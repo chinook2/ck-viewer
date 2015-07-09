@@ -9,8 +9,7 @@ Ext.define('ck.map.Controller', {
 	
 	
 	init: function() {
-		var me = this;
-		var v = me.getView();
+		var v = this.getView();
 		
 		if(!(v.getMap() instanceof ol.Map)){
 			var olMap = new ol.Map({
@@ -32,6 +31,7 @@ Ext.define('ck.map.Controller', {
 								'VERSION': '1.1.0'
 							}
 						}),
+						extent: [-610070.44,5042682.29,1082551.12,6644802.40],
 						title: 'Régions',
 						path: 'GEOFLA'
 					}),
@@ -43,6 +43,7 @@ Ext.define('ck.map.Controller', {
 								'VERSION': '1.1.0'
 							}
 						}),
+						extent: [156745.83,5220016.20,579901.22,5620546.22],
 						title: 'Départements',
 						path: 'GEOFLA',
                         visible: false
@@ -51,7 +52,7 @@ Ext.define('ck.map.Controller', {
 			});
 			v.setMap(olMap);
 			
-			var vm = me.getViewModel();		   
+			var vm = this.getViewModel();		   
 			
 			var p = v.getCoordPrecision();
 			var olv = olMap.getView();
@@ -87,7 +88,7 @@ Ext.define('ck.map.Controller', {
 			});
 			
 			
-			this.fireEvent('ckmapReady', v);
+			this.fireEvent('ckmapReady', this);
 		}
 	},
 	
@@ -111,7 +112,15 @@ Ext.define('ck.map.Controller', {
 		return this.getMapView().setRotation(rot);
 	},
 	
-		
+	setExtent: function(extent) {
+		return this.getMapView().fitExtent(extent, this.getMap().getSize());
+	},
+	
+	
+	getLayers: function() {
+		return this.getMap().getLayers();
+	},
+	
 	
 	/**
 	*	Function resizeMap

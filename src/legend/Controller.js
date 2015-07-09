@@ -18,14 +18,13 @@ Ext.define('ck.legend.Controller', {
 	
 	
 	init: function() {
-		var olMap = this.getMap();
-		if(!(olMap instanceof ol.Map)) return;
+		if(!this.getMap()) return;
 		
 		this.initTree();
 	},
 	
-	onMapReady: function(ckmap) {
-		this.getView().setMap( ckmap.getMap() );
+	onMapReady: function(mapController) {
+		this.getView().setMap( mapController );
 		this.init();
 	},
 	
@@ -34,12 +33,10 @@ Ext.define('ck.legend.Controller', {
 	},
 	
 	initTree: function() {
-		var me = this;
-		var v = me.getView();
+		var v = this.getView();
 		var root = v.getRootNode();
 		
-		var olMap = me.getMap();
-		var layers = olMap.getLayers();
+		var layers = this.getMap().getLayers();
 		
 		layers.forEach(function(layer){			
 			var node = {
@@ -82,7 +79,7 @@ Ext.define('ck.legend.Controller', {
 			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
 		// });
 		
-		this.fireEvent('cklegendReady', v);
+		this.fireEvent('cklegendReady', this);
 	},
 	
 	// bind tree panel to ol map
@@ -93,5 +90,19 @@ Ext.define('ck.legend.Controller', {
 		if(modifiedFieldNames=='checked') {
 			layer.set('visible', rec.get('checked'));
 		}
+	},
+	
+	
+	actionLegendLayerZoom: function(tree, rowIndex, colIndex, row, event, rec) {
+		var layer = rec.get('layer');
+		if(!layer) return;
+		
+		var extent = layer.getExtent();
+		if(!extent) {
+			Ext.log("Layer ''"+ layer.get('title') +"' have no extent !");
+			return;
+		}
+		
+		this.getMap().setExtent(extent);
 	}
 });

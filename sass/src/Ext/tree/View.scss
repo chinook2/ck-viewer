@@ -1,8 +1,12 @@
-.#{$prefix}tree-checkbox-tristate div[role=button]:before {
-	color: grey;
-    content: '\f14a';
-}
-
 .#{$prefix}tree-noicon {
 	display: none !important;
+}
+
+.ck-legend .#{$prefix}tree-checkbox-tristate div[role=button]:before {
+	color: grey;
+	content: '\f14a';
+}
+
+.ck-legend .#{$prefix}action-col-icon {
+	font-size: 15px !important;
 }
