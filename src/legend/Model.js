@@ -1,15 +1,15 @@
-/**
+﻿/**
  * This class is the view model for the Main view of the application.
  */
 Ext.define('ck.legend.Model', {
-    extend: 'Ext.app.ViewModel',
+	extend: 'Ext.app.ViewModel',
 
-    alias: 'viewmodel.cklegend',
+	alias: 'viewmodel.cklegend',
 
-    data: {
-    },
+	data: {
+	},
 
-    formulas: {
-    }
-    
+	formulas: {
+	}
+	
 });
