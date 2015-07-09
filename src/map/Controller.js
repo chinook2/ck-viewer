@@ -44,7 +44,8 @@ Ext.define('ck.map.Controller', {
                             }
                         }),
                         title: 'Départements',
-                        path: 'GEOFLA'
+                        path: 'GEOFLA',
+                        visible: false
                     })
                 ]
             });

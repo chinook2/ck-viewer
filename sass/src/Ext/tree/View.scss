@@ -2,3 +2,7 @@
 	color: grey;
     content: '\f14a';
 }
+
+.#{$prefix}tree-noicon {
+	display: none !important;
+}

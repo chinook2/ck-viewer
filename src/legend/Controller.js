@@ -46,6 +46,7 @@ Ext.define('ck.legend.Controller', {
                 leaf: true,
                 text: layer.get('title'),
                 checked: layer.get('visible'),
+                iconCls: 'x-tree-noicon',
                 layer: layer
             };
             var pNode = root;
@@ -62,6 +63,7 @@ Ext.define('ck.legend.Controller', {
                         pNode = pNode.appendChild({
                             text: keys[i],
                             id: keyId,
+                            iconCls: 'x-tree-noicon',
                             checked: false
                         }, true);
                     } else {
