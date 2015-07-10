@@ -21,6 +21,11 @@ Ext.define('ck.legend.Controller', {
 		if(!this.getMap()) return;
 		
 		this.initTree();
+		
+		this.actionColumn = this.getView().down('actioncolumn');
+		if(!this.actionColumn) {
+			Ext.log("No actionColumn found for ck.legend.");
+		}
 	},
 	
 	onMapReady: function(mapController) {
@@ -75,6 +80,7 @@ Ext.define('ck.legend.Controller', {
 		
 		v.getStore().on('update', this.onUpdate);
 		
+		
 		// olMap.on('addlayer', function() {
 			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
 		// });
@@ -90,19 +96,5 @@ Ext.define('ck.legend.Controller', {
 		if(modifiedFieldNames=='checked') {
 			layer.set('visible', rec.get('checked'));
 		}
-	},
-	
-	
-	actionLegendLayerZoom: function(tree, rowIndex, colIndex, row, event, rec) {
-		var layer = rec.get('layer');
-		if(!layer) return;
-		
-		var extent = layer.getExtent();
-		if(!extent) {
-			Ext.log("Layer ''"+ layer.get('title') +"' have no extent !");
-			return;
-		}
-		
-		this.getMap().setExtent(extent);
 	}
 });

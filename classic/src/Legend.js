@@ -16,7 +16,11 @@ Ext.define("ck.Legend", {
 		type: "cklegend"
 	},
 
-	plugins: ['treechecker'],
+	plugins: [
+		'legendchecker',
+		'legendlayeredit',
+		'legendlayerzoom'
+	],
 	
 	viewConfig: {
 		plugins: { 
@@ -44,15 +48,13 @@ Ext.define("ck.Legend", {
 		dataIndex: 'text',
 		flex: 1
 	},{
-		xtype: 'actioncolumn',
-		width: 50,
+		xtype: 'actioncolumn'
+		//width: 50
+		/*,
 		items: [{
 			iconCls: 'fa fa-paint-brush fa-lg',
 			tooltip: 'Edit style'
-		},{
-			iconCls: 'fa fa-search fa-lg fa-flip-horizontal',
-			tooltip: 'Zoom on layer',
-			handler: 'actionLegendLayerZoom'
 		}]
+		*/
 	}]
 });

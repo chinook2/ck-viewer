@@ -3,8 +3,8 @@
 
 Ext.define('ck.legend.plugin.checker', {
 	extend: 'Ext.AbstractPlugin',
-	alias: 'plugin.treechecker',
-		
+	alias: 'plugin.legendchecker',
+	
 	init: function(cmp) {
 		this.treeView =  cmp.getView();
 		
