@@ -29,7 +29,12 @@ Ext.define('ck.legend.plugin.action', {
 					var el = tree.getEl();
 					el.select('.x-action-col-cell').hide();
 				},
-				// Hide actions when first show childs items
+				// Hide actions on collapse (global refresh)
+				refresh: function(tree, eOpts) {
+					var el = tree.getEl();
+					el.select('.x-action-col-cell').hide();
+				},
+				// Hide actions on expand (first childs show)
 				itemadd: function(records, index, node, eOpts ) {
 					node.forEach(function(n){
 						var rowEl = Ext.get(n);
