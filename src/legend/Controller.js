@@ -19,7 +19,29 @@ Ext.define('ck.legend.Controller', {
 	init: function() {
 		if(!this.getMap()) return;
 		
-		this.initTree();		
+		var v = this.getView();
+		
+		var layers = this.getMap().getLayers().getArray();
+		
+		// layers.forEach(function(layer) {
+		for(li=layers.length-1; li>=0; li--){
+			this.addLayer(layers[li]);
+		}
+		// }, this);
+		
+		// Attach events
+		v.getStore().on('update', this.onUpdate);
+		
+		v.getView().on({
+			drop: this.onDrop,
+			scope: this
+		});
+		
+		// olMap.on('addlayer', function() {
+			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
+		// });
+		
+		this.fireEvent('cklegendReady', this);		
 	},
 	
 	onMapReady: function(mapController) {
@@ -40,62 +62,43 @@ Ext.define('ck.legend.Controller', {
                 layers.push(rec.get('layer'));
             }
         });
-        return layers;	
+        return layers.reverse();	
 	},
 	
-	initTree: function() {
-		var v = this.getView();
-		var root = v.getRootNode();
+	addLayer: function(layer) {
+		var root = this.getView().getRootNode();
+		var pNode = root;
 		
-		var layers = this.getMap().getLayers();
+		var node = {
+			leaf: true,
+			text: layer.get('title'),
+			checked: layer.get('visible'),
+			iconCls: 'x-tree-noicon',
+			layer: layer
+		};
 		
-		layers.forEach(function(layer){			
-			var node = {
-				leaf: true,
-				text: layer.get('title'),
-				checked: layer.get('visible'),
-                iconCls: 'x-tree-noicon',
-				layer: layer
+		var path = layer.get('path')
+		if(path) {
+			var keys = path.split('/');
+			var keyId = pKeyId = '';
+			
+			for(i=0; i<keys.length; i++) {
+				keyId += '_' + keys[i];
+				var isNode = root.findChild('id', keyId);
+				if(!isNode) {
+					pNode = pNode.appendChild({
+						text: keys[i],
+						id: keyId,
+						iconCls: 'x-tree-noicon',
+						checked: false
+					}, true);
+				} else {
+					pNode = isNode;
+				}
 			};
-			var pNode = root;
-			
-			var path = layer.get('path')
-			if(path) {
-				var keys = path.split('/');
-				var keyId = pKeyId = '';
-				
-				for(i=0; i<keys.length; i++) {
-					keyId += '_' + keys[i];
-					var isNode = root.findChild('id', keyId);
-					if(!isNode) {
-						pNode = pNode.appendChild({
-							text: keys[i],
-							id: keyId,
-                            iconCls: 'x-tree-noicon',
-							checked: false
-						}, true);
-					} else {
-						pNode = isNode;
-					}
-				};
-			}
-			
-			pNode.appendChild(node);
-		});
+		}
 		
-		// Attach events
-		v.getStore().on('update', this.onUpdate);
-		
-		v.getView().on({
-			drop: this.onDrop,
-			scope: this
-		});
-		
-		// olMap.on('addlayer', function() {
-			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
-		// });
-		
-		this.fireEvent('cklegendReady', this);
+		pNode.appendChild(node);		
 	},
 	
 	// Allow change layer visibility for groups / sub layers. Bind tree store property to ol Layers
