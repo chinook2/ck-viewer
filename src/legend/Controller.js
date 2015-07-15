@@ -16,16 +16,10 @@ Ext.define('ck.legend.Controller', {
 		}
 	},
 	
-	
 	init: function() {
 		if(!this.getMap()) return;
 		
-		this.initTree();
-		
-		this.actionColumn = this.getView().down('actioncolumn');
-		if(!this.actionColumn) {
-			Ext.log("No actionColumn found for ck.legend.");
-		}
+		this.initTree();		
 	},
 	
 	onMapReady: function(mapController) {
@@ -35,6 +29,18 @@ Ext.define('ck.legend.Controller', {
 	
 	getMap: function() {
 		return this.getView().getMap();
+	},
+	
+	getLayers: function() {
+        var layers = [];
+		var root = this.getView().getRootNode();
+		
+        root.cascadeBy(function(rec){
+            if (rec.get('layer')) {
+                layers.push(rec.get('layer'));
+            }
+        });
+        return layers;	
 	},
 	
 	initTree: function() {
@@ -77,9 +83,13 @@ Ext.define('ck.legend.Controller', {
 			pNode.appendChild(node);
 		});
 		
-		
+		// Attach events
 		v.getStore().on('update', this.onUpdate);
 		
+		v.getView().on({
+			drop: this.onDrop,
+			scope: this
+		});
 		
 		// olMap.on('addlayer', function() {
 			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
@@ -88,13 +98,25 @@ Ext.define('ck.legend.Controller', {
 		this.fireEvent('cklegendReady', this);
 	},
 	
-	// bind tree panel to ol map
+	// Allow change layer visibility for groups / sub layers. Bind tree store property to ol Layers
+	// If we use onCheckChange event update only when click on layer chekbox and not for groups.
 	onUpdate: function(store, rec, operation, modifiedFieldNames, details, eOpts) {
 		var layer = rec.get('layer');
 		if(!layer) return;
 		
 		if(modifiedFieldNames=='checked') {
 			layer.set('visible', rec.get('checked'));
+		}
+	},
+	
+	onDrop: function(node, data, overModel, dropPosition, eOpts) {		
+        var ckLayers = this.getLayers();
+		
+		var olLayers = this.getMap().getLayers();
+		olLayers.clear();
+		
+		for(i=0; i<ckLayers.length; i++) {
+			olLayers.push(ckLayers[i]);
 		}
 	}
 });
