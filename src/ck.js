@@ -13,7 +13,7 @@ Ext.define('ck', {
 	}
 });
 
-// Evite des erreur si on utilise un console.log() sur un navigateur qui ne le gère pas
+// Evite des erreur si on utilise un console.log() sur un navigateur qui ne le gÃ¨re pas
 if (!window.console) window.console = {};
 if (!window.console.log) window.console.log = function () { };
 if (!window.console.info) window.console.info = function () { };
