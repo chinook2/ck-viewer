@@ -92,6 +92,16 @@ Ext.define('ck.map.Controller', {
 		}
 	},
 	
+	//
+	get: function(property) {
+		return this.getViewModel().get(property);
+	},
+	
+	set: function(property, value) {
+		return this.getViewModel().set(property, value);
+	},
+	//
+	
 	getMap: function() {
 		return this.getView().getMap();
 	},
@@ -115,8 +125,7 @@ Ext.define('ck.map.Controller', {
 	setExtent: function(extent) {
 		return this.getMapView().fitExtent(extent, this.getMap().getSize());
 	},
-	
-	
+		
 	getLayers: function() {
 		return this.getMap().getLayers();
 	},
