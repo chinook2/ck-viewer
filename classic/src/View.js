@@ -22,5 +22,9 @@ Ext.define("ck.View", {
 		type: 'fit'
 	},
 	
+	config: {
+		name: 'default'
+	},
+	
 	cls: 'ck-view'
 });

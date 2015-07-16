@@ -8,6 +8,11 @@ Ext.define('ck.view.Controller', {
 	alias: 'controller.ckview',
 		
 	init: function() {
+		var cfg = Ext.Object.fromQueryString(location.search);
+		if(cfg.app) {
+			this.getView().setName(cfg.app);
+		}
+		
 		this.initUi();				
 	},
 		
@@ -16,7 +21,8 @@ Ext.define('ck.view.Controller', {
 	 */
 	initUi: function(ui) {
 		if(!ui) {
-			this.getUi();
+			var uiName = this.getView().getName();
+			this.getUi(uiName);
 			return;
 		}
 		
@@ -25,10 +31,9 @@ Ext.define('ck.view.Controller', {
 	},
 	
 	// Récupère la définition de l'application
-	getUi: function() {
+	getUi: function(uiName) {
 		Ext.Ajax.request({
-			// url: Ext.manifest.fileConf.appFullPath + '/ui/main.json',
-			url: '../packages/local/ck-viewer/resources/ui/default.json',
+			url: '../packages/local/ck-viewer/resources/ui/'+uiName+'.json',
 			disableCaching: false,
 			scope: this,
 			success: function(response){
@@ -36,14 +41,18 @@ Ext.define('ck.view.Controller', {
 				this.initUi(uiConfig);
 			},
 			failure: function(response, opts) {
-				var uiConfig = Ext.decode(response.responseText);
-				this.initUi(uiConfig);
+				// TODO : on Tablet when access local file via ajax, success pass here !!
+				// var uiConfig = Ext.decode(response.responseText);
+				// this.initUi(uiConfig);
+				
+				Ext.log({
+					level: 'error',
+					msg: 'Error when loading "'+uiName+'" interface !. Loading the default interface...'
+				});
+				
+				this.getUi('default');
 			}
 		});		
-	},
-	
-	onBtnClick: function(btn) {
-		alert("click" + btn.text);
 	}
-	
+
 });

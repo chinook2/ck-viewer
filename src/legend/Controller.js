@@ -22,12 +22,10 @@ Ext.define('ck.legend.Controller', {
 		var v = this.getView();
 		
 		var layers = this.getMap().getLayers().getArray();
-		
-		// layers.forEach(function(layer) {
+		// Reverse layer order
 		for(li=layers.length-1; li>=0; li--){
 			this.addLayer(layers[li]);
 		}
-		// }, this);
 		
 		// Attach events
 		v.getStore().on('update', this.onUpdate);

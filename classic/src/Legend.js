@@ -28,10 +28,6 @@ Ext.define("ck.Legend", {
 		}
 	},
 	
-	// listeners: {
-		// checkchange: 'onCheckChange'
-	// },
-	
 	config: {
 		map: null
 	},
@@ -49,12 +45,5 @@ Ext.define("ck.Legend", {
 		flex: 1
 	},{
 		xtype: 'actioncolumn'
-		//width: 50
-		/*,
-		items: [{
-			iconCls: 'fa fa-paint-brush fa-lg',
-			tooltip: 'Edit style'
-		}]
-		*/
 	}]
 });
