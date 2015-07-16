@@ -1,7 +1,7 @@
 ﻿/**
  * This class is the view model for the Main view of the application.
  */
-Ext.define('ck.map.Model', {
+Ext.define('Ck.map.Model', {
 	extend: 'Ext.app.ViewModel',
 
 	alias: 'viewmodel.ckmap',

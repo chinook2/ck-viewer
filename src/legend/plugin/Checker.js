@@ -1,7 +1,7 @@
 ﻿/*
  */
 
-Ext.define('ck.legend.plugin.checker', {
+Ext.define('Ck.legend.plugin.Checker', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendchecker',
 	

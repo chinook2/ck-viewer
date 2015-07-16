@@ -2,12 +2,12 @@
  * 
  */
 
-Ext.define("ck.Legend", {
+Ext.define("Ck.Legend", {
 	extend: "Ext.tree.Panel",
 	alias: "widget.cklegend",
 	
 	requires: [
-		'ck.legend.*'
+		'Ck.legend.*'
 	],
 
 	controller: "cklegend",

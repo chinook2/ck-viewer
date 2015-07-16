@@ -1,6 +1,6 @@
 ﻿/*
  */
-Ext.define('ck.legend.plugin.slider', {
+Ext.define('Ck.legend.plugin.Slider', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendslider',
 	

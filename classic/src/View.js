@@ -1,15 +1,15 @@
 /**
  * été
  */
-Ext.define("ck.View", {
+Ext.define("Ck.View", {
 	extend: 'Ext.Container',
 	
 	requires: [
 		// 'Ext.plugin.Viewport',
 		// 'Ext.window.MessageBox',
-		'ck.view.*',
-		'ck.Map',
-		'ck.Legend'
+		'Ck.view.*',
+		'Ck.Map',
+		'Ck.Legend'
 	],
 	
 	controller: 'ckview',

@@ -1,11 +1,11 @@
 /*
- * @class ck
+ * @class Ck
  * 
  * 
  * @singleton
  */
 
-Ext.define('ck', {
+Ext.define('Ck', {
 	singleton: true,
 	
 	/**
@@ -28,7 +28,7 @@ Ext.define('ck', {
 		
 		if(!idMap) {
 			// Return the first map component by CSS Selector
-			map = ck.getMaps().shift();
+			map = Ck.getMaps().shift();
 			if(!map) return false;
 		} else {
 			// Return the map component by ID

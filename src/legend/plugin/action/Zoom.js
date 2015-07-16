@@ -1,8 +1,8 @@
 /*
  */
 
-Ext.define('ck.legend.plugin.action.zoom', {
-	extend: 'ck.legend.plugin.action',
+Ext.define('Ck.legend.plugin.action.Zoom', {
+	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayerzoom',
 	
 	/*

@@ -3,7 +3,7 @@
  * "autoCreateViewport" property. That setting automatically applies the "viewport"
  * plugin to promote that instance of this class to the body element.
  */
-Ext.define('ck.view.Controller', {
+Ext.define('Ck.view.Controller', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.ckview',
 		

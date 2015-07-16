@@ -1,8 +1,8 @@
 /*
  */
 
-Ext.define('ck.legend.plugin.action.edit', {
-	extend: 'ck.legend.plugin.action',
+Ext.define('Ck.legend.plugin.action.Edit', {
+	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayeredit',
 	
 	iconCls: 'fa fa-pencil fa-lg',

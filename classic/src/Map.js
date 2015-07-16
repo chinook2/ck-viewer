@@ -2,12 +2,12 @@
  *
  */
 
-Ext.define("ck.Map", {
+Ext.define("Ck.Map", {
 	extend: "Ext.panel.Panel",
 	alias: "widget.ckmap",
 	
 	requires: [
-		'ck.map.*'
+		'Ck.map.*'
 	],
 
 	controller: "ckmap",

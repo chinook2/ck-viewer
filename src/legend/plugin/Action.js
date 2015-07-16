@@ -1,7 +1,7 @@
 /*
  */
 
-Ext.define('ck.legend.plugin.action', {
+Ext.define('Ck.legend.plugin.Action', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.action',
 		
@@ -11,7 +11,7 @@ Ext.define('ck.legend.plugin.action', {
 		// Get the Action Column
 		this.actionColumn = cmp.down('actioncolumn');
 		if(!this.actionColumn) {
-			Ext.log("No actionColumn found for ck.legend.plugin.action.zoom.");
+			Ext.log("No actionColumn found for Ck.legend.plugin.action.zoom.");
 			return;
 		}
 		

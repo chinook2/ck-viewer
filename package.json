@@ -263,7 +263,7 @@
             "path": "libs/ol3/ol-debug.js"
         },
         {
-            "path": "src/ck.js"
+            "path": "src/Ck.js"
         }
     ],
     
