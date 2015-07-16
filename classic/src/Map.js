@@ -36,6 +36,7 @@ Ext.define("ck.Map", {
 		'coordPrecision'
 	],
 	*/
+	cls: 'ck-map',
 	
 	listeners: {
 		resize: 'resize' // The resize handle is necessary to set the map!

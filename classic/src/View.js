@@ -20,6 +20,7 @@ Ext.define("ck.View", {
 	
 	layout: {
 		type: 'fit'
-	}
-
+	},
+	
+	cls: 'ck-view'
 });
