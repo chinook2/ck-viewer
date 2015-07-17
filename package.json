@@ -277,6 +277,19 @@
         {
             "path": "libs/ol3/ol.css"
         }
-    ]
-    
+    ],
+	
+	/**
+	* override objects for setting build environment specific 
+	* settings.
+	*/
+	"production": {
+		environment : 'production'
+	},
+	"testing": {
+		environment : 'testing'
+	},
+	"development": {
+		environment: 'development'
+	}
 }

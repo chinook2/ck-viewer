@@ -4,9 +4,30 @@
  * 
  * @singleton
  */
+ 
+// @require Ck.Ajax
 
 Ext.define('Ck', {
+	extend: 'Ext.Base',
 	singleton: true,
+	
+	mixins: [
+        'Ext.mixin.Inheritable',
+        'Ext.util.Observable'
+    ],
+	
+	/**
+	 * 
+	 */
+	params: null,
+	
+	
+	/**
+	 *
+	 */
+	constructor: function() {
+		this.params = Ext.Object.fromQueryString(location.search);
+	},
 	
 	/**
 	 *
@@ -40,10 +61,21 @@ Ext.define('Ck', {
 		return map;
 	},
 	
+	
+	getInfos: function() {
+		return Ext.manifest.packages['ck-viewer'];
+	},
 	getVersion: function() {
-		return '2.0.0';
+		return this.getInfos().version;
+	},
+	getEnvironment: function() {
+		return this.getInfos().environment;
+	},
+	getEnv: function() {
+		return this.getEnvironment();
 	}
 });
+
 
 // Evite des erreur si on utilise un console.log() sur un navigateur qui ne le gère pas
 if (!window.console) window.console = {};

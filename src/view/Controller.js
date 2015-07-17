@@ -8,9 +8,8 @@ Ext.define('Ck.view.Controller', {
 	alias: 'controller.ckview',
 		
 	init: function() {
-		var cfg = Ext.Object.fromQueryString(location.search);
-		if(cfg.app) {
-			this.getView().setName(cfg.app);
+		if(Ck.params.app) {
+			this.getView().setName(Ck.params.app);
 		}
 		
 		this.initUi();				
@@ -32,9 +31,9 @@ Ext.define('Ck.view.Controller', {
 	
 	// Récupère la définition de l'application
 	getUi: function(uiName) {
-		Ext.Ajax.request({
+		
+		Cks.get({
 			url: '../packages/local/ck-viewer/resources/ui/'+uiName+'.json',
-			disableCaching: false,
 			scope: this,
 			success: function(response){
 				var uiConfig = Ext.decode(response.responseText);
@@ -51,8 +50,8 @@ Ext.define('Ck.view.Controller', {
 				});
 				
 				this.getUi('default');
-			}
-		});		
+			}		
+		});	
 	}
 
 });
