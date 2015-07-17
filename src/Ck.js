@@ -4,17 +4,24 @@
  * 
  * @singleton
  */
- 
-// @require Ck.Ajax
 
 Ext.define('Ck', {
 	extend: 'Ext.Base',
+	alternateClassName: ['Chinook', 'ck'],
+	
 	singleton: true,
 	
 	mixins: [
         'Ext.mixin.Inheritable',
         'Ext.util.Observable'
     ],
+	
+	requires: [
+		'Ck.Ajax',
+		
+		'Ck.Map',
+		'Ck.Legend'
+	],
 	
 	/**
 	 * 

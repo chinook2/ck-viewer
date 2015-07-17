@@ -5,11 +5,7 @@ Ext.define("Ck.View", {
 	extend: 'Ext.Container',
 	
 	requires: [
-		// 'Ext.plugin.Viewport',
-		// 'Ext.window.MessageBox',
-		'Ck.view.*',
-		'Ck.Map',
-		'Ck.Legend'
+		'Ck.view.*'
 	],
 	
 	controller: 'ckview',
