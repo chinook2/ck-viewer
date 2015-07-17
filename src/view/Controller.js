@@ -33,7 +33,7 @@ Ext.define('Ck.view.Controller', {
 	getUi: function(uiName) {
 		
 		Cks.get({
-			url: '../packages/local/ck-viewer/resources/ui/'+uiName+'.json',
+			url: 'packages/local/ck-viewer/resources/ui/'+uiName+'.json',
 			scope: this,
 			success: function(response){
 				var uiConfig = Ext.decode(response.responseText);

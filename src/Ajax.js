@@ -11,6 +11,19 @@ Ext.define('Ck.Ajax', {
 	
 	singleton: true,
 	
+	constructor: function() {
+		this.ls = new Ext.util.LocalStorage({
+			 id: 'Ck-'+Ext.manifest.name
+		});
+		
+        Ext.Ajax.on({
+			beforerequest: this.onBeforeRequest,
+			requestcomplete: this.onRequestComplete,
+			requestexception: this.onRequestException,
+			scope: this
+		});
+	},
+	
 	/**
 	 *
 	 */
@@ -47,18 +60,8 @@ Ext.define('Ck.Ajax', {
 	 *
 	 */	
 	request: function(options) {
-		this.ls = new Ext.util.LocalStorage({
-			 id: 'Ck-'+Ext.manifest.name
-		});
-		
-        Ext.Ajax.on({
-			beforerequest: this.onBeforeRequest,
-			requestcomplete: this.onRequestComplete,
-			requestexception: this.onRequestException,
-			scope: this
-		});
-		
-		options.disableCaching = false;
+		options.disableCaching = false;		
+
 		
 		Ext.Ajax.request(options);	
 	},
