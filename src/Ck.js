@@ -4,39 +4,14 @@
  * 
  * @singleton
  */
+Ext.ns('Ck');
 
-Ext.define('Ck', {
-	extend: 'Ext.Base',
-	alternateClassName: ['Chinook', 'ck'],
-	
-	singleton: true,
-	
-	mixins: [
-        'Ext.mixin.Inheritable',
-        'Ext.util.Observable'
-    ],
-	
-	requires: [
-		'Ck.Controller',
-		'Ck.Ajax',
-		
-		'Ck.Map',
-		'Ck.Legend',
-		'Ck.Toolbar'
-	],
-		
+// @define Ck
+Ext.apply(Ck, {
 	/**
 	 * 
 	 */
 	params: null,
-	
-	
-	/**
-	 *
-	 */
-	constructor: function() {
-		this.params = Ext.Object.fromQueryString(location.search);
-	},
 	
 	/**
 	 *
@@ -85,10 +60,21 @@ Ext.define('Ck', {
 	}
 });
 
+/**
+ * Load Ck classes
+ */
+Ext.require([
+	'Ck.Controller',
+	'Ck.Ajax',
+	
+	'Ck.Map',
+	'Ck.Legend',
+	'Ck.Toolbar'
+]);
 
-// Evite des erreur si on utilise un console.log() sur un navigateur qui ne le gère pas
-if (!window.console) window.console = {};
-if (!window.console.log) window.console.log = function () { };
-if (!window.console.info) window.console.info = function () { };
-if (!window.console.warn) window.console.warn = function () { };
-if (!window.console.error) window.console.error = function () { };
+/**
+ * Init global variable on page load
+ */
+Ext.onReady(function(){
+	Ck.params = Ext.Object.fromQueryString(location.search);
+});
