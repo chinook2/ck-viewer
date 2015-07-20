@@ -88,7 +88,6 @@ Ext.define('Ck.map.Controller', {
 			});
 			
 			
-			this.fireEvent('ckmapReady', this);
 		}
 	},
 	
@@ -140,6 +139,9 @@ Ext.define('Ck.map.Controller', {
 		var m = v.getMap();
 		if(!m.isRendered()){
 			m.setTarget(v.body.id);
+			
+			// Fire map ready when it's rendered
+			this.fireEvent('ckmapReady', this);
 		} else {
 			m.updateSize();
 		}

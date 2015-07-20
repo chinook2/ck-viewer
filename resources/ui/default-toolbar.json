@@ -18,10 +18,21 @@
         region: 'center',
         center: [260000, 5900000],
         zoom: 6,
-        "dockedItems": [{
-            "xtype": "toolbar",
-            "dock": "bottom",
-            "items": [{
+        dockedItems: [{
+            xtype: "cktoolbar",
+            dock: "right",
+			
+			items: [{
+				xtype: "button",
+				text: "A"
+			},{
+				xtype: "button",
+				text: "B"
+			}]
+		},{
+            xtype: "toolbar",
+            dock: "bottom",
+            items: [{
                 "xtype": "tbtext",
                 "bind": {
                     "html": "Centre : {x} {y}"

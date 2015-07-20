@@ -4,21 +4,10 @@
  * plugin to promote that instance of this class to the body element.
  */
 Ext.define('Ck.legend.Controller', {
-	extend: 'Ext.app.ViewController',
+	extend: 'Ck.Controller',
 	alias: 'controller.cklegend',
-	
-	listen: {
-		controller: {
-			'ckmap': {
-				// 
-				ckmapReady: 'onMapReady'
-			}
-		}
-	},
-	
-	init: function() {
-		if(!this.getMap()) return;
 		
+	ckInit: function() {		
 		var v = this.getView();
 		
 		var layers = this.getMap().getLayers().getArray();
@@ -40,15 +29,6 @@ Ext.define('Ck.legend.Controller', {
 		// });
 		
 		this.fireEvent('cklegendReady', this);		
-	},
-	
-	onMapReady: function(mapController) {
-		this.getView().setMap( mapController );
-		this.init();
-	},
-	
-	getMap: function() {
-		return this.getView().getMap();
 	},
 	
 	getLayers: function() {

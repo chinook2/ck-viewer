@@ -17,12 +17,14 @@ Ext.define('Ck', {
     ],
 	
 	requires: [
+		'Ck.Controller',
 		'Ck.Ajax',
 		
 		'Ck.Map',
-		'Ck.Legend'
+		'Ck.Legend',
+		'Ck.Toolbar'
 	],
-	
+		
 	/**
 	 * 
 	 */
