@@ -24,10 +24,14 @@
 			
 			items: [{
 				xtype: "button",
-				text: "A"
+				iconCls: " fa fa-search-plus",
+				scale: "large",
+				handler: "mapZoomInClick"
 			},{
 				xtype: "button",
-				text: "B"
+				iconCls: " fa fa-search-minus",
+				scale: "large",
+				handler: "mapZoomOutClick"
 			}]
 		},{
             xtype: "toolbar",

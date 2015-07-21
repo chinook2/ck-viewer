@@ -14,10 +14,10 @@ Ext.define('Ck.toolbar.Controller', {
 		// Fix right align of toolbar when overlay=true
 		if(v.overlay === true && v.dock == 'right') {
 			// workaround of post layout process
-			Ext.Function.defer(function(){
+			v.on('afterlayout', function() {
 				v.el.setLeft(null);
 				v.el.setRight(0);
-			}, 100);			
+			});
 		}
 		
 		this.updateOlControls();

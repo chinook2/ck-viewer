@@ -124,7 +124,15 @@ Ext.define('Ck.map.Controller', {
 	setExtent: function(extent) {
 		return this.getMapView().fitExtent(extent, this.getMap().getSize());
 	},
-		
+	
+	getZoom: function() {
+		return this.getMapView().getZoom();
+	},
+	
+	setZoom: function(zoom) {
+		return this.getMapView().setZoom(zoom);
+	},
+	
 	getLayers: function() {
 		return this.getMap().getLayers();
 	},
