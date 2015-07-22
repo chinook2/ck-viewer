@@ -7,12 +7,15 @@ Ext.define('Ck.Ajax', {
 	
 	singleton: true,
 	
+	/**
+	 * @ignore
+	 */
 	constructor: function() {
 		this.ls = new Ext.util.LocalStorage({
 			 id: 'Ck-'+Ext.manifest.name
 		});
 		
-        Ext.Ajax.on({
+		Ext.Ajax.on({
 			beforerequest: this.onBeforeRequest,
 			requestcomplete: this.onRequestComplete,
 			requestexception: this.onRequestException,
