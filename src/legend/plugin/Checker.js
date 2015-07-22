@@ -1,6 +1,6 @@
-﻿/*
+﻿/**
+ * 
  */
-
 Ext.define('Ck.legend.plugin.Checker', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendchecker',

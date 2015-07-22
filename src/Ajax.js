@@ -1,10 +1,6 @@
-/*
- * @class Ck.Ajax
+/**
  * 
- * 
- * @singleton
  */
-
 Ext.define('Ck.Ajax', {
 	extend: 'Ext.data.Connection',
 	alternateClassName: 'Cks',
@@ -24,41 +20,23 @@ Ext.define('Ck.Ajax', {
 		});
 	},
 	
-	/**
-	 *
-	 */
 	get: function(options) {
 		options.method = 'GET';
 		this.request(options);
 	},
 	
-	/**
-	 *
-	 */	
 	post: function() {
 	},
 
-	/**
-	 *
-	 */	
 	put: function() {
 	},
 
-	/**
-	 *
-	 */
 	update: function() {
 	},
 
-	/**
-	 *
-	 */	
 	del: function() {
 	},
 	
-	/**
-	 *
-	 */	
 	request: function(options) {
 		options.disableCaching = false;		
 

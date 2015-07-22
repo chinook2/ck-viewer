@@ -1,6 +1,6 @@
-/*
+/**
+ * 
  */
-
 Ext.define('Ck.legend.plugin.Action', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.action',

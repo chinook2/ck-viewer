@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 Ext.define("Ck.map.controllers.ZoomOut", {
     override: "Ck.Controller",
     

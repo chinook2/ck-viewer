@@ -1,6 +1,6 @@
-/*
+/**
+ * 
  */
-
 Ext.define('Ck.legend.plugin.action.Edit', {
 	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayeredit',

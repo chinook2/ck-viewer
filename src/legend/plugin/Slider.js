@@ -1,4 +1,5 @@
-﻿/*
+﻿/**
+ * 
  */
 Ext.define('Ck.legend.plugin.Slider', {
 	extend: 'Ext.AbstractPlugin',

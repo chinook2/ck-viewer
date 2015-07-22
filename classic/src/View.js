@@ -1,5 +1,5 @@
 /**
- * été
+ * 
  */
 Ext.define("Ck.View", {
 	extend: 'Ext.Container',

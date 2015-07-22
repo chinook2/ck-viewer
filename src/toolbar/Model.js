@@ -1,5 +1,5 @@
 /**
- * This class is the view model for the Main view of the application.
+ * 
  */
 Ext.define('Ck.toolbar.Model', {
 	extend: 'Ext.app.ViewModel',

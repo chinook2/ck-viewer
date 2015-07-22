@@ -1,4 +1,4 @@
-/*
+/**
  * @class Ck
  *
  * The Ck namespace (global object) encapsulates all classes, singletons, and
@@ -71,6 +71,7 @@ Ext.apply(Ck, {
 
 /**
  * Load Ck classes
+ * @ignore
  */
 Ext.require([
 	'Ck.Controller',
@@ -83,6 +84,7 @@ Ext.require([
 
 /**
  * Init global variable on page load
+ * @ignore 
  */
 Ext.onReady(function(){
 	Ck.params = Ext.Object.fromQueryString(location.search);
