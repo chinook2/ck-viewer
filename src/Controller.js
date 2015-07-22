@@ -23,7 +23,7 @@ Ext.define('Ck.Controller', {
 	
 	/**
 	 * Called when the map is ready.
-	 * @param {Ck.map.Controller} The map controller
+	 * @param {Ck.map.Controller} mapController The map controller
 	 */
 	ckInit: Ext.emptyFn,
 	

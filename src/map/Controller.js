@@ -2,13 +2,13 @@
  *
  */
 Ext.define('Ck.map.Controller', {
-	extend: 'Ext.app.ViewController',
+	extend: 'Ck.Controller',
 	alias: 'controller.ckmap',
 	
 	/**
 	 * @event ckmapReady
 	 * Fires when the map is ready (rendered)
-	 * @params {Ck.map.Controller} this
+	 * @param {Ck.map.Controller} this
 	 */
 	
 	
@@ -115,8 +115,8 @@ Ext.define('Ck.map.Controller', {
 	
 	
 	/**
-	 * Get the current map controller.
-	 * @return {Ck.map.Controller} The map controller
+	 * Get the map associated with the controller.
+	 * @return {ol.Map} The Ol map
 	 */
 	getMap: function() {
 		return this.getView().getMap();
@@ -133,7 +133,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Set the center of the current view.
-	 * @params {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
+	 * @param {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
 	 */
 	setCenter: function(c) {
 		return this.getMapView().setCenter(c);
@@ -141,7 +141,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Set the resolution for this view.
-	 * @params {Number} res The resolution of the view.
+	 * @param {Number} res The resolution of the view.
 	 */
 	setResolution: function(res) {
 		return this.getMapView().setResolution(res);
@@ -149,7 +149,7 @@ Ext.define('Ck.map.Controller', {
 
 	/**
 	 * Set the rotation for this view.
-	 * @params {Number} rot The rotation of the view in radians.
+	 * @param {Number} rot The rotation of the view in radians.
 	 */
 	setRotation: function(rot) {
 		return this.getMapView().setRotation(rot);
@@ -157,7 +157,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Fit the map view to the passed extent.
-	 * @params {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
+	 * @param {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
 	 */
 	setExtent: function(extent) {
 		return this.getMapView().fitExtent(extent, this.getMap().getSize());
@@ -173,7 +173,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Zoom to a specific zoom level.
-	 * @params {Number} zoom The zoom level 0-n
+	 * @param {Number} zoom The zoom level 0-n
 	 */
 	setZoom: function(zoom) {
 		return this.getMapView().setZoom(zoom);
