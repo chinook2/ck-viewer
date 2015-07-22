@@ -1,5 +1,5 @@
 /**
- * 
+ * ZoomIn controller.
  */
 Ext.define("Ck.map.controllers.ZoomIn", {
 	override: "Ck.Controller",
@@ -8,16 +8,14 @@ Ext.define("Ck.map.controllers.ZoomIn", {
 	 * Zoom in the map on click.
 	 * 
 	 * Use on a {@link Ext.button.Button} in a Ext.toolbar ...
-	 * 
 	 *		{
 	 *			xtype: "button",
-	 *			iconCls: " fa fa-search-plus",
+	 *			iconCls: "fa fa-search-plus",
 	 *			scale: "large",
-	 *			handler: "mapZoomInClick"
+	 *			handler: "ckmapZoomIn"
 	 *		}
-	 * 
 	 */
-	mapZoomInClick: function(btn) {
+	ckmapZoomIn: function(btn) {
 		var map = this.getMap();
 		map.setZoom( map.getZoom() + 1 );
 	}

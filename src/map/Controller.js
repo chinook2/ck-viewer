@@ -5,7 +5,6 @@ Ext.define('Ck.map.Controller', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.ckmap',
 	
-	
 	init: function() {
 		var v = this.getView();
 		

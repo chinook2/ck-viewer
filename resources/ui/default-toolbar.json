@@ -21,17 +21,16 @@
         dockedItems: [{
             xtype: "cktoolbar",
             dock: "right",
-			
 			items: [{
 				xtype: "button",
-				iconCls: " fa fa-search-plus",
+				iconCls: "fa fa-search-plus",
 				scale: "large",
-				handler: "mapZoomInClick"
+				handler: "ckmapZoomIn"
 			},{
 				xtype: "button",
-				iconCls: " fa fa-search-minus",
+				iconCls: "fa fa-search-minus",
 				scale: "large",
-				handler: "mapZoomOutClick"
+				handler: "ckmapZoomOut"
 			}]
 		},{
             xtype: "toolbar",
