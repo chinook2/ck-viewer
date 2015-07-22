@@ -1,13 +1,13 @@
 /**
- * ZoomIn controller.
  */
 Ext.define("Ck.map.controllers.ZoomIn", {
 	override: "Ck.Controller",
 
 	/**
-	 * Zoom in the map on click.
+	 * Zoom in the map.
 	 * 
-	 * Use on a {@link Ext.button.Button} in a Ext.toolbar ...
+	 * Use on a {@link Ext.button.Button} in a {@link Ext.toolbar.Panel}.
+	 *
 	 *		{
 	 *			xtype: "button",
 	 *			iconCls: "fa fa-search-plus",

@@ -5,6 +5,17 @@ Ext.define('Ck.map.Controller', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.ckmap',
 	
+	/**
+	 * @event ckmapReady
+	 * Fires when the map is ready (rendered)
+	 * @params {Ck.map.Controller} this
+	 */
+	
+	
+	/**
+	 * Init the map component, init the viewModel.
+	 * @protected
+	 */
 	init: function() {
 		var v = this.getView();
 		
@@ -88,57 +99,99 @@ Ext.define('Ck.map.Controller', {
 		}
 	},
 	
-	//
+	/**
+	 * Getter for the viewModel.
+	 */
 	get: function(property) {
 		return this.getViewModel().get(property);
 	},
 	
+	/**
+	 * Setter for the viewModel.
+	 */
 	set: function(property, value) {
 		return this.getViewModel().set(property, value);
 	},
-	//
 	
+	
+	/**
+	 * Get the current map controller.
+	 * @return {Ck.map.Controller} The map controller
+	 */
 	getMap: function() {
 		return this.getView().getMap();
 	},
+	
+	/**
+	 * Get the Ol view associated with this map..
+	 * @return {ol.View} The view that controls this map. 
+	 * @protected
+	 */
 	getMapView: function() {
 		return this.getMap().getView();
 	},
 	
-	
+	/**
+	 * Set the center of the current view.
+	 * @params {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
+	 */
 	setCenter: function(c) {
 		return this.getMapView().setCenter(c);
 	},
 	
+	/**
+	 * Set the resolution for this view.
+	 * @params {Number} res The resolution of the view.
+	 */
 	setResolution: function(res) {
 		return this.getMapView().setResolution(res);
 	},
-	
+
+	/**
+	 * Set the rotation for this view.
+	 * @params {Number} rot The rotation of the view in radians.
+	 */
 	setRotation: function(rot) {
 		return this.getMapView().setRotation(rot);
 	},
 	
+	/**
+	 * Fit the map view to the passed extent.
+	 * @params {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
+	 */
 	setExtent: function(extent) {
 		return this.getMapView().fitExtent(extent, this.getMap().getSize());
 	},
 	
+	/**
+	 * Get the current zoom level. Return undefined if the current resolution is undefined or not a "constrained resolution".
+	 * @return {Number} zoom
+	 */
 	getZoom: function() {
 		return this.getMapView().getZoom();
 	},
 	
+	/**
+	 * Zoom to a specific zoom level.
+	 * @params {Number} zoom The zoom level 0-n
+	 */
 	setZoom: function(zoom) {
 		return this.getMapView().setZoom(zoom);
 	},
 	
+	/**
+	 * Get the collection of layers associated with this map.
+	 *	@return {ol.Collection} 
+	 */
 	getLayers: function() {
 		return this.getMap().getLayers();
 	},
 	
 	
 	/**
-	*	Function resizeMap
-	*	Retaille la map en fonction de la taille de la div de la vue
-	**/
+	 *	Resize the map when the view is resized.
+	 * Render the map if it's not rendered (first call)
+	 */
 	resize: function() {
 		var v = this.getView();
 		var m = v.getMap();
