@@ -1,20 +1,27 @@
 /*
  * @class Ck
- * 
- * 
+ *
+ * The Ck namespace (global object) encapsulates all classes, singletons, and
+ * utility methods provided by Chinook's libraries 
+ *
  * @singleton
  */
 Ext.ns('Ck');
 
 // @define Ck
 Ext.apply(Ck, {
-	/**
-	 * 
-	 */
-	params: null,
 	
 	/**
-	 *
+	 * @property params
+	 * @type Object
+	 * @readonly
+	 * Global variable Ext.params of the current URL parameters
+	 */
+	params: {},
+	
+	/**
+	 * Get all the maps avaible.
+	 * @return {Ck.map.Controller[]} An array of map controllers
 	 */
 	getMaps: function() {
 		// Return all maps components by CSS Selector
@@ -26,7 +33,9 @@ Ext.apply(Ck, {
 	},
 	
 	/**
-	 *
+	 * Get the first map or a map by id.
+	 * @param {string} [idMap] id of the map
+	 * @return {Ck.map.Controller} the map controllers
 	 */
 	getMap: function(idMap) {
 		var map;
