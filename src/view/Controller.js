@@ -42,14 +42,11 @@ Ext.define('Ck.view.Controller', {
 				// var uiConfig = Ext.decode(response.responseText);
 				// this.initUi(uiConfig);
 				
-				Ext.log({
-					level: 'error',
-					msg: 'Error when loading "'+uiName+'" interface !. Loading the default interface...'
-				});
+				Ck.error('Error when loading "'+uiName+'" interface !. Loading the default interface...');
 				
 				this.getUi('default');
-			}		
-		});	
+			}
+		});
 	}
 
 });

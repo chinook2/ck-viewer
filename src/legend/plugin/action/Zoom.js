@@ -23,7 +23,7 @@ Ext.define('Ck.legend.plugin.action.Zoom', {
 	doAction: function(layer) {		
 		var extent = layer.getExtent();
 		if(!extent) {
-			Ext.log("Layer ''"+ layer.get('title') +"' have no extent !");
+			Ck.log("Layer '"+ layer.get('title') +"' has no extent !");
 			return;
 		}
 		

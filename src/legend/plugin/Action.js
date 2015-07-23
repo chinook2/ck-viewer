@@ -11,7 +11,7 @@ Ext.define('Ck.legend.plugin.Action', {
 		// Get the Action Column
 		this.actionColumn = cmp.down('actioncolumn');
 		if(!this.actionColumn) {
-			Ext.log("No actionColumn found for Ck.legend.plugin.action.zoom.");
+			Ck.log("No actionColumn found for Ck.legend.plugin.action.zoom.");
 			return;
 		}
 		

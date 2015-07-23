@@ -66,6 +66,17 @@ Ext.apply(Ck, {
 	},
 	getEnv: function() {
 		return this.getEnvironment();
+	},
+	
+	
+	log: function(opt) {
+		Ext.log(opt);
+	},
+	error: function(msg) {
+		Ext.log({
+			level: 'error',
+			msg: msg
+		});
 	}
 });
 
