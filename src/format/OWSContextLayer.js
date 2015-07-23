@@ -72,6 +72,9 @@ Ext.define('Ck.format.OWSContextLayer', {
 			return 'wmts';
 		} else if (c.indexOf('wfs') != -1) {
 			return 'wfs';
+			
+		} else if (c.indexOf('geojson') != -1) {
+			return 'geojson';
 		
 		// WCS, WPS, CSW, GML, KML, GeoTIFF, GMLJP2, GMLCOV
 		} else {

@@ -100,6 +100,21 @@ Ext.define('Ck.map.Controller', {
                         visible: layer.getVisible()
 					});
 					break;
+					
+				case 'geojson':
+					olLayer = new ol.layer.Vector({
+						source: new ol.source.Vector({
+							format: new ol.format.GeoJSON(),
+							url: layer.getHref(false)
+						}),
+						style: Ck.map.Style.style,
+						//projection: 'EPSG:2154',
+						//extent: layer.getExtent(),
+						title: layer.getTitle(),
+						path: layer.getExtension('path'),
+                        visible: layer.getVisible()						
+					});
+					break;
 			}
 			
 			if(olLayer) {

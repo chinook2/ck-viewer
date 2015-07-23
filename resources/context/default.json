@@ -36,8 +36,6 @@
 			"categories" : [],
 			"links" : [],
 			"active" : true,
-			"minscale" : 100,
-			"maxscale" : 10000000,
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/osm",
 				"operations" : [{ 
@@ -50,52 +48,6 @@
 				}],
 				"extension" : []
 			}]
-		}
-	},{
-		"type": "Feature",
-		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/wms/2",
-		"properties": {
-			"title" : "Régions",
-			"updated" : "2015-07-22T00:00:00Z",
-			"content" : "GEOFLA",
-			"publisher" : "Chinook Server",
-			"active" : true,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_l93/www/index.php?LAYERS=region&amp;VERSION=1.1.0"
-				}]
-			}],
-			"extension" : {
-				"path": "GEOFLA"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/wms/3",
-		"properties": {
-			"title" : "Départements",
-			"updated" : "2015-07-22T00:00:00Z",
-			"content" : "Open Stree Map example",
-			"publisher" : "Chinook Server",
-			"active" : false,
-			"bbox" : [156745.83,5220016.20,579901.22,5620546.22],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_l93/www/index.php?LAYERS=departement&amp;VERSION=1.1.0"
-				}]
-			}],
-			"extension" : {
-				"path": "GEOFLA"
-			}
 		}
 	}]
 }
