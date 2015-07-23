@@ -5,10 +5,26 @@ Ext.define('Ck.map.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckmap',
 	
+	requires: [
+		'Ck.format.OWSContext'
+	],
+	
 	/**
-	 * @event ckmapReady
+	 * @event ready
 	 * Fires when the map is ready (rendered)
 	 * @param {Ck.map.Controller} this
+	 */
+	
+	/**
+	 * @event loaded
+	 * Fires when the map is ready (rendered) and all the layers of the current context are loaded
+	 * @param {Ck.map.Controller} this
+	 */
+	
+	/**
+	 * @event addlayer
+	 * Fires when layer is added to the map
+	 * @param {ol.layer.*} layer
 	 */
 	
 	
@@ -19,84 +35,135 @@ Ext.define('Ck.map.Controller', {
 	init: function() {
 		var v = this.getView();
 		
-		if(!(v.getMap() instanceof ol.Map)){
-			var olMap = new ol.Map({
-				view: new ol.View({
-					center: v.getCenter(),
-					zoom: v.getZoom()
-				}),
-				
-				layers: [
-					new ol.layer.Tile({
-						source: new ol.source.MapQuest({layer: 'osm'}),
-						title: 'Open Stree Map'
-					}),
-					new ol.layer.Image({
-						source: new ol.source.ImageWMS({
-							url: 'http://localhost:8080/projets/__Chinookgs/app/1.6/demo_l93/www/index.php',
-							params: {
-								'LAYERS': 'region',
-								'VERSION': '1.1.0'
-							}
-						}),
-						extent: [-610070.44,5042682.29,1082551.12,6644802.40],
-						title: 'Régions',
-						path: 'GEOFLA'
-					}),
-					new ol.layer.Image({
-						source: new ol.source.ImageWMS({
-							url: 'http://localhost:8080/projets/__Chinookgs/app/1.6/demo_l93/www/index.php',
-							params: {
-								'LAYERS': 'departement',
-								'VERSION': '1.1.0'
-							}
-						}),
-						extent: [156745.83,5220016.20,579901.22,5620546.22],
-						title: 'Départements',
-						path: 'GEOFLA',
-                        visible: false
-					})
-				]
-			});
-			v.setMap(olMap);
-			
-			var vm = this.getViewModel();		   
-			
-			var p = v.getCoordPrecision();
-			var olv = olMap.getView();
-			
-			var proj = olv.getProjection().getCode();
-			var units = olv.getProjection().getUnits();
-			vm.set('olview.projection.code', proj);
-			vm.set('olview.projection.units', units);
-			
-			olMap.on('moveend', function(e){
-
-				var c = olv.getCenter();
-				vm.set('olview.center', c );
-				
-				var res = olv.getResolution();
-				vm.set('olview.resolution', res );
-				
-				var rot = olv.getRotation();
-				vm.set('olview.rotation', rot );
-				
-				var extent = olv.calculateExtent(olMap.getSize());
-				var bl = ol.extent.getBottomLeft(extent);
-				var tr = ol.extent.getTopRight(extent);
-				vm.set('extent', [
-					ol.coordinate.format(bl, '{x}', p),
-					ol.coordinate.format(bl, '{y}', p),
-					ol.coordinate.format(tr, '{x}', p),
-					ol.coordinate.format(tr, '{y}', p)
-				]);
-				
-				var z = olv.getZoom();
-				vm.set('zoom', z);
-			});
-			
-			
+		if(Ck.params.context) {
+			v.setContext(Ck.params.context);
 		}
+
+		var olMap = new ol.Map({
+			view: new ol.View({
+				center: v.getCenter(),
+				zoom: v.getZoom()
+			})
+		});
+		
+		this.bindMap(olMap);
+		
+		// Relay olMap events
+		olMap.getLayers().on('add', function(colEvent) {
+			var layer = colEvent.element;
+			this.fireEvent('addlayer', layer);
+		}, this);
+	},
+	
+	initContext: function(context) {
+		if(!context) {
+			var contextName = this.getView().getContext();
+			this.getContext(contextName);
+			return;
+		}
+		
+		var owc = new Ck.Owc(context);
+		if(!owc) {
+			Ck.log("This context is not a OWS context !");
+			return;
+		}
+				
+		// remove all layers
+		this.getLayers().clear();
+		
+		// set the bbox
+		this.setExtent( owc.getExtent() );
+		
+		owc.getLayers().forEach(function(lyr) {
+			var layer = owc.getLayer(lyr);
+			if(!layer) return;
+			
+			var olLayer = false;
+			
+			switch(layer.getType()) {
+				case 'osm':
+					olLayer = new ol.layer.Tile({
+						source: new ol.source.MapQuest({layer: 'osm'}),
+						title: layer.getTitle()
+					});
+					break;
+					
+				case 'wms':
+					olLayer = new ol.layer.Image({
+						source: new ol.source.ImageWMS({
+							url: layer.getHref(false),
+							params:  layer.getHrefParams()
+						}),
+						extent: layer.getExtent(),
+						title: layer.getTitle(),
+						path: layer.getExtension('path'),
+                        visible: layer.getVisible()
+					});
+					break;
+			}
+			
+			if(olLayer) {
+				this.getOlMap().addLayer(olLayer);
+			}
+		}, this);
+		
+		// Fire when layers are loaded
+		this.fireEvent('loaded', this);
+	},
+	
+	getContext: function(contextName) {
+		Cks.get({
+			url: 'packages/local/ck-viewer/resources/context/'+contextName+'.json',
+			scope: this,
+			success: function(response){
+				var owc = Ext.decode(response.responseText);
+				this.initContext(owc);
+			},
+			failure: function(response, opts) {
+				Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
+				this.getContext('default');
+			}
+		});
+	},
+	
+	bindMap: function(olMap) {
+		var v = this.getView();
+		var vm = this.getViewModel();
+		
+		v.setMap(olMap);
+		
+		var p = v.getCoordPrecision();
+		var olv = olMap.getView();
+		
+		var proj = olv.getProjection().getCode();
+		var units = olv.getProjection().getUnits();
+		vm.set('olview.projection.code', proj);
+		vm.set('olview.projection.units', units);
+		
+		olMap.on('moveend', function(e){
+
+			var c = olv.getCenter();
+			vm.set('olview.center', c );
+			
+			var res = olv.getResolution();
+			vm.set('olview.resolution', res );
+			
+			var rot = olv.getRotation();
+			vm.set('olview.rotation', rot );
+			
+			var extent = olv.calculateExtent(olMap.getSize());
+			var bl = ol.extent.getBottomLeft(extent);
+			var tr = ol.extent.getTopRight(extent);
+			vm.set('extent', [
+				ol.coordinate.format(bl, '{x}', p),
+				ol.coordinate.format(bl, '{y}', p),
+				ol.coordinate.format(tr, '{x}', p),
+				ol.coordinate.format(tr, '{y}', p)
+			]);
+			
+			var z = olv.getZoom();
+			vm.set('zoom', z);
+		});
 	},
 	
 	/**
@@ -118,7 +185,7 @@ Ext.define('Ck.map.Controller', {
 	 * Get the map associated with the controller.
 	 * @return {ol.Map} The Ol map
 	 */
-	getMap: function() {
+	getOlMap: function() {
 		return this.getView().getMap();
 	},
 	
@@ -127,8 +194,8 @@ Ext.define('Ck.map.Controller', {
 	 * @return {ol.View} The view that controls this map. 
 	 * @protected
 	 */
-	getMapView: function() {
-		return this.getMap().getView();
+	getOlView: function() {
+		return this.getOlMap().getView();
 	},
 	
 	/**
@@ -136,7 +203,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
 	 */
 	setCenter: function(c) {
-		return this.getMapView().setCenter(c);
+		return this.getOlView().setCenter(c);
 	},
 	
 	/**
@@ -144,7 +211,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {Number} res The resolution of the view.
 	 */
 	setResolution: function(res) {
-		return this.getMapView().setResolution(res);
+		return this.getOlView().setResolution(res);
 	},
 
 	/**
@@ -152,7 +219,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {Number} rot The rotation of the view in radians.
 	 */
 	setRotation: function(rot) {
-		return this.getMapView().setRotation(rot);
+		return this.getOlView().setRotation(rot);
 	},
 	
 	/**
@@ -160,7 +227,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
 	 */
 	setExtent: function(extent) {
-		return this.getMapView().fitExtent(extent, this.getMap().getSize());
+		return this.getOlView().fitExtent(extent, this.getOlMap().getSize());
 	},
 	
 	/**
@@ -168,7 +235,7 @@ Ext.define('Ck.map.Controller', {
 	 * @return {Number} zoom
 	 */
 	getZoom: function() {
-		return this.getMapView().getZoom();
+		return this.getOlView().getZoom();
 	},
 	
 	/**
@@ -176,7 +243,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {Number} zoom The zoom level 0-n
 	 */
 	setZoom: function(zoom) {
-		return this.getMapView().setZoom(zoom);
+		return this.getOlView().setZoom(zoom);
 	},
 	
 	/**
@@ -184,7 +251,7 @@ Ext.define('Ck.map.Controller', {
 	 *	@return {ol.Collection} 
 	 */
 	getLayers: function() {
-		return this.getMap().getLayers();
+		return this.getOlMap().getLayers();
 	},
 	
 	
@@ -194,12 +261,14 @@ Ext.define('Ck.map.Controller', {
 	 */
 	resize: function() {
 		var v = this.getView();
-		var m = v.getMap();
+		var m = this.getOlMap();
 		if(!m.isRendered()){
 			m.setTarget(v.body.id);
 			
+			this.initContext();
+			
 			// Fire map ready when it's rendered
-			this.fireEvent('ckmapReady', this);
+			this.fireEvent('ready', this);
 		} else {
 			m.updateSize();
 		}

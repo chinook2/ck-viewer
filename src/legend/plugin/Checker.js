@@ -11,7 +11,7 @@ Ext.define('Ck.legend.plugin.Checker', {
 		cmp.on('checkchange', this.onCheckChange, this);
 		
 		//
-		cmp.getController().on('cklegendReady', function(treeController) {
+		cmp.getController().on('ready', function(treeController) {
 			treeController.getView().getChecked().forEach(function(node){
 				this.onCheckChange(node);
 			}, this);

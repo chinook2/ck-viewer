@@ -4,8 +4,17 @@
 Ext.define('Ck.legend.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.cklegend',
-		
-	ckInit: function() {		
+	
+	listen: {
+		controller: {
+			'ckmap': {
+				// Called when add layer to map
+				addlayer: 'onMapAddLayer'
+			}
+		}
+	},
+	
+	ckLayersInit: function() {
 		var v = this.getView();
 		
 		var layers = this.getMap().getLayers().getArray();
@@ -22,11 +31,16 @@ Ext.define('Ck.legend.Controller', {
 			scope: this
 		});
 		
+		// var olMap = this.getMap().getOlMap();
 		// olMap.on('addlayer', function() {
 			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
 		// });
 		
-		this.fireEvent('cklegendReady', this);		
+		this.fireEvent('ready', this);		
+	},
+	
+	onMapAddLayer: function(layer) {
+		// this.addLayer(layer);
 	},
 	
 	getLayers: function() {

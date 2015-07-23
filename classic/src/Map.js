@@ -26,7 +26,9 @@ Ext.define("Ck.Map", {
 		center: [0, 0],
 		zoom: 2,
 		
-		coordPrecision: 2
+		coordPrecision: 2,
+		
+		context: 'default'
 	},
 
 	/* TODO : voir si peut simplifier des choses ?

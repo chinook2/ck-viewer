@@ -11,7 +11,9 @@ Ext.define('Ck.Controller', {
 		controller: {
 			'ckmap': {
 				// Called when map is ready
-				ckmapReady: 'onMapReady'
+				ready: 'onMapReady',
+				// Called when layers are added from context
+				loaded: 'onMapLoaded'
 			}
 		}
 	},
@@ -28,13 +30,29 @@ Ext.define('Ck.Controller', {
 	ckInit: Ext.emptyFn,
 	
 	/**
-	 * Called by ckmapReady event of ckmap controller
+	 * Called when the layers are ready from context.
+	 * @param {Ck.map.Controller} mapController The map controller
+	 */
+	ckLayersInit: Ext.emptyFn,
+	
+	/**
+	 * Called by 'ready' event of ckmap controller
 	 * @protected
 	 */
 	onMapReady: function(mapController) {
 		this._map = mapController;
 		
 		this.ckInit(mapController);
+	},
+	
+	/**
+	 * Called by 'loaded' event of ckmap controller
+	 * @protected
+	 */
+	onMapLoaded: function(mapController) {		
+		this._map = mapController;
+		
+		this.ckLayersInit(mapController);
 	},
 	
 	/**
