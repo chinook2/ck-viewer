@@ -108,8 +108,7 @@ Ext.define('Ck.map.Controller', {
 							url: layer.getHref(false)
 						}),
 						style: Ck.map.Style.style,
-						//projection: 'EPSG:2154',
-						//extent: layer.getExtent(),
+						extent: layer.getExtent(),
 						title: layer.getTitle(),
 						path: layer.getExtension('path'),
                         visible: layer.getVisible()						
