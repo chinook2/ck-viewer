@@ -78,44 +78,88 @@ Ext.define('Ck.map.Controller', {
 			var layer = owc.getLayer(lyr);
 			if(!layer) return;
 			
-			var olLayer = false;
+			var olLayer, olLayerType, olSource, olStyle = false;
 			
 			switch(layer.getType()) {
 				case 'osm':
-					olLayer = new ol.layer.Tile({
-						source: new ol.source.MapQuest({layer: 'osm'}),
-						title: layer.getTitle()
+					olLayerType = 'Tile';
+					olSource = new ol.source.MapQuest({
+						layer: 'osm'
 					});
 					break;
 					
 				case 'wms':
-					olLayer = new ol.layer.Image({
-						source: new ol.source.ImageWMS({
-							url: layer.getHref(false),
-							params:  layer.getHrefParams()
-						}),
-						extent: layer.getExtent(),
-						title: layer.getTitle(),
-						path: layer.getExtension('path'),
-                        visible: layer.getVisible()
+					olLayerType = 'Image';
+					olSource = new ol.source.ImageWMS({
+						url: layer.getHref(false),
+						params: layer.getHrefParams()
 					});
 					break;
 					
 				case 'geojson':
-					olLayer = new ol.layer.Vector({
-						source: new ol.source.Vector({
-							format: new ol.format.GeoJSON(),
-							url: layer.getHref(false)
-						}),
-						style: Ck.map.Style.style,
-						extent: layer.getExtent(),
-						title: layer.getTitle(),
-						path: layer.getExtension('path'),
-                        visible: layer.getVisible()						
+					olLayerType = 'Vector';
+					olSource = new ol.source.Vector({
+						url: layer.getHref(false),
+						format: new ol.format.GeoJSON()
 					});
+					olStyle = Ck.map.Style.style;
+					
+					var cluster = layer.getExtension('cluster');
+					if(cluster) {
+						// TODO : check if scope is ok with N layers
+						var styleCache = {};
+						var nbFeatures = false;
+						var olSrcVector = olSource;
+						var dist = cluster.distance || 60;
+						olSource = new ol.source.Cluster({
+							distance: dist,
+							source: olSrcVector
+						});
+						olStyle = function(feature, resolution) {
+							var size = feature.get('features').length;
+							var style = styleCache[size];
+							if (!style) {
+								var minSize = cluster.minSize || 10;
+								var maxSize = cluster.maxSize || cluster.distance || 60;
+								if(!nbFeatures) nbFeatures = olSrcVector.getFeatures().length;
+								var ptRadius = minSize + ((size * maxSize) / nbFeatures);
+								style = [new ol.style.Style({
+									image: new ol.style.Circle({
+										radius: ptRadius,
+										stroke: new ol.style.Stroke({
+											color: '#fff'
+										}),
+										fill: new ol.style.Fill({
+											color:  'rgba(51,153,204,0.75)'
+										})
+									}),
+									text: new ol.style.Text({
+										text: size.toString(),
+										scale: ptRadius * .1,
+										fill: new ol.style.Fill({
+											color: '#fff'
+										})
+									})
+								})];
+								styleCache[size] = style;
+							}
+							return style;
+						}
+					}
 					break;
 			}
 			
+			if(olLayerType) {
+				olLayer = new ol.layer[olLayerType]({
+					source: olSource,
+					extent: layer.getExtent(),
+					title: layer.getTitle(),
+					style: olStyle,
+					visible: layer.getVisible(),
+					path: layer.getExtension('path')
+				});
+				
+			}
 			if(olLayer) {
 				this.getOlMap().addLayer(olLayer);
 			}

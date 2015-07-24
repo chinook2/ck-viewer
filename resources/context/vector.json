@@ -70,7 +70,8 @@
 				}]
 			}],
 			"extension" : {
-				"path": ""
+				"path": "",
+				"cluster": true
 			}
 		}
 	}]
