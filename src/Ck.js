@@ -6,7 +6,7 @@
  *
  * @singleton
  */
-Ext.ns('Ck');
+var Ck = Ck || {};
 
 // @define Ck
 Ext.apply(Ck, {
@@ -79,19 +79,6 @@ Ext.apply(Ck, {
 		});
 	}
 });
-
-/**
- * Load Ck classes
- * @ignore
- */
-Ext.require([
-	'Ck.Controller',
-	'Ck.Ajax',
-	
-	'Ck.Map',
-	'Ck.Legend',
-	'Ck.Toolbar'
-]);
 
 /**
  * Init global variable on page load

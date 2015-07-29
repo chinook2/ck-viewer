@@ -5,7 +5,18 @@ Ext.define("Ck.View", {
 	extend: 'Ext.Container',
 	
 	requires: [
-		'Ck.view.*'
+		// require in production
+        'Ext.plugin.Viewport',
+        'Ext.window.MessageBox',
+        
+		'Ext.layout.*',
+        'Ext.form.*',
+        'Ext.tab.*',
+        'Ext.grid.*',
+		
+		// 'Ck.view.*',
+
+		'Ck.*' // Load all Ck class...
 	],
 	
 	controller: 'ckview',

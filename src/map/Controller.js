@@ -171,7 +171,7 @@ Ext.define('Ck.map.Controller', {
 	
 	getContext: function(contextName) {
 		Cks.get({
-			url: 'packages/local/ck-viewer/resources/context/'+contextName+'.json',
+			url: Ext.manifest.profile +'/resources/ck-viewer/context/'+contextName+'.json',
 			scope: this,
 			success: function(response){
 				var owc = Ext.decode(response.responseText);
