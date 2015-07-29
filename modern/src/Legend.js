@@ -1,13 +1,12 @@
 /**
- * été
+ * 
  */
-
-Ext.define("ck.Legend", {
+Ext.define("Ck.Legend", {
     extend: "Ext.list.Tree",
     alias: "widget.cklegend",
     
     requires: [
-        'ck.legend.*'
+        'Ck.legend.*'
     ],
 
     controller: "cklegend",
