@@ -19,6 +19,10 @@ Ext.apply(Ck, {
 	 */
 	params: {},
 	
+	init: function() {
+		Ck.params = Ext.Object.fromQueryString(location.search);
+	},
+	
 	/**
 	 * Get all the maps avaible.
 	 * @return {Ck.map.Controller[]} An array of map controllers
@@ -85,5 +89,5 @@ Ext.apply(Ck, {
  * @ignore 
  */
 Ext.onReady(function(){
-	Ck.params = Ext.Object.fromQueryString(location.search);
+	Ck.init();
 });

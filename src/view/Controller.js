@@ -15,6 +15,8 @@ Ext.define('Ck.view.Controller', {
 				scope: this
 			});
 			return;
+		} else {
+			Ck.init();
 		}
 		//</debug>
 		
