@@ -14,8 +14,6 @@ Ext.define("Ck.View", {
         'Ext.tab.*',
         'Ext.grid.*',
 		
-		// 'Ck.view.*',
-
 		'Ck.*' // Load all Ck class...
 	],
 	

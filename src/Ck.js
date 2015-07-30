@@ -19,6 +19,17 @@ Ext.apply(Ck, {
 	 */
 	params: {},
 	
+	/**
+	 * @property actions
+	 * @type Array
+	 * @readonly
+	 * Global array of avaible Ck.Action.
+	 */
+	actions: [],
+	
+	/**
+	 * Init global variables. Called on app launch.
+	 */
 	init: function() {
 		Ck.params = Ext.Object.fromQueryString(location.search);
 	},
