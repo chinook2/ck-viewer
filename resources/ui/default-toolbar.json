@@ -1,41 +1,39 @@
 {
-    layout: 'border',
-    items: [{
-		xtype: 'panel',
-        bind: {
-            title: '{name}'
+    "layout": "border",
+    "items": [{
+		"xtype": "panel",
+        "bind": {
+            "title": "{name}"
         },
-        region: 'north',
-		height: 45,
-        split: true
+        "region": "north",
+		"height": 45,
+        "split": true
 	},{
-        xtype: 'cklegend',
-        region: 'west',
-        width: 250,
-        split: true
+        "xtype": "cklegend",
+        "region": "west",
+        "width": 250,
+        "split": true
     },{
-        xtype: 'ckmap',        
-        region: 'center',
-        center: [260000, 5900000],
-        zoom: 6,
-        dockedItems: [{
-            xtype: "cktoolbar",
-            dock: "right",
-			items: [{
-				xtype: "button",
-				iconCls: "fa fa-search-plus",
-				scale: "large",
-				handler: "ckmapZoomIn"
-			},{
-				xtype: "button",
-				iconCls: "fa fa-search-minus",
-				scale: "large",
-				handler: "ckmapZoomOut"
+        "xtype": "ckmap",        
+        "region": "center",
+        "center": [260000, 5900000],
+        "zoom": 6,
+        "dockedItems": [{
+            "xtype": "cktoolbar",
+            "dock": "right",
+			"items": [{
+				"_xtype": "button",
+				"scale": "large",
+				"action": "ckmapZoomin"
+			},,{
+				"_xtype": "button",
+				"scale": "large",
+				"action": "ckmapZoomout"
 			}]
 		},{
-            xtype: "toolbar",
-            dock: "bottom",
-            items: [{
+            "xtype": "toolbar",
+            "dock": "bottom",
+            "items": [{
                 "xtype": "tbtext",
                 "bind": {
                     "html": "Centre : {x} {y}"

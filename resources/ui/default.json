@@ -1,18 +1,18 @@
 {
-    layout: 'border',
-    items: [{
-        xtype: 'cklegend',
-        bind: {
-            title: '{name}'
+    "layout": "border",
+    "items": [{
+        "xtype": "cklegend",
+        "bind": {
+            "title": "{name}"
         },
-        region: 'west',
-        width: 250,
-        split: true
+        "region": "west",
+        "width": 250,
+        "split": true
     },{
-        xtype: 'ckmap',        
-        region: 'center',
-        center: [260000, 5900000],
-        zoom: 6,
+        "xtype": "ckmap",        
+        "region": "center",
+        "center": [260000, 5900000],
+        "zoom": 6,
         "dockedItems": [{
             "xtype": "toolbar",
             "dock": "bottom",

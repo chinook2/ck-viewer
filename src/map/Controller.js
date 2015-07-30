@@ -170,8 +170,13 @@ Ext.define('Ck.map.Controller', {
 	},
 	
 	getContext: function(contextName) {
+		var path = Ext.manifest.profile + '/resources/ck-viewer';
+		//<debug>
+		// mini hack to load static resource in dev and prod (this is ignored in prod) !
+		path = 'packages/local/ck-viewer/resources';
+		//</debug>	
 		Cks.get({
-			url: Ext.manifest.profile +'/resources/ck-viewer/context/'+contextName+'.json',
+			url: path +'/context/'+contextName+'.json',
 			scope: this,
 			success: function(response){
 				var owc = Ext.decode(response.responseText);
