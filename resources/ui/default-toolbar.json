@@ -21,14 +21,21 @@
         "dockedItems": [{
             "xtype": "cktoolbar",
             "dock": "right",
+			"defaults": {
+				"scale": "large"
+			},
 			"items": [{
-				"_xtype": "button",
-				"scale": "large",
 				"action": "ckmapZoomin"
-			},,{
-				"_xtype": "button",
-				"scale": "large",
+			},{
 				"action": "ckmapZoomout"
+			},{
+				"xtype": "ckgroup",
+				"iconCls": "fa fa-search",
+				"items": [{
+					"action": "ckmapZoomin"
+				},{
+					"action": "ckmapZoomout"
+				}]
 			}]
 		},{
             "xtype": "toolbar",

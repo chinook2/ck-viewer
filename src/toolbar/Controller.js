@@ -15,7 +15,9 @@ Ext.define('Ck.toolbar.Controller', {
 			v.on('afterlayout', function() {
 				v.el.setLeft(null);
 				v.el.setRight(0);
-			});
+				
+				v.fireEvent("positionUpdated", v);
+			}, this);
 		}
 		
 		this.updateOlControls();
@@ -41,5 +43,4 @@ Ext.define('Ck.toolbar.Controller', {
 			
 		}
 	}
-	
 });

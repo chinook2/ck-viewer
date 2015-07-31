@@ -7,12 +7,13 @@ Ext.define('Ext.overrides.Component', {
 	constructor: function(config) {
 		config = config || {};
 		if(config.action) {
-			var act = config.action;
-			if( Ck.actions[act] ) {
-				config = Ck.actions[act];
+			var action = key = config.action;
+			if(config.itemId) key += config.itemId;
+			if( Ck.actions[key] ) {
+				config = Ck.actions[key];
 			} else {
-				config = Ext.create('widget.'+act, config);
-				Ck.actions[act] = config;
+				config = Ext.create('widget.'+action, config);
+				Ck.actions[key] = config;
 			}
 		}
 		
