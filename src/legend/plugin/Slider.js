@@ -6,25 +6,48 @@ Ext.define('Ck.legend.plugin.Slider', {
 	alias: 'plugin.legendslider',
 	
 	init: function(cmp) {
-		// this.preRenderer = this.renderer || this.defaultRenderer;
-		// this.oScope = this.scope || window;
+		cmp.on({
+			itemmousedown: this.onItemmousedown,
+			itemremove: this.onItemremove,
+			scope: this
+		});
+	},
+	
+	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
+		var layer = record.get('layer');
+		if(!layer) return;
 		
-		// cmp.on('itemclick', this.onItemclick, this);
-		// cmp.on('itemappend', this.onItemappend, this);
-	}
-
-	/*
-	onItemclick: function(tree, record, item, index, e, eOpts ) {
-		var i = item;
+		var opacity = layer.getOpacity();
 		
-		this.slider = Ext.create('Ext.slider.Single', {
-			width: 200,
-			value: 50,
-			increment: 10,
-			minValue: 0,
-			maxValue: 100,
-			renderTo: item
-		});	   
+		var slider = record.get('slider');
+		if(slider) {
+			slider.setVisible(slider.hidden);
+		} else {
+			slider = Ext.create('Ext.slider.Single', {
+				width: 200,
+				value: (opacity * 100),
+				increment: 1,
+				minValue: 0,
+				maxValue: 100,
+				renderTo: item,
+				useTips: true,
+				tipText: function(thumb) {
+					return Ext.String.format('Opacity {0} %', thumb.value);
+				},
+				listeners: {
+					change: function(s, v) {
+						layer.setOpacity(v/100);
+					}
+				}
+			});
+			record.set('slider', slider);
+		}
+	},
+	
+	// the Ext doc is wrong for the list params !!
+	onItemremove: function(root, record) {
+		// After drag&drop the slider reference is wrong, need to rebuild
+		record.set('slider', false);
 	}
-	*/
+	
 });

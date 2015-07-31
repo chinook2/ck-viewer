@@ -18,6 +18,7 @@ Ext.define("Ck.Legend", {
 
 	plugins: [
 		'legendchecker',
+		'legendslider',
 		'legendlayeredit',
 		'legendlayerzoom'
 	],
