@@ -16,8 +16,9 @@ Ext.define('Ck.Action', {
 	_map: null,
 	
     constructor: function(config) {
-		// this.map = Ck.getMap();
-		// this.map.on('loaded', this.ckLayersInit);
+
+		// Use global event to call function when map is ready.
+		// ckmap isn't avaible when first pass here...
 		Ext.on('ckmapReady', function(map) {
 			this._map = map;
 			this.ckInit(map);

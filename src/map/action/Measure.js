@@ -59,10 +59,8 @@ Ext.define('Ck.map.action.Measure', {
 	/**
 	 *
 	 */
-	ckLayersInit: function(map) {
-		// this.callParent([config]);
-		
-		this.olMap = ckmap.getOlMap();
+	ckLayersInit: function(map) {		
+		this.olMap = map.getOlMap();
 		
 		var source = new ol.source.Vector();
 		var vector = new ol.layer.Vector({
@@ -116,10 +114,6 @@ Ext.define('Ck.map.action.Measure', {
 		
 		this.createMeasureTooltip();
 		this.createHelpTooltip();
-
-		// this.draw.on('change:active', function(evt) {
-			// var active = evt.target.get('active');
-		// }, this);
 		
 		this.draw.on('drawstart', function(evt) {
 			// set sketch
