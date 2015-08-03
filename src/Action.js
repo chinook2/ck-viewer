@@ -13,7 +13,21 @@ Ext.define('Ck.Action', {
 	
 	tooltip: '',
 	
+	_map: null,
+	
     constructor: function(config) {
+		// this.map = Ck.getMap();
+		// this.map.on('loaded', this.ckLayersInit);
+		Ext.on('ckmapReady', function(map) {
+			this._map = map;
+			this.ckInit(map);
+		}, this);
+		
+		Ext.on('ckmapLoaded', function(map) {
+			this._map = map;
+			this.ckLayersInit(map);
+		}, this);
+		
 		config = Ext.applyIf(config || {}, {
 			disabled: this.disabled,
 			hidden: this.hidden,
@@ -22,10 +36,20 @@ Ext.define('Ck.Action', {
 			iconCls: this.iconCls,
 			handler: this.doAction,
 			
+			toggleHandler: this.toggleAction,
+			
 			tooltip: this.tooltip,
+			toggleGroup: this.toggleGroup,
 			
 			scope: this
 		});
         this.callParent([config]);
-    }
+    },
+	
+	getMap: function() {
+		return this._map;
+	},
+	
+	ckInit: Ext.emptyFn,
+	ckLayersInit: Ext.emptyFn
 });

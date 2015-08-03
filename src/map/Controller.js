@@ -16,8 +16,31 @@ Ext.define('Ck.map.Controller', {
 	 */
 	
 	/**
+	 * @event ckmapReady
+	 * Global event. Fires when the map is ready (rendered)
+	 *
+	 *		Ext.on('ckmapReady', function(map) {
+	 *			this._map = map;
+	 *			this.ckInit(map);
+	 *		}, this);
+	 * 
+	 * @param {Ck.map.Controller} this
+	 */
+	
+	/**
 	 * @event loaded
 	 * Fires when the map is ready (rendered) and all the layers of the current context are loaded
+	 * @param {Ck.map.Controller} this
+	 */
+	/**
+	 * @event ckmapLoaded
+	 * Global event. Fires when the map is ready (rendered) and all the layers of the current context are loaded.
+	 *
+	 *		Ext.on('ckmapLoaded', function(map) {
+	 *			this._map = map;
+	 *			this.ckLayersInit(map);
+	 *		}, this);
+	 *
 	 * @param {Ck.map.Controller} this
 	 */
 	
@@ -167,6 +190,7 @@ Ext.define('Ck.map.Controller', {
 		
 		// Fire when layers are loaded
 		this.fireEvent('loaded', this);
+		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
 	},
 	
 	getContext: function(contextName) {
@@ -332,6 +356,7 @@ Ext.define('Ck.map.Controller', {
 			
 			// Fire map ready when it's rendered
 			this.fireEvent('ready', this);
+			Ext.GlobalEvents.fireEvent('ckmapReady', this);
 		} else {
 			m.updateSize();
 		}

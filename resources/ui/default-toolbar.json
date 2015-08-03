@@ -30,11 +30,11 @@
 				"action": "ckmapZoomout"
 			},{
 				"xtype": "ckgroup",
-				"iconCls": "fa fa-search",
+				"iconCls": "fa fa-globe",
 				"items": [{
-					"action": "ckmapZoomin"
+					"action": "ckmapMeasureLength"
 				},{
-					"action": "ckmapZoomout"
+					"action": "ckmapMeasureArea"
 				}]
 			}]
 		},{

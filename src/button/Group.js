@@ -7,24 +7,26 @@
 	extend: 'Ext.button.Button',
 	alternateClassName: 'Ck.GroupButton',
 
+	enableToggle: true,
+	
 	autoClose: false,
 	
 	/**
-	 * Point d'ancrage de la subtoolbar. Par défaut elle est alignée à gauche du bouton.
+	 * Anchor point of the toolbar.
 	 */
-	anchor: "r-l",
+	anchor: 'r-l',
 	
 	offsets: [0,0],
 	
 	items: [],
 	
+	cls: 'ck-group-button',
+	
 	/**
-	 * Classe cls de la toolbar. Par défaut initialisée à "x-toolbar-eastbar"
+	 * Extra class for the sub toolbar
 	 */
-	toolbarCls: "ck-toolbar ck-toolbar-group",
-	
-	collapsed: true,
-	
+	toolbarCls: 'ck-toolbar ck-toolbar-group',
+		
 	onRender: function() {
 		// The container of the group button
 		var mainToolbar = this.ownerCt;
@@ -51,7 +53,7 @@
 		
 		if(this.autoClose === true) {
 			this.toolbar.items.each(function(cmp, idx, len) {
-				cmp.on("click", function() {
+				cmp.on('click', function() {
 					this.collapse();				
 				}, this);			
 			}, this);
@@ -62,36 +64,28 @@
 			this.updatePosition();
 		}, this);
 		
-		
 		this.callParent();
 	},
 	
 	
-	handler: function(){
-		if (this.collapsed){
+	handler: function(btn) {
+		if (btn.pressed) {
 			this.expand();
-		}else{
+		} else {
 			this.collapse();
 		}
 	},
 	
 	expand: function(){
-		if (!this.collapsed) return;
-		this.collapsed = false;
-		// this.addCls("x-subtoolbar-active");
 		this.toolbar.show();
 		this.updatePosition();
 	},
 	
 	collapse: function(){
-		if (this.collapsed) return;
-		this.collapsed = true;
-		// this.removeCls("x-subtoolbar-active");
 		this.toolbar.hide();
 	},
 	
 	updatePosition: function() {
 		this.toolbar.getEl().anchorTo(this.getEl(), this.anchor, this.offsets);
-	}
-	
+	}	
 });
