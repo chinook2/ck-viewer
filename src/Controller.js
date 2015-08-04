@@ -1,7 +1,7 @@
 /** 
  * Base controller for all ck.*.controller.
  * 
- * Add the {@link ckInit} function called on ckmapReady event.
+ * Add the {@link ckReady} and {@link ckLoaded} functions called on ckmap ready and loaded event.
  *
  */
 Ext.define('Ck.Controller', {
@@ -19,21 +19,18 @@ Ext.define('Ck.Controller', {
 	},
 	
 	_map: null,
-	
-	//init: function() {
-	//},
-	
+		
 	/**
 	 * Called when the map is ready.
 	 * @param {Ck.map.Controller} mapController The map controller
 	 */
-	ckInit: Ext.emptyFn,
+	ckReady: Ext.emptyFn,
 	
 	/**
 	 * Called when the layers are ready from context.
 	 * @param {Ck.map.Controller} mapController The map controller
 	 */
-	ckLayersInit: Ext.emptyFn,
+	ckLoaded: Ext.emptyFn,
 	
 	/**
 	 * Called by 'ready' event of ckmap controller
@@ -42,7 +39,7 @@ Ext.define('Ck.Controller', {
 	onMapReady: function(mapController) {
 		this._map = mapController;
 		
-		this.ckInit(mapController);
+		this.ckReady(mapController);
 	},
 	
 	/**
@@ -52,7 +49,7 @@ Ext.define('Ck.Controller', {
 	onMapLoaded: function(mapController) {		
 		this._map = mapController;
 		
-		this.ckLayersInit(mapController);
+		this.ckLoaded(mapController);
 	},
 	
 	/**

@@ -59,11 +59,12 @@ Ext.define('Ck.map.action.Measure', {
 	/**
 	 *
 	 */
-	ckLayersInit: function(map) {		
+	ckLoaded: function(map) {		
 		this.olMap = map.getOlMap();
 		
 		var source = new ol.source.Vector();
-		var vector = new ol.layer.Vector({
+		this.measureLayer = new ol.layer.Vector({
+			id: 'measureLayer',
 			source: source,
 			style: new ol.style.Style({
 				fill: new ol.style.Fill({
@@ -81,7 +82,7 @@ Ext.define('Ck.map.action.Measure', {
 				})
 			})
 		});
-		this.olMap.addLayer(vector);
+		this.olMap.addLayer(this.measureLayer);
 		
 		this.type = this.initialConfig.type || this.type;
 		var gtype = (this.type == 'area' ? 'Polygon' : 'LineString');

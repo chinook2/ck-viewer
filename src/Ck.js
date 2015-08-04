@@ -28,10 +28,26 @@ Ext.apply(Ck, {
 	actions: [],
 	
 	/**
-	 * Init global variables. Called on app launch.
+	 * Called on app start.
 	 */
 	init: function() {
 		Ck.params = Ext.Object.fromQueryString(location.search);
+	},
+	
+	/**
+	 * Adds a listener to be notified when the map is ready (before context and layers are loaded).
+	 *
+     * @param {Function} fn The method to call.
+     * @param {Object} [scope] The scope (`this` reference) in which the handler function
+     * executes. Defaults to the browser window.
+     * @param {Object} [options] An object with extra options.
+     * @param {Number} [options.delay=0] A number of milliseconds to delay.
+     * @param {Number} [options.priority=0] Relative priority of this callback. A larger
+     * number will result in the callback being sorted before the others.  Priorities
+     * 1000 or greater and -1000 or lesser are reserved for internal framework use only.
+	 */
+	onReady: function(fn, scope, options) {
+		Ext.on('ckmapReady', fn, scope, options);
 	},
 	
 	/**
@@ -92,13 +108,14 @@ Ext.apply(Ck, {
 			level: 'error',
 			msg: msg
 		});
+	},
+	debug: function(msg, obj) {
+		//<debug>
+		Ext.log({
+			level: 'info',
+			msg: msg,
+			dump: obj
+		});
+		//</debug>
 	}
-});
-
-/**
- * Init global variable on page load
- * @ignore 
- */
-Ext.onReady(function(){
-	Ck.init();
-});
+}).init();

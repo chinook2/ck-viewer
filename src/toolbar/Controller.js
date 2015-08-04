@@ -5,8 +5,7 @@ Ext.define('Ck.toolbar.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.cktoolbar',
 	
-	
-	ckInit: function() {
+	ckReady: function() {
 		var v = this.getView();
 		
 		// Fix right align of toolbar when overlay=true

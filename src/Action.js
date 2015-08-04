@@ -15,18 +15,27 @@ Ext.define('Ck.Action', {
 	
 	_map: null,
 	
+	/**
+     * @inheritdoc Ck.Controller
+	 */	
+	ckReady: Ext.emptyFn,
+	
+	/**
+     * @inheritdoc Ck.Controller
+     */
+	ckLoaded: Ext.emptyFn,
+	
     constructor: function(config) {
-
 		// Use global event to call function when map is ready.
 		// ckmap isn't avaible when first pass here...
 		Ext.on('ckmapReady', function(map) {
 			this._map = map;
-			this.ckInit(map);
+			this.ckReady(map);
 		}, this);
 		
 		Ext.on('ckmapLoaded', function(map) {
 			this._map = map;
-			this.ckLayersInit(map);
+			this.ckLoaded(map);
 		}, this);
 		
 		config = Ext.applyIf(config || {}, {
@@ -49,8 +58,5 @@ Ext.define('Ck.Action', {
 	
 	getMap: function() {
 		return this._map;
-	},
-	
-	ckInit: Ext.emptyFn,
-	ckLayersInit: Ext.emptyFn
+	}
 });

@@ -1,25 +1,16 @@
 /**
  * 
  */
+//<debug>
+// Mini hack to load Ck.js main static class in dev mode
+Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
+//</debug>
+
 Ext.define('Ck.view.Controller', {
 	extend: 'Ext.app.ViewController',
 	alias: 'controller.ckview',
 	
 	init: function() {
-		//<debug>
-		// mini hack to load Ck.js main static class in dev mode
-		if(!Ck.params) {
-			Ext.Loader.loadScript({
-				url: Ext.manifest.paths.Ck + "/Ck.js",
-				onLoad: this.init,
-				scope: this
-			});
-			return;
-		} else {
-			Ck.init();
-		}
-		//</debug>
-		
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
 		}
@@ -28,7 +19,8 @@ Ext.define('Ck.view.Controller', {
 	},
 		
 	/**
-	 * PRIVATE
+	 * Add the UI in the view.
+	 * @private
 	 */
 	initUi: function(ui) {
 		if(!ui) {
@@ -41,7 +33,10 @@ Ext.define('Ck.view.Controller', {
 		return true;
 	},
 	
-	// Récupère la définition de l'application
+	/**
+	 *	Get the json definition of the UI from the server (or localstorage).
+	 * @private
+	 */
 	getUi: function(uiName) {
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
 		//<debug>

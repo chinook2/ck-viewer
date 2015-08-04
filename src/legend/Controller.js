@@ -14,7 +14,7 @@ Ext.define('Ck.legend.Controller', {
 		}
 	},
 	
-	ckLayersInit: function() {
+	ckLoaded: function() {
 		var v = this.getView();
 		
 		var layers = this.getMap().getLayers().getArray();
