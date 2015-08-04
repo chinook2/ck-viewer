@@ -342,6 +342,19 @@ Ext.define('Ck.map.Controller', {
 		return this.getOlMap().getLayers();
 	},
 	
+	/**
+	 * Get a layer by ID.
+	 *	@return {ol.Layer} 
+	 */
+	getLayer: function(id) {
+		var layers = this.getLayers().getArray();
+		// Reverse layer order
+		for(li=layers.length-1; li>=0; li--){
+			if (id == layers[li].get('id')) {
+				return layers[li];
+			}
+		}
+	},
 	
 	/**
 	 *	Resize the map when the view is resized.

@@ -62,88 +62,111 @@ Ext.define('Ck.map.action.Measure', {
 	ckLoaded: function(map) {		
 		this.olMap = map.getOlMap();
 		
-		var source = new ol.source.Vector();
-		this.measureLayer = new ol.layer.Vector({
-			id: 'measureLayer',
-			source: source,
-			style: new ol.style.Style({
-				fill: new ol.style.Fill({
-					color: 'rgba(255, 255, 255, 0.2)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: '#ffcc33',
-					width: 2
-				}),
-				image: new ol.style.Circle({
-					radius: 7,
-					fill: new ol.style.Fill({
-						color: '#ffcc33'
-					})
-				})
-			})
-		});
-		this.olMap.addLayer(this.measureLayer);
-		
-		this.type = this.initialConfig.type || this.type;
-		var gtype = (this.type == 'area' ? 'Polygon' : 'LineString');
-
-		this.draw = new ol.interaction.Draw({
-			source: source,
-			type: gtype,
-			style: new ol.style.Style({
-				fill: new ol.style.Fill({
-					color: 'rgba(255, 255, 255, 0.2)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: 'rgba(0, 0, 0, 0.5)',
-					lineDash: [10, 10],
-					width: 2
-				}),
-				image: new ol.style.Circle({
-					radius: 5,
-					stroke: new ol.style.Stroke({
-						color: 'rgba(0, 0, 0, 0.7)'
-					}),
+		this.measureLayer = map.getLayer('measureLayer');
+		if(!this.measureLayer) {
+			this.measureLayer = new ol.layer.Vector({
+				id: 'measureLayer',
+				source:  new ol.source.Vector(),
+				style: new ol.style.Style({
 					fill: new ol.style.Fill({
 						color: 'rgba(255, 255, 255, 0.2)'
+					}),
+					stroke: new ol.style.Stroke({
+						color: '#ffcc33',
+						width: 2
+					}),
+					image: new ol.style.Circle({
+						radius: 7,
+						fill: new ol.style.Fill({
+							color: '#ffcc33'
+						})
 					})
 				})
-			})
-		});
-		this.olMap.addInteraction(this.draw);
-		this.draw.setActive(false);
+			});
+			this.olMap.addLayer(this.measureLayer);
+		}
 		
-		this.createMeasureTooltip();
-		this.createHelpTooltip();
+		var source = this.measureLayer.getSource();
 		
-		this.draw.on('drawstart', function(evt) {
-			// set sketch
-			this.sketch = evt.feature;
-		}, this);
+		
+		this.type = this.initialConfig.type || this.type;
+		if(this.type) {
+			var gtype = (this.type == 'area' ? 'Polygon' : 'LineString');
 
-		this.draw.on('drawend', function(evt) {
-			this.measureTooltipElement.className = 'tooltip tooltip-static';
-			this.measureTooltip.setOffset([0, -7]);
-			// unset sketch
-			this.sketch = null;
-			// unset tooltip so that a new one can be created
-			this.measureTooltipElement = null;
+			this.draw = new ol.interaction.Draw({
+				source: source,
+				type: gtype,
+				style: new ol.style.Style({
+					fill: new ol.style.Fill({
+						color: 'rgba(255, 255, 255, 0.2)'
+					}),
+					stroke: new ol.style.Stroke({
+						color: 'rgba(0, 0, 0, 0.5)',
+						lineDash: [10, 10],
+						width: 2
+					}),
+					image: new ol.style.Circle({
+						radius: 5,
+						stroke: new ol.style.Stroke({
+							color: 'rgba(0, 0, 0, 0.7)'
+						}),
+						fill: new ol.style.Fill({
+							color: 'rgba(255, 255, 255, 0.2)'
+						})
+					})
+				})
+			});
+			this.olMap.addInteraction(this.draw);
+			this.draw.setActive(false);
+			
 			this.createMeasureTooltip();
-		}, this);
-		
-		this.wgs84Sphere = new ol.Sphere(6378137);
+			this.createHelpTooltip();
+			
+			this.draw.on('drawstart', function(evt) {
+				// set sketch
+				this.sketch = evt.feature;
+			}, this);
+
+			this.draw.on('drawend', function(evt) {
+				this.measureTooltipElement.className = 'tooltip tooltip-static';
+				this.measureTooltip.setOffset([0, -7]);
+				
+				// associate the overlay to the feature and remove it when feature is removed
+				evt.feature.set('overlay', this.measureTooltip);
+				source.on('removefeature', function(evt) {
+					this.olMap.removeOverlay(evt.feature.get('overlay'));
+				}, this);
+				
+				// unset sketch
+				this.sketch = null;
+				
+				// unset tooltip so that a new one can be created
+				this.measureTooltipElement = null;
+				this.createMeasureTooltip();
+			}, this);
+			
+			this.wgs84Sphere = new ol.Sphere(6378137);
+		}
 	},
 	
 	/**
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
+		if(!this.draw) return;
 		this.draw.setActive(pressed);
 		if(pressed) {
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
 		} else {
 			this.olMap.un('pointermove', this.pointerMoveHandler, this);
 		}
+	},
+	
+	/**
+	 * 
+	 */
+	clearAll: function() {
+		if(this.measureLayer) this.measureLayer.getSource().clear();	
 	},
 	
 	/**

@@ -35,6 +35,8 @@
 					"action": "ckmapMeasureLength"
 				},{
 					"action": "ckmapMeasureArea"
+				},{
+					"action": "ckmapMeasureClear"
 				}]
 			}]
 		},{
