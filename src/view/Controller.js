@@ -17,7 +17,14 @@ Ext.define('Ck.view.Controller', {
 		
 		this.initUi();				
 	},
-		
+	
+	/**
+	 * Called before adding the UI to the view. To be overridden by the app in order to modify, control the UI.
+	 */
+	beforeAdd: function(ui) {
+		return ui;
+	},
+	
 	/**
 	 * Add the UI in the view.
 	 * @private
@@ -29,7 +36,12 @@ Ext.define('Ck.view.Controller', {
 			return;
 		}
 		
-		this.view.add(ui);
+		ui = this.beforeAdd(ui);
+		
+		if(this.fireEvent('beforeadd', ui) !== false) {
+			this.view.add(ui);
+		}
+		
 		return true;
 	},
 	
