@@ -19,6 +19,11 @@ Ext.define('Ck.map.action.Measure', {
 	type: 'length',
 	
 	/**
+	 * Allow snapping between measure
+	 */
+	snap: true,
+	
+	/**
 	 * Currently drawn feature.
 	 * @type {ol.Feature}
 	 */
@@ -144,6 +149,13 @@ Ext.define('Ck.map.action.Measure', {
 				this.measureTooltipElement = null;
 				this.createMeasureTooltip();
 			}, this);
+			
+			this.snap = this.initialConfig.snap || this.snap;
+			if(this.snap) {
+				this.olMap.addInteraction(new ol.interaction.Snap({
+				  source: source
+				}));
+			}
 			
 			this.wgs84Sphere = new ol.Sphere(6378137);
 		}
