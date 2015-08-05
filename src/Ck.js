@@ -4,6 +4,26 @@
  * The Ck namespace (global object) encapsulates all classes, singletons, and
  * utility methods provided by Chinook's libraries 
  *
+ * The main applications is initiated with Ext.application which is called once the DOM is ready.
+ * Then call the main view {app}.view.main.Main which extend Ck.View the entry point of the 'ck-viewer' package.
+ *
+ * For example:
+ *
+ *     Ext.define('AppDemo.view.main.Main', {
+ *         extend: 'Ck.View',
+ *         xtype: 'app-main',
+ *     	
+ *     	requires: [
+ *     		'AppDemo.view.main.MainController'
+ *     	],
+ *     	
+ *     	controller: 'main'
+ *     });
+ *
+ * For a Web GIS package the most important view is Ck.Map and Ck.Legend.
+ *
+ * The Ck.Controller is also very important as a basis of all other controllers of the package.
+ *
  * @singleton
  */
 var Ck = Ck || {};
@@ -29,6 +49,8 @@ Ext.apply(Ck, {
 	
 	/**
 	 * Called on app start.
+	 * 
+	 * Populate the Ck.params parameter.
 	 */
 	init: function() {
 		Ck.params = Ext.Object.fromQueryString(location.search);
@@ -88,6 +110,7 @@ Ext.apply(Ck, {
 	
 	/**
 	 * Get informations of the package (from Ext.manifest).
+	 *
 	 *  - creator
 	 *  - version
 	 *  - environment
@@ -100,7 +123,7 @@ Ext.apply(Ck, {
 	
 	/**
 	 * Get version of the package (from Ext.manifest).
-	 * Also avaible with {@link Ext.versions}
+	 * Also avaible with Ext.versions
 	 *
 	 * @return {String} The version number as string
 	 */
@@ -110,6 +133,7 @@ Ext.apply(Ck, {
 	
 	/**
 	 * Get execution environment (from Ext.manifest).
+	 *
 	 *  - production
 	 *  - testing
 	 *  - development
@@ -121,7 +145,8 @@ Ext.apply(Ck, {
 	},
 	
 	/**
-	 * Short alias of {@link Ck.getEnvironment}, get execution environment (from Ext.manifest).
+	 * Short alias of Ck.getEnvironment, get execution environment (from Ext.manifest).
+	 *
 	 *  - production
 	 *  - testing
 	 *  - development
@@ -134,7 +159,7 @@ Ext.apply(Ck, {
 	
 	
 	/**
-	 * @inheritdoc Ext.log
+	 * @inheritdoc Ext#log
 	 */
 	log: function(opt) {
 		Ext.log(opt);
