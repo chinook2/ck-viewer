@@ -1,4 +1,23 @@
 /**
+ * The map controller allow to interact with the map. You can use the Ck.map.Model binding to control the map from a view
+ * or you can use directly the map controller functions from another controller or a Ck.Action.
+ * 
+ * ### ckmap is the controller
+ *
+ * The events like ckmapReady, the Ck.Controller#getMap (and by inheritance getMap() of all the ck controllers) return a Ck.map.Controller.
+ *
+ * Example in Ck.map.action.ZoomIn :
+ *
+ *		var map = Ck.getMap();
+ *		map.setZoom( map.getZoom() + 1 );
+ *
+ * Example in Ck.legend.controller : 
+ *
+ *     var layers = this.getMap().getLayers()
+ *
+ * ### Events relay
+ * 
+ * The map controller relay also ol.Map events like addLayer.
  *
  */
 Ext.define('Ck.map.Controller', {
@@ -78,6 +97,10 @@ Ext.define('Ck.map.Controller', {
 		}, this);
 	},
 	
+	/**
+	 * Init the context map. Called when map is ready.
+	 * @protected
+	 */
 	initContext: function(context) {
 		if(!context) {
 			var contextName = this.getView().getContext();
@@ -194,6 +217,12 @@ Ext.define('Ck.map.Controller', {
 		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
 	},
 	
+	/**
+	 * Load the context. Called by initContext.
+	 * @param {String} The name of the context to load.
+	 * @return {Object} The OWS Context. 
+	 * @protected
+	 */
 	getContext: function(contextName) {
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
 		//<debug>
@@ -214,6 +243,11 @@ Ext.define('Ck.map.Controller', {
 		});
 	},
 	
+	/**
+	 * Bind the map with the model. Update the model on map moveend event.
+	 * @param {ol.Map} olMap
+	 * @protected
+	 */
 	bindMap: function(olMap) {
 		var v = this.getView();
 		var vm = this.getViewModel();
@@ -255,14 +289,24 @@ Ext.define('Ck.map.Controller', {
 	},
 	
 	/**
-	 * Getter for the viewModel.
+	 * Getter for the viewModel. See Ck.map.Model for the list of avaible configs.
+	 *
+	 *     ckmap.get('center')
+	 *
+	 * @param {String} property The parameter to retrieve
+	 * @return {Object/Array/String}
 	 */
 	get: function(property) {
 		return this.getViewModel().get(property);
 	},
 	
 	/**
-	 * Setter for the viewModel.
+	 * Setter for the viewModel. See Ck.map.Model for the list of avaible configs.
+	 *
+	 *     ckmap.set('center', [10, 10])
+	 *
+	 * @param {String} property The parameter to update
+	 * @param {String} value The value
 	 */
 	set: function(property, value) {
 		return this.getViewModel().set(property, value);
@@ -359,6 +403,7 @@ Ext.define('Ck.map.Controller', {
 	/**
 	 *	Resize the map when the view is resized.
 	 * Render the map if it's not rendered (first call)
+	 * @protected
 	 */
 	resize: function() {
 		var v = this.getView();
@@ -366,12 +411,12 @@ Ext.define('Ck.map.Controller', {
 		if(!m.isRendered()){
 			m.setTarget(v.body.id);
 			
-			this.initContext();
-			
 			// Fire map ready when it's rendered
 			Ck.log('fireEvent ckmapReady');
 			this.fireEvent('ready', this);
 			Ext.GlobalEvents.fireEvent('ckmapReady', this);
+			
+			this.initContext();
 		} else {
 			m.updateSize();
 		}

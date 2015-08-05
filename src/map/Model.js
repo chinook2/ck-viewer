@@ -3,7 +3,7 @@
  * 
  * ### Simple binding
  * 
- * Parameters that can be displayed in the view (map viaw or child view)
+ * Parameters that can be displayed in the view (map view or child view)
  *
  *  - zoom
  *  - extent
@@ -21,7 +21,7 @@
  *
  * ### Examples
  *
- * Display the curent center of the map
+ * Display the current center of the map
  *
  *     {
  *     	"xtype": "tbtext",
@@ -41,7 +41,7 @@
  *     }
  *
  *
- * Add un combobox to show the curent scale and change it as well.
+ * Add un combobox to show the current scale and change it as well.
  *
  *     {
  *     	"xtype": "combo",
