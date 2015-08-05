@@ -168,7 +168,11 @@ Ext.apply(Ck, {
 	/**
 	 * Alias for Ck.log({level:'error', ...}). Log a message with error level.
 	 *
+	 * Note : only accept a string (the error message). To use all the log options see Ck.log.
+	 *
 	 * This method does nothing in a release build.
+	 *
+     * @param {String} msg The error message to log.
 	 */
 	error: function(msg) {
 		Ext.log({
@@ -176,4 +180,5 @@ Ext.apply(Ck, {
 			msg: msg
 		});
 	}
+	
 }).init();

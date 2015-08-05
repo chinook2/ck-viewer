@@ -1,5 +1,41 @@
 ﻿/**
+ * Data binding for map view.
+ * 
+ * two-way binding
  *
+ * Display the curent center of the map
+ *
+ *     {
+ *     	"xtype": "tbtext",
+ *     	"bind": {
+ *     		"html": "Centre : {x} {y}"
+ *     	}
+ *     }
+ *
+ *
+ * Diplay the current extent of the map
+ *
+ *     {
+ *     	"xtype": "tbtext",
+ *     	"bind": {
+ *     		"html": "Bbox : {xmin},{ymin},{xmax},{ymax}"
+ *     	}
+ *     }
+ *
+ *
+ * Add un combobox to show the curent scale and change it as well.
+ *
+ *     {
+ *     	"xtype": "combo",
+ *     	"fieldLabel": "Echelle",
+ *     	"displayField": "scale",
+ *     	"valueField": "res",
+ *     	"reference": "mapScales",
+ *     	"bind": {
+ *     		"value": "{resolution}",
+ *     		"store":"{scales}"
+ *     	}
+ *     }
  */
 Ext.define('Ck.map.Model', {
 	extend: 'Ext.app.ViewModel',
@@ -19,26 +55,54 @@ Ext.define('Ck.map.Model', {
 			}
 		},
 		
+		/**
+		 *
+		 */
 		zoom: undefined,
+
+		/**
+		 *
+		 */
 		extent: undefined
 	},
 
+	/**
+	 * @ignore
+	 */
 	formulas: {
+		/**
+		 *
+		 */
 		xmin: function(get){
 			return get('extent')[0];
 		},
+
+		/**
+		 *
+		 */
 		ymin: function(get){
 			return get('extent')[1];
 		},
+
+		/**
+		 *
+		 */
 		xmax: function(get){
 			return get('extent')[2];
 		},
+
+		/**
+		 *
+		 */
 		ymax: function(get){
 			return get('extent')[3];
 		},
 		
 		
 		
+		/**
+		 *
+		 */
 		x: {
 			get: function(get) {
 				return Number(ol.coordinate.format(get('olview.center'), '{x}', this.getCoordPrecision()));
@@ -47,6 +111,10 @@ Ext.define('Ck.map.Model', {
 				this.set('center', [Number(x), this.get('y')]);
 			}
 		},
+
+		/**
+		 *
+		 */
 		y: {
 			get: function(get) {
 				return Number(ol.coordinate.format(get('olview.center'), '{y}', this.getCoordPrecision()));
@@ -56,11 +124,16 @@ Ext.define('Ck.map.Model', {
 			}
 		},
 		
+		/**
+		 *
+		 */
 		scale: function(get){
 			return this.getScale(get('olview.resolution'), get('olview.projection.units'));
 		},
 
-		
+		/**
+		 *
+		 */
 		center: {
 			get: function(get) {
 				return get('olview.center');
@@ -70,6 +143,9 @@ Ext.define('Ck.map.Model', {
 			}
 		},
 		
+		/**
+		 *
+		 */
 		resolution: {
 			get: function(get) {
 				return get('olview.resolution');
@@ -79,6 +155,9 @@ Ext.define('Ck.map.Model', {
 			}
 		},
 		
+		/**
+		 *
+		 */
 		rotation: {
 			get: function(get) {
 				return get('olview.rotation');
@@ -89,6 +168,9 @@ Ext.define('Ck.map.Model', {
 		}		
 	},
 	
+	/**
+	 * @ignore
+	 */
 	stores: {
 		scales: {
 			fields: ['res', 'scale'],
