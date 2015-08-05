@@ -1,7 +1,10 @@
 /**
+ * Base class for measure actions.
  * 
+ * See : Ck.map.action.measure.Lenght, Ck.map.action.measure.Area ...
+ *
+ * Code from : http://openlayers.org/en/master/examples/measure.html?q=measure
  */
-// From : http://openlayers.org/en/master/examples/measure.html?q=measure
 Ext.define('Ck.map.action.Measure', {
 	extend: 'Ck.Action',
 	alias: 'widget.ckmapMeasure',
@@ -14,7 +17,11 @@ Ext.define('Ck.map.action.Measure', {
 	toggleGroup: 'ckmapAction',
 	
 	/**
-	 * length or area
+	 * The type of the measure :
+	 *
+	 *  - length
+	 *  - area
+	 *  - ...
 	 */
 	type: 'length',
 	
@@ -46,17 +53,17 @@ Ext.define('Ck.map.action.Measure', {
 
 	/**
 	 * Message to show when the user start measure.
-	 * @type {string}
 	 */
 	startMsg : 'Click to start measuring',
 	
 	/**
-	 * Message to show when the user is drawing a polygon.
-	 * @type {string}
+	 * Message to show when the user is measuring.
 	 */
 	continueMsg: 'Click to continue measuring',
 
-
+	/**
+	 * 
+	 */
 	geodesic: true,
 	
 	draw: null,

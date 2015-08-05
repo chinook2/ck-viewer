@@ -1,21 +1,35 @@
 /**
- * Define the default style for vector layer...
+ * Define default style for vector layer...
  */
 Ext.define('Ck.map.Style', {
 	alternateClassName: 'Ck.Style',
 	singleton: true,
 	
+	/**
+	 * Default fill color.
+	 */
 	fill: {
 		color: 'rgba(255,255,255,0.4)'
 	},
+	
+	/**
+	 * Default stroke color and width.
+	 */
 	stroke: {
 		color: '#3399CC',
 		width: 2
 	},
+	
+	/**
+	 * Default radius.
+	 */
 	radius: 10,
 	
 	style:null,
 	
+	/**
+	 * Default styles by type ([Multi]Point, [Multi]LineString, [Multi]Polygon).
+	 */
 	defaultStyles: {
 		'Point': [new ol.style.Style({
 			image: new ol.style.Circle({
@@ -73,6 +87,9 @@ Ext.define('Ck.map.Style', {
 		})]
 	},
 	
+	/**
+	 *
+	 */
 	styleFunction: function(feature, resolution) {
 		var featureStyleFunction = feature.getStyleFunction();
 		if (featureStyleFunction) {
@@ -83,6 +100,12 @@ Ext.define('Ck.map.Style', {
 	}
 });
 
+/**
+ * Get default ol.style {Array} using Ck.map.Style.fill, Ck.map.Style.stroke and Ck.map.Style.radius properties.
+ *
+ * 	olStyle = Ck.map.Style.style;
+ * 
+ */
 Ck.map.Style.style = [
 	new ol.style.Style({
 		image: new ol.style.Circle({

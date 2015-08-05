@@ -11,7 +11,7 @@
  *		var map = Ck.getMap();
  *		map.setZoom( map.getZoom() + 1 );
  *
- * Example in Ck.legend.controller : 
+ * Example in Ck.legend.Controller : 
  *
  *     var layers = this.getMap().getLayers()
  *
