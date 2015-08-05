@@ -86,36 +86,69 @@ Ext.apply(Ck, {
 	},
 	
 	
+	/**
+	 * Get informations of the package (from Ext.manifest).
+	 *  - creator
+	 *  - version
+	 *  - environment
+	 *
+	 * @return {Object} The informations
+	 */
 	getInfos: function() {
 		return Ext.manifest.packages['ck-viewer'];
 	},
+	
+	/**
+	 * Get version of the package (from Ext.manifest).
+	 * Also avaible with {@link Ext.versions}
+	 *
+	 * @return {String} The version number as string
+	 */
 	getVersion: function() {
 		return this.getInfos().version;
 	},
+	
+	/**
+	 * Get execution environment (from Ext.manifest).
+	 *  - production
+	 *  - testing
+	 *  - development
+	 *
+	 * @return {String} The environment
+	 */
 	getEnvironment: function() {
 		return this.getInfos().environment;
 	},
+	
+	/**
+	 * Short alias of {@link Ck.getEnvironment}, get execution environment (from Ext.manifest).
+	 *  - production
+	 *  - testing
+	 *  - development
+	 *
+	 * @return {String} The environment
+	 */	
 	getEnv: function() {
 		return this.getEnvironment();
 	},
 	
 	
+	/**
+	 * @inheritdoc Ext.log
+	 */
 	log: function(opt) {
 		Ext.log(opt);
 	},
+	
+	/**
+	 * Alias for Ck.log({level:'error', ...}). Log a message with error level.
+	 *
+	 * This method does nothing in a release build.
+	 */
 	error: function(msg) {
 		Ext.log({
 			level: 'error',
 			msg: msg
 		});
-	},
-	debug: function(msg, obj) {
-		//<debug>
-		Ext.log({
-			level: 'info',
-			msg: msg,
-			dump: obj
-		});
-		//</debug>
 	}
 }).init();
