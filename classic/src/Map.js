@@ -33,7 +33,6 @@ Ext.define("Ck.Map", {
 		map: null,
 		
 		/**
-		 * @cfg {Array} center
 		 * The initial center of the map [x, y]
 		 */
 		center: [0, 0],

@@ -1,7 +1,25 @@
 ﻿/**
- * Data binding for map view.
+ * Data binding for map view. Allow to display parameters in the view and change parameters (two-way).
  * 
- * two-way binding
+ * ### Simple binding
+ * 
+ * Parameters that can be displayed in the view (map viaw or child view)
+ *
+ *  - zoom
+ *  - extent
+ *  - xmin, ymin, xmax, ymax (calculated from extent)
+ *  - scale
+ * 
+ * ### Two-way binding
+ *
+ * Parameters that can be displayed in the view and edited. Changing a parameter change the map parameter.
+ *
+ *  - x, y
+ *  - center
+ *  - resolution
+ *  - rotation
+ *
+ * ### Examples
  *
  * Display the curent center of the map
  *
@@ -56,12 +74,14 @@ Ext.define('Ck.map.Model', {
 		},
 		
 		/**
-		 *
+		 * @cfg {Number}
+		 * Current zoom level of the map.
 		 */
 		zoom: undefined,
 
 		/**
-		 *
+		 * @cfg {Array}
+		 * Current extent of the map [xmin, ymin, xmax, ymax].
 		 */
 		extent: undefined
 	},
@@ -71,28 +91,32 @@ Ext.define('Ck.map.Model', {
 	 */
 	formulas: {
 		/**
-		 *
+		 * @cfg {Number}
+		 * Current xmin of the map.
 		 */
 		xmin: function(get){
 			return get('extent')[0];
 		},
 
 		/**
-		 *
+		 * @cfg {Number}
+		 * Current ymin of the map.
 		 */
 		ymin: function(get){
 			return get('extent')[1];
 		},
 
 		/**
-		 *
+		 * @cfg {Number}
+		 * Current xmax of the map.
 		 */
 		xmax: function(get){
 			return get('extent')[2];
 		},
 
 		/**
-		 *
+		 * @cfg {Number}
+		 * Current ymax of the map.
 		 */
 		ymax: function(get){
 			return get('extent')[3];
@@ -101,7 +125,11 @@ Ext.define('Ck.map.Model', {
 		
 		
 		/**
+		 * @cfg {Number}
+		 * Current center 'x' of the map. Calculated from center, and update center on change.
+		 * Use Ck.Map#coordPrecision to format the number.
 		 *
+		 * Two-way binding
 		 */
 		x: {
 			get: function(get) {
@@ -113,7 +141,11 @@ Ext.define('Ck.map.Model', {
 		},
 
 		/**
+		 * @cfg {Number}
+		 * Current center 'y' of the map. Calculated from center, and update center on change.
+		 * Use Ck.Map#coordPrecision to format the number.
 		 *
+		 * Two-way binding
 		 */
 		y: {
 			get: function(get) {
@@ -125,14 +157,18 @@ Ext.define('Ck.map.Model', {
 		},
 		
 		/**
-		 *
+		 * @cfg {Number}
+		 * Current scale of the map (calculated from resolution).
 		 */
 		scale: function(get){
 			return this.getScale(get('olview.resolution'), get('olview.projection.units'));
 		},
 
 		/**
+		 * @cfg {Array}
+		 * Current center of the map [x, y].
 		 *
+		 * Two-way binding
 		 */
 		center: {
 			get: function(get) {
@@ -144,7 +180,10 @@ Ext.define('Ck.map.Model', {
 		},
 		
 		/**
+		 * @cfg {Number}
+		 * Current resolution of the map.
 		 *
+		 * Two-way binding
 		 */
 		resolution: {
 			get: function(get) {
@@ -156,7 +195,10 @@ Ext.define('Ck.map.Model', {
 		},
 		
 		/**
+		 * @cfg {Number}
+		 * Current rotation of the map.
 		 *
+		 * Two-way binding
 		 */
 		rotation: {
 			get: function(get) {
@@ -183,6 +225,11 @@ Ext.define('Ck.map.Model', {
 	
 	
 	
+	/**
+	 * Calculate the scale of the map from resolution and map unit.
+	 * @return {Number} scale
+	 * @private
+	 */
 	getScale: function(res, unit) {
 		var dpi = 25.4 / 0.28;
 		var mpu = ol.proj.METERS_PER_UNIT[unit];
@@ -190,11 +237,21 @@ Ext.define('Ck.map.Model', {
 	},
 	
 	
+	/**
+	 * Get the map controller.
+	 * @return {Ck.map.Controller} controller
+	 * @private
+	 */
 	getViewController: function() {
 		return this.getView().getController();
 	},
 	
 	
+	/**
+	 * Get the coordinates precision from the Ck.Map#coordPrecision.
+	 * @return {Number} coordPrecision
+	 * @private
+	 */
 	getCoordPrecision: function() {
 		if(!this.coordPrecision) {
 			this.coordPrecision = this.getView().getCoordPrecision();
