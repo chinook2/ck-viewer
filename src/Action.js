@@ -12,24 +12,24 @@
  *
  * Example : 
  * 
- *	 {
- *	 	"xtype": "ckmap",		
- *	 	"region": "center",
- *	 	"center": [260000, 5900000],
- *	 	"zoom": 6,
- *	 	"dockedItems": [{
- *	 		"xtype": "cktoolbar",
- *	 		"dock": "right",
- *	 		"defaults": {
- *	 			"scale": "large"
- *	 		},
- *	 		"items": [{
- *	 			"action": "ckmapZoomin"
- *	 		},{
- *	 			"action": "ckmapZoomout"
- *	 		}]
- *	 	}]
- *	 }
+ *     {
+ *     	"xtype": "ckmap",		
+ *     	"region": "center",
+ *     	"center": [260000, 5900000],
+ *     	"zoom": 6,
+ *     	"dockedItems": [{
+ *     		"xtype": "cktoolbar",
+ *     		"dock": "right",
+ *     		"defaults": {
+ *     			"scale": "large"
+ *     		},
+ *     		"items": [{
+ *     			"action": "ckmapZoomin"
+ *     		},{
+ *     			"action": "ckmapZoomout"
+ *     		}]
+ *     	}]
+ *     }
  * 
  * You can access a action by the global Array Ck.actions. 
  *
@@ -108,14 +108,18 @@ Ext.define('Ck.Action', {
     /**
      * A function called when the button is clicked (can be used instead of click event).
      * 
-     * See also {@link #clickEvent}
+	 * Implemented by sub classes.
+     * 
      * @param {Ext.button.Button} button This button.
      * @param {Ext.event.Event} e The click event.
      */
 	doAction: Ext.emptyFn,
 	
     /**
-     * Function called when a Button with {@link #enableToggle} set to true is clicked.
+     * Function called when a Action with 'toggleGroup' set is clicked.
+	 *
+	 * Implemented by sub classes.
+	 *
      * @param {Ext.button.Button} toggleHandler.button This button.
      * @param {Boolean} toggleHandler.state The next state of the Button, true means pressed.
      */	
