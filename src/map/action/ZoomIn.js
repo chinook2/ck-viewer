@@ -16,26 +16,10 @@ Ext.define('Ck.map.action.ZoomIn', {
 	extend: 'Ck.Action',
 	alias: "widget.ckmapZoomin",
 	
-	/**
-	 * @inheritdoc Ext.button.Button
-	 */
 	itemId: 'zoomin',
-	
-	/**
-	 * @inheritdoc Ext.button.Button
-	 */
 	text: '',
-	
-	/**
-	 * @inheritdoc Ext.button.Button
-	 */
 	iconCls: 'fa fa-search-plus',
-	
-	/**
-	 * @inheritdoc Ext.button.Button
-	 */
 	tooltip: 'Zoom in',
-	
 	
 	/**
 	 * Zoom in the map on click.
