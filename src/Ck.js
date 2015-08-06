@@ -4,6 +4,8 @@
  * The Ck namespace (global object) encapsulates all classes, singletons, and
  * utility methods provided by Chinook's libraries 
  *
+ * ## Application start 
+ *
  * The main applications is initiated with Ext.application which is called once the DOM is ready.
  * Then call the main view {app}.view.main.Main which extend Ck.View the entry point of the 'ck-viewer' package.
  *
@@ -20,6 +22,19 @@
  *     	controller: 'main'
  *     });
  *
+ * ## URL Parameters
+ *
+ * The application can use URL Parameters to configure differents view.
+ *
+ *     - Ck.view.Controller
+ *         - app : name of the layout to load
+ *     - Ck.map.Controller
+ *         - context : name of the context to load
+ *     - Ck.Ajax
+ *         - nocache : allow to reload the app and context from server (ignore LocalStorage)
+ *
+ * ## Next...
+ * 
  * For a Web GIS package the most important view is Ck.Map and Ck.Legend.
  *
  * The Ck.Controller is also very important as a basis of all other controllers of the package.
