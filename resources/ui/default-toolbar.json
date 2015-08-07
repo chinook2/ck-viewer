@@ -38,6 +38,16 @@
 				},{
 					"action": "ckmapMeasureClear"
 				}]
+			},{
+				"xtype": "ckgroup",
+				"iconCls": "fa fa-asterisk",
+				"items": [{
+					"action": "ckmapSelectPoint"
+				},{
+					"action": "ckmapSelectCircle"
+				},{
+					"action": "ckmapSelectBox"
+				}]
 			}]
 		},{
             "xtype": "toolbar",
