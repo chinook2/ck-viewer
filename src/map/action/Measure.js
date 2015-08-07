@@ -1,7 +1,7 @@
 /**
  * Base class for measure actions.
  * 
- * See : Ck.map.action.measure.Lenght, Ck.map.action.measure.Area ...
+ * See : Ck.map.action.measure.Length, Ck.map.action.measure.Area ...
  *
  * Code from : http://openlayers.org/en/master/examples/measure.html?q=measure
  */

@@ -59,6 +59,10 @@
 			}, this);
 		}
 		
+		// fix hide when multiple group button
+		this.toolbar.getEl().setVisibilityMode(Ext.Element.VISIBILITY);
+		//
+		
 		// Fix anchor of sub-toolbar when mainToolbar is right align and overlay=true
 		mainToolbar.on('positionUpdated', function() {
 			this.updatePosition();
