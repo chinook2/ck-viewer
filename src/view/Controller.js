@@ -14,7 +14,7 @@ Ext.define('Ck.view.Controller', {
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
 		}
-		
+
 		this.initUi();				
 	},
 	
@@ -51,6 +51,7 @@ Ext.define('Ck.view.Controller', {
 	 */
 	getUi: function(uiName) {
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
+		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
 		//<debug>
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
 		path = 'packages/local/ck-viewer/resources';

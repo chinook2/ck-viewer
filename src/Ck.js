@@ -133,6 +133,7 @@ Ext.apply(Ck, {
 	 * @return {Object} The informations
 	 */
 	getInfos: function() {
+		if(!Ext.manifest.packages) return {};
 		return Ext.manifest.packages['ck-viewer'];
 	},
 	

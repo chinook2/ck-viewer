@@ -225,6 +225,7 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getContext: function(contextName) {
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
+		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
 		//<debug>
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
 		path = 'packages/local/ck-viewer/resources';
