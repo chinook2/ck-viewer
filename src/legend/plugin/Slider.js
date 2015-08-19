@@ -1,5 +1,6 @@
 ﻿/**
- * 
+ * Slider to set layer opacity. It's displayed at the layer click.
+ * The opacity range begins from 0 to 100 pourcent.
  */
 Ext.define('Ck.legend.plugin.Slider', {
 	extend: 'Ext.AbstractPlugin',

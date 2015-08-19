@@ -1,5 +1,8 @@
 /**
+ * @class Ck.button.Group
  *
+ * This class manage a button that can hide or shows a collection of button.
+ * Buttons are disposed in a Ext Toolbar.
  */
  Ext.define('Ck.button.Group', {
 	alias: 'widget.ckgroup',
@@ -21,6 +24,12 @@
 	items: [],
 	
 	cls: 'ck-group-button',
+	
+	/**
+	 * @type Ext.toolbar.Toolbar
+	 * Associate toolbar
+	 */
+	toolbar: null,
 	
 	/**
 	 * Extra class for the sub toolbar

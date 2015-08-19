@@ -25,12 +25,15 @@
 				"scale": "large"
 			},
 			"items": [{
+				"action": "ckmapResetview"
+			},{
 				"action": "ckmapZoomin"
 			},{
 				"action": "ckmapZoomout"
 			},{
 				"xtype": "ckgroup",
-				"iconCls": "fa fa-globe",
+				"tooltip": "Measure tools",
+				"iconCls": "fa fa-asterisk",
 				"items": [{
 					"action": "ckmapMeasureLength"
 				},{
@@ -40,7 +43,8 @@
 				}]
 			},{
 				"xtype": "ckgroup",
-				"iconCls": "fa fa-asterisk",
+				"tooltip": "Select tools",
+				"iconCls": "fa fa-info-circle",
 				"items": [{
 					"action": "ckmapSelectPoint"
 				},{

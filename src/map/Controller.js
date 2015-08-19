@@ -69,7 +69,6 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.layer.*} layer
 	 */
 	
-	
 	/**
 	 * Init the map component, init the viewModel.
 	 * @protected
@@ -88,6 +87,27 @@ Ext.define('Ck.map.Controller', {
 			})
 		});
 		
+		// Adding controls 
+		if(v.scaleLine) {
+			olMap.addControl(new ol.control.ScaleLine(
+				(typeof v.scaleLine == "object")? v.scaleLine : undefined
+			));
+		}
+		
+		if(v.zoomSlider) {
+			var style = "zoomslider-style1";
+			
+			olMap.addControl(new ol.control.ZoomSlider(
+				(typeof v.zoomSlider == "object")? v.zoomSlider : undefined
+			));
+			
+			if(typeof v.zoomSlider == "object" && v.zoomSlider.style) {
+				style = v.zoomSlider.style;
+			}
+			
+			v.cls += " " + style;
+		}
+		
 		this.bindMap(olMap);
 		
 		// Relay olMap events
@@ -99,6 +119,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Init the context map. Called when map is ready.
+	 * @param {undefined/Object} Object with features, id, properties and type members
 	 * @protected
 	 */
 	initContext: function(context) {
@@ -113,7 +134,9 @@ Ext.define('Ck.map.Controller', {
 			Ck.log("This context is not a OWS context !");
 			return;
 		}
-				
+		
+		this.originOwc = owc;
+		
 		// remove all layers
 		this.getLayers().clear();
 		
@@ -421,6 +444,12 @@ Ext.define('Ck.map.Controller', {
 		} else {
 			m.updateSize();
 		}
+	},
+	
+	/**
+	 * Reset the current view to initial extend
+	 */
+	resetView: function() {
+		this.setExtent(this.originOwc.getExtent());
 	}
-	 
 });

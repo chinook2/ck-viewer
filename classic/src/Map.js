@@ -50,7 +50,24 @@ Ext.define("Ck.Map", {
 		/**
 		 * The initial context to load.
 		 */
-		context: 'default'
+		context: 'default',
+		
+		/**
+		 * @property {Boolean/Object}
+		 * Display scale line. False to hide, true to show and object to show with specified parameters.
+		 */
+		scaleLine: true,
+		
+		/**
+		 * @property {Boolean/Object}
+		 * Display zoom slider. False to hide, true to show and object to show with specified parameters.
+		 *
+		 * A parameter is added over openlayers : style. It can take 3 values :
+		 * - zoomslider-style1 (default)
+		 * - zoomslider-style2
+		 * - zoomslider-style3
+		 */
+		zoomSlider: true
 	},
 
 	/* TODO : voir si peut simplifier des choses ?
