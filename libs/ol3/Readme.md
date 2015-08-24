@@ -1,6 +1,6 @@
 # ck-viewer/libs/ol3
 
-## OpenLayers 3.6.0
+## OpenLayers 3.8.2
 
 Files : 
 - ol.css : style

@@ -55,6 +55,28 @@
 		"type": "Feature",
 		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson/1",
 		"properties": {
+			"title" : "Limites départementales",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "GEOFLA",
+			"active" : true,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "https://raw.githubusercontent.com/chinook2/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": ""
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson/1",
+		"properties": {
 			"title" : "Etablissements d'enseignement supérieur",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "Ministère de l'Éducation nationale, de l'Enseignement supérieur et de la Recherche",

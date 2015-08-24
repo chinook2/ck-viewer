@@ -1,8 +1,11 @@
 /**
  * Base class for select actions.
+ *
+ * The ol.interaction.Select is not used because ol does not support exotic selection (circle, polygon...).
+ * However an ol.interaction.Select is created to manage selected features properly.
+ * So selections are made manually.
  * 
  * See : Ck.map.action.select.Point, Ck.map.action.select.Square ...
- *
  */
 Ext.define('Ck.map.action.Select', {
 	extend: 'Ck.Action',
@@ -34,22 +37,25 @@ Ext.define('Ck.map.action.Select', {
 	/**
 	 * The type of the selection :
 	 *
-	 *  - point
-	 *  - circle
-	 *  - box
-	 *  - ...
+	 *    - point
+	 *    - circle
+	 *    - box
+	 *    - ...
 	 */
 	type: 'point',
 	
 	multi: true,
 	
-	// Select on vector layer
-	//    - select by geometry (circle, box, polygon)
-	//
-	// Select on WMS layer (via WFS call)
-	//    - draw selection as vector
-	//    - draw selection by WMS call of a dynamic layer using WFS filter (for large selection !)
-	
+	/**
+	 * Select on vector layer :
+	 *
+	 *    - select by geometry (circle, box, polygon)
+	 *
+	 * Select on WMS layer (via WFS call) :
+	 *
+	 *    - draw selection as vector
+	 *    - draw selection by WMS call of a dynamic layer using WFS filter (for large selection !)
+	 */
 	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
 		this.type = this.initialConfig.type || this.type;
@@ -89,16 +95,8 @@ Ext.define('Ck.map.action.Select', {
 				// set sketch
 				this.sketch = evt.feature;
 			}, this);
-
-			this.draw.on('drawend', function(feature){
-				// Fix delay for clear current drawing
-				Ext.defer(function(){
-					this.overlay_.getFeatures().clear();
-				}, 200, this);
-				
-				// unset sketch
-				this.sketch = null;
-			});
+			
+			this.draw.on('drawend', this.processSelection, this);
 			
 			
 			this.olMap.addInteraction(this.draw);
@@ -116,14 +114,12 @@ Ext.define('Ck.map.action.Select', {
 			}
 		}
 		
+		// Select controls to host selected features
 		if(!this.select){
-			this.select = new ol.interaction.Select({
-				// layers: this.getLayers,
-				multi: this.multi
-			});
-			this.olMap.addInteraction(this.select);
+			this.select = new ol.interaction.Select();
+			// this.olMap.addInteraction(this.select);
 			this.select.set('id', 'ckmapSelect');
-			this.select.setActive(false);
+			// this.select.setActive(false);
 			
 			this.select.on('select', function(e) {
 				Ck.log(e.target.getFeatures().getLength() +
@@ -131,6 +127,111 @@ Ext.define('Ck.map.action.Select', {
 				  ' and deselected ' + e.deselected.length + ' features)');
 			});		
 		}
+	},
+	
+	/**
+	 * Query layers with current selection
+	 * @param {ol.interaction.DrawEvent}
+	 */
+	processSelection: function(feature) {
+		this.select.getFeatures().clear();
+		// Fix delay to remove cursor drawing point
+		Ext.defer(function(){
+			this.overlay_.getSource().clear();
+		}, 200, this.draw);
+		
+		// unset sketch
+		this.draw.sketch = null;
+		
+		// Parse les géométries en GeoJSON
+		var geoJSON  = new ol.format.GeoJSON();
+		var type = feature.feature.getGeometry().getType();
+		
+		switch(type) {
+			case "Circle" :
+				var radius = feature.feature.getGeometry().getRadius();
+				var pt = turf.point(feature.feature.getGeometry().getCenter());
+				var geom = turf.buffer(pt, radius, "meters");
+				var selFt = geom.features[0];
+				break;
+			case "Point" :
+				var radius = Ck.getMap().getOlView().getResolution() * 10;
+				var pt = turf.point(feature.feature.getGeometry().getCoordinates());
+				var geom = turf.buffer(pt, radius, "meters");
+				break;
+			default :
+				var selFt = geoJSON.writeFeatureObject(feature.feature);
+		}
+		
+		/* Developper : you can display buffered draw for Circle and Point
+			writer = new ol.format.WKT();
+			// writer.writeFeature(geoJSON.readFeature(selFt)); // getWKT
+			ft = geoJSON.readFeature(selFt);
+			
+			if(!window.lyr) {
+				window.lyr = new ol.layer.Vector({
+					id: "onTheFlyLayer",
+					title: "onTheFlyLayer",
+					source: new ol.source.Vector({
+						projection: 'EPSG:3857',
+						format: new ol.format.GeoJSON()
+					}),
+					style: new ol.style.Style({
+						stroke: new ol.style.Stroke({
+							color: 'blue',
+							width: 3
+						}),
+						fill: new ol.style.Fill({
+							color: 'rgba(0, 0, 255, 0.1)'
+						})
+					})
+				});
+				Ck.getMap().getOlMap().addLayer(window.lyr);
+			}
+			window.lyr.getSource().addFeature(ft);
+		//*/
+		
+		// Query vector layers
+		var lyrFts, lyrFt;
+		var res = [];
+		var vectorLayers = Ck.getMap().getLayersType(ol.layer.Vector);
+		
+		if(vectorLayers.length > 0) {
+			for(var i = 0; i < vectorLayers.length; i++) {
+				res[i] = [];
+				lyrFts = vectorLayers[i].getSource().getFeatures();
+				for(var j = 0; j < lyrFts.length; j++) {
+					lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+					if(turf.intersect(lyrFt, selFt)) {
+						if(lyrFts[j].getProperties().features) {
+							for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
+								res[i].push(lyrFts[j].getProperties().features[k]);
+							}
+						} else {
+							res[i].push(lyrFts[j]);
+						}
+					}
+				}
+				
+				// alert(vectorLayers[i].getProperties().id || vectorLayers[i].getProperties().title);
+			}
+			
+			
+		}
+		
+		// TODO : Query WMS / WFS layers
+		
+		//
+		
+		// alert("Nombre de résultat : " + res[1].length);
+		
+		for(var i = 0; i < res.length; i++) {
+			for(var j = 0; j < res[i].length; j++) {
+				this.select.getFeatures().push(res[i][j]);
+			}
+		}
+		
+		return res;
 	},
 	
 	/**

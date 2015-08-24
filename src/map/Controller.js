@@ -383,7 +383,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
 	 */
 	setExtent: function(extent) {
-		return this.getOlView().fitExtent(extent, this.getOlMap().getSize());
+		return this.getOlView().fit(extent, this.getOlMap().getSize());
 	},
 	
 	/**
@@ -404,7 +404,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Get the collection of layers associated with this map.
-	 *	@return {ol.Collection} 
+	 * @return {ol.Collection} 
 	 */
 	getLayers: function() {
 		return this.getOlMap().getLayers();
@@ -412,7 +412,7 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Get a layer by ID.
-	 *	@return {ol.Layer} 
+	 * @return {ol.Layer} 
 	 */
 	getLayer: function(id) {
 		var layers = this.getLayers().getArray();
@@ -422,6 +422,24 @@ Ext.define('Ck.map.Controller', {
 				return layers[li];
 			}
 		}
+	},
+	
+	/**
+	 * Get all layers of a certain type
+	 * @param {Constructor}	The constructor of desired layer type
+	 * @return {Array}
+	 */
+	getLayersType: function(type) {
+		var lyrs = this.getLayers().getArray();
+		var res = [];
+		
+		for(var i = 0; i < lyrs.length; i++) {
+			if(lyrs[i].getVisible() && lyrs[i] instanceof type && lyrs[i].getProperties().id != "measureLayer") {
+				res.push(lyrs[i]);
+			}
+		}
+		
+		return res;
 	},
 	
 	/**

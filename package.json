@@ -265,6 +265,8 @@
             "path": "libs/proj4js/proj4.js"
         },{
             "path": "libs/proj4js/defs/EPSG2154.js"
+        },{
+            "path": "libs/turf/turf.js"
         }
     ],
     
