@@ -137,14 +137,20 @@ Ext.define('Ck.map.Controller', {
 		
 		this.originOwc = owc;
 		
-		// remove all layers
+		var viewProj = owc.getProjection();
+		
+		// this.getOlView().setProperties({
+			// projection: viewProj
+		// })
+		
+		// Remove all layers
 		this.getLayers().clear();
 		
-		// set the bbox
+		// Set the bbox
 		this.setExtent( owc.getExtent() );
 		
 		owc.getLayers().forEach(function(lyr) {
-			var layer = owc.getLayer(lyr);
+			var params, opt_options, layer = owc.getLayer(lyr);
 			if(!layer) return;
 			
 			var olLayer, olLayerType, olSource, olStyle = false;
@@ -159,12 +165,49 @@ Ext.define('Ck.map.Controller', {
 					
 				case 'wms':
 					olLayerType = 'Image';
-					olSource = new ol.source.ImageWMS({
+					opt_options = {
 						url: layer.getHref(false),
-						params: layer.getHrefParams()
-					});
+						params: {
+							layers: layer.getName(),
+							version: layer.getProtocolVersion()
+						}
+					};
+					
+					olSource = new ol.source.ImageWMS(opt_options);
 					break;
 					
+				case "wfs":
+					olLayerType = 'Vector';
+					
+					olSource = new ol.source.Vector({
+						loader: function(extent, resolution, projection) {
+							var url = this.layer.getHref(true);
+							Ext.Ajax.request({
+								scope: this,
+								url: url,
+								useDefaultXhrHeader: false,
+								success: function(response) {
+									// Reading options (=> reprojection parameters)
+									var readingOpt = {
+										dataProjection: ol.proj.get("EPSG:4326"),
+										featureProjection: projection
+									}
+									var format = new ol.format.WFS();
+									var features = format.readFeatures(response.responseXML, readingOpt);
+									
+									this.addFeatures(features);
+								},
+								failure: function() {
+									Ck.log('Request getFeature fail for layer ' + this.layer.getTitle());
+								}
+							});
+						}
+					});
+					
+					olSource.layer = layer;
+					olStyle = Ck.map.Style.style;
+				break;
+				
 				case 'geojson':
 					olLayerType = 'Vector';
 					olSource = new ol.source.Vector({
@@ -218,10 +261,12 @@ Ext.define('Ck.map.Controller', {
 					break;
 			}
 			
+			var extent = layer.getExtent(viewProj) || owc.getExtent();
+			
 			if(olLayerType) {
 				olLayer = new ol.layer[olLayerType]({
 					source: olSource,
-					extent: layer.getExtent(),
+					extent: extent,
 					title: layer.getTitle(),
 					style: olStyle,
 					visible: layer.getVisible(),

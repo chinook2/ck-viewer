@@ -87,7 +87,13 @@ Ext.define('Ck.map.action.Select', {
 			this.draw = new ol.interaction.Draw({
 				type: this.type,
 				geometryFunction: geometryFunction,
-				maxPoints: maxPoints
+				maxPoints: maxPoints,
+				caller: this,
+				condition: function(params) {
+					window.shiftKey = params.originalEvent.shiftKey;
+					return true;
+				},
+				freehandCondition: undefined
 			});
 			
 			
@@ -117,9 +123,9 @@ Ext.define('Ck.map.action.Select', {
 		// Select controls to host selected features
 		if(!this.select){
 			this.select = new ol.interaction.Select();
-			// this.olMap.addInteraction(this.select);
+			this.olMap.addInteraction(this.select);
 			this.select.set('id', 'ckmapSelect');
-			// this.select.setActive(false);
+			this.select.setActive(false);
 			
 			this.select.on('select', function(e) {
 				Ck.log(e.target.getFeatures().getLength() +
@@ -133,8 +139,11 @@ Ext.define('Ck.map.action.Select', {
 	 * Query layers with current selection
 	 * @param {ol.interaction.DrawEvent}
 	 */
-	processSelection: function(feature) {
-		this.select.getFeatures().clear();
+	processSelection: function(evntParams) {
+		var feature = evntParams.feature;
+		if(!window.shiftKey) {
+			this.select.getFeatures().clear();
+		}
 		// Fix delay to remove cursor drawing point
 		Ext.defer(function(){
 			this.overlay_.getSource().clear();
@@ -145,22 +154,23 @@ Ext.define('Ck.map.action.Select', {
 		
 		// Parse les géométries en GeoJSON
 		var geoJSON  = new ol.format.GeoJSON();
-		var type = feature.feature.getGeometry().getType();
+		var type = feature.getGeometry().getType();
 		
 		switch(type) {
 			case "Circle" :
-				var radius = feature.feature.getGeometry().getRadius();
-				var pt = turf.point(feature.feature.getGeometry().getCenter());
+				var radius = feature.getGeometry().getRadius();
+				var pt = turf.point(feature.getGeometry().getCenter());
 				var geom = turf.buffer(pt, radius, "meters");
 				var selFt = geom.features[0];
 				break;
 			case "Point" :
 				var radius = Ck.getMap().getOlView().getResolution() * 10;
-				var pt = turf.point(feature.feature.getGeometry().getCoordinates());
+				var pt = turf.point(feature.getGeometry().getCoordinates());
 				var geom = turf.buffer(pt, radius, "meters");
+				var selFt = geom.features[0];
 				break;
 			default :
-				var selFt = geoJSON.writeFeatureObject(feature.feature);
+				var selFt = geoJSON.writeFeatureObject(feature);
 		}
 		
 		/* Developper : you can display buffered draw for Circle and Point
@@ -191,12 +201,13 @@ Ext.define('Ck.map.action.Select', {
 			window.lyr.getSource().addFeature(ft);
 		//*/
 		
-		// Query vector layers
-		var lyrFts, lyrFt;
 		var res = [];
+		
+		// Query vector layers
 		var vectorLayers = Ck.getMap().getLayersType(ol.layer.Vector);
 		
 		if(vectorLayers.length > 0) {
+			var lyrFts, lyrFt;
 			for(var i = 0; i < vectorLayers.length; i++) {
 				res[i] = [];
 				lyrFts = vectorLayers[i].getSource().getFeatures();
@@ -219,17 +230,32 @@ Ext.define('Ck.map.action.Select', {
 			
 		}
 		
-		// TODO : Query WMS / WFS layers
+		// Query raster layers
+		var rasterLayers = Ck.getMap().getLayersType(ol.layer.Image);
 		
-		//
-		
-		// alert("Nombre de résultat : " + res[1].length);
-		
-		for(var i = 0; i < res.length; i++) {
-			for(var j = 0; j < res[i].length; j++) {
-				this.select.getFeatures().push(res[i][j]);
+		if(rasterLayers.length > 0) {
+			var source, url;
+			for(var i = 0; i < rasterLayers.length; i++) {
+				source = rasterLayers[i].getSource();
+				url = source.getUrl();
+				
+				
+				
+				// alert(vectorLayers[i].getProperties().id || vectorLayers[i].getProperties().title);
 			}
 		}
+		
+		// Highligth selected features and add them to select collection
+		this.select.setActive(true);
+		var selCollection = this.select.getFeatures();
+		for(var i = 0; i < res.length; i++) {
+			for(var j = 0; j < res[i].length; j++) {
+				if(!window.shiftKey || selCollection.getArray().indexOf(res[i][j]) == -1) {
+					selCollection.push(res[i][j]);
+				}
+			}
+		}
+		this.select.setActive(false);
 		
 		return res;
 	},

@@ -18,9 +18,46 @@ Ext.define('Ck.format.OWSContextLayer', {
 		return this.lyr.properties.title;
 	},
 	
-	getExtent: function() {
-		// if(!this.lyr.properties.bbox) return [-180,-90,180,90]; // TODO : check projection for default bbox
-		return this.lyr.properties.bbox;
+	getName: function() {
+		return this.lyr.properties.name;
+	},
+	
+	/**
+	 * Get layer extent reprojected if necessary
+	 * @param {ol.proj.ProjectionLike}
+	 * @return {ol.Extent}
+	 */
+	getExtent: function(proj) {
+		if(this.lyr.properties.bbox) {
+			return this.lyr.properties.bbox;
+		} else if(this.lyr.properties.latlongbbox) {
+			if(proj) {
+				var srcProj = ol.proj.get("EPSG:4326");
+				var dstProj = ol.proj.get(proj);
+				if(ol.proj.equivalent(srcProj, dstProj)) {
+					return this.lyr.properties.latlongbbox;
+				} else {
+					return ol.proj.transformExtent(this.lyr.properties.latlongbbox, srcProj, dstProj);
+				}
+			} else {
+				return this.lyr.properties.latlongbbox;
+			}
+		}
+		
+		return null;
+	},
+	
+	/**
+	 * Get the layer projection
+	 * @return {ol.proj.Projection}
+	 */
+	getProjection: function() {
+		return ol.proj.get(this.lyr.properties.sourceProjection);
+	},
+	
+	getProtocolVersion: function() {
+		var offering = this.lyr.properties.offerings[0];
+		return offering.version;
 	},
 	
 	getHref: function(params) {
@@ -29,7 +66,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 		var href = Ext.htmlDecode(operation.href);
 		
 		var aHref = href.split("?");
-		if(params===false) return aHref[0];
+		if(params === false) return aHref[0];
 		return href;
 	},
 	

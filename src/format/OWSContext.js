@@ -18,8 +18,15 @@ Ext.define('Ck.format.OWSContext', {
 	},
 	
 	getExtent: function() {
-		if(!this.owc.properties.bbox) return [-180,-90,180,90]; // TODO : check projection for default bbox
-		return this.owc.properties.bbox;
+		if(!this.owc.properties.bbox) {
+			return this.getProjection().getWorldExtent() || [-180,-90,180,90];
+		} else {
+			return this.owc.properties.bbox;
+		}
+	},
+	
+	getProjection: function() {
+		return ol.proj.get(this.owc.properties.srs || "EPSG:3857");
 	},
 	
 	getLayers: function() {
@@ -28,5 +35,5 @@ Ext.define('Ck.format.OWSContext', {
 	
 	getLayer: function(layer) {
 		return new Ck.OwcLayer(layer, this);
-	}	
+	}
 });

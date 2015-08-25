@@ -15,6 +15,7 @@
 		"creator" : "Chinook Server",
 		"rights" : "Chinook, licensed under a BSD License",
 		"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+		"srs": "EPSG:3857",
 		"categories" : [],
 		"links" : [{
 			"rel" : "profile",
@@ -38,6 +39,7 @@
 			"active" : true,
 			"minscale" : 100,
 			"maxscale" : 10000000,
+			"latlongbbox": [-179, -89, 179, 89],
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/osm",
 				"operations" : [{ 
@@ -96,5 +98,48 @@
 				"cluster": true
 			}
 		}
-	}]
+	},{
+		"type": "Feature",
+		"id": "polygon_test",
+		"properties": {
+			"title" : "Couche polygone",
+			"name": "couche_polygon_4326",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "Memoris",
+			"active" : true,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"sourceProjection": "EPSG:4326",
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-wfs/1.0/req/wfs",
+				"version": "1.1.1",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/xml",
+					"href" : "http://10.1.0.47/demo/www/index.php?service=WFS&request=GetFeature&typename=couche_polygon_4326&version=1.1.0"
+				}]
+			}]
+		}
+	},{
+		"type": "Feature",
+		"id": "ligne_test",
+		"properties": {
+			"title" : "Couche ligne",
+			"name": "ign:couche_ligne_2154",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "Memoris",
+			"active" : true,
+			"sourceProjection": "EPSG:2154",
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-wms/1.0/req/wms",
+				"version": "1.1.0",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/image",
+					"href" : "http://10.1.0.47/demo/www/index.php"
+				}]
+			}]
+		}
+	},]
 }
