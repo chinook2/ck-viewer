@@ -52,6 +52,8 @@
 				},{
 					"action": "ckmapSelectBox"
 				}]
+			},{
+				"action": "ckOpenPrint"
 			}]
 		},{
             "xtype": "toolbar",
