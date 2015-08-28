@@ -13,12 +13,12 @@ Ext.define("Ck.Print", {
 	controller: "ckprint",
 	
 	viewModel: {
-		type: "ckprint",
+		type: "ckprint"
 	},
 	
 	config: {
 		bodyPadding: 10,
-		defaultType: "textfield"		
+		defaultType: "textfield"
 	},
 	
 	items: [{

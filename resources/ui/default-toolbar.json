@@ -25,6 +25,8 @@
 				"scale": "large"
 			},
 			"items": [{
+				"action": "ckOpenOverview"
+			},{
 				"action": "ckmapResetview"
 			},{
 				"action": "ckmapZoomin"

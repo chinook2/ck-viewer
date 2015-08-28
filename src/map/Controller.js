@@ -275,6 +275,13 @@ Ext.define('Ck.map.Controller', {
 				
 			}
 			if(olLayer) {
+				// Set specific Chinook parameters
+				olLayer.ckParams = {};
+				var ckParams = this.getViewModel().data.ckLayerParams;
+				for(var i = 0; i < ckParams.length; i++) {
+					olLayer.ckParams[ckParams[i]] = layer.lyr.properties[ckParams[i]];
+				}
+				
 				this.getOlMap().addLayer(olLayer);
 			}
 		}, this);
@@ -467,6 +474,17 @@ Ext.define('Ck.map.Controller', {
 				return layers[li];
 			}
 		}
+	},
+	
+	getOverviewLayers: function() {
+		var resLayers = [];
+		var layers = this.getLayers().getArray();
+		for(var i = 0; i < layers.length; i++) {
+			if(layers[i].ckParams && layers[i].ckParams.overviewLayer === true) {
+				resLayers.push(layers[i]);
+			}
+		}
+		return resLayers;
 	},
 	
 	/**
