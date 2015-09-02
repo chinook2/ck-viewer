@@ -25,6 +25,10 @@ Ext.define("Ck.Map", {
 		type: "ckmap"
 	},
 
+	plugins: [
+		'mapprogress'
+	],
+	
 	layout: {
 		type: 'fit'
 	},
@@ -52,22 +56,24 @@ Ext.define("Ck.Map", {
 		 */
 		context: 'default',
 		
-		/**
-		 * @property {Boolean/Object}
-		 * Display scale line. False to hide, true to show and object to show with specified parameters.
-		 */
-		scaleLine: true,
-		
-		/**
-		 * @property {Boolean/Object}
-		 * Display zoom slider. False to hide, true to show and object to show with specified parameters.
-		 *
-		 * A parameter is added over openlayers : style. It can take 3 values :
-		 * - zoomslider-style1 (default)
-		 * - zoomslider-style2
-		 * - zoomslider-style3
-		 */
-		zoomSlider: true
+		controls: {
+			/**
+			 * @property {Boolean/Object}
+			 * Display scale line. False to hide, true to show and object to show with specified parameters.
+			 */
+			ScaleLine: {},
+			
+			/**
+			 * @property {Boolean/Object}
+			 * Display zoom slider. False to hide, true to show and object to show with specified parameters.
+			 *
+			 * A parameter is added over openlayers : style. It can take 3 values :
+			 * - zoomslider-style1 (default)
+			 * - zoomslider-style2
+			 * - zoomslider-style3
+			 */
+			ZoomSlider: {}
+		}
 	},
 
 	/* TODO : voir si peut simplifier des choses ?

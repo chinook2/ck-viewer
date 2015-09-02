@@ -63,3 +63,17 @@
 .zoomslider-style3 a.ol-zoomslider-handle:hover {
   background-color: rgba(255,69,0,0.7);
 }
+
+/****************************************************************************************/
+/************************************* Map Progress *************************************/
+/****************************************************************************************/
+.ck-progress {
+	position: absolute;
+	bottom: 0;
+	height: 5px;
+	background: rgba(0, 60, 136, 0.4);
+	width: 100%;
+	transition: width 250ms;
+	visibility: hidden;
+	z-index: 100000;
+}
