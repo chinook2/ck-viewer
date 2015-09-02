@@ -87,25 +87,17 @@ Ext.define('Ck.map.Controller', {
 			})
 		});
 		
-		// Adding controls 
-		if(v.scaleLine) {
-			olMap.addControl(new ol.control.ScaleLine(
-				(typeof v.scaleLine == "object")? v.scaleLine : undefined
-			));
+		// Adding controls
+		var control, controls = v.getControls();
+		for(var controlName in controls) {
+			control = Ck.create("ol.control." + controlName, controls[controlName]);
+			if(control) {
+				olMap.addControl(control);
+			}
 		}
 		
-		if(v.zoomSlider) {
-			var style = "zoomslider-style1";
-			
-			olMap.addControl(new ol.control.ZoomSlider(
-				(typeof v.zoomSlider == "object")? v.zoomSlider : undefined
-			));
-			
-			if(typeof v.zoomSlider == "object" && v.zoomSlider.style) {
-				style = v.zoomSlider.style;
-			}
-			
-			v.cls += " " + style;
+		if(controls.ZoomSlider) {			
+			v.addCls((controls.ZoomSlider.style)? controls.ZoomSlider.style : "zoomslider-style1");
 		}
 		
 		this.bindMap(olMap);
@@ -123,6 +115,8 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	initContext: function(context) {
+		var vm = this.getViewModel();
+		
 		if(!context) {
 			var contextName = this.getView().getContext();
 			this.getContext(contextName);
@@ -147,124 +141,129 @@ Ext.define('Ck.map.Controller', {
 		this.getLayers().clear();
 		
 		// Set the bbox
-		this.setExtent( owc.getExtent() );
+		this.setExtent(owc.getExtent());
 		
 		owc.getLayers().forEach(function(lyr) {
 			var params, opt_options, layer = owc.getLayer(lyr);
 			if(!layer) return;
 			
-			var olLayer, olLayerType, olSource, olStyle = false;
+			var olLayer, olLayerType, olSourceOptions, olSource,
+				olSourceAdditional = {},
+				olStyle = false,
+				ckLayerSpec = vm.getData().ckOlLayerConnection[layer.getType()];
 			
-			switch(layer.getType()) {
-				case 'osm':
-					olLayerType = 'Tile';
-					olSource = new ol.source.MapQuest({
-						layer: 'osm'
-					});
-					break;
-					
-				case 'wms':
-					olLayerType = 'Image';
-					opt_options = {
-						url: layer.getHref(false),
-						params: {
-							layers: layer.getName(),
-							version: layer.getProtocolVersion()
-						}
-					};
-					
-					olSource = new ol.source.ImageWMS(opt_options);
-					break;
-					
-				case "wfs":
-					olLayerType = 'Vector';
-					
-					olSource = new ol.source.Vector({
-						loader: function(extent, resolution, projection) {
-							var url = this.layer.getHref(true);
-							Ext.Ajax.request({
-								scope: this,
-								url: url,
-								useDefaultXhrHeader: false,
-								success: function(response) {
-									// Reading options (=> reprojection parameters)
-									var readingOpt = {
-										dataProjection: ol.proj.get("EPSG:4326"),
-										featureProjection: projection
-									}
-									var format = new ol.format.WFS();
-									var features = format.readFeatures(response.responseXML, readingOpt);
-									
-									this.addFeatures(features);
-								},
-								failure: function() {
-									Ck.log('Request getFeature fail for layer ' + this.layer.getTitle());
-								}
-							});
-						}
-					});
-					
-					olSource.layer = layer;
-					olStyle = Ck.map.Style.style;
-				break;
-				
-				case 'geojson':
-					olLayerType = 'Vector';
-					olSource = new ol.source.Vector({
-						url: layer.getHref(false),
-						format: new ol.format.GeoJSON()
-					});
-					olStyle = Ck.map.Style.style;
-					
-					var cluster = layer.getExtension('cluster');
-					if(cluster) {
-						// TODO : check if scope is ok with N layers
-						var styleCache = {};
-						var nbFeatures = false;
-						var olSrcVector = olSource;
-						var dist = cluster.distance || 60;
-						olSource = new ol.source.Cluster({
-							distance: dist,
-							source: olSrcVector
-						});
-						olStyle = function(feature, resolution) {
-							var size = feature.get('features').length;
-							var style = styleCache[size];
-							if (!style) {
-								var minSize = cluster.minSize || 10;
-								var maxSize = cluster.maxSize || cluster.distance || 60;
-								if(!nbFeatures) nbFeatures = olSrcVector.getFeatures().length;
-								var ptRadius = minSize + ((size * maxSize) / nbFeatures);
-								style = [new ol.style.Style({
-									image: new ol.style.Circle({
-										radius: ptRadius,
-										stroke: new ol.style.Stroke({
-											color: '#fff'
-										}),
-										fill: new ol.style.Fill({
-											color:  'rgba(51,153,204,0.75)'
-										})
-									}),
-									text: new ol.style.Text({
-										text: size.toString(),
-										scale: ptRadius * .1,
-										fill: new ol.style.Fill({
-											color: '#fff'
-										})
-									})
-								})];
-								styleCache[size] = style;
+			if(Ext.isEmpty(ckLayerSpec)) {
+				Ck.error("Layer of type " + layer.getType() + " is not supported by Chinook 2.");
+			} else {
+				switch(layer.getType()) {
+					case 'osm':
+						olSourceOptions = {
+							layer: 'osm'
+						};
+						break;
+						
+					case 'wms':
+						olSourceOptions = {
+							url: layer.getHref(false),
+							params: {
+								layers: layer.getName(),
+								version: layer.getProtocolVersion()
 							}
-							return style;
+						};
+						break;
+						
+					case "wfs":
+						olSourceOptions = {
+							loader: function(extent, resolution, projection) {
+								var url = this.layer.getHref(true);
+								Ext.Ajax.request({
+									scope: this,
+									url: url,
+									useDefaultXhrHeader: false,
+									success: function(response) {
+										// Reading options (=> reprojection parameters)
+										var readingOpt = {
+											dataProjection: ol.proj.get("EPSG:4326"),
+											featureProjection: projection
+										}
+										var format = new ol.format.WFS();
+										var features = format.readFeatures(response.responseXML, readingOpt);
+										
+										this.addFeatures(features);
+									},
+									failure: function() {
+										Ck.log('Request getFeature fail for layer ' + this.layer.getTitle());
+									}
+								});
+							}
+						};
+						olSourceAdditional = {
+							layer: layer
+						};
+						olStyle = Ck.map.Style.style;
+						break;
+					
+					case 'geojson':
+						olSourceOptions = {
+							url: layer.getHref(false),
+							format: new ol.format.GeoJSON()
+						};
+						olStyle = Ck.map.Style.style;
+						break;
+				}
+				
+				var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
+				
+				// For vector layer only, if we want a clustered representation
+				var cluster = layer.getExtension('cluster');
+				if(cluster) {
+					// TODO : check if scope is ok with N layers
+					var styleCache = {};
+					var nbFeatures = false;
+					var olSrcVector = olSource;
+					var dist = cluster.distance || 60;
+					olSource = new ol.source.Cluster({
+						distance: dist,
+						source: olSrcVector
+					});
+					olStyle = function(feature, resolution) {
+						var size = feature.get('features').length;
+						var style = styleCache[size];
+						if (!style) {
+							var minSize = cluster.minSize || 10;
+							var maxSize = cluster.maxSize || cluster.distance || 60;
+							if(!nbFeatures) nbFeatures = olSrcVector.getFeatures().length;
+							var ptRadius = minSize + ((size * maxSize) / nbFeatures);
+							style = [new ol.style.Style({
+								image: new ol.style.Circle({
+									radius: ptRadius,
+									stroke: new ol.style.Stroke({
+										color: '#fff'
+									}),
+									fill: new ol.style.Fill({
+										color:  'rgba(51,153,204,0.75)'
+									})
+								}),
+								text: new ol.style.Text({
+									text: size.toString(),
+									scale: ptRadius * .1,
+									fill: new ol.style.Fill({
+										color: '#fff'
+									})
+								})
+							})];
+							styleCache[size] = style;
 						}
+						return style;
 					}
-					break;
-			}
-			
-			var extent = layer.getExtent(viewProj) || owc.getExtent();
-			
-			if(olLayerType) {
-				olLayer = new ol.layer[olLayerType]({
+				}
+				
+				Ext.apply(olSource, olSourceAdditional);
+				var extent = layer.getExtent(viewProj) || owc.getExtent();
+				
+				// Layer creation
+				
+				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 					source: olSource,
 					extent: extent,
 					title: layer.getTitle(),
@@ -273,16 +272,16 @@ Ext.define('Ck.map.Controller', {
 					path: layer.getExtension('path')
 				});
 				
-			}
-			if(olLayer) {
-				// Set specific Chinook parameters
-				olLayer.ckParams = {};
-				var ckParams = this.getViewModel().data.ckLayerParams;
-				for(var i = 0; i < ckParams.length; i++) {
-					olLayer.ckParams[ckParams[i]] = layer.lyr.properties[ckParams[i]];
+				if(olLayer) {
+					// Set specific Chinook parameters
+					olLayer.ckParams = {};
+					var ckParams = vm.data.ckLayerParams;
+					for(var i = 0; i < ckParams.length; i++) {
+						olLayer.ckParams[ckParams[i]] = layer.lyr.properties[ckParams[i]];
+					}
+					
+					this.getOlMap().addLayer(olLayer);
 				}
-				
-				this.getOlMap().addLayer(olLayer);
 			}
 		}, this);
 		

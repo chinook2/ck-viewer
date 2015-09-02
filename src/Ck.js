@@ -195,6 +195,73 @@ Ext.apply(Ck, {
 			level: 'error',
 			msg: msg
 		});
-	}
+	},
 	
+	/**
+	 * Create an object from a config object
+	 * @param {String/Object}		Class name or config object. Config object must have "xtype" and "config" member
+	 * @param {Object/undefined}	Config object if first param is a string
+	 * @return {Object/False}		An instance of desired class or false if an error occurred
+	 */
+	create: function(cls, config) {
+		if(typeof cls == "object") {
+			cls = cls.xtype;
+			config = cls.config || {}
+		} else if(typeof cls == "string") {
+			config = config || {};
+		} else {
+			Ck.error("Function signature not respected -> Ck.create({String/Object}, {Object})");
+			return false;
+		}
+		
+		var constructor = Ck.getClass(cls);
+		
+		if(typeof constructor == "function") {
+			var lib = this.getOwnerLibrary(cls);
+			switch(lib) {
+				case "Ext":
+					var obj = Ext.create(cls, config);
+					break;
+				default:
+					var obj = new constructor(config);
+			}
+		} else {
+			Ck.error("The class \"" + cls + "\" does not exists.");
+			return false;
+		}
+		
+		if(obj instanceof constructor) {				
+			return obj;
+		} else {
+			Ck.error("Instanciation of the " + cls + " object failed.");
+			return false;
+		}
+	},
+	
+	/**
+	 * Return the owner library of a class
+	 * @param {String}
+	 * @return {String}
+	 */
+	getOwnerLibrary: function(className) {
+		var namespaces = className.split(".");
+		return namespaces[0];
+	},
+	
+	/**
+	 * Return the constructor of a class from a string or undefined if class does not exists
+	 * @param {String} Name of the desired class
+	 * @return {Function} Constructor of the desired class
+	 **/
+	getClass: function(className) {
+		var namespaces = className.split(".");
+		var windowSpace = window;
+		for(var i=0; i<namespaces.length; i++) {
+			if(typeof windowSpace[namespaces[i]] == "undefined") {
+				return undefined;
+			}
+			windowSpace = windowSpace[namespaces[i]];
+		}
+		return windowSpace;
+	}	
 }).init();

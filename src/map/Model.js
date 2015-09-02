@@ -73,6 +73,25 @@ Ext.define('Ck.map.Model', {
 			}
 		},
 		
+		ckOlLayerConnection :{
+			"osm": {
+				"source": "MapQuest",
+				"layerType": "Tile"
+			},
+			"wms": {
+				"source": "ImageWMS",
+				"layerType": "Image"
+			},
+			"wfs": {
+				"source": "Vector",
+				"layerType": "Vector"
+			},
+			"geojson": {
+				"source": "Vector",
+				"layerType": "Vector"
+			}
+		},
+		
 		/** 
 		 * Specific Chinook parameters
 		 */
