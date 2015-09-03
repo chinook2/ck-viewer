@@ -80,25 +80,39 @@ Ext.define('Ck.map.Controller', {
 			v.setContext(Ck.params.context);
 		}
 
-		var olMap = new ol.Map({
-			view: new ol.View({
-				center: v.getCenter(),
-				zoom: v.getZoom()
-			})
-		});
-		
-		// Adding controls
+		// Create controls
+		var olControls = [];
 		var control, controls = v.getControls();
 		for(var controlName in controls) {
 			control = Ck.create("ol.control." + controlName, controls[controlName]);
 			if(control) {
-				olMap.addControl(control);
+				olControls.push(control);
 			}
 		}
 		
 		if(controls.ZoomSlider) {			
 			v.addCls((controls.ZoomSlider.style)? controls.ZoomSlider.style : "zoomslider-style1");
 		}
+		
+		// Create interactions
+		var olInteractions = []
+		var interaction, interactions = v.getInteractions();
+		for(var interactionName in interactions) {
+			interaction = Ck.create("ol.interaction." + interactionName, interactions[interactionName]);
+			if(interaction) {
+				olInteractions.push(interaction);
+			}
+		}
+		
+		// Create the map
+		var olMap = new ol.Map({
+			view: new ol.View({
+				center: v.getCenter(),
+				zoom: v.getZoom()
+			}),
+			controls: olControls,
+			interactions: olInteractions
+		});
 		
 		this.bindMap(olMap);
 		

@@ -56,15 +56,26 @@ Ext.define("Ck.Map", {
 		 */
 		context: 'default',
 		
+		/**
+		 * List of ol.control.
+		 */
 		controls: {
 			/**
-			 * @property {Boolean/Object}
+			 * Default control. + and - buttons to zoom in and zoom out.
+			 */
+			Zoom: {},
+			
+			/**
+			 * Control to display layers attributions.
+			 */
+			Attribution: {},
+			
+			/**
 			 * Display scale line. False to hide, true to show and object to show with specified parameters.
 			 */
 			ScaleLine: {},
 			
 			/**
-			 * @property {Boolean/Object}
 			 * Display zoom slider. False to hide, true to show and object to show with specified parameters.
 			 *
 			 * A parameter is added over openlayers : style. It can take 3 values :
@@ -74,9 +85,36 @@ Ext.define("Ck.Map", {
 			 */
 			ZoomSlider: {},
 			
+			/**
+			 * Button to switch between full screen and window mode.
+			 */
 			FullScreen: {
 				className: "ck-full-screen"
+			},
+			
+			/**
+			 * Button to set the north at the top of the screen.
+			 */
+			Rotate: {
+				className: "ck-rotate",
+				tipLabel: "Click + AltShift to rotate"
 			}
+		},
+		
+		/**
+		 * List of ol.interaction to add to the map.
+		 * Pinch interactions is for touch screen devices.
+		 */
+		interactions: {
+			DragRotate: {},
+			DragPan: {},
+			DoubleClickZoom: {},
+			PinchRotate: {},
+			PinchZoom: {},
+			KeyboardPan: {},
+			KeyboardZoom: {},
+			MouseWheelZoom: {},
+			DragZoom: {}
 		}
 	},
 
