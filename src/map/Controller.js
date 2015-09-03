@@ -241,7 +241,7 @@ Ext.define('Ck.map.Controller', {
 										color: '#fff'
 									}),
 									fill: new ol.style.Fill({
-										color:  'rgba(51,153,204,0.75)'
+										color:	'rgba(51,153,204,0.75)'
 									})
 								}),
 								text: new ol.style.Text({
@@ -366,7 +366,7 @@ Ext.define('Ck.map.Controller', {
 	/**
 	 * Getter for the viewModel. See Ck.map.Model for the list of avaible configs.
 	 *
-	 *     ckmap.get('center')
+	 *		 ckmap.get('center')
 	 *
 	 * @param {String} property The parameter to retrieve
 	 * @return {Object/Array/String}
@@ -378,7 +378,7 @@ Ext.define('Ck.map.Controller', {
 	/**
 	 * Setter for the viewModel. See Ck.map.Model for the list of avaible configs.
 	 *
-	 *     ckmap.set('center', [10, 10])
+	 *		 ckmap.set('center', [10, 10])
 	 *
 	 * @param {String} property The parameter to update
 	 * @param {String} value The value
@@ -505,6 +505,24 @@ Ext.define('Ck.map.Controller', {
 	},
 	
 	/**
+	 * 
+	 */
+	getLayersStore: function() {
+		var res = [];
+		var lyrs = this.getLayers().getArray();
+		for(var i = 0; i < lyrs.length; i++) {
+			// TODO improve true layer detection
+			if(lyrs[i].getProperties().title) {
+				res.push({
+					"id": lyrs[i].getProperties().title,
+					"data": lyrs[i]
+				});
+			}
+		}
+		return res;
+	},
+	
+	/**
 	 *	Resize the map when the view is resized.
 	 * Render the map if it's not rendered (first call)
 	 * @protected
@@ -531,5 +549,31 @@ Ext.define('Ck.map.Controller', {
 	 */
 	resetView: function() {
 		this.setExtent(this.originOwc.getExtent());
+	},
+	
+	/**
+	 * Apply the given function to all layers of the map
+	 */
+	applyFunction: function(fct) {
+		this.getLayers().forEach(fct);
+	},
+	
+	applyEffect: function(effectName, layer) {
+		var kernel = Ck.normalizeKernel(effectName);
+		if(!kernel) {
+			return false;
+		}
+		
+		var applyEffect = function(layer) {
+			layer.on("postcompose", function(event) {
+				Ck.convolve(event.context, kernel);
+			})
+		}
+		
+		if(layer) {
+			applyEffect(layer);
+		} else {
+			this.applyFunction(applyEffect);
+		}
 	}
 });

@@ -47,6 +47,41 @@ var Ck = Ck || {};
 Ext.apply(Ck, {
 	
 	/**
+	 * Kernels list corresponding to effects
+	 */
+	kernelEffect: {
+		none: [
+			0, 0, 0,
+			0, 1, 0,
+			0, 0, 0
+		],sharpen: [
+			0, -1, 0,
+			-1, 5, -1,
+			0, -1, 0
+		],sharpenless: [
+			0, -1, 0,
+			-1, 10, -1,
+			0, -1, 0
+		],blur: [
+			1, 1, 1,
+			1, 1, 1,
+			1, 1, 1
+		],shadow: [
+			1, 2, 1,
+			0, 1, 0,
+			-1, -2, -1
+		],emboss: [
+			-2, 1, 0,
+			-1, 1, 1,
+			0, 1, 2
+		],edge: [
+			0, 1, 0,
+			1, -4, 1,
+			0, 1, 0
+		]
+	},
+	
+	/**
 	 * @property params
 	 * @type Object
 	 * @readonly
@@ -74,14 +109,14 @@ Ext.apply(Ck, {
 	/**
 	 * Adds a listener to be notified when the map is ready (before context and layers are loaded).
 	 *
-     * @param {Function} fn The method to call.
-     * @param {Object} [scope] The scope (`this` reference) in which the handler function
-     * executes. Defaults to the browser window.
-     * @param {Object} [options] An object with extra options.
-     * @param {Number} [options.delay=0] A number of milliseconds to delay.
-     * @param {Number} [options.priority=0] Relative priority of this callback. A larger
-     * number will result in the callback being sorted before the others.  Priorities
-     * 1000 or greater and -1000 or lesser are reserved for internal framework use only.
+	 * @param {Function} fn The method to call.
+	 * @param {Object} [scope] The scope (`this` reference) in which the handler function
+	 * executes. Defaults to the browser window.
+	 * @param {Object} [options] An object with extra options.
+	 * @param {Number} [options.delay=0] A number of milliseconds to delay.
+	 * @param {Number} [options.priority=0] Relative priority of this callback. A larger
+	 * number will result in the callback being sorted before the others.	Priorities
+	 * 1000 or greater and -1000 or lesser are reserved for internal framework use only.
 	 */
 	onReady: function(fn, scope, options) {
 		Ext.on('ckmapReady', fn, scope, options);
@@ -188,7 +223,7 @@ Ext.apply(Ck, {
 	 *
 	 * This method does nothing in a release build.
 	 *
-     * @param {String} msg The error message to log.
+	 * @param {String} msg The error message to log.
 	 */
 	error: function(msg) {
 		Ext.log({
@@ -217,7 +252,7 @@ Ext.apply(Ck, {
 		var constructor = Ck.getClass(cls);
 		
 		if(typeof constructor == "function") {
-			var lib = this.getOwnerLibrary(cls);
+			var lib = Ck.getOwnerLibrary(cls);
 			switch(lib) {
 				case "Ext":
 					var obj = Ext.create(cls, config);
@@ -263,5 +298,75 @@ Ext.apply(Ck, {
 			windowSpace = windowSpace[namespaces[i]];
 		}
 		return windowSpace;
-	}	
+	},
+	
+	normalizeKernel: function(effectName) {
+		var kernel = Ck.kernelEffect[effectName];
+		if(!kernel) {
+			return false;
+		}
+		var len = kernel.length;
+		var normal = new Array(len);
+		var i, sum = 0;
+		for (i = 0; i < len; ++i) {
+			sum += kernel[i];
+		}
+		if (sum <= 0) {
+			normal.normalized = false;
+			sum = 1;
+		} else {
+			normal.normalized = true;
+		}
+		for (i = 0; i < len; ++i) {
+			normal[i] = kernel[i] / sum;
+		}
+		return normal;
+	},
+	
+	/**
+	 * Apply a convolution kernel to canvas.	This works for any size kernel, but
+	 * performance starts degrading above 3 x 3.
+	 * @param {CanvasRenderingContext2D} context Canvas 2d context.
+	 * @param {Array.<number>} kernel Kernel.
+	 */
+	convolve: function(context, kernel) {
+		var canvas = context.canvas;
+		var width = canvas.width;
+		var height = canvas.height;
+
+		var size = Math.sqrt(kernel.length);
+		var half = Math.floor(size / 2);
+
+		var inputData = context.getImageData(0, 0, width, height).data;
+
+		var output = context.createImageData(width, height);
+		var outputData = output.data;
+
+		for (var pixelY = 0; pixelY < height; ++pixelY) {
+			var pixelsAbove = pixelY * width;
+			for (var pixelX = 0; pixelX < width; ++pixelX) {
+				var r = 0, g = 0, b = 0, a = 0;
+				for (var kernelY = 0; kernelY < size; ++kernelY) {
+					for (var kernelX = 0; kernelX < size; ++kernelX) {
+						var weight = kernel[kernelY * size + kernelX];
+						var neighborY = Math.min(
+								height - 1, Math.max(0, pixelY + kernelY - half));
+						var neighborX = Math.min(
+								width - 1, Math.max(0, pixelX + kernelX - half));
+						var inputIndex = (neighborY * width + neighborX) * 4;
+						r += inputData[inputIndex] * weight;
+						g += inputData[inputIndex + 1] * weight;
+						b += inputData[inputIndex + 2] * weight;
+						a += inputData[inputIndex + 3] * weight;
+					}
+				}
+				var outputIndex = (pixelsAbove + pixelX) * 4;
+				outputData[outputIndex] = r;
+				outputData[outputIndex + 1] = g;
+				outputData[outputIndex + 2] = b;
+				outputData[outputIndex + 3] = kernel.normalized ? a : 255;
+			}
+		}
+		context.putImageData(output, 0, 0);
+	}
 }).init();
