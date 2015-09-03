@@ -12,10 +12,6 @@ Ext.define("Ck.Overview", {
 
 	controller: "ckoverview",
 	
-	viewModel: {
-		type: "ckoverview"
-	},
-	
 	config: {
 		ovHeight: 200,
 		ovWidth: 200,
