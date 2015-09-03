@@ -77,3 +77,39 @@
 	visibility: hidden;
 	z-index: 100000;
 }
+
+
+/****************************************************************************************/
+/********************************** FullScreen Control **********************************/
+/****************************************************************************************/
+.ck-map:-moz-full-screen, .ck-map:-moz-full-screen>div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+.ck-map:-webkit-full-screen, .ck-map:-webkit-full-screen>div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+.ck-map:-ms-fullscreen, .ck-map:-ms-fullscreen>div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+.ck-map:fullscreen, .ck-map:fullscreen>div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+.ck-map:-webkit-full-screen-ancestor, .ck-map:-webkit-full-screen-ancestor>div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+
+.ck-map:-webkit-full-screen-ancestor, .ck-map:-webkit-full-screen-ancestor>div:first-child {
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.ck-full-screen{
+	right: 0.5em;
+    bottom: 2.5em;
+}

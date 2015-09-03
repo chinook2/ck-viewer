@@ -72,7 +72,11 @@ Ext.define("Ck.Map", {
 			 * - zoomslider-style2
 			 * - zoomslider-style3
 			 */
-			ZoomSlider: {}
+			ZoomSlider: {},
+			
+			FullScreen: {
+				className: "ck-full-screen"
+			}
 		}
 	},
 
