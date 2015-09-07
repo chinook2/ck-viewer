@@ -29,6 +29,10 @@ Ext.define('Ck.format.OWSContext', {
 		return ol.proj.get(this.owc.properties.srs || "EPSG:3857");
 	},
 	
+	getScales: function(layer) {
+		return this.owc.properties.scales;
+	},
+	
 	getLayers: function() {
 		return this.owc.features;
 	},

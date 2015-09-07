@@ -145,11 +145,30 @@ Ext.define('Ck.map.Controller', {
 		
 		this.originOwc = owc;
 		
-		var viewProj = owc.getProjection();
+		var v = this.getView();
+		var olMap = this.getOlMap();
+		var olView = this.getOlView();
 		
-		// this.getOlView().setProperties({
-			// projection: viewProj
-		// })
+		var viewProj = owc.getProjection();
+		var viewScales = owc.getScales();
+		
+		// Set scales for combobox and olView
+		var vmStores = vm.storeInfo;
+		vmStores.scales = new Ext.data.Store({
+			fields: ['res', 'scale'],
+			data: viewScales
+		});
+		
+		vm.setStores(vmStores);
+		
+		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
+		olMap.setView(new ol.View({
+			center: v.getCenter(),
+			zoom: v.getZoom(),
+			minResolution: viewScales[0].res,
+			maxResolution: viewScales[viewScales.length-1].res
+		}));
+		this.bindMap(olMap);
 		
 		// Remove all layers
 		this.getLayers().clear();
