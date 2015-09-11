@@ -240,10 +240,7 @@ Ext.define('Ck.map.Model', {
 	stores: {
 		scales: {
 			fields: ['res', 'scale'],
-			data: [
-				{res: 1222.99245256282, scale: "1 / 4 367 821"},
-				{res: 2445.98490512564, scale: "1 / 8 735 643"}
-			]
+			data: []
 		}
 	},
 	

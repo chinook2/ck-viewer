@@ -10,6 +10,7 @@ Ext.define('Ck.map.plugin.Progress', {
 	 * @protected
 	 */
 	init: function(ckMap) {
+		this.map = ckMap;
 		this.loaded = 0;
 		this.loading = 0;
 		this.el = this.createLoadElement();
@@ -52,6 +53,7 @@ Ext.define('Ck.map.plugin.Progress', {
 	 */
 	addLoading: function() {
 		if (this.loading === 0) {
+			this.map.getController().fireEvent("layersloading");
 			this.show();
 		}
 		++this.loading;
@@ -79,6 +81,7 @@ Ext.define('Ck.map.plugin.Progress', {
 			this.loading = 0;
 			this.loaded = 0;
 			setTimeout(this.hide.bind(this), 500);
+			this.map.getController().fireEvent("layersloaded");
 		}
 	},
 

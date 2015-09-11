@@ -1,0 +1,30 @@
+﻿#ckPrint-page div{
+	float: left;
+}
+
+#ckPrint-page{
+	position: relative;
+	background-color: gray;
+}
+
+#ckPrint-body{
+	position: absolute;
+	margin: 10px;
+	background-color: rgb(155, 155, 155);
+	top: 0px;
+	bottom: 0px;
+	right: 0px;
+	left: 0px;
+}
+
+#ckPrint-title{
+	position: absolute;	right: 0px;	left: 0px;	top: 0px;	height: 30px;	margin-bottom: 5px;	background-color: red;
+}
+
+#ckPrint-legend{
+	position: absolute;	top: 35px;	width: 100px;	bottom: 0px;	background-color: green;
+}
+
+#ckPrint-map{
+	position: absolute;	right: 0px;	top: 35px;	left: 105px;	bottom: 0px;	background-color: black;
+}

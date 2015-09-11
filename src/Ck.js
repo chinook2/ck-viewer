@@ -46,6 +46,118 @@ var Ck = Ck || {};
 // @define Ck
 Ext.apply(Ck, {
 	
+	CM_PER_INCH: 2.45,
+	DOTS_PER_INCH: 96,
+	
+	INCHES_PER_UNIT: {
+		"50kilometers": 1968500,
+		"150kilometers": 5905500,
+		"BenoitChain": 791.9977268035781,
+		"BenoitLink": 7.919977268035781,
+		"Brealey": 14763.75,
+		"CaGrid": 39.359685060000004,
+		"CapeFoot": 11.999868185255002,
+		"Centimeter": 0.3937,
+		"ClarkeChain": 791.991309620512,
+		"ClarkeFoot": 11.999868327581488,
+		"ClarkeLink": 7.91991309620512,
+		"Decameter": 393.7,
+		"Decimeter": 3.9370000000000003,
+		"Dekameter": 393.7,
+		"Fathom": 71.999856,
+		"Foot": 12,
+		"Furlong": 7919.999999999997,
+		"GermanMeter": 39.370535294205006,
+		"GoldCoastFoot": 11.999964589846002,
+		"GunterChain": 792.0000000000001,
+		"GunterLink": 7.920000000000001,
+		"Hectometer": 3937,
+		"IFoot": 11.999976,
+		"IInch": 0.9999979999999999,
+		"IMile": 63359.87328,
+		"IYard": 35.999928,
+		"Inch": 1,
+		"IndianFoot": 11.9999567087,
+		"IndianFt37": 11.9999134017,
+		"IndianFt62": 11.999960252000001,
+		"IndianFt75": 11.999956315,
+		"IndianYard": 35.99987015540864,
+		"IndianYd37": 35.999740205100004,
+		"IndianYd62": 35.999880755999996,
+		"IndianYd75": 35.999868945,
+		"IntnlChain": 791.998416,
+		"IntnlLink": 7.91998416,
+		"Kilometer": 39370,
+		"Lat-66": 4367838.370169282,
+		"Lat-83": 4367954.152606599,
+		"Meter": 39.37,
+		"Mil": 9.99998e-7,
+		"MicroInch": 0.000999998,
+		"Mile": 63360,
+		"Millimeter": 0.03937,
+		"ModAmFt": 12.000458400000001,
+		"NautM": 72913.24,
+		"NautM-UK": 72959.85408,
+		"Perch": 198.00000000000014,
+		"Pole": 198.00000000000014,
+		"Rod": 198.00000000000014,
+		"Rood": 148.75036777426,
+		"SearsChain": 791.9970428354235,
+		"SearsFoot": 11.999955194477684,
+		"SearsLink": 7.919970428354236,
+		"SearsYard": 35.99986558343306,
+		"Yard": 36,
+		"ch": 791.998416,
+		"cm": 0.3937,
+		"dd": 4374754,
+		"deg": 4374754,
+		"degre": 4374754,
+		"degree": 4374754,
+		"degrees": 4374754,
+		"dm": 3936.9999999999995,
+		"fath": 71.999856,
+		"ft": 12,
+		"gon": 4860837.777777778,
+		"in": 1,
+		"inches": 1,
+		"ind-ch": 791.9942845122,
+		"ind-ft": 11.9999134017,
+		"ind-yd": 35.999740205100004,
+		"km": 39370,
+		"kmi": 72913.23999999999,
+		"link": 7.91998416,
+		"m": 39.37,
+		"meter": 39.37,
+		"meters": 39.37,
+		"metre": 39.37,
+		"metres": 39.37,
+		"mi": 63360,
+		"mm": 0.039369999999999995,
+		"nmi": 72913.23999999999,
+		"rad": 76353.86126479201,
+		"us-ch": 792.0000000000001,
+		"us-ft": 12,
+		"us-in": 1,
+		"us-mi": 63360,
+		"us-yd": 36,
+		"yd": 36
+	},
+	
+	/**
+	 * Known page size in millimeters
+	 */
+	pageSize: {
+		"a0": [841, 1189],
+		"a1": [594, 841],
+		"a2": [420, 594],
+		"a3": [297, 420],
+		"a4": [210, 297],
+		"a5": [148, 210],
+		"a6": [105, 148],
+		"a7": [74, 105],
+		"a8": [52, 74]
+	},
+		
 	/**
 	 * Kernels list corresponding to effects
 	 */
@@ -208,6 +320,24 @@ Ext.apply(Ck, {
 		return this.getEnvironment();
 	},
 	
+	/**
+	 * Get default resource path
+	 * @return {String}
+	 */
+	getPath: function() {
+		var path = Ext.manifest.profile + '/resources/ck-viewer';
+		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
+		//<debug>
+		// mini hack to load static resource in dev and prod (this is ignored in prod) !
+		path = 'packages/local/ck-viewer/resources';
+		//</debug>	
+		
+		return path;
+	},
+		
+	zoomToExtent: function(extent) {
+		this.getMap().getOlView().fit(extent, this.getMap().getOlMap().getSize());
+	},
 	
 	/**
 	 * @inheritdoc Ext#log
@@ -368,5 +498,43 @@ Ext.apply(Ck, {
 			}
 		}
 		context.putImageData(output, 0, 0);
+	},
+	
+	/**
+	 * @param {float}
+	 * @return {Float} A normalized scale value, in 1 / X format. 
+	 *         This means that if a value less than one ( already 1/x) is passed
+	 *         in, it just returns scale directly. Otherwise, it returns 
+	 *         1 / scale
+	 */
+	normalizeScale: function(scale) {
+		var normScale = (scale > 1.0) ? (1.0 / scale) 
+									  : scale;
+		return normScale;
+	},
+
+	/**
+	 * @param {Float}
+	 * @param {ol.proj.ProjectionLike}
+	 * 
+	 * @return {Float} The corresponding resolution given passed-in scale and unit 
+	 *     parameters.  If the given scale is falsey, the returned resolution will
+	 *     be undefined.
+	 */
+	getResolutionFromScale: function(scale, proj) {
+		var resolution;
+		var normScale = Ck.normalizeScale(scale);
+		return 1 / (normScale * ((proj.getMetersPerUnit() * 100) / Ck.CM_PER_INCH) * Ck.DOTS_PER_INCH);
+	},
+	
+	/**
+	 * @param {Float}
+	 * @param {ol.proj.ProjectionLike}
+	 * 
+	 * @return {Float} The corresponding scale given passed-in resolution and unit parameters.
+	 */
+	getScaleFromResolution: function(resolution, proj) {
+		var proj = ol.proj.get(proj);
+		return resolution * ((proj.getMetersPerUnit() * 100) / Ck.CM_PER_INCH) * Ck.DOTS_PER_INCH;
 	}
 }).init();

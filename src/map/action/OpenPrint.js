@@ -33,7 +33,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 		if(!this.win) {
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'Print',
-				height: 200,
+				// height: 400,
 				width: 400,
 				layout: 'fit',
 				closeAction: 'hide',

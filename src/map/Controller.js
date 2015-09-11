@@ -51,6 +51,17 @@ Ext.define('Ck.map.Controller', {
 	 * Fires when the map is ready (rendered) and all the layers of the current context are loaded
 	 * @param {Ck.map.Controller} this
 	 */
+	 
+	/**
+	 * @event layersloaded
+	 * Fires when all layers are loaded
+	 */
+	 
+	/**
+	 * @event layersloading
+	 * Fires when layers begin to load
+	 */
+	 
 	/**
 	 * @event ckmapLoaded
 	 * Global event. Fires when the map is ready (rendered) and all the layers of the current context are loaded.
@@ -116,11 +127,23 @@ Ext.define('Ck.map.Controller', {
 		
 		this.bindMap(olMap);
 		
+		this.on("layersloading", this.layersLoading, this);
+		this.on("layersloaded", this.layersLoaded, this);
+		this.layersAreLoading = false;
+		
 		// Relay olMap events
 		olMap.getLayers().on('add', function(colEvent) {
 			var layer = colEvent.element;
 			this.fireEvent('addlayer', layer);
 		}, this);
+	},
+	
+	layersLoading: function() {
+		this.layersAreLoading = true;
+	},
+	
+	layersLoaded: function() {
+		this.layersAreLoading = false;
 	},
 	
 	/**
@@ -294,8 +317,7 @@ Ext.define('Ck.map.Controller', {
 				Ext.apply(olSource, olSourceAdditional);
 				var extent = layer.getExtent(viewProj) || owc.getExtent();
 				
-				// Layer creation
-				
+				// Layer creation	
 				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 					source: olSource,
 					extent: extent,
@@ -331,12 +353,7 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	getContext: function(contextName) {
-		var path = Ext.manifest.profile + '/resources/ck-viewer';
-		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
-		//<debug>
-		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		path = 'packages/local/ck-viewer/resources';
-		//</debug>	
+		var path = Ck.getPath();
 		Cks.get({
 			url: path +'/context/'+contextName+'.json',
 			scope: this,
@@ -556,6 +573,13 @@ Ext.define('Ck.map.Controller', {
 	},
 	
 	/**
+	 * Return true if at least one layers is loading. False otherwise
+	 */
+	isLayerLoading: function() {
+		return this.layersAreLoading;
+	},
+	
+	/**
 	 *	Resize the map when the view is resized.
 	 * Render the map if it's not rendered (first call)
 	 * @protected
@@ -582,6 +606,16 @@ Ext.define('Ck.map.Controller', {
 	 */
 	resetView: function() {
 		this.setExtent(this.originOwc.getExtent());
+	},
+	
+	redraw: function() {
+		this.getLayers().forEach(function(layer) {
+			var source = layer.getSource();
+			if(source.getParams && source.updateParams) {
+				var params = source.getParams();
+				source.updateParams(params);
+			}
+		});
 	},
 	
 	/**
