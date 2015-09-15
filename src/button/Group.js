@@ -76,7 +76,7 @@
 		mainToolbar.on('positionUpdated', function() {
 			this.updatePosition();
 		}, this);
-		
+
 		this.callParent();
 	},
 	
@@ -91,7 +91,13 @@
 	
 	expand: function(){
 		this.toolbar.show();
-		this.updatePosition();
+
+		// last fix for right align and overlay !
+		var btns = Ext.query('.'+this.cls);
+		for(b=0; b<btns.length; b++) {
+			var btn = Ext.getCmp(btns[b].id);
+			if(btn) btn.updatePosition();
+		}
 	},
 	
 	collapse: function(){
