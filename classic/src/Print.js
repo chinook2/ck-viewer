@@ -7,7 +7,7 @@ Ext.define("Ck.Print", {
 	alias: "widget.ckprint",
 	
 	requires: [
-		'Ck.print.*'
+		"Ck.print.*"
 	],
 
 	controller: "ckprint",
@@ -25,8 +25,9 @@ Ext.define("Ck.Print", {
 	},
 	
 	items: [{
-		fieldLabel: 'Title',
-		name: 'title'
+		fieldLabel: "Title",
+		itemId: "title",
+		name: "title"
 	},{
 		xtype: "combo",
 		itemId: "resolution",
@@ -96,5 +97,5 @@ Ext.define("Ck.Print", {
 		itemId: "cancel"
 	}],
 
-	cls: 'ck-print'
+	cls: "ck-print"
 });
