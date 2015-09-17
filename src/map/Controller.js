@@ -79,6 +79,18 @@ Ext.define('Ck.map.Controller', {
 	 * Fires when layer is added to the map
 	 * @param {ol.layer.*} layer
 	 */
+	 
+	/**
+	 * @event removelayer
+	 * Fires when layer is removed from the map
+	 * @param {ol.layer.*} layer
+	 */
+	
+	/**
+	 * @propety {Ck.legend.Controller}
+	 * Legend associated to this map
+	 */
+	legend: null,
 	
 	/**
 	 * Init the map component, init the viewModel.
@@ -135,6 +147,10 @@ Ext.define('Ck.map.Controller', {
 		olMap.getLayers().on('add', function(colEvent) {
 			var layer = colEvent.element;
 			this.fireEvent('addlayer', layer);
+		}, this);
+		olMap.getLayers().on('remove', function(colEvent) {
+			var layer = colEvent.element;
+			this.fireEvent('removelayer', layer);
 		}, this);
 	},
 	
@@ -437,7 +453,6 @@ Ext.define('Ck.map.Controller', {
 		return this.getViewModel().set(property, value);
 	},
 	
-	
 	/**
 	 * Get the map associated with the controller.
 	 * @return {ol.Map} The Ol map
@@ -453,6 +468,13 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getOlView: function() {
 		return this.getOlMap().getView();
+	},
+	
+	/**
+	 * 
+	 */
+	getLegend: function() {
+		return this.legend;
 	},
 	
 	/**

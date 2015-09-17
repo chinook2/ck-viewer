@@ -5,7 +5,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayeredit',
 	
-	iconCls: 'fa fa-pencil fa-lg',
+	iconCls: 'fa fa-pencil fa-lg ck-plugin',
 	tooltip: 'Edit layer',
 	
 	doAction: function(layer) {		

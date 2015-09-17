@@ -55,6 +55,8 @@
 					"action": "ckmapSelectBox"
 				}]
 			},{
+				"action": "ckOpenImport"
+			},{
 				"action": "ckOpenPrint"
 			}]
 		},{

@@ -4,6 +4,8 @@
 Ext.define('Ck.legend.plugin.Action', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.action',
+	
+	disableClass: "ck-disablePlugin",
 		
 	init: function(cmp) {
 		this.tree =  cmp;
@@ -71,7 +73,7 @@ Ext.define('Ck.legend.plugin.Action', {
 					return false;
 				},
 				getClass: function(v, meta, rec) {
-					if(!rec.get('layer')) return '';
+					if(!rec.get('layer')) return this.disableClass;
 					return this.iconCls;
 				},
 				scope: this
