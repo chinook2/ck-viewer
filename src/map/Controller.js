@@ -335,6 +335,7 @@ Ext.define('Ck.map.Controller', {
 				
 				// Layer creation	
 				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
+					id: layer.getId(),
 					source: olSource,
 					extent: extent,
 					title: layer.getTitle(),

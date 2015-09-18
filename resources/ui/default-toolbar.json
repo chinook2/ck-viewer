@@ -80,6 +80,9 @@
 				"action": "ckOpenImport"
 			},{
 				"action": "ckOpenPrint"
+			},{
+				"action": "ckmapForm",
+				"layer": "departement"
 			}]
 		},{
             "xtype": "toolbar",
