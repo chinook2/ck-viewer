@@ -9,7 +9,8 @@ Ext.define("Ck.View", {
 		
 		'Ck.Controller',
 		'Ck.Ajax',
-		'Ck.Map'
+		'Ck.Map',
+		'Ck.Zip'
     ],
     
     controller: 'ckview',

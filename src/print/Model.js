@@ -33,7 +33,7 @@ Ext.define('Ck.print.Model', {
 			data: [
 				{id: "jpg", label: "JPG"},
 				{id: "png", label: "PNG"},
-				{id: "pdf", label: "Pdf"},
+				{id: "pdf", label: "Pdf"}
 			]
 		},
 		formats: {

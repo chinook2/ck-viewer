@@ -4,6 +4,8 @@
 Ext.define('Ck.legend.plugin.Action', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.action',
+	
+	disableClass: "ck-disablePlugin",
 		
 	init: function(cmp) {
 		this.tree =  cmp;
@@ -70,11 +72,11 @@ Ext.define('Ck.legend.plugin.Action', {
 				// Disabled actions for groups
 				// view, rowIndex, colIndex, item, record
 				isDisabled: function(v, r, c, i, rec) {
-					if(!rec.get('layer')) return true;
+					if(rec && !rec.get('layer')) return true;
 					return false;
 				},
 				getClass: function(v, meta, rec) {
-					if(rec && !rec.get('layer')) return '';
+					if(rec && !rec.get('layer')) return this.disableClass;
 					return this.iconCls;
 				},
 				scope: this

@@ -120,7 +120,7 @@
 			"name": "couche_polygon_4326",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "Memoris",
-			"active" : true,
+			"active" : false,
 			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
 			"sourceProjection": "EPSG:4326",
 			"offerings" : [{
@@ -132,7 +132,10 @@
 					"type" : "application/xml",
 					"href" : "http://10.1.0.47/demo/www/index.php?service=WFS&request=GetFeature&typename=couche_polygon_4326&version=1.1.0"
 				}]
-			}]
+			}],
+		  	"extension" : {
+				"path": "Victor"
+		  	}
 		}
 	},{
 		"type": "Feature",
@@ -142,7 +145,7 @@
 			"name": "ign:couche_ligne_2154",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "Memoris",
-			"active" : true,
+			"active" : false,
 			"sourceProjection": "EPSG:2154",
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-wms/1.0/req/wms",
@@ -153,7 +156,10 @@
 					"type" : "application/image",
 					"href" : "http://10.1.0.47/demo/www/index.php"
 				}]
-			}]
+			}],
+		  	"extension" : {
+				"path": "Victor"
+		  	}
 		}
 	}]
 }

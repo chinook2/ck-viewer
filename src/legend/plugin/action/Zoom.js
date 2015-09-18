@@ -17,7 +17,7 @@ Ext.define('Ck.legend.plugin.action.Zoom', {
 	},
 	*/
 	
-	iconCls: 'fa fa-search fa-lg fa-flip-horizontal',
+	iconCls: 'fa fa-search fa-lg fa-flip-horizontal ck-plugin',
 	tooltip: 'Zoom on layer',
 	
 	doAction: function(layer) {		

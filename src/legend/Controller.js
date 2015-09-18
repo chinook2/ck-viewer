@@ -9,9 +9,15 @@ Ext.define('Ck.legend.Controller', {
 		controller: {
 			'ckmap': {
 				// Called when add layer to map
-				addlayer: 'onMapAddLayer'
+				addlayer: 'onMapAddLayer',
+				removelayer: 'onMapRemoveLayer',
+				ready: 'linkToMap'
 			}
 		}
+	},
+	
+	linkToMap: function(ckMap) {
+		ckMap.legend = this;
 	},
 	
 	ckLoaded: function() {
@@ -41,6 +47,43 @@ Ext.define('Ck.legend.Controller', {
 	
 	onMapAddLayer: function(layer) {
 		// this.addLayer(layer);
+	},
+	
+	/**
+	 * Called when a layer is removed from the map
+	 * @param {ol.layer}
+	 */
+	onMapRemoveLayer: function(layer) {
+		var node = this.getNodeByLayer(layer);
+		if(node) {
+			node.remove();
+		}
+	},
+	
+	/**
+	 * Find the node of the tree view corresponding to the specified layer
+	 * @param {ol.layer}
+	 * @return {Ext.data.NodeStore}
+	 */
+	getNodeByLayer: function(layer) {
+		var searchNode = function(node, layer) {
+			var resultNode;
+			var data = node.getData();
+			if(data.layer) {
+				if(data.layer == layer)
+					return node;
+			} else if(node.childNodes && node.childNodes.length > 0) {
+				for(var i = 0; i < node.childNodes.length; i++) {
+					resultNode = searchNode(node.childNodes[i], layer);
+					if(resultNode) {
+						return resultNode;
+					}
+				}
+			}
+		};
+		var root = this.getView().getRootNode();
+		var node = searchNode(root, layer);
+		return node;
 	},
 	
 	getLayers: function() {
