@@ -26,7 +26,8 @@ Ext.define('Ck.forms.Controller', {
     },
     
     formSaveClick: function() {
-        this.saveData();
+        this.saveData();		
+		this.formCloseClick();
     },
     
     formCloseClick: function() {        
