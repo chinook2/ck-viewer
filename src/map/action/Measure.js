@@ -235,7 +235,7 @@ Ext.define('Ck.map.action.Measure', {
 					
 					var helpMsg = this.startMsg;
 					if (this.sketch) helpMsg = this.continueMsg;
-					tip.update(helpMsg);
+					tip.setHtml(helpMsg);
 				},
 				scope: this
 			}

@@ -50,14 +50,8 @@ Ext.define('Ck.view.Controller', {
 	 * @private
 	 */
 	getUi: function(uiName) {
-		var path = Ext.manifest.profile + '/resources/ck-viewer';
-		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
-		//<debug>
-		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		path = 'packages/local/ck-viewer/resources';
-		//</debug>
 		Cks.get({
-			url: path + '/ui/'+uiName+'.json',
+			url: Ck.getPath() + '/ui/'+uiName+'.json',
 			scope: this,
 			success: function(response){
 				var uiConfig = Ext.decode(response.responseText);

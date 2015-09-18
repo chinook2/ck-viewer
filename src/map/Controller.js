@@ -353,9 +353,8 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	getContext: function(contextName) {
-		var path = Ck.getPath();
 		Cks.get({
-			url: path +'/context/'+contextName+'.json',
+			url: Ck.getPath() +'/context/'+contextName+'.json',
 			scope: this,
 			success: function(response){
 				var owc = Ext.decode(response.responseText);

@@ -11,10 +11,13 @@ Ext.define('Ck.legend.plugin.Action', {
 		// Get the Action Column
 		this.actionColumn = cmp.down('actioncolumn');
 		if(!this.actionColumn) {
-			Ck.log("No actionColumn found for Ck.legend.plugin.action.zoom.");
+			Ck.log("No actionColumn found for Ck.legend.plugin.action.");
 			return;
 		}
-		
+
+		// Add tree reference to the actionColumn
+		this.actionColumn.ownerTree = cmp;
+
 		// Init the Action Column (items is wrong on init !)
 		if(this.actionColumn.items && (this.actionColumn.items.length == 1) && (this.actionColumn.items[0].xtype == 'actioncolumn')) {
 			this.actionColumn.items = [];
@@ -71,7 +74,7 @@ Ext.define('Ck.legend.plugin.Action', {
 					return false;
 				},
 				getClass: function(v, meta, rec) {
-					if(!rec.get('layer')) return '';
+					if(rec && !rec.get('layer')) return '';
 					return this.iconCls;
 				},
 				scope: this

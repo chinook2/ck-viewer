@@ -5,7 +5,9 @@
 Ext.define('Ck.legend.plugin.Slider', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendslider',
-	
+
+	tipPrefix: 'Opacity',
+
 	init: function(cmp) {
 		cmp.on({
 			itemmousedown: this.onItemmousedown,
@@ -32,8 +34,9 @@ Ext.define('Ck.legend.plugin.Slider', {
 				maxValue: 100,
 				renderTo: item,
 				useTips: true,
+				tipPrefix: this.tipPrefix,
 				tipText: function(thumb) {
-					return Ext.String.format('Opacity {0} %', thumb.value);
+					return Ext.String.format(slider.tipPrefix + ' {0} %', thumb.value);
 				},
 				listeners: {
 					change: function(s, v) {

@@ -343,7 +343,7 @@ Ext.apply(Ck, {
 	 * @inheritdoc Ext#log
 	 */
 	log: function(opt) {
-		Ext.log(opt);
+		if(opt) Ext.log(opt);
 	},
 	
 	/**
@@ -356,6 +356,7 @@ Ext.apply(Ck, {
 	 * @param {String} msg The error message to log.
 	 */
 	error: function(msg) {
+		if(!msg) return;
 		Ext.log({
 			level: 'error',
 			msg: msg
