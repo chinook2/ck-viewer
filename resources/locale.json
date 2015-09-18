@@ -1,0 +1,45 @@
+{
+	"success": true,
+	"data": [{
+        "en": "Choose a language",
+        "fr": "Selectionner une langue",
+        "es": "Cambiar idioma",
+    },{
+        "en": "AppDemo",
+        "fr": "App FR",
+        "es": "App ES"
+    },{
+        "en": "Display overview",
+        "fr": "Vue générale",
+        "es": "en espagnol..."
+    },{
+        "en": "Cancel",
+        "fr": "Annuler",
+        "es": "Cancelar"
+    },{
+        "en": "Print",
+        "fr": "Imprimer",
+        "es": "Print ES"
+    },{
+        "en": "Title",
+        "fr": "Titre",
+        "es": "Titulo"
+    },{
+        "en": "Click to start measuring (shift and hold click for free measure)",
+        "fr": "Cliquer pour commencer à mesurer (Shift + click enfoncer pour mesurer à main levée)",
+        "es": "Es muy facil..."
+    },{
+        "en": "Opacity",
+        "fr": "Opacité",
+        "es": "Opacidad"
+    },{
+        "en": "Edit layer",
+        "fr": "Editer la couche",
+        "es": "Editar ..."
+    },{
+        "en": "Zoom on layer",
+        "fr": "Zoomer sur la couche",
+        "es": "Ver todo !"
+    }
+    ]
+}

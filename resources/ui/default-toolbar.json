@@ -7,8 +7,30 @@
         },
         "region": "north",
 		"height": 45,
-        "split": true
-	},{
+        "split": true,
+        "dockedItems": [{
+            "xtype": "toolbar",
+            "dock": "top",
+            "overlay": true,
+            "top": 0,
+            "defaults": {
+                "scale": "small"
+            },
+            "items": [{
+                "text": "en",
+                "toLocale": "en",
+                "action": "cklocaleSet"
+            },{
+                "text": "fr",
+                "toLocale": "fr",
+                "action": "cklocaleSet"
+            },{
+                "text": "es",
+                "toLocale": "es",
+                "action": "cklocaleSet"
+            }]
+        }]
+    },{
         "xtype": "cklegend",
         "region": "west",
         "width": 250,
