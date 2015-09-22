@@ -21,8 +21,8 @@ Ext.define('Ck.forms.Controller', {
         this.initForm();
     },
         
-    formLoad: function() {
-        this.loadData();
+    formLoad: function(options) {
+        this.loadData(options);
     },
     
     formSaveClick: function() {
@@ -76,6 +76,10 @@ Ext.define('Ck.forms.Controller', {
             }
             
             this.isInit = true;
+
+            // Auto-load data if params avaible
+            //var url = this.view.getdataUrl();
+            //if(url) this.loadData();
         }
                 
         return true;
@@ -83,8 +87,15 @@ Ext.define('Ck.forms.Controller', {
     
     // Récupère la définition du formulaire à afficher
     getForm: function() {
+        var formUrl = this.view.getFormUrl();
+        var formName = this.view.getFormName();
+        if(!formUrl && formName) formUrl = Ck.getPath() + '/forms/'+ formName + '.json';
+        if(!formUrl) {
+            Ck.Notify.error("'formUrl' or 'formName' not set.");
+            return false;
+        }
         Cks.get({
-            url: Ck.getPath() + '/forms/'+ this.view.getFormName() + '.json',
+            url: formUrl,
             disableCaching: false,
             scope: this,
             success: function(response){
@@ -192,16 +203,24 @@ Ext.define('Ck.forms.Controller', {
     },
     
     // Lecture des données depuis le Storage
-    loadData: function() {	
+    loadData: function(options) {
         var me = this;
         var v = me.getView();
         
         // Getters via config param in the view
         var lyr = v.getLayer();
-        var fid = v.getFid();
-        
+
+        var fid = options.fid;
+        var data = options.data;
+
         // Init le form 'vide'
         me.resetData();
+
+        if(data) {
+            v.getForm().setValues(data);
+            return;
+        }
+
         /*
         // TODO : gestion du retour si erreur...
         if(!fid) {

@@ -7,13 +7,13 @@
     "form": {
         "items": [{
             "fieldLabel": "ID Geofla",
-            "name": "id_geofla"
+            "name": "ID_GEOFLA"
         },{
             "fieldLabel": "Nom",
-            "name": "nom_dept"
+            "name": "NOM_DEPT"
         },{
             "fieldLabel": "Nom région",
-            "name": "nom_region"
+            "name": "NOM_REGION"
         }]
     }
 }

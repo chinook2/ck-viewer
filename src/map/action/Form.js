@@ -57,10 +57,12 @@ Ext.define('Ck.map.action.Form', {
 				var p = f.getProperties();
 				var fid = p[featureId];
 				
-				this.mapFormPanel.setConfig({
-					fid: fid
-				}).getController().formLoad();
-				
+				this.mapFormPanel.getController().formLoad({
+					data: p
+					//fid: fid  // or
+					//url: url  // or
+				});
+
 				//
 				var tab = this.mapFormPanel.down('tabpanel');
 				if(tab) tab.setActiveTab(0);
