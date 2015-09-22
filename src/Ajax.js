@@ -63,11 +63,7 @@ Ext.define('Ck.Ajax', {
 		var res = this.ls.getItem(options.url);
 		if(res) {
 			//<debug>
-			Ext.toast({
-				html: 'Request from Cache : '+ options.url,
-				align: 'tr',
-				slideInDuration: 400
-			});
+			Ck.Notify.info('Request from Cache : '+ options.url);
 			//</debug>
 			
 			var response = {
@@ -81,27 +77,15 @@ Ext.define('Ck.Ajax', {
 	
 	onRequestComplete: function(conn, response, options, eOpts) {
 		//<debug>
-		Ext.toast({
-			html: 'Request success : '+ options.url,
-			align: 'tr',
-			slideInDuration: 400
-		});
+		Ck.Notify.info('Request success : '+ options.url);
 		//</debug>
 		
 		this.ls.setItem(options.url, response.responseText);
 	},
 	
 	onRequestException: function(conn, response, options, eOpts) {
-		//<debug>
-		Ext.toast({
-			html: '<span style="color:red">Request failure : ' + options.url + '</span>',
-			autoClose: false,
-			closable: true,
-			headerPosition: 'right',
-			align: 'tr'
-		});
-		//</debug>
-		
+		Ck.Notify.error('Request failure : ' + options.url);
+
 		// TODO : parse error message ...
 	}
 });
