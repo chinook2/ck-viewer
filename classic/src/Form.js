@@ -1,20 +1,20 @@
 
-Ext.define("Ck.Forms",{
+Ext.define("Ck.Form",{
     extend: "Ext.form.Panel",
-    alias: "widget.ckforms",
+    alias: "widget.ckform",
     
     requires: [
         'Ext.layout.*',
         'Ext.form.*',
         'Ext.tab.*',
         'Ext.grid.*',
-		'Ck.forms.*'
+		'Ck.form.*'
         //'Ext.ux.printer.*',
     ],
     
-    controller: "ckforms",
+    controller: "ckform",
     viewModel: {
-        type: "ckforms"
+        type: "ckform"
     },
     
     config: {
@@ -48,5 +48,5 @@ Ext.define("Ck.Forms",{
         }]
     }],
 	
-	cls: 'ckforms'
+	cls: 'ckform'
 });

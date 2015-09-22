@@ -1,10 +1,10 @@
 ﻿/**
  * 
  */
-Ext.define('Ck.forms.Model', {
+Ext.define('Ck.form.Model', {
 	extend: 'Ext.app.ViewModel',
 
-	alias: 'viewmodel.ckforms',
+	alias: 'viewmodel.ckform',
 
 	data: {
 	},

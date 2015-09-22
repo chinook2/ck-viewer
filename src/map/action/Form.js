@@ -5,7 +5,7 @@ Ext.define('Ck.map.action.Form', {
 	extend: 'Ck.Action',
 	alias: "widget.ckmapForm",
 	
-	itemId: 'forms',
+	itemId: 'form',
 	text: '',
 	iconCls: 'fa fa-file-text',
 	tooltip: 'Open Form',	
@@ -28,7 +28,7 @@ Ext.define('Ck.map.action.Form', {
 		// Initialise le formulaire (dans une popup plein écran)
 		if(!this.mapFormPanel) {			
 			this.mapFormPanel =  Ext.create({
-				xtype: 'ckforms',
+				xtype: 'ckform',
 				formName: layer
 			});
 			
