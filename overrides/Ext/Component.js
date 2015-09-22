@@ -70,7 +70,7 @@ Ext.define('Ext.overrides.Component', {
 
 	cascadeLocale:function(locale) {
 		var me = this;
-Ext.log(me.getXType());
+
 		me.setLocale(locale);
 
 		if(me.items) {
@@ -135,7 +135,7 @@ Ext.log(me.getXType());
 			this[config.name] = value;
 		};
 
-		translate = function(val, localeName) {
+		var translate = function(val, localeName) {
 			var me = this,
 				// toLocale : special to force a language (used with action cklocaleSet)
 				locale = me.toLocale || me.getLocale(),
@@ -155,8 +155,8 @@ Ext.log(me.getXType());
 			}
 
 			//<debug>
-			Ext.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
-			//<debug>
+			Ext.log('  [' + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
+			//</debug>
 			return str ? str : val;
 		};
 
@@ -316,7 +316,7 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 
 			//<debug>
 			Ext.log("  *[" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + item[localeName] + ' -> ' + locale + ') :: '+ localeName );
-			//<debug>
+			//</debug>
 		});
 
 	},
