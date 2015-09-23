@@ -33,8 +33,8 @@ Ext.define('Ck.map.action.Form', {
 			});
 			
 			this.mapFormWindow = Ext.create('Ext.window.Window', {
-				height: 200,
-				width: 400,
+				height: 300,
+				width: 600,
 				layout: 'fit',
 				headerPosition: 'right',
 				//maximized: true,

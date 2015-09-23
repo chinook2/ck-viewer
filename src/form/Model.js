@@ -7,6 +7,9 @@ Ext.define('Ck.form.Model', {
 	alias: 'viewmodel.ckform',
 
 	data: {
+		isEditable: true,
+		isPrintable: false,
+		editing: false
 	},
 
 	formulas: {

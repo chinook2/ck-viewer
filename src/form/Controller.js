@@ -25,12 +25,26 @@ Ext.define('Ck.form.Controller', {
 		this.loadData(options);
 	},
 
-	formSaveClick: function () {
-		this.saveData();
-		this.formCloseClick();
+	formEdit: function(){
+		this.startEditing();
 	},
 
-	formCloseClick: function () {
+	formSave: function () {
+		this.saveData();
+		this.formClose();
+	},
+
+	formCancel: function(){
+		this.stopEditing();
+	},
+
+	formPrint: function () {
+		Ext.alert("WIP.");
+	},
+
+	formClose: function () {
+		this.stopEditing();
+
 		var win = this.view.up('window');
 		if (win) {
 			win.close();
@@ -111,6 +125,10 @@ Ext.define('Ck.form.Controller', {
 		var fn = function (c) {
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
+
+			Ext.applyIf(c, {
+				plugins: ['formreadonly']
+			});
 
 			if (c.xtype == "tabpanel") {
 				Ext.applyIf(c, {
@@ -200,6 +218,20 @@ Ext.define('Ck.form.Controller', {
 
 		Ext.each(cfg.items, fn, this);
 		return cfg;
+	},
+
+	startEditing: function(){
+		this.getViewModel().set("editing", true);
+		this.getViewModel().set("isEditable", false);
+
+		this.fireEvent('startEditing');
+	},
+
+	stopEditing: function () {
+		this.getViewModel().set("editing", false);
+		this.getViewModel().set("isEditable", true);
+
+		this.fireEvent('stopEditing');
 	},
 
 	// Lecture des données depuis le Storage
@@ -352,7 +384,7 @@ Ext.define('Ck.form.Controller', {
 		 v.fireEvent('aftersave', res);
 
 		 // Ferme le form
-		 me.formCloseClick();
+		 me.formClose();
 		 }
 		 });
 		 */

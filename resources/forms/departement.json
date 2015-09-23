@@ -7,7 +7,9 @@
     "form": {
         "items": [{
             "fieldLabel": "ID Geofla",
-            "name": "ID_GEOFLA"
+            "name": "ID_GEOFLA",
+          "prefix": "n° ",
+          "suffix": " (validé)"
         },{
             "fieldLabel": "Nom",
             "name": "NOM_DEPT"

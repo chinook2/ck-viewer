@@ -36,15 +36,39 @@ Ext.define("Ck.Form",{
         xtype: 'toolbar',
         dock: 'bottom',
         ui: 'footer',
-        defaults: {minWidth: 150},
-        items: ['->',{
+        defaults: {minWidth: 120},
+        items: [{
+            xtype: "button",
+            text: "Edit",
+            handler: 'formEdit',
+            bind: {
+                hidden: "{!isEditable}"
+            }
+        },{
             xtype: "button",
             text: "Save",
-            handler: 'formSaveClick'
+            handler: 'formSave',
+            bind: {
+                hidden: "{!editing}"
+            }
         },{
             xtype: "button",
             text: "Cancel",
-            handler: 'formCloseClick'
+            handler: 'formCancel',
+            bind: {
+                hidden: "{!editing}"
+            }
+        },'->',{
+            xtype: "button",
+            text: "Print",
+            handler: 'formPrint',
+            bind: {
+                hidden: "{!isPrintable}"
+            }
+        },{
+            xtype: "button",
+            text: "Close",
+            handler: 'formClose'
         }]
     }],
 	
