@@ -29,7 +29,7 @@ Ext.define('Ck.import.Model', {
 			data: [
 				{id: "shp", label: "ShapeFile"},
 				{id: "mif", label: "MapInfo MIF/MID"},
-				{id: "gpx", label: "GPX"},
+				{id: "gpx", label: "GPX"}
 			]
 		},
 		projection: {
