@@ -2,18 +2,18 @@
  *
  */
 
-Ext.define("Ck.Import", {
+Ext.define("Ck.ImportVector", {
 	extend: "Ext.form.Panel",
-	alias: "widget.ckimport",
+	alias: "widget.ckimportvector",
 	
 	requires: [
-		"Ck.import.*"
+		"Ck.importvector.*"
 	],
 
-	controller: "ckimport",
+	controller: "ckimportvector",
 	
 	viewModel: {
-		type: "ckimport"
+		type: "ckimportvector"
 	},
 	
 	config: {

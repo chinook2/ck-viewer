@@ -6,7 +6,7 @@ Ext.define('Ck.map.action.OpenImport', {
 	alias: "widget.ckOpenImport",
 	
 	requires: [
-		'Ck.Import'
+		'Ck.ImportVector'
 	],
 	
 	itemId: 'openimport',
@@ -27,7 +27,7 @@ Ext.define('Ck.map.action.OpenImport', {
 				layout: 'fit',
 				closeAction: 'hide',
 				items: {
-					xtype: 'ckimport',
+					xtype: 'ckimportvector',
 					openner: this
 				}
 			});

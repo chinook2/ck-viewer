@@ -13075,12 +13075,12 @@ function decode64(base64) {
     return output;
 }
 
-function SVGNodeContainer(node, native) {
+function SVGNodeContainer(node, nat) {
     this.src = node;
     this.image = null;
     var self = this;
 
-    this.promise = native ? new Promise(function(resolve, reject) {
+    this.promise = nat ? new Promise(function(resolve, reject) {
         self.image = new Image();
         self.image.onload = resolve;
         self.image.onerror = reject;
@@ -15552,12 +15552,12 @@ function decode64(base64) {
 
     return output;
 }
-function SVGNodeContainer(node, native) {
+function SVGNodeContainer(node, nat) {
     this.src = node;
     this.image = null;
     var self = this;
 
-    this.promise = native ? new Promise(function(resolve, reject) {
+    this.promise = nat ? new Promise(function(resolve, reject) {
         self.image = new Image();
         self.image.onload = resolve;
         self.image.onerror = reject;

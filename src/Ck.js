@@ -41,6 +41,10 @@
  *
  * @singleton
  */
+String.prototype.stripExtension = function() {
+	return this.substr(0, this.lastIndexOf("."));
+}
+ 
 var Ck = Ck || {};
 
 // @define Ck
@@ -539,3 +543,5 @@ Ext.apply(Ck, {
 		return resolution * ((proj.getMetersPerUnit() * 100) / Ck.CM_PER_INCH) * Ck.DOTS_PER_INCH;
 	}
 }).init();
+
+
