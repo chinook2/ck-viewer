@@ -1,10 +1,10 @@
 ﻿/**
  * Data binding for map view. Allow to display parameters in the view and change parameters (two-way).
  */
-Ext.define('Ck.import.Model', {
+Ext.define('Ck.importvector.Model', {
 	extend: 'Ext.app.ViewModel',
 
-	alias: 'viewmodel.ckimport',
+	alias: 'viewmodel.ckimportvector',
 
 	data: {
 		importParam: {
@@ -29,7 +29,7 @@ Ext.define('Ck.import.Model', {
 			data: [
 				{id: "shp", label: "ShapeFile"},
 				{id: "mif", label: "MapInfo MIF/MID"},
-				{id: "gpx", label: "GPX"},
+				{id: "gpx", label: "GPX"}
 			]
 		},
 		projection: {

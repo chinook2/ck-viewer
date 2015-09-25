@@ -1,9 +1,9 @@
 /**
  * 
  */
-Ext.define('Ck.import.Controller', {
+Ext.define('Ck.importvector.Controller', {
 	extend: 'Ck.Controller',
-	alias: 'controller.ckimport',
+	alias: 'controller.ckimportvector',
 	
 	/**
 	 * List of parameters to configure the import
@@ -40,20 +40,20 @@ Ext.define('Ck.import.Controller', {
 		Ext.apply(this.importParam, vm.getData().importParam);
 		
 		this.control({
-			"ckimport button#import": {
+			"ckimportvector button#import": {
 				click: this.startImport,
 				scope: this
 			},
-			"ckimport button#cancel": {
+			"ckimportvector button#cancel": {
 				click: this.cancel
 			},
-			"ckimport textfield#file": {
+			"ckimportvector textfield#file": {
 				change: this.paramChange
 			},
-			"ckimport combo#format": {
+			"ckimportvector combo#format": {
 				change: this.paramChange
 			},
-			"ckimport combo#projection": {
+			"ckimportvector combo#projection": {
 				change: this.paramChange
 			}
 		});
@@ -89,7 +89,7 @@ Ext.define('Ck.import.Controller', {
 	},
 	
 	/**
-	 * Set default value for each item
+	 * Set default value for each field
 	 */
 	loadDefaultParam: function() {
 		var importParam = this.importParam;
