@@ -335,9 +335,10 @@ Ext.define('Ck.map.Controller', {
 				
 				// Layer creation	
 				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
+					id: layer.getId(),
+					title: layer.getTitle(),
 					source: olSource,
 					extent: extent,
-					title: layer.getTitle(),
 					style: olStyle,
 					visible: layer.getVisible(),
 					path: layer.getExtension('path')
@@ -546,6 +547,10 @@ Ext.define('Ck.map.Controller', {
 		}
 	},
 	
+	/**
+	 * Get all overview layer
+	 * @return {ol.layer[]}
+	 */
 	getOverviewLayers: function() {
 		var resLayers = [];
 		var layers = this.getLayers().getArray();

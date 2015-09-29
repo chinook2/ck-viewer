@@ -14,6 +14,10 @@ Ext.define('Ck.format.OWSContextLayer', {
 		this.context = owsContext;
 	},
 	
+	getId: function() {
+		return this.lyr.id;
+	},
+	
 	getTitle: function() {
 		return this.lyr.properties.title;
 	},

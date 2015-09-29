@@ -95,7 +95,7 @@ Ext.define('Ck.map.Model', {
 		/** 
 		 * Specific Chinook parameters
 		 */
-		ckLayerParams: ["overviewLayer"],
+		ckLayerParams: ["overviewLayer", "geometryType"],
 		
 		/**
 		 * @cfg {Number}

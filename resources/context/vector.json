@@ -1,6 +1,6 @@
 {
 	"type": "FeatureCollection",
-	"id": "http://www.opengis.net/owc/1.0/examples/geojson/1",
+	"id": "vector_context",
 	"properties" : {
 		"lang" : "en",
 		"title" : "Context Example",
@@ -39,7 +39,7 @@
 	},
 	"features" : [{
 		"type": "Feature",
-		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/wmts/1",
+		"id": "openstreetmap",
 		"geometry": {},
 		"properties": {
 			"title" : "Open Stree Map",
@@ -70,12 +70,14 @@
 	},{
 		"type": "Feature",
 		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson/1",
+		"id": "limites_departementales",
 		"properties": {
 			"title" : "Limites départementales",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "GEOFLA",
 			"active" : true,
 			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"geometryType": "Polygon",
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
 				"operations" : [{ 
@@ -91,13 +93,14 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson/1",
+		"id": "etablissements_enseignement_superieur",
 		"properties": {
 			"title" : "Etablissements d'enseignement supérieur",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "Ministère de l'Éducation nationale, de l'Enseignement supérieur et de la Recherche",
 			"active" : true,
 			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"geometryType": "Point",
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
 				"operations" : [{ 
@@ -123,6 +126,7 @@
 			"active" : false,
 			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
 			"sourceProjection": "EPSG:4326",
+			"geometryType": "Polygon",
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-wfs/1.0/req/wfs",
 				"version": "1.1.1",
