@@ -12,15 +12,18 @@ Ext.define('Ck.Ajax', {
 	 */
 	constructor: function() {
 		this.ls = new Ext.util.LocalStorage({
-			 id: 'Ck-'+Ext.manifest.name
+			id: 'Ck-' + Ext.manifest.name
 		});
-		
-		Ext.Ajax.on({
-			beforerequest: this.onBeforeRequest,
-			requestcomplete: this.onRequestComplete,
-			requestexception: this.onRequestException,
-			scope: this
-		});
+
+		// Global disable ajax cache and ajax global events
+		if (Ck.getOption('ajaxCache') !== false) {
+			Ext.Ajax.on({
+				beforerequest: this.onBeforeRequest,
+				requestcomplete: this.onRequestComplete,
+				requestexception: this.onRequestException,
+				scope: this
+			});
+		}
 	},
 	
 	get: function(options) {

@@ -331,14 +331,31 @@ Ext.apply(Ck, {
 	getPath: function() {
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
 		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
+
 		//<debug>
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
 		path = 'packages/local/ck-viewer/resources';
 		//</debug>	
 		
-		return path;
+		return this.getApi() + path;
 	},
-		
+
+	getOption: function (opt) {
+		if(!Ext.manifest.ckClient) return false;
+		return Ext.manifest.ckClient[opt];
+	},
+
+	/**
+	 * Get default API Url
+	 *
+	 * See app.json parameter 'ckClient.api'
+	 * @return {string}
+	 */
+	getApi: function () {
+		return this.getOption('api');
+	},
+
+
 	zoomToExtent: function(extent) {
 		this.getMap().getOlView().fit(extent, this.getMap().getOlMap().getSize());
 	},
