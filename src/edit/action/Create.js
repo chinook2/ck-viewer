@@ -80,6 +80,7 @@ Ext.define('Ck.edit.action.Create', {
 					this.drawInteraction.source_.addFeature(sketchFeature);
 				}
 
+				this.endAction(sketchFeature);
 				this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
 			}.bind(this);
 		}
@@ -231,8 +232,10 @@ Ext.define('Ck.edit.action.Create', {
 	},
 	
 	closeAction: function() {
-		this.drawInteraction.setActive(false);
-		this.map.getOlMap().removeInteraction(this.drawInteraction);
-		delete this.drawInteraction;
+		if(this.used) {
+			this.drawInteraction.setActive(false);
+			this.map.getOlMap().removeInteraction(this.drawInteraction);
+			delete this.drawInteraction;
+		}
 	}
 });
