@@ -26,6 +26,7 @@ Ext.define("Ck.Form",{
 
         fid: null,		// Feature ID : recup depuis le geoJSON
 		data: null,		// Données inline
+        dataUrl : null, //
 
         isSubForm: false
     },

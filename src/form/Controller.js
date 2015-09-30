@@ -92,8 +92,10 @@ Ext.define('Ck.form.Controller', {
 			this.isInit = true;
 
 			// Auto-load data if params avaible
-			//var url = this.view.getdataUrl();
-			//if(url) this.loadData();
+			var url = this.view.getDataUrl();
+			if(url) this.loadData({
+				url: url
+			});
 		}
 
 		return true;
