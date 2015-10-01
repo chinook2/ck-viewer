@@ -16,6 +16,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	title: '',
 
 	init: function(cmp) {
+		var ignoreComponent = ['panel', 'tabpanel', 'fieldset'];
+		if(ignoreComponent.indexOf(cmp.getXType()) != -1) return;
+
 		if(cmp.suffix) this.suffix = cmp.suffix;
 		if(cmp.prefix) this.prefix = cmp.prefix;
 		if(cmp.tpl) this.tpl = cmp.tpl;

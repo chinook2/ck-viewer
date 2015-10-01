@@ -18,6 +18,10 @@ Ext.define('Ck.form.Controller', {
 		this.isSubForm = this.getView().getIsSubForm();
 		this.isInit = false;
 
+		this.ls = new Ext.util.LocalStorage({
+			id: 'Ck-' + Ext.manifest.name + '-Form'
+		});
+
 		this.initForm();
 	},
 
@@ -58,7 +62,11 @@ Ext.define('Ck.form.Controller', {
 	initForm: function (form) {
 		if (!this.isInit) {
 			if (!form) {
-				this.getForm();
+				var formUrl = this.view.getFormUrl();
+				var formName = this.view.getFormName();
+				if (!formUrl && formName) formUrl = Ck.getPath() + '/forms/' + formName + '.json';
+
+				this.getForm(formUrl);
 				return;
 			}
 
@@ -101,13 +109,74 @@ Ext.define('Ck.form.Controller', {
 		return true;
 	},
 
-	// Récupère la définition du formulaire à afficher
-	getForm: function () {
-		var formUrl = this.view.getFormUrl();
-		var formName = this.view.getFormName();
-		if (!formUrl && formName) formUrl = Ck.getPath() + '/forms/' + formName + '.json';
+	/*
+	 * Get Form definition
+	 * @param
+	 */
+	getForm: function (formUrl) {
 		if (!formUrl) {
-			Ck.Notify.error("'formUrl' or 'formName' not set.");
+			Ck.Notify.error("'formUrl' or 'formName' not set in getForm.");
+			return false;
+		}
+
+		// Load Form from LocalStorage (cache form with includes - ajax cache can't save all in one)
+		var form = this.ls.getItem(formUrl);
+		if(form){
+			this.initForm( Ext.decode(form) );
+			return;
+		}
+
+		Cks.get({
+			url: formUrl,
+			disableCaching: false,
+			scope: this,
+			success: function (response) {
+				var me = this;
+				var formConfig = Ext.decode(response.responseText, true);
+				if(!formConfig){
+					Ck.Notify.error("Invalid JSON Form in : "+ formUrl);
+					return false;
+				}
+
+				var incForms = me.getIncludedForm(formConfig.form);
+
+				Ck.asyncForEach(incForms, function(frmName, cb) {
+					// Include one sub-form...
+					me.includeForm(formConfig, frmName, cb);
+				}, function(newFormConfig) {
+					// Called when all included forms are done (compiled in newFormConfig)
+					// If no included form use default formConfig.
+					var cfg = newFormConfig || formConfig;
+
+					// Save Form in LocalStorage
+					me.ls.setItem(formUrl, Ext.encode(cfg));
+
+					me.initForm(cfg);
+				});
+			}
+		});
+	},
+
+	// List all included form in a form.
+	getIncludedForm: function (cfg) {
+		var includeForm = [];
+		var fn = function (c) {
+			if(c['@include']) {
+				includeForm.push(c['@include']);
+			}
+			if (c.items) {
+				Ext.each(c.items, fn, this);
+			}
+		};
+
+		Ext.each(cfg.items, fn, this);
+		return includeForm;
+	},
+
+	includeForm: function(formConfig, formName, callback) {
+		var formUrl = Ck.getPath() + '/forms/' + formName + '.json';
+		if (!formUrl) {
+			Ck.Notify.error("'formUrl' or 'formName' not set in includeForm.");
 			return false;
 		}
 		Cks.get({
@@ -115,13 +184,35 @@ Ext.define('Ck.form.Controller', {
 			disableCaching: false,
 			scope: this,
 			success: function (response) {
-				var formConfig = Ext.decode(response.responseText);
-				this.initForm(formConfig);
+				var me = this;
+				var subFormConfig = Ext.decode(response.responseText, true);
+				if(!subFormConfig){
+					Ck.Notify.error("Invalid JSON Form in : "+ formUrl);
+					return false;
+				}
+
+				var fn = function (c, idx, frm) {
+					if (c.items) {
+						Ext.each(c.items, fn, this);
+					}
+					if(c['@include'] == formName) {
+						delete frm[idx]['@include'];
+						Ext.apply(frm[idx], subFormConfig.form);
+					}
+				};
+				Ext.each(formConfig.form.items, fn, this);
+
+				// Find include form recursively
+				var incForms = me.getIncludedForm(subFormConfig.form);
+				Ck.asyncForEach(incForms, function(frmName, cb) {
+					me.includeForm(formConfig, frmName, cb);
+				}, function(newFormConfig) {
+					callback(newFormConfig || formConfig);
+				});
 			}
 		});
 	},
 
-	// private
 	// auto config pour le form (simplification du json)
 	applyFormDefaults: function (cfg) {
 		var fn = function (c) {
@@ -129,7 +220,8 @@ Ext.define('Ck.form.Controller', {
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
 			Ext.applyIf(c, {
-				plugins: ['formreadonly']
+				plugins: ['formreadonly'],
+				anchor: '100%'
 			});
 
 			if (c.xtype == "tabpanel") {
@@ -139,8 +231,9 @@ Ext.define('Ck.form.Controller', {
 					deferredRender: false,
 					border: false,
 					defaults: {
-						layout: 'form',
+						//layout: 'form',
 						// scrollable: 'y',
+						anchor: '100%',
 						labelSeparator: this.layoutConfig.labelSeparator
 					}
 				});
@@ -164,13 +257,15 @@ Ext.define('Ck.form.Controller', {
 					plugins: ['gridsubform']
 				});
 			}
-
+/*
 			if (c.xtype == "fieldset") {
 				Ext.applyIf(c, {
-					layout: 'form'
+					//layout: 'form',
+					//defaultType: 'textfield',
+
 				});
 			}
-
+*/
 			if (c.xtype == "datefield") {
 				Ext.applyIf(c, {
 					format: "d/m/Y"
@@ -273,7 +368,12 @@ Ext.define('Ck.form.Controller', {
 			url: url,
 			scope: this,
 			success: function (response) {
-				var data = Ext.decode(response.responseText);
+				var data = Ext.decode(response.responseText, true);
+				if(!data) {
+					Ck.Notify.error("Invalid JSON Data in : "+ url);
+					return false;
+				}
+
 				v.getForm().setValues(data);
 			},
 			failure: function (response, opts) {

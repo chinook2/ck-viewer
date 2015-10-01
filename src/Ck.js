@@ -558,7 +558,35 @@ Ext.apply(Ck, {
 	getScaleFromResolution: function(resolution, proj) {
 		var proj = ol.proj.get(proj);
 		return resolution * ((proj.getMetersPerUnit() * 100) / Ck.CM_PER_INCH) * Ck.DOTS_PER_INCH;
+	},
+
+	/**
+	 * asynchronous sequential version of Array.prototype.forEach
+	 * @param array the array to iterate over
+	 * @param fn the function to apply to each item in the array, function
+	 *        has two argument, the first is the item value, the second a
+	 *        callback function
+	 * @param callback the function to call when the forEach has ended
+	 */
+	asyncForEach: function(array, fn, callback) {
+		array = array.slice(0); // Just to be sure
+		function processOne() {
+			var item = array.pop();
+			fn(item, function(result, err) {
+				if(array.length > 0) {
+					processOne();
+				} else {
+					callback(result, err);
+				}
+			});
+		}
+		if(array.length > 0) {
+			processOne();
+		} else {
+			callback();
+		}
 	}
+
 }).init();
 
 
