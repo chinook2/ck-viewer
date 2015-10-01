@@ -29,7 +29,8 @@ Ext.define('Ck.map.action.Form', {
 		if(!this.mapFormPanel) {			
 			this.mapFormPanel =  Ext.create({
 				xtype: 'ckform',
-				formName: layer
+				formName: layer,
+				layer: layer
 			});
 			
 			this.mapFormWindow = Ext.create('Ext.window.Window', {
@@ -59,7 +60,7 @@ Ext.define('Ck.map.action.Form', {
 				
 				this.mapFormPanel.getController().formLoad({
 					data: p
-					//fid: fid  // or
+					//fid: 66  // or
 					//url: url  // or
 				});
 

@@ -10,6 +10,8 @@ Ext.define('Ck.form.Controller', {
 	isSubForm: false,
 	storage: null,
 
+	dataUrl: null,
+
 	layoutConfig: {
 		labelSeparator: ' : '
 	},
@@ -97,13 +99,14 @@ Ext.define('Ck.form.Controller', {
 				}
 			}
 
+			if(form.dataUrl){
+				this.dataUrl = form.dataUrl;
+			}
+
 			this.isInit = true;
 
-			// Auto-load data if params avaible
-			var url = this.view.getDataUrl();
-			if(url) this.loadData({
-				url: url
-			});
+			// Auto-load data if params available
+			this.loadData();
 		}
 
 		return true;
@@ -231,8 +234,6 @@ Ext.define('Ck.form.Controller', {
 					deferredRender: false,
 					border: false,
 					defaults: {
-						//layout: 'form',
-						// scrollable: 'y',
 						anchor: '100%',
 						labelSeparator: this.layoutConfig.labelSeparator
 					}
@@ -338,10 +339,16 @@ Ext.define('Ck.form.Controller', {
 
 		// Getters via config param in the view
 		var lyr = v.getLayer();
+		var bSilent = false;
 
-		var fid = options.fid;
-		var url = options.url;
-		var data = options.data;
+		//
+		if(!options) {
+			options = {};
+			bSilent = true;
+		}
+		var fid = options.fid || v.getFid();
+		var url = options.url || v.getDataUrl();
+		var data = options.data || v.getData();
 
 		// Init le form 'vide'
 		me.resetData();
@@ -355,11 +362,18 @@ Ext.define('Ck.form.Controller', {
 		if (fid) {
 			// Load data by ID - build standard url
 			// TODO : Call un service REST for loading data...
-			url = Ck.getPath() + '/data/' + lyr + '/' + fid + '.json';
+			if(me.dataUrl){
+				// Form provide un template URL to load data
+				var tpl = new Ext.Template(me.dataUrl);
+				url = tpl.apply([fid]);
+			} else {
+				// Build default url
+				url = Ck.getPath() + '/data/' + lyr + '/' + fid + '.json';
+			}
 		}
 
 		if(!url){
-			Ck.Notify.error("Forms loadData 'fid' or 'url' not set.");
+			if(!bSilent) Ck.Notify.error("Forms loadData 'fid' or 'url' not set.");
 			return;
 		}
 

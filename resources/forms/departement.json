@@ -1,21 +1,19 @@
 {
-    "name": "departement.default",
-    "description": "Fiche de description des Départements...",
-    "window": {
-        "title": "DEPARTEMENTS"
-    },
-    "form": {
-        "items": [{
-            "fieldLabel": "ID Geofla",
-            "name": "ID_GEOFLA",
-          "prefix": "n° ",
-          "suffix": " (validé)"
-        },{
-            "fieldLabel": "Nom",
-            "name": "NOM_DEPT"
-        },{
-            "fieldLabel": "Nom région",
-            "name": "NOM_REGION"
-        }]
-    }
+	"name": "departement.default",
+	"description": "Fiche de description des Départements...",
+	"window": {
+		"title": "DEPARTEMENTS"
+	},
+	"dataUrl": "/packages/local/ck-viewer/resources/data/departement/{0}.json",
+	"form": {
+		"items": [{
+			"fieldLabel": "ID Geofla",
+			"name": "ID_GEOFLA",
+			"prefix": "n° ",
+			"suffix": " (validé)"
+		},{
+			"fieldLabel": "Nom",
+			"name": "NOM_DEPT"
+		}]
+	}
 }
