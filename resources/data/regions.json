@@ -1,0 +1,112 @@
+[
+  {
+    "CODE": "11",
+    "NOM": "ILE-DE-FRANCE",
+    "hidden": false
+  },
+  {
+    "CODE": "21",
+    "NOM": "CHAMPAGNE-ARDENNE",
+    "hidden": false
+  },
+  {
+    "CODE": "22",
+    "NOM": "PICARDIE",
+    "hidden": false
+  },
+  {
+    "CODE": "23",
+    "NOM": "HAUTE-NORMANDIE",
+    "hidden": false
+  },
+  {
+    "CODE": "24",
+    "NOM": "CENTRE",
+    "hidden": false
+  },
+  {
+    "CODE": "25",
+    "NOM": "BASSE-NORMANDIE",
+    "hidden": false
+  },
+  {
+    "CODE": "26",
+    "NOM": "BOURGOGNE",
+    "hidden": false
+  },
+  {
+    "CODE": "31",
+    "NOM": "NORD-PAS-DE-CALAIS",
+    "hidden": false
+  },
+  {
+    "CODE": "41",
+    "NOM": "LORRAINE",
+    "hidden": false
+  },
+  {
+    "CODE": "42",
+    "NOM": "ALSACE",
+    "hidden": false
+  },
+  {
+    "CODE": "43",
+    "NOM": "FRANCHE-COMTE",
+    "hidden": false
+  },
+  {
+    "CODE": "52",
+    "NOM": "PAYS DE LA LOIRE",
+    "hidden": false
+  },
+  {
+    "CODE": "53",
+    "NOM": "BRETAGNE",
+    "hidden": false
+  },
+  {
+    "CODE": "54",
+    "NOM": "POITOU-CHARENTES",
+    "hidden": false
+  },
+  {
+    "CODE": "72",
+    "NOM": "AQUITAINE",
+    "hidden": false
+  },
+  {
+    "CODE": "73",
+    "NOM": "MIDI-PYRENEES",
+    "hidden": true
+  },
+  {
+    "CODE": "74",
+    "NOM": "LIMOUSIN",
+    "hidden": false
+  },
+  {
+    "CODE": "82",
+    "NOM": "RHONE-ALPES",
+    "hidden": false
+  },
+  {
+    "CODE": "83",
+    "NOM": "AUVERGNE",
+    "hidden": false
+  },
+  {
+    "CODE": "91",
+    "NOM": "LANGUEDOC-ROUSSILLON",
+    "hidden": false
+  },
+  {
+    "CODE": "93",
+    "NOM": "PROVENCE-ALPES-COTE D'AZUR",
+    "hidden": false
+  },
+  {
+    "CODE": "94",
+    "NOM": "CORSE",
+    "hidden": false
+  }
+]

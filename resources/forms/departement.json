@@ -13,7 +13,24 @@
 			"suffix": " (validé)"
 		},{
 			"fieldLabel": "Nom",
-			"name": "NOM_DEPT"
+			"name": "NOM_DEPT",
+		  	"allowBlank" : false
+		},{
+			"xtype": "combo",
+			"name": "NOM_REGION",
+
+			"_store": [
+				"un",
+				"deux",
+				"trois"
+			],
+
+		  	"store": "/packages/local/ck-viewer/resources/data/regions.json",
+			"sorters": "NOM",
+
+			"displayField": "NOM",
+			"valueField": "NOM",
+			"tpl": "<ul class='x-list-plain'><tpl for='.'><tpl if='hidden!=true'><li role='option' class='x-boundlist-item'>{NOM} ({CODE})</li></tpl></tpl></ul>"
 		}]
 	}
 }

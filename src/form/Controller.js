@@ -124,7 +124,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Load Form from LocalStorage (cache form with includes - ajax cache can't save all in one)
 		var form = this.ls.getItem(formUrl);
-		if(form){
+		if(form && Ck.getEnvironment() == 'production'){
 			this.initForm( Ext.decode(form) );
 			return;
 		}
@@ -156,6 +156,16 @@ Ext.define('Ck.form.Controller', {
 
 					me.initForm(cfg);
 				});
+			},
+			failure: function(response, opts) {
+				// TODO : on Tablet when access local file via ajax, success pass here !!
+				// var uiConfig = Ext.decode(response.responseText);
+				// this.initUi(uiConfig);
+
+				Ck.error('Error when loading "'+ formUrl +'" form !. Loading the default form...');
+
+				var defaultFormUrl = Ck.getPath() + '/forms/default.json';
+				this.getForm(defaultFormUrl);
 			}
 		});
 	},
@@ -252,6 +262,23 @@ Ext.define('Ck.form.Controller', {
 				});
 			}
 			//
+
+			if (c.xtype == "combo") {
+				// storeUrl : alias to define proxy type ajax with url.
+				var storeUrl = c.storeUrl;
+				if(Ext.isString(c.store) && !Ext.StoreManager.get(c.store)){
+					// Should be a short alias to define storeUrl
+					storeUrl = c.store;
+				}
+				if(storeUrl){
+					c.store = {
+						proxy: {
+							type: 'ajax',
+							url: storeUrl
+						}
+					}
+				}
+			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
 				Ext.applyIf(c, {

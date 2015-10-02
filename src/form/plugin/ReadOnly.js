@@ -10,7 +10,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	// Gestion des liens ou pour ajouter une unitée : 32 m² avec suffix= m²
 	suffix: '',
 	prefix: '',
-	tpl: '',
+	fieldTpl: '',
 
 	target: '_blank',
 	title: '',
@@ -21,14 +21,14 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 		if(cmp.suffix) this.suffix = cmp.suffix;
 		if(cmp.prefix) this.prefix = cmp.prefix;
-		if(cmp.tpl) this.tpl = cmp.tpl;
+		if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
 		if(cmp.target) this.target = cmp.target;
 		if(cmp.title) this.title = cmp.title;
 
 		this.formController = cmp.lookupController();
 		this.formViewModel = cmp.lookupViewModel();
 
-		if(this.tpl) this.template = new Ext.Template(this.tpl);
+		if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
 
 		this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
 		this.labelEl = new Ext.Element(document.createElement('label')).addCls('x-form-item-label x-form-item-label-default');
