@@ -265,19 +265,31 @@ Ext.define('Ck.form.Controller', {
 
 			if (c.xtype == "combo") {
 				// storeUrl : alias to define proxy type ajax with url.
+				var store = c.store;
 				var storeUrl = c.storeUrl;
 				if(Ext.isString(c.store) && !Ext.StoreManager.get(c.store)){
 					// Should be a short alias to define storeUrl
 					storeUrl = c.store;
 				}
+				if(c.store && c.store.url) {
+					storeUrl = c.store.url;
+				}
 				if(storeUrl){
-					c.store = {
+					store = {
+						autoLoad: true,
 						proxy: {
 							type: 'ajax',
+							noCache: false,
 							url: storeUrl
 						}
 					}
 				}
+
+				Ext.Object.merge(c, {
+					queryMode: 'local',
+					store: store
+				});
+
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {

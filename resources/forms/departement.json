@@ -10,27 +10,43 @@
 			"fieldLabel": "ID Geofla",
 			"name": "ID_GEOFLA",
 			"prefix": "n° ",
-			"suffix": " (validé)"
-		},{
-			"fieldLabel": "Nom",
-			"name": "NOM_DEPT",
-		  	"allowBlank" : false
+			"suffix": " (validé)",
+		  "allowBlank" : false
 		},{
 			"xtype": "combo",
 			"name": "NOM_REGION",
+			"suffix": " (test)",
 
 			"_store": [
 				"un",
 				"deux",
 				"trois"
 			],
+		  	"__store": "/packages/local/ck-viewer/resources/data/regions.json",
 
-		  	"store": "/packages/local/ck-viewer/resources/data/regions.json",
-			"sorters": "NOM",
+		  	"store": {
+			  "url": "/packages/local/ck-viewer/resources/data/regions.json",
+			  "sorters": [{
+				"property": "NOM"
+			  }],
+			  "filters": [{
+				"property": "hidden",
+				"value": false
+			  }]
+			},
 
 			"displayField": "NOM",
-			"valueField": "NOM",
-			"tpl": "<ul class='x-list-plain'><tpl for='.'><tpl if='hidden!=true'><li role='option' class='x-boundlist-item'>{NOM} ({CODE})</li></tpl></tpl></ul>"
+			"valueField": "CODE",
+
+		  	"itemTpl": "{NOM} ({CODE})",
+			"__tpl": "<ul class='x-list-plain'><tpl for='.'><tpl if='hidden!=true'><li role='option' class='x-boundlist-item'></li></tpl></tpl></ul>"
+		},{
+		  "xtype": "combo",
+		  "fieldLabel": "Nom",
+		  "name": "NOM_DEPT",
+		  "store": "/packages/local/ck-viewer/resources/data/departements.json",
+		  "displayField": "NOM_DEPT",
+		  "valueField": "NOM_DEPT"
 		}]
 	}
 }

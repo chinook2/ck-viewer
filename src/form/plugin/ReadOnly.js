@@ -35,7 +35,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.textEl.appendTo(this.labelEl);
 		this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
 
-		cmp.on('afterrender', this.onRender, this);
+		cmp.on('afterrender', this.onRender, this, {delay: 50});
 		cmp.on('change', this.onChange, this);
 
 		this.formController.on('startEditing', this.setReadOnly, this);
