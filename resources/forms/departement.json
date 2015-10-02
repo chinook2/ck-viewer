@@ -36,17 +36,15 @@
 			},
 
 			"displayField": "NOM",
-			"valueField": "CODE",
-
-		  	"itemTpl": "{NOM} ({CODE})",
-			"__tpl": "<ul class='x-list-plain'><tpl for='.'><tpl if='hidden!=true'><li role='option' class='x-boundlist-item'></li></tpl></tpl></ul>"
+			"valueField": "CODE"
 		},{
 		  "xtype": "combo",
 		  "fieldLabel": "Nom",
 		  "name": "NOM_DEPT",
 		  "store": "/packages/local/ck-viewer/resources/data/departements.json",
 		  "displayField": "NOM_DEPT",
-		  "valueField": "NOM_DEPT"
+		  "valueField": "NOM_DEPT",
+		  "itemTpl": "{NOM_DEPT} ({CODE_DEPT})"
 		}]
 	}
 }

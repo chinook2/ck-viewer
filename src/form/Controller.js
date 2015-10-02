@@ -273,7 +273,9 @@ Ext.define('Ck.form.Controller', {
 				}
 				if(c.store && c.store.url) {
 					storeUrl = c.store.url;
+					delete c.store.url;
 				}
+
 				if(storeUrl){
 					store = {
 						autoLoad: true,
@@ -284,6 +286,13 @@ Ext.define('Ck.form.Controller', {
 						}
 					}
 				}
+
+				if(c.itemTpl) {
+					c.listConfig = {
+						itemTpl: c.itemTpl
+					}
+				}
+				delete c.itemTpl;
 
 				Ext.Object.merge(c, {
 					queryMode: 'local',
