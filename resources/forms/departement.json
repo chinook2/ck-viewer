@@ -15,6 +15,7 @@
 		},{
 			"xtype": "combo",
 			"name": "NOM_REGION",
+		  "fieldLabel": "Nom région",
 			"suffix": " (test)",
 
 			"_store": [
@@ -35,8 +36,11 @@
 			  }]
 			},
 
+		  	"reference": "region",
+		  	"publishes": "value",
+
 			"displayField": "NOM",
-			"valueField": "CODE"
+			"valueField": "NOM"
 		},{
 		  "xtype": "combo",
 		  "fieldLabel": "Nom",
@@ -44,7 +48,14 @@
 		  "store": "/packages/local/ck-viewer/resources/data/departements.json",
 		  "displayField": "NOM_DEPT",
 		  "valueField": "NOM_DEPT",
-		  "itemTpl": "{NOM_DEPT} ({CODE_DEPT})"
+		  "__itemTpl": "{NOM_DEPT} ({CODE_DEPT})",
+		  "forceSelection": true,
+		  "bind": {
+			"filters": {
+			  "property": "NOM_REGION",
+			  "value": "{region.value}"
+			}
+		  }
 		}]
 	}
 }
