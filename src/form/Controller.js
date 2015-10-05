@@ -234,7 +234,8 @@ Ext.define('Ck.form.Controller', {
 
 			Ext.applyIf(c, {
 				plugins: ['formreadonly'],
-				anchor: '100%'
+				anchor: '100%',
+				labelSeparator: this.layoutConfig.labelSeparator
 			});
 
 			if (c.xtype == "tabpanel") {

@@ -76,8 +76,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 		cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
 		if(r){
-			// this.addCls('ck-forms-readonly');
+
 			cmp.triggerWrap.hide();
+			cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
 
 			var val = cmp.getValue();
 			if(val != '') {
@@ -96,9 +97,13 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			this.labelEl.show();
 
 		} else {
-			// this.removeCls('ck-forms-readonly');
 			this.labelEl.hide();
 			cmp.triggerWrap.show();
+
+			// Add a marker for required fields when editing
+			if(cmp.allowBlank === false) {
+				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="' + Ext.baseCSSPrefix + 'required">*</span>');
+			}
 		}
 
 		if(cmp.inputEl) {
