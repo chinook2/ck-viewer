@@ -24,11 +24,8 @@ Ext.define('Ck.edit.action.Geometry', {
 			// TODO : limiter l'édition à ce predios (en conservant la topologie)
 			// voir si on peut ajouter un onBeforeDrag sur le modify et tester l'id du feature ?
 			this.vertexInteraction = new ol.interaction.Select({
-				layers: [layer],
-				style: this.editModifyStyleFunction,
-				condition: function(mapBrowserEvent) {
-					return mapBrowserEvent.type == ol.MapBrowserEvent.EventType.DBLCLICK;
-				}
+				layers: [this.getLayer()],
+				style: this.editModifyStyleFunction
 			});
 			this.map.getOlMap().addInteraction(this.vertexInteraction);
 
@@ -47,43 +44,12 @@ Ext.define('Ck.edit.action.Geometry', {
 				
 				this.feature = e.selected[0];				
 				
-				
-				
-				
-				
-				
-				
-				
-				
-				
-				// il faut refaire l'interaction à chaque clic, fonction de la sélection...
-				this.vertexModifyInteraction = new ol.interaction.Vertex({
-					feature: this.feature, // JMA limite l'édition à ce feature, mais passe les autres pour la topologie...
-					source: source,
-					//features: new ol.Collection(aFeatures),
-					pixelTolerance: 15,
-					type: this.type
-				});
-				
-				this.vertexModifyInteraction.on('select', function(e) {
-					this.selectedVertex = e.selected;
-					this.selectedVertex.setStyle(this.editSelectedStyle);
-				});
-				
-				this.map.getOlMap().addInteraction(this.vertexModifyInteraction);				
-				
-				switch(this.type) {
-					case "ADD":
-						Panama.utils.message.Msg.showToast("Clic en un l&iacute;mite de predio para a&ntilde;adir un v&eacute;rtice.");
-						break;
-					case "DELETE":
-						Panama.utils.message.Msg.showToast("Seleccionar un v&eacute;rtice para borrarlo.");
-						break;
-					case "MODIFY":
-						Panama.utils.message.Msg.showToast("Arrastrar y soltar para mover un v&eacute;rtice.");
-						break;
-				}		   
-			});
+				if(this.feature.getGeometry().getType() != "Point") {
+					
+					this.editController.vertexPanel.getController().loadFeature(this.feature);
+					this.editController.switchPanel(this.editController.vertexPanel);
+				}	   
+			}.bind(this));
 		}
 		
 		this.vertexInteraction.setActive(status);
@@ -214,6 +180,10 @@ Ext.define('Ck.edit.action.Geometry', {
 		}
 		*/
 		
+		
+		
+		
+		/*
 		if(status){
 			if(this.feature) {
 				// Resélectionne le dernier feature édité.
@@ -232,6 +202,21 @@ Ext.define('Ck.edit.action.Geometry', {
 			// Vide la sélection en cours au bout de 0.5 sec.
 			this.task.delay(500);
 		}
+		*/
+		
+		
+	},
+	
+	/**
+	 * Disable interaction
+	 */
+	
+	
+	/**
+	 * Unhighlight feature
+	 */
+	reset: function() {
+		this.vertexInteraction.getFeatures().clear();
 	},
 	
 	closeAction: function() {

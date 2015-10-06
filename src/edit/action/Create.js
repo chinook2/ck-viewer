@@ -15,6 +15,7 @@ Ext.define('Ck.edit.action.Create', {
 	 * Activate the geometry creation interaction
 	 **/
 	toggleAction: function(btn, status) {
+		this.associatedEl = btn;
 		this.used = true;
 		var source = this.getLayerSource();
 

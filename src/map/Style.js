@@ -21,6 +21,14 @@ Ext.define('Ck.map.Style', {
 	},
 	
 	/**
+	 * Default overlay stroke color and width
+	 */
+	overlayStroke: {
+		color: "#FF3333",
+		width: 2
+	},
+	
+	/**
 	 * Default radius.
 	 */
 	radius: 10,
@@ -111,9 +119,22 @@ Ck.map.Style.style = [
 		image: new ol.style.Circle({
 			fill: new ol.style.Fill(Ck.map.Style.fill),
 			stroke: new ol.style.Stroke(Ck.map.Style.stroke),
-			radius: Ck.map.Style.radius
+			radius: 15
 		}),
 		fill: new ol.style.Fill(Ck.map.Style.fill),
 		stroke: new ol.style.Stroke(Ck.map.Style.stroke)
+	})
+];
+
+Ck.map.Style.overlayStyle = [
+	new ol.style.Style({
+		image: new ol.style.RegularShape({
+			points: 4,
+			stroke: new ol.style.Stroke(Ck.map.Style.overlayStroke),
+			radius: Ck.map.Style.radius,
+			angle: 0.785398
+		}),
+		fill: new ol.style.Fill(Ck.map.Style.fill),
+		stroke: new ol.style.Stroke(Ck.map.Style.overlayStroke)
 	})
 ];

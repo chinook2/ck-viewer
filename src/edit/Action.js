@@ -29,6 +29,11 @@ Ext.define('Ck.edit.Action', {
 			return this.layer;
 		}
 
+		this.layer = this.associatedEl.lookupController().layer;
+		if(this.layer) {
+			return this.layer;
+		}
+		
 		var layerId = this.openner.getView().layerId;
 		this.layer = this.map.getLayer(layerId);
 

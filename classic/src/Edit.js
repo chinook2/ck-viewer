@@ -18,24 +18,33 @@ Ext.define("Ck.Edit", {
 	editConfig: {
 		layerId: "ckedit-layer",
 		snapLayer: "",
-		tolerance: 10000
+		tolerance: 10000,
+		deleteConfirmation: true
+	},
+	
+	layout: {
+		type: "fit"
 	},
 	
 	items: [{
-		xtype: "grid",
-		itemId: "edit-history",
-		columns: [
-			{ text: "#", dataIndex: "number", width: 35 },
-			{ text: "FeatureID", dataIndex: "featureid" },
-			{ text: "Action", dataIndex: "action" }
-		],
-		store: {
-			storeId: "editHistoryStore",
-			fields: ["number", "featureid", "action"],
-			data: [
-				{ number: 99, featureid: "toto", action: "sup" }
-			]
-		}
+		id: "edit-historypanel",
+		tbar: [{
+			action: "ckEditCreate",
+			enableToggle: true,
+			toggleGroup: "edit-tools"
+		},{
+			action: "ckEditAttribute",
+			enableToggle: true,
+			toggleGroup: "edit-tools"
+		},{
+			action: "ckEditGeometry",
+			enableToggle: true,
+			toggleGroup: "edit-tools"
+		},{
+			action: "ckEditDelete",
+			enableToggle: true,
+			toggleGroup: "edit-tools"
+		}]
 	}],
 	
 

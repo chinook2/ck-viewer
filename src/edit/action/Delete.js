@@ -32,24 +32,26 @@ Ext.define('Ck.edit.action.Delete', {
 			});
 			
 			this.delInteraction.on('select', function(e) {
-				if(e.selected.length==0) return;
-				var me = this;
-				var feature = e.selected[0];
-								
-				Ext.Msg.show({
-					title: "Borrar",
-					message: "&iquest; Seguro que quiere borrar la entidad seleccionada ?",
-					buttons: Ext.Msg.YESNO,
-					icon: Ext.Msg.QUESTION,
-					fn: function(btn) {
-						if (btn === 'yes') {
-							source.removeFeature(feature);						
-							// me.updateDbRecord(feature);
-						}
-						// Efface la sélection dans tous les cas
-						me.delInteraction.getFeatures().clear();
+				if(e.selected.length != 0) {
+					var feature = e.selected[0];
+					
+					if(this.deleteConfirmation) {
+						Ext.Msg.show({
+							title: "Edition",
+							message: "Are you sure to delete this feature ?",
+							buttons: Ext.Msg.YESNO,
+							icon: Ext.Msg.QUESTION,
+							fn: function(btn) {
+								if (btn === 'yes') {
+									source.removeFeature(feature);
+								}
+							}
+						});
+					} else {
+						source.removeFeature(feature);
 					}
-				});
+					this.delInteraction.getFeatures().clear();
+				}
 			}, this);
 		   
 			this.map.getOlMap().addInteraction(this.delInteraction);
@@ -58,49 +60,6 @@ Ext.define('Ck.edit.action.Delete', {
 		this.delInteraction.setActive(status);
 	},
 	
-	updateDbRecord: function(f) {
-		var me = this;
-		var v = me.getView();
-		var lyr = v.layerId;
-		var featureId = "cedula";
-		
-		var p = f.getProperties();
-		var fid = p[featureId];
-		
-		// Pas encore de données en bdd sur ce predios
-		if(!fid) return;
-		
-		var app = Panama.app.getApplication();
-		var storage = app.storage;
-
-		// TODO : avoir un storage.update()...
-		storage.load({
-			layer: lyr,
-			fid: fid,
-			success: function(res) {
-			
-				// Mis à jour du status
-				res.status = "DELETED";				
-				// Mis à jour de la date de modification
-				res.re_fecha = Ext.Date.clearTime(new Date());
-				
-				storage.save({
-					layer: lyr,
-					sid: res.id, // storage ID en cours
-					data: res,
-					success: function(res) {
-						// TODO : Message que tout est OK
-					},
-					failure: function() {
-						// TODO
-					}
-				});
-			},
-			failure: function() {
-				// TODO
-			}
-		});
-	},
 	
 	closeAction: function() {
 		this.map.getOlMap().removeInteraction(this.drawInteraction);

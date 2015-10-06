@@ -37,14 +37,17 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 	},
 	
 	doAction: function(layer) {
+		if(this.win) {
+			this.win.destroy();
+		}
 		this.win = Ext.create('Ext.window.Window', {
 			title: "Edit layer " + layer.get('title'),
-			// height: 400,
-			width: 400,
+			width: 380,
+			height: 300,
 			layout: 'fit',
+			collapsible: true,
 			items: {
 				xtype: 'ckedit',
-				openner: this,
 				layer: layer
 			}
 		});
