@@ -1,9 +1,6 @@
 [submodule "libs/turf"]
 	path = libs/turf
 	url = https://github.com/turfjs/turf
-[submodule "libs/jszip"]
-	path = libs/jszip
-	url = https://github.com/Stuk/jszip
 [submodule "libs/zip"]
 	path = libs/zip
 	url = git://github.com/gildas-lormeau/zip.js
