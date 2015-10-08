@@ -56,10 +56,10 @@ Ext.define("Ck.edit.Vertex", {
 	}],
 	
 	bbar: [{
-		text: "Save",
+		iconCls: 'fa fa-check',
 		itemId: "save"
 	},{
-		text: "Cancel",
+		iconCls: 'fa fa-remove',
 		itemId: "cancel"
 	},{
 		text: "Add vertex",
@@ -76,5 +76,39 @@ Ext.define("Ck.edit.Vertex", {
 		allowDecimals: false,
 		allowBlank: false,
 		hideTrigger: true
+	},{
+		xtype: "splitbutton",
+		itemId: "vertex-live-edit",
+		iconCls: "fa fa-list",
+		tooltip: "Dynamic interaction",
+		menu: [{
+			xtype: "radio",
+			itemId: "action-none",
+			checked: true,
+			boxLabel: "None",
+			boxLabelAlign: "before",
+			inputValue: "n",
+			width: 120,
+			dock: "left",
+			margin: "0 5 0 5"
+		},{
+			xtype: "radio",
+			itemId: "action-alter",
+			boxLabel: "Alter vertex",
+			boxLabelAlign: "before",
+			inputValue: "a",
+			width: 120,
+			dock: "left",
+			margin: "0 5 0 5"
+		},{
+			xtype: "radio",
+			itemId: "action-move",
+			boxLabel: "Move feature",
+			boxLabelAlign: "before",
+			inputValue: "a",
+			width: 120,
+			dock: "left",
+			margin: "0 5 0 5"
+		}]
 	}]	
 });

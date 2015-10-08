@@ -1,5 +1,11 @@
 /**
+ * Controller what manage feature modification.
+ * Users can modify the feature by 2 way. With the vertex panel or with
+ * 4 ol.interaction to play directly with the map :
  *
+ * - ol.interaction.Translate
+ * - ol.interaction.Draw
+ * - 
  */
 Ext.define('Ck.edit.vertex.Controller', {
 	extend: 'Ck.Controller',
@@ -37,7 +43,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		var olMap = Ck.getMap().getOlMap();
+		this.olMap = Ck.getMap().getOlMap();
 		
 		this.grid = view.items.get(0);
 		this.store = this.grid.getStore();
@@ -52,7 +58,26 @@ Ext.define('Ck.edit.vertex.Controller', {
 				scope: this
 			},
 			"ckedit-vertex button#add-vertex": {
-				click: this.addVertex,
+				click: function() {
+					var posCmp = this.getView().getDockedItems()[0].getComponent("vertex-position");
+					// Position must be between 1 and store.length
+					if(posCmp.isValid()) {
+						var index = posCmp.getValue() - 1;
+						this.addVertex(index);
+					}
+				},
+				scope: this
+			},
+			// "ckedit-vertex radio#action-none": {
+				// change: this.liveAction,
+				// scope: this
+			// },
+			"ckedit-vertex radio#action-move": {
+				change: this.liveAction,
+				scope: this
+			},
+			"ckedit-vertex radio#action-alter": {
+				change: this.liveAction,
 				scope: this
 			}
 		});
@@ -69,11 +94,15 @@ Ext.define('Ck.edit.vertex.Controller', {
 				renderOrder: function() { return 0 }
 			});
 
-			olMap.addLayer(this.vertexLayer);
+			this.olMap.addLayer(this.vertexLayer);
 			// olMap.getLayers().setAt(olMap.getLayers().getLength() - 1, this.vertexLayer);
 		}
 	},
 	
+	/**
+	 * Start the vertex session edit for the passed feature
+	 * @param {ol.Feature}
+	 */
 	loadFeature: function(feature) {
 		this.fireEvent("beginsession", feature);
 		this.featureChanged = false;
@@ -105,7 +134,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.gridEvent = this.grid.on({
 			destroyable: true,
 			select: {
-				fn: this.addMarker,
+				fn: this.updateMarker,
 				scope: this
 			},
 			itemkeydown: {
@@ -116,10 +145,6 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		this.storeEvent = this.store.on({
 			destroyable: true,
-			add: {
-				fn: this.vertexAdded,
-				scope: this
-			},
 			remove: {
 				fn: this.vertexDeleted,
 				scope: this
@@ -142,6 +167,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.removeAllMarker();
 		this.gridEvent.destroy();
 		this.storeEvent.destroy();
+		this.getView().getDockedItems()[0].getComponent("vertex-live-edit").getMenu().getComponent("action-none").setValue(true);
 	},
 	
 	/**
@@ -181,8 +207,12 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {Ext.selection.RowModel}
 	 * @param {Ext.data.Model}
 	 */
-	addMarker: function(rm, record) {
+	updateMarker: function(rm, record) {
 		this.removeAllMarker();
+		
+		// Update the position field to simplify creation
+		var posCmp = this.getView().getDockedItems()[0].getComponent("vertex-position");
+		posCmp.setValue(record.data.number);
 		
 		var mk = this.createMarker(record.data.geometry);
 		this.vertexLayer.getSource().addFeature(mk);
@@ -190,7 +220,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	
 	/**
 	 * Create a square marker to locate vertex.
-	 * Called by showMarker and addMarker methods
+	 * Called by showMarker and updateMarker methods
 	 *
 	 * @param {Number[]}	Coordinate
 	 *
@@ -226,46 +256,45 @@ Ext.define('Ck.edit.vertex.Controller', {
 	/**
 	 * Add row and vertex to the specified position.
 	 * For position 5 the new vertex will be between current 4 and 5 vertex
+	 * @param {Integer}
 	 */
-	addVertex: function() {
-		var posCmp = this.getView().getDockedItems()[0].getComponent("vertex-position");
+	addVertex: function(index) {
+		var lastPos = this.store.data.length - 1;
 		
-		// Position must be between 1 and store.length
-		if(posCmp.isValid()) {
-			var pos = posCmp.getValue() - 1;
-			var lastPos = this.store.data.length;
-			
-			// pos is the position in the store
-			if(pos > lastPos) {
-				pos = lastPos;
-			}
-			
-			// The new vertex will be positionned beetween its previous and next
-			var previousCoord	= this.store.data.getAt((pos == 0)? lastPos : pos - 1).data.geometry;
-			var nextCoord		= this.store.data.getAt(pos).data.geometry;
-			
-			var lon = (previousCoord[0] + nextCoord[0]) / 2;
-			var lat = (previousCoord[1] + nextCoord[1]) / 2;
-			
-			this.grid.getStore().insert(pos, {
-				number: pos + 1,
-				longitude: this.trimCoord(lon),
-				latitude: this.trimCoord(lat),
-				geometry: [lon, lat],
-			});
+		// index is the position in the store
+		if(index > lastPos) {
+			index = lastPos;
 		}
+		
+		// The new vertex will be positionned beetween its previous and next
+		var previousCoord	= this.store.data.getAt((index == 0)? lastPos : index - 1).data.geometry;
+		var nextCoord		= this.store.data.getAt(index).data.geometry;
+		
+		var lon = (previousCoord[0] + nextCoord[0]) / 2;
+		var lat = (previousCoord[1] + nextCoord[1]) / 2;
+		
+		
+		var record = {
+			number: index + 1,
+			longitude: this.trimCoord(lon),
+			latitude: this.trimCoord(lat),
+			geometry: [lon, lat],
+		};
+		this.grid.getStore().insert(index, record);
+		this.focusRow(index);
+		this.vertexAdded(this.store.getAt(index), index);
 	},
 	
 	/**
 	 * Fired when row added in the grid.
 	 * Add a vertex to the polygon.
 	 * @param {Ext.data.Store}
-	 * @param {Ext.data.Model[]}
+	 * @param {Ext.data.Model}
 	 * @param {Number}
 	 */
-	vertexAdded: function(store, records, index) {
-		this.coords.splice(index, 0, [records[0].data.longitude, records[0].data.latitude]);
-		this.addMarker(null, records[0]);
+	vertexAdded: function(record, index) {
+		this.coords.splice(index, 0, [record.data.longitude, record.data.latitude]);
+		this.updateMarker(null, record);
 		this.updateFeature();
 	},
 	
@@ -294,17 +323,18 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 	
 	/**
-	 * Fired when a row of the grid was modified. 
+	 * Fired when a row of the grid was modified.
+	 * Do something only on user interaction
 	 * @param {Ext.data.Store}
 	 * @param {Ext.data.Model}
 	 * @param {String}
 	 * @param {String[]}
 	 */
 	updateVertex: function(store, record, operation, fields) {
-		if(fields[0] != "number") {
+		if(fields.length == 1 && (fields[0] == "latitude" || fields[0] == "longitude")) {
 			record.data.geometry = [record.data.longitude, record.data.latitude]
 			this.coords[record.data.number - 1] = record.data.geometry;
-			this.addMarker(null, record);
+			this.updateMarker(null, record);
 			this.updateFeature();
 		}
 	},
@@ -314,14 +344,16 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	updateFeature: function() {
 		this.featureChanged = true;
+		this.coords.push(this.coords[0])
 		this.feature.getGeometry().setCoordinates(this.ftCoords);
+		this.coords.splice(-1, 1);
 	},
 	
 	/**
 	 * Reset number field of each item of the grid
 	 */
 	reindexVertex: function() {
-		for(var i = 0; i < this.store.data.length - 1; i++) {
+		for(var i = 0; i < this.store.data.length; i++) {
 			this.store.data.getAt(i).set("number", i + 1);
 		}
 	},
@@ -345,6 +377,124 @@ Ext.define('Ck.edit.vertex.Controller', {
 	
 	close: function() {
 		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+	},
+	
+	/**
+	 * Manage live interaction (directly on the map)
+	 * @param {Ext.form.field.RadioView}
+	 * @param {Boolean}
+	 */
+	liveAction: function(rb, checked) {
+		switch(rb.getItemId()) {
+			case "action-none":
+				
+				break;
+			case "action-move":
+				if(!this.moveInteraction) {
+					this.moveInteraction = new ol.interaction.Translate({
+						features: new ol.Collection([this.feature])
+					});
+					this.olMap.addInteraction(this.moveInteraction);
+				}
+				delete this.moveInteraction.previousCursor_;
+				this.moveInteraction.setActive(checked);
+				break;
+			case "action-alter":
+				if(!this.createInteraction) {
+					this.createInteraction = new ol.interaction.Modify({
+						// clickTolerance
+						deleteCondition: ol.events.condition.never,
+						features: new ol.Collection([this.feature])
+					});
+					this.createInteraction.on("modifystart", this.focusVertexRow, this);
+					this.createInteraction.on("modifyend", this.updateVertexRow, this);
+					this.olMap.addInteraction(this.createInteraction);
+				}
+				this.createInteraction.setActive(checked);
+				break;
+		}
+	},
+	
+	/**
+	 * Called when alter interaction is used. If vertex snapped the matching row.
+	 * If no vertex snapped a row was created
+	 * @param {ol.interaction.ModifyEvent}
+	 */
+	focusVertexRow: function(event) {
+		var vertex = event.currentTarget.vertexFeature_.getGeometry();
+		var coord = vertex.getCoordinates();
+		
+		if(event.currentTarget.snappedToVertex_) {
+			idx = this.getIndexFromCoord(coord) - 1;
+		} else {
+			var geom = this.feature.getGeometry();
+			
+			var prevPoint = event.currentTarget.dragSegments_[0][0].segment[0];
+			var idx = this.getIndexFromCoord(prevPoint);
+			
+			var data = {
+				number: idx + 1,
+				longitude: this.trimCoord(coord[0]),
+				latitude: this.trimCoord(coord[1]),
+				geometry: coord
+			};
+			this.grid.getStore().insert(idx, data);
+			
+			this.coords.splice(idx, 0, [data.longitude, data.latitude]);
+			
+			this.reindexVertex();
+			
+			
+			// var nextPoint = event.currentTarget.dragSegments_[1][0].segment[1];
+		}
+		
+		this.focusRow(idx);
+		this.currentVertexIdx = idx;
+	},
+	
+	/**
+	 * Called when user drop the vertex to update the matching row.
+	 * @param {ol.interaction.ModifyEvent}
+	 */
+	updateVertexRow: function(event) {
+		var coord = event.currentTarget.vertexFeature_.getGeometry().getCoordinates();
+		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
+		
+		if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
+			dataRow.set({
+				"geometry": coord,
+				"longitude": coord[0],
+				"latitude": coord[1]
+			});
+			this.updateMarker(null, dataRow);
+			this.coords[this.currentVertexIdx] = coord;
+			// this.ftCoords = this.feature.getGeometry().getCoordinates();
+		}
+	},
+	
+	/**
+	 * Retrieve the index of the corresponding line at coordinates
+	 * @param {ol.Coordinates}
+	 * @return {Integer}
+	 */
+	getIndexFromCoord: function(coord) {
+		var coord, found = false, arVertex = this.store.getData();
+		for(var i = 0; (i < arVertex.getCount() && !found); i++) {
+			geom = arVertex.getAt(i).data.geometry;
+			if(geom[0] == coord[0] && geom[1] == coord[1]) {
+				found = true;
+			}
+		}
+		return i;
+	},
+	
+	/**
+	 * Focus and scroll to the specified row
+	 * @param {Integer} The row to focus
+	 */
+	focusRow: function(idx) {
+		this.grid.setSelection(this.store.getAt(idx));
+		this.grid.getView().focusRow(idx);
 	},
 	
 	/**

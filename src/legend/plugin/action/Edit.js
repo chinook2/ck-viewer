@@ -42,7 +42,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		}
 		this.win = Ext.create('Ext.window.Window', {
 			title: "Edit layer " + layer.get('title'),
-			width: 380,
+			width: 410,
 			height: 300,
 			layout: 'fit',
 			collapsible: true,
