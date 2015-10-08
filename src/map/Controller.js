@@ -91,7 +91,12 @@ Ext.define('Ck.map.Controller', {
 	 * Legend associated to this map
 	 */
 	legend: null,
-	
+
+	urlTpl: {
+		st: '{0}/context/{1}.json',
+		ws: '{0}/context/{1}'
+	},
+
 	/**
 	 * Init the map component, init the viewModel.
 	 * @protected
@@ -371,7 +376,7 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getContext: function(contextName) {
 		Cks.get({
-			url: Ck.getPath() +'/context/'+contextName+'.json',
+			url: this.getFullUrl(contextName),
 			scope: this,
 			success: function(response){
 				var owc = Ext.decode(response.responseText);
@@ -379,7 +384,7 @@ Ext.define('Ck.map.Controller', {
 			},
 			failure: function(response, opts) {
 				Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
-				this.getContext('default');
+				this.getContext('ck-default');
 			}
 		});
 	},

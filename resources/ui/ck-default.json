@@ -1,0 +1,42 @@
+{
+    "layout": "border",
+    "items": [{
+        "xtype": "cklegend",
+        "bind": {
+            "title": "{name}"
+        },
+        "region": "west",
+        "width": 250,
+        "split": true
+    },{
+        "xtype": "ckmap",        
+        "region": "center",
+        "center": [260000, 5900000],
+        "zoom": 6,
+        "dockedItems": [{
+            "xtype": "toolbar",
+            "dock": "bottom",
+            "items": [{
+                "xtype": "tbtext",
+                "bind": {
+                    "html": "Centre : {x} {y}"
+                }
+            },{
+                "xtype": "tbtext",
+                "bind": {
+                    "html": "Bbox : {xmin},{ymin},{xmax},{ymax}"
+                }
+            },{
+                "xtype": "combo",
+                "fieldLabel": "Echelle",
+                "displayField": "scale",
+                "valueField": "res",
+                "reference": "mapScales",
+                "bind": {
+                    "value": "{resolution}",
+                    "store":"{scales}"
+                }
+            }]
+        }]
+    }]
+}

@@ -337,7 +337,7 @@ Ext.apply(Ck, {
 		path = 'packages/local/ck-viewer/resources';
 		//</debug>	
 		
-		return this.getApi() + path;
+		return path;
 	},
 
 	getOption: function (opt) {

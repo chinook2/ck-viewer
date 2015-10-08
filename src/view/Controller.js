@@ -7,9 +7,14 @@ Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
 //</debug>
 
 Ext.define('Ck.view.Controller', {
-	extend: 'Ext.app.ViewController',
+	extend: 'Ck.Controller',
 	alias: 'controller.ckview',
-	
+
+	urlTpl: {
+		st: '{0}/ui/{1}.json',
+		ws: '{0}/ui/{1}'
+	},
+
 	init: function() {
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
@@ -51,7 +56,7 @@ Ext.define('Ck.view.Controller', {
 	 */
 	getUi: function(uiName) {
 		Cks.get({
-			url: Ck.getPath() + '/ui/'+uiName+'.json',
+			url: this.getFullUrl(uiName),
 			scope: this,
 			success: function(response){
 				var uiConfig = Ext.decode(response.responseText);
@@ -64,7 +69,7 @@ Ext.define('Ck.view.Controller', {
 				
 				Ck.error('Error when loading "'+uiName+'" interface !. Loading the default interface...');
 				
-				this.getUi('default');
+				this.getUi('ck-default');
 			}
 		});
 	}

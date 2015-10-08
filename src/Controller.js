@@ -58,5 +58,41 @@ Ext.define('Ck.Controller', {
 	 */
 	getMap: function() {
 		return this._map;
+	},
+
+	/**
+	 * Get the full URL of resource.
+	 *
+	 * - ck-name : static resource in ck-viewer package
+	 * - /name : static resource in application
+	 * - name : resource from service REST API
+	 *
+	 * @param {string} name of the resource
+	 * @return {string} the full Url
+	 */
+	getFullUrl: function (name) {
+		var url = '';
+		var tpl = this.urlTpl || {st: "", ws: ""};
+
+		// Static resource in ck-viewer package
+		if(Ext.String.startsWith(name, 'ck-')) {
+			url = Ext.String.format(tpl.st, Ck.getPath(), name);
+		}
+
+		// Static resource in application
+		else if(Ext.String.startsWith(name, '/')) {
+			url = Ext.String.format(tpl.st, 'resources', name);
+			url = url.replace('//', '/');
+		}
+
+		// Resource from Web Service (API Call)
+		else {
+			url = Ext.String.format(tpl.ws, Ck.getApi(), name);
+		}
+
+		// Security for url path
+		url = url.replace(/\.\./g, '');
+
+		return url;
 	}
 });

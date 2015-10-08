@@ -173,7 +173,9 @@ Ext.define('Ck.print.Controller', {
 			}
 		});
 	},
-	
+
+	// TODO: merge css in the html template layout (get template from ck-viewer / app / api
+
 	/**
 	 * Load and add CSS to the document
 	 */

@@ -23,6 +23,7 @@ Ext.define("Ck.Form",{
 		layer: null,	// nom du layer = nom de la table
 		sid: null,		// Storage ID (peut être = au fid) : Identifiant unique de la base (utile avec persistencejs)
 
+		defaultFormName: 'ck-default',
 		formName: null,	// nom du formulaire
 		formUrl: null,	// URL du formulaire
 

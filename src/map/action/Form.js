@@ -29,7 +29,7 @@ Ext.define('Ck.map.action.Form', {
 		if(!this.mapFormPanel) {			
 			this.mapFormPanel =  Ext.create({
 				xtype: 'ckform',
-				formName: layer,
+				formName: '/' + layer,
 				layer: layer
 			});
 			

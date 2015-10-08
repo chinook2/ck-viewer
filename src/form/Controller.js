@@ -12,6 +12,11 @@ Ext.define('Ck.form.Controller', {
 
 	dataUrl: null,
 
+	urlTpl: {
+		st: '{0}/forms/{1}.json',
+		ws: '{0}/forms/{1}'
+	},
+
 	layoutConfig: {
 		labelSeparator: ' : '
 	},
@@ -58,6 +63,14 @@ Ext.define('Ck.form.Controller', {
 	},
 
 
+	getOption: function (opt) {
+		var formOpt = Ck.getOption('form');
+		if(formOpt && formOpt[opt]) {
+			return formOpt[opt];
+		}
+		return Ck.getOption(opt);
+	},
+
 	/**
 	 * PRIVATE
 	 */
@@ -66,7 +79,7 @@ Ext.define('Ck.form.Controller', {
 			if (!form) {
 				var formUrl = this.view.getFormUrl();
 				var formName = this.view.getFormName();
-				if (!formUrl && formName) formUrl = Ck.getPath() + '/forms/' + formName + '.json';
+				if (!formUrl && formName) formUrl = this.getFullUrl(formName);
 
 				this.getForm(formUrl);
 				return;
@@ -164,8 +177,7 @@ Ext.define('Ck.form.Controller', {
 
 				Ck.error('Error when loading "'+ formUrl +'" form !. Loading the default form...');
 
-				var defaultFormUrl = Ck.getPath() + '/forms/default.json';
-				this.getForm(defaultFormUrl);
+				this.getForm(this.getFullUrl(this.view.getDefaultFormName()));
 			}
 		});
 	},
@@ -187,7 +199,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	includeForm: function(formConfig, formName, callback) {
-		var formUrl = Ck.getPath() + '/forms/' + formName + '.json';
+		var formUrl = this.getFullUrl(formName);
 		if (!formUrl) {
 			Ck.Notify.error("'formUrl' or 'formName' not set in includeForm.");
 			return false;
@@ -417,7 +429,7 @@ Ext.define('Ck.form.Controller', {
 				url = tpl.apply([fid]);
 			} else {
 				// Build default url
-				url = Ck.getPath() + '/data/' + lyr + '/' + fid + '.json';
+				url = 'resources/data/' + lyr + '/' + fid + '.json';
 			}
 		}
 
