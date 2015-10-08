@@ -125,7 +125,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 				number: i + 1,
 				longitude: this.trimCoord(this.coords[i][0]),
 				latitude: this.trimCoord(this.coords[i][1]),
-				geometry: this.coords[i],
+				geometry: this.coords[i]
 			});
 		}
 		
@@ -278,7 +278,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 			number: index + 1,
 			longitude: this.trimCoord(lon),
 			latitude: this.trimCoord(lat),
-			geometry: [lon, lat],
+			geometry: [lon, lat]
 		};
 		this.grid.getStore().insert(index, record);
 		this.focusRow(index);
