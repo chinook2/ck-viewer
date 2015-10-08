@@ -50,6 +50,10 @@
 			"categories" : [],
 			"links" : [],
 			"active" : true,
+			"minscale" : 100,
+			"maxscale" : 10000000,
+			"latlongbbox": [-179, -89, 179, 89],
+			"overviewLayer": true,			
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/osm",
 				"operations" : [{ 
