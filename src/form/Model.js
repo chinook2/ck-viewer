@@ -9,7 +9,9 @@ Ext.define('Ck.form.Model', {
 	data: {
 		isEditable: true,
 		isPrintable: false,
-		editing: false
+		editing: false,
+
+		fid: null
 	},
 
 	formulas: {

@@ -25,11 +25,20 @@ Ext.define('Ck.form.Controller', {
 		this.isSubForm = this.getView().getIsSubForm();
 		this.isInit = false;
 
-		this.ls = new Ext.util.LocalStorage({
-			id: 'Ck-' + Ext.manifest.name + '-Form'
-		});
+		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
+		this.ls = Ext.util.LocalStorage.get(isStorage);
+		if(!this.ls) {
+			this.ls = new Ext.util.LocalStorage({
+				id: isStorage
+			});
+		}
 
 		this.initForm();
+	},
+
+	destroy: function() {
+		this.ls.release();
+		me.callParent();
 	},
 
 	formLoad: function (options) {
@@ -276,7 +285,7 @@ Ext.define('Ck.form.Controller', {
 			}
 			//
 
-			if (c.xtype == "combo") {
+			if (c.xtype == "combo" || c.xtype == "combobox" || c.xtype == "grid" || c.xtype == "gridpanel") {
 				// storeUrl : alias to define proxy type ajax with url.
 				var store = c.store;
 				var storeUrl = c.storeUrl;
@@ -285,10 +294,12 @@ Ext.define('Ck.form.Controller', {
 					storeUrl = c.store;
 				}
 				if(c.store && c.store.url) {
+					// Another alias to define storeUrl
 					storeUrl = c.store.url;
 					delete c.store.url;
 				}
 
+				// Construct store with storeUrl
 				if(storeUrl){
 					store = {
 						autoLoad: true,
@@ -307,16 +318,22 @@ Ext.define('Ck.form.Controller', {
 				}
 				delete c.itemTpl;
 
+				// Default in-memory Store
+				if(!store) {
+					store = {
+						"proxy": "memory"
+					}
+				}
+
 				Ext.Object.merge(c, {
 					queryMode: 'local',
 					store: store
 				});
-
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
-				Ext.applyIf(c, {
-					plugins: ['gridsubform']
+				Ext.apply(c, {
+					plugins: ['gridsubform', 'gridstore']
 				});
 			}
 /*
@@ -407,9 +424,9 @@ Ext.define('Ck.form.Controller', {
 			options = {};
 			bSilent = true;
 		}
-		var fid = options.fid || v.getFid();
+		var fid = options.fid || v.getDataFid();
 		var url = options.url || v.getDataUrl();
-		var data = options.data || v.getData();
+		var data = options.raw || v.getDataRaw();
 
 		// Init le form 'vide'
 		me.resetData();
@@ -417,6 +434,9 @@ Ext.define('Ck.form.Controller', {
 		if (data) {
 			// Load inline data
 			v.getForm().setValues(data);
+			this.fireEvent('afterload', data);
+
+			if(v.getEditing()===true) this.startEditing();
 			return;
 		}
 
@@ -450,6 +470,9 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				v.getForm().setValues(data);
+				this.fireEvent('afterload', data);
+				
+				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
@@ -573,13 +596,16 @@ Ext.define('Ck.form.Controller', {
 		// Init le form 'vide'
 		v.reset();
 
-		// Ajoute les données au viewModel (binding...)
+		// Reset les données du viewModel (binding...)
 		this.getViewModel().setData({
 			layer: null,
 			fid: null,
 			record: null
 		});
 
+		this.fireEvent('afterreset');
+
+		/*
 		// GRID : reset data
 		var grids = v.query('gridpanel');
 		for (var g = 0; g < grids.length; g++) {
@@ -596,6 +622,7 @@ Ext.define('Ck.form.Controller', {
 				delete form.rowIndex;
 			}
 		}
+		*/
 
 		return true;
 	}

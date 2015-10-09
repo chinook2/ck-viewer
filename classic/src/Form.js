@@ -20,6 +20,8 @@ Ext.define("Ck.Form",{
 	},
 	
 	config: {
+		editing: false,
+
 		layer: null,	// nom du layer = nom de la table
 		sid: null,		// Storage ID (peut être = au fid) : Identifiant unique de la base (utile avec persistencejs)
 
@@ -27,8 +29,8 @@ Ext.define("Ck.Form",{
 		formName: null,	// nom du formulaire
 		formUrl: null,	// URL du formulaire
 
-		fid: null,		// Feature ID : recup depuis le geoJSON
-		data: null,		// Données inline
+		dataFid: null,		// Feature ID : recup depuis le geoJSON
+		dataRaw: null,		// Données inline
 		dataUrl : null, //
 
 		isSubForm: false

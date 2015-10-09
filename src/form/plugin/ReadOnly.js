@@ -16,7 +16,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	title: '',
 
 	init: function(cmp) {
-		var ignoreComponent = ['panel', 'tabpanel', 'fieldset'];
+		var ignoreComponent = ['panel', 'tabpanel', 'gridpanel', 'fieldset'];
 		if(ignoreComponent.indexOf(cmp.getXType()) != -1) return;
 
 		if(cmp.suffix) this.suffix = cmp.suffix;
@@ -45,7 +45,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	// private
 	onRender : function(cmp){
 		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)
-		this.labelEl.insertAfter(cmp.triggerWrap);
+		if(cmp.triggerWrap) this.labelEl.insertAfter(cmp.triggerWrap);
 
 		// Masque par défaut les input si form.readOnly est true
 		this.setReadOnly();
