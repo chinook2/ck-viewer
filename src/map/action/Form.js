@@ -17,7 +17,11 @@ Ext.define('Ck.map.action.Form', {
 		var map = this.getMap();
 		var layer = btn.layer;
 		var featureId = btn.featureId || 'fid';
-		
+		if(!map) {
+			Ck.log("enable to find Map");
+			return false;
+		}
+
 		var lyr = map.getLayer(layer);
 		if(!lyr) {
 			Ck.log("enable to find layer : "+layer);
@@ -57,9 +61,21 @@ Ext.define('Ck.map.action.Form', {
 				var f = ce.element;
 				var p = f.getProperties();
 				var fid = p[featureId];
-				
+
+				// For testing grid...
+				if(layer=='region'){
+					p.departements = [
+						{ "ID_GEOFLA": 11, "CODE_DEPT": "11", "NOM_DEPT": "AUDE", "CODE_CHF": "069", "NOM_CHF": "CARCASSONNE", "CODE_REG": "91", "NOM_REGION": "LANGUEDOC-ROUSSILLON" },
+						{ "ID_GEOFLA": 31, "CODE_DEPT": "30", "NOM_DEPT": "GARD", "CODE_CHF": "189", "NOM_CHF": "NIMES", "CODE_REG": "91", "NOM_REGION": "LANGUEDOC-ROUSSILLON" },
+						{ "ID_GEOFLA": 34, "CODE_DEPT": "33", "NOM_DEPT": "GIRONDE", "CODE_CHF": "063", "NOM_CHF": "BORDEAUX", "CODE_REG": "72", "NOM_REGION": "AQUITAINE" },
+						{ "ID_GEOFLA": 49, "CODE_DEPT": "48", "NOM_DEPT": "LOZERE", "CODE_CHF": "095", "NOM_CHF": "MENDE", "CODE_REG": "91", "NOM_REGION": "LANGUEDOC-ROUSSILLON" },
+						{ "ID_GEOFLA": 67, "CODE_DEPT": "66", "NOM_DEPT": "PYRENEES-ORIENTALES", "CODE_CHF": "136", "NOM_CHF": "PERPIGNAN", "CODE_REG": "91", "NOM_REGION": "LANGUEDOC-ROUSSILLON" }
+					]
+				}
+				//
+
 				this.mapFormPanel.getController().formLoad({
-					data: p
+					raw: p
 					//fid: 66  // or
 					//url: url  // or
 				});
