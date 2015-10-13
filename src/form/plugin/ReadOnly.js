@@ -16,8 +16,8 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	title: '',
 
 	init: function(cmp) {
-		var ignoreComponent = ['panel', 'tabpanel', 'gridpanel', 'fieldset'];
-		if(ignoreComponent.indexOf(cmp.getXType()) != -1) return;
+		// Apply only on subclass of component/box/field/{xtype}
+		if(cmp.getXTypes().indexOf('/field/') == -1) return;
 
 		if(cmp.suffix) this.suffix = cmp.suffix;
 		if(cmp.prefix) this.prefix = cmp.prefix;
@@ -58,6 +58,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	setReadOnly: function() {
 		var cmp = this.getCmp();
 		if(!cmp.rendered) return;
+		if(!cmp.triggerWrap) return;
 
 		// r for readOnly is true when editing is false
 		var r = !this.formViewModel.get("editing");

@@ -481,7 +481,15 @@ Ext.define('Ck.map.Controller', {
 	getLegend: function() {
 		return this.legend;
 	},
-	
+
+	/**
+	 * Get the map projection.
+	 * @return {ol.proj.Projection} proj
+	 */
+	getProjection: function() {
+		return  this.getOlView().getProjection();
+	},
+
 	/**
 	 * Set the center of the current view.
 	 * @param {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
