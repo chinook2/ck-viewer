@@ -85,6 +85,7 @@ Ext.define('Ck.legend.plugin.Action', {
 		
 		this.actionColumn.items.push(action);
 		this.actionColumn.width = this.actionColumn.items.length * 20;
+		this.actionColumn.fireEvent('add', action);
 	},
 	
 	// tree, rowIndex, colIndex, row, event, record
