@@ -42,6 +42,11 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.formController.on('stopEditing', this.setReadOnly, this);
 	},
 
+	destroy: function () {
+		this.cmp.lookupController().clearListeners();
+		this.callParent();
+	},
+
 	// private
 	onRender : function(cmp){
 		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)

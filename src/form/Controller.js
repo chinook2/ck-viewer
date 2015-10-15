@@ -38,7 +38,7 @@ Ext.define('Ck.form.Controller', {
 
 	destroy: function() {
 		this.ls.release();
-		me.callParent();
+		this.callParent();
 	},
 
 	formLoad: function (options) {
@@ -49,8 +49,24 @@ Ext.define('Ck.form.Controller', {
 		this.startEditing();
 	},
 
-	formSave: function () {
+	formSave: function (btn) {
 		this.saveData();
+
+		// Link to another form
+		if(btn.nextFormName){
+			this.view.setFormName(btn.nextFormName);
+			this.isInit = false;
+			this.initForm();
+			return;
+		}
+		if(btn.nextFormUrl){
+			this.view.setFormUrl(btn.nextFormUrl);
+			this.isInit = false;
+			this.initForm();
+			return;
+		}
+
+		// Close the form
 		this.formClose();
 	},
 
@@ -67,7 +83,9 @@ Ext.define('Ck.form.Controller', {
 
 		var win = this.view.up('window');
 		if (win) {
-			win.close();
+			win.destroy();
+		} else {
+			this.view.destroy();
 		}
 	},
 
@@ -97,7 +115,28 @@ Ext.define('Ck.form.Controller', {
 			// Ajoute la définition du formulaire au panel
 			var fcf = this.applyFormDefaults(form.form);
 
+			this.view.removeAll();
 			this.view.add(fcf.items);
+
+
+			// Manage bottom toolbar
+			var dock = this.view.getDockedItems()[0];
+			if(!this.defaultDock) {
+				this.defaultDock =  dock.initialConfig;
+				this.defaultDock.hidden = false;
+			}
+			// Remove existing toolbar
+			this.view.removeDocked(dock);
+
+			if(fcf.dockedItems) {
+				// Add custom toolbar
+				this.view.addDocked(fcf.dockedItems);
+			} else {
+				// Add default toolbar
+				this.view.addDocked(this.defaultDock);
+				//this.view.getDockedItems()[0].show();
+			}
+
 
 			/**/
 			if (this.isSubForm) {
