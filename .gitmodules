@@ -1,9 +1,0 @@
-[submodule "libs/turf"]
-	path = libs/turf
-	url = https://github.com/turfjs/turf
-[submodule "libs/zip"]
-	path = libs/zip
-	url = git://github.com/gildas-lormeau/zip.js
-[submodule "libs/shapefile-js"]
-	path = libs/shapefile-js
-	url = https://github.com/calvinmetcalf/shapefile-js
