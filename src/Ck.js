@@ -273,6 +273,18 @@ Ext.apply(Ck, {
 		return map;
 	},
 	
+	/**
+	 * Get action by widget name (eg: ckmapMeasure)
+	 * @param {String}
+	 * @return {Ck.Action}
+	 */
+	getAction: function(widget) {
+		for(var i = 0; i < Ck.actions.length; i++) {
+			if(Ck.actions[i].config.action == widget) {
+				return Ck.actions[i];
+			}
+		}
+	},
 	
 	/**
 	 * Get informations of the package (from Ext.manifest).
