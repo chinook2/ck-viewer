@@ -286,29 +286,40 @@ Ext.define('Ck.form.Controller', {
 			//
 
 			if (c.xtype == "combo" || c.xtype == "combobox" || c.xtype == "grid" || c.xtype == "gridpanel") {
-				// storeUrl : alias to define proxy type ajax with url.
-				var store = c.store;
-				var storeUrl = c.storeUrl;
-				if(Ext.isString(c.store) && !Ext.StoreManager.get(c.store)){
-					// Should be a short alias to define storeUrl
-					storeUrl = c.store;
-				}
-				if(c.store && c.store.url) {
-					// Another alias to define storeUrl
-					storeUrl = c.store.url;
-					delete c.store.url;
-				}
+				// Internal function to initialse store definition
+				var processStore = function(o){
+					// storeUrl : alias to define proxy type ajax with url.
+					var store = o.store;
+					var storeUrl = o.storeUrl;
+					if(Ext.isString(o.store) && !Ext.StoreManager.get(o.store)){
+						// Should be a short alias to define storeUrl
+						storeUrl = o.store;
+					}
+					if(o.store && o.store.url) {
+						// Another alias to define storeUrl
+						storeUrl = o.store.url;
+						delete o.store.url;
+					}
 
-				// Construct store with storeUrl
-				if(storeUrl){
-					store = {
-						autoLoad: true,
-						proxy: {
-							type: 'ajax',
-							noCache: false,
-							url: storeUrl
+					// Construct store with storeUrl
+					if(storeUrl){
+						store = {
+							autoLoad: true,
+							proxy: {
+								type: 'ajax',
+								noCache: false,
+								url: storeUrl
+							}
 						}
 					}
+
+					// Default in-memory Store
+					if(!store) {
+						store = {
+							"proxy": "memory"
+						}
+					}
+					return store;
 				}
 
 				if(c.itemTpl) {
@@ -318,22 +329,25 @@ Ext.define('Ck.form.Controller', {
 				}
 				delete c.itemTpl;
 
-				// Default in-memory Store
-				if(!store) {
-					store = {
-						"proxy": "memory"
-					}
+				// Init stores for grid editor
+				if(Ext.isArray(c.columns)){
+					Ext.each(c.columns, function(col, idx, cols){
+						if(col.editor && col.editor.store) {
+							cols[idx].editor.store = processStore(col.editor)
+						}
+					});
+
 				}
 
 				Ext.Object.merge(c, {
 					queryMode: 'local',
-					store: store
+					store: processStore(c)
 				});
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
 				Ext.apply(c, {
-					plugins: ['gridsubform', 'gridstore']
+					plugins: ['gridsubform', 'gridstore', 'gridediting', 'rowediting']
 				});
 			}
 /*
