@@ -28,7 +28,7 @@ Ext.define("Ck.View", {
 	},
 	
 	config: {
-		name: 'default'
+		name: 'ck-default'
 	},
 	
 	cls: 'ck-view'

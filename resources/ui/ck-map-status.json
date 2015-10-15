@@ -3,18 +3,6 @@
     "coordPrecision": 0,
     "dockedItems": [{
         "xtype": "toolbar",
-        "dock": "top",
-        "defaults": {
-            "height": "40px",
-            "width": "40px",
-            "iconCls": "mapToolbarIcon"
-        },
-        "items": [{
-            "text": "Ctr",
-            "handler": "mapCenterClick"
-        }]
-    },{
-        "xtype": "toolbar",
         "dock": "bottom",
         "items": [{
             "xtype": "tbtext",

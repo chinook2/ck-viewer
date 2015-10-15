@@ -54,7 +54,7 @@ Ext.define("Ck.Map", {
 		/**
 		 * The initial context to load.
 		 */
-		context: 'default',
+		context: 'ck-default',
 		
 		/**
 		 * List of ol.control.

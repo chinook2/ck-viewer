@@ -298,16 +298,20 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 			if (store && val && item[localeName] !== locale) {
 				rec = store.findRecord(item[localeName] || 'en', val, 0, false, true, true);
 				str = rec ? rec.get(locale) : null;
-				if(str) {
+				if (str) {
 					item[localeName] = locale;
 					item.tooltip = str;
 				}
 			}
 
 			// Update tooltip already rendered !
-			me.ownerTree.getEl().select('.x-action-col-'+idx).set({
-				"data-qtip": item.tooltip
-			});
+			var el = me.ownerTree.getEl();
+			if (el) {
+				el.select('.x-action-col-' + idx).set({
+					"data-qtip": item.tooltip
+				});
+			}
+
 
 			// Keep all words to translate
 			if(Ext.Localisable.indexOf(val) == -1) {
@@ -318,16 +322,20 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 			Ext.log("  *[" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + item[localeName] + ' -> ' + locale + ') :: '+ localeName );
 			//</debug>
 		});
-
 	},
+
 	setLocale: function(locale) {
 		var me = this;
-		me.callParent(arguments);
 
-		// Translate actions (Array of items)
+		// Translate existing actions (Array of items)
 		if (me.items) {
 			me._translateItems(locale);
 		}
+
+		// Translate new added actions
+		me.on('add', me._translateItems, this, {
+			args: [locale]
+		});
 	}
 });
 
@@ -379,7 +387,7 @@ Ext.define("Ext.overrides.slider.Single",  {
 	setTipPrefix: function (txt) {
 		this.tipPrefix = txt;
 		if(!this.rendered) return;
-		this.callParent(arguments);
+		//this.callParent(arguments);
 	}
 });
 

@@ -76,10 +76,6 @@
 				},{
 					"action": "ckmapSelectBox"
 				}]
-			},{
-				"action": "ckOpenImport"
-			},{
-				"action": "ckOpenPrint"
 			}]
 		},{
             "xtype": "toolbar",
