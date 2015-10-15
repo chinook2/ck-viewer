@@ -13,13 +13,12 @@ Ext.define('Ck.edit.action.Delete', {
 
 	toggleAction: function(btn, status) {
 		this.used = true;
-		var source = this.getLayerSource();
 		
 		// this.map.getOlMap().registerRemoveEvent(source);
 		
 		if(!this.delInteraction) {
 			this.delInteraction = new ol.interaction.Select({
-				layers: [this.layer],
+				layers: [this.getLayer()],
 				style: new ol.style.Style({
 					stroke: new ol.style.Stroke({
 						color: 'yellow',
@@ -43,12 +42,12 @@ Ext.define('Ck.edit.action.Delete', {
 							icon: Ext.Msg.QUESTION,
 							fn: function(btn) {
 								if (btn === 'yes') {
-									source.removeFeature(feature);
+									this.removeFeature(feature);
 								}
 							}
 						});
 					} else {
-						source.removeFeature(feature);
+						this.removeFeature(feature);
 					}
 					this.delInteraction.getFeatures().clear();
 				}
@@ -58,6 +57,16 @@ Ext.define('Ck.edit.action.Delete', {
 		}
 
 		this.delInteraction.setActive(status);
+	},
+	
+	/**
+	 * Remove feature from source and launch featureremove edit controller event.
+	 * @param {ol.Feature}
+	 */
+	removeFeature: function(feature) {
+		var source = this.getLayerSource();
+		source.removeFeature(feature);
+		this.editController.fireEvent("featureremove", feature);
 	},
 	
 	

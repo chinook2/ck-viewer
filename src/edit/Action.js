@@ -19,6 +19,7 @@ Ext.define('Ck.edit.Action', {
 		this.callParent([config]);
 
 		this.map = Ck.getMap();
+		this.olMap = this.map.getOlMap();
 	},
 
 	/**

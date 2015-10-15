@@ -83,6 +83,7 @@ Ext.define('Ck.edit.action.Create', {
 
 				this.endAction(sketchFeature);
 				this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
+				this.editController.fireEvent("featurecreate", sketchFeature);
 			}.bind(this);
 		}
 

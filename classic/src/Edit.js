@@ -44,6 +44,27 @@ Ext.define("Ck.Edit", {
 			action: "ckEditDelete",
 			enableToggle: true,
 			toggleGroup: "edit-tools"
+		},{
+			xtype: "splitbutton",
+			itemId: "vertex-live-edit",
+			iconCls: "fa fa-list",
+			tooltip: "Advance operation",
+			dock: "right",
+			menu: [{
+				action: "ckEditCrop",
+				xtype: "button",
+				text: "Crop in half",
+				enableToggle: true,
+				toggleGroup: "edit-tools",
+				iconCls: "fa fa-crop"
+			},{
+				action: "ckEditUnion",
+				xtype: "button",
+				text: "Gathering",
+				enableToggle: true,
+				toggleGroup: "edit-tools",
+				iconCls: "fa fa-compress"
+			}]
 		}]
 	}],
 	
