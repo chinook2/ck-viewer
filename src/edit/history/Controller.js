@@ -33,39 +33,64 @@ Ext.define('Ck.edit.history.Controller', {
 			featureremove: {
 				fn: this.onFeatureRemove,
 				scope: this
+			},
+			featurecrop: {
+				fn: this.onFeatureCrop,
+				scope: this
+			},
+			featureunion: {
+				fn: this.onFeatureUnion,
+				scope: this
 			}
 		});
-		
-		var source = editController.layer.getSource();
-		source.on("removefeature" , this.onFeatureRemove, this);
 	},
 	
 	/**
 	 * Fired when feature is created
+	 * @param {ol.Feature}
 	 */
 	onFeatureAdd: function(feature) {
 		this.store.add(this.createRecord(feature, "Add"));
 	},
 	
 	/**
-	 * Fired when feature is created
+	 * Fired when feature geometry was modified
+	 * @param {ol.Feature}
 	 */
 	onFeautreGeometry: function(feature) {
 		this.store.add(this.createRecord(feature, "Geometry"));
 	},
 	
 	/**
-	 * Fired when feature is created
+	 * Fired when feature attribute was modified
+	 * @param {ol.Feature}
 	 */
 	onFeatureAttribute: function(feature) {
 		this.store.add(this.createRecord(feature, "Attribute"));
 	},
 	
 	/**
-	 * Fired when feature is created
+	 * Fired when feature was removed
+	 * @param {ol.Feature}
 	 */
-	onFeatureRemove: function(ev) {
-		this.store.add(this.createRecord(ev.feature, "Remove"));
+	onFeatureRemove: function(feature) {
+		this.store.add(this.createRecord(feature, "Remove"));
+	},
+	
+	/**
+	 * Fired when feature was croped
+	 * @param {ol.Feature}
+	 */
+	onFeatureCrop: function(feature) {
+		this.store.add(this.createRecord(feature, "Crop"));
+	},
+	
+	/**
+	 * Fired when features gathered
+	 * @param {ol.Feature[]}
+	 */
+	onFeatureUnion: function(feature) {
+		this.store.add(this.createRecord(feature, "Union"));
 	},
 	
 	/**

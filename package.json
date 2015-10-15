@@ -270,6 +270,8 @@
         },{
             "path": "libs/turf/turf.js"
         },{
+            "path": "libs/turf/turf-snap.js"
+        },{
             "path": "libs/jspdf/jspdf.min.js"
         },{
 			"path": "libs/html2canvas/html2canvas.js"
@@ -315,6 +317,8 @@
 				"path": "libs/proj4js/defs/EPSG2154.js"
 			},{
 				"path": "libs/turf/turf.js"
+			},{
+				"path": "libs/turf/turf-snap.js"
 			},{
 				"path": "libs/jspdf/jspdf.debug.js"
 			},{

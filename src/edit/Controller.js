@@ -13,25 +13,37 @@ Ext.define('Ck.edit.Controller', {
 	
 	/**
 	 * @event featurecreate
-	 * Fires when user want to save vertex change
+	 * Fires when a feature was created
 	 * @param {ol.Feature}
 	 */
 	 
 	/**
 	 * @event featuregeometry
-	 * Fires when user want to save vertex change
+	 * Fires when a feature geometry was modified
 	 * @param {ol.Feature}
 	 */
 	 
 	/**
 	 * @event featureattribute
-	 * Fires when user want to save vertex change
+	 * Fires when a feature attribute was modified
 	 * @param {ol.Feature}
 	 */
 	 
 	/**
 	 * @event featureremove
-	 * Fires when user want to save vertex change
+	 * Fires when a feature was removed
+	 * @param {ol.Feature}
+	 */
+	 
+	/**
+	 * @event featurecrop
+	 * Fires when a feature was croped
+	 * @param {ol.Feature}
+	 */
+	 
+	/**
+	 * @event featureunion
+	 * Fires when a feature was gathered
 	 * @param {ol.Feature}
 	 */
 	
@@ -50,7 +62,9 @@ Ext.define('Ck.edit.Controller', {
 			"create": Ck.getAction("ckEditCreate"),
 			"attribute": Ck.getAction("ckEditAttribute"),
 			"geometry": Ck.getAction("ckEditGeometry"),
-			"delete": Ck.getAction("ckEditDelete")
+			"delete": Ck.getAction("ckEditDelete"),
+			"crop": Ck.getAction("ckEditCrop"),
+			"union": Ck.getAction("ckEditUnion")
 		};
 		
 		for(var key in this.action) {
@@ -111,6 +125,9 @@ Ext.define('Ck.edit.Controller', {
 		this.action["geometry"].vertexInteraction.setActive(false);
 	},
 	
+	/**
+	 * For vertex panel validating
+	 */
 	saveVertexChange: function(feature, changed) {
 		this.switchPanel();
 		this.action["geometry"].reset();

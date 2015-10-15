@@ -113,7 +113,13 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.feature = feature;
 		this.ftCoords = feature.getGeometry().getCoordinates();
 		
-		this.coords = this.ftCoords[this.idxX][this.idxY];
+		// Multi or single feature
+		if(isNaN(this.ftCoords[0][0][0])) {
+			this.coords = this.ftCoords[this.idxX][this.idxY];
+		} else {
+			this.coords = this.ftCoords[this.idxX];
+		}
+		
 		// Remove the duplicate first/last vertex from the store
 		this.coords.splice(this.coords.length - 1, 1);
 		
