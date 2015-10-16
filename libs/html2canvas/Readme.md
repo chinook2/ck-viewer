@@ -1,0 +1,1 @@
+GitHub link : https://github.com/niklasvh/html2canvas
