@@ -1,6 +1,7 @@
 /**
  * 
  */
+// @require Ck
 Ext.define('Ck.Ajax', {
 	extend: 'Ext.data.Connection',
 	alternateClassName: 'Cks',
