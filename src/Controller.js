@@ -72,7 +72,11 @@ Ext.define('Ck.Controller', {
 	 */
 	getFullUrl: function (name) {
 		var url = '';
-		var tpl = this.urlTpl || {st: "", ws: ""};
+
+		var tpl = {st: "", ws: ""};
+		if(Ext.isFunction(this.getView().getUrlTemplate)){
+			tpl = this.getView().getUrlTemplate();
+		}
 
 		// Static resource in ck-viewer package
 		if(Ext.String.startsWith(name, 'ck-')) {

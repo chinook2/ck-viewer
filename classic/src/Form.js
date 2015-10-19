@@ -29,6 +29,11 @@ Ext.define("Ck.Form",{
 		formName: null,	// nom du formulaire
 		formUrl: null,	// URL du formulaire
 
+		urlTemplate: {
+			st: '{0}/forms/{1}.json',
+			ws: '{0}/forms/{1}'
+		},
+
 		dataFid: null,		// Feature ID : recup depuis le geoJSON
 		dataRaw: null,		// Données inline
 		dataUrl : null, //

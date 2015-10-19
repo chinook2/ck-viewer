@@ -12,11 +12,6 @@ Ext.define('Ck.form.Controller', {
 
 	dataUrl: null,
 
-	urlTpl: {
-		st: '{0}/forms/{1}.json',
-		ws: '{0}/forms/{1}'
-	},
-
 	layoutConfig: {
 		labelSeparator: ' : '
 	},
@@ -67,7 +62,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Close the form
-		this.formClose();
+		// this.formClose();
 	},
 
 	formCancel: function(){
@@ -79,14 +74,35 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function () {
-		this.stopEditing();
+		var closeMe = function(){
+			this.stopEditing();
 
-		var win = this.view.up('window');
-		if (win) {
-			win.destroy();
-		} else {
-			this.view.destroy();
-		}
+			var win = this.view.up('window');
+			if (win) {
+				win.destroy();
+			} else {
+				this.view.destroy();
+			}
+		}.bind(this);
+
+		Ext.Msg.show({
+			title:'Close ?',
+			message: 'You are closing a form that has unsaved changes. Would you like to save your changes ?',
+			buttons: Ext.Msg.YESNOCANCEL,
+			icon: Ext.Msg.QUESTION,
+			fn: function(btn) {
+				if (btn === 'yes') {
+					this.saveData();
+					closeMe();
+				} else if (btn === 'no') {
+					closeMe()
+				} else {
+					// Nothing don't close
+				}
+			},
+			scope: this
+		});
+
 	},
 
 
@@ -513,7 +529,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Load data from custom URL ou standard URL
 		Cks.get({
-			url: url,
+			url: this.getFullUrl(url),
 			scope: this,
 			success: function (response) {
 				var data = Ext.decode(response.responseText, true);

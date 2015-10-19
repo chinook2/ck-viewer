@@ -92,11 +92,6 @@ Ext.define('Ck.map.Controller', {
 	 */
 	legend: null,
 
-	urlTpl: {
-		st: '{0}/context/{1}.json',
-		ws: '{0}/context/{1}'
-	},
-
 	/**
 	 * Init the map component, init the viewModel.
 	 * @protected

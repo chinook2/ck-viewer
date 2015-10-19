@@ -55,7 +55,12 @@ Ext.define("Ck.Map", {
 		 * The initial context to load.
 		 */
 		context: 'ck-default',
-		
+
+		urlTemplate: {
+			st: '{0}/context/{1}.json',
+			ws: '{0}/context/{1}'
+		},
+
 		/**
 		 * List of ol.control.
 		 */
