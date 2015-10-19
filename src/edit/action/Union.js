@@ -1,7 +1,7 @@
 /**
  * Edit tool used to crop new feature
  */
-Ext.define('Ck.edit.action.Crop', {
+Ext.define('Ck.edit.action.Union', {
 	extend: 'Ck.edit.Action',
 	alias: 'widget.ckEditUnion',
 
