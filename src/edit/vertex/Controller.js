@@ -68,10 +68,6 @@ Ext.define('Ck.edit.vertex.Controller', {
 				},
 				scope: this
 			},
-			// "ckedit-vertex radio#action-none": {
-				// change: this.liveAction,
-				// scope: this
-			// },
 			"ckedit-vertex radio#action-move": {
 				change: this.liveAction,
 				scope: this
@@ -91,10 +87,11 @@ Ext.define('Ck.edit.vertex.Controller', {
 				id: vertexLayerId,
 				source: new ol.source.Vector(),
 				style: Ck.map.Style.overlayStyle,
-				renderOrder: function() { return 0 }
+				renderOrder: function() { return 0 },
+				zIndex: 1000
 			});
-
-			this.olMap.addLayer(this.vertexLayer);
+			
+			this.vertexLayer.setMap(this.olMap);
 			// olMap.getLayers().setAt(olMap.getLayers().getLength() - 1, this.vertexLayer);
 		}
 	},

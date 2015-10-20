@@ -25,7 +25,7 @@ Ext.define('Ck.edit.action.Geometry', {
 			// voir si on peut ajouter un onBeforeDrag sur le modify et tester l'id du feature ?
 			this.vertexInteraction = new ol.interaction.Select({
 				layers: [this.getLayer()],
-				style: this.editModifyStyleFunction
+				zIndex: 800
 			});
 			this.map.getOlMap().addInteraction(this.vertexInteraction);
 
