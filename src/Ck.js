@@ -342,11 +342,13 @@ Ext.apply(Ck, {
 	 */
 	getPath: function() {
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
-		if(!Ext.manifest.profile) path = 'packages/local/ck-viewer/resources';
+		var basePath = 'packages/local/ck-viewer';
+		if(Ext.manifest.paths && Ext.manifest.paths.Ck) basePath = Ext.manifest.paths.Ck.replace('/src','');
+		if(!Ext.manifest.profile) path = basePath + '/resources';
 
 		//<debug>
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		path = 'packages/local/ck-viewer/resources';
+		path = basePath + '/resources';
 		//</debug>	
 		
 		return path;

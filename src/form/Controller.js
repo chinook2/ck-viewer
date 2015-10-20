@@ -75,6 +75,11 @@ Ext.define('Ck.form.Controller', {
 
 	formClose: function () {
 		var closeMe = function(){
+			if(this.view.beforeClose() === false){
+				Ck.log("beforeClose cancel close form.");
+				return;
+			}
+
 			this.stopEditing();
 
 			var win = this.view.up('window');
