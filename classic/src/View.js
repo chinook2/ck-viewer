@@ -28,7 +28,12 @@ Ext.define("Ck.View", {
 	},
 	
 	config: {
-		name: 'ck-default'
+		name: 'ck-default',
+
+		urlTemplate: {
+			st: '{0}/ui/{1}.json',
+			ws: '{0}/ui/{1}'
+		}
 	},
 	
 	cls: 'ck-view'

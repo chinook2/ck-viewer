@@ -10,11 +10,6 @@ Ext.define('Ck.view.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckview',
 
-	urlTpl: {
-		st: '{0}/ui/{1}.json',
-		ws: '{0}/ui/{1}'
-	},
-
 	init: function() {
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
