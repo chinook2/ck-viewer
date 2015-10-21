@@ -84,5 +84,7 @@ Ext.define("Ck.Form",{
 		}]
 	}],
 	
-	cls: 'ckform'
+	cls: 'ckform',
+
+	beforeClose: Ext.emptyFn
 });

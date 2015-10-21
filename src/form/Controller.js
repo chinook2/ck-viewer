@@ -16,6 +16,16 @@ Ext.define('Ck.form.Controller', {
 		labelSeparator: ' : '
 	},
 
+
+	// Override by named controller of the form Ck.form.controller.{name}
+	beforeShow: Ext.emptyFn,
+	beforeLoad: Ext.emptyFn,
+	afterLoad: Ext.emptyFn,
+	beforeSave: Ext.emptyFn,
+	afterSave: Ext.emptyFn,
+	beforeClose: Ext.emptyFn,
+
+
 	init: function () {
 		this.isSubForm = this.getView().getIsSubForm();
 		this.isInit = false;
@@ -32,7 +42,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	destroy: function() {
-		this.ls.release();
+		if(this.ls) this.ls.release();
 		this.callParent();
 	},
 
@@ -62,7 +72,11 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Close the form
-		// this.formClose();
+		if(btn.andClose) {
+			this.formClose({
+				force: true
+			});
+		}
 	},
 
 	formCancel: function(){
@@ -73,7 +87,12 @@ Ext.define('Ck.form.Controller', {
 		Ext.alert("WIP.");
 	},
 
-	formClose: function () {
+	formClose: function (btn) {
+		if(this.view.getController().beforeClose() === false){
+			Ck.log("beforeClose cancel formClose.");
+			return;
+		}
+
 		var closeMe = function(){
 			if(this.view.beforeClose() === false){
 				Ck.log("beforeClose cancel close form.");
@@ -90,23 +109,28 @@ Ext.define('Ck.form.Controller', {
 			}
 		}.bind(this);
 
-		Ext.Msg.show({
-			title:'Close ?',
-			message: 'You are closing a form that has unsaved changes. Would you like to save your changes ?',
-			buttons: Ext.Msg.YESNOCANCEL,
-			icon: Ext.Msg.QUESTION,
-			fn: function(btn) {
-				if (btn === 'yes') {
-					this.saveData();
-					closeMe();
-				} else if (btn === 'no') {
-					closeMe()
-				} else {
-					// Nothing don't close
-				}
-			},
-			scope: this
-		});
+		if(btn.force === true){
+			closeMe();
+		} else {
+			Ext.Msg.show({
+				title:'Close ?',
+				message: 'You are closing a form that has unsaved changes. Would you like to save your changes ?',
+				buttons: Ext.Msg.YESNOCANCEL,
+				icon: Ext.Msg.QUESTION,
+				fn: function(btn) {
+					if (btn === 'yes') {
+						this.saveData();
+						closeMe();
+					} else if (btn === 'no') {
+						closeMe()
+					} else {
+						// Nothing don't close
+					}
+				},
+				scope: this
+			});
+
+		}
 
 	},
 
@@ -130,6 +154,22 @@ Ext.define('Ck.form.Controller', {
 				if (!formUrl && formName) formUrl = this.getFullUrl(formName);
 
 				this.getForm(formUrl);
+				return;
+			}
+
+			// Create un dedicated controller form the named form
+			Ext.define('Ck.form.controller.' + form.name, {
+				extend: 'Ck.form.Controller',
+				alias: 'controller.ckform_'+ form.name
+			});
+
+			// Define new controller for this view !
+			// Use this.view.getController() to access overriden methods !
+			this.view.setController('ckform_' + form.name);
+			//
+
+			if(this.view.getController().beforeShow(form) === false){
+				Ck.log("beforeShow cancel initForm.");
 				return;
 			}
 
@@ -493,6 +533,11 @@ Ext.define('Ck.form.Controller', {
 		var lyr = v.getLayer();
 		var bSilent = false;
 
+		if(this.view.getController().beforeLoad(options) === false){
+			Ck.log("beforeLoad cancel loadData.");
+			return;
+		}
+
 		//
 		if(!options) {
 			options = {};
@@ -507,6 +552,11 @@ Ext.define('Ck.form.Controller', {
 
 		if (data) {
 			// Load inline data
+			if(this.view.getController().afterLoad(data) === false){
+				Ck.log("afterLoad cancel loadData.");
+				return;
+			}
+
 			v.getForm().setValues(data);
 			this.fireEvent('afterload', data);
 
@@ -543,9 +593,14 @@ Ext.define('Ck.form.Controller', {
 					return false;
 				}
 
+				if(this.view.getController().afterLoad(data) === false){
+					Ck.log("afterLoad cancel loadData.");
+					return;
+				}
+
 				v.getForm().setValues(data);
 				this.fireEvent('afterload', data);
-				
+
 				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
@@ -609,6 +664,7 @@ Ext.define('Ck.form.Controller', {
 		var sid = v.getSid();
 		var lyr = v.getLayer();
 
+
 		// TODO : pose pb avec les subforms...
 		// if (!v.isValid()) {
 		// return;
@@ -647,6 +703,11 @@ Ext.define('Ck.form.Controller', {
 		}
 		//
 
+		if(this.view.getController().beforeSave(dt) === false){
+			Ck.log("beforeSave cancel saveData.");
+			return;
+		}
+
 		/*
 		 // Call Storage to save data
 		 var res = me.storage.save({
@@ -662,6 +723,11 @@ Ext.define('Ck.form.Controller', {
 		 }
 		 });
 		 */
+
+		if(this.view.getController().afterSave(dt) === false){
+			Ck.log("afterSave cancel saveData.");
+			return;
+		}
 	},
 
 	resetData: function () {
