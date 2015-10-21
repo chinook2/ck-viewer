@@ -146,6 +146,10 @@ Ext.define('Ck.map.Controller', {
 		// Relay olMap events
 		olMap.getLayers().on('add', function(colEvent) {
 			var layer = colEvent.element;
+			// Alias to get extension property directly
+			layer.getExtension = function(key) {
+				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
+			};
 			this.fireEvent('addlayer', layer);
 		}, this);
 		olMap.getLayers().on('remove', function(colEvent) {
@@ -341,17 +345,11 @@ Ext.define('Ck.map.Controller', {
 					extent: extent,
 					style: olStyle,
 					visible: layer.getVisible(),
-					path: layer.getExtension('path')
+					path: layer.getExtension('path') || "",
+					extension: layer.getExtension()
 				});
 				
 				if(olLayer) {
-					// Set specific Chinook parameters
-					olLayer.ckParams = {};
-					var ckParams = vm.data.ckLayerParams;
-					for(var i = 0; i < ckParams.length; i++) {
-						olLayer.ckParams[ckParams[i]] = layer.lyr.properties[ckParams[i]];
-					}
-					
 					this.getOlMap().addLayer(olLayer);
 				}
 			}
@@ -535,57 +533,50 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Get the collection of layers associated with this map.
-	 * @return {ol.Collection} 
+	 * @param {Function/undefined} Function with 1 param of ol.layer. Return true to add the layer to the result array
+	 * @return {ol.Collection} If no function was passed so all layers are returned
 	 */
-	getLayers: function() {
-		return this.getOlMap().getLayers();
+	getLayers: function(fct) {
+		var res, layers = this.getOlMap().getLayers();
+		if(Ext.isEmpty(fct)) {
+			res = layers;
+		} else {
+			res = new ol.Collection();
+			layers.forEach(function(lyr) {
+				if(fct(lyr)) {
+					res.push(lyr);
+				}
+			});
+		}
+		return res;
+	},
+	
+	/**
+	 * Get a layer according the passed function
+	 * @param {Function}
+	 * @return {ol.Layer/undefined} 
+	 */
+	getLayer: function(fct) {
+		var layers = this.getLayers().getArray();
+		
+		for(var i = 0; i < layers.length; i++) {
+			if(fct(layers[i])) {
+				return layers[i];
+			}
+		}
+		
+		return undefined;
 	},
 	
 	/**
 	 * Get a layer by ID.
-	 * @return {ol.Layer} 
+	 * @param {String}
+	 * @return {ol.Layer/undefined} 
 	 */
-	getLayer: function(id) {
-		var layers = this.getLayers().getArray();
-		// Reverse layer order
-		for(li=layers.length-1; li>=0; li--){
-			if (id == layers[li].get('id')) {
-				return layers[li];
-			}
-		}
-	},
-	
-	/**
-	 * Get all overview layer
-	 * @return {ol.layer[]}
-	 */
-	getOverviewLayers: function() {
-		var resLayers = [];
-		var layers = this.getLayers().getArray();
-		for(var i = 0; i < layers.length; i++) {
-			if(layers[i].ckParams && layers[i].ckParams.overviewLayer === true) {
-				resLayers.push(layers[i]);
-			}
-		}
-		return resLayers;
-	},
-	
-	/**
-	 * Get all layers of a certain type
-	 * @param {Constructor}	The constructor of desired layer type
-	 * @return {Array}
-	 */
-	getLayersType: function(type) {
-		var lyrs = this.getLayers().getArray();
-		var res = [];
-		
-		for(var i = 0; i < lyrs.length; i++) {
-			if(lyrs[i].getVisible() && lyrs[i] instanceof type && lyrs[i].getProperties().id != "measureLayer") {
-				res.push(lyrs[i]);
-			}
-		}
-		
-		return res;
+	getLayerById(id) {
+		return this.getLayer(function(lyr) {
+			return (lyr.get("id") == id);
+		});
 	},
 	
 	/**
@@ -593,16 +584,15 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getLayersStore: function() {
 		var res = [];
-		var lyrs = this.getLayers().getArray();
-		for(var i = 0; i < lyrs.length; i++) {
+		this.getLayers().forEach(function(lyr) {
 			// TODO improve true layer detection
-			if(lyrs[i].getProperties().title) {
+			if(lyr.getProperties().title) {
 				res.push({
-					"id": lyrs[i].getProperties().title,
-					"data": lyrs[i]
+					"id": lyr.get("title"),
+					"data": lyr
 				});
 			}
-		}
+		});
 		return res;
 	},
 	

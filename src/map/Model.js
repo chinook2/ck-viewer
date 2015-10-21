@@ -92,11 +92,6 @@ Ext.define('Ck.map.Model', {
 			}
 		},
 		
-		/** 
-		 * Specific Chinook parameters
-		 */
-		ckLayerParams: ["overviewLayer", "geometryType"],
-		
 		/**
 		 * @cfg {Number}
 		 * Current zoom level of the map.

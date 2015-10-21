@@ -40,6 +40,7 @@ Ext.define('Ck.edit.action.Delete', {
 							message: "Are you sure to delete this feature ?",
 							buttons: Ext.Msg.YESNO,
 							icon: Ext.Msg.QUESTION,
+							scope: this,
 							fn: function(btn) {
 								if (btn === 'yes') {
 									this.removeFeature(feature);

@@ -122,7 +122,9 @@ Ext.define('Ck.map.action.Select', {
 		
 		// Select controls to host selected features
 		if(!this.select){
-			this.select = new ol.interaction.Select();
+			this.select = new ol.interaction.Select({
+				style: Ck.map.Style.selectionStyle
+			});
 			this.olMap.addInteraction(this.select);
 			this.select.set('id', 'ckmapSelect');
 			this.select.setActive(false);
@@ -164,7 +166,7 @@ Ext.define('Ck.map.action.Select', {
 				var selFt = geom.features[0];
 				break;
 			case "Point" :
-				var radius = Ck.getMap().getOlView().getResolution() * 10;
+				var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
 				var pt = turf.point(feature.getGeometry().getCoordinates());
 				var geom = turf.buffer(pt, radius, "meters");
 				var selFt = geom.features[0];
@@ -201,49 +203,42 @@ Ext.define('Ck.map.action.Select', {
 			window.lyr.getSource().addFeature(ft);
 		//*/
 		
-		var res = [];
+		var i = 0; res = [];
 		
 		// Query vector layers
-		var vectorLayers = Ck.getMap().getLayersType(ol.layer.Vector);
+		var vectorLayers = Ck.getMap().getLayers(function(lyr) {
+			return (lyr.getVisible() && lyr instanceof ol.layer.Vector && lyr.getProperties("id") != "measureLayer");
+		});
 		
-		if(vectorLayers.length > 0) {
+		vectorLayers.forEach(function(lyr) {
 			var lyrFts, lyrFt;
-			for(var i = 0; i < vectorLayers.length; i++) {
-				res[i] = [];
-				lyrFts = vectorLayers[i].getSource().getFeatures();
-				for(var j = 0; j < lyrFts.length; j++) {
-					lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
-					if(turf.intersect(lyrFt, selFt)) {
-						if(lyrFts[j].getProperties().features) {
-							for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
-								res[i].push(lyrFts[j].getProperties().features[k]);
-							}
-						} else {
-							res[i].push(lyrFts[j]);
+			res[i] = [];
+			lyrFts = lyr.getSource().getFeatures();
+			for(var j = 0; j < lyrFts.length; j++) {
+				lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+				if(turf.intersect(lyrFt, selFt)) {
+					if(lyrFts[j].getProperties().features) {
+						for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
+							res[i].push(lyrFts[j].getProperties().features[k]);
 						}
+					} else {
+						res[i].push(lyrFts[j]);
 					}
 				}
-				
-				// alert(vectorLayers[i].getProperties().id || vectorLayers[i].getProperties().title);
 			}
-			
-			
-		}
+			i++;
+		});
 		
 		// Query raster layers
-		var rasterLayers = Ck.getMap().getLayersType(ol.layer.Image);
+		var rasterLayers = Ck.getMap().getLayers(function(lyr) {
+			return (lyr.getVisible() && lyr instanceof ol.layer.Image);
+		});
 		
-		if(rasterLayers.length > 0) {
-			var source, url;
-			for(var i = 0; i < rasterLayers.length; i++) {
-				source = rasterLayers[i].getSource();
-				url = source.getUrl();
-				
-				
-				
-				// alert(vectorLayers[i].getProperties().id || vectorLayers[i].getProperties().title);
-			}
-		}
+		rasterLayers.forEach(function(lyr) {
+			var source = lyr.getSource();
+			url = source.getUrl();
+		});
+		
 		
 		// Highligth selected features and add them to select collection
 		this.select.setActive(true);
