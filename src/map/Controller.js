@@ -573,7 +573,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {String}
 	 * @return {ol.Layer/undefined} 
 	 */
-	getLayerById(id) {
+	getLayerById: function(id) {
 		return this.getLayer(function(lyr) {
 			return (lyr.get("id") == id);
 		});
