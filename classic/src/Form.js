@@ -44,6 +44,10 @@ Ext.define("Ck.Form",{
 	bodyPadding: 10,
 	scrollable: true,
 
+	layout: {
+		type: 'fit'
+	},
+	
 	dockedItems: [{
 		xtype: 'toolbar',
 		dock: 'bottom',
