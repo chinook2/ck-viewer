@@ -181,13 +181,17 @@ Ext.define('Ck.form.Controller', {
 
 
 			// Manage bottom toolbar
-			var dock = this.view.getDockedItems()[0];
+			var docks = this.view.getDockedItems();
+			var dock  = docks[0];
 			if(!this.defaultDock) {
-				this.defaultDock =  dock.initialConfig;
+				this.defaultDock = dock.initialConfig;
 				this.defaultDock.hidden = false;
 			}
 			// Remove existing toolbar
-			this.view.removeDocked(dock);
+			Ext.each(docks, function(d){
+				this.view.removeDocked(d);
+			}, this);
+			
 
 			if(fcf.dockedItems) {
 				// Add custom toolbar
@@ -195,7 +199,6 @@ Ext.define('Ck.form.Controller', {
 			} else {
 				// Add default toolbar
 				this.view.addDocked(this.defaultDock);
-				//this.view.getDockedItems()[0].show();
 			}
 
 
