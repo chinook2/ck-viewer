@@ -349,6 +349,7 @@ Ext.define('Ck.form.Controller', {
 
 	// auto config pour le form (simplification du json)
 	applyFormDefaults: function (cfg) {
+		var me = this;
 		var fn = function (c) {
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
@@ -356,7 +357,7 @@ Ext.define('Ck.form.Controller', {
 			Ext.applyIf(c, {
 				plugins: ['formreadonly'],
 				anchor: '100%',
-				labelSeparator: this.layoutConfig.labelSeparator
+				labelSeparator: me.layoutConfig.labelSeparator
 			});
 
 			if (c.xtype == "tabpanel") {
@@ -367,7 +368,7 @@ Ext.define('Ck.form.Controller', {
 					border: false,
 					defaults: {
 						anchor: '100%',
-						labelSeparator: this.layoutConfig.labelSeparator
+						labelSeparator: me.layoutConfig.labelSeparator
 					}
 				});
 			}
@@ -408,7 +409,7 @@ Ext.define('Ck.form.Controller', {
 							proxy: {
 								type: 'ajax',
 								noCache: false,
-								url: storeUrl
+								url: me.getFullUrl(storeUrl)
 							}
 						}
 					}
@@ -466,10 +467,10 @@ Ext.define('Ck.form.Controller', {
 
 				// Init-Actualise avec la date du jour (après le chargement)
 				if (c.value == 'now') {
-					this.view.on('afterload', function () {
-						var f = this.view.form.findField(c.name);
+					me.view.on('afterload', function () {
+						var f = me.view.form.findField(c.name);
 						if (f) f.setValue(Ext.Date.clearTime(new Date()));
-					}, this);
+					});
 				}
 			}
 			if (c.xtype == "timefield") {
@@ -479,10 +480,10 @@ Ext.define('Ck.form.Controller', {
 
 				// Init-Actualise avec la date du jour (après le chargement)
 				if (c.value == 'now') {
-					this.view.on('afterload', function () {
-						var f = this.view.form.findField(c.name);
+					me.view.on('afterload', function () {
+						var f = me.view.form.findField(c.name);
 						if (f) f.setValue(Ext.Date.format(new Date(), c.format));
-					}, this);
+					});
 				}
 			}
 
@@ -491,7 +492,7 @@ Ext.define('Ck.form.Controller', {
 				Ext.applyIf(c, {
 					defaults: {
 						layout: 'form',
-						labelSeparator: this.layoutConfig.labelSeparator,
+						labelSeparator: me.layoutConfig.labelSeparator,
 						border: false
 					}
 				});

@@ -366,7 +366,7 @@ Ext.apply(Ck, {
 	 * @return {string}
 	 */
 	getApi: function () {
-		return this.getOption('api');
+		return this.getOption('api') || '';
 	},
 
 
