@@ -87,6 +87,12 @@ Ext.define('Ck.map.Controller', {
 	 */
 	
 	/**
+	 * @propety {boolean}
+	 * True when OpenLayers map is rendered (or rendering)
+	 */
+	rendered: false,
+	
+	/**
 	 * @propety {Ck.legend.Controller}
 	 * Legend associated to this map
 	 */
@@ -611,8 +617,9 @@ Ext.define('Ck.map.Controller', {
 	resize: function() {
 		var v = this.getView();
 		var m = this.getOlMap();
-		if(!m.isRendered()){
+		if(!this.rendered){
 			m.setTarget(v.body.id);
+			this.rendered = true;
 			
 			// Fire map ready when it's rendered
 			Ck.log('fireEvent ckmapReady');
