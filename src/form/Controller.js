@@ -562,6 +562,10 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			v.getForm().setValues(data);
+			this.getViewModel().setData({
+				layer: lyr,
+				data: data
+			});			
 			this.fireEvent('afterload', data);
 
 			if(v.getEditing()===true) this.startEditing();
@@ -603,6 +607,12 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				v.getForm().setValues(data);
+				this.getViewModel().setData({
+					layer: lyr,
+					fid: fid,
+					data: data
+				});
+				
 				this.fireEvent('afterload', data);
 
 				if(v.getEditing()===true) this.startEditing();
