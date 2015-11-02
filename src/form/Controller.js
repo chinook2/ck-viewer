@@ -248,10 +248,12 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load Form from LocalStorage (cache form with includes - ajax cache can't save all in one)
-		var form = this.ls.getItem(formUrl);
-		if(form && Ck.getEnvironment() == 'production'){
-			this.initForm( Ext.decode(form) );
-			return;
+		if(this.ls){
+			var form = this.ls.getItem(formUrl);
+			if(form && Ck.getEnvironment() == 'production'){
+				this.initForm( Ext.decode(form) );
+				return;
+			}
 		}
 
 		Cks.get({
@@ -277,7 +279,7 @@ Ext.define('Ck.form.Controller', {
 					var cfg = newFormConfig || formConfig;
 
 					// Save Form in LocalStorage
-					me.ls.setItem(formUrl, Ext.encode(cfg));
+					if(me.ls) me.ls.setItem(formUrl, Ext.encode(cfg));
 
 					me.initForm(cfg);
 				});

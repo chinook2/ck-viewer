@@ -226,8 +226,10 @@ Ext.define("Ck.Pdf", {
         me.cls = me.cls || '';
         me.cls += (' ' + me.extraBaseCls);
 		
-		var basePath = Ext.manifest.paths.Ck.replace('/src','');
-		PDFJS.workerSrc = basePath + "/libs/pdf.js/pdf.worker.js";
+		// Ext.manifest.paths doesn't in production !
+		var basePath = '';
+		if(Ext.manifest.paths) basePath = Ext.manifest.paths.Ck.replace('/src','/');
+		PDFJS.workerSrc = basePath + "libs/pdf.js/pdf.worker.js";
 		
         PDFJS.disableTextLayer = me.disableTextLayer;
 
