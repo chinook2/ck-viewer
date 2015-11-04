@@ -175,10 +175,9 @@ Ext.define('Ck.form.Controller', {
 
 			// Ajoute la définition du formulaire au panel
 			var fcf = this.applyFormDefaults(form.form);
-
-			this.view.removeAll();
+			
+			this.view.removeAll(true);
 			this.view.add(fcf.items);
-
 
 			// Manage bottom toolbar
 			var docks = this.view.getDockedItems();
@@ -447,8 +446,14 @@ Ext.define('Ck.form.Controller', {
 
 				Ext.Object.merge(c, {
 					queryMode: 'local',
-					store: processStore(c)
+					store: processStore(c),
+					listeners: {
+						removed: function(item, ownerCt, eOpts){
+							item.removeBindings()
+						}
+					}
 				});
+				
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
