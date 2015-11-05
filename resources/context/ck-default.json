@@ -42,9 +42,9 @@
 		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/wmts/1",
 		"geometry": {},
 		"properties": {
-			"title" : "Open Stree Map",
+			"title" : "Open Street Map",
 			"updated" : "2015-07-22T00:00:00Z",
-			"content" : "Open Stree Map",
+			"content" : "Open Street Map",
 			"authors" : [],
 			"publisher" : "OSM Server",
 			"categories" : [],
