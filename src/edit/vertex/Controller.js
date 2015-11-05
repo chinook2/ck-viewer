@@ -79,7 +79,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		});
 		
 		var vertexLayerId = view.config.layer.getProperties().id + "_vertex-marker";
-		this.vertexLayer = Ck.getMap().getLayer(vertexLayerId);
+		this.vertexLayer = Ck.getMap().getLayerById(vertexLayerId);
 		
 		
 		if(!this.vertexLayer) {

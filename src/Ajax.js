@@ -33,6 +33,8 @@ Ext.define('Ck.Ajax', {
 	},
 	
 	post: function() {
+		options.method = 'POST';
+		this.request(options);
 	},
 
 	put: function() {

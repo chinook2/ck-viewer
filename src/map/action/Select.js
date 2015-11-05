@@ -234,9 +234,41 @@ Ext.define('Ck.map.action.Select', {
 			return (lyr.getVisible() && lyr instanceof ol.layer.Image);
 		});
 		
+		var size = Ck.getMap().getOlMap().getSize();
+		var extent = Ck.getMap().getOlView().calculateExtent(size).join(",");
+		var xy = evntParams.target.downPx_;
+		
 		rasterLayers.forEach(function(lyr) {
 			var source = lyr.getSource();
 			url = source.getUrl();
+			Ck.Ajax.get({
+				scope: this,
+				url: url,
+				params: {
+					service: "WMS",
+					request: "GetFeatureInfo",
+					version: source.getParams().version,
+					layers: source.getParams().layers,
+					query_layers: source.getParams().layers,
+					bbox: extent,
+					srs: "EPSG:3857",
+					feature_count: 10,
+					x: xy[0],
+					y: xy[1],
+					width: size[0],
+					height: size[1],
+					info_format: "application/vnd.ogc.gml",
+					geometriefeature: "bounds",
+					mod: "sheet"
+				},
+				success: function(response) {
+					var parser = new ol.format.WMSGetFeatureInfo();
+					var features = parser.readFeatures(response.responseXML);
+				},
+				failure: function() {
+					Ck.log("Request getFeature fail for layer ");
+				}
+			});
 		});
 		
 		

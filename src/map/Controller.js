@@ -241,10 +241,7 @@ Ext.define('Ck.map.Controller', {
 					case 'wms':
 						olSourceOptions = {
 							url: layer.getHref(false),
-							params: {
-								layers: layer.getName(),
-								version: layer.getProtocolVersion()
-							}
+							params: layer.getHrefParams()
 						};
 						break;
 						
