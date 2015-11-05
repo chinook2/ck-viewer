@@ -22,7 +22,8 @@ Ext.define('Ck.map.action.osmimport.Import', {
 				closeAction: 'hide',
 				collapsible: true,
 				items: [{
-					xtype: "ckosmimport"
+					xtype: "ckosmimportimport",
+					openner: this
 				}]
 				
 			});
