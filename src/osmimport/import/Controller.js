@@ -1,5 +1,6 @@
 /**
- * 
+ * ViewController used to manage the Import Panel of OSM Import.
+ * @author Florent RICHARD
  */
 Ext.define('Ck.osmimport.import.Controller', {
 	extend: 'Ck.Controller',

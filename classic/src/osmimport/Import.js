@@ -1,5 +1,6 @@
 /**
- *
+ * View for the Import Panel of the OSM Import.
+ * @author Florent RICHARD
  */
 
 Ext.define("Ck.osmimport.Import", {

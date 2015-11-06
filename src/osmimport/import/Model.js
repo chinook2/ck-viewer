@@ -1,5 +1,6 @@
 ﻿/**
- * Data binding for Osm Import Panel
+ * ViewModel to do Data binding for OSM Import Panel
+ * @author Florent RICHARD
  */
 Ext.define('Ck.osmimport.import.Model', {
 	extend: 'Ext.app.ViewModel',
@@ -10,9 +11,6 @@ Ext.define('Ck.osmimport.import.Model', {
 		foo: 'bar'
 	},
 		
-	/**
-	 * @ignore
-	 */
 	stores: {
 	}
 });
