@@ -297,6 +297,7 @@ Ext.define('Ck.form.Controller', {
 
 	// List all included form in a form.
 	getIncludedForm: function (cfg) {
+		if(!cfg) return;
 		var includeForm = [];
 		var fn = function (c) {
 			if(c['@include']) {

@@ -139,41 +139,21 @@ Ext.define('Ck.form.plugin.Subform', {
 	},
 	
     addItem: function() {
-		return; 
-		
-		/*
-        // this = grid
-        
-        // Récup le subform
-        var form = this.getDockedComponent('subform');
-        if(!form) return;
-        
-        var lyr = this.name; // this = grid. name = nom de la table et du form
-        
+		var form = this._subform.getForm();		
         if (!form.isValid()) {
             return;
         }
-        
+		
         // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
         var res = form.getValues(false, false, false, true);
-        
-        if(form.rowIndex >= 0) {
-            // Update record
-            var rec = this.getStore().getAt(form.rowIndex);
-            if(rec) rec.set(res);
-            
-            delete form.rowIndex;
-        } else {
-            // Add new record
-            var md =  'Storage.'+lyr;
-            var rec = Ext.create(md, res);
-            
-            this.getStore().insert(0, rec);
-        }
+		
+		// Insert new record		
+		this._grid.getStore().insert(0, res);
 
-        this.getView().refresh();
         form.reset();
-        */
+		if(this._subformWindow) {
+			this._subformWindow.hide();
+		}
     },
     
 	updateItem: function() {
@@ -181,10 +161,21 @@ Ext.define('Ck.form.plugin.Subform', {
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
 		
-		
 		var form = this._subform.getForm();
-		form.reset();
+        if (!form.isValid()) {
+            return;
+        }
 		
+        // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
+        var res = form.getValues(false, false, false, true);
+		
+		// Update selected record
+		var rec = this._grid.getStore().getAt(this._subform.rowIndex);
+		if(rec) rec.set(res);
+		
+		delete this._subform.rowIndex;
+		
+		form.reset();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
@@ -237,10 +228,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 		
+        this._subform.rowIndex = rowIndex;
+		
 		// Finally load subform data with fid, url or data
 		formController.loadData(options);
-		
-        // this._subform.rowIndex = rowIndex;
-        // this._subform.loadRecord(rec);
     }
 });
