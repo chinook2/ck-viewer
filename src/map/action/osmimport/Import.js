@@ -1,5 +1,7 @@
 /**
- * 
+ * Action for OpenStreetMap import.
+ * Opens a panel to set the configuration of the import and execute it.
+ * @author Florent RICHARD
  */
 Ext.define('Ck.map.action.osmimport.Import', {
 	extend: 'Ck.map.action.OsmImport',
@@ -19,7 +21,6 @@ Ext.define('Ck.map.action.osmimport.Import', {
 				// height: 400,
 				width: 400,
 				layout: 'fit',
-				closeAction: 'hide',
 				collapsible: true,
 				items: [{
 					xtype: "ckosmimportimport",
@@ -32,6 +33,9 @@ Ext.define('Ck.map.action.osmimport.Import', {
 		this.win.show();
 	},
 	
+	/**
+	 * Used to close the window.
+	 */
 	close: function() {
 		this.win.hide();
 	}

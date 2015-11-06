@@ -1,5 +1,7 @@
 /**
- * 
+ * Action for OpenStreetMap import.
+ * Opens a panel to show the OSM Attributions.
+ * @author Florent RICHARD
  */
 Ext.define('Ck.map.action.osmimport.Attributions', {
 	extend: 'Ck.map.action.OsmImport',
@@ -8,6 +10,32 @@ Ext.define('Ck.map.action.osmimport.Attributions', {
 	itemId: 'osmimportattributions',
 	text: '',
 	iconCls: 'fa fa-info',
-	tooltip: 'Attributions'
+	tooltip: 'Attributions',
+	toggleAction:  function(btn, pressed) {
+		if(!this.win) {
+			this.win = Ext.create('Ext.window.Window', {
+				title: 'OSM Attributions',
+				// height: 400,
+				width: 400,
+				layout: 'fit',
+				items: [{
+					xtype: "ckosmimportattributions"
+				}],
+				listeners: {
+					close: function() {
+						btn.setPressed(false);
+						this.toggleAction(this.button, false);
+					},
+					scope: this
+				}
+				
+			});
+		}
+		if (pressed) {
+			this.win.show();
+		} else {
+			this.win.hide()
+		}
+	}
 });
 

@@ -1,6 +1,6 @@
 /**
  * Base class for Osm Import actions.
- * 
+ * @author Florent RICHARD
  */
 Ext.define('Ck.map.action.OsmImport', {
 	extend: 'Ck.Action',
