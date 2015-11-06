@@ -11,7 +11,7 @@ Ext.define('Ck.osmimport.import.Model', {
 	    "Ck.osmimport.import.OsmTagsStore"
 	],
 	data: {
-		foo: 'bar'
+		checkedTags: []
 	},
 		
 	stores: {

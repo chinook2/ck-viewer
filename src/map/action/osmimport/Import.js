@@ -19,11 +19,11 @@ Ext.define('Ck.map.action.osmimport.Import', {
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'OSM Data Import',
 				// height: 400,
-				width: 400,
+				width: 600,
 				layout: 'fit',
 				collapsible: true,
 				closeAction: 'hide',
-				resizble: false,
+				resizable: false,
 				items: [{
 					xtype: "ckosmimportimport",
 					openner: this

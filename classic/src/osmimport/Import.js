@@ -2,7 +2,6 @@
  * View for the Import Panel of the OSM Import.
  * @author Florent RICHARD
  */
-
 Ext.define("Ck.osmimport.Import", {
 	extend: "Ext.form.Panel",
 	alias: "widget.ckosmimportimport",
@@ -10,17 +9,17 @@ Ext.define("Ck.osmimport.Import", {
 	requires: [
 		"Ck.osmimport.import.*"
 	],
-
 	controller: "ckosmimportimport",
-	
 	viewModel: {
 		type: "ckosmimportimport"
 	},
+
 	layout: 'anchor',
 	config: {
 		bodyPadding: 10
 	},
-	items: [{
+
+	items: [{ // Tags OSM Selection
 		xtype: "fieldset",
 		title: "OSM Tags Selection",
 		items: [{
@@ -52,9 +51,16 @@ Ext.define("Ck.osmimport.Import", {
 			anchor: '100%',
 			bind: {
 				hidden: "{!tagsexpert.checked}"
-			}
+			},
+			reference: "tagsexpert"
 		}]
-	}],
+	}/*,{ // Selection zone
+		
+	},{ // Selection Date
+		
+	},{ // Selection rendering
+		
+	}*/],
 	
 	buttons: [{
 		text: "Import",
