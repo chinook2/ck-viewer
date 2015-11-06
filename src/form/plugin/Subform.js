@@ -5,42 +5,93 @@ Ext.define('Ck.form.plugin.Subform', {
     extend: 'Ext.AbstractPlugin',
     alias: 'plugin.gridsubform',
 
+	_subform: null,
+	
     init: function(grid) {
         if(!grid.subform) return;
 
-        // Ajoute la barre d'outils au grid
-        grid.addDocked([{
-            xtype: 'toolbar',
-            dock: 'top',
-            items: ['->',{
-                text: 'Add',
-                handler: this.addItem,
-                scope: grid
-            }]
-        },{
-        // Ajoute le subform 'inline' à droite du grid
-            xtype: 'ckform',
-            dock: 'right',
-            itemId: 'subform',
-            width: 500,
-            
-            isSubForm: true, 
-                // TODO voir a mettre en param ds le json
-                layout: 'form',
-                scrollable: 'y',
+		var subForm = {};
+		if(Ext.isString(grid.subform)){
+			subForm.url = grid.subform;
+			grid.subform = subForm;
+		} else {
+			subForm = grid.subform;
+		}
+		
+		// add subform in a panel
+		if(subForm.renderTo) {
+			grid.on('afterrender', function() {
+				var ct = Ext.getCmp(subForm.renderTo);
+				if(!ct){
+					Ck.Notify.error("Enable to render subform '"+ subForm.url +"' in '"+ subForm.renderTo +"'")
+					return;
+				}
+				var vm = grid.lookupViewModel();
+				this._subform = Ext.create({
+					xtype: 'ckform',
+					itemId: 'subform',
+					isSubForm: true, 
+					editing: subForm.editing || vm.get('editing'),
+					
+					// TODO use param from json
+					layout: 'form',
+					scrollable: 'y',
+					
+					formName: '/' + subForm.url,
+					layer: grid.name,
+					
+					// Default toolbar
+					dockedItems: [{
+						xtype: 'toolbar',
+						dock: 'bottom',
+						items: ['->',{
+							text: 'Add',
+							handler: this.addItem,
+							scope: grid
+						}]
+					}]
+				});
+				ct.add(this._subform);
+			}, this, {delay: 50});
+			
+		// (default) dock subform on right of the grid
+		} else {
+			// Adding toolbar for subform on grid
+			grid.addDocked([{
+				xtype: 'toolbar',
+				dock: 'top',
+				items: ['->',{
+					text: 'Add',
+					handler: this.addItem,
+					scope: grid
+				}]
+			},{
+			// add subform 'inline'
+				xtype: 'ckform',
+				dock: 'right',
+				itemId: 'subform',
+				width: 500,
+				
+				isSubForm: true, 
+					// TODO use param from json
+					layout: 'form',
+					scrollable: 'y',
 
-            formName: '/' + grid.subform,
-            layer: grid.name
-        }]);
+				formName: '/' + subForm.url,
+				layer: grid.name
+			}]);
+		}
         
-        // Ajoute la colonne pour supprimer
+		// TODO : add subform in popup
+		
+        // Add column to delete row
         var column = Ext.create('Ext.grid.column.Action', {
             width: 30,
             sortable: false,
             menuDisabled: true,
             items: [{
-                icon: 'resources/theme/images/delete.gif',
-                tooltip: 'Delete',
+                iconCls: 'fa fa-close',
+                tooltip: 'Delete row',
                 scope: this,
                 handler: this.deleteItem
             }]
@@ -48,8 +99,8 @@ Ext.define('Ck.form.plugin.Subform', {
         grid.headerCt.insert(grid.columns.length, column);
         grid.getView().refresh();        
         //
-                
-        grid.on('rowclick', this.editItem, grid);
+        
+        grid.on('rowclick', this.editItem, this);
     },
 
     /**
@@ -118,10 +169,44 @@ Ext.define('Ck.form.plugin.Subform', {
     },
         
     editItem: function(grid, rec, tr, rowIndex) {
-        var form = this.getDockedComponent('subform');
-        if(!form) return;
-        form.rowIndex = rowIndex;
-        form.loadRecord(rec);
+        // var form = this.getDockedComponent('subform');
+        if(!this._subform) return;
+		var formController = this._subform.getController();
+		// grid = tableview, grid.grid = gridpanel ...
+		grid = grid.grid;
+		
+		var data = rec.getData();
+		var fidName = grid.subform.fid || grid.fid || 'fid';	
+		var fidValue = data[fidName];
+		
+		var dataUrl = grid.subform.dataUrl;
+		
+		// By default load subform with data from the grid
+		var options = {
+			raw: data
+		};
+		
+		// If find un Feature Id, try load with it
+		if(fidValue) {
+			options = {
+				fid: fidValue
+			};
+		}
+		
+		// If find a Data URL, try load with it instead 
+		if(dataUrl) {
+			var tpl = new Ext.Template(dataUrl);
+			dataUrl = tpl.apply(data);
+			options = {
+				url: dataUrl
+			};
+		}
+		
+		// Finally load subform data with fid, url or data
+		formController.loadData(options);
+		
+        // this._subform.rowIndex = rowIndex;
+        // this._subform.loadRecord(rec);
     },
     
     deleteItem: function(grid, rowIndex) {
