@@ -22,7 +22,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Hide the import panel
 	 */
 	cancel: function() {
-		console.log(this.getView());
 		this.getView().openner.close();
 	}
 });

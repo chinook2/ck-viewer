@@ -21,10 +21,12 @@ Ext.define('Ck.map.action.osmimport.Attributions', {
 				items: [{
 					xtype: "ckosmimportattributions"
 				}],
+				closeAction: 'hide',
 				listeners: {
 					close: function() {
+						console.log("close listener");
 						btn.setPressed(false);
-						this.toggleAction(this.button, false);
+						this.win.hide();
 					},
 					scope: this
 				}
