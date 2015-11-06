@@ -7,10 +7,14 @@ Ext.define('Ck.osmimport.import.Model', {
 
 	alias: 'viewmodel.ckosmimportimport',
 
+	requires: [
+	    "Ck.osmimport.import.OsmTagsStore"
+	],
 	data: {
 		foo: 'bar'
 	},
 		
 	stores: {
+		osmtags: {type: 'osmtagsstore'}
 	}
 });

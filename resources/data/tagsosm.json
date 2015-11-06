@@ -1,0 +1,29 @@
+{
+    children : [{
+        text: 'Terrains',
+        children: [{
+            text: 'Résidentiel',
+            tag: '[landuse=residential]',
+            leaf: true
+  		},{
+            text: 'Parking',
+            tag: '[amenity=parking]',
+            leaf: true
+        },{
+            text: 'Herbe',
+            tag: '[landuse=grass]',
+            leaf: true
+        }]
+    },{
+        text: 'Education',
+        children: [{
+            text: 'Ecoles Primaires',
+            tag: '[amenity=school]["school:FR"=primaire]',
+            leaf: true
+  		},{
+            text: 'Bibliothèques',
+            tag: '[amenity=library]',
+            leaf: true
+        }]
+    }]
+}

@@ -13,9 +13,11 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.control({
 			"ckosmimportimport button#cancel": {
 				click: this.cancel
+			},
+			"ckosmimportimport treepanel#osmtags-tree": {
+				load: this.onTagsTreeLoad
 			}
 		});
-		
 	},
 		
 	/**
@@ -23,5 +25,17 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	cancel: function() {
 		this.getView().openner.close();
+	},
+	
+	/**
+	 * Method launched once the tree store is loaded and displayed
+	 * Adds a checkbox to each leaf in the tree used to display OSM Tags.
+	 */
+	onTagsTreeLoad: function(tree) {
+		tree.getRootNode().cascadeBy(function(node) {
+			if (node.isLeaf()) {
+				node.set("checked", false);
+			}
+		});
 	}
 });
