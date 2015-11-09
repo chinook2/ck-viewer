@@ -16,6 +16,7 @@ Ext.define('Ck.osmimport.import.Model', {
 	},
 		
 	stores: {
-		osmtags: {type: 'osmtagsstore'}
+		osmtags: {type: 'osmtagsstore'},
+		osm: {type: 'osmimport'}
 	}
 });

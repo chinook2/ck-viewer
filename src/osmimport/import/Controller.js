@@ -20,6 +20,9 @@ Ext.define('Ck.osmimport.import.Controller', {
 			},
 			"ckosmimportimport button#btnSelection": {
 				click: this.onSelectionClick
+			},
+			"ckosmimportimport button#import": {
+				click: this.onImportClick
 			}
 		});
 		
@@ -160,5 +163,58 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.olMap.removeInteraction(this.mapInteraction);
 		this.mapInteraction = draw;
         this.olMap.addInteraction(this.mapInteraction);
+	},
+
+	/**
+	 * Method called when user clicks on Import Button.
+	 * Execute the import of data from OSM
+	 */
+	onImportClick: function(btn) {
+		this.checkParams();
+		var request = this.prepareRequest();
+		this.executeRequest(request);
+	},
+	
+	/**
+	 * Method used to check that every param configured by user is correct to perform the import.
+	 */
+	checkParams: function() {
+		// TODO
+		
+	},
+	
+	/**
+	 * Prepares the request for OSM.
+	 * Return the request ready to be sent to OSM.
+	 */
+	prepareRequest: function() {
+		var request = "[out:json];";
+		request += "(";
+		request += 'node[amenity=parking](poly:"47.31332124967781 -1.5219497680664062 47.28223745480767 -1.5219497680664062 47.28223745480767 -1.465301513671875 47.31332124967781 -1.465301513671875 47.31332124967781 -1.5219497680664062");';
+		request += 'way[amenity=parking](poly:"47.31332124967781 -1.5219497680664062 47.28223745480767 -1.5219497680664062 47.28223745480767 -1.465301513671875 47.31332124967781 -1.465301513671875 47.31332124967781 -1.5219497680664062");';
+		request += 'rel[amenity=parking](poly:"47.31332124967781 -1.5219497680664062 47.28223745480767 -1.5219497680664062 47.28223745480767 -1.465301513671875 47.31332124967781 -1.465301513671875 47.31332124967781 -1.5219497680664062");';
+		request += ");";
+		request += "(._;>;);";
+		request += "out geom;";
+		console.log(request);
+		return request;
+	},
+	
+	/**
+	 * Executes the request on OSM.
+	 */
+	executeRequest: function(request) {
+		var vm = this.getViewModel();
+		var store = vm.getStore("osm");
+		store.getProxy().setExtraParam("data", request);
+		store.load(this.onRequestFinished);
+	},
+	
+	/**
+	 * Method called when the request on OSM is finished.
+	 * Display data or error according the request results.
+	 */
+	onRequestFinished: function(records, operation, success) {
+		console.log(records);
 	}
 });
