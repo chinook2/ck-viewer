@@ -84,7 +84,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		if(r){
 
 			cmp.triggerWrap.hide();
-			cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
+			if(!cmp.hideLabel) cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
 
 			var val = cmp.getValue();
 			if(val != '') {
