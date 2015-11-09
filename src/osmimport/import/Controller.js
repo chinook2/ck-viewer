@@ -10,6 +10,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * @protected
 	 */
 	init: function() {
+		// Init Constants:
+		this.OSM_PROJECTION = "EPSG:4326";
+	
+		// Init controls
 		this.control({
 			"ckosmimportimport button#cancel": {
 				click: this.cancel
@@ -116,7 +120,11 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	onSelectionDone: function(evt) {
 		var transformGeometry = new ol.geom.Polygon(evt.feature.getGeometry().getCoordinates());
-		this.selectionCoords = transformGeometry.transform(this.olMap.getView().getProjection(), 'EPSG:4326').getCoordinates()[0];
+		var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
+		this.selectionCoords = "";
+		for(var i = 0; i < coords.length; i++) {
+			this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
+		}
 	},
 	
 	/**
@@ -190,13 +198,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 	prepareRequest: function() {
 		var request = "[out:json];";
 		request += "(";
-		request += 'node[amenity=parking](poly:"47.31332124967781 -1.5219497680664062 47.28223745480767 -1.5219497680664062 47.28223745480767 -1.465301513671875 47.31332124967781 -1.465301513671875 47.31332124967781 -1.5219497680664062");';
-		request += 'way[amenity=parking](poly:"47.31332124967781 -1.5219497680664062 47.28223745480767 -1.5219497680664062 47.28223745480767 -1.465301513671875 47.31332124967781 -1.465301513671875 47.31332124967781 -1.5219497680664062");';
-		request += 'rel[amenity=parking](poly:"47.31332124967781 -1.5219497680664062 47.28223745480767 -1.5219497680664062 47.28223745480767 -1.465301513671875 47.31332124967781 -1.465301513671875 47.31332124967781 -1.5219497680664062");';
+		request += 'node[amenity=parking](poly:"' + this.selectionCoords + '");';
+		request += 'way[amenity=parking](poly:"' + this.selectionCoords + '");';
+		request += 'rel[amenity=parking](poly:"' + this.selectionCoords + '");';
 		request += ");";
 		request += "(._;>;);";
 		request += "out geom;";
-		console.log(request);
 		return request;
 	},
 	

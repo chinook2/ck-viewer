@@ -6,6 +6,9 @@ Ext.define("Ck.osmimport.import.OsmImportStore", {
 	proxy: {
 		type: "ajax",
 		url: "http://overpass-api.de/api/interpreter",
+		actionMethods : {
+			read    : 'POST'
+		},
 		limitParam: false,
 		pageParam: false,
 		startParam: false,
