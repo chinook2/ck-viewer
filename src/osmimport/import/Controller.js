@@ -10,7 +10,9 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * @protected
 	 */
 	init: function() {
-		// Init Constants:
+		/**
+         * Init Constants
+		 */
 		this.OSM_PROJECTION = "EPSG:4326";
 	
 		// Init controls
@@ -33,14 +35,14 @@ Ext.define('Ck.osmimport.import.Controller', {
 		/**
 		 * Init of the Map Elements for Selection
 		 */
-		this.selectionCoords = []; // stores the coordinates of the selection.
+		this.selectionCoords = ""; // stores the coordinates of the selection ready to be used in OSM API.
 		this.olMap = Ck.getMap().getOlMap();
 		this.selectionSource = new ol.source.Vector({wrapX:false});
 		this.selectionVector = new ol.layer.Vector({
 			source: this.selectionSource,
 			style: new ol.style.Style({
 				fill: new ol.style.Fill({
-			        color: 'rgba(255, 255, 255, 0.2)'
+			        color: 'rgba(255, 255, 255, 0.4)'
 			    }),
 			    stroke: new ol.style.Stroke({
 			        color: '#ffcc33',
@@ -134,6 +136,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var selectType = Ext.getCmp("selectionMode").items.get(0).getGroupValue();
 		var draw, geometryFunction, maxPoints;
 		var self = this;
+
+		// Prepare draw interaction and geometryFunction according selection mode
 		if (selectType === "rectangle") {
 			maxPoints = 2;
 			selectType = "LineString";
@@ -150,7 +154,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				return geometry;
 			};
 		} else if (selectType === "polygone") {
-			maxPoints = 100;
 			selectType = "Polygon";
 			geometryFunction = function(coordinates, geometry) {
 				self.selectionSource.clear();
@@ -161,6 +164,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				return geometry;
 			};
 		}
+
 		draw = new ol.interaction.Draw({
 			source: self.selectionSource,
 			type: /** @type {ol.geom.GeometryType} */ (selectType),
@@ -212,7 +216,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	executeRequest: function(request) {
 		var vm = this.getViewModel();
-		var store = vm.getStore("osm");
+		var store = vm.getStore("osmapi");
 		store.getProxy().setExtraParam("data", request);
 		store.load(this.onRequestFinished);
 	},

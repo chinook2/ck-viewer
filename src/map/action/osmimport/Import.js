@@ -31,8 +31,8 @@ Ext.define('Ck.map.action.osmimport.Import', {
 				
 			});
 		}
-		
 		this.win.show();
+		this.win.expand();
 	},
 	
 	/**

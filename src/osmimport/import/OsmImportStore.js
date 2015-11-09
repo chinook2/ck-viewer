@@ -1,3 +1,7 @@
+/**
+ * Store to access to the OSM API.
+ * @author Florent RICHARD
+ */
 Ext.define("Ck.osmimport.import.OsmImportStore", {
 	extend: "Ext.data.Store",
 	alias: "store.osmimport",

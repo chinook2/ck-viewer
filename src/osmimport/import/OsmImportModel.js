@@ -1,7 +1,14 @@
+/**
+ * Model for the data read from the OSM API.
+ * Contains:
+ * - params returned by the API
+ * - additionnal params used to simplify the display of data.
+ * @author Florent RICHARD
+ */
 Ext.define('Ck.osmimport.import.OsmImportModel', {
 	extend: 'Ext.data.Model',
 	fields: [
-		{name: "type", type: "string",},
+		{name: "type", type: "string"},
 		{name: "id", type: "int"},
 		{name: "lat", type: "number"},
 		{name: "lon", type: "number"},
