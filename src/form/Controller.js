@@ -24,8 +24,11 @@ Ext.define('Ck.form.Controller', {
 	beforeSave: Ext.emptyFn,
 	afterSave: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
-
-
+	
+	loadFailed: Ext.emptyFn,
+	saveFailed: Ext.emptyFn,
+	//
+	
 	init: function () {
 		this.isSubForm = this.getView().getIsSubForm();
 		this.isInit = false;
@@ -55,28 +58,33 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formSave: function (btn) {
-		this.saveData();
+		var res = this.saveData(function(){
+			//After save success.
+			
+			// Link to another form
+			if(btn.nextFormName){
+				this.view.setFormName(btn.nextFormName);
+				this.isInit = false;
+				this.initForm();
+				return;
+			}
+			if(btn.nextFormUrl){
+				this.view.setFormUrl(btn.nextFormUrl);
+				this.isInit = false;
+				this.initForm();
+				return;
+			}
 
-		// Link to another form
-		if(btn.nextFormName){
-			this.view.setFormName(btn.nextFormName);
-			this.isInit = false;
-			this.initForm();
-			return;
-		}
-		if(btn.nextFormUrl){
-			this.view.setFormUrl(btn.nextFormUrl);
-			this.isInit = false;
-			this.initForm();
-			return;
-		}
-
-		// Close the form
-		if(btn.andClose) {
-			this.formClose({
-				force: true
-			});
-		}
+			// Close the form
+			if(btn.andClose) {
+				this.formClose({
+					force: true
+				});
+			}
+		});
+		
+		// If we have error exit here (log message is in saveData())
+		if(!res) return false;
 	},
 
 	formCancel: function(){
@@ -584,8 +592,13 @@ Ext.define('Ck.form.Controller', {
 		if (fid) {
 			// TODO : Call un service REST for loading data...
 			if(me.dataUrl){
-				// Form provide un template URL to load data
-				var tpl = new Ext.Template(me.dataUrl);
+				// Form provide un template URL (or multiples URL) to load data
+				var dataUrl = me.dataUrl;
+				if(Ext.isObject(dataUrl)) {
+					dataUrl = dataUrl.read;
+				}
+				
+				var tpl = new Ext.Template(dataUrl);
 				url = tpl.apply([fid]);
 			} else {
 				// Build default url
@@ -602,6 +615,7 @@ Ext.define('Ck.form.Controller', {
 			return;
 		}
 
+		
 		// Load data from custom URL ou standard URL
 		url = this.getFullUrl(url);
 		Cks.get({
@@ -609,30 +623,36 @@ Ext.define('Ck.form.Controller', {
 			scope: this,
 			success: function (response) {
 				var data = Ext.decode(response.responseText, true);
-				if(!data) {
-					Ck.Notify.error("Invalid JSON Data in : "+ url);
-					return false;
-				}
+				if(response.status == 200) {
+					if(!data) {
+						Ck.Notify.error("Invalid JSON Data in : "+ url);
+						return false;
+					}
 
-				if(this.oController.afterLoad(data) === false){
-					Ck.log("afterLoad cancel loadData.");
-					return;
-				}
+					if(this.oController.afterLoad(data) === false){
+						Ck.log("afterLoad cancel loadData.");
+						return;
+					}
 
-				v.getForm().setValues(data);
-				this.getViewModel().setData({
-					layer: lyr,
-					fid: fid,
-					data: data
-				});
+					v.getForm().setValues(data);
+					this.getViewModel().setData({
+						layer: lyr,
+						fid: fid,
+						data: data
+					});
+					
+					this.fireEvent('afterload', data);
+				}
 				
-				this.fireEvent('afterload', data);
 
 				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
 				Ck.Notify.error("Forms loadData error when loading data from : "+ url +".");
+				
+				this.fireEvent('loadfailed', response);
+				this.oController.loadFailed(response);
 			}
 		});
 
@@ -684,18 +704,22 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	// Enregistre les données dans le Storage
-	saveData: function () {
+	saveData: function (callback) {
 		var me = this;
 		var v = me.getView();
 
 		var sid = v.getSid();
 		var lyr = v.getLayer();
+		
+		var fid = v.getDataFid();
+		var url = v.getDataUrl();
 
 
 		// TODO : pose pb avec les subforms...
-		// if (!v.isValid()) {
-		// return;
-		// }
+		if (!v.isValid()) {
+			Ck.log("Form is not valid in saveData.");
+			return false;
+		}
 
 		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
 		var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
@@ -732,9 +756,64 @@ Ext.define('Ck.form.Controller', {
 
 		if(this.oController.beforeSave(dt) === false){
 			Ck.log("beforeSave cancel saveData.");
-			return;
+			return false;
 		}
 
+		var url = '';
+		// Load data by ID - build standard url
+		if (fid) {
+			// TODO : Call un service REST for loading data...
+			if(me.dataUrl){
+				// Form provide un template URL to load data
+				var dataUrl = me.dataUrl;
+				if(Ext.isObject(dataUrl)) {
+					dataUrl = dataUrl.update;
+				}
+				var tpl = new Ext.Template(dataUrl);
+				url = tpl.apply([fid]);
+			} else {
+				Ck.log("fid defined but no dataUrl template !");
+			}
+		}
+
+		if(!url){
+			if(!bSilent) Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
+			
+			// We need to stopEditing too...
+			// this.stopEditing();
+			return false;
+		}
+
+		// Load data from custom URL ou standard URL
+		url = this.getFullUrl(url);
+		Cks.put({
+			url: url,
+			params: dt,
+			scope: this,
+			success: function (response) {
+				var data = Ext.decode(response.responseText, true);
+				if(!data) {
+					Ck.Notify.error("Invalid JSON Data in : "+ url);
+					return false;
+				}
+				
+				this.fireEvent('aftersave', data);
+				if(this.oController.afterSave(dt) === false){
+					Ck.log("afterSave cancel saveData.");
+					return false;
+				}		
+				
+				callback();
+			},
+			failure: function (response, opts) {
+				// TODO : on Tablet when access local file via ajax, success pass here !!
+				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
+				
+				this.fireEvent('savefailed', response);
+				this.oController.saveFailed(response);
+			}
+		});
+		
 		/*
 		 // Call Storage to save data
 		 var res = me.storage.save({
@@ -742,19 +821,9 @@ Ext.define('Ck.form.Controller', {
 		 sid: sid,
 		 data: dt,
 		 success: function(res) {
-		 // TODO : Message que tout est OK
-		 v.fireEvent('aftersave', res);
-
-		 // Ferme le form
-		 me.formClose();
 		 }
 		 });
 		 */
-
-		if(this.oController.afterSave(dt) === false){
-			Ck.log("afterSave cancel saveData.");
-			return;
-		}
 	},
 
 	resetData: function () {
