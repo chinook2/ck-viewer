@@ -33,7 +33,7 @@ Ext.define('Ck.form.plugin.Subform', {
     },
     
 	
-	initSubForm: function(grid, subForm) {
+	initSubForm: function(grid) {
 		this._grid = grid;
 		var subForm = grid.subform;
 		
@@ -44,7 +44,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			xtype: 'ckform',
 			itemId: 'subform',
 			isSubForm: true, 
-			editing: subForm.editing || grid.lookupViewModel().get('editing'),
+			editing: subForm.editing || grid.lookupController().getView().getEditing(),
 			urlTemplate: subForm.urlTemplate || grid.lookupController().getView().getUrlTemplate(),
 			
 			// TODO use param from json

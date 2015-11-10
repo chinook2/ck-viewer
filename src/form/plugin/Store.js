@@ -31,7 +31,9 @@ Ext.define('Ck.form.plugin.Store', {
     },
     
     loadRecord: function(res) {
-        var n = this.name; // nom de la table = nom de la relation = clé dans la table des résultats
+        if(!res) return;
+		
+		var n = this.name; // nom de la table = nom de la relation = clé dans la table des résultats
         this.getStore().loadData(res[n]);
     },
     
@@ -47,7 +49,7 @@ Ext.define('Ck.form.plugin.Store', {
 
 
     resetData: function () {
-
+		/*
 		// GRID : reset data
 		var grids = v.query('gridpanel');
 		for (var g = 0; g < grids.length; g++) {
@@ -64,7 +66,7 @@ Ext.define('Ck.form.plugin.Store', {
 				delete form.rowIndex;
 			}
 		}
-
+		*/
 
 		return true;
     }

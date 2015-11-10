@@ -16,7 +16,18 @@ Ext.define('Ck.form.Controller', {
 		labelSeparator: ' : '
 	},
 
-
+	//startEditing
+	//stopEditing
+	
+	//afterload
+	//loadfailed
+	
+	//beforesave
+	//aftersave
+	//savefailed
+	
+	//afterreset
+	
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	beforeLoad: Ext.emptyFn,
@@ -653,7 +664,6 @@ Ext.define('Ck.form.Controller', {
 					this.fireEvent('afterload', data);
 				}
 				
-
 				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
@@ -730,8 +740,10 @@ Ext.define('Ck.form.Controller', {
 			return false;
 		}
 		
+		this.fireEvent('beforesave');
+		
 		// We need to stopEditing too, plugins can process data before saving...
-		this.stopEditing();
+		//this.stopEditing();
 
 		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
 		var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
@@ -746,6 +758,7 @@ Ext.define('Ck.form.Controller', {
 
 			// Récup les enregistrements nouveaux et modifiés
 			grid.getStore().each(function (model) {
+				if(model.data.dummy===true) return;
 				dtg.push(model.data);
 			});
 			dt[grid.name] = dtg;

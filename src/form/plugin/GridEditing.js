@@ -91,18 +91,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	startEditing: function() {
 		// add & show action column
 		this.actionColumn.show();
-		
 		this.addNewRow();
 	},
 
 	stopEditing: function() {
 		// hide action column
 		this.actionColumn.hide();
-		
-		// Remove empty field for new record...
-		var store = this.grid.getStore();
-		var row = store.find('dummy', true);
-		if(row) store.removeAt(row);
+		this.deleteNewRow();
 	},
 	
 	addNewRow: function(e, context){
@@ -120,6 +115,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		store.add({
 			dummy: true
 		});		
+	},
+	
+	deleteNewRow: function(){
+		// Remove empty field for new record...
+		var store = this.grid.getStore();
+		var row = store.find('dummy', true);
+		if(row) store.removeAt(row);
 	},
 	
 	deleteRow: function(grid, rowIndex) {
