@@ -200,11 +200,16 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Return the request ready to be sent to OSM.
 	 */
 	prepareRequest: function() {
+		var vm = this.getViewModel();
+		var checkedTags = vm.data.checkedTags;
 		var request = "[out:json];";
 		request += "(";
-		request += 'node[amenity=parking](poly:"' + this.selectionCoords + '");';
-		request += 'way[amenity=parking](poly:"' + this.selectionCoords + '");';
-		request += 'rel[amenity=parking](poly:"' + this.selectionCoords + '");';
+		for (var i = 0; i < checkedTags.length; i++) {
+			console.log(checkedTags[i]);
+			request += 'node' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '");';
+			request += 'way' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '");';
+			request += 'rel' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '");';
+		}
 		request += ");";
 		request += "(._;>;);";
 		request += "out geom;";
