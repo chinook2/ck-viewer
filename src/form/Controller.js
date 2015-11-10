@@ -62,13 +62,13 @@ Ext.define('Ck.form.Controller', {
 			//After save success.
 			
 			// Link to another form
-			if(btn.nextFormName){
+			if(btn && btn.nextFormName){
 				this.view.setFormName(btn.nextFormName);
 				this.isInit = false;
 				this.initForm();
 				return;
 			}
-			if(btn.nextFormUrl){
+			if(btn && btn.nextFormUrl){
 				this.view.setFormUrl(btn.nextFormUrl);
 				this.isInit = false;
 				this.initForm();
@@ -76,7 +76,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			// Close the form
-			if(btn.andClose) {
+			if(btn && btn.andClose) {
 				this.formClose({
 					force: true
 				});
@@ -117,7 +117,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}.bind(this);
 
-		if(btn.force === true){
+		if(btn && btn.force === true){
 			closeMe();
 		} else {
 			Ext.Msg.show({
@@ -466,9 +466,18 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
-				Ext.apply(c, {
-					plugins: ['gridsubform', 'gridstore', 'gridediting', 'rowediting']
-				});
+				if(c.subform){
+					Ext.apply(c, {
+						plugins: ['gridstore', 'gridsubform']
+					});
+				} else {
+					Ext.apply(c, {
+						plugins: ['gridstore', 'gridediting', {
+							ptype: 'rowediting',
+							clicksToEdit: 1
+						}]
+					});
+				}
 			}
 /*
 			if (c.xtype == "fieldset") {
@@ -720,6 +729,9 @@ Ext.define('Ck.form.Controller', {
 			Ck.log("Form is not valid in saveData.");
 			return false;
 		}
+		
+		// We need to stopEditing too, plugins can process data before saving...
+		this.stopEditing();
 
 		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
 		var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
@@ -730,7 +742,7 @@ Ext.define('Ck.form.Controller', {
 		for (var g = 0; g < grids.length; g++) {
 			var grid = grids[g];
 			var dtg = [];
-			var dtgd = [];
+			// var dtgd = [];
 
 			// Récup les enregistrements nouveaux et modifiés
 			grid.getStore().each(function (model) {
@@ -739,10 +751,10 @@ Ext.define('Ck.form.Controller', {
 			dt[grid.name] = dtg;
 
 			// Récup les enregistrements supprimés
-			Ext.each(grid.getStore().getRemovedRecords(), function (model) {
-				dtgd.push(model.data);
-			});
-			dt[grid.name + '_del'] = dtgd;
+			// Ext.each(grid.getStore().getRemovedRecords(), function (model) {
+				// dtgd.push(model.data);
+			// });
+			// dt[grid.name + '_del'] = dtgd;
 		}
 		//
 
@@ -778,9 +790,6 @@ Ext.define('Ck.form.Controller', {
 
 		if(!url){
 			Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
-			
-			// We need to stopEditing too...
-			// this.stopEditing();
 			return false;
 		}
 

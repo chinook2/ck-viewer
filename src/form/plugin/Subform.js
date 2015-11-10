@@ -36,6 +36,9 @@ Ext.define('Ck.form.plugin.Subform', {
 	initSubForm: function(grid, subForm) {
 		this._grid = grid;
 		var subForm = grid.subform;
+		
+		// Options for the plugin
+		if(!grid.gridediting) grid.gridediting = {};
 
 		this._subform = Ext.create({
 			xtype: 'ckform',
@@ -117,23 +120,49 @@ Ext.define('Ck.form.plugin.Subform', {
 			}, subForm.window));
 		}
 		
-		/*
-        // Add column to delete row
-        var column = Ext.create('Ext.grid.column.Action', {
-            width: 30,
-            sortable: false,
-            menuDisabled: true,
-            items: [{
-                iconCls: 'fa fa-close',
-                tooltip: 'Delete row',
-                scope: this,
-                handler: this.deleteItem
-            }]
-        });
-        grid.headerCt.insert(grid.columns.length, column);
-        grid.getView().refresh();        
-        //
-        */
+ 		// Get the Action Column
+		this.actionColumn = grid.down('actioncolumn');
+		if(!this.actionColumn) {
+			var actions = [];
+			if(grid.gridediting.editrow!==false){
+				actions.push({
+					iconCls: 'fa fa-edit',
+					tooltip: 'Edit row',
+					handler: Ext.emptyFn
+				});
+			}
+			if(grid.gridediting.deleterow!==false){
+				actions.push({
+					//iconCls: 'fa fa-close',
+					isDisabled: function(v, r, c, i, rec) {
+						if(rec && rec.get('dummy')) return true;
+						return false;
+					},
+					getClass: function(v, meta, rec) {
+						if(rec && rec.get('dummy')) return false;
+						return 'fa fa-close';
+					},
+					tooltip: 'Delete row',
+					handler: this.deleteItem
+				});
+			}
+			
+			var conf = grid.getInitialConfig();
+			// Add action column for editing by plugin GridEditing
+			conf.columns.push({
+				xtype: 'actioncolumn',
+				hidden: true,
+				items: actions
+			});
+
+			grid.reconfigure(conf.columns);
+			this.actionColumn = grid.down('actioncolumn');
+
+			// Add grid reference to the actionColumn
+			// this.actionColumn.ownerGrid = this.grid;
+			
+			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
+		}       
 		
         grid.on('rowclick', this.loadItem, this);
 	},
