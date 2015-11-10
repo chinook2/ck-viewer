@@ -117,6 +117,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		lyrs.forEach(function(lyr) {
 			var src = lyr.getSource();
 			
+			// Vector type layers else raster type (ImageWMS)
 			if(src.getFeaturesInExtent) {
 				features = src.getFeaturesInExtent(bbox);
 				if(features.length != 0) {
@@ -139,6 +140,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				Ck.Ajax.get({
 					scope: this,
 					url: url,
+					cors: true,
+					useDefaultXhrHeader : false,
 					params: {
 						service: "WMS",
 						request: "GetFeatureInfo",
