@@ -46,5 +46,33 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		},
 		{name: "properties"}
 	],
-	idProperty: 'id'
+	idProperty: 'id',
+	
+	/**
+	 * Method to verify if the record is a feature or simply a member of the feature.
+	 * For example: each node of a polygon is visible in the records.
+	 */
+	containsSearchedTags: function(searchedTags) {
+		var correct = false;
+		var tags = this.data.tags;
+		searchedTags.forEach(function(searchedTag) {
+			if (tags != undefined) {
+				for (var key in tags) {
+					var tag = key;
+					if (tag.indexOf(":") > -1) {
+						tag = '"' + tag + '"';
+					}
+					var value = tags[key];
+					if (value.indexOf(":") > -1) {
+						value = '"' + value + '"';
+					}
+					var tagToSearch = '['+tag+'='+value+']';
+					if (searchedTag.tag.indexOf(tagToSearch) > -1) {
+						correct = true;
+					}
+				}
+			}
+		});
+		return correct;
+	}
 });

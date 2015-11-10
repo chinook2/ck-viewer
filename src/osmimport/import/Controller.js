@@ -67,7 +67,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			source: this.displaySource,
 			style: new ol.style.Style({
 				fill: new ol.style.Fill({
-					color: 'rgba(255, 0, 0, 0.5)'
+					color: 'rgba(255, 0, 0, 0.1)'
 				}),
 				stroke: new ol.style.Stroke({
 					color: '#FF0000',
@@ -75,8 +75,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 				}),
 			    image: new ol.style.Circle({
 			        radius: 7,
+					stroke: new ol.style.Stroke({
+						color: '#ff0000',
+						width: 2
+					}),
 			        fill: new ol.style.Fill({
-				        color: '#ff0000'
+				        color: '#FFFFFF'
 			        })
 			    })
 			})
@@ -129,7 +133,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			}
 		}
 		var textexpert = checkedTags.map(function(a) {return a.tag;}).join(";");
-		this.lookupReference("tagsexpert").setValue(textexpert);
+		this.lookupReference("tagsexperttext").setValue(textexpert);
 	},
 	
 	/**
@@ -270,16 +274,18 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	onRequestFinished: function(records, operation, success) {
 		var olFeatures = [];
-		for (var r = 0; r < records.length; r++) {
-			feature = new ol.Feature(
-				Ext.apply({
-					geometry: records[r].data.coords
-				}, records[r].data.tags)
-			);
-			olFeatures.push(feature);
-		}
+		var checkedTags = this.getViewModel().data.checkedTags;
+		records.forEach(function(record) {
+			if (record.containsSearchedTags(checkedTags)) {
+				feature = new ol.Feature(
+					Ext.apply({
+						geometry: record.data.coords
+					}, record.data.tags)
+				);
+				olFeatures.push(feature);
+			}
+		});
 		this.displayVector.getSource().clear();
 		this.displayVector.getSource().addFeatures(olFeatures);
 	}
-	
 });

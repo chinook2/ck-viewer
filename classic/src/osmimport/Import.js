@@ -50,7 +50,7 @@ Ext.define("Ck.osmimport.Import", {
 			bind: {
 				hidden: "{!tagsexpert.checked}"
 			},
-			reference: "tagsexpert"
+			reference: "tagsexperttext"
 		}]
 	},{ // Selection zone
 		xtype: "fieldset",
