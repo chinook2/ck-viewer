@@ -14,6 +14,21 @@ Ext.define('Ck.osmimport.import.Controller', {
          * Init Constants
 		 */
 		this.OSM_PROJECTION = "EPSG:4326";
+		this.DEFAULT_STYLE = new ol.style.Style({
+				fill: new ol.style.Fill({
+			        color: 'rgba(255, 0, 0, 0.25)'
+			    }),
+			    stroke: new ol.style.Stroke({
+			        color: '#FF0000',
+			        width: 2
+			    }),
+			    image: new ol.style.Circle({
+			        radius: 7,
+			        fill: new ol.style.Fill({
+				        color: 'rgba(255, 0, 0, 0.4)'
+			        })
+			    })
+			});
 	
 		// Init controls
 		this.control({
@@ -62,28 +77,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		/**
 		 * Init the Map Elements for Display results
 		 */
-		this.displaySource = new ol.source.Vector();
+		this.displaySource = new ol.source.Vector({wrapX:false});
 		this.displayVector = new ol.layer.Vector({
 			source: this.displaySource,
-			style: new ol.style.Style({
-				fill: new ol.style.Fill({
-					color: 'rgba(255, 0, 0, 0.1)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: '#FF0000',
-					width: 2
-				}),
-			    image: new ol.style.Circle({
-			        radius: 7,
-					stroke: new ol.style.Stroke({
-						color: '#ff0000',
-						width: 2
-					}),
-			        fill: new ol.style.Fill({
-				        color: '#FFFFFF'
-			        })
-			    })
-			})
+			style: this.DEFAULT_STYLE
 		});
 		this.olMap.addLayer(this.displayVector);
 	},
@@ -273,10 +270,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Display data or error according the request results.
 	 */
 	onRequestFinished: function(records, operation, success) {
+		var self = this;
 		var olFeatures = [];
 		var checkedTags = this.getViewModel().data.checkedTags;
 		records.forEach(function(record) {
 			if (record.containsSearchedTags(checkedTags)) {
+				console.log(record.data.coords);
 				feature = new ol.Feature(
 					Ext.apply({
 						geometry: record.data.coords

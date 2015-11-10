@@ -27,7 +27,9 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 					var point = [data.geometry[p].lon, data.geometry[p].lat];
 					coords.push(point);
 				}
-				if (data.geometry[0] === data.geometry[data.geometry.length - 1]) {
+				console.log(data.geometry);
+				if (data.geometry[0].lat === data.geometry[data.geometry.length - 1].lat 
+				    && data.geometry[0].lon === data.geometry[data.geometry.length - 1].lon ) {
 					geom = new ol.geom.Polygon([coords]);
 				} else {
 					geom = new ol.geom.MultiLineString([coords]);
