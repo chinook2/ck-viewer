@@ -777,7 +777,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(!url){
-			if(!bSilent) Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
+			Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
 			
 			// We need to stopEditing too...
 			// this.stopEditing();
@@ -803,7 +803,7 @@ Ext.define('Ck.form.Controller', {
 					return false;
 				}		
 				
-				callback();
+				Ext.callback(callback, this);
 			},
 			failure: function (response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
