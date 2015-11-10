@@ -32,11 +32,11 @@ Ext.define('Ck.osmimport.import.Controller', {
 			}
 		});
 		
+		this.olMap = Ck.getMap().getOlMap();
 		/**
 		 * Init of the Map Elements for Selection
 		 */
 		this.selectionCoords = ""; // stores the coordinates of the selection ready to be used in OSM API.
-		this.olMap = Ck.getMap().getOlMap();
 		this.selectionSource = new ol.source.Vector({wrapX:false});
 		this.selectionVector = new ol.layer.Vector({
 			source: this.selectionSource,
@@ -58,6 +58,30 @@ Ext.define('Ck.osmimport.import.Controller', {
 		});
 		this.olMap.addLayer(this.selectionVector);
 		this.mapInteraction = undefined;
+		
+		/**
+		 * Init the Map Elements for Display results
+		 */
+		this.displaySource = new ol.source.Vector();
+		this.displayVector = new ol.layer.Vector({
+			source: this.displaySource,
+			style: new ol.style.Style({
+				fill: new ol.style.Fill({
+					color: 'rgba(255, 0, 0, 0.5)'
+				}),
+				stroke: new ol.style.Stroke({
+					color: '#FF0000',
+					width: 2
+				}),
+			    image: new ol.style.Circle({
+			        radius: 7,
+			        fill: new ol.style.Fill({
+				        color: '#ff0000'
+			        })
+			    })
+			})
+		});
+		this.olMap.addLayer(this.displayVector);
 	},
 		
 	/**
@@ -205,7 +229,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var request = "[out:json];";
 		request += "(";
 		for (var i = 0; i < checkedTags.length; i++) {
-			console.log(checkedTags[i]);
 			request += 'node' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '");';
 			request += 'way' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '");';
 			request += 'rel' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '");';
@@ -223,7 +246,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var vm = this.getViewModel();
 		var store = vm.getStore("osmapi");
 		store.getProxy().setExtraParam("data", request);
-		store.load(this.onRequestFinished);
+		store.load({
+			scope: this,
+			callback: this.onRequestFinished
+		});
 	},
 	
 	/**
@@ -231,6 +257,16 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Display data or error according the request results.
 	 */
 	onRequestFinished: function(records, operation, success) {
-		console.log(records);
+		var olFeatures = [];
+		for (var r = 0; r < records.length; r++) {
+			feature = new ol.Feature(
+				Ext.apply({
+					geometry: records[r].data.coords
+				}, records[r].data.tags)
+			);
+			olFeatures.push(feature);
+		}
+		this.displayVector.getSource().clear();
+		this.displayVector.getSource().addFeatures(olFeatures);
 	}
 });

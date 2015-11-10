@@ -25,5 +25,16 @@
             tag: '[amenity=library]',
             leaf: true
         }]
-    }]
+    },{
+		text: 'Voies de circulation',
+		children: [{
+			text: 'Rues',
+			tag: '[highway=residential]',
+			leaf: true
+		},{
+			text: 'Chemin Piétonnier',
+			tag: '[highway=footway]',
+			leaf: true
+		}]
+	}]
 }
