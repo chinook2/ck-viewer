@@ -24,8 +24,11 @@ Ext.define('Ck.form.Controller', {
 	beforeSave: Ext.emptyFn,
 	afterSave: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
-
-
+	
+	loadFailed: Ext.emptyFn,
+	saveFailed: Ext.emptyFn,
+	//
+	
 	init: function () {
 		this.isSubForm = this.getView().getIsSubForm();
 		this.isInit = false;
@@ -55,28 +58,33 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formSave: function (btn) {
-		this.saveData();
+		var res = this.saveData(function(){
+			//After save success.
+			
+			// Link to another form
+			if(btn.nextFormName){
+				this.view.setFormName(btn.nextFormName);
+				this.isInit = false;
+				this.initForm();
+				return;
+			}
+			if(btn.nextFormUrl){
+				this.view.setFormUrl(btn.nextFormUrl);
+				this.isInit = false;
+				this.initForm();
+				return;
+			}
 
-		// Link to another form
-		if(btn.nextFormName){
-			this.view.setFormName(btn.nextFormName);
-			this.isInit = false;
-			this.initForm();
-			return;
-		}
-		if(btn.nextFormUrl){
-			this.view.setFormUrl(btn.nextFormUrl);
-			this.isInit = false;
-			this.initForm();
-			return;
-		}
-
-		// Close the form
-		if(btn.andClose) {
-			this.formClose({
-				force: true
-			});
-		}
+			// Close the form
+			if(btn.andClose) {
+				this.formClose({
+					force: true
+				});
+			}
+		});
+		
+		// If we have error exit here (log message is in saveData())
+		if(!res) return false;
 	},
 
 	formCancel: function(){
@@ -88,7 +96,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function (btn) {
-		if(this.view.getController().beforeClose() === false){
+		if(this.oController.beforeClose() === false){
 			Ck.log("beforeClose cancel formClose.");
 			return;
 		}
@@ -163,12 +171,12 @@ Ext.define('Ck.form.Controller', {
 				alias: 'controller.ckform_'+ form.name
 			});
 
-			// Define new controller for this view !
-			// Use this.view.getController() to access overriden methods !
-			this.view.setController('ckform_' + form.name);
+			// Define new controller to be overriden by application
+			// Use this.oController to access overriden methods !
+			this.oController = Ext.create('Ck.form.controller.' + form.name);
 			//
 
-			if(this.view.getController().beforeShow(form) === false){
+			if(this.oController.beforeShow(form) === false){
 				Ck.log("beforeShow cancel initForm.");
 				return;
 			}
@@ -204,8 +212,8 @@ Ext.define('Ck.form.Controller', {
 			/**/
 			if (this.isSubForm) {
 				// Sous-formulaire les contrôles sont différents
-				var bbar = this.getView().getDockedItems('toolbar[dock="bottom"]');
-				if (bbar[0]) bbar[0].hide();
+				// var bbar = this.getView().getDockedItems('toolbar[dock="bottom"]');
+				// if (bbar[0]) bbar[0].hide();
 			} else {
 				// Init la popup qui contient le formulaire
 				var fcw = form.window;
@@ -228,7 +236,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			this.isInit = true;
-
+			
 			// Auto-load data if params available
 			this.loadData();
 		}
@@ -297,6 +305,7 @@ Ext.define('Ck.form.Controller', {
 
 	// List all included form in a form.
 	getIncludedForm: function (cfg) {
+		if(!cfg) return;
 		var includeForm = [];
 		var fn = function (c) {
 			if(c['@include']) {
@@ -544,7 +553,7 @@ Ext.define('Ck.form.Controller', {
 		var lyr = v.getLayer();
 		var bSilent = false;
 
-		if(this.view.getController().beforeLoad(options) === false){
+		if(this.oController.beforeLoad(options) === false){
 			Ck.log("beforeLoad cancel loadData.");
 			return;
 		}
@@ -561,9 +570,9 @@ Ext.define('Ck.form.Controller', {
 		// Init le form 'vide'
 		me.resetData();
 
+		// Load inline data
 		if (data) {
-			// Load inline data
-			if(this.view.getController().afterLoad(data) === false){
+			if(this.oController.afterLoad(data) === false){
 				Ck.log("afterLoad cancel loadData.");
 				return;
 			}
@@ -579,12 +588,17 @@ Ext.define('Ck.form.Controller', {
 			return;
 		}
 
+		// Load data by ID - build standard url
 		if (fid) {
-			// Load data by ID - build standard url
 			// TODO : Call un service REST for loading data...
 			if(me.dataUrl){
-				// Form provide un template URL to load data
-				var tpl = new Ext.Template(me.dataUrl);
+				// Form provide un template URL (or multiples URL) to load data
+				var dataUrl = me.dataUrl;
+				if(Ext.isObject(dataUrl)) {
+					dataUrl = dataUrl.read;
+				}
+				
+				var tpl = new Ext.Template(dataUrl);
 				url = tpl.apply([fid]);
 			} else {
 				// Build default url
@@ -594,39 +608,51 @@ Ext.define('Ck.form.Controller', {
 
 		if(!url){
 			if(!bSilent) Ck.Notify.error("Forms loadData 'fid' or 'url' not set.");
+			
+			// If new form with empty data we need to startEditing too...
+			if(v.getEditing()===true) this.startEditing();
+			
 			return;
 		}
 
+		
 		// Load data from custom URL ou standard URL
+		url = this.getFullUrl(url);
 		Cks.get({
-			url: this.getFullUrl(url),
+			url: url,
 			scope: this,
 			success: function (response) {
 				var data = Ext.decode(response.responseText, true);
-				if(!data) {
-					Ck.Notify.error("Invalid JSON Data in : "+ url);
-					return false;
-				}
+				if(response.status == 200) {
+					if(!data) {
+						Ck.Notify.error("Invalid JSON Data in : "+ url);
+						return false;
+					}
 
-				if(this.view.getController().afterLoad(data) === false){
-					Ck.log("afterLoad cancel loadData.");
-					return;
-				}
+					if(this.oController.afterLoad(data) === false){
+						Ck.log("afterLoad cancel loadData.");
+						return;
+					}
 
-				v.getForm().setValues(data);
-				this.getViewModel().setData({
-					layer: lyr,
-					fid: fid,
-					data: data
-				});
+					v.getForm().setValues(data);
+					this.getViewModel().setData({
+						layer: lyr,
+						fid: fid,
+						data: data
+					});
+					
+					this.fireEvent('afterload', data);
+				}
 				
-				this.fireEvent('afterload', data);
 
 				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
 				Ck.Notify.error("Forms loadData error when loading data from : "+ url +".");
+				
+				this.fireEvent('loadfailed', response);
+				this.oController.loadFailed(response);
 			}
 		});
 
@@ -678,18 +704,22 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	// Enregistre les données dans le Storage
-	saveData: function () {
+	saveData: function (callback) {
 		var me = this;
 		var v = me.getView();
 
 		var sid = v.getSid();
 		var lyr = v.getLayer();
+		
+		var fid = v.getDataFid();
+		var url = v.getDataUrl();
 
 
 		// TODO : pose pb avec les subforms...
-		// if (!v.isValid()) {
-		// return;
-		// }
+		if (!v.isValid()) {
+			Ck.log("Form is not valid in saveData.");
+			return false;
+		}
 
 		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
 		var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
@@ -724,11 +754,66 @@ Ext.define('Ck.form.Controller', {
 		}
 		//
 
-		if(this.view.getController().beforeSave(dt) === false){
+		if(this.oController.beforeSave(dt) === false){
 			Ck.log("beforeSave cancel saveData.");
-			return;
+			return false;
 		}
 
+		var url = '';
+		// Load data by ID - build standard url
+		if (fid) {
+			// TODO : Call un service REST for loading data...
+			if(me.dataUrl){
+				// Form provide un template URL to load data
+				var dataUrl = me.dataUrl;
+				if(Ext.isObject(dataUrl)) {
+					dataUrl = dataUrl.update;
+				}
+				var tpl = new Ext.Template(dataUrl);
+				url = tpl.apply([fid]);
+			} else {
+				Ck.log("fid defined but no dataUrl template !");
+			}
+		}
+
+		if(!url){
+			if(!bSilent) Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
+			
+			// We need to stopEditing too...
+			// this.stopEditing();
+			return false;
+		}
+
+		// Load data from custom URL ou standard URL
+		url = this.getFullUrl(url);
+		Cks.put({
+			url: url,
+			params: dt,
+			scope: this,
+			success: function (response) {
+				var data = Ext.decode(response.responseText, true);
+				if(!data) {
+					Ck.Notify.error("Invalid JSON Data in : "+ url);
+					return false;
+				}
+				
+				this.fireEvent('aftersave', data);
+				if(this.oController.afterSave(dt) === false){
+					Ck.log("afterSave cancel saveData.");
+					return false;
+				}		
+				
+				callback();
+			},
+			failure: function (response, opts) {
+				// TODO : on Tablet when access local file via ajax, success pass here !!
+				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
+				
+				this.fireEvent('savefailed', response);
+				this.oController.saveFailed(response);
+			}
+		});
+		
 		/*
 		 // Call Storage to save data
 		 var res = me.storage.save({
@@ -736,19 +821,9 @@ Ext.define('Ck.form.Controller', {
 		 sid: sid,
 		 data: dt,
 		 success: function(res) {
-		 // TODO : Message que tout est OK
-		 v.fireEvent('aftersave', res);
-
-		 // Ferme le form
-		 me.formClose();
 		 }
 		 });
 		 */
-
-		if(this.view.getController().afterSave(dt) === false){
-			Ck.log("afterSave cancel saveData.");
-			return;
-		}
 	},
 
 	resetData: function () {
