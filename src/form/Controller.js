@@ -16,6 +16,16 @@ Ext.define('Ck.form.Controller', {
 		labelSeparator: ' : '
 	},
 
+
+	// Override by named controller of the form Ck.form.controller.{name}
+	beforeShow: Ext.emptyFn,
+	beforeLoad: Ext.emptyFn,
+	afterLoad: Ext.emptyFn,
+	beforeSave: Ext.emptyFn,
+	afterSave: Ext.emptyFn,
+	beforeClose: Ext.emptyFn,
+
+
 	init: function () {
 		this.isSubForm = this.getView().getIsSubForm();
 		this.isInit = false;
@@ -32,7 +42,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	destroy: function() {
-		this.ls.release();
+		if(this.ls) this.ls.release();
 		this.callParent();
 	},
 
@@ -62,7 +72,11 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Close the form
-		// this.formClose();
+		if(btn.andClose) {
+			this.formClose({
+				force: true
+			});
+		}
 	},
 
 	formCancel: function(){
@@ -73,7 +87,12 @@ Ext.define('Ck.form.Controller', {
 		Ext.alert("WIP.");
 	},
 
-	formClose: function () {
+	formClose: function (btn) {
+		if(this.view.getController().beforeClose() === false){
+			Ck.log("beforeClose cancel formClose.");
+			return;
+		}
+
 		var closeMe = function(){
 			if(this.view.beforeClose() === false){
 				Ck.log("beforeClose cancel close form.");
@@ -90,23 +109,28 @@ Ext.define('Ck.form.Controller', {
 			}
 		}.bind(this);
 
-		Ext.Msg.show({
-			title:'Close ?',
-			message: 'You are closing a form that has unsaved changes. Would you like to save your changes ?',
-			buttons: Ext.Msg.YESNOCANCEL,
-			icon: Ext.Msg.QUESTION,
-			fn: function(btn) {
-				if (btn === 'yes') {
-					this.saveData();
-					closeMe();
-				} else if (btn === 'no') {
-					closeMe()
-				} else {
-					// Nothing don't close
-				}
-			},
-			scope: this
-		});
+		if(btn.force === true){
+			closeMe();
+		} else {
+			Ext.Msg.show({
+				title:'Close ?',
+				message: 'You are closing a form that has unsaved changes. Would you like to save your changes ?',
+				buttons: Ext.Msg.YESNOCANCEL,
+				icon: Ext.Msg.QUESTION,
+				fn: function(btn) {
+					if (btn === 'yes') {
+						this.saveData();
+						closeMe();
+					} else if (btn === 'no') {
+						closeMe()
+					} else {
+						// Nothing don't close
+					}
+				},
+				scope: this
+			});
+
+		}
 
 	},
 
@@ -133,21 +157,40 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
+			// Create un dedicated controller form the named form
+			Ext.define('Ck.form.controller.' + form.name, {
+				extend: 'Ck.form.Controller',
+				alias: 'controller.ckform_'+ form.name
+			});
+
+			// Define new controller for this view !
+			// Use this.view.getController() to access overriden methods !
+			this.view.setController('ckform_' + form.name);
+			//
+
+			if(this.view.getController().beforeShow(form) === false){
+				Ck.log("beforeShow cancel initForm.");
+				return;
+			}
+
 			// Ajoute la définition du formulaire au panel
 			var fcf = this.applyFormDefaults(form.form);
-
-			this.view.removeAll();
+			
+			this.view.removeAll(true);
 			this.view.add(fcf.items);
 
-
 			// Manage bottom toolbar
-			var dock = this.view.getDockedItems()[0];
+			var docks = this.view.getDockedItems();
+			var dock  = docks[0];
 			if(!this.defaultDock) {
-				this.defaultDock =  dock.initialConfig;
+				this.defaultDock = dock.initialConfig;
 				this.defaultDock.hidden = false;
 			}
 			// Remove existing toolbar
-			this.view.removeDocked(dock);
+			Ext.each(docks, function(d){
+				this.view.removeDocked(d);
+			}, this);
+			
 
 			if(fcf.dockedItems) {
 				// Add custom toolbar
@@ -155,7 +198,6 @@ Ext.define('Ck.form.Controller', {
 			} else {
 				// Add default toolbar
 				this.view.addDocked(this.defaultDock);
-				//this.view.getDockedItems()[0].show();
 			}
 
 
@@ -205,10 +247,12 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load Form from LocalStorage (cache form with includes - ajax cache can't save all in one)
-		var form = this.ls.getItem(formUrl);
-		if(form && Ck.getEnvironment() == 'production'){
-			this.initForm( Ext.decode(form) );
-			return;
+		if(this.ls){
+			var form = this.ls.getItem(formUrl);
+			if(form && Ck.getEnvironment() == 'production'){
+				this.initForm( Ext.decode(form) );
+				return;
+			}
 		}
 
 		Cks.get({
@@ -234,7 +278,7 @@ Ext.define('Ck.form.Controller', {
 					var cfg = newFormConfig || formConfig;
 
 					// Save Form in LocalStorage
-					me.ls.setItem(formUrl, Ext.encode(cfg));
+					if(me.ls) me.ls.setItem(formUrl, Ext.encode(cfg));
 
 					me.initForm(cfg);
 				});
@@ -309,6 +353,7 @@ Ext.define('Ck.form.Controller', {
 
 	// auto config pour le form (simplification du json)
 	applyFormDefaults: function (cfg) {
+		var me = this;
 		var fn = function (c) {
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
@@ -316,7 +361,7 @@ Ext.define('Ck.form.Controller', {
 			Ext.applyIf(c, {
 				plugins: ['formreadonly'],
 				anchor: '100%',
-				labelSeparator: this.layoutConfig.labelSeparator
+				labelSeparator: me.layoutConfig.labelSeparator
 			});
 
 			if (c.xtype == "tabpanel") {
@@ -327,7 +372,7 @@ Ext.define('Ck.form.Controller', {
 					border: false,
 					defaults: {
 						anchor: '100%',
-						labelSeparator: this.layoutConfig.labelSeparator
+						labelSeparator: me.layoutConfig.labelSeparator
 					}
 				});
 			}
@@ -368,7 +413,7 @@ Ext.define('Ck.form.Controller', {
 							proxy: {
 								type: 'ajax',
 								noCache: false,
-								url: storeUrl
+								url: me.getFullUrl(storeUrl)
 							}
 						}
 					}
@@ -401,8 +446,14 @@ Ext.define('Ck.form.Controller', {
 
 				Ext.Object.merge(c, {
 					queryMode: 'local',
-					store: processStore(c)
+					store: processStore(c),
+					listeners: {
+						removed: function(item, ownerCt, eOpts){
+							item.removeBindings()
+						}
+					}
 				});
+				
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
@@ -426,10 +477,10 @@ Ext.define('Ck.form.Controller', {
 
 				// Init-Actualise avec la date du jour (après le chargement)
 				if (c.value == 'now') {
-					this.view.on('afterload', function () {
-						var f = this.view.form.findField(c.name);
+					me.view.on('afterload', function () {
+						var f = me.view.form.findField(c.name);
 						if (f) f.setValue(Ext.Date.clearTime(new Date()));
-					}, this);
+					});
 				}
 			}
 			if (c.xtype == "timefield") {
@@ -439,10 +490,10 @@ Ext.define('Ck.form.Controller', {
 
 				// Init-Actualise avec la date du jour (après le chargement)
 				if (c.value == 'now') {
-					this.view.on('afterload', function () {
-						var f = this.view.form.findField(c.name);
+					me.view.on('afterload', function () {
+						var f = me.view.form.findField(c.name);
 						if (f) f.setValue(Ext.Date.format(new Date(), c.format));
-					}, this);
+					});
 				}
 			}
 
@@ -451,7 +502,7 @@ Ext.define('Ck.form.Controller', {
 				Ext.applyIf(c, {
 					defaults: {
 						layout: 'form',
-						labelSeparator: this.layoutConfig.labelSeparator,
+						labelSeparator: me.layoutConfig.labelSeparator,
 						border: false
 					}
 				});
@@ -493,6 +544,11 @@ Ext.define('Ck.form.Controller', {
 		var lyr = v.getLayer();
 		var bSilent = false;
 
+		if(this.view.getController().beforeLoad(options) === false){
+			Ck.log("beforeLoad cancel loadData.");
+			return;
+		}
+
 		//
 		if(!options) {
 			options = {};
@@ -507,7 +563,16 @@ Ext.define('Ck.form.Controller', {
 
 		if (data) {
 			// Load inline data
+			if(this.view.getController().afterLoad(data) === false){
+				Ck.log("afterLoad cancel loadData.");
+				return;
+			}
+
 			v.getForm().setValues(data);
+			this.getViewModel().setData({
+				layer: lyr,
+				data: data
+			});			
 			this.fireEvent('afterload', data);
 
 			if(v.getEditing()===true) this.startEditing();
@@ -543,9 +608,20 @@ Ext.define('Ck.form.Controller', {
 					return false;
 				}
 
+				if(this.view.getController().afterLoad(data) === false){
+					Ck.log("afterLoad cancel loadData.");
+					return;
+				}
+
 				v.getForm().setValues(data);
-				this.fireEvent('afterload', data);
+				this.getViewModel().setData({
+					layer: lyr,
+					fid: fid,
+					data: data
+				});
 				
+				this.fireEvent('afterload', data);
+
 				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
@@ -609,6 +685,7 @@ Ext.define('Ck.form.Controller', {
 		var sid = v.getSid();
 		var lyr = v.getLayer();
 
+
 		// TODO : pose pb avec les subforms...
 		// if (!v.isValid()) {
 		// return;
@@ -647,6 +724,11 @@ Ext.define('Ck.form.Controller', {
 		}
 		//
 
+		if(this.view.getController().beforeSave(dt) === false){
+			Ck.log("beforeSave cancel saveData.");
+			return;
+		}
+
 		/*
 		 // Call Storage to save data
 		 var res = me.storage.save({
@@ -662,6 +744,11 @@ Ext.define('Ck.form.Controller', {
 		 }
 		 });
 		 */
+
+		if(this.view.getController().afterSave(dt) === false){
+			Ck.log("afterSave cancel saveData.");
+			return;
+		}
 	},
 
 	resetData: function () {
