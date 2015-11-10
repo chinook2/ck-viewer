@@ -16,43 +16,46 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		{name: "nodes", reference: "OsmImportModel"},
 		{name: "geometry"},
 		{name: "coords", calculate: function(data) {
-			var geom = undefined;
-			// Create coords with points in lon/lat format (openlayer use lon/lat while OSM use lat/lon).
-			if (data.type === "node") {
-				var point = [data.lon, data.lat];
-				geom = new ol.geom.Point(point);
-			} else if (data.type === "way") {
-				var coords = [];
-				for (var p = 0; p < data.geometry.length; p++) {
-					var point = [data.geometry[p].lon, data.geometry[p].lat];
-					coords.push(point);
+				var geom = undefined;
+
+				// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
+				if (data.type === "node") {  // Points
+					var point = [data.lon, data.lat];
+					geom = new ol.geom.Point(point);
+				} else if (data.type === "way") { // MultiLine or Polygon
+					var coords = [];
+					for (var p = 0; p < data.geometry.length; p++) {
+						var point = [data.geometry[p].lon, data.geometry[p].lat];
+						coords.push(point);
+					}
+
+					if (data.geometry[0].lat === data.geometry[data.geometry.length - 1].lat &&
+						data.geometry[0].lon === data.geometry[data.geometry.length - 1].lon) {
+						geom = new ol.geom.Polygon([coords]);
+					} else {
+						geom = new ol.geom.MultiLineString([coords]);
+					}
+				} else if (data.type === "relation") {  // OSM Relations
+					// TODO
+					// use members
+					// voire récursivité?
 				}
-				console.log(data.geometry);
-				if (data.geometry[0].lat === data.geometry[data.geometry.length - 1].lat 
-				    && data.geometry[0].lon === data.geometry[data.geometry.length - 1].lon ) {
-					geom = new ol.geom.Polygon([coords]);
-				} else {
-					geom = new ol.geom.MultiLineString([coords]);
+
+				// Transform the OSM projection into Map projection
+				if (geom != undefined) {
+					geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
 				}
-			} else if (data.type === "relation") {
-				// TODO
-				// use members
-				// voire récursivité?
+				return geom;
 			}
-			// Transform the OSM projection into Map projection
-			if (geom != undefined) {
-				geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
-			}
-			return geom;
-		}
 		},
 		{name: "properties"}
 	],
 	idProperty: 'id',
 	
 	/**
-	 * Method to verify if the record is a feature or simply a member of the feature.
+	 * Method to check if the record is a feature or simply a member of the feature.
 	 * For example: each node of a polygon is visible in the records.
+	 * Check is made by looking for the tags to search in the tags of the record.
 	 */
 	containsSearchedTags: function(searchedTags) {
 		var correct = false;
@@ -69,8 +72,9 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 						value = '"' + value + '"';
 					}
 					var tagToSearch = '['+tag+'='+value+']';
-					if (searchedTag.tag.indexOf(tagToSearch) > -1) {
+					if (searchedTag.tag.indexOf(tagToSearch) > -1) { // TODO : improve the checks to handle complex tags
 						correct = true;
+						break;
 					}
 				}
 			}

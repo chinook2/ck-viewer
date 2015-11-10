@@ -14,6 +14,7 @@ Ext.define('Ck.osmimport.import.Controller', {
          * Init Constants
 		 */
 		this.OSM_PROJECTION = "EPSG:4326";
+		// Style to be applied by default to the imported data.
 		this.DEFAULT_STYLE = new ol.style.Style({
 				fill: new ol.style.Fill({
 			        color: 'rgba(255, 0, 0, 0.25)'
@@ -26,11 +27,17 @@ Ext.define('Ck.osmimport.import.Controller', {
 			        radius: 7,
 			        fill: new ol.style.Fill({
 				        color: 'rgba(255, 0, 0, 0.4)'
-			        })
+			        }),
+					stroke: new ol.style.Stroke({
+						color: '#FF0000',
+						width: 2
+					})
 			    })
 			});
 	
-		// Init controls
+		/**
+		 * Init the controls from View.
+		 */
 		this.control({
 			"ckosmimportimport button#cancel": {
 				click: this.cancel
@@ -77,7 +84,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		/**
 		 * Init the Map Elements for Display results
 		 */
-		this.displaySource = new ol.source.Vector({wrapX:false});
+		this.displaySource = new ol.source.Vector();
 		this.displayVector = new ol.layer.Vector({
 			source: this.displaySource,
 			style: this.DEFAULT_STYLE
@@ -206,7 +213,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	
 	/**
 	 * Method to remove the interaction on map for the geographical zone selection.
-	 * Used with several listeners
+	 * Used on several actions (cancel, import done)
 	 */
 	stopZoneSelection: function() {
 		this.olMap.removeInteraction(this.mapInteraction);
@@ -275,7 +282,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var checkedTags = this.getViewModel().data.checkedTags;
 		records.forEach(function(record) {
 			if (record.containsSearchedTags(checkedTags)) {
-				console.log(record.data.coords);
 				feature = new ol.Feature(
 					Ext.apply({
 						geometry: record.data.coords
