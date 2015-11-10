@@ -88,6 +88,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Hide the import panel
 	 */
 	cancel: function() {
+		this.stopZoneSelection();
 		this.getView().openner.close();
 	},
 	
@@ -151,6 +152,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		for(var i = 0; i < coords.length; i++) {
 			this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
 		}
+		this.stopZoneSelection();
 	},
 	
 	/**
@@ -200,6 +202,15 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.mapInteraction = draw;
         this.olMap.addInteraction(this.mapInteraction);
 	},
+	
+	/**
+	 * Method to remove the interaction on map for the geographical zone selection.
+	 * Used with several listeners
+	 */
+	stopZoneSelection: function() {
+		this.olMap.removeInteraction(this.mapInteraction);
+		this.mapInteraction = undefined;
+	},
 
 	/**
 	 * Method called when user clicks on Import Button.
@@ -207,6 +218,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	onImportClick: function(btn) {
 		this.checkParams();
+		this.stopZoneSelection();
 		var request = this.prepareRequest();
 		this.executeRequest(request);
 	},
@@ -269,4 +281,5 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.displayVector.getSource().clear();
 		this.displayVector.getSource().addFeatures(olFeatures);
 	}
+	
 });
