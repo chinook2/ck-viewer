@@ -90,6 +90,11 @@ Ext.define('Ck.osmimport.import.Controller', {
 			style: this.DEFAULT_STYLE
 		});
 		this.olMap.addLayer(this.displayVector);
+		
+		/**
+		 * Init the Message Boxes attributes.
+		 */
+		this.waitMsg = undefined;
 	},
 		
 	/**
@@ -227,6 +232,14 @@ Ext.define('Ck.osmimport.import.Controller', {
 	onImportClick: function(btn) {
 		this.checkParams();
 		this.stopZoneSelection();
+		this.waitMsg = Ext.Msg.show({
+            msg: 'Importing data from OpenStreetMap, please wait...',
+            progressText: 'Importing...',
+            width: 300,
+            wait: {
+                interval: 200
+            }
+        });
 		var request = this.prepareRequest();
 		this.executeRequest(request);
 	},
@@ -293,5 +306,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		});
 		this.displayVector.getSource().clear();
 		this.displayVector.getSource().addFeatures(olFeatures);
+		this.waitMsg.close();
 	}
 });
