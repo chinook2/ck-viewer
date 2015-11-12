@@ -16,6 +16,8 @@ Ext.define('Ck.form.Controller', {
 		labelSeparator: ' : '
 	},
 
+	fields: [],
+	
 	//startEditing
 	//stopEditing
 	
@@ -42,6 +44,7 @@ Ext.define('Ck.form.Controller', {
 	
 	init: function () {
 		this.isSubForm = this.getView().getIsSubForm();
+		if(this.getView().getEditing()===true) this.startEditing();
 		this.isInit = false;
 
 		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
@@ -107,14 +110,14 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function (btn) {
-		if(this.oController.beforeClose() === false){
-			Ck.log("beforeClose cancel formClose.");
-			return;
-		}
 
 		var closeMe = function(){
+			if(this.oController.beforeClose() === false){
+				Ck.log("beforeClose cancel formClose.");
+				return;
+			}
 			if(this.view.beforeClose() === false){
-				Ck.log("beforeClose cancel close form.");
+				Ck.log("view beforeClose cancel formClose.");
 				return;
 			}
 
@@ -374,7 +377,14 @@ Ext.define('Ck.form.Controller', {
 	// auto config pour le form (simplification du json)
 	applyFormDefaults: function (cfg) {
 		var me = this;
+		this.fields = [];
+		
 		var fn = function (c) {
+			// Get Alls direct fieldss of the form with includes (exclude subform)
+			if(c.name) {
+				this.fields.push(c.name);
+			}
+			
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
@@ -564,7 +574,45 @@ Ext.define('Ck.form.Controller', {
 		this.fireEvent('stopEditing');
 	},
 
-	// Lecture des données depuis le Storage
+	// Prevent getting values from subform...
+	getValues: function() {
+		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
+		// var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
+		// var dt = v.getValues(false, false, false, false); // Retourne les dates sous forme de string (d/m/Y)
+		var v = this.getView();
+		var form = v.getForm();
+		
+		var values = {};
+		this.fields.forEach(function(field){
+			var f = form.findField(field);
+			if(f){
+				values[field] = f.getValue();
+			}
+		}, this);
+		
+		// GRID : save data
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			var dtg = [];
+
+			// Récup les enregistrements nouveaux et modifiés
+			grid.getStore().each(function (model) {
+				if(model.data.dummy===true) return;
+				dtg.push(model.data);
+			});
+			values[grid.name] = dtg;
+		}
+		//
+
+		return values;
+	},
+	
+	// Load data from
+	//  - fid
+	//  - dataUrl
+	//  - dataRaw
+	// ...
 	loadData: function (options) {
 		var me = this;
 		var v = me.getView();
@@ -619,7 +667,8 @@ Ext.define('Ck.form.Controller', {
 				}
 				
 				var tpl = new Ext.Template(dataUrl);
-				url = tpl.apply([fid]);
+				if(Ext.isString(fid)) fid = [fid];
+				url = tpl.apply(fid);
 			} else {
 				// Build default url
 				url = 'resources/data/' + lyr + '/' + fid + '.json';
@@ -745,32 +794,9 @@ Ext.define('Ck.form.Controller', {
 		// We need to stopEditing too, plugins can process data before saving...
 		//this.stopEditing();
 
-		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-		var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
-		// var dt = v.getValues(false, false, false, false); // Retourne les dates sous forme de string (d/m/Y)
 
-		// GRID : save data
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			var dtg = [];
-			// var dtgd = [];
-
-			// Récup les enregistrements nouveaux et modifiés
-			grid.getStore().each(function (model) {
-				if(model.data.dummy===true) return;
-				dtg.push(model.data);
-			});
-			dt[grid.name] = dtg;
-
-			// Récup les enregistrements supprimés
-			// Ext.each(grid.getStore().getRemovedRecords(), function (model) {
-				// dtgd.push(model.data);
-			// });
-			// dt[grid.name + '_del'] = dtgd;
-		}
-		//
-
+		var dt = this.getValues();
+		
 		// Mis à jour du status
 		if (!sid) {
 			dt.status = "CREATED";
@@ -795,7 +821,8 @@ Ext.define('Ck.form.Controller', {
 					dataUrl = dataUrl.update;
 				}
 				var tpl = new Ext.Template(dataUrl);
-				url = tpl.apply([fid]);
+				if(Ext.isString(fid)) fid = [fid];
+				url = tpl.apply(fid);
 			} else {
 				Ck.log("fid defined but no dataUrl template !");
 			}
