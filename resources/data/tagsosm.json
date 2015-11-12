@@ -13,7 +13,11 @@
             text: 'Herbe',
             tag: '[landuse=grass]',
             leaf: true
-        }]
+        },{
+			text: 'Terrain de Sport',
+			tag: '[leisure=pitch]',
+			leaf: true
+		}]
     },{
         text: 'Education',
         children: [{

@@ -282,9 +282,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var checkedTags = this.getViewModel().data.checkedTags;
 		records.forEach(function(record) {
 			if (record.containsSearchedTags(checkedTags)) {
+				var geom = record.calculateGeom();
 				feature = new ol.Feature(
 					Ext.apply({
-						geometry: record.data.coords
+						geometry: geom
 					}, record.data.tags)
 				);
 				olFeatures.push(feature);

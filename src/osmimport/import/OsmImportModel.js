@@ -14,43 +14,57 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		{name: "lon", type: "number"},
 		{name: "tags"},
 		{name: "nodes", reference: "OsmImportModel"},
-		{name: "geometry"},
-		{name: "coords", calculate: function(data) {
-				var geom = undefined;
-
-				// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
-				if (data.type === "node") {  // Points
-					var point = [data.lon, data.lat];
-					geom = new ol.geom.Point(point);
-				} else if (data.type === "way") { // MultiLine or Polygon
-					var coords = [];
-					for (var p = 0; p < data.geometry.length; p++) {
-						var point = [data.geometry[p].lon, data.geometry[p].lat];
-						coords.push(point);
-					}
-
-					if (data.geometry[0].lat === data.geometry[data.geometry.length - 1].lat &&
-						data.geometry[0].lon === data.geometry[data.geometry.length - 1].lon) {
-						geom = new ol.geom.Polygon([coords]);
-					} else {
-						geom = new ol.geom.MultiLineString([coords]);
-					}
-				} else if (data.type === "relation") {  // OSM Relations
-					// TODO
-					// use members
-					// voire récursivité?
-				}
-
-				// Transform the OSM projection into Map projection
-				if (geom != undefined) {
-					geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
-				}
-				return geom;
-			}
-		},
+		{name: "geometry"}, // Array for ways and relations
+		{name: "members", type: "auto"}, // Array for relations
 		{name: "properties"}
 	],
 	idProperty: 'id',
+	
+	
+	calculateGeom: function(data, convert) {
+		var data = data || this.data;
+		var convertGeom = true;
+		if (convert == false) {
+			convertGeom = false;
+		}
+		var geom = undefined;
+	// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
+		if (data.type === "node") {  // Points
+			var point = [data.lon, data.lat];
+			geom = new ol.geom.Point(point);
+		} else if (data.type === "way") { // MultiLine or Polygon
+			var coords = [];
+			for (var p = 0; p < data.geometry.length; p++) {
+				var point = [data.geometry[p].lon, data.geometry[p].lat];
+				coords.push(point);
+			}
+
+			if (data.geometry[0].lat === data.geometry[data.geometry.length - 1].lat &&
+				data.geometry[0].lon === data.geometry[data.geometry.length - 1].lon) {
+				geom = new ol.geom.Polygon([coords]);
+			} else {
+				geom = new ol.geom.MultiLineString([coords]);
+			}
+		} else if (data.type === "relation") {  // OSM Relations
+			var geoms = [];
+			for (var memberId in data.members) {
+				var member = data.members[memberId];
+				if (member.type === "way" && member.role !== "inner") {
+					geoms.push(this.calculateGeom(member, false));
+				}
+			}
+			geom = new ol.geom.GeometryCollection(geoms);
+			// TODO
+			// use members
+			// voire récursivité?
+		}
+
+		// Transform the OSM projection into Map projection
+		if (geom != undefined && convertGeom) {
+			geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
+		}
+		return geom;
+	},
 	
 	/**
 	 * Method to check if the record is a feature or simply a member of the feature.
