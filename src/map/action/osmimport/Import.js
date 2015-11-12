@@ -48,5 +48,6 @@ Ext.define('Ck.map.action.osmimport.Import', {
 	collapse: function() {
 		this.win.collapse();
 	}
+	
 });
 

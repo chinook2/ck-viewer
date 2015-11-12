@@ -235,7 +235,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.stopZoneSelection();
 		this.waitMsg = Ext.Msg.show({
             msg: 'Importing data from OpenStreetMap, please wait...',
-            progressText: 'Importing...',
             width: 300,
             wait: {
                 interval: 200

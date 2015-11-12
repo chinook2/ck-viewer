@@ -74,25 +74,30 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 	containsSearchedTags: function(searchedTags) {
 		var correct = false;
 		var tags = this.data.tags;
-		searchedTags.forEach(function(searchedTag) {
-			if (tags != undefined) {
-				for (var key in tags) {
-					var tag = key;
-					if (tag.indexOf(":") > -1) {
-						tag = '"' + tag + '"';
+		if (tags != undefined) {
+			for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
+				var searchedTag = searchedTags[i];
+				var key_val = searchedTag.tag.match(/["?\w+:?]+=?["\w*:?]*/g);
+				var rec_correct = 0;
+				for (var kvId in key_val) {  // Check that each tag is in the selected group
+					var kv = key_val[kvId];
+					var k = kv.split("=")[0].replace(/"/g, '');
+					var v = kv.split("=")[1];
+					if (v != undefined) {
+						v = v.replace(/"/g, '');
 					}
-					var value = tags[key];
-					if (value.indexOf(":") > -1) {
-						value = '"' + value + '"';
-					}
-					var tagToSearch = '['+tag+'='+value+']';
-					if (searchedTag.tag.indexOf(tagToSearch) > -1) { // TODO : improve the checks to handle complex tags
-						correct = true;
-						break;
+					if (k in tags) {
+						if (v !== "" && tags[k] === v) {
+							rec_correct++;
+						}
 					}
 				}
+				if (rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
+					correct = true;
+					break;
+				}
 			}
-		});
+		}
 		return correct;
 	}
 });

@@ -40,5 +40,20 @@
 			tag: '[highway=footway]',
 			leaf: true
 		}]
+	},{
+		text: 'Transports',
+		children: [{
+			text: 'Lignes de Tramway',
+			tag: '[type=route][route=tram]',
+			leaf: 'true'
+		},{
+			text: 'Lignes de Bus TAN',
+			tag: '[type=route][route=bus][network=TAN]',
+			leaf: 'true'
+		},{
+			text: 'Lignes de Car LILA',
+			tag: '[type=route][route=bus][network="FR:Lila"]',
+			leaf: 'true'
+		}]
 	}]
 }
