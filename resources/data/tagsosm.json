@@ -45,15 +45,22 @@
 		children: [{
 			text: 'Lignes de Tramway',
 			tag: '[type=route][route=tram]',
-			leaf: 'true'
+			leaf: true
 		},{
 			text: 'Lignes de Bus TAN',
 			tag: '[type=route][route=bus][network=TAN]',
-			leaf: 'true'
+			leaf: true
 		},{
 			text: 'Lignes de Car LILA',
 			tag: '[type=route][route=bus][network="FR:Lila"]',
-			leaf: 'true'
+			leaf: true
+		}]
+	},{
+		text: 'Divers',
+		children: [{
+			text: "Centrales de production d'énergie",
+			tag: '[type=site][power=plant]',
+			leaf: true
 		}]
 	},{
 		text: 'Diverses Erreurs',

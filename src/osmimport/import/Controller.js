@@ -320,48 +320,59 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var olFeatures = [];
 			var nbFeaturesImported = 0;
 			var checkedTags = this.getViewModel().data.checkedTags;
-			for (var r = 0; r < records.length; r++) {
-				var record = records[r];
-				if (record.containsSearchedTags(checkedTags)) {
-					nbFeaturesImported++;
-					if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
-						var geom = record.calculateGeom();
-						feature = new ol.Feature(
-							Ext.apply({
-								geometry: geom
-							}, record.data.tags)
-						);
-						olFeatures.push(feature);
+			try {
+				for (var r = 0; r < records.length; r++) {
+					var record = records[r];
+					if (record.containsSearchedTags(checkedTags)) {
+						nbFeaturesImported++;
+						if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
+							var geom = record.calculateGeom();
+							feature = new ol.Feature(
+								Ext.apply({
+									geometry: geom
+								}, record.data.tags)
+							);
+							olFeatures.push(feature);
+						}
 					}
 				}
-			}
-			this.displayVector.getSource().clear();
-			this.displayVector.getSource().addFeatures(olFeatures);
-			this.waitMsg.close();
-			if (nbFeaturesImported === 0) {  // No Result
+				this.displayVector.getSource().clear();
+				this.displayVector.getSource().addFeatures(olFeatures);
+				this.waitMsg.close();
+				if (nbFeaturesImported === 0) {  // No Result
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed.<br/>No data found for the selection',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
+				} else if (nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.<br/>'
+							 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
+				} else {
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.INFO
+					});
+				}
+			} catch (exception){
+				this.waitMsg.close();
 				Ext.MessageBox.show({
 					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed.<br/>No data found for the selection',
+					msg: 'An error occured while computing the imported data.',
 					width: 500,
 					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.WARNING
-				});
-			} else if (nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.<br/>'
-						 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.WARNING
-				});
-			} else {
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.INFO
+					icon: Ext.Msg.ERROR
 				});
 			}
 		} else {

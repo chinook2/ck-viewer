@@ -16,6 +16,7 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		{name: "nodes", reference: "OsmImportModel"},
 		{name: "geometry"}, // Array for ways and relations
 		{name: "members", type: "auto"}, // Array for relations
+		{name: "role"}, // Used in relations
 		{name: "properties"}
 	],
 	idProperty: 'id',
@@ -49,20 +50,16 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 			var geoms = [];
 			for (var memberId in data.members) {
 				var member = data.members[memberId];
-				if (member.type === "way" && member.role !== "inner") {
-					geoms.push(this.calculateGeom(member, false));
-				}
+				geoms.push(this.calculateGeom(member, false));
 			}
 			geom = new ol.geom.GeometryCollection(geoms);
-			// TODO
-			// use members
-			// voire récursivité?
 		}
 
 		// Transform the OSM projection into Map projection
 		if (geom != undefined && convertGeom) {
 			geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
 		}
+		toto.titi();
 		return geom;
 	},
 	
