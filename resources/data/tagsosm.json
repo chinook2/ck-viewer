@@ -55,5 +55,24 @@
 			tag: '[type=route][route=bus][network="FR:Lila"]',
 			leaf: 'true'
 		}]
+	},{
+		text: 'Diverses Erreurs',
+		children: [{
+			text: 'Erreur no tag',
+			tag: '',
+			leaf: true
+		},{
+			text: 'Erreur tag sans key',
+			tag: '[=residential]',
+			leaf: true
+		},{
+			text: 'Erreur tag vide',
+			tag: '[]',
+			leaf: true
+		},{
+			text: 'Erreur tag vide avec 1 tag erreur',
+			tag: '[amenity=school][]',
+			leaf: true
+		}]
 	}]
 }

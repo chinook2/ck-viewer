@@ -92,7 +92,7 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 						}
 					}
 				}
-				if (rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
+				if (key_val != null && rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
 					correct = true;
 					break;
 				}
