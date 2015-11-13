@@ -34,7 +34,7 @@ Ext.define('Ck.form.plugin.Store', {
         if(!res) return;
 		
 		var n = this.name; // nom de la table = nom de la relation = clé dans la table des résultats
-        this.getStore().loadData(res[n]);
+        if(res[n]) this.getStore().loadData(res[n]);
     },
     
     getValues: function() {
