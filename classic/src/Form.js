@@ -49,6 +49,7 @@ Ext.define("Ck.Form",{
 		dock: 'bottom',
 		ui: 'footer',
 		defaults: {minWidth: 120},
+		hidden: true,
 		items: [{
 			xtype: "button",
 			text: "Edit",

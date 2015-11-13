@@ -588,6 +588,10 @@ Ext.define('Ck.form.Controller', {
 			var f = form.findField(field);
 			if(f){
 				values[field] = f.getValue();
+				if(f.displayField) {
+					if(!values['__display']) values['__display'] = {}
+					values['__display'][field] = f.getDisplayValue();
+				}
 			}
 		}, this);
 		
@@ -853,6 +857,11 @@ Ext.define('Ck.form.Controller', {
 					return false;
 				}		
 				
+				this.getViewModel().setData({
+					layer: lyr,
+					fid: fid,
+					data: dt
+				});
 				Ext.callback(callback, this);
 			},
 			failure: function (response, opts) {
