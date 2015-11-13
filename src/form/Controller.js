@@ -188,6 +188,7 @@ Ext.define('Ck.form.Controller', {
 			// Define new controller to be overriden by application
 			// Use this.oController to access overriden methods !
 			this.oController = Ext.create('Ck.form.controller.' + form.name);
+			this.oController._parent = this;
 			//
 
 			if(this.oController.beforeShow(form) === false){
@@ -798,11 +799,11 @@ Ext.define('Ck.form.Controller', {
 		var dt = this.getValues();
 		
 		// Mis à jour du status
-		if (!sid) {
-			dt.status = "CREATED";
-		} else {
-			dt.status = "MODIFIED";
-		}
+		// if (!sid) {
+			// dt.status = "CREATED";
+		// } else {
+			// dt.status = "MODIFIED";
+		// }
 		//
 
 		if(this.oController.beforeSave(dt) === false){
