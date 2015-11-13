@@ -710,10 +710,10 @@ Ext.define('Ck.form.Controller', {
 					}
 
 					v.getForm().setValues(data);
-					this.getViewModel().setData({
+					this.getViewModel().set({
 						layer: lyr,
 						fid: fid,
-						data: data
+						data: Ext.apply(this.getViewModel().get('data') || {}, data)
 					});
 					
 					this.fireEvent('afterload', data);
@@ -854,10 +854,10 @@ Ext.define('Ck.form.Controller', {
 						return false;
 					}		
 					
-					this.getViewModel().setData({
+					this.getViewModel().set({
 						layer: lyr,
 						fid: fid,
-						data: dt
+						data: Ext.apply(this.getViewModel().get('data'), dt)
 					});
 				}
 				Ext.callback(callback, this);
