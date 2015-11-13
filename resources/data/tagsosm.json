@@ -98,6 +98,14 @@
 			text: 'Point-virgule présent',
 			tag: '[amenity=school];',
 			leaf: true
+		},{
+			text: 'Double point sans guillemets dans la clé',
+			tag: '[amenity=school][school:FR=primaire]',
+			leaf: true
+		},{
+			text: 'Double point sans guillemets dans la valeur',
+			tag: '[type=route][network=FR:Lila]',
+			leaf: true
 		}]
 	}]
 }
