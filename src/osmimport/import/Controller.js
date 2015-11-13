@@ -15,6 +15,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		 */
 		this.OSM_PROJECTION = "EPSG:4326";
 		this.NB_FEATURES_MAX = 200;
+		
 		// Style to be applied by default to the imported data.
 		this.DEFAULT_STYLE = new ol.style.Style({
 				fill: new ol.style.Fill({
@@ -152,11 +153,11 @@ Ext.define('Ck.osmimport.import.Controller', {
 	checkOsmTags: function() {
 		var errorMessage = "";
 		var vm = this.getViewModel();
-		if (vm.data.checkedTags.length === 0) {
+		if (vm.data.checkedTags.length === 0) {  // Check at least one is selected
 			errorMessage += " - No OSM tag selected<br/>";
 		}
 		var tagList = vm.data.checkedTags;
-		for (var t = 0; t < tagList.length; t++) {
+		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			if ((tagList[t].tag.indexOf(";") > -1) ||
 				(tagList[t].tag.match(/^(\[["?\w+:?]+=?["\w*:?]*\])+$/g) == null)) {
 				errorMessage += ' - Tag "' + tagList[t].text + '" is incorrect<br/>';
@@ -182,7 +183,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var transformGeometry = new ol.geom.Polygon(evt.feature.getGeometry().getCoordinates());
 		var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
 		this.selectionCoords = "";
-		for(var i = 0; i < coords.length; i++) {
+		for (var i = 0; i < coords.length; i++) {
 			this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
 		}
 		this.stopZoneSelection();
@@ -311,11 +312,15 @@ Ext.define('Ck.osmimport.import.Controller', {
 	prepareRequest: function() {
 		var vm = this.getViewModel();
 		var checkedTags = vm.data.checkedTags;
+		
+		// Prepare date filter
 		var minDateString = "";
 		var minDate = this.lookupReference("datemin").getValue();
-		if (this.lookupReference("sincedate").checked == true && minDate !== "") {
+		if (this.lookupReference("sincedate").checked == true && minDate !== null) {
 			minDateString = '(newer:"'+ Ext.Date.format(minDate, 'Y-m-d') + 'T00:00:00Z")';
 		}
+		
+		// Prepare the request
 		var request = "[out:json];";
 		request += "(";
 		for (var i = 0; i < checkedTags.length; i++) {

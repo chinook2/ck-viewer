@@ -20,8 +20,7 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		{name: "properties"}
 	],
 	idProperty: 'id',
-	
-	
+
 	calculateGeom: function(data, convert) {
 		var data = data || this.data;
 		var convertGeom = true;
@@ -29,11 +28,11 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 			convertGeom = false;
 		}
 		var geom = undefined;
-	// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
+		// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
 		if (data.type === "node") {  // Points
 			var point = [data.lon, data.lat];
 			geom = new ol.geom.Point(point);
-		} else if (data.type === "way") { // MultiLine or Polygon
+		} else if (data.type === "way") {  // MultiLine or Polygon
 			var coords = [];
 			for (var p = 0; p < data.geometry.length; p++) {
 				var point = [data.geometry[p].lon, data.geometry[p].lat];
@@ -61,7 +60,7 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		}
 		return geom;
 	},
-	
+
 	/**
 	 * Method to check if the record is a feature or simply a member of the feature.
 	 * For example: each node of a polygon is visible in the records.
@@ -72,8 +71,7 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		var tags = this.data.tags;
 		if (tags != undefined) {
 			for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
-				var searchedTag = searchedTags[i];
-				var key_val = searchedTag.tag.match(/["?\w+:?]+=?["\w*:?]*/g);
+				var key_val = searchedTags[i].tag.match(/["?\w+:?]+=?["\w*:?]*/g);
 				var rec_correct = 0;
 				for (var kvId in key_val) {  // Check that each tag is in the selected group
 					var kv = key_val[kvId];
