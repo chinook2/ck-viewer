@@ -92,7 +92,33 @@ Ext.define("Ck.osmimport.Import", {
 				itemId: "btnSelection"
 			}]
 		}]
-	}/*,{ // Selection Date
+	},{
+		xtype: "fieldset",
+		title: "Options",
+		collapsible: true,
+		collapsed: true,
+		items: [{
+			xtype: 'panel',
+			layout: 'hbox',
+			items: [{
+				xtype: "checkbox",
+				boxLabel: "Modifications since",
+				reference: "sincedate",
+				itemId: "sincedate"
+			},{
+				xtype: "component",
+				width: 10
+			},{
+				xtype: "datefield",
+				itemId: "date-min",
+				maxValue: new Date(),
+				format: 'd/m/Y',
+				bind: {
+					disabled: "{!sincedate.checked}"
+				}
+			}]
+		}]}
+	/*,{ // Selection Date
 		
 	},{ // Selection rendering
 		
@@ -100,7 +126,8 @@ Ext.define("Ck.osmimport.Import", {
 	
 	buttons: [{
 		text: "Import",
-		itemId: "import"
+		itemId: "import",
+		formBind: true
 	},{
 		text: "Cancel",
 		itemId: "cancel"
