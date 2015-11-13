@@ -231,25 +231,49 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Execute the import of data from OSM
 	 */
 	onImportClick: function(btn) {
-		this.checkParams();
-		this.stopZoneSelection();
-		this.waitMsg = Ext.Msg.show({
-            msg: 'Importing data from OpenStreetMap, please wait...',
-            width: 300,
-            wait: {
-                interval: 200
-            }
-        });
-		var request = this.prepareRequest();
-		this.executeRequest(request);
+		var paramsOK = this.checkParams();
+		if (paramsOK) {
+			this.stopZoneSelection();
+			this.waitMsg = Ext.Msg.show({
+				msg: 'Importing data from OpenStreetMap, please wait...',
+				width: 300,
+				wait: {
+					interval: 200
+				}
+			});
+			var request = this.prepareRequest();
+			this.executeRequest(request);
+		}
 	},
 	
 	/**
 	 * Method used to check that every param configured by user is correct to perform the import.
 	 */
 	checkParams: function() {
-		// TODO
+		var paramsOK = true;
+		var errorMessage = "";
+		var vm = this.getViewModel();
 		
+		// Execute Checks
+		if (vm.data.checkedTags.length === 0) {
+			errorMessage += " - No OSM tag selected<br/>";
+		}
+		if (this.selectionCoords === "") {
+			errorMessage += " - No geographical zone selected<br/>"
+		}
+		
+		// Display Error Message in case of error
+		if (errorMessage.length > 0) {
+			paramsOK = false;
+			Ext.MessageBox.show({
+				title: 'OSM Import',
+				msg: "Import can't be executed. Some parameters are incorrect:<br/>" + errorMessage,
+				width: 500,
+				buttons: Ext.MessageBox.OK,
+				icon: Ext.Msg.ERROR
+			});
+		}
+		return paramsOK;
 	},
 	
 	/**
