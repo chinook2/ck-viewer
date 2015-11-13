@@ -129,7 +129,8 @@ Ext.define('Ck.form.plugin.Subform', {
 				actions.push({
 					iconCls: 'fa fa-edit',
 					tooltip: 'Edit row',
-					handler: Ext.emptyFn
+					handler: Ext.emptyFn,
+					scope: this
 				});
 			}
 			if(grid.gridediting.deleterow!==false){
@@ -144,7 +145,8 @@ Ext.define('Ck.form.plugin.Subform', {
 						return 'fa fa-close';
 					},
 					tooltip: 'Delete row',
-					handler: this.deleteItem
+					handler: this.deleteItem,
+					scope: this
 				});
 			}
 			
