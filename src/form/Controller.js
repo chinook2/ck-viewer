@@ -696,6 +696,7 @@ Ext.define('Ck.form.Controller', {
 			url: url,
 			scope: this,
 			success: function (response) {
+				if(response.responseText=="") response.responseText = "{}";
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200) {
 					if(!data) {
@@ -846,22 +847,19 @@ Ext.define('Ck.form.Controller', {
 			scope: this,
 			success: function (response) {
 				var data = Ext.decode(response.responseText, true);
-				if(!data) {
-					Ck.Notify.error("Invalid JSON Data in : "+ url);
-					return false;
+				if(response.status == 200) {
+					this.fireEvent('aftersave', data);
+					if(this.oController.afterSave(dt) === false){
+						Ck.log("afterSave cancel saveData.");
+						return false;
+					}		
+					
+					this.getViewModel().setData({
+						layer: lyr,
+						fid: fid,
+						data: dt
+					});
 				}
-				
-				this.fireEvent('aftersave', data);
-				if(this.oController.afterSave(dt) === false){
-					Ck.log("afterSave cancel saveData.");
-					return false;
-				}		
-				
-				this.getViewModel().setData({
-					layer: lyr,
-					fid: fid,
-					data: dt
-				});
 				Ext.callback(callback, this);
 			},
 			failure: function (response, opts) {
