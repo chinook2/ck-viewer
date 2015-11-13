@@ -59,7 +59,6 @@ Ext.define('Ck.osmimport.import.OsmImportModel', {
 		if (geom != undefined && convertGeom) {
 			geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
 		}
-		toto.titi();
 		return geom;
 	},
 	

@@ -6,10 +6,6 @@
             tag: '[landuse=residential]',
             leaf: true
   		},{
-            text: 'Parking',
-            tag: '[amenity=parking]',
-            leaf: true
-        },{
             text: 'Herbe',
             tag: '[landuse=grass]',
             leaf: true
@@ -30,30 +26,40 @@
             leaf: true
         }]
     },{
-		text: 'Voies de circulation',
-		children: [{
-			text: 'Rues',
-			tag: '[highway=residential]',
-			leaf: true
-		},{
-			text: 'Chemin Piétonnier',
-			tag: '[highway=footway]',
-			leaf: true
-		}]
-	},{
 		text: 'Transports',
 		children: [{
-			text: 'Lignes de Tramway',
-			tag: '[type=route][route=tram]',
-			leaf: true
+			text: 'Transports en Commun',
+			children: [{
+				text: 'Lignes de Tramway',
+				tag: '[type=route][route=tram]',
+				leaf: true
+			},{
+				text: 'Lignes de Bus TAN',
+				tag: '[type=route][route=bus][network=TAN]',
+				leaf: true
+			},{
+				text: 'Lignes de Car LILA',
+				tag: '[type=route][route=bus][network="FR:Lila"]',
+				leaf: true
+			}]
 		},{
-			text: 'Lignes de Bus TAN',
-			tag: '[type=route][route=bus][network=TAN]',
-			leaf: true
+			text: 'Vélos, Piétons',
+			children: [{
+				text: 'Parking Vélos, Accroche-vélo',
+				tag: '[amenity=bicycle_parking]',
+				leaf: true
+			},{
+				text: 'Chemin Piétonnier',
+				tag: '[highway=footway]',
+				leaf: true
+			}]
 		},{
-			text: 'Lignes de Car LILA',
-			tag: '[type=route][route=bus][network="FR:Lila"]',
-			leaf: true
+			text: 'Automobiles',
+			children: [{
+				text: 'Parking',
+				tag: '[amenity=parking]',
+				leaf: true
+			}]
 		}]
 	},{
 		text: 'Divers',
@@ -78,7 +84,19 @@
 			leaf: true
 		},{
 			text: 'Erreur tag vide avec 1 tag erreur',
-			tag: '[amenity=school][]',
+			tag: '[amenity=school][=residential]',
+			leaf: true
+		},{
+			text: 'Erreur tag vide avec 1 tag erreur 2',
+			tag: '[amenity=school]private',
+			leaf: true
+		},{
+			text: 'Texte sans crochet',
+			tag: 'amenity=school',
+			leaf: true
+		},{
+			text: 'Point-virgule présent',
+			tag: '[amenity=school];',
 			leaf: true
 		}]
 	}]
