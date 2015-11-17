@@ -50447,7 +50447,8 @@ ol.layer.Layer.prototype.setMap = function(map) {
         map, ol.render.EventType.PRECOMPOSE, function(evt) {
           var layerState = this.getLayerState();
           layerState.managed = false;
-          layerState.zIndex = Infinity;
+		  var zIndex = this.getZIndex();
+          layerState.zIndex = (goog.isDef(zIndex) && zIndex != 0) ? zIndex : Infinity;
           evt.frameState.layerStatesArray.push(layerState);
           evt.frameState.layerStates[goog.getUid(this)] = layerState;
         }, false, this);
@@ -112815,7 +112816,8 @@ ol.interaction.Select = function(opt_options) {
     style: options.style ? options.style :
         ol.interaction.Select.getDefaultStyleFunction(),
     updateWhileAnimating: true,
-    updateWhileInteracting: true
+    updateWhileInteracting: true,
+	zIndex: goog.isDef(options.zIndex) ? options.zIndex : Infinity
   });
 
   var features = this.featureOverlay_.getSource().getFeaturesCollection();
