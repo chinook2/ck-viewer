@@ -489,11 +489,11 @@ Ext.define('Ck.form.Controller', {
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
 				if(c.subform){
-					Ext.apply(c, {
+					Ext.applyIf(c, {
 						plugins: ['gridstore', 'gridsubform']
 					});
 				} else {
-					Ext.apply(c, {
+					Ext.applyIf(c, {
 						plugins: ['gridstore', 'gridediting', {
 							ptype: 'rowediting',
 							clicksToEdit: 1
@@ -852,13 +852,16 @@ Ext.define('Ck.form.Controller', {
 					if(this.oController.afterSave(dt) === false){
 						Ck.log("afterSave cancel saveData.");
 						return false;
-					}		
+					}
 					
-					this.getViewModel().set({
-						layer: lyr,
-						fid: fid,
-						data: Ext.apply(this.getViewModel().get('data'), dt)
-					});
+					var vm = this.getViewModel();
+					if(vm){
+						vm.set({
+							layer: lyr,
+							fid: fid,
+							data: Ext.apply(vm.get('data'), dt)
+						});
+					}
 				}
 				Ext.callback(callback, this);
 			},
