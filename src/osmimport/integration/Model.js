@@ -10,6 +10,6 @@ Ext.define('Ck.osmimport.integration.Model', {
 	requires: [
 	],
 	data: {
-		test: "test data from view"
+		layersList : ["arrets de bus", "lignes de transport en commun", "Ecoles"]
 	}
 });
