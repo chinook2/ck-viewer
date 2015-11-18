@@ -12,16 +12,13 @@ Ext.define('Ck.map.action.OsmImport', {
 	tooltip: '',
 	
 	toggleGroup: 'ckmapAction',
-	importDone: false,
 	osmapi: new Ck.osmimport.OsmImportStore(),
 	finishImport: function() {
-		importDone = true;
 		Ck.actions['ckmapOsmImportImport'].setDisabled(true);
 		Ck.actions['ckmapOsmImportIntegration'].setDisabled(false);
 	},
 	
 	finishIntegration: function() {
-		importDone = false;
 		Ck.actions['ckmapOsmImportIntegration'].setDisabled(true);
 		Ck.actions['ckmapOsmImportImport'].setDisabled(false);
 	}

@@ -13,7 +13,7 @@ Ext.define('Ck.map.action.osmimport.Import', {
 	tooltip: 'Import Data',
 	toggleGroup: null,
 	enableToggle: false,
-	disabled: this.importDone,
+	disabled: false,  // available by default, changed once import is finished
 	
 	doAction: function(btn) {
 		if(!this.win) {
