@@ -25,7 +25,7 @@ Ext.define('Ck.map.action.osmimport.Integration', {
 				closable: false,
 				resizable: false,
 				items: [{
-					xtype: "ckosmimportimport",
+					xtype: "ckosmimportintegration",
 					openner: this
 				}]
 				
