@@ -97,12 +97,89 @@ Ext.define("Ck.osmimport.Integration", {
 			bind: {
 				hidden: "{!coordstags.checked}"
 			},
+			defaults: {
+				height: 200
+			},
 			items: [{
-				xtype: "label",
-				text: "Couche d'intégration"
+				xtype: "panel",
+				layout: {
+					type: "vbox",
+					align: "middle"
+				},
+				items: [{
+					xtype: "label",
+					text: "Couche d'intégration"
+				},{
+					xtype: "grid",
+					width: 400,
+					height: 180,
+					enableColumnHide: false,
+					enableColumnMove: false,
+					enableColumnResize: false,
+					selModel: {mode: "MULTI"},
+					columns: {
+						items: [
+							{
+								text: "Attributs",
+								dataIndex: "attr"
+							},{
+								text: "Tag OSM associé",
+								dataIndex: "tag"
+							}
+						],
+						defaults: {
+							width: 180
+						}
+					},
+					bind: {
+						store: {data: "{layersAttributes}"}
+					}
+				}]
 			},{
-				xtype: "label",
-				text: "Couche OSM"
+				xtype: "panel",
+				layout: {
+					type: "vbox",
+					align: "middle",
+					pack: "center"
+				},
+				width: 60,
+				defaults: {
+					xtype: "button",
+					margin: "10"
+				},
+				items: [{
+					iconCls: "fa fa-caret-left"
+				},{
+					iconCls: "fa fa-caret-right"
+				}]
+			},{
+				xtype: "panel",
+				layout: {
+					type: "vbox",
+					align: "middle"
+				},
+				items: [{
+					xtype: "label",
+					text: "Couche OSM"
+				},{
+					xtype: "grid",
+					width: 200,
+					height: 180,
+					enableColumnHide: false,
+					enableColumnMove: false,
+					enableColumnResize: false,
+					columns: [
+						{
+							xtype: "gridcolumn",
+							text: "Tag OSM",
+							dataIndex: "tag",
+							width: 180
+						}
+					],
+					bind: {
+						store: {data: "{tagsOsm}"}
+					}
+				}]
 			}]
 		}]
 	}],

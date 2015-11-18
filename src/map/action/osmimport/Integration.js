@@ -19,8 +19,7 @@ Ext.define('Ck.map.action.osmimport.Integration', {
 		if(!this.win) {
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'OSM Data Integration',
-				// height: 400,
-				width: 600,
+				width: 700,
 				layout: 'fit',
 				collapsible: true,
 				closable: false,

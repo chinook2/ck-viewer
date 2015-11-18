@@ -10,6 +10,23 @@ Ext.define('Ck.osmimport.integration.Model', {
 	requires: [
 	],
 	data: {
-		layersList : ["arrets de bus", "lignes de transport en commun", "Ecoles"]
+		layersList : ["arrets de bus", "lignes de transport en commun", "Ecoles"],
+		layersAttributes: [{attr: "Nom"},
+						   {attr: "Numéro de voirie"},
+						   {attr: "Libelle de Voie", tag: "addr:street"},
+						   {attr: "Libelle Commune"},
+						   {attr: "Type"},
+						   {attr: "sous-type"}],
+		tagsOsm: [{tag:"name"},
+				  {tag:"addr:housenumber"},
+				  {tag:"amenity"},
+				  {tag:"output:generator:electricity"},
+				  {tag:"route"},
+				  {tag:"highway"},
+				  {tag:"school:FR"},
+				  {tag:"type"},
+				  {tag:"operator:type"},
+				  {tag:"ref:UAI"},
+				  {tag:"ref:FR:LaPoste"}]
 	}
 });
