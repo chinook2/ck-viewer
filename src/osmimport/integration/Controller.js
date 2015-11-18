@@ -10,9 +10,12 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * @protected
 	 */
 	init: function() {
+		this.openner = this.getView().openner;
+
 		/**
          * Init Constants
 		 */
+		
 		
 	
 		/**
@@ -32,13 +35,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Hide the integration panel
 	 */
 	onCancelClick: function() {
-		this.getView().openner.close();
+		this.openner.close();
 	},
 	
 	/**
 	 * Indicate to the tool that the user has finished the integration of data.
 	 */
 	onIntegrationFinishedClick: function() {
-		this.getView().openner.finishIntegration();
+		this.openner.finishIntegration();
+		this.openner.close();
 	}
 });

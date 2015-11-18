@@ -10,6 +10,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * @protected
 	 */
 	init: function() {
+		this.openner = this.getView().openner;
+
 		/**
          * Init Constants
 		 */
@@ -104,7 +106,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	cancel: function() {
 		this.stopZoneSelection();
-		this.getView().openner.close();
+		this.openner.close();
 	},
 	
 	/**
@@ -170,7 +172,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Method launched when user clicks on the "Selection" button.
 	 */
 	onSelectionClick: function(btn) {
-		this.getView().openner.collapse();
+		this.openner.collapse();
 		this.prepareSelector();
 	},
 	
@@ -338,7 +340,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Executes the request on OSM.
 	 */
 	executeRequest: function(request) {
-		var store = this.getView().openner.osmapi;
+		var store = this.openner.osmapi;
 		store.getProxy().setExtraParam("data", request);
 		store.load({
 			scope: this,
@@ -351,7 +353,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Display data or error according the request results.
 	 */
 	onRequestFinished: function(records, operation, success) {
-		this.getView().openner.close();
+		this.openner.close();
 		if (success) {
 			var self = this;
 			var olFeatures = [];
@@ -392,7 +394,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.WARNING
 				});
-				this.getView().openner.finishImport();
+				this.openner.finishImport();
 			} else {
 				Ext.MessageBox.show({
 					title: 'OSM Import',
@@ -401,7 +403,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.INFO
 				});
-				this.getView().openner.finishImport();
+				this.openner.finishImport();
 			}
 
 		} else {
