@@ -78,6 +78,10 @@ Ext.define('Ck.map.Model', {
 				"source": "MapQuest",
 				"layerType": "Tile"
 			},
+			"wmts": {
+				"source": "WMTS",
+				"layerType": "Tile"
+			},
 			"wms": {
 				"source": "ImageWMS",
 				"layerType": "Image"

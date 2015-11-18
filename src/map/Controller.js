@@ -113,6 +113,7 @@ Ext.define('Ck.map.Controller', {
 		var olControls = [];
 		var control, controls = v.getControls();
 		for(var controlName in controls) {
+			if(controls[controlName]===false) continue;
 			control = Ck.create("ol.control." + controlName, controls[controlName]);
 			if(control) {
 				olControls.push(control);
@@ -197,7 +198,9 @@ Ext.define('Ck.map.Controller', {
 		var v = this.getView();
 		var olMap = this.getOlMap();
 		var olView = this.getOlView();
-		
+
+		proj4.defs("EPSG:3943", "+proj=lcc +lat_1=42.25 +lat_2=43.75 +lat_0=43 +lon_0=3 +x_0=1700000 +y_0=2200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+
 		var viewProj = owc.getProjection();
 		var viewScales = owc.getScales();
 		
@@ -212,6 +215,7 @@ Ext.define('Ck.map.Controller', {
 		
 		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
 		olMap.setView(new ol.View({
+			projection: viewProj,
 			center: v.getCenter(),
 			zoom: v.getZoom(),
 			minResolution: viewScales[0].res,
@@ -223,7 +227,7 @@ Ext.define('Ck.map.Controller', {
 		this.getLayers().clear();
 		
 		// Set the bbox
-		this.setExtent(owc.getExtent());
+		// this.setExtent(owc.getExtent());
 		
 		owc.getLayers().forEach(function(lyr) {
 			var params, opt_options, layer = owc.getLayer(lyr);
@@ -248,6 +252,34 @@ Ext.define('Ck.map.Controller', {
 						olSourceOptions = {
 							url: layer.getHref(false),
 							params: layer.getHrefParams()
+						};
+						break;
+						
+					case 'wmts':
+						params = layer.getHrefParams();
+						// get resolution from main view. need inverse order
+						var resolutions = owc.getResolutions();
+						resolutions.reverse();
+						
+						// generate resolutions and matrixIds arrays for this WMTS
+						var matrixIds = [];
+						for (var z = 0; z < resolutions.length; ++z) {
+							matrixIds[z] = z;
+						};
+						
+						olSourceOptions = {
+							url: layer.getHref(false),
+							layer: params.LAYER,
+							matrixSet: params.TILEMATRIXSET,
+							format: params.FORMAT || 'image/png',
+							style: params.STYLE || 'default',
+							
+							// TODO : use extent, resolutions different from main view.
+							tileGrid: new ol.tilegrid.WMTS({
+								origin: ol.extent.getTopLeft(owc.getExtent()),
+								resolutions: resolutions,
+								matrixIds: matrixIds
+							})
 						};
 						break;
 						
