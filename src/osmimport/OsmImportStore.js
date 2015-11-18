@@ -1,12 +1,13 @@
 /**
- * Store to access to the OSM API.
+ * Store to access to the OSM API, import data 
+ * and store imported data until integration is finished
  * @author Florent RICHARD
  */
-Ext.define("Ck.osmimport.import.OsmImportStore", {
+Ext.define("Ck.osmimport.OsmImportStore", {
 	extend: "Ext.data.Store",
 	alias: "store.osmimport",
-	requires: ["Ck.osmimport.import.OsmImportModel"],
-	model: "Ck.osmimport.import.OsmImportModel",
+	requires: ["Ck.osmimport.OsmImportModel"],
+	model: "Ck.osmimport.OsmImportModel",
 	proxy: {
 		type: "ajax",
 		url: "http://overpass-api.de/api/interpreter",

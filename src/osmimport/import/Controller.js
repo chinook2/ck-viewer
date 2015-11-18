@@ -338,8 +338,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Executes the request on OSM.
 	 */
 	executeRequest: function(request) {
-		var vm = this.getViewModel();
-		var store = vm.getStore("osmapi");
+		var store = this.getView().openner.osmapi;
 		store.getProxy().setExtraParam("data", request);
 		store.load({
 			scope: this,
@@ -358,7 +357,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var olFeatures = [];
 			var nbFeaturesImported = 0;
 			var checkedTags = this.getViewModel().data.checkedTags;
-
 			for (var r = 0; r < records.length; r++) {
 				var record = records[r];
 				if (record.containsSearchedTags(checkedTags)) {

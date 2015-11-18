@@ -3,9 +3,10 @@
  * Contains:
  * - params returned by the API
  * - additionnal params used to simplify the display of data.
+ * - method to convert data for display and integration
  * @author Florent RICHARD
  */
-Ext.define('Ck.osmimport.import.OsmImportModel', {
+Ext.define('Ck.osmimport.OsmImportModel', {
 	extend: 'Ext.data.Model',
 	fields: [
 		{name: "type", type: "string"},

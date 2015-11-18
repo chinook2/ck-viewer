@@ -39,6 +39,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Indicate to the tool that the user has finished the integration of data.
 	 */
 	onIntegrationFinishedClick: function() {
-		this.getView().openner.finishIntegration()
+		this.getView().openner.finishIntegration();
 	}
 });

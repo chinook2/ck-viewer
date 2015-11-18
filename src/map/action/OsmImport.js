@@ -13,7 +13,7 @@ Ext.define('Ck.map.action.OsmImport', {
 	
 	toggleGroup: 'ckmapAction',
 	importDone: false,
-	
+	osmapi: new Ck.osmimport.OsmImportStore(),
 	finishImport: function() {
 		importDone = true;
 		Ck.actions['ckmapOsmImportImport'].setDisabled(true);
