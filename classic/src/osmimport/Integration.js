@@ -6,21 +6,24 @@ Ext.define("Ck.osmimport.Integration", {
 	extend: "Ext.form.Panel",
 	alias: "widget.ckosmimportintegration",
 	
-	/*requires: [
+	requires: [
 		"Ck.osmimport.integration.*"
 	],
 	controller: "ckosmimportintegration",
 	viewModel: {
 		type: "ckosmimportintegration"
-	},*/
+	},
 
 	layout: 'anchor',
 	config: {
 		bodyPadding: 10
 	},
-	items: [{xtype: "container",
-			 html: "<p>Panel Integration</p>"
-		}],
+	items: [{
+		xtype: "container",
+		bind: {
+			html: "<p>Panel Integration: {test}</p>"
+		}
+	}],
 	
 	buttons: [{
 		text: "Integration",
