@@ -11,7 +11,20 @@ Ext.define('Ck.map.action.OsmImport', {
 	iconCls: '',
 	tooltip: '',
 	
-	toggleGroup: 'ckmapAction'
+	toggleGroup: 'ckmapAction',
+	importDone: false,
+	
+	finishImport: function() {
+		importDone = true;
+		Ck.actions['ckmapOsmImportImport'].setDisabled(true);
+		Ck.actions['ckmapOsmImportIntegration'].setDisabled(false);
+	},
+	
+	finishIntegration: function() {
+		importDone = false;
+		Ck.actions['ckmapOsmImportIntegration'].setDisabled(true);
+		Ck.actions['ckmapOsmImportImport'].setDisabled(false);
+	}
 		
 });
 

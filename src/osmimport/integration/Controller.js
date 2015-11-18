@@ -20,7 +20,10 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		 */
 		this.control({
 			"ckosmimportintegration button#cancel": {
-				click: this.cancel
+				click: this.onCancelClick
+			},
+			"ckosmimportintegration button#integrationfinished": {
+				click: this.onIntegrationFinishedClick
 			}
 		});
 	},
@@ -28,7 +31,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	/**
 	 * Hide the integration panel
 	 */
-	cancel: function() {
+	onCancelClick: function() {
 		this.getView().openner.close();
+	},
+	
+	/**
+	 * Indicate to the tool that the user has finished the integration of data.
+	 */
+	onIntegrationFinishedClick: function() {
+		this.getView().openner.finishIntegration()
 	}
 });

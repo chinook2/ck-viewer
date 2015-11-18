@@ -13,6 +13,7 @@ Ext.define('Ck.map.action.osmimport.Integration', {
 	tooltip: 'Integrate Data',
 	toggleGroup: null,
 	enableToggle: false,
+	disabled: !this.importDone,
 	
 	doAction: function(btn) {
 		if(!this.win) {

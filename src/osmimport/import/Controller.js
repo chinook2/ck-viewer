@@ -394,6 +394,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.WARNING
 				});
+				this.getView().openner.finishImport();
 			} else {
 				Ext.MessageBox.show({
 					title: 'OSM Import',
@@ -402,6 +403,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.INFO
 				});
+				this.getView().openner.finishImport();
 			}
 
 		} else {
