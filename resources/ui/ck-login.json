@@ -1,0 +1,43 @@
+{
+	"controller": "cklogin",
+	"layout": "center",
+	"items": {
+		"xtype": "form",
+		"frame":true,
+		"width": 320,
+		"bodyPadding": 10,
+		"bind":{
+			"title": "{name} Login"
+		},
+		"defaults": {
+			"anchor": "100%",
+			"labelWidth": 120
+		},
+		"defaultType": "textfield",
+		"items": [{
+			"allowBlank": false,
+			"fieldLabel": "User ID",
+			"name": "username",
+			"emptyText": "user id"
+		}, {
+			"allowBlank": false,
+			"fieldLabel": "Password",
+			"name": "password",
+			"emptyText": "password",
+			"inputType": "password"
+		}, {
+			"xtype":"checkbox",
+			"fieldLabel": "Remember me",
+			"name": "remember",
+			"hidden": true
+		}],
+		
+		"buttons": [{
+			"text":"Register",
+			"hidden": true
+		},{
+			"text":"Login",
+			"action": "ckLogin"
+		}]
+	}
+}
