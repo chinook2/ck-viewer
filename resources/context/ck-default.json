@@ -76,13 +76,37 @@
 			"publisher" : "GEOFLA",
 			"active" : false,
 			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"geometryType": "MultiPolygon",
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
 				"operations" : [{ 
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "application/json",
-					"href" : "https://raw.githubusercontent.com/chinook2/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
+					"href" : "https://raw.githubusercontent.com/florentrichard44/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": ""
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "school",
+		"properties": {
+			"title" : "Ecoles",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"geometryType": "Point",
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "https://raw.githubusercontent.com/florentrichard44/ck-viewer/master/resources/data/geojson_schools.geojson"
 				}]
 			}],
 			"extension" : {
