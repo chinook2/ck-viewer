@@ -109,6 +109,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		
 		var size = this.olMap.getSize();
 		var extent = Ck.getMap().getOlView().calculateExtent(size).join(",");
+		var projCode = Ck.getMap().getProjection().getCode();
 		
 		this.nbQueryDone = 0;
 		this.nbQuery = lyrs.getLength();
@@ -142,14 +143,15 @@ Ext.define('Ck.map.action.FeatureInfo', {
 					url: url,
 					cors: true,
 					useDefaultXhrHeader : false,
+					nocache: true,
 					params: {
 						service: "WMS",
 						request: "GetFeatureInfo",
-						version: src.getParams().version,
-						layers: src.getParams().layers,
-						query_layers: src.getParams().layers,
+						version: src.getParams().version || src.getParams().VERSION,
+						layers: src.getParams().layers || src.getParams().LAYERS,
+						query_layers: src.getParams().layers || src.getParams().LAYERS,
 						bbox: extent,
-						srs: "EPSG:3857",
+						srs: projCode,
 						feature_count: 10,
 						x: this.curPixel[0],
 						y: this.curPixel[1],
@@ -197,7 +199,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				
 				this.win.show();
 			} else {
-				alert("Result empty!");
+				// alert("Result empty!");
 			}
 		}
 	},
