@@ -30,19 +30,21 @@ Ext.define("Ck.osmimport.Integration", {
 		items: [{
 			xtype: "combobox",
 			reference: "layerselection",
+			itemId: "layerselection",
 			width: 300,
 			bind: {
-				store: "{layersList}"
-			}
+				store: {data:"{layersList}", fields: ["title", "id"]}
+			},
+			displayField: "title",
+			valueField: "id",
+			editable: false
 		},{
 			xtype: "label",
 			margin: "0 0 0 10",
 			style: {
 				"font-style": "italic"
 			},
-			bind: {
-				text: "Géométrie: "
-			}
+			reference: "geometrylabel"
 		}]	
 	},{  // Geometry to integrate
 		xtype: "fieldcontainer",

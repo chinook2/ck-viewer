@@ -27,8 +27,21 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			},
 			"ckosmimportintegration button#integrationfinished": {
 				click: this.onIntegrationFinishedClick
+			},
+			"ckosmimportintegration #layerselection": {
+				change: this.onLayerSelectionChange,
+				scope: this
 			}
 		});
+		
+		/**
+		 * Init the view
+		 */
+		var layersList = this.getLayersList();
+		this.getViewModel().data.layersList = layersList;
+		if (layersList.length > 0) {
+			this.lookupReference("layerselection").select(layersList[0].id);
+		}
 	},
 		
 	/**
@@ -44,5 +57,30 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onIntegrationFinishedClick: function() {
 		this.openner.finishIntegration();
 		this.openner.close();
+	},
+	
+	/**
+	 * Returns the list of all the layers in the map which can integrate OSM data.
+	 */
+	getLayersList: function() {
+		var layersList = [];
+		var layersArray = Ck.getMap().getLayers().getArray();
+		for (var i in layersArray) {
+			if (layersArray[i].get("title") != undefined) {
+				var layerObj = {title: layersArray[i].get("title"),
+								id: layersArray[i].get("id")};
+				layersList.push(layerObj);
+			}
+		}
+		return layersList;
+	},
+	
+	/** 
+	 * Method called when the user changes the selection of layer on which data will be integrated.
+	 */
+	onLayerSelectionChange: function(combobox, newValue, oldValue, eOpts) {
+		var selectedLayer = Ck.getMap().getLayer(newValue);
+		var geometryType = selectedLayer.ckParams.geometryType;
+		this.lookupReference("geometrylabel").setText("Géométrie: " + geometryType);
 	}
 });
