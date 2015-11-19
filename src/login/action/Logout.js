@@ -6,7 +6,7 @@ Ext.define('Ck.login.action.Logout', {
 	alias: "widget.ckLogout",
 	
 	itemId: 'logout',
-	text: '',
+	text: 'Logout',
 	iconCls: 'fa fa-unlock-alt',
 	tooltip: 'Logout',
 	

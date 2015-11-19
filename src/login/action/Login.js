@@ -6,7 +6,7 @@ Ext.define('Ck.login.action.Login', {
 	alias: "widget.ckLogin",
 	
 	itemId: 'login',
-	text: '',
+	text: 'Login',
 	iconCls: 'fa fa-lock',
 	tooltip: 'Login',
 	
@@ -15,7 +15,7 @@ Ext.define('Ck.login.action.Login', {
 	 */
 	doAction: function(btn) {
 		if(!btn) return;
-		var controller = btn.lookupController();
+		var controller = (btn.isController) ? btn : btn.lookupController();
 		var view = controller.getView();
 		
 		var form = view.down('form');
@@ -39,8 +39,8 @@ Ext.define('Ck.login.action.Login', {
 						sessionStorage.setItem("CkLoggedIn", login.data.uid);
 						
 						// Remove Login Window
-						var view = btn.up('ckview');
-						view.destroy();
+						var mainView = view.up('ckview');
+						mainView.destroy();
 						
 						// Add the main view to the viewport		
 						var ui = Ck.getOption('authenticatedUi') || 'ck-default';
