@@ -67,6 +67,10 @@
 			text: "Centrales de production d'énergie",
 			tag: '[type=site][power=plant]',
 			leaf: true
+		},{
+			text: "Boîtes aux Lettres",
+			tag: '[amenity=post_box]',
+			leaf: true
 		}]
 	},{
 		text: 'Diverses Erreurs',

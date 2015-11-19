@@ -94,7 +94,7 @@
 		"type": "Feature",
 		"id": "school",
 		"properties": {
-			"title" : "Ecoles",
+			"title" : "Boîtes aux lettres",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -106,7 +106,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "application/json",
-					"href" : "https://raw.githubusercontent.com/florentrichard44/ck-viewer/master/resources/data/geojson_schools.geojson"
+					"href" : "/packages/local/ck-viewer/resources/data/geojson_boitesauxlettres.geojson"
 				}]
 			}],
 			"extension" : {
