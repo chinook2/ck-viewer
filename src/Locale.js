@@ -50,7 +50,7 @@ Ext.define('Ck.Locale', {
         // TODO : Manage multiples views
         var v = Ext.query('.ck-view')[0];
         if(!v) {
-            Ck.log("Enable to find a valid Ck.View");
+            Ck.log("Enable to find a valid Ck.View to set Locale.");
             return;
         }
 
