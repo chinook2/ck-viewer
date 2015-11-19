@@ -29,8 +29,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				click: this.onIntegrationFinishedClick
 			},
 			"ckosmimportintegration #layerselection": {
-				change: this.onLayerSelectionChange,
-				scope: this
+				change: this.onLayerSelectionChange
 			}
 		});
 		

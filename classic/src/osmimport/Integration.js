@@ -33,7 +33,10 @@ Ext.define("Ck.osmimport.Integration", {
 			itemId: "layerselection",
 			width: 300,
 			bind: {
-				store: {data:"{layersList}", fields: ["title", "id"]}
+				store: {
+					data:"{layersList}",
+					fields: ["title", "id"]
+				}
 			},
 			displayField: "title",
 			valueField: "id",
@@ -71,7 +74,7 @@ Ext.define("Ck.osmimport.Integration", {
 		},{
 			xtype: "label",
 			cls: Ext.baseCSSPrefix + "fa fa-warning",
-			data: "Une conversion des données peut être nécessaire.",
+			data: "Une conversion de certaines données sera nécessaire.",
 			style: {
 				"color": "orange"
 			},

@@ -24,7 +24,6 @@ Ext.define('Ck.map.action.osmimport.Attributions', {
 				closeAction: 'hide',
 				listeners: {
 					close: function() {
-						console.log("close listener");
 						btn.setPressed(false);
 						this.win.hide();
 					},

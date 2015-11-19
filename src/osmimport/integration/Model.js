@@ -4,11 +4,8 @@
  */
 Ext.define('Ck.osmimport.integration.Model', {
 	extend: 'Ext.app.ViewModel',
-
 	alias: 'viewmodel.ckosmimportintegration',
 
-	requires: [
-	],
 	data: {
 		layersList: [],
 		layersAttributes: [{attr: "Nom"},
