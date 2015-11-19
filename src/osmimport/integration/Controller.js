@@ -25,6 +25,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			"ckosmimportintegration button#cancel": {
 				click: this.onCancelClick
 			},
+			"ckosmimportintegration button#integration": {
+				click: this.onIntegrationClick
+			},
 			"ckosmimportintegration button#integrationfinished": {
 				click: this.onIntegrationFinishedClick
 			},
@@ -81,5 +84,29 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var selectedLayer = Ck.getMap().getLayer(newValue);
 		var geometryType = selectedLayer.ckParams.geometryType;
 		this.lookupReference("geometrylabel").setText("Géométrie: " + geometryType);
+	},
+	
+	/**
+	 * Method called when the user clicks on the integration button.
+	 * Execute the integration according the user's configuration on panel.
+	 */
+	onIntegrationClick: function() {
+		var selectedLayer = this.lookupReference("layerselection").getValue();
+		var integrationLayer = Ck.getMap().getLayer(selectedLayer);
+		var records = this.getView().openner.osmapi.getData().items;
+		var newFeatures = []
+		for (var i in records) {
+			var record = records[i];
+			if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
+				var feature = new ol.Feature(
+							Ext.apply({
+								geometry: record.calculateGeom()
+							})
+						);
+				newFeatures.push(feature);
+			}
+		}
+		integrationLayer.getSource().addFeatures(newFeatures);
+		console.log(integrationLayer);
 	}
 });
