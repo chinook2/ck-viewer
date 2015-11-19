@@ -56,7 +56,5 @@ Ext.define('Ck.login.action.Logout', {
 			},
 			scope: this
 		});		
-	},
-	
-	clear
+	}
 });
