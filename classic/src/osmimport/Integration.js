@@ -56,18 +56,28 @@ Ext.define("Ck.osmimport.Integration", {
 			vertical: true,
 			columns: 1,
 			defaults: {
-				xtype: "radio",
-				name: 'selection-geometry'
+				xtype: "radio"
 			},
 			id: "geometrytointegrate",
 			items: [{
 				checked: true,
 				boxLabel: 'Géométrie de la couche sélectionnée',
 				inputValue: 'selectedone'
-			}, {
+			},{
 				boxLabel: 'Toutes les géométries',
-				inputValue: 'all'
+				inputValue: 'all',
+				reference: "selectAllGeometries"
 			}]
+		},{
+			xtype: "label",
+			cls: Ext.baseCSSPrefix + "fa fa-warning",
+			data: "Une conversion des données peut être nécessaire.",
+			style: {
+				"color": "orange"
+			},
+			bind: {
+				hidden: "{!selectAllGeometries.checked}"
+			}
 		}]
 	},{  // Informations to integrate
 		xtype: "fieldcontainer",
