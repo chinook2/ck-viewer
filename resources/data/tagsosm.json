@@ -1,115 +1,115 @@
 {
-    children : [{
-        text: 'Terrains',
-        children: [{
-            text: 'Résidentiel',
-            tag: '[landuse=residential]',
-            leaf: true
+    "children" : [{
+        "text": "Terrains",
+        "children": [{
+            "text": "Résidentiel",
+            "tag": "[landuse=residential]",
+            "leaf": true
   		},{
-            text: 'Herbe',
-            tag: '[landuse=grass]',
-            leaf: true
+            "text": "Herbe",
+            "tag": "[landuse=grass]",
+            "leaf": true
         },{
-			text: 'Terrain de Sport',
-			tag: '[leisure=pitch]',
-			leaf: true
+			"text": "Terrain de Sport",
+			"tag": "[leisure=pitch]",
+			"leaf": true
 		}]
     },{
-        text: 'Education',
-        children: [{
-            text: 'Ecoles Primaires',
-            tag: '[amenity=school]["school:FR"=primaire]',
-            leaf: true
+        "text": "Education",
+        "children": [{
+            "text": "Ecoles Primaires",
+            "tag": "[amenity=school][\"school:FR\"=primaire]",
+            "leaf": true
   		},{
-            text: 'Bibliothèques',
-            tag: '[amenity=library]',
-            leaf: true
+            "text": "Bibliothèques",
+            "tag": "[amenity=library]",
+            "leaf": true
         }]
     },{
-		text: 'Transports',
-		children: [{
-			text: 'Transports en Commun',
-			children: [{
-				text: 'Lignes de Tramway',
-				tag: '[type=route][route=tram]',
-				leaf: true
+		"text": "Transports",
+		"children": [{
+			"text": "Transports en Commun",
+			"children": [{
+				"text": "Lignes de Tramway",
+				"tag": "[type=route][route=tram]",
+				"leaf": true
 			},{
-				text: 'Lignes de Bus TAN',
-				tag: '[type=route][route=bus][network=TAN]',
-				leaf: true
+				"text": "Lignes de Bus TAN",
+				"tag": "[type=route][route=bus][network=TAN]",
+				"leaf": true
 			},{
-				text: 'Lignes de Car LILA',
-				tag: '[type=route][route=bus][network="FR:Lila"]',
-				leaf: true
+				"text": "Lignes de Car LILA",
+				"tag": "[type=route][route=bus][network=\"FR:Lila\"]",
+				"leaf": true
 			}]
 		},{
-			text: 'Vélos, Piétons',
-			children: [{
-				text: 'Parking Vélos, Accroche-vélo',
-				tag: '[amenity=bicycle_parking]',
-				leaf: true
+			"text": "Vélos, Piétons",
+			"children": [{
+				"text": "Parking Vélos, Accroche-vélo",
+				"tag": "[amenity=bicycle_parking]",
+				"leaf": true
 			},{
-				text: 'Chemin Piétonnier',
-				tag: '[highway=footway]',
-				leaf: true
+				"text": "Chemin Piétonnier",
+				"tag": "[highway=footway]",
+				"leaf": true
 			}]
 		},{
-			text: 'Automobiles',
-			children: [{
-				text: 'Parking',
-				tag: '[amenity=parking]',
-				leaf: true
+			"text": "Automobiles",
+			"children": [{
+				"text": "Parking",
+				"tag": "[amenity=parking]",
+				"leaf": true
 			}]
 		}]
 	},{
-		text: 'Divers',
-		children: [{
-			text: "Centrales de production d'énergie",
-			tag: '[type=site][power=plant]',
-			leaf: true
+		"text": "Divers",
+		"children": [{
+			"text": "Centrales de production d'énergie",
+			"tag": "[type=site][power=plant]",
+			"leaf": true
 		},{
-			text: "Boîtes aux Lettres",
-			tag: '[amenity=post_box]',
-			leaf: true
+			"text": "Boîtes aux Lettres",
+			"tag": "[amenity=post_box]",
+			"leaf": true
 		}]
 	},{
-		text: 'Diverses Erreurs',
-		children: [{
-			text: 'Erreur no tag',
-			tag: '',
-			leaf: true
+		"text": "Diverses Erreurs",
+		"children": [{
+			"text": "Erreur no tag",
+			"tag": "",
+			"leaf": true
 		},{
-			text: 'Erreur tag sans key',
-			tag: '[=residential]',
-			leaf: true
+			"text": "Erreur tag sans key",
+			"tag": "[=residential]",
+			"leaf": true
 		},{
-			text: 'Erreur tag vide',
-			tag: '[]',
-			leaf: true
+			"text": "Erreur tag vide",
+			"tag": "[]",
+			"leaf": true
 		},{
-			text: 'Erreur tag vide avec 1 tag erreur',
-			tag: '[amenity=school][=residential]',
-			leaf: true
+			"text": "Erreur tag vide avec 1 tag erreur",
+			"tag": "[amenity=school][=residential]",
+			"leaf": true
 		},{
-			text: 'Erreur tag vide avec 1 tag erreur 2',
-			tag: '[amenity=school]private',
-			leaf: true
+			"text": "Erreur tag vide avec 1 tag erreur 2",
+			"tag": "[amenity=school]private",
+			"leaf": true
 		},{
-			text: 'Texte sans crochet',
-			tag: 'amenity=school',
-			leaf: true
+			"text": "texte sans crochet",
+			"tag": "amenity=school",
+			"leaf": true
 		},{
-			text: 'Point-virgule présent',
-			tag: '[amenity=school];',
-			leaf: true
+			"text": "Point-virgule présent",
+			"tag": "[amenity=school];",
+			"leaf": true
 		},{
-			text: 'Double point sans guillemets dans la clé',
-			tag: '[amenity=school][school:FR=primaire]',
-			leaf: true
+			"text": "Double point sans guillemets dans la clé",
+			"tag": "[amenity=school][school:FR=primaire]",
+			"leaf": true
 		},{
-			text: 'Double point sans guillemets dans la valeur',
-			tag: '[type=route][network=FR:Lila]',
-			leaf: true
+			"text": "Double point sans guillemets dans la valeur",
+			"tag": "[type=route][network=FR:Lila]",
+			"leaf": true
 		}]
 	}]
 }
