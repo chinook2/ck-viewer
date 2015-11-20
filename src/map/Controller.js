@@ -341,7 +341,8 @@ Ext.define('Ck.map.Controller', {
 					extent: extent,
 					style: olStyle,
 					visible: layer.getVisible(),
-					path: layer.getExtension('path')
+					path: layer.getExtension('path'),
+					url: olSourceOptions.url
 				});
 				
 				if(olLayer) {

@@ -93,8 +93,76 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onIntegrationClick: function() {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		var integrationLayer = Ck.getMap().getLayer(selectedLayer);
-		var records = this.getView().openner.osmapi.getData().items;
-		var newFeatures = []
+		Ext.define("GeoJsonModel", {
+			extend: "Ext.data.Model",
+			fields: [
+					{name: "type", defaultValue: "Feature"},
+					{name: "properties"},
+					{name: "bbox"},
+					{name: "geometry"}
+				],
+				 clientIdProperty: "clientId"});
+		var layerStore = Ext.create("Ext.data.Store", {
+			model: "GeoJsonModel",
+			proxy: {
+				type: 'ajax',
+				url: integrationLayer.get("url"),
+				limitParam: false,
+				pageParam: false,
+				startParam: false,
+ 				noCache: false,
+				writer: {
+					type: "json",
+					clientIdProperty: "clientId"
+				}
+			}
+		});
+		
+		layerStore.load({
+			scope: this,
+			callback:function(loadedFeatures, operation, success) {
+				//var newFeatures = [];
+				var records = this.getView().openner.osmapi.getData().items;
+				console.log(loadedFeatures);
+				var features = loadedFeatures[0].data.features;
+				console.log(features);
+				for (var i in records) {
+					var record = records[i];
+					if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
+						var geom = record.calculateGeom();
+						var feature = new ol.Feature(
+									Ext.apply({
+										geometry: geom
+									})
+								);				
+						//newFeatures.push(feature);
+						console.log(geom.getCoordinates());
+						var featureObj = {
+							id: -1,
+							type: "Feature",
+							properties: {},
+							bbox: [],
+							geometry: {
+								type: "Point",
+								coordinates: geom.getCoordinates()
+								
+							},
+							clientId: -i - 1
+							
+						};
+						features.push(featureObj);
+					}
+				}
+				console.log(loadedFeatures);
+				layerStore.setData(loadedFeatures);
+				console.log(layerStore);
+				console.log(layerStore.getModel());
+				layerStore.update();
+			}
+		});
+		
+		/*layerStore.beginUpdate();
+		
 		for (var i in records) {
 			var record = records[i];
 			if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
@@ -102,11 +170,15 @@ Ext.define('Ck.osmimport.integration.Controller', {
 							Ext.apply({
 								geometry: record.calculateGeom()
 							})
-						);
+						);				
 				newFeatures.push(feature);
+				layerStore.add(feature);
 			}
 		}
-		integrationLayer.getSource().addFeatures(newFeatures);
-		console.log(integrationLayer);
+		console.log(layerStore.getData());
+		layerStore.endUpdate();
+		layerStore.update();
+		integrationLayer.getSource().addFeatures(newFeatures);*/
+		
 	}
 });

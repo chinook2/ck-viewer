@@ -92,7 +92,7 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "school",
+		"id": "postbox",
 		"properties": {
 			"title" : "Boîtes aux lettres",
 			"updated" : "2015-07-16T00:00:00Z",
