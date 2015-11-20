@@ -82,7 +82,20 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	onLayerSelectionChange: function(combobox, newValue, oldValue, eOpts) {
 		var selectedLayer = Ck.getMap().getLayer(newValue);
-		var geometryType = selectedLayer.ckParams.geometryType;
+		var geometryType = undefined;
+		if (typeof selectedLayer.getSource().getFeatures === "function") {
+			var layerData = selectedLayer.getSource().getFeatures();
+			for (var i in layerData) {
+				var geom = layerData[i].getGeometry().getType();
+				console.log(geom);
+				if (geometryType == undefined) {
+					geometryType = geom;
+				} else if (geometryType != geom) {
+					geometryType = undefined;
+					break;
+				}
+			}
+		}
 		this.lookupReference("geometrylabel").setText("Géométrie: " + geometryType);
 	},
 	
