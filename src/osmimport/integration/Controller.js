@@ -121,7 +121,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		layerStore.load({
 			scope: this,
 			callback:function(loadedFeatures, operation, success) {
-				//var newFeatures = [];
+				var newFeatures = [];
 				var records = this.getView().openner.osmapi.getData().items;
 				console.log(loadedFeatures);
 				var features = loadedFeatures[0].data.features;
@@ -135,10 +135,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 										geometry: geom
 									})
 								);				
-						//newFeatures.push(feature);
+						newFeatures.push(feature);
 						console.log(geom.getCoordinates());
 						var featureObj = {
-							id: -1,
 							type: "Feature",
 							properties: {},
 							bbox: [],
@@ -146,9 +145,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 								type: "Point",
 								coordinates: geom.getCoordinates()
 								
-							},
-							clientId: -i - 1
-							
+							}
 						};
 						features.push(featureObj);
 					}
@@ -158,6 +155,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				console.log(layerStore);
 				console.log(layerStore.getModel());
 				layerStore.update();
+				integrationLayer.getSource().addFeatures(newFeatures);
 			}
 		});
 		
