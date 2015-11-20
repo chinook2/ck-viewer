@@ -113,10 +113,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Method launched once the tree store is loaded and displayed
 	 * Adds a checkbox to each leaf in the tree used to display OSM Tags.
 	 */
-	onTreeOsmTagsLoad: function(tree) {
-		tree.getRootNode().cascadeBy(function(node) {
-			if (node.isLeaf()) {
-				node.set("checked", false);
+	onTreeOsmTagsLoad: function(treestore, records, successful, operation, node, options) {
+		treestore.getRootNode().cascadeBy(function(treenode) {
+			if (treenode.isLeaf()) {
+				treenode.set("checked", false);
 			}
 		});
 	},
