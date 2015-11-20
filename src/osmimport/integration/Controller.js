@@ -93,90 +93,20 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onIntegrationClick: function() {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		var integrationLayer = Ck.getMap().getLayer(selectedLayer);
-		Ext.define("GeoJsonModel", {
-			extend: "Ext.data.Model",
-			fields: [
-					{name: "type", defaultValue: "Feature"},
-					{name: "properties"},
-					{name: "bbox"},
-					{name: "geometry"}
-				],
-				 clientIdProperty: "clientId"});
-		var layerStore = Ext.create("Ext.data.Store", {
-			model: "GeoJsonModel",
-			proxy: {
-				type: 'ajax',
-				url: integrationLayer.get("url"),
-				limitParam: false,
-				pageParam: false,
-				startParam: false,
- 				noCache: false,
-				writer: {
-					type: "json",
-					clientIdProperty: "clientId"
-				}
-			}
-		});
-		
-		layerStore.load({
-			scope: this,
-			callback:function(loadedFeatures, operation, success) {
-				var newFeatures = [];
-				var records = this.getView().openner.osmapi.getData().items;
-				console.log(loadedFeatures);
-				var features = loadedFeatures[0].data.features;
-				console.log(features);
-				for (var i in records) {
-					var record = records[i];
-					if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
-						var geom = record.calculateGeom();
-						var feature = new ol.Feature(
-									Ext.apply({
-										geometry: geom
-									})
-								);				
-						newFeatures.push(feature);
-						console.log(geom.getCoordinates());
-						var featureObj = {
-							type: "Feature",
-							properties: {},
-							bbox: [],
-							geometry: {
-								type: "Point",
-								coordinates: geom.getCoordinates()
-								
-							}
-						};
-						features.push(featureObj);
-					}
-				}
-				console.log(loadedFeatures);
-				layerStore.setData(loadedFeatures);
-				console.log(layerStore);
-				console.log(layerStore.getModel());
-				layerStore.update();
-				integrationLayer.getSource().addFeatures(newFeatures);
-			}
-		});
-		
-		/*layerStore.beginUpdate();
-		
+		var newFeatures = [];
+		var records = this.getView().openner.osmapi.getData().items;
 		for (var i in records) {
 			var record = records[i];
 			if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
+				var geom = record.calculateGeom();
 				var feature = new ol.Feature(
 							Ext.apply({
-								geometry: record.calculateGeom()
+								geometry: geom
 							})
 						);				
 				newFeatures.push(feature);
-				layerStore.add(feature);
 			}
 		}
-		console.log(layerStore.getData());
-		layerStore.endUpdate();
-		layerStore.update();
-		integrationLayer.getSource().addFeatures(newFeatures);*/
-		
+		integrationLayer.getSource().addFeatures(newFeatures);
 	}
 });
