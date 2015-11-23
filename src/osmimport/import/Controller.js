@@ -91,7 +91,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.displaySource = new ol.source.Vector();
 		this.displayVector = new ol.layer.Vector({
 			source: this.displaySource,
-			style: this.DEFAULT_STYLE
+			style: this.DEFAULT_STYLE,
+			id: "osmimport"
 		});
 		this.olMap.addLayer(this.displayVector);
 		

@@ -57,6 +57,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Indicate to the tool that the user has finished the integration of data.
 	 */
 	onIntegrationFinishedClick: function() {
+		Ck.getMap().getLayer("osmimport").getSource().clear();
 		this.openner.finishIntegration();
 		this.openner.close();
 	},
