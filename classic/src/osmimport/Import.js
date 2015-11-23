@@ -28,17 +28,38 @@ Ext.define("Ck.osmimport.Import", {
 				xtype: "treepanel",
 				rootVisible: false,
 				scrollable: true,
+				header: {xtype: "container", height: 0},
 				border: true,
 				height: 200,
-				flex: 0.6,
+				flex: 0.5,
 				bind:{
 					store: "{osmtags}"
 				},
 				itemId: 'osmtags-tree'
 			},{
 				xtype: "grid",
-				flex: 0.2,
-				margin: "0 0 0 10"
+				flex: 0.4,
+				height: 200,
+				margin: "0 0 0 10",
+				border: true,
+				enableColumnHide: false,
+				enableColumnMove: false,
+				enableColumnResize: false,
+				sortableColumns: false,
+				columns: [
+					{
+						xtype: "gridcolumn",
+						text: "Tags Sélectionnés",
+						dataIndex: "text",
+						flex: 1
+					}
+				],
+				bind: {
+					store: {
+						data: "{checkedTags}" 
+					}
+				},
+				reference: "checkedtagslist"
 			}]
 		},{
 			xtype: "checkbox",

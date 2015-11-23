@@ -149,6 +149,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		}
 		var textexpert = checkedTags.map(function(a) {return a.tag;}).join(";");
 		this.lookupReference("tagsexperttext").setValue(textexpert);
+		this.lookupReference("checkedtagslist").getStore().load();
 	},
 	
 	/**
