@@ -125,6 +125,11 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				}
 			break;
 			case "Polygon":
+				if (this.data.type === "way" &&
+					(this.data.geometry[0].lat === this.data.geometry[this.data.geometry.length - 1].lat &&
+					 this.data.geometry[0].lon === this.data.geometry[this.data.geometry.length - 1].lon)) {
+					result = true;
+				}
 			break;
 			case "MultiPoint":
 			break;

@@ -13,6 +13,10 @@
 			"text": "Terrain de Sport",
 			"tag": "[leisure=pitch]",
 			"leaf": true
+		},{
+			"text": "Zone d'Activités Commerciales",
+			"tag": "[landuse=commercial]",
+			"leaf": true
 		}]
     },{
         "text": "Education",

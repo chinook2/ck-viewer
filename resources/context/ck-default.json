@@ -86,7 +86,7 @@
 				}]
 			}],
 			"extension" : {
-				"path": ""
+				"path": "Limites Administratives"
 			}
 		}
 	},{
@@ -108,7 +108,7 @@
 				}]
 			}],
 			"extension" : {
-				"path": ""
+				"path": "Divers"
 			}
 		}
 	},{
@@ -130,7 +130,29 @@
 				}]
 			}],
 			"extension" : {
-				"path": ""
+				"path": "Déplacements/Vélos, Piétons"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "commercialzones",
+		"properties": {
+			"title" : "Zones d'Activités Commerciales",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/zones_commerciales.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Activités"
 			}
 		}
 	}]
