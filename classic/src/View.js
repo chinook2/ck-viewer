@@ -3,6 +3,7 @@
  */
 Ext.define("Ck.View", {
 	extend: 'Ext.Container',
+	alias: "widget.ckview",
 	
 	requires: [
 		// require in production
@@ -16,6 +17,7 @@ Ext.define("Ck.View", {
 		
 		'Ck.*' // Load all Ck class...
 	],
+	plugins: 'viewport',
 	
 	controller: 'ckview',
 	

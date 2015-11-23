@@ -16,7 +16,20 @@ Ext.define('Ck.form.Controller', {
 		labelSeparator: ' : '
 	},
 
-
+	fields: [],
+	
+	//startEditing
+	//stopEditing
+	
+	//afterload
+	//loadfailed
+	
+	//beforesave
+	//aftersave
+	//savefailed
+	
+	//afterreset
+	
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	beforeLoad: Ext.emptyFn,
@@ -31,6 +44,7 @@ Ext.define('Ck.form.Controller', {
 	
 	init: function () {
 		this.isSubForm = this.getView().getIsSubForm();
+		if(this.getView().getEditing()===true) this.startEditing();
 		this.isInit = false;
 
 		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
@@ -62,13 +76,13 @@ Ext.define('Ck.form.Controller', {
 			//After save success.
 			
 			// Link to another form
-			if(btn.nextFormName){
+			if(btn && btn.nextFormName){
 				this.view.setFormName(btn.nextFormName);
 				this.isInit = false;
 				this.initForm();
 				return;
 			}
-			if(btn.nextFormUrl){
+			if(btn && btn.nextFormUrl){
 				this.view.setFormUrl(btn.nextFormUrl);
 				this.isInit = false;
 				this.initForm();
@@ -76,7 +90,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			// Close the form
-			if(btn.andClose) {
+			if(btn && btn.andClose) {
 				this.formClose({
 					force: true
 				});
@@ -96,14 +110,14 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function (btn) {
-		if(this.oController.beforeClose() === false){
-			Ck.log("beforeClose cancel formClose.");
-			return;
-		}
 
 		var closeMe = function(){
+			if(this.oController.beforeClose() === false){
+				Ck.log("beforeClose cancel formClose.");
+				return;
+			}
 			if(this.view.beforeClose() === false){
-				Ck.log("beforeClose cancel close form.");
+				Ck.log("view beforeClose cancel formClose.");
 				return;
 			}
 
@@ -117,7 +131,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}.bind(this);
 
-		if(btn.force === true){
+		if(btn && btn.force === true){
 			closeMe();
 		} else {
 			Ext.Msg.show({
@@ -174,6 +188,7 @@ Ext.define('Ck.form.Controller', {
 			// Define new controller to be overriden by application
 			// Use this.oController to access overriden methods !
 			this.oController = Ext.create('Ck.form.controller.' + form.name);
+			this.oController._parent = this;
 			//
 
 			if(this.oController.beforeShow(form) === false){
@@ -363,7 +378,14 @@ Ext.define('Ck.form.Controller', {
 	// auto config pour le form (simplification du json)
 	applyFormDefaults: function (cfg) {
 		var me = this;
+		this.fields = [];
+		
 		var fn = function (c) {
+			// Get Alls direct fieldss of the form with includes (exclude subform)
+			if(c.name) {
+				this.fields.push(c.name);
+			}
+			
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
@@ -466,9 +488,18 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
-				Ext.apply(c, {
-					plugins: ['gridsubform', 'gridstore', 'gridediting', 'rowediting']
-				});
+				if(c.subform){
+					Ext.applyIf(c, {
+						plugins: ['gridstore', 'gridsubform']
+					});
+				} else {
+					Ext.applyIf(c, {
+						plugins: ['gridstore', 'gridediting', {
+							ptype: 'rowediting',
+							clicksToEdit: 1
+						}]
+					});
+				}
 			}
 /*
 			if (c.xtype == "fieldset") {
@@ -544,7 +575,49 @@ Ext.define('Ck.form.Controller', {
 		this.fireEvent('stopEditing');
 	},
 
-	// Lecture des données depuis le Storage
+	// Prevent getting values from subform...
+	getValues: function() {
+		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
+		// var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
+		// var dt = v.getValues(false, false, false, false); // Retourne les dates sous forme de string (d/m/Y)
+		var v = this.getView();
+		var form = v.getForm();
+		
+		var values = {};
+		this.fields.forEach(function(field){
+			var f = form.findField(field);
+			if(f){
+				values[field] = f.getValue();
+				if(f.displayField) {
+					if(!values['__display']) values['__display'] = {}
+					values['__display'][field] = f.getDisplayValue();
+				}
+			}
+		}, this);
+		
+		// GRID : save data
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			var dtg = [];
+
+			// Récup les enregistrements nouveaux et modifiés
+			grid.getStore().each(function (model) {
+				if(model.data.dummy===true) return;
+				dtg.push(model.data);
+			});
+			values[grid.name] = dtg;
+		}
+		//
+
+		return values;
+	},
+	
+	// Load data from
+	//  - fid
+	//  - dataUrl
+	//  - dataRaw
+	// ...
 	loadData: function (options) {
 		var me = this;
 		var v = me.getView();
@@ -599,7 +672,8 @@ Ext.define('Ck.form.Controller', {
 				}
 				
 				var tpl = new Ext.Template(dataUrl);
-				url = tpl.apply([fid]);
+				if(Ext.isString(fid)) fid = [fid];
+				url = tpl.apply(fid);
 			} else {
 				// Build default url
 				url = 'resources/data/' + lyr + '/' + fid + '.json';
@@ -622,6 +696,7 @@ Ext.define('Ck.form.Controller', {
 			url: url,
 			scope: this,
 			success: function (response) {
+				if(response.responseText=="") response.responseText = "{}";
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200) {
 					if(!data) {
@@ -635,16 +710,15 @@ Ext.define('Ck.form.Controller', {
 					}
 
 					v.getForm().setValues(data);
-					this.getViewModel().setData({
+					this.getViewModel().set({
 						layer: lyr,
 						fid: fid,
-						data: data
+						data: Ext.apply(this.getViewModel().get('data') || {}, data)
 					});
 					
 					this.fireEvent('afterload', data);
 				}
 				
-
 				if(v.getEditing()===true) this.startEditing();
 			},
 			failure: function (response, opts) {
@@ -720,38 +794,21 @@ Ext.define('Ck.form.Controller', {
 			Ck.log("Form is not valid in saveData.");
 			return false;
 		}
+		
+		this.fireEvent('beforesave');
+		
+		// We need to stopEditing too, plugins can process data before saving...
+		//this.stopEditing();
 
-		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-		var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
-		// var dt = v.getValues(false, false, false, false); // Retourne les dates sous forme de string (d/m/Y)
 
-		// GRID : save data
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			var dtg = [];
-			var dtgd = [];
-
-			// Récup les enregistrements nouveaux et modifiés
-			grid.getStore().each(function (model) {
-				dtg.push(model.data);
-			});
-			dt[grid.name] = dtg;
-
-			// Récup les enregistrements supprimés
-			Ext.each(grid.getStore().getRemovedRecords(), function (model) {
-				dtgd.push(model.data);
-			});
-			dt[grid.name + '_del'] = dtgd;
-		}
-		//
-
+		var dt = this.getValues();
+		
 		// Mis à jour du status
-		if (!sid) {
-			dt.status = "CREATED";
-		} else {
-			dt.status = "MODIFIED";
-		}
+		// if (!sid) {
+			// dt.status = "CREATED";
+		// } else {
+			// dt.status = "MODIFIED";
+		// }
 		//
 
 		if(this.oController.beforeSave(dt) === false){
@@ -770,17 +827,15 @@ Ext.define('Ck.form.Controller', {
 					dataUrl = dataUrl.update;
 				}
 				var tpl = new Ext.Template(dataUrl);
-				url = tpl.apply([fid]);
+				if(Ext.isString(fid)) fid = [fid];
+				url = tpl.apply(fid);
 			} else {
 				Ck.log("fid defined but no dataUrl template !");
 			}
 		}
 
 		if(!url){
-			if(!bSilent) Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
-			
-			// We need to stopEditing too...
-			// this.stopEditing();
+			Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
 			return false;
 		}
 
@@ -792,18 +847,23 @@ Ext.define('Ck.form.Controller', {
 			scope: this,
 			success: function (response) {
 				var data = Ext.decode(response.responseText, true);
-				if(!data) {
-					Ck.Notify.error("Invalid JSON Data in : "+ url);
-					return false;
+				if(response.status == 200) {
+					this.fireEvent('aftersave', data);
+					if(this.oController.afterSave(dt) === false){
+						Ck.log("afterSave cancel saveData.");
+						return false;
+					}
+					
+					var vm = this.getViewModel();
+					if(vm){
+						vm.set({
+							layer: lyr,
+							fid: fid,
+							data: Ext.apply(vm.get('data'), dt)
+						});
+					}
 				}
-				
-				this.fireEvent('aftersave', data);
-				if(this.oController.afterSave(dt) === false){
-					Ck.log("afterSave cancel saveData.");
-					return false;
-				}		
-				
-				callback();
+				Ext.callback(callback, this);
 			},
 			failure: function (response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!

@@ -5,6 +5,7 @@ Ext.define('Ck.map.plugin.Progress', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.mapprogress',
 	
+	
 	/**
 	 * Init the map component, init the viewModel
 	 * @protected
@@ -16,6 +17,10 @@ Ext.define('Ck.map.plugin.Progress', {
 		this.el = this.createLoadElement();
 		
 		ckMap.getController().on("addLayer", this.addLoadListeners, this);
+	},
+	
+	destroy: function(){
+		this.el.remove();
 	},
 	
 	/**
