@@ -157,14 +157,23 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	checkOsmTags: function() {
 		var errorMessage = "";
-		var vm = this.getViewModel();
-		if (vm.data.checkedTags.length === 0) {  // Check at least one is selected
-			errorMessage += " - No OSM tag selected<br/>";
+		var tagList = [];
+		if (this.lookupReference("tagsexpert").getValue()) {  // Expert Mode
+			var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
+			for (var i in tagsText) {
+				var tagObj = {"tag": tagsText[i], "text": "Custom Tag"};
+				tagList.push(tagObj);
+			}
+		} else {
+			var vm = this.getViewModel();
+			if (vm.data.checkedTags.length === 0) {  // Check at least one is selected
+				errorMessage += " - No OSM tag selected<br/>";
+			}
+			tagList = vm.data.checkedTags;
 		}
-		var tagList = vm.data.checkedTags;
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?\w+:?]+=?["\w*:?]*\])+$/g) == null)) {
+				(tagList[t].tag.match(/^(\[["?(\w|\u00C0-\u00FF)+:?]+=?["(\w|\u00C0-\u00FF)*:?]*\])+$/g) == null)) {
 				errorMessage += ' - Tag "' + tagList[t].text + '" is incorrect<br/>';
 			} 
 		}
@@ -318,6 +327,16 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var vm = this.getViewModel();
 		var checkedTags = vm.data.checkedTags;
 		
+		// Use expert mode for tags
+		if (this.lookupReference("tagsexpert").getValue()) {
+			var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
+			checkedTags = [];
+			for (var i in tagsText) {
+				var tagObj = {"tag": tagsText[i]};
+				checkedTags.push(tagObj);
+			}
+		}
+		
 		// Prepare date filter
 		var minDateString = "";
 		var minDate = this.lookupReference("datemin").getValue();
@@ -361,7 +380,17 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var self = this;
 			var olFeatures = [];
 			var nbFeaturesImported = 0;
-			var checkedTags = this.getViewModel().data.checkedTags;
+			var checkedTags = [];
+			if (this.lookupReference("tagsexpert").getValue()) {  // Searched tag for expert mode
+				var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
+				checkedTags = [];
+				for (var i in tagsText) {
+					var tagObj = {"tag": tagsText[i]};
+					checkedTags.push(tagObj);
+				}
+			} else {
+				checkedTags = this.getViewModel().data.checkedTags;
+			}
 			for (var r = 0; r < records.length; r++) {
 				var record = records[r];
 				if (record.containsSearchedTags(checkedTags)) {
