@@ -77,6 +77,24 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		return layersList;
 	},
 	
+	/**
+	 * Returns the geometry type of a layer.
+	 */
+	getGeometryType: function(layer) {
+		var geometryType = undefined;
+		var layerData = layer.getSource().getFeatures();
+		for (var i in layerData) {
+			var geom = layerData[i].getGeometry().getType();
+			if (geometryType == undefined) {
+				geometryType = geom;
+			} else if (geometryType != geom) {
+				geometryType = undefined;
+				break;
+			}
+		}
+		return geometryType;
+	},
+	
 	/** 
 	 * Method called when the user changes the selection of layer on which data will be integrated.
 	 */
@@ -84,17 +102,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var selectedLayer = Ck.getMap().getLayer(newValue);
 		var geometryType = undefined;
 		if (typeof selectedLayer.getSource().getFeatures === "function") {
-			var layerData = selectedLayer.getSource().getFeatures();
-			for (var i in layerData) {
-				var geom = layerData[i].getGeometry().getType();
-				console.log(geom);
-				if (geometryType == undefined) {
-					geometryType = geom;
-				} else if (geometryType != geom) {
-					geometryType = undefined;
-					break;
-				}
-			}
+			geometryType = this.getGeometryType(selectedLayer);
 		}
 		this.lookupReference("geometrylabel").setText("Géométrie: " + geometryType);
 	},
@@ -106,16 +114,28 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onIntegrationClick: function() {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		var integrationLayer = Ck.getMap().getLayer(selectedLayer);
+		var integrationGeometryType;
 		var newFeatures = [];
-		var records = this.getView().openner.osmapi.getData().items;
-		for (var i in records) {
-			var record = records[i];
-			if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
-				var feature = this.convertData(record, integrationLayer);
-				newFeatures.push(feature);
+		if (typeof integrationLayer.getSource().getFeatures === "function") {
+			integrationGeometryType = this.getGeometryType(integrationLayer);
+			var records = this.getView().openner.osmapi.getData().items;
+			for (var i in records) {
+				var record = records[i];
+				if (record.containsSearchedTags([{tag:"[amenity=post_box]"}]) &&
+					record.isGeometryType(integrationGeometryType)) {
+					var feature = this.convertData(record, integrationLayer);
+					newFeatures.push(feature);
+				}
 			}
+			integrationLayer.getSource().addFeatures(newFeatures);
 		}
-		integrationLayer.getSource().addFeatures(newFeatures);
+		Ext.MessageBox.show({
+			title: 'OSM Import',
+			msg: 'Integration of data from OpenStreetMap succeed. ' + newFeatures.length + ' elements integrated.',
+			width: 500,
+			buttons: Ext.MessageBox.OK,
+			icon: Ext.Msg.INFO
+		});
 	},
 	
 	/**

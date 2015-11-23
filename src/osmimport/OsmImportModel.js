@@ -98,5 +98,32 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 		}
 		return correct;
+	},
+	
+	/**
+	 * Method indicates if the record is the same geometry type as the geometry type of a layer.
+	 */
+	isGeometryType: function(type) {
+		var result = false;
+		switch(type) {
+			case "undefined": result = true;
+			break;
+			case "Point": 
+				if (this.data.type === "node") {
+					result = true;
+				}
+			break;
+			case "LineString": 
+			break;
+			case "Polygon":
+			break;
+			case "MultiPoint":
+			break;
+			case "MultiLineString":
+			break;
+			case "MultiPolygon":
+			break;
+		}
+		return result;
 	}
 });
