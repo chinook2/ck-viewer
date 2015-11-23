@@ -17,7 +17,8 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		{name: "nodes", reference: "OsmImportModel"},
 		{name: "geometry"}, // Array for ways and relations
 		{name: "members", type: "auto"}, // Array for relations
-		{name: "role"}, // Used in relations
+		{name: "role"}, // Used in relations,
+		{name: "isSearchedTag", type: "boolean", defaultValue: false},
 		{name: "properties"}
 	],
 	idProperty: 'id',
@@ -72,30 +73,33 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * Check is made by looking for the tags to search in the tags of the record.
 	 */
 	containsSearchedTags: function(searchedTags) {
-		var correct = false;
+		var correct = this.data.isSearchedTag;
 		var tags = this.data.tags;
-		if (tags != undefined) {
-			for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
-				var key_val = searchedTags[i].tag.match(/["?\w+:?]+=?["\w*:?]*/g);
-				var rec_correct = 0;
-				for (var kvId in key_val) {  // Check that each tag is in the selected group
-					var kv = key_val[kvId];
-					var k = kv.split("=")[0].replace(/"/g, '');
-					var v = kv.split("=")[1];
-					if (v != undefined) {
-						v = v.replace(/"/g, '');
-					}
-					if (k in tags) {
-						if (v !== "" && tags[k] === v) {
-							rec_correct++;
+		if (searchedTags != undefined) {
+			if (tags != undefined) {
+				for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
+					var key_val = searchedTags[i].tag.match(/["?\w+:?]+=?["\w*:?]*/g);
+					var rec_correct = 0;
+					for (var kvId in key_val) {  // Check that each tag is in the selected group
+						var kv = key_val[kvId];
+						var k = kv.split("=")[0].replace(/"/g, '');
+						var v = kv.split("=")[1];
+						if (v != undefined) {
+							v = v.replace(/"/g, '');
+						}
+						if (k in tags) {
+							if (v !== "" && tags[k] === v) {
+								rec_correct++;
+							}
 						}
 					}
-				}
-				if (key_val != null && rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
-					correct = true;
-					break;
+					if (key_val != null && rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
+						correct = true;
+						break;
+					}
 				}
 			}
+			this.data.isSearchedTag = correct;  // Modify the flag. Permits to share a status between import and integration
 		}
 		return correct;
 	},

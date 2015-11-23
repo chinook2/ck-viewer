@@ -121,7 +121,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var records = this.getView().openner.osmapi.getData().items;
 			for (var i in records) {
 				var record = records[i];
-				if (record.containsSearchedTags([{tag:"[amenity=post_box]"}]) &&
+				if (record.containsSearchedTags() &&
 					record.isGeometryType(integrationGeometryType)) {
 					var feature = this.convertData(record, integrationLayer);
 					newFeatures.push(feature);
