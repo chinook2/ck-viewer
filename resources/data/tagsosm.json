@@ -26,7 +26,7 @@
             "leaf": true
         }]
     },{
-		"text": "Transports",
+		"text": "Déplacements",
 		"children": [{
 			"text": "Transports en Commun",
 			"children": [{
@@ -52,6 +52,14 @@
 				"text": "Chemin Piétonnier",
 				"tag": "[highway=footway]",
 				"leaf": true
+			},{
+				"text": "Rues Piétonnes",
+				"tag": "[highway=pedestrian]",
+				"leaf": true
+			},{
+				"text": "Contre-sens cyclistes",
+				"tag": "[cycleway=opposite_lane]",
+				"leaf": true
 			}]
 		},{
 			"text": "Automobiles",
@@ -60,6 +68,13 @@
 				"tag": "[amenity=parking]",
 				"leaf": true
 			}]
+		}]
+	},{
+		"text": "Sports, Loisirs",
+		"children": [{
+			"text": "Circuits automobiles",
+			"tag": "[highway=raceway]",
+			"leaf": true
 		}]
 	},{
 		"text": "Divers",
