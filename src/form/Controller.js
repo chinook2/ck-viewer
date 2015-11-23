@@ -489,16 +489,21 @@ Ext.define('Ck.form.Controller', {
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel") {
 				if(c.subform){
-					Ext.applyIf(c, {
-						plugins: ['gridstore', 'gridsubform']
-					});
+					// Ext.apply(c, {
+						// plugins: ['gridstore', 'gridsubform']
+					// });
+					c.plugins = Ext.Array.merge(c.plugins,  ['gridstore', 'gridsubform']);
 				} else {
-					Ext.applyIf(c, {
-						plugins: ['gridstore', 'gridediting', {
-							ptype: 'rowediting',
-							clicksToEdit: 1
-						}]
-					});
+					// Ext.apply(c, {
+						// plugins: ['gridstore', 'gridediting', {
+							// ptype: 'rowediting',
+							// clicksToEdit: 1
+						// }]
+					// });
+					c.plugins = Ext.Array.merge(c.plugins,  ['gridstore', 'gridediting', {
+						ptype: 'rowediting',
+						clicksToEdit: 1
+					}]);
 				}
 			}
 /*
