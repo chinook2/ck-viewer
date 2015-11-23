@@ -36,7 +36,7 @@ Ext.define('Ck.edit.Action', {
 		}
 		
 		var layerId = this.openner.getView().layerId;
-		this.layer = this.map.getLayer(layerId);
+		this.layer = this.map.getLayerById(layerId);
 
 		if(!this.layer) {
 			this.layer = new ol.layer.Vector({
@@ -78,7 +78,7 @@ Ext.define('Ck.edit.Action', {
 	 * @return {String}
 	 **/
 	getGeometryType: function() {
-		return this.layer.ckParams.geometryType || this.defaultGeometryType;
+		return this.layer.getExtension("geometryType") || this.defaultGeometryType;
 	},
 
 	/**

@@ -84,10 +84,18 @@ Ext.define('Ck.format.OWSContextLayer', {
 		return this.lyr.properties.active;
 	},
 	
+	/**
+	 * Return one properties or all properties (in an object) if key param is not defined
+	 * @param {String/undefined}
+	 * @return {String/Object}
+	 */
 	getExtension: function(key) {
-		var ext = this.lyr.properties.extension;
-		if(!ext) return '';
-		return ext[key];
+		var ext = this.lyr.properties.extension || {};
+		if(Ext.isEmpty(key)) {
+			return ext;
+		} else {
+			return ext[key];
+		}
 	},
 	
 	getType: function() {

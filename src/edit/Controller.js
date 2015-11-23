@@ -79,7 +79,7 @@ Ext.define('Ck.edit.Controller', {
 		});
 		
 		// Display vertex panel for line and polygon
-		if(view.layer.ckParams.geometryType != "Point") {
+		if(view.layer.getExtension("geometryType") != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
 			vertexContainer = (Ext.isEmpty(vertexContainer))? view : vertexContainer;
 		

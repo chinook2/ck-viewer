@@ -68,7 +68,8 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		// r for readOnly is true when editing is false
 		var r = !this.formViewModel.get("editing");
 
-		if(this.readOnly === true) r = true;
+		if(cmp.readOnly) r = true;
+		
 		/*
 		 if(this.join) {
 		 this.disable(); // pas envoyer lors du submit
@@ -84,9 +85,11 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		if(r){
 
 			cmp.triggerWrap.hide();
-			cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
+			if(!cmp.hideLabel) cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
 
 			var val = cmp.getValue();
+			if(cmp.displayField) val = cmp.getDisplayValue();
+			
 			if(val != '') {
 				val = this.prefix + val + this.suffix;
 				if(this.template) {

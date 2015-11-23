@@ -11,30 +11,39 @@ Ext.define('Ck.form.field.Map', {
 	],
 
 	fieldSubTpl: [
-		'<div id="{id}">\n',
-		'</div>',
+		'<div id="{id}" class="{fieldCls}"></div>',
 		{
+			compiled: true,
 			disableFormats: true
 		}
 	],
 
 	inputCls: Ext.baseCSSPrefix + 'form-map',
 
+	map: null,
+	
 	// Map Controller instance for the mapfield
 	ckmap: null,
 
 	// Internal geometry to show and edit with the map widget
 	geometry: null,
+	
+	initComponent: function() {
+		this.map = Ext.create(Ext.applyIf({
+			xtype: 'ckmap'
+		}, this.initialConfig));
+		this.ckmap = this.map.getController();
 
+		this.on('resize', function(){
+			this.map.setSize(this.getSize());
+		}, this);
+		
+		this.callParent(arguments);
+	},
+	
 	afterRender: function () {
 		this.callParent(arguments);
-
-		// Add map in the form.
-		var map = Ext.create(Ext.applyIf({
-			xtype: 'ckmap',
-			renderTo: this.id + '-bodyEl'
-		}, this.initialConfig));
-		this.ckmap = map.getController();
+		this.map.render(this.inputEl);
 	},
 
 	getValue: function(){
@@ -45,6 +54,7 @@ Ext.define('Ck.form.field.Map', {
 		this.geometry = geojsonObject;
 
 		if(!geojsonObject) return;
+		if(!this.ckmap) return;
 
 		// Need to add the layer after map loaded...
 		this.ckmap.on({

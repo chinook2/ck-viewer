@@ -29,6 +29,14 @@ Ext.define('Ck.map.Style', {
 	},
 	
 	/**
+	 * Default select stroke color and width
+	 */
+	selectStroke: {
+		color: "#FF953D",
+		width: 2
+	},
+	
+	/**
 	 * Default radius.
 	 */
 	radius: 10,
@@ -136,5 +144,17 @@ Ck.map.Style.overlayStyle = [
 		}),
 		fill: new ol.style.Fill(Ck.map.Style.fill),
 		stroke: new ol.style.Stroke(Ck.map.Style.overlayStroke)
+	})
+];
+
+Ck.map.Style.selectionStyle = [
+	new ol.style.Style({
+		image: new ol.style.Circle({
+			fill: new ol.style.Fill(Ck.map.Style.fill),
+			stroke: new ol.style.Stroke(Ck.map.Style.selectStroke),
+			radius: 10
+		}),
+		fill: new ol.style.Fill(Ck.map.Style.fill),
+		stroke: new ol.style.Stroke(Ck.map.Style.selectStroke)
 	})
 ];

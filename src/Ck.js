@@ -341,6 +341,7 @@ Ext.apply(Ck, {
 	 * @return {String}
 	 */
 	getPath: function() {
+		// Ext.manifest.paths doesn't in production !
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
 		var basePath = 'packages/local/ck-viewer';
 		if(Ext.manifest.paths && Ext.manifest.paths.Ck) basePath = Ext.manifest.paths.Ck.replace('/src','');
@@ -366,7 +367,7 @@ Ext.apply(Ck, {
 	 * @return {string}
 	 */
 	getApi: function () {
-		return this.getOption('api');
+		return this.getOption('api') || '';
 	},
 
 

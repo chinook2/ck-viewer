@@ -96,7 +96,7 @@ Ext.define('Ck.print.Controller', {
 		
 		// Use ol.interaction.Translate
 		// Add DragFeature interaction to move preview
-		this.moveInteraction = new ol.interaction.DragFeature({
+		this.moveInteraction = new ol.interaction.Translate({
 			features: []
 		});
 		this.olMap.addInteraction(this.moveInteraction);
@@ -280,7 +280,7 @@ Ext.define('Ck.print.Controller', {
 		this.feature = new ol.Feature({
 			geometry: new ol.geom.Polygon.fromExtent(coordinate)
 		});
-		this.moveInteraction.setFeatures([this.feature]);
+		this.moveInteraction.features_ = new ol.Collection([this.feature]);
 		this.previewLayer.getSource().addFeature(this.feature);
 	},
 	

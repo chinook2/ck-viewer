@@ -74,7 +74,7 @@ Ext.define('Ck.map.action.Measure', {
 	ckLoaded: function(map) {		
 		this.olMap = map.getOlMap();
 		
-		this.measureLayer = map.getLayer('measureLayer');
+		this.measureLayer = map.getLayerById('measureLayer');
 		if(!this.measureLayer) {
 			this.measureLayer = new ol.layer.Vector({
 				id: 'measureLayer',

@@ -34,7 +34,10 @@ Ext.define('Ck.overview.Controller', {
 		
 		this.config = this.getView().getConfig();
 		
-		this.ovLayers = Ck.getMap().getOverviewLayers();
+		this.ovLayers = Ck.getMap().getLayers(function(lyr) {
+			return (lyr.getExtension("overviewLayer") === true);
+		});
+		
 		
 		if(this.ovLayers.length == 0) {
 			this.getView().on("beforerender", function() {

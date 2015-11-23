@@ -22,7 +22,7 @@ Ext.define('Ck.map.action.Form', {
 			return false;
 		}
 
-		var lyr = map.getLayer(layer);
+		var lyr = map.getLayerById(layer);
 		if(!lyr) {
 			Ck.log("enable to find layer : "+layer);
 			return false;

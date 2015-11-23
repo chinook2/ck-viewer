@@ -32,16 +32,30 @@ Ext.define('Ck.Ajax', {
 		this.request(options);
 	},
 	
-	post: function() {
+	post: function(options) {
+		options.method = 'POST';
+		this.request(options);
 	},
 
-	put: function() {
+	put: function(options) {
+		options.method = 'PUT';
+		
+		// TODO : chek if we have file to upload ...
+		// application/x-www-form-urlencoded;charset=UTF-8
+		options.headers = {
+			'Content-Type': 'application/json'
+		};
+		
+		
+		options.params = Ext.encode(options.params);
+		
+		this.request(options);
 	},
 
-	update: function() {
+	update: function(options) {
 	},
 
-	del: function() {
+	del: function(options) {
 	},
 	
 	request: function(options) {
@@ -51,17 +65,32 @@ Ext.define('Ck.Ajax', {
 		Ext.Ajax.request(options);	
 	},
 	
-	onBeforeRequest: function(conn, options, eOpts) {
-		// Disable Ajax cache (in production)
+	isCacheAvailable: function(options) {
+		// Only cache GET request
+		if(options.method != 'GET') {
+			return false;
+		}
+		
+		// Disable Ajax cache for a specific call
+		if(options.nocache===true) {
+			return false;
+		}
+
+		// Disable Ajax cache by URL param (in production)
 		if(Ck.params.hasOwnProperty('nocache')) {
-			return true;
+			return false;
 		}
 		
 		// Disable Ajax cache (in testing and development). Allow 'forcecache' for testing and development.
 		if(Ck.getEnvironment() != 'production' && !Ck.params.hasOwnProperty('forcecache')) {
-			return true;
+			return false;
 		}
 		
+		return true;
+	},
+	
+	onBeforeRequest: function(conn, options, eOpts) {
+		if(!this.isCacheAvailable(options)) return true;
 		// TODO : test cache validity
 		
 		var res = this.ls.getItem(options.url);
@@ -83,6 +112,8 @@ Ext.define('Ck.Ajax', {
 		//<debug>
 		Ck.Notify.info('Request success : '+ options.url);
 		//</debug>
+		
+		if(!this.isCacheAvailable(options)) return true;
 		
 		this.ls.setItem(options.url, response.responseText);
 	},

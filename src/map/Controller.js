@@ -87,6 +87,12 @@ Ext.define('Ck.map.Controller', {
 	 */
 	
 	/**
+	 * @propety {boolean}
+	 * True when OpenLayers map is rendered (or rendering)
+	 */
+	rendered: false,
+	
+	/**
 	 * @propety {Ck.legend.Controller}
 	 * Legend associated to this map
 	 */
@@ -107,6 +113,7 @@ Ext.define('Ck.map.Controller', {
 		var olControls = [];
 		var control, controls = v.getControls();
 		for(var controlName in controls) {
+			if(controls[controlName]===false) continue;
 			control = Ck.create("ol.control." + controlName, controls[controlName]);
 			if(control) {
 				olControls.push(control);
@@ -146,6 +153,10 @@ Ext.define('Ck.map.Controller', {
 		// Relay olMap events
 		olMap.getLayers().on('add', function(colEvent) {
 			var layer = colEvent.element;
+			// Alias to get extension property directly
+			layer.getExtension = function(key) {
+				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
+			};
 			this.fireEvent('addlayer', layer);
 		}, this);
 		olMap.getLayers().on('remove', function(colEvent) {
@@ -187,7 +198,9 @@ Ext.define('Ck.map.Controller', {
 		var v = this.getView();
 		var olMap = this.getOlMap();
 		var olView = this.getOlView();
-		
+
+		proj4.defs("EPSG:3943", "+proj=lcc +lat_1=42.25 +lat_2=43.75 +lat_0=43 +lon_0=3 +x_0=1700000 +y_0=2200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+
 		var viewProj = owc.getProjection();
 		var viewScales = owc.getScales();
 		
@@ -202,6 +215,7 @@ Ext.define('Ck.map.Controller', {
 		
 		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
 		olMap.setView(new ol.View({
+			projection: viewProj,
 			center: v.getCenter(),
 			zoom: v.getZoom(),
 			minResolution: viewScales[0].res,
@@ -213,7 +227,7 @@ Ext.define('Ck.map.Controller', {
 		this.getLayers().clear();
 		
 		// Set the bbox
-		this.setExtent(owc.getExtent());
+		// this.setExtent(owc.getExtent());
 		
 		owc.getLayers().forEach(function(lyr) {
 			var params, opt_options, layer = owc.getLayer(lyr);
@@ -237,10 +251,35 @@ Ext.define('Ck.map.Controller', {
 					case 'wms':
 						olSourceOptions = {
 							url: layer.getHref(false),
-							params: {
-								layers: layer.getName(),
-								version: layer.getProtocolVersion()
-							}
+							params: layer.getHrefParams()
+						};
+						break;
+						
+					case 'wmts':
+						params = layer.getHrefParams();
+						// get resolution from main view. need inverse order
+						var resolutions = owc.getResolutions();
+						resolutions.reverse();
+						
+						// generate resolutions and matrixIds arrays for this WMTS
+						var matrixIds = [];
+						for (var z = 0; z < resolutions.length; ++z) {
+							matrixIds[z] = z;
+						};
+						
+						olSourceOptions = {
+							url: layer.getHref(false),
+							layer: params.LAYER,
+							matrixSet: params.TILEMATRIXSET,
+							format: params.FORMAT || 'image/png',
+							style: params.STYLE || 'default',
+							
+							// TODO : use extent, resolutions different from main view.
+							tileGrid: new ol.tilegrid.WMTS({
+								origin: ol.extent.getTopLeft(owc.getExtent()),
+								resolutions: resolutions,
+								matrixIds: matrixIds
+							})
 						};
 						break;
 						
@@ -341,17 +380,11 @@ Ext.define('Ck.map.Controller', {
 					extent: extent,
 					style: olStyle,
 					visible: layer.getVisible(),
-					path: layer.getExtension('path')
+					path: layer.getExtension('path') || "",
+					extension: layer.getExtension()
 				});
 				
 				if(olLayer) {
-					// Set specific Chinook parameters
-					olLayer.ckParams = {};
-					var ckParams = vm.data.ckLayerParams;
-					for(var i = 0; i < ckParams.length; i++) {
-						olLayer.ckParams[ckParams[i]] = layer.lyr.properties[ckParams[i]];
-					}
-					
 					this.getOlMap().addLayer(olLayer);
 				}
 			}
@@ -535,57 +568,50 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Get the collection of layers associated with this map.
-	 * @return {ol.Collection} 
+	 * @param {Function/undefined} Function with 1 param of ol.layer. Return true to add the layer to the result array
+	 * @return {ol.Collection} If no function was passed so all layers are returned
 	 */
-	getLayers: function() {
-		return this.getOlMap().getLayers();
+	getLayers: function(fct) {
+		var res, layers = this.getOlMap().getLayers();
+		if(Ext.isEmpty(fct)) {
+			res = layers;
+		} else {
+			res = new ol.Collection();
+			layers.forEach(function(lyr) {
+				if(fct(lyr)) {
+					res.push(lyr);
+				}
+			});
+		}
+		return res;
+	},
+	
+	/**
+	 * Get a layer according the passed function
+	 * @param {Function}
+	 * @return {ol.Layer/undefined} 
+	 */
+	getLayer: function(fct) {
+		var layers = this.getLayers().getArray();
+		
+		for(var i = 0; i < layers.length; i++) {
+			if(fct(layers[i])) {
+				return layers[i];
+			}
+		}
+		
+		return undefined;
 	},
 	
 	/**
 	 * Get a layer by ID.
-	 * @return {ol.Layer} 
+	 * @param {String}
+	 * @return {ol.Layer/undefined} 
 	 */
-	getLayer: function(id) {
-		var layers = this.getLayers().getArray();
-		// Reverse layer order
-		for(li=layers.length-1; li>=0; li--){
-			if (id == layers[li].get('id')) {
-				return layers[li];
-			}
-		}
-	},
-	
-	/**
-	 * Get all overview layer
-	 * @return {ol.layer[]}
-	 */
-	getOverviewLayers: function() {
-		var resLayers = [];
-		var layers = this.getLayers().getArray();
-		for(var i = 0; i < layers.length; i++) {
-			if(layers[i].ckParams && layers[i].ckParams.overviewLayer === true) {
-				resLayers.push(layers[i]);
-			}
-		}
-		return resLayers;
-	},
-	
-	/**
-	 * Get all layers of a certain type
-	 * @param {Constructor}	The constructor of desired layer type
-	 * @return {Array}
-	 */
-	getLayersType: function(type) {
-		var lyrs = this.getLayers().getArray();
-		var res = [];
-		
-		for(var i = 0; i < lyrs.length; i++) {
-			if(lyrs[i].getVisible() && lyrs[i] instanceof type && lyrs[i].getProperties().id != "measureLayer") {
-				res.push(lyrs[i]);
-			}
-		}
-		
-		return res;
+	getLayerById: function(id) {
+		return this.getLayer(function(lyr) {
+			return (lyr.get("id") == id);
+		});
 	},
 	
 	/**
@@ -593,16 +619,15 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getLayersStore: function() {
 		var res = [];
-		var lyrs = this.getLayers().getArray();
-		for(var i = 0; i < lyrs.length; i++) {
+		this.getLayers().forEach(function(lyr) {
 			// TODO improve true layer detection
-			if(lyrs[i].getProperties().title) {
+			if(lyr.getProperties().title) {
 				res.push({
-					"id": lyrs[i].getProperties().title,
-					"data": lyrs[i]
+					"id": lyr.get("title"),
+					"data": lyr
 				});
 			}
-		}
+		});
 		return res;
 	},
 	
@@ -621,8 +646,9 @@ Ext.define('Ck.map.Controller', {
 	resize: function() {
 		var v = this.getView();
 		var m = this.getOlMap();
-		if(!m.isRendered()){
+		if(!this.rendered){
 			m.setTarget(v.body.id);
+			this.rendered = true;
 			
 			// Fire map ready when it's rendered
 			Ck.log('fireEvent ckmapReady');

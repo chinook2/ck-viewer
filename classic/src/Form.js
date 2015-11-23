@@ -43,12 +43,13 @@ Ext.define("Ck.Form",{
 
 	bodyPadding: 10,
 	scrollable: true,
-
+	
 	dockedItems: [{
 		xtype: 'toolbar',
 		dock: 'bottom',
 		ui: 'footer',
 		defaults: {minWidth: 120},
+		hidden: true,
 		items: [{
 			xtype: "button",
 			text: "Edit",
@@ -84,5 +85,7 @@ Ext.define("Ck.Form",{
 		}]
 	}],
 	
-	cls: 'ckform'
+	cls: 'ckform',
+
+	beforeClose: Ext.emptyFn
 });

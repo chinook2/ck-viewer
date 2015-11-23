@@ -46,7 +46,8 @@ Ext.define('Ck.toolbar.Controller', {
 				}
 			}, v);*/
 		}
-		this.updateOlControls();
+		
+		v.on('afterlayout', this.updateOlControls, this);
 	},
 	
 	/*

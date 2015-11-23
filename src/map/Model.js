@@ -78,6 +78,10 @@ Ext.define('Ck.map.Model', {
 				"source": "MapQuest",
 				"layerType": "Tile"
 			},
+			"wmts": {
+				"source": "WMTS",
+				"layerType": "Tile"
+			},
 			"wms": {
 				"source": "ImageWMS",
 				"layerType": "Image"
@@ -91,11 +95,6 @@ Ext.define('Ck.map.Model', {
 				"layerType": "Vector"
 			}
 		},
-		
-		/** 
-		 * Specific Chinook parameters
-		 */
-		ckLayerParams: ["overviewLayer", "geometryType"],
 		
 		/**
 		 * @cfg {Number}
