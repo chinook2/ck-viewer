@@ -57,8 +57,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Indicate to the tool that the user has finished the integration of data.
 	 */
 	onIntegrationFinishedClick: function() {
-		Ck.getMap().getLayer("osmimport_data").getSource().clear();
-		Ck.getMap().getLayer("osmimport_selection").getSource().clear();
+		Ck.getMap().getLayerById("osmimport_data").getSource().clear();
+		Ck.getMap().getLayerById("osmimport_selection").getSource().clear();
 		this.openner.finishIntegration();
 		this.openner.close();
 	},
@@ -68,7 +68,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	getLayersList: function() {
 		var layersList = [];
-		var layersArray = Ck.getMap().getLayers().getArray();
+		var layersArray = Ck.getMap().getLayers().getArray();  // TODO use a filter to have only the corrects layers.
 		for (var i in layersArray) {
 			if (layersArray[i].get("title") != undefined) {
 				var layerObj = {title: layersArray[i].get("title"),
@@ -101,7 +101,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Method called when the user changes the selection of layer on which data will be integrated.
 	 */
 	onLayerSelectionChange: function(combobox, newValue, oldValue, eOpts) {
-		var selectedLayer = Ck.getMap().getLayer(newValue);
+		var selectedLayer = Ck.getMap().getLayerById(newValue);
 		var geometryType = undefined;
 		if (typeof selectedLayer.getSource().getFeatures === "function") {
 			geometryType = this.getGeometryType(selectedLayer);
@@ -115,7 +115,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	onIntegrationClick: function() {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
-		var integrationLayer = Ck.getMap().getLayer(selectedLayer);
+		var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
 		var integrationGeometryType;
 		var newFeatures = [];
 		if (typeof integrationLayer.getSource().getFeatures === "function") {
