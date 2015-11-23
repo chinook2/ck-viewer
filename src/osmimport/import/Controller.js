@@ -80,7 +80,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 				        color: '#ffcc33'
 			        })
 			    })
-			})
+			}),
+			id: "osmimport_selection"
 		});
 		this.olMap.addLayer(this.selectionVector);
 		this.mapInteraction = undefined;
@@ -92,7 +93,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.displayVector = new ol.layer.Vector({
 			source: this.displaySource,
 			style: this.DEFAULT_STYLE,
-			id: "osmimport"
+			id: "osmimport_data"
 		});
 		this.olMap.addLayer(this.displayVector);
 		
