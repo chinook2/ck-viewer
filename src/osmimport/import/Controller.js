@@ -364,7 +364,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 				if (record.containsSearchedTags(checkedTags)) {
 					nbFeaturesImported++;
 					if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
-						var geom = record.calculateGeom();
+						var newProjection = Ck.getMap().getOlMap().getView().getProjection();
+						var geom = record.calculateGeom(newProjection);
 						feature = new ol.Feature(
 							Ext.apply({
 								geometry: geom

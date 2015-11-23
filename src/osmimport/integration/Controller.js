@@ -111,15 +111,33 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		for (var i in records) {
 			var record = records[i];
 			if (record.containsSearchedTags([{tag:"[amenity=post_box]"}])) {
-				var geom = record.calculateGeom();
-				var feature = new ol.Feature(
-							Ext.apply({
-								geometry: geom
-							})
-						);				
+				var feature = this.convertData(record, integrationLayer);
 				newFeatures.push(feature);
 			}
 		}
 		integrationLayer.getSource().addFeatures(newFeatures);
+	},
+	
+	/**
+	 * This method converts a data from OSM format (as imported) to layer format.
+	 * Conversion is done on geometry (correct projection) and (tags / attributes)
+	 */
+	convertData: function(data, integrationLayer) {
+		var convertedData;
+		var newProjection = Ck.getMap().getOlMap().getView().getProjection();  // TODO change to get the projection of integration layer
+		var geom = data.calculateGeom(newProjection);  // TODO tranform with correct projection
+		var convertedData = new ol.Feature(
+					Ext.apply({
+						geometry: geom
+					})
+				);	
+		return convertedData;
+	},
+	
+	/** 
+	 * Method to save the data in the server.
+	 */
+	saveData: function() {
+		
 	}
 });

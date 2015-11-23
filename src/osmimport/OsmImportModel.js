@@ -22,7 +22,11 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	],
 	idProperty: 'id',
 
-	calculateGeom: function(data, convert) {
+	/**
+	 * Method used to create the geometry of a data according its OSM type.
+	 * Geometry is transformed in the new projection.
+	 **/
+	calculateGeom: function(newProjection, data, convert) {
 		var data = data || this.data;
 		var convertGeom = true;
 		if (convert == false) {
@@ -50,14 +54,14 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			var geoms = [];
 			for (var memberId in data.members) {
 				var member = data.members[memberId];
-				geoms.push(this.calculateGeom(member, false));
+				geoms.push(this.calculateGeom(null, member, false));
 			}
 			geom = new ol.geom.GeometryCollection(geoms);
 		}
 
 		// Transform the OSM projection into Map projection
 		if (geom != undefined && convertGeom) {
-			geom.transform("EPSG:4326", Ck.getMap().getOlMap().getView().getProjection());
+			geom.transform("EPSG:4326", newProjection);
 		}
 		return geom;
 	},
