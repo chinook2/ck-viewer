@@ -227,7 +227,7 @@ Ext.define('Ck.map.Controller', {
 		this.getLayers().clear();
 		
 		// Set the bbox
-		// this.setExtent(owc.getExtent());
+		this.setExtent(owc.getExtent());
 		
 		owc.getLayers().forEach(function(lyr) {
 			var params, opt_options, layer = owc.getLayer(lyr);
