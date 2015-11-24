@@ -205,7 +205,7 @@ Ext.define('Ck.form.Controller', {
 			// Manage bottom toolbar
 			var docks = this.view.getDockedItems();
 			var dock  = docks[0];
-			if(!this.defaultDock) {
+			if(!this.defaultDock && dock) {
 				this.defaultDock = dock.initialConfig;
 				this.defaultDock.hidden = false;
 			}
@@ -220,7 +220,7 @@ Ext.define('Ck.form.Controller', {
 				this.view.addDocked(fcf.dockedItems);
 			} else {
 				// Add default toolbar
-				this.view.addDocked(this.defaultDock);
+				if(this.defaultDock) this.view.addDocked(this.defaultDock);
 			}
 
 
@@ -376,12 +376,24 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	// auto config pour le form (simplification du json)
-	applyFormDefaults: function (cfg) {
+	applyFormDefaults: function (cfg) {		
 		var me = this;
 		this.fields = [];
 		
 		var fn = function (c) {
-			// Get Alls direct fieldss of the form with includes (exclude subform)
+			// Subforms : init default params and exit
+			if(c.xtype=='ckform') {
+				Ext.applyIf(c, {
+					isSubForm: true,
+					editing:true,
+					urlTemplate: {ws: "{0}/{1}"},
+					bodyPadding: 0,
+					dockedItems: []
+				});				
+				return;
+			}
+			
+			// Get Alls direct fields of the form with includes (exclude subform)
 			if(c.name) {
 				this.fields.push(c.name);
 			}
@@ -389,6 +401,7 @@ Ext.define('Ck.form.Controller', {
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
+			
 			Ext.applyIf(c, {
 				plugins: ['formreadonly'],
 				anchor: '100%',
