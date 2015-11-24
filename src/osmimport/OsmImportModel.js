@@ -88,7 +88,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 							v = v.replace(/"/g, '');
 						}
 						if (k in tags) {
-							if (v !== "" && tags[k] === v) {
+							if ((v !== "" && tags[k] === v) || !v) {
 								rec_correct++;
 							}
 						}

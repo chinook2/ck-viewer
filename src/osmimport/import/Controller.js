@@ -172,10 +172,35 @@ Ext.define('Ck.osmimport.import.Controller', {
 			tagList = vm.data.checkedTags;
 		}
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
+			error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?(\w|\u00C0-\u00FF)+:?]+=?["(\w|\u00C0-\u00FF)*:?]*\])+$/g) == null)) {
+				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+=?["\w*\u00C0-\u00FF*:?]*\])+$/g) == null)) {
+				error = true;
+			} else {  // search for : or accent without ""
+				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+=?["?\w*\u00C0-\u00FF*:?]*)+/g);
+				for (var kvId in key_val) {  // Check that each tag is in the selected group
+					var kv = key_val[kvId];
+					var k = kv.split("=")[0];
+					var v = kv.split("=")[1];
+					if ((k.indexOf(":") > -1 || k.match(/[\u00C0-\u00FF]/g) != null) &&
+						!(k.charAt(0) == "\"" || k.charAt(k.length - 1) == "\"")) {
+						error = true;
+					}
+					if (v) {
+						if ((v.indexOf(":") > -1 || v.match(/[\u00C0-\u00FF]/g) != null) &&
+							!(v.charAt(0) == "\"" || v.charAt(v.length - 1) == "\"")) {
+							error = true;
+						}
+					} else {
+						if (key_val[kvId].indexOf("=") > -1) {  // no [key=]
+							error = true;
+						}
+					}
+				}
+			}
+			if (error) {
 				errorMessage += ' - Tag "' + tagList[t].text + '" is incorrect<br/>';
-			} 
+			}
 		}
 		return errorMessage;
 	},
@@ -281,7 +306,9 @@ Ext.define('Ck.osmimport.import.Controller', {
 			}
 		} catch (exception) {  // Application is never locked with the "Wait MessageBox" if an error occurs
 			console.log(exception);  // TODO remove this debug log
-			this.waitMsg.close();
+			if (this.waitMsg) {
+				this.waitMsg.close();
+			}
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured while importing the data.',

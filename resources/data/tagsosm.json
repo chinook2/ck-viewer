@@ -129,6 +129,14 @@
 			"text": "Double point sans guillemets dans la valeur",
 			"tag": "[type=route][network=FR:Lila]",
 			"leaf": true
+		},{
+			"text": "Accent sans guillemets dans la clé",
+			"tag": "[amenity=school][lycée=\"school:FR\"]",
+			"leaf": true
+		},{
+			"text": "Accent sans guillemets dans la valeur",
+			"tag": "[amenity=school][\"school:FR\"=lycée]",
+			"leaf": true
 		}]
 	}]
 }
