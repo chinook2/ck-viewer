@@ -11,7 +11,6 @@ Ext.define('Ck.map.action.osmimport.Import', {
 	text: '',
 	iconCls: 'fa fa-cloud-download',
 	tooltip: 'Import Data',
-	toggleGroup: null,
 	enableToggle: false,
 	disabled: false,  // available by default, changed once import is finished
 	
