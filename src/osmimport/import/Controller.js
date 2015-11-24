@@ -264,7 +264,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 					selectionGeometry = [coords];
 				}
 			}
-			if (!selectionGeometry) {  // Select other geometry or click on place where there is no feature
+			if (selectionGeometry) {  // Selection success
+				this.selectionVector.getSource().clear();
+				this.selectionVector.getSource().addFeature(evt.selected[0]);
+			} else {  // Select other geometry or click on place where there is no feature
 				Ext.MessageBox.show({
 					title: 'OSM Import',
 					msg: 'Incorrect selection. You shall select one Polygon or MultiPolygon',
