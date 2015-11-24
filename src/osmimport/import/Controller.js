@@ -220,18 +220,24 @@ Ext.define('Ck.osmimport.import.Controller', {
 	},
 	
 	/**
+	 * Returns the list of all the layers that can be used for admin selection.
+	 */
+	getAdminSelectionLayers: function() {
+		var adminLayers = [];
+		var allLayers = Ck.getMap().getLayers().getArray();
+		for (var i in allLayers) {
+			if (allLayers[i].get("admin") && allLayers[i].get("visible")) {
+				adminLayers.push(allLayers[i]);
+			}
+		}
+		return adminLayers;
+	},
+	
+	/**
 	 * Method to check if the selection of an admin zone is available.
 	 */
 	isAdminSelectionAvailable: function() {
-		var available = false;
-		var allLayers = Ck.getMap().getLayers().getArray();
-		for (var i in allLayers) {
-			if (allLayers[i].get("admin") && allLayers[i].get("visible")) {  // TODO Check if poly or multipoly
-				available = true;
-				break;
-			}
-		}
-		return available;
+		return this.getAdminSelectionLayers().length > 0;
 	},
 	
 	/**
@@ -258,6 +264,15 @@ Ext.define('Ck.osmimport.import.Controller', {
 					selectionGeometry = [coords];
 				}
 			}
+			if (!selectionGeometry) {  // Select other geometry or click on place where there is no feature
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'Incorrect selection. You shall select one Polygon or MultiPolygon',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.ERROR
+				});
+			}
 		} else {
 			selectionGeometry = evt.feature.getGeometry().getCoordinates();
 		}
@@ -282,15 +297,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 
 		// Prepare draw interaction and geometryFunction according selection mode
 		if (selectType === "admin") {
-			var adminLayers = [];
-			var allLayers = Ck.getMap().getLayers().getArray();
-			for (var i in allLayers) {
-				if (allLayers[i].get("admin") && allLayers[i].get("visible")) {  // TODO filter poly or multipoly
-					adminLayers.push(allLayers[i]);
-				}
-			}
 			newInteraction = new ol.interaction.Select({
-				layers: adminLayers
+				layers: this.getAdminSelectionLayers()
 			});
 			newInteraction.on("select", this.onSelectionDone, this);
 		} else {
@@ -344,6 +352,17 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.olMap.removeInteraction(this.mapInteraction);
 		this.mapInteraction = undefined;
 	},
+	
+	/**
+	 * Method checks if the selection is correct to be used for the import
+	 */
+	checkSelection: function() {
+		var errorMessage = "";
+		if (this.selectionCoords === "") {
+			errorMessage += " - No geographical zone selected<br/>"
+		}
+		return errorMessage;
+	},
 
 	/**
 	 * Method called when user clicks on Import Button.
@@ -388,9 +407,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		
 		// Execute Checks
 		errorMessage += this.checkOsmTags();
-		if (this.selectionCoords === "") {
-			errorMessage += " - No geographical zone selected<br/>"
-		}
+		errorMessage += this.checkSelection();
 		
 		// Display Error Message in case of error
 		if (errorMessage.length > 0) {
