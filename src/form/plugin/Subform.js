@@ -172,8 +172,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	},
 	
     addItem: function() {
-		var form = this._subform.getForm();		
-        if (!form.isValid()) {
+        if (!this._subform.isValid()) {
             return;
         }
 		
@@ -187,7 +186,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Insert new record		
 		this._grid.getStore().insert(0, res);
 
-        form.reset();
+        this._subform.reset();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}

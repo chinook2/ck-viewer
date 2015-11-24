@@ -613,6 +613,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}, this);
 		
+		// TODO : manage grid as field with a plugin...
 		// GRID : save data
 		var grids = v.query('gridpanel');
 		for (var g = 0; g < grids.length; g++) {
@@ -628,7 +629,31 @@ Ext.define('Ck.form.Controller', {
 		}
 		//
 
+		// SUBFORM : save data
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			values[sf.name] = sf.getController().getValues();
+		}
+		//
+		
 		return values;
+	},
+	
+	setValues: function(data) {
+		if(!data) return;
+		
+		var v = this.getView();
+		var form = v.getForm();
+		form.setValues(data);
+		
+		// SUBFORM : load data
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];			
+			if(data[sf.name]) sf.getController().setValues(data[sf.name]);
+		}
+		//
 	},
 	
 	// Load data from
@@ -668,7 +693,7 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
-			v.getForm().setValues(data);
+			this.setValues(data);
 			this.getViewModel().setData({
 				layer: lyr,
 				data: data
@@ -727,7 +752,7 @@ Ext.define('Ck.form.Controller', {
 						return;
 					}
 
-					v.getForm().setValues(data);
+					this.setValues(data);
 					this.getViewModel().set({
 						layer: lyr,
 						fid: fid,
@@ -871,7 +896,7 @@ Ext.define('Ck.form.Controller', {
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
-					
+					/*
 					var vm = this.getViewModel();
 					if(vm){
 						vm.set({
@@ -880,6 +905,7 @@ Ext.define('Ck.form.Controller', {
 							data: Ext.apply(vm.get('data'), dt)
 						});
 					}
+					*/
 				}
 				Ext.callback(callback, this);
 			},
