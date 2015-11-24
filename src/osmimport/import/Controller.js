@@ -98,6 +98,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.olMap.addLayer(this.displayVector);
 		
 		/**
+		 * Init elements for admin zone selection.
+		 */
+		var adminAvailable = this.isAdminSelectionAvailable();
+		this.getViewModel().data.adminSelectAvailable = adminAvailable;
+		
+		/**
 		 * Init the Message Boxes attributes.
 		 */
 		this.waitMsg = undefined;
@@ -214,16 +220,54 @@ Ext.define('Ck.osmimport.import.Controller', {
 	},
 	
 	/**
+	 * Method to check if the selection of an admin zone is available.
+	 */
+	isAdminSelectionAvailable: function() {
+		var available = false;
+		var allLayers = Ck.getMap().getLayers().getArray();
+		for (var i in allLayers) {
+			if (allLayers[i].get("admin") && allLayers[i].get("visible")) {  // TODO Check if poly or multipoly
+				available = true;
+				break;
+			}
+		}
+		return available;
+	},
+	
+	/**
 	 * Method called once the user has finished its selection of a geographical zone.
 	 * - Converts the coordinates
 	 * - Stores the coordinates
 	 */
 	onSelectionDone: function(evt) {
-		var transformGeometry = new ol.geom.Polygon(evt.feature.getGeometry().getCoordinates());
-		var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
-		this.selectionCoords = "";
-		for (var i = 0; i < coords.length; i++) {
-			this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
+		var selectionGeometry;
+		var selectType = Ext.getCmp("selectionMode").items.get(0).getGroupValue();
+		if (selectType === "admin") {
+			if (evt.selected.length > 0) {
+				var featureGeom = evt.selected[0].getGeometry();
+				if (featureGeom.getType() === "Polygon") {
+					selectionGeometry = featureGeom.getCoordinates();
+				} else if (featureGeom.getType() === "MultiPolygon") {
+					var coords = [];
+					var multipoly = featureGeom.getCoordinates();
+					for (var poly in multipoly) {
+						for (var coord in multipoly[poly][0]) {
+							coords.push(multipoly[poly][0][coord]);
+						}
+					}
+					selectionGeometry = [coords];
+				}
+			}
+		} else {
+			selectionGeometry = evt.feature.getGeometry().getCoordinates();
+		}
+		if (selectionGeometry) {
+			var transformGeometry = new ol.geom.Polygon(selectionGeometry);
+			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
+			this.selectionCoords = "";
+			for (var i = 0; i < coords.length; i++) {
+				this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
+			}
 		}
 		this.stopZoneSelection();
 	},
@@ -233,46 +277,62 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	prepareSelector: function() {
 		var selectType = Ext.getCmp("selectionMode").items.get(0).getGroupValue();
-		var draw, geometryFunction, maxPoints;
 		var self = this;
+		var newInteraction;
 
 		// Prepare draw interaction and geometryFunction according selection mode
-		if (selectType === "rectangle") {
-			maxPoints = 2;
-			selectType = "LineString";
-			geometryFunction = function(coordinates, geometry) {
-				self.selectionSource.clear();
-				if (!geometry) {
-					geometry = new ol.geom.Polygon(null);
+		if (selectType === "admin") {
+			var adminLayers = [];
+			var allLayers = Ck.getMap().getLayers().getArray();
+			for (var i in allLayers) {
+				if (allLayers[i].get("admin") && allLayers[i].get("visible")) {  // TODO filter poly or multipoly
+					adminLayers.push(allLayers[i]);
 				}
-				var start = coordinates[0];
-				var end = coordinates[1];
-				geometry.setCoordinates([
-					[start, [start[0], end[1]], end, [end[0], start[1]], start]
-				]);
-				return geometry;
-			};
-		} else if (selectType === "polygone") {
-			selectType = "Polygon";
-			geometryFunction = function(coordinates, geometry) {
-				self.selectionSource.clear();
-				if (!geometry) {
-					geometry = new ol.geom.Polygon(null);
-				}
-				geometry.setCoordinates(coordinates);
-				return geometry;
-			};
-		}
+			}
+			newInteraction = new ol.interaction.Select({
+				layers: adminLayers
+			});
+			newInteraction.on("select", this.onSelectionDone, this);
+		} else {
+			var draw, geometryFunction, maxPoints;
+			if (selectType === "rectangle") {
+				maxPoints = 2;
+				selectType = "LineString";
+				geometryFunction = function(coordinates, geometry) {
+					self.selectionSource.clear();
+					if (!geometry) {
+						geometry = new ol.geom.Polygon(null);
+					}
+					var start = coordinates[0];
+					var end = coordinates[1];
+					geometry.setCoordinates([
+						[start, [start[0], end[1]], end, [end[0], start[1]], start]
+					]);
+					return geometry;
+				};
+			} else if (selectType === "polygone") {
+				selectType = "Polygon";
+				geometryFunction = function(coordinates, geometry) {
+					self.selectionSource.clear();
+					if (!geometry) {
+						geometry = new ol.geom.Polygon(null);
+					}
+					geometry.setCoordinates(coordinates);
+					return geometry;
+				};
+			}
 
-		draw = new ol.interaction.Draw({
-			source: self.selectionSource,
-			type: /** @type {ol.geom.GeometryType} */ (selectType),
-			geometryFunction: geometryFunction,
-			maxPoints: maxPoints
-        });
-		draw.on('drawend', this.onSelectionDone, this);
+			draw = new ol.interaction.Draw({
+				source: self.selectionSource,
+				type: /** @type {ol.geom.GeometryType} */ (selectType),
+				geometryFunction: geometryFunction,
+				maxPoints: maxPoints
+			});
+			draw.on('drawend', this.onSelectionDone, this);
+			newInteraction = draw;
+		}
 		this.olMap.removeInteraction(this.mapInteraction);
-		this.mapInteraction = draw;
+		this.mapInteraction = newInteraction;
         this.olMap.addInteraction(this.mapInteraction);
 	},
 	

@@ -86,7 +86,31 @@
 				}]
 			}],
 			"extension" : {
-				"path": "Limites Administratives"
+				"path": "Limites Administratives",
+				"admin": true
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "commune",
+		"properties": {
+			"title" : "Limites Communales",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "OpenStreetMap",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/communes_loireatlantique.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Limites Administratives",
+				"admin": true
 			}
 		}
 	},{

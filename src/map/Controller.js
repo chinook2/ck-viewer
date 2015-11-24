@@ -381,6 +381,7 @@ Ext.define('Ck.map.Controller', {
 					style: olStyle,
 					visible: layer.getVisible(),
 					path: layer.getExtension('path') || "",
+					admin: layer.getExtension('admin') || false,
 					extension: layer.getExtension()
 				});
 				

@@ -81,6 +81,17 @@
 			"leaf": true
 		}]
 	},{
+		"text": "Urgences, Sécurité",
+		"children": [{
+			"text": "Caserne Pompiers",
+			"tag": "[amenity=fire_station]",
+			"leaf": true
+		},{
+			"text": "Police, Gendarmerie",
+			"tag": "[amenity=police]",
+			"leaf": true
+		}]
+	},{
 		"text": "Divers",
 		"children": [{
 			"text": "Centrales de production d'énergie",
