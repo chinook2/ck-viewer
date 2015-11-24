@@ -113,6 +113,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Hide the import panel
 	 */
 	cancel: function() {
+		this.selectionVector.getSource().clear();
 		this.stopZoneSelection();
 		this.openner.close();
 	},
@@ -265,6 +266,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				}
 			}
 			if (selectionGeometry) {  // Selection success
+			console.log(evt);
 				this.selectionVector.getSource().clear();
 				this.selectionVector.getSource().addFeature(evt.selected[0]);
 			} else {  // Select other geometry or click on place where there is no feature
