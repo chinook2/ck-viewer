@@ -179,6 +179,8 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
+			this.name = form.name;
+			
 			// Create un dedicated controller form the named form
 			Ext.define('Ck.form.controller.' + form.name, {
 				extend: 'Ck.form.Controller',
@@ -381,6 +383,11 @@ Ext.define('Ck.form.Controller', {
 		this.fields = [];
 		
 		var fn = function (c) {
+			// Get Alls direct fields of the form with includes (exclude subform)
+			if(c.name) {
+				this.fields.push(c.name);
+			}
+			
 			// Subforms : init default params and exit
 			if(c.xtype=='ckform') {
 				Ext.applyIf(c, {
@@ -391,11 +398,6 @@ Ext.define('Ck.form.Controller', {
 					dockedItems: []
 				});				
 				return;
-			}
-			
-			// Get Alls direct fields of the form with includes (exclude subform)
-			if(c.name) {
-				this.fields.push(c.name);
 			}
 			
 			// Default textfield si propriété name et pas de xtype
@@ -448,6 +450,15 @@ Ext.define('Ck.form.Controller', {
 						// Another alias to define storeUrl
 						storeUrl = o.store.url;
 						delete o.store.url;
+					}
+					
+					// Apply template if available like dataUrl...
+					var v = me.getView();
+					var fid = v.getDataFid();
+					if(fid){
+						var tpl = new Ext.Template(storeUrl);
+						if(Ext.isString(fid)) fid = [fid];
+						storeUrl = tpl.apply(fid);
 					}
 
 					// Construct store with storeUrl
@@ -618,6 +629,9 @@ Ext.define('Ck.form.Controller', {
 		var grids = v.query('gridpanel');
 		for (var g = 0; g < grids.length; g++) {
 			var grid = grids[g];
+			if(!grid.name) continue;
+			if(this.fields.indexOf(grid.name)==-1) continue;
+			
 			var dtg = [];
 
 			// Récup les enregistrements nouveaux et modifiés
@@ -633,6 +647,9 @@ Ext.define('Ck.form.Controller', {
 		var subforms = v.query('ckform');
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
+			if(!sf.name) continue;
+			if(this.fields.indexOf(sf.name)==-1) continue;
+			
 			values[sf.name] = sf.getController().getValues();
 		}
 		//
@@ -834,7 +851,7 @@ Ext.define('Ck.form.Controller', {
 
 		// TODO : pose pb avec les subforms...
 		if (!v.isValid()) {
-			Ck.log("Form is not valid in saveData.");
+			Ck.log("Form is not valid in saveData : "+ this.name);
 			return false;
 		}
 		
@@ -858,8 +875,47 @@ Ext.define('Ck.form.Controller', {
 			Ck.log("beforeSave cancel saveData.");
 			return false;
 		}
+		
+		
+		// SUBFORM : save data only if subform is not linked to main form with a name property
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			
+			// TODO : manage save callback...
+			if(!sf.name) sf.getController().saveData();
+		}
+		//
 
 		var url = '';
+		
+
+		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
+		// GRID : save data only if gridpanel is not linked to main form with a name property
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			if(grid.name) continue;
+			
+			var dtg = [];
+
+			// Récup les enregistrements nouveaux et modifiés
+			grid.getStore().each(function (model) {
+				if(model.data.dummy===true) return;
+				dtg.push(model.data);
+			});
+			
+			// Use Grid url and data for saving form !
+			// Need rework ;)
+			url = grid.getStore().getProxy().getUrl();
+			dt = dtg;
+			
+			// TEMP : assume only one grid !
+			break;
+		}
+		//
+		//
+		
 		// Load data by ID - build standard url
 		if (fid) {
 			// TODO : Call un service REST for loading data...
@@ -878,7 +934,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(!url){
-			Ck.Notify.error("Forms saveData 'fid' or 'url' not set.");
+			Ck.Notify.error("Forms saveData 'fid' or 'url' not set in "+ this.name);
 			return false;
 		}
 

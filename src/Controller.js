@@ -72,7 +72,11 @@ Ext.define('Ck.Controller', {
 	 */
 	getFullUrl: function (name) {
 		var url = '';
-
+		
+		if(Ext.String.startsWith(name, 'http')) {
+			return name;
+		}
+		
 		var tpl = {st: "", ws: ""};
 		if(Ext.isFunction(this.getView().getUrlTemplate)){
 			tpl = this.getView().getUrlTemplate();

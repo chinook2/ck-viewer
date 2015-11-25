@@ -186,6 +186,9 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Insert new record		
 		this._grid.getStore().insert(0, res);
 
+		// Save if params available
+		formController.saveData();
+		
         this._subform.reset();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
