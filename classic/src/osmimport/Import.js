@@ -49,7 +49,7 @@ Ext.define("Ck.osmimport.Import", {
 				columns: [
 					{
 						xtype: "gridcolumn",
-						text: "Tags Sélectionnés",
+						text: "Selected Tags",
 						dataIndex: "text",
 						flex: 1
 					}
@@ -94,12 +94,12 @@ Ext.define("Ck.osmimport.Import", {
 					inputValue: 'rectangle',
 					height: 20
 				}, {
-					boxLabel: 'Polygone',
+					boxLabel: 'Polygon',
 					name: 'selection-mode',
-					inputValue: 'polygone',
+					inputValue: 'polygon',
 					height: 20
 				}, {
-					boxLabel: 'Administrative limite from layer',
+					boxLabel: 'Administrative limit from layer',
 					name: 'selection-mode',
 					inputValue: 'admin',
 					height: 20,
@@ -118,7 +118,7 @@ Ext.define("Ck.osmimport.Import", {
 		title: "Options",
 		collapsible: true,
 		collapsed: true,
-		items: [{  // Date Sélection
+		items: [{  // Date Selection
 			xtype: 'panel',
 			layout: 'hbox',
 			items: [{

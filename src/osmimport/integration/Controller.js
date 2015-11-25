@@ -106,7 +106,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		if (typeof selectedLayer.getSource().getFeatures === "function") {
 			geometryType = this.getGeometryType(selectedLayer);
 		}
-		this.lookupReference("geometrylabel").setText("Géométrie: " + geometryType);
+		this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
 	},
 	
 	/**

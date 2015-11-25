@@ -20,24 +20,24 @@ Ext.define('Ck.osmimport.import.Controller', {
 		
 		// Style to be applied by default to the imported data.
 		this.DEFAULT_STYLE = new ol.style.Style({
+			fill: new ol.style.Fill({
+				color: 'rgba(255, 0, 0, 0.25)'
+			}),
+			stroke: new ol.style.Stroke({
+				color: '#FF0000',
+				width: 2
+			}),
+			image: new ol.style.Circle({
+				radius: 7,
 				fill: new ol.style.Fill({
-			        color: 'rgba(255, 0, 0, 0.25)'
-			    }),
-			    stroke: new ol.style.Stroke({
-			        color: '#FF0000',
-			        width: 2
-			    }),
-			    image: new ol.style.Circle({
-			        radius: 7,
-			        fill: new ol.style.Fill({
-				        color: 'rgba(255, 0, 0, 0.4)'
-			        }),
-					stroke: new ol.style.Stroke({
-						color: '#FF0000',
-						width: 2
-					})
-			    })
-			});
+					color: 'rgba(255, 0, 0, 0.4)'
+				}),
+				stroke: new ol.style.Stroke({
+					color: '#FF0000',
+					width: 2
+				})
+			})
+		});
 	
 		/**
 		 * Init the controls from View.
@@ -322,7 +322,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					]);
 					return geometry;
 				};
-			} else if (selectType === "polygone") {
+			} else if (selectType === "polygon") {
 				selectType = "Polygon";
 				geometryFunction = function(coordinates, geometry) {
 					self.selectionSource.clear();

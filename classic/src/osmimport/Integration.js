@@ -20,7 +20,7 @@ Ext.define("Ck.osmimport.Integration", {
 	},
 	items: [{ // Layer Selection
 		xtype: "fieldcontainer",
-		fieldLabel: "Sélectionner la couche d'intégration",
+		fieldLabel: "Select the integration layer",
 		labelAlign: "top",
 		labelStyle: 'font-weight: bold',
 		layout: {
@@ -51,7 +51,7 @@ Ext.define("Ck.osmimport.Integration", {
 		}]	
 	},{  // Geometry to integrate
 		xtype: "fieldcontainer",
-		fieldLabel: "Selectionner la géométrie à intégrer",
+		fieldLabel: "Select the geometry to integrate",
 		labelAlign: "top",
 		labelStyle: "font-weight: bold",
 		items: [{
@@ -64,17 +64,17 @@ Ext.define("Ck.osmimport.Integration", {
 			id: "geometrytointegrate",
 			items: [{
 				checked: true,
-				boxLabel: 'Géométrie de la couche sélectionnée',
+				boxLabel: "Selected layer's geometry",
 				inputValue: 'selectedone'
 			},{
-				boxLabel: 'Toutes les géométries',
+				boxLabel: 'All geometries',
 				inputValue: 'all',
 				reference: "selectAllGeometries"
 			}]
 		},{
 			xtype: "label",
 			cls: Ext.baseCSSPrefix + "fa fa-warning",
-			data: "Une conversion de certaines données sera nécessaire.",
+			data: "Some data need a conversion.",
 			style: {
 				"color": "orange"
 			},
@@ -84,7 +84,7 @@ Ext.define("Ck.osmimport.Integration", {
 		}]
 	},{  // Informations to integrate
 		xtype: "fieldcontainer",
-		fieldLabel: "Sélectionner les informations à intégrer",
+		fieldLabel: "Select informations to integrates",
 		labelAlign: "top",
 		labelStyle: "font-weight: bold",
 		items: [{
@@ -98,10 +98,10 @@ Ext.define("Ck.osmimport.Integration", {
 			id: "informationtointegrate",
 			items: [{
 				checked: true,
-				boxLabel: "Seulement les coordonnées",
+				boxLabel: "Only coordinates",
 				inputValue: "coords"
 			},{
-				boxLabel: "Coordonnées + Tags",
+				boxLabel: "Coordinates + Tags",
 				inputValue: "coordstags",
 				reference: "coordstags"
 			}]
@@ -123,7 +123,7 @@ Ext.define("Ck.osmimport.Integration", {
 				},
 				items: [{
 					xtype: "label",
-					text: "Couche d'intégration"
+					text: "Integration Layer"
 				},{
 					xtype: "grid",
 					width: 400,
@@ -135,10 +135,10 @@ Ext.define("Ck.osmimport.Integration", {
 					columns: {
 						items: [
 							{
-								text: "Attributs",
+								text: "Attributes",
 								dataIndex: "attr"
 							},{
-								text: "Tag OSM associé",
+								text: "Associated OSM Tag",
 								dataIndex: "tag"
 							}
 						],
@@ -175,7 +175,7 @@ Ext.define("Ck.osmimport.Integration", {
 				},
 				items: [{
 					xtype: "label",
-					text: "Couche OSM"
+					text: "OSM Layer"
 				},{
 					xtype: "grid",
 					width: 200,
@@ -186,7 +186,7 @@ Ext.define("Ck.osmimport.Integration", {
 					columns: [
 						{
 							xtype: "gridcolumn",
-							text: "Tag OSM",
+							text: "OSM Tag",
 							dataIndex: "tag",
 							width: 180
 						}
@@ -203,7 +203,7 @@ Ext.define("Ck.osmimport.Integration", {
 		text: "Integration",
 		itemId: "integration"
 	},{
-		text: "Integration Terminée",
+		text: "Integration Finished",
 		itemId: "integrationfinished"
 	},{
 		text: "Cancel",
