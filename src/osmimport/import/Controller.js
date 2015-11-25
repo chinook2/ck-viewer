@@ -179,7 +179,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			tagList = vm.data.checkedTags;
 		}
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
-			error = false;
+			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
 				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+=?["\w*\u00C0-\u00FF*:?]*\])+$/g) == null)) {
 				error = true;
@@ -505,7 +505,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
 						var newProjection = Ck.getMap().getOlMap().getView().getProjection();
 						var geom = record.calculateGeom(newProjection);
-						feature = new ol.Feature(
+						var feature = new ol.Feature(
 							Ext.apply({
 								geometry: geom
 							}, record.data.tags)

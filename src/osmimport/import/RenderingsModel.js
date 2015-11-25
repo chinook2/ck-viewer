@@ -9,10 +9,14 @@ Ext.define('Ck.osmimport.import.RenderingsModel', {
 		{name: "fillcolor", type: "string"},
 		{name: "strokecolor", type: "string"}
 	],
-	validators: [
-		{type: "presence", field: "fillcolor"},
-		{type: "format", field: "fillcolor", matcher: /^rgba\([0-9]+,\s?[0-9]+,\s?[0-9]+,\s?[0-9\.]+\)$/},
-		{type: "presence", field: "strokecolor"},
-		{type: "format", field: "strokecolor", matcher: /^#[0-9A-Fa-f]{6}$/}
-	]
+	validators: {
+		fillcolor: [
+			{type: "presence"},
+			{type: "format", matcher: /^rgba\([0-9]+,\s?[0-9]+,\s?[0-9]+,\s?[0-9\.]+\)$/}
+		],
+		strokecolor: [
+			{type: "presence"},
+			{type: "format", matcher: /^#[0-9A-Fa-f]{6}$/}
+		]
+	}
 });

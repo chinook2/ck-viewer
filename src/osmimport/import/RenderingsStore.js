@@ -1,5 +1,5 @@
 /**
- * Store to set the Tree for OSM Tags in OSM Import Panel.
+ * Store to get list of renderings in OSM Import Panel.
  * Data comes from a JSON file in resources
  * @author Florent RICHARD
  */
