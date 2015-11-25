@@ -1,6 +1,6 @@
 /**
- * Controller what manage feature modification.
- * Users can modify the feature by 2 way. With the vertex panel or with
+ * Controller what manage vertex modification.
+ * Users can modify the geometry by 2 way. With the vertex panel or with
  * 4 ol.interaction to play directly with the map :
  *
  * - ol.interaction.Translate
@@ -16,28 +16,32 @@ Ext.define('Ck.edit.vertex.Controller', {
 	/**
 	 * Say if change occurred
 	 */
-	featureChanged: false,
+	geometryChanged: false,
 	
-	/**
-	 * @event validate
-	 * Fires when user want to save vertex change
-	 * @param {ol.Feature}
-	 * @param {Boolean} Say if the feature is changed
-	 */
-	 
-	/**
-	 * @event cancel
-	 * Fires when user want to discard vertex change
-	 * @param {ol.Feature}
-	 */
-	 
 	/**
 	 * @event beginsession
 	 * Fires at begin of vertex session
 	 * @param {ol.Feature}
 	 */
-	
-	
+	 
+	/**
+	 * @event geometrychange
+	 * Fires when the geometry is altered
+	 * @param {ol.geom.SimpleGeometry}
+	 */
+	 
+	/**
+	 * @event validate
+	 * Fires when user want to save vertex change
+	 * @param {ol.geom.SimpleGeometry}
+	 * @param {Boolean} Say if the geometry is changed
+	 */
+	 
+	/**
+	 * @event cancel
+	 * Fires when user want to discard vertex change
+	 * @param {ol.geom.SimpleGeometry}
+	 */
 	
 	/**
 	 * @protected
@@ -87,8 +91,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 				id: vertexLayerId,
 				source: new ol.source.Vector(),
 				style: Ck.map.Style.overlayStyle,
-				renderOrder: function() { return 0 },
-				zIndex: 1000
+				zIndex: Ck.map.Style.zIndex.vertexOverlay
 			});
 			
 			this.vertexLayer.setMap(this.olMap);
@@ -102,37 +105,15 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	loadFeature: function(feature) {
 		this.fireEvent("beginsession", feature);
-		this.featureChanged = false;
-		this.originalGeometry = feature.getGeometry().clone();
-		this.idxX = 0;
-		this.idxY = 0;
+		this.geometryChanged = false;
 		
 		this.feature = feature;
-		this.ftCoords = feature.getGeometry().getCoordinates();
+		this.geometry = feature.getGeometry();
 		
-		// Multi or single feature
-		if(isNaN(this.ftCoords[0][0][0])) {
-			this.coords = this.ftCoords[this.idxX][this.idxY];
-		} else {
-			this.coords = this.ftCoords[this.idxX];
-		}
+		this.originalGeometry = this.geometry.clone();
+		this.ftCoords = this.geometry.getCoordinates();
 		
-		// Remove the duplicate first/last vertex from the store
-		this.coords.splice(this.coords.length - 1, 1);
-		
-		var records = [];
-		
-		// Add each vertex to the grid
-		for(var i = 0; i < this.coords.length; i++) {
-			records.push({
-				number: i + 1,
-				longitude: this.trimCoord(this.coords[i][0]),
-				latitude: this.trimCoord(this.coords[i][1]),
-				geometry: this.coords[i]
-			});
-		}
-		
-		this.store.loadData(records);
+		this.loadVertex();
 		
 		this.gridEvent = this.grid.on({
 			destroyable: true,
@@ -163,10 +144,31 @@ Ext.define('Ck.edit.vertex.Controller', {
 		});
 	},
 	
+	loadVertex: function() {
+		this.store.erase();
+		// Remove the duplicate first/last vertex from the store
+		this.coords = this.ftCoords[0];
+		this.coords.splice(this.coords.length - 1, 1);
+		
+		var records = [];
+		
+		// Add each vertex to the grid
+		for(var i = 0; i < this.coords.length; i++) {
+			records.push({
+				number: i + 1,
+				longitude: this.trimCoord(this.coords[i][0]),
+				latitude: this.trimCoord(this.coords[i][1]),
+				geometry: this.coords[i]
+			});
+		}
+		
+		this.store.loadData(records);
+	},
+	
 	/**
 	 * To make the panel unactive 
 	 */
-	unloadFeature: function() {
+	unloadGeometry: function() {
 		this.removeAllMarker();
 		this.gridEvent.destroy();
 		this.storeEvent.destroy();
@@ -235,8 +237,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		var point = new ol.geom.Point(coords);
 		var marker = new ol.Feature({
-			geometry: point,
-			style: Ck.map.Style.overlayStyle[0]
+			geometry: point
 		});
 		
 		var mapExtent = Ck.getMap().getOlView().calculateExtent(Ck.getMap().getOlMap().getSize());
@@ -298,7 +299,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	vertexAdded: function(record, index) {
 		this.coords.splice(index, 0, [record.data.longitude, record.data.latitude]);
 		this.updateMarker(null, record);
-		this.updateFeature();
+		this.updateGeometry();
 	},
 	
 	/**
@@ -322,7 +323,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.grid.getView().focusRow(newIdx);		
 		
 		this.coords.splice(index, 1);
-		this.updateFeature();
+		this.updateGeometry();
 	},
 	
 	/**
@@ -338,84 +339,93 @@ Ext.define('Ck.edit.vertex.Controller', {
 			record.data.geometry = [record.data.longitude, record.data.latitude]
 			this.coords[record.data.number - 1] = record.data.geometry;
 			this.updateMarker(null, record);
-			this.updateFeature();
+			this.updateGeometry();
 		}
 	},
 	
 	/**
-	 * Update the current feature with the new coordinates
+	 * Update the current geometry with the new coordinates
 	 */
-	updateFeature: function() {
-		this.featureChanged = true;
+	updateGeometry: function() {
+		this.geometryChanged = true;
 		this.coords.push(this.coords[0])
-		this.feature.getGeometry().setCoordinates(this.ftCoords);
+		this.geometry.setCoordinates(this.ftCoords);
 		this.coords.splice(-1, 1);
+		this.fireEvent("geometrychange", this.geometry);
 	},
 	
 	/**
-	 * Reset number field of each item of the grid
-	 */
-	reindexVertex: function() {
-		for(var i = 0; i < this.store.data.length; i++) {
-			this.store.data.getAt(i).set("number", i + 1);
-		}
-	},
-	
-	/**
-	 * Save the current feature
+	 * Save the current geometry
 	 */
 	save: function() {
-		this.unloadFeature();
-		this.fireEvent("validate", this.feature, this.featureChanged);
+		this.unloadGeometry();
+		this.fireEvent("validate", this.geometry, this.geometryChanged);
 	},
 	
 	/**
 	 * Discard change
 	 */
 	cancel: function() {
-		this.unloadFeature();
-		this.feature.setGeometry(this.originalGeometry);
-		this.fireEvent("cancel", this.feature);
+		this.unloadGeometry();
+		this.geometry = this.originalGeometry;
+		this.fireEvent("cancel", this.geometry);
 	},
 	
 	close: function() {
 		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
 	},
 	
+	/**************************************************************************************/
+	/***************************** Live interaction managment *****************************/
+	/**************************************************************************************/
 	/**
 	 * Manage live interaction (directly on the map)
 	 * @param {Ext.form.field.RadioView}
 	 * @param {Boolean}
 	 */
 	liveAction: function(rb, checked) {
+		// Interaction need a feature, not a geometry
+		// var tempFeature = Ck.create("ol.Feature", { geometry : this.geometry });
+		
 		switch(rb.getItemId()) {
 			case "action-none":
 				
 				break;
 			case "action-move":
-				if(!this.moveInteraction) {
-					this.moveInteraction = new ol.interaction.Translate({
-						features: new ol.Collection([this.feature])
-					});
-					this.olMap.addInteraction(this.moveInteraction);
+				if(this.moveInteraction) {
+					this.olMap.removeInteraction(this.moveInteraction);
 				}
+				this.moveInteraction = new ol.interaction.Translate({
+					features: new ol.Collection([this.feature])
+				});
+				this.moveInteraction.on("translateend", this.translateEnd, this);
+				this.olMap.addInteraction(this.moveInteraction);
+				
 				delete this.moveInteraction.previousCursor_;
 				this.moveInteraction.setActive(checked);
 				break;
 			case "action-alter":
-				if(!this.createInteraction) {
-					this.createInteraction = new ol.interaction.Modify({
-						// clickTolerance
-						deleteCondition: ol.events.condition.never,
-						features: new ol.Collection([this.feature])
-					});
-					this.createInteraction.on("modifystart", this.focusVertexRow, this);
-					this.createInteraction.on("modifyend", this.updateVertexRow, this);
-					this.olMap.addInteraction(this.createInteraction);
+				if(this.modifyInteraction) {
+					this.olMap.removeInteraction(this.modifyInteraction);
 				}
-				this.createInteraction.setActive(checked);
+				this.modifyInteraction = new ol.interaction.Modify({
+					deleteCondition: ol.events.condition.never,
+					features: new ol.Collection([this.feature])
+				});
+				this.modifyInteraction.on("modifystart", this.focusVertexRow, this);
+				this.modifyInteraction.on("modifyend", this.updateVertexRow, this);
+				this.olMap.addInteraction(this.modifyInteraction);
+					
+				this.modifyInteraction.setActive(checked);
 				break;
 		}
+	},
+	
+	translateEnd: function(evt) {
+		var ft = evt.features.getArray()[0];
+		this.ftCoords = ft.getGeometry().getCoordinates();
+		this.loadVertex();
+		this.removeAllMarker();
 	},
 	
 	/**
@@ -429,9 +439,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		if(event.currentTarget.snappedToVertex_) {
 			idx = this.getIndexFromCoord(coord) - 1;
-		} else {
-			var geom = this.feature.getGeometry();
-			
+		} else {			
 			var prevPoint = event.currentTarget.dragSegments_[0][0].segment[0];
 			var idx = this.getIndexFromCoord(prevPoint);
 			
@@ -460,6 +468,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {ol.interaction.ModifyEvent}
 	 */
 	updateVertexRow: function(event) {
+		this.geometryChanged = true;
 		var coord = event.currentTarget.vertexFeature_.getGeometry().getCoordinates();
 		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
 		
@@ -471,7 +480,19 @@ Ext.define('Ck.edit.vertex.Controller', {
 			});
 			this.updateMarker(null, dataRow);
 			this.coords[this.currentVertexIdx] = coord;
-			// this.ftCoords = this.feature.getGeometry().getCoordinates();
+		}
+		this.fireEvent("geometrychange", this.geometry);
+	},
+	
+	/**************************************************************************************/
+	/**************************************** Utils ***************************************/
+	/**************************************************************************************/	
+	/**
+	 * Reset number field of each item of the grid
+	 */
+	reindexVertex: function() {
+		for(var i = 0; i < this.store.data.length; i++) {
+			this.store.data.getAt(i).set("number", i + 1);
 		}
 	},
 	
