@@ -180,6 +180,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			this.name = form.name;
+			this.dataUrl = null;
 			
 			// Create un dedicated controller form the named form
 			Ext.define('Ck.form.controller.' + form.name, {
@@ -617,10 +618,11 @@ Ext.define('Ck.form.Controller', {
 			var f = form.findField(field);
 			if(f){
 				values[field] = f.getValue();
-				if(f.displayField) {
-					if(!values['__display']) values['__display'] = {}
-					values['__display'][field] = f.getDisplayValue();
-				}
+				// TODO : add config option to get display values
+				// if(f.displayField) {
+					// if(!values['__display']) values['__display'] = {}
+					// values['__display'][field] = f.getDisplayValue();
+				// }
 			}
 		}, this);
 		
@@ -736,7 +738,9 @@ Ext.define('Ck.form.Controller', {
 				url = tpl.apply(fid);
 			} else {
 				// Build default url
-				url = 'resources/data/' + lyr + '/' + fid + '.json';
+				if(lyr && Ext.isString(fid)) {
+					url = 'resources/data/' + lyr + '/' + fid + '.json';
+				}
 			}
 		}
 
@@ -929,12 +933,12 @@ Ext.define('Ck.form.Controller', {
 				if(Ext.isString(fid)) fid = [fid];
 				url = tpl.apply(fid);
 			} else {
-				Ck.log("fid defined but no dataUrl template !");
+				Ck.log("fid ("+ fid +") defined but no dataUrl template in "+ this.name);
 			}
 		}
 
 		if(!url){
-			Ck.Notify.error("Forms saveData 'fid' or 'url' not set in "+ this.name);
+			Ck.Notify.info("Forms saveData 'fid' or 'url' not set in "+ this.name);
 			return false;
 		}
 
