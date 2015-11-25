@@ -9,7 +9,7 @@ Ext.define('Ck.edit.action.Union', {
 	 * Default properties when this action is used through a button
 	 */
 	iconCls: 'fa fa-crop',
-	tooltip: 'Crop features',
+	tooltip: 'Gather features',
 
 	/**
 	 * Activate the geometry crop interaction

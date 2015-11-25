@@ -4,8 +4,6 @@
 Ext.define('Ck.edit.Action', {
 	extend: 'Ck.Action',
 
-	alias: 'controller.edit-editpanel',
-
 	layer: null,
 	layerStyle: null,
 	defaultGeometryType: "polygon",

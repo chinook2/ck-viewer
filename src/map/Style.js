@@ -43,6 +43,13 @@ Ext.define('Ck.map.Style', {
 	
 	style:null,
 	
+	zIndex: {
+		editInteraction	: 500,
+		cloneLayer		: 520,
+		featureOverlay	: 540,
+		vertexOverlay	: 560
+	},
+	
 	/**
 	 * Default styles by type ([Multi]Point, [Multi]LineString, [Multi]Polygon).
 	 */
@@ -142,7 +149,7 @@ Ck.map.Style.overlayStyle = [
 			radius: Ck.map.Style.radius,
 			angle: 0.785398
 		}),
-		fill: new ol.style.Fill(Ck.map.Style.fill),
+		// fill: new ol.style.Fill(Ck.map.Style.fill),
 		stroke: new ol.style.Stroke(Ck.map.Style.overlayStroke)
 	})
 ];

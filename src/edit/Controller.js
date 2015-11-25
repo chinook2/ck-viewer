@@ -51,11 +51,13 @@ Ext.define('Ck.edit.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
+		this.layer = view.layer;
+		this.multi = (this.layer.getExtension("geometryType").indexOf("Multi") != -1);
+		
 		var conf = view.editConfig;
 		conf.editController = this;
 		conf.layer = view.layer;
-		this.layer = view.layer;
-		
+		conf.multi = this.multi;
 		
 		
 		this.action = {
@@ -78,6 +80,21 @@ Ext.define('Ck.edit.Controller', {
 			}
 		});
 		
+		if(this.multi) {
+			var featureContainer = Ext.getCmp("edit-featurepanel");
+			featureContainer = (Ext.isEmpty(featureContainer))? view : featureContainer;
+		
+			this.featurePanel = Ext.create("widget.ckedit-feature", conf);
+			featureContainer.add(this.featurePanel);
+		
+			// Add listeners
+			this.feature = this.featurePanel.getController();
+			Ext.apply(this.feature, conf);
+			this.feature.addListener("beginsession", this.beginFeatureEdition, this);
+			this.feature.addListener("validate", this.saveFeatureChange, this);
+			this.feature.addListener("cancel", this.cancelFeatureChange, this);
+		}
+		
 		// Display vertex panel for line and polygon
 		if(view.layer.getExtension("geometryType") != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
@@ -88,10 +105,15 @@ Ext.define('Ck.edit.Controller', {
 		
 			// Add listeners
 			this.vertex = this.vertexPanel.getController();
-			this.vertex.addListener("validate", this.saveVertexChange, this);
-			this.vertex.addListener("cancel", this.cancelVertexChange, this);
-			this.vertex.addListener("beginsession", this.beginVertexChange, this);
+			Ext.apply(this.vertex, conf);
+			
+			var receiver = (this.multi)? this.feature : this;
+			this.vertex.addListener("beginsession", receiver.beginVertexChange, receiver);
+			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
+			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
+			// this.vertex.addListener("geometrychange", receiver.vertexChange, receiver);
 		}
+		
 		
 		this.historyPanel = Ext.getCmp("edit-historypanel");
 		if(this.historyPanel) {
@@ -101,46 +123,120 @@ Ext.define('Ck.edit.Controller', {
 			Ext.apply(this.history, conf);
 			this.history.createListeners(this);
 		}
-		
 	},
 	
 	/**
-	 * Display the global edit panel or the specific vertex panel alternately.
-	 * Or display specified panel
-	 * @param {Ext.panel.Panel} The panel to display
+	 * When the process goes through sub-feature edition
+	 * @param {ol.Feature}
 	 */
-	switchPanel: function(panel) {
-		if(Ext.isEmpty(panel)) {
-			this.editPanelVisible = !this.editPanelVisible;
-			this.historyPanel.setVisible(this.editPanelVisible);
-			this.vertexPanel.setVisible(this.editPanelVisible);
+	beginFeatureEdition: function(feature) {
+		this.action["geometry"].disableInteraction();
+	},
+	
+	/**
+	 * For feature panel validating
+	 * @param {ol.Feature}
+	 * @param {Boolean}
+	 */
+	saveFeatureChange: function(feature, changed) {
+		this.switchPanel(this.historyPanel);
+		this.action["geometry"].reset();
+		if(changed) {
+			this.fireEvent("featurechange", feature);
+		}
+		this.action["geometry"].enableInteraction();
+	},
+	
+	/**
+	 * When user cancel modification
+	 * @param {ol.Feature}
+	 */
+	cancelFeatureChange: function(feature) {
+		this.switchPanel(this.historyPanel);
+		this.action["geometry"].reset();
+		this.action["geometry"].enableInteraction();
+	},
+	
+	
+	
+	
+	
+	/**
+	 * Start a geometry edition session.
+	 * If the layer is a multi-features layer, subfeatures panel is displayed, vertex panel otherwise
+	 * @param {ol.Feature}
+	 */
+	startGeometryEdition: function(feature) {
+		if(this.multi) {
+			this.startFeatureEdition(feature);
 		} else {
-			this.historyPanel.setVisible(panel == this.historyPanel);
-			this.vertexPanel.setVisible(panel == this.vertexPanel);
-			this.editPanelVisible = (panel == this.historyPanel);
+			this.startVertexEdition(feature.getGeometry());
 		}
 	},
 	
-	beginVertexChange: function(feautre) {
-		this.action["geometry"].vertexInteraction.setActive(false);
+	/**
+	 * When the edited layer is a multi-feature layer.
+	 * Open sub-features selection panel
+	 * @param {ol.Feature}
+	 */
+	startFeatureEdition: function(feature) {
+		this.feature.loadFeature(feature);
+		this.switchPanel(this.featurePanel);
+	},
+	
+	/**
+	 * Edit a simple geometry (polygon, line or point)
+	 * @param {ol.geom.SimpleGeometry}
+	 */
+	startVertexEdition: function(feature) {
+		if(feature.getGeometry().getType() != "Point") {
+			this.vertex.loadFeature(feature);
+			this.switchPanel(this.vertexPanel);
+		}	
+	},
+	
+	
+	
+	beginVertexChange: function() {
+		this.action["geometry"].disableInteraction();
 	},
 	
 	/**
 	 * For vertex panel validating
 	 */
 	saveVertexChange: function(feature, changed) {
-		this.switchPanel();
+		this.switchPanel(this.historyPanel);
 		this.action["geometry"].reset();
 		if(changed) {
 			this.fireEvent("featuregeometry", feature);
 		}
-		this.action["geometry"].vertexInteraction.setActive(true);
+		this.action["geometry"].enableInteraction();
 	},
 	
+	/**
+	 * When the user cancel his changes
+	 */
 	cancelVertexChange: function(feature) {
-		this.switchPanel();
+		
+		this.switchPanel(this.historyPanel);
 		this.action["geometry"].reset();
-		this.action["geometry"].vertexInteraction.setActive(true);
+		this.action["geometry"].enableInteraction();
+	},
+	
+	/**
+	 * Display the specified panel
+	 * @param {Ext.panel.Panel} The panel to display
+	 */
+	switchPanel: function(panel) {
+		if(this.historyPanel) {
+			this.historyPanel.setVisible(this.historyPanel == panel);
+		}
+		if(this.vertexPanel) {
+			this.vertexPanel.setVisible(this.vertexPanel == panel);
+		}
+		if(this.featurePanel) {
+			this.featurePanel.setVisible(this.featurePanel == panel);
+		}
 	},
 	
 	close: function() {
