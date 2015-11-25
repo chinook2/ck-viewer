@@ -3,33 +3,34 @@
  * Opens a panel to show the OSM Attributions.
  * @author Florent RICHARD
  */
-Ext.define('Ck.map.action.osmimport.Attributions', {
-	extend: 'Ck.map.action.OsmImport',
-	alias: 'widget.ckmapOsmImportAttributions',
+Ext.define("Ck.map.action.osmimport.Attributions", {
+	extend: "Ck.map.action.OsmImport",
+	alias: "widget.ckmapOsmImportAttributions",
 	
-	itemId: 'osmimportattributions',
-	text: '',
-	iconCls: 'fa fa-info',
-	tooltip: 'Attributions',
+	itemId: "osmimportattributions",
+	iconCls: "fa fa-info",
+	tooltip: "Attributions",
+	
+	/**
+	 * Method launched when action button is clicked.
+	 * The attribution panel is shown or hidden.
+	 */
 	toggleAction:  function(btn, pressed) {
 		if(!this.win) {
-			this.win = Ext.create('Ext.window.Window', {
-				title: 'OSM Attributions',
-				// height: 400,
-				width: 400,
-				layout: 'fit',
+			this.win = Ext.create("Ext.window.Window", {
+				title: "OSM Attributions",
+				resizable: false,
 				items: [{
 					xtype: "ckosmimportattributions"
 				}],
-				closeAction: 'hide',
+				closeAction: "hide",
 				listeners: {
 					close: function() {
 						btn.setPressed(false);
 						this.win.hide();
 					},
 					scope: this
-				}
-				
+				}			
 			});
 		}
 		if (pressed) {
@@ -39,4 +40,3 @@ Ext.define('Ck.map.action.osmimport.Attributions', {
 		}
 	}
 });
-
