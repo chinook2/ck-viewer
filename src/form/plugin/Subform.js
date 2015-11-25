@@ -169,6 +169,28 @@ Ext.define('Ck.form.plugin.Subform', {
 		}       
 		
         grid.on('rowclick', this.loadItem, this);
+		
+		// Get associate form of the grid (assume first parent form)
+		var formView = grid.view.up('form');
+		if(!formView) return;
+		
+		var formController = formView.getController();
+		// On start editing
+		formController.on({
+			startEditing: this.startEditing,
+			stopEditing: this.stopEditing,
+			scope: this
+		});
+	},
+	
+	startEditing: function() {
+		// add & show action column
+		this.actionColumn.show();
+	},
+
+	stopEditing: function() {
+		// hide action column
+		this.actionColumn.hide();
 	},
 	
     addItem: function() {
