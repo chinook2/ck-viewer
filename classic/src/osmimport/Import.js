@@ -137,11 +137,17 @@ Ext.define("Ck.osmimport.Import", {
 					disabled: "{!sincedate.checked}"
 				}
 			}]
+		},{  // Rendering selection
+			xtype: "combobox",
+			reference: "rendering",
+			fieldLabel: "Rendering style",
+			bind: {
+				store: "{renderings}"
+			},
+			displayField: "name",
+			editable: false
 		}]
-	}
-	/*,{ // Selection rendering
-		
-	}*/],
+	}],
 	
 	buttons: [{
 		text: "Import",

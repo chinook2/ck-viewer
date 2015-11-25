@@ -485,7 +485,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 	onRequestFinished: function(records, operation, success) {
 		this.openner.close();
 		if (success) {
-			var self = this;
 			var olFeatures = [];
 			var nbFeaturesImported = 0;
 			var checkedTags = [];
@@ -517,6 +516,38 @@ Ext.define('Ck.osmimport.import.Controller', {
 			}
 			this.displayVector.getSource().clear();
 			this.displayVector.getSource().addFeatures(olFeatures);
+			
+			// Apply rendering style to the imported data
+			var style = this.DEFAULT_STYLE;
+			var renderingName = this.lookupReference("rendering").getValue();
+			if (renderingName) {
+				var renderingStore = this.getViewModel().getStore("renderings");
+				var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
+				if (rendering.isValid()) {
+					style = new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: rendering.data.fillcolor
+						}),
+						stroke: new ol.style.Stroke({
+							color: rendering.data.strokecolor,
+							width: 2
+						}),
+						image: new ol.style.Circle({
+							radius: 7,
+							fill: new ol.style.Fill({
+								color: rendering.data.fillcolor
+							}),
+							stroke: new ol.style.Stroke({
+								color: rendering.data.strokecolor,
+								width: 2
+							})
+						})
+					});
+				}
+			}
+			this.displayVector.setStyle(style);
+			
+			// Manage messages for end of import
 			this.waitMsg.close();
 			if (nbFeaturesImported === 0) {  // No Result
 				Ext.MessageBox.show({

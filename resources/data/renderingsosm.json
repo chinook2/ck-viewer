@@ -1,0 +1,33 @@
+{
+    "renderings": [{
+		"name": "Rouge",
+		"fillcolor": "rgba(255, 0, 0, 0.2)",
+		"strokecolor": "#FF0000"
+	},{
+		"name": "Noir fond Rouge",
+		"fillcolor": "rgba(255, 0, 0, 1)",
+		"strokecolor": "#000000"
+	},{
+		"name": "Vert",
+		"fillcolor": "rgba(0, 255, 0, 0.2)",
+		"strokecolor": "#00FF00"
+	},{
+		"name": "Bleu",
+		"fillcolor": "rgba(0, 0, 255, 0.2)",
+		"strokecolor": "#0000FF"
+	},{
+		"name": "No fillcolor",
+		"strokecolor": "#0000FF"
+	},{
+		"name": "No strokecolor",
+		"fillcolor": "rgba(0, 0, 255, 0.2)"
+	},{
+		"name": "Incorrect fillcolor",
+		"fillcolor": "rgba(0, 255, 0)",
+		"strokecolor": "#00FF00"
+	},{
+		"name": "Incorrect strokecolor",
+		"fillcolor": "rgba(0, 255, 0, 0.2)",
+		"strokecolor": "00FF00"
+	}]
+}
