@@ -618,6 +618,12 @@ Ext.define('Ck.form.Controller', {
 			var f = form.findField(field);
 			if(f){
 				values[field] = f.getValue();
+				
+				// allow formatting date before send to server
+				if(f.submitFormat){
+					values[field] = f.getSubmitValue();
+				}
+
 				// TODO : add config option to get display values
 				// if(f.displayField) {
 					// if(!values['__display']) values['__display'] = {}
@@ -641,6 +647,12 @@ Ext.define('Ck.form.Controller', {
 				if(model.data.dummy===true) return;
 				dtg.push(model.data);
 			});
+			
+			// TEMP : check allowblank here...
+			// if(dtg.length==0 && grid.allowBlank===false){
+				// return false;
+			// }
+			
 			values[grid.name] = dtg;
 		}
 		//
@@ -903,10 +915,21 @@ Ext.define('Ck.form.Controller', {
 			
 			var dtg = [];
 
-			// Récup les enregistrements nouveaux et modifiés
-			grid.getStore().each(function (model) {
-				if(model.data.dummy===true) return;
-				dtg.push(model.data);
+			// Get all records with special formatting for date...
+			grid.getStore().each(function (rec) {
+				if(rec.data.dummy===true) return;
+				var row = {};
+				grid.getColumns().forEach(function(col) {
+					if(!col.dataIndex) return;
+					var val = rec.data[col.dataIndex];
+					if(col.xtype == 'datecolumn' && col.submitFormat){
+						row[col.dataIndex] = val ? Ext.Date.format(val, col.submitFormat) : '';
+					}else{
+						row[col.dataIndex] = val;
+					}
+				});
+				
+				dtg.push(row);
 			});
 			
 			// Use Grid url and data for saving form !
