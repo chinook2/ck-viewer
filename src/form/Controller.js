@@ -437,7 +437,7 @@ Ext.define('Ck.form.Controller', {
 			}
 			//
 
-			if (c.xtype == "combo" || c.xtype == "combobox" || c.xtype == "grid" || c.xtype == "gridpanel") {
+			if (c.xtype == "combo" || c.xtype == "combobox" || c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
 				// Internal function to initialse store definition
 				var processStore = function(o){
 					// storeUrl : alias to define proxy type ajax with url.
@@ -512,12 +512,12 @@ Ext.define('Ck.form.Controller', {
 				
 			}
 
-			if (c.xtype == "grid" || c.xtype == "gridpanel") {
+			if (c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
 				if(c.subform){
 					// Ext.apply(c, {
 						// plugins: ['gridstore', 'gridsubform']
 					// });
-					c.plugins = Ext.Array.merge(c.plugins,  ['gridstore', 'gridsubform']);
+					c.plugins = Ext.Array.merge(c.plugins,  ['gridsubform']);
 				} else {
 					// Ext.apply(c, {
 						// plugins: ['gridstore', 'gridediting', {
@@ -525,7 +525,7 @@ Ext.define('Ck.form.Controller', {
 							// clicksToEdit: 1
 						// }]
 					// });
-					c.plugins = Ext.Array.merge(c.plugins,  ['gridstore', 'gridediting', {
+					c.plugins = Ext.Array.merge(c.plugins,  ['gridediting', {
 						ptype: 'rowediting',
 						clicksToEdit: 1
 					}]);
@@ -607,9 +607,6 @@ Ext.define('Ck.form.Controller', {
 
 	// Prevent getting values from subform...
 	getValues: function() {
-		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-		// var dt = v.getValues(false, false, false, true); // Retourne les dates sous forme de string d'objet (date complète)
-		// var dt = v.getValues(false, false, false, false); // Retourne les dates sous forme de string (d/m/Y)
 		var v = this.getView();
 		var form = v.getForm();
 		
@@ -631,31 +628,6 @@ Ext.define('Ck.form.Controller', {
 				// }
 			}
 		}, this);
-		
-		// TODO : manage grid as field with a plugin...
-		// GRID : save data
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			if(!grid.name) continue;
-			if(this.fields.indexOf(grid.name)==-1) continue;
-			
-			var dtg = [];
-
-			// Récup les enregistrements nouveaux et modifiés
-			grid.getStore().each(function (model) {
-				if(model.data.dummy===true) return;
-				dtg.push(model.data);
-			});
-			
-			// TEMP : check allowblank here...
-			// if(dtg.length==0 && grid.allowBlank===false){
-				// return false;
-			// }
-			
-			values[grid.name] = dtg;
-		}
-		//
 
 		// SUBFORM : save data
 		var subforms = v.query('ckform');
@@ -876,16 +848,7 @@ Ext.define('Ck.form.Controller', {
 		// We need to stopEditing too, plugins can process data before saving...
 		//this.stopEditing();
 
-
-		var dt = this.getValues();
-		
-		// Mis à jour du status
-		// if (!sid) {
-			// dt.status = "CREATED";
-		// } else {
-			// dt.status = "MODIFIED";
-		// }
-		//
+		var dt = this.getValues();	
 
 		if(this.oController.beforeSave(dt) === false){
 			Ck.log("beforeSave cancel saveData.");
