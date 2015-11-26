@@ -86,7 +86,7 @@ Ext.define("Ck.osmimport.Import", {
 				defaults: {
 					xtype: "radio"
 				},
-				id: "selectionMode",
+				reference: "selectionMode",
 				items:[{
 					checked: true,
 					boxLabel: 'Rectangle',

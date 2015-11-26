@@ -10,6 +10,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * @protected
 	 */
 	init: function() {
+		this.vm = this.getViewModel();
 		this.openner = this.getView().openner;
 
 		/**
@@ -21,7 +22,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		// Style to be applied by default to the imported data.
 		this.DEFAULT_STYLE = new ol.style.Style({
 			fill: new ol.style.Fill({
-				color: 'rgba(255, 0, 0, 0.25)'
+				color: 'rgba(255, 0, 0, 0.4)'
 			}),
 			stroke: new ol.style.Stroke({
 				color: '#FF0000',
@@ -101,7 +102,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		 * Init elements for admin zone selection.
 		 */
 		var adminAvailable = this.isAdminSelectionAvailable();
-		this.getViewModel().data.adminSelectAvailable = adminAvailable;
+		this.vm.data.adminSelectAvailable = adminAvailable;
 		
 		/**
 		 * Init the Message Boxes attributes.
@@ -135,19 +136,19 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * - update the list of checked tags in the ViewModel.
 	 */
 	onTreeOsmTagsChange: function(node, checked) {
-		var vm = this.getViewModel();
-		var checkedTags = vm.data.checkedTags;
+		var checkedTags = this.vm.data.checkedTags;
 		var obj = {
 			text: node.data.text,
 			tag: node.data.tag
 		};
-		if (checked) {
+		if (checked) {  // Add the tag
 			checkedTags.push(obj);
-		} else {
+		} else {  // Remove the tag
 			var index = -1;
 			for (var i = 0; i < checkedTags.length; i++) {
 				if (checkedTags[i].tag === obj.tag) {
 					index = i;
+					break;
 				}
 			}
 			if (index > -1) {
@@ -160,10 +161,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 	},
 	
 	/**
-	 * Method used to check that selected tags are corrects
+	 * Method returning the list of all the selected tag.
+	 * Whatever the mode: classic or expert.
 	 */
-	checkOsmTags: function() {
-		var errorMessage = "";
+	getSelectedTags: function() {
 		var tagList = [];
 		if (this.lookupReference("tagsexpert").getValue()) {  // Expert Mode
 			var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
@@ -171,31 +172,39 @@ Ext.define('Ck.osmimport.import.Controller', {
 				var tagObj = {"tag": tagsText[i], "text": "Custom Tag"};
 				tagList.push(tagObj);
 			}
-		} else {
-			var vm = this.getViewModel();
-			if (vm.data.checkedTags.length === 0) {  // Check at least one is selected
-				errorMessage += " - No OSM tag selected<br/>";
-			}
-			tagList = vm.data.checkedTags;
+		} else {  // Classic Mode
+			tagList = this.vm.data.checkedTags;
+		}
+		return tagList;
+	},
+	
+	/**
+	 * Method used to check that selected tags are corrects
+	 */
+	checkOsmTags: function() {
+		var errorMessage = "";
+		var tagList = this.getSelectedTags();
+		if (tagList.length === 0) {  // Check at least one is selected
+			errorMessage += " - No OSM tag selected<br/>";
 		}
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
 				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+=?["\w*\u00C0-\u00FF*:?]*\])+$/g) == null)) {
 				error = true;
-			} else {  // search for : or accent without ""
+			} else {  // search other errors
 				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+=?["?\w*\u00C0-\u00FF*:?]*)+/g);
 				for (var kvId in key_val) {  // Check that each tag is in the selected group
 					var kv = key_val[kvId];
 					var k = kv.split("=")[0];
 					var v = kv.split("=")[1];
-					if ((k.indexOf(":") > -1 || k.match(/[\u00C0-\u00FF]/g) != null) &&
-						!(k.charAt(0) == "\"" || k.charAt(k.length - 1) == "\"")) {
+					if ((k.match(/[:\u00C0-\u00FF]/g) != null) &&
+						(k.charAt(0) != "\"" || k.charAt(k.length - 1) != "\"")) {  // Check correct key ":" or "é"
 						error = true;
 					}
 					if (v) {
-						if ((v.indexOf(":") > -1 || v.match(/[\u00C0-\u00FF]/g) != null) &&
-							!(v.charAt(0) == "\"" || v.charAt(v.length - 1) == "\"")) {
+						if ((v.match(/[:\u00C0-\u00FF]/g) != null) &&
+							(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check correct value ":" or "é"
 							error = true;
 						}
 					} else {
@@ -248,7 +257,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	onSelectionDone: function(evt) {
 		var selectionGeometry;
-		var selectType = Ext.getCmp("selectionMode").items.get(0).getGroupValue();
+		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
 		if (selectType === "admin") {
 			if (evt.selected.length > 0) {
 				var featureGeom = evt.selected[0].getGeometry();
@@ -295,7 +304,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Prepare the selector for the geographical zone according user's configuration.
 	 */
 	prepareSelector: function() {
-		var selectType = Ext.getCmp("selectionMode").items.get(0).getGroupValue();
+		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
 		var self = this;
 		var newInteraction;
 
@@ -432,18 +441,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Return the request ready to be sent to OSM.
 	 */
 	prepareRequest: function() {
-		var vm = this.getViewModel();
-		var checkedTags = vm.data.checkedTags;
-		
-		// Use expert mode for tags
-		if (this.lookupReference("tagsexpert").getValue()) {
-			var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
-			checkedTags = [];
-			for (var i in tagsText) {
-				var tagObj = {"tag": tagsText[i]};
-				checkedTags.push(tagObj);
-			}
-		}
+		var checkedTags = this.getSelectedTags();
 		
 		// Prepare date filter
 		var minDateString = "";
@@ -496,7 +494,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					checkedTags.push(tagObj);
 				}
 			} else {
-				checkedTags = this.getViewModel().data.checkedTags;
+				checkedTags = this.vm.data.checkedTags;
 			}
 			for (var r = 0; r < records.length; r++) {
 				var record = records[r];
@@ -521,7 +519,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var style = this.DEFAULT_STYLE;
 			var renderingName = this.lookupReference("rendering").getValue();
 			if (renderingName) {
-				var renderingStore = this.getViewModel().getStore("renderings");
+				var renderingStore = this.vm.getStore("renderings");
 				var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
 				if (rendering.isValid()) {
 					style = new ol.style.Style({
@@ -578,7 +576,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.openner.finishImport();
 			}
 
-		} else {
+		} else {  // Request failed
 			this.waitMsg.close();
 			var statusCode = operation.getError().status;
 			var errorMessage = "";
