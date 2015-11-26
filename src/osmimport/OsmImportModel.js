@@ -44,12 +44,10 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				var point = [data.geometry[p].lon, data.geometry[p].lat];
 				coords.push(point);
 			}
-
-			if (data.geometry[0].lat === data.geometry[data.geometry.length - 1].lat &&
-				data.geometry[0].lon === data.geometry[data.geometry.length - 1].lon) {
+			if (this.isPolygon()) {
 				geom = new ol.geom.Polygon([coords]);
 			} else {
-				geom = new ol.geom.MultiLineString([coords]);
+				geom = new ol.geom.LineString(coords);
 			}
 		} else if (data.type === "relation") {  // OSM Relations
 			var geoms = [];
@@ -67,6 +65,68 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		return geom;
 	},
 
+	/**
+	 * This method determines if the feature is a polygon or not.
+	 * A polygon is detected from several elements of the data:
+	 * type is a way
+	 * way form a closed loop
+	 * no tag area=no
+	 * value of other tags
+	 * see https://wiki.openstreetmap.org/wiki/Overpass_turbo/Polygon_Features for more informations
+	 * 
+	 */
+	isPolygon: function() {
+		var polygon = false;
+		if (this.data.type === "way") {
+			var geom = this.data.geometry;
+			if (geom[0].lat === geom[geom.length - 1].lat &&
+				geom[0].lon === geom[geom.length - 1].lon) { // Closed way
+				var tags = this.data.tags;
+				/* Check specific values for tags
+				 * Key: the name of the tag
+				 * poly_val: values which indicates that the element IS a polygon
+				 * nopoly_val: values which indicates that the element IS NOT a polygon
+				 */
+				var tagsToCheck = [
+					{key: "area", poly_val: [], nopoly_val: ["no"]},
+					{key: "building", poly_val: [], nopoly_val: ["no"]},
+					{key: "highway", poly_val: ["services", "rest_area", "escape"], nopoly_val: ["no"]},
+					{key: "natural", poly_val: [], nopoly_val: ["no", "coastline", "cliff", "ridge", "arete", "tree_row"]},
+					{key: "landuse", poly_val: [], nopoly_val: ["no"]},
+					{key: "waterway", poly_val: ["riverbank", "dock", "boatyard", "dam"], nopoly_val: ["no"]},
+					{key: "amenity", poly_val: [], nopoly_val: ["no"]},
+					{key: "leisure", poly_val: [], nopoly_val: ["no"]},
+					{key: "barrier", poly_val: ["city_wall", "ditch", "hedge", "retaining_wall", "wall", "spikes"], nopoly_val:["no"]},
+					{key: "railway", poly_val: ["station", "turntable", "roundhouse", "platform"], nopoly_val: ["no"]},
+					{key: "boundary", poly_val: [], nopoly_val: ["no"]},
+					{key: "man_made", poly_val: [], nopoly_val: ["no", "cutline", "embankment", "pipeline"]},
+					{key: "power", poly_val: ["plant", "substation", "generator", "tranformer"], nopoly_val: ["no"]},
+					{key: "place", poly_val: [], nopoly_val: ["no"]},
+					{key: "shop", poly_val: [], nopoly_val: ["no"]},
+					{key: "aeroway", poly_val: [], nopoly_val: ["no", "taxiway"]},
+					{key: "tourism", poly_val: [], nopoly_val: ["no"]},
+					{key: "historic", poly_val: [], nopoly_val: ["no"]},
+					{key: "public_transport", poly_val: [], nopoly_val: ["no"]},
+					{key: "office", poly_val: [], nopoly_val: ["no"]},
+					{key: "building:part", poly_val: [], nopoly_val: ["no"]},
+					{key: "ruins", poly_val: [], nopoly_val: ["no"]},
+					{key: "area:highway", poly_val: [], nopoly_val: ["no"]},
+					{key: "craft", poly_val: [], nopoly_val: ["no"]},
+					{key: "golf", poly_val: [], nopoly_val: ["no"]}
+				];
+				for (var t in tagsToCheck) {
+					if (tags[tagsToCheck[t].key] &&  // Tag is present
+						((tagsToCheck[t].nopoly_val.length == 0 || tagsToCheck[t].nopoly_val.indexOf(tags[tagsToCheck[t].key]) == -1) &&  // Value for way is absent
+						 (tagsToCheck[t].poly_val.length == 0 || tagsToCheck[t].poly_val.indexOf(tags[tagsToCheck[t].key]) > -1))) {  // values for polygon is present
+							polygon = true;
+							break;
+					}
+				}
+			}
+		}
+		return polygon;
+	},
+	
 	/**
 	 * Method to check if the record is a feature or simply a member of the feature.
 	 * For example: each node of a polygon is visible in the records.

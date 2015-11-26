@@ -485,17 +485,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 		if (success) {
 			var olFeatures = [];
 			var nbFeaturesImported = 0;
-			var checkedTags = [];
-			if (this.lookupReference("tagsexpert").getValue()) {  // Searched tag for expert mode
-				var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
-				checkedTags = [];
-				for (var i in tagsText) {
-					var tagObj = {"tag": tagsText[i]};
-					checkedTags.push(tagObj);
-				}
-			} else {
-				checkedTags = this.vm.data.checkedTags;
-			}
+			var checkedTags = this.getSelectedTags();
+	
 			for (var r = 0; r < records.length; r++) {
 				var record = records[r];
 				if (record.containsSearchedTags(checkedTags)) {
