@@ -38,7 +38,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		if (data.type === "node") {  // Points
 			var point = [data.lon, data.lat];
 			geom = new ol.geom.Point(point);
-		} else if (data.type === "way") {  // MultiLine or Polygon
+		} else if (data.type === "way") {  // Line or Polygon
 			var coords = [];
 			for (var p = 0; p < data.geometry.length; p++) {
 				var point = [data.geometry[p].lon, data.geometry[p].lat];
@@ -50,12 +50,37 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				geom = new ol.geom.LineString(coords);
 			}
 		} else if (data.type === "relation") {  // OSM Relations
-			var geoms = [];
-			for (var memberId in data.members) {
-				var member = data.members[memberId];
-				geoms.push(this.calculateGeom(null, member, false));
+			if (data.tags.type == "multipolygon") { // handle OSM multipolygon with inners in a Polygon
+				var nb_outer = 0;
+				var nb_inner = 0;
+				for (var memberId in data.members) {
+					var member = data.members[memberId];
+					if (member.role == "inner") nb_inner++;
+					if (member.role == "outer") nb_outer++;
+				}
+				if (nb_outer == 1 && nb_inner > 0) {
+					var coords = [];
+					for (var memberId in data.members) {
+						var member = data.members[memberId];
+						if (member.role == "outer") {
+							var polygeom = this.calculateGeom(null, member, false);
+							coords.push(polygeom.getCoordinates(false));
+						} else if (member.role == "inner") {
+							var polygeom = this.calculateGeom(null, member, false);
+							coords.push(polygeom.getCoordinates(true));
+						}
+					}
+					geom = new ol.geom.Polygon(coords);
+				}
 			}
-			geom = new ol.geom.GeometryCollection(geoms);
+			if (geom == undefined) {  // Not OSM multipolygon with inner(s)
+				var geoms = [];
+				for (var memberId in data.members) {
+					var member = data.members[memberId];
+					geoms.push(this.calculateGeom(null, member, false));
+				}
+				geom = new ol.geom.GeometryCollection(geoms);
+			}
 		}
 
 		// Transform the OSM projection into Map projection
