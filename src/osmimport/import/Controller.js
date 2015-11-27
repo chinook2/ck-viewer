@@ -483,58 +483,72 @@ Ext.define('Ck.osmimport.import.Controller', {
 	onRequestFinished: function(records, operation, success) {
 		this.openner.close();
 		if (success) {
-			var olFeatures = [];
-			var nbFeaturesImported = 0;
-			var checkedTags = this.getSelectedTags();
-	
-			for (var r = 0; r < records.length; r++) {
-				var record = records[r];
-				if (record.containsSearchedTags(checkedTags)) {
-					nbFeaturesImported++;
-					if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
-						var newProjection = Ck.getMap().getOlMap().getView().getProjection();
-						var geom = record.calculateGeom(newProjection);
-						var feature = new ol.Feature(
-							Ext.apply({
-								geometry: geom
-							}, record.data.tags)
-						);
-						olFeatures.push(feature);
+			try {
+				var olFeatures = [];
+				var nbFeaturesImported = 0;
+				var checkedTags = this.getSelectedTags();
+		
+				for (var r = 0; r < records.length; r++) {
+					var record = records[r];
+					if (record.containsSearchedTags(checkedTags)) {
+						nbFeaturesImported++;
+						if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
+							var newProjection = Ck.getMap().getOlMap().getView().getProjection();
+							var geom = record.calculateGeom(newProjection, undefined, true, records);
+							var feature = new ol.Feature(
+								Ext.apply({
+									geometry: geom
+								}, record.data.tags)
+							);
+							olFeatures.push(feature);
+						}
 					}
 				}
-			}
-			this.displayVector.getSource().clear();
-			this.displayVector.getSource().addFeatures(olFeatures);
-			
-			// Apply rendering style to the imported data
-			var style = this.DEFAULT_STYLE;
-			var renderingName = this.lookupReference("rendering").getValue();
-			if (renderingName) {
-				var renderingStore = this.vm.getStore("renderings");
-				var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
-				if (rendering.isValid()) {
-					style = new ol.style.Style({
-						fill: new ol.style.Fill({
-							color: rendering.data.fillcolor
-						}),
-						stroke: new ol.style.Stroke({
-							color: rendering.data.strokecolor,
-							width: 2
-						}),
-						image: new ol.style.Circle({
-							radius: 7,
+				this.displayVector.getSource().clear();
+				this.displayVector.getSource().addFeatures(olFeatures);
+				
+				// Apply rendering style to the imported data
+				var style = this.DEFAULT_STYLE;
+				var renderingName = this.lookupReference("rendering").getValue();
+				if (renderingName) {
+					var renderingStore = this.vm.getStore("renderings");
+					var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
+					if (rendering.isValid()) {
+						style = new ol.style.Style({
 							fill: new ol.style.Fill({
 								color: rendering.data.fillcolor
 							}),
 							stroke: new ol.style.Stroke({
 								color: rendering.data.strokecolor,
 								width: 2
+							}),
+							image: new ol.style.Circle({
+								radius: 7,
+								fill: new ol.style.Fill({
+									color: rendering.data.fillcolor
+								}),
+								stroke: new ol.style.Stroke({
+									color: rendering.data.strokecolor,
+									width: 2
+								})
 							})
-						})
-					});
+						});
+					}
 				}
+				this.displayVector.setStyle(style);
+			} catch (exception) {
+				console.log(exception);  // TODO remove this debug log
+				if (this.waitMsg) {
+					this.waitMsg.close();
+				}
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'An error occured while computing the imported data.',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.ERROR
+				});
 			}
-			this.displayVector.setStyle(style);
 			
 			// Manage messages for end of import
 			this.waitMsg.close();

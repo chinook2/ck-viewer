@@ -24,10 +24,29 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	idProperty: 'id',
 
 	/**
+	 * This method search and return the element given by its id in the records.
+	 * @param records All the records as returned by the store after load.
+	 * @param id Id of the Sub-Element to get.
+	 */
+	getSubElement: function(records, id) {
+		var subElement;
+		for (var i in records) {
+			if (records[i].data.id == id) {
+				subElement = records[i];
+			}
+		}
+		return subElement;
+	},
+	
+	/**
 	 * Method used to create the geometry of a data according its OSM type.
 	 * Geometry is transformed in the new projection.
+	 * @param newProjection Projection to be used for displaying or saving the data.
+	 * @param data Data for which the geometry is calculated. Defaults is undefined.
+	 * @param convert Indicates if the projection shall be converted or not. Default is true.
+	 * @param allRecords List of all the records as returned by the store after load.
 	 **/
-	calculateGeom: function(newProjection, data, convert) {
+	calculateGeom: function(newProjection, data, convert, allRecords) {
 		var data = data || this.data;
 		var convertGeom = true;
 		if (convert == false) {
@@ -44,7 +63,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				var point = [data.geometry[p].lon, data.geometry[p].lat];
 				coords.push(point);
 			}
-			if (this.isPolygon()) {
+			if (this.isPolygon(data)) {
 				geom = new ol.geom.Polygon([coords]);
 			} else {
 				geom = new ol.geom.LineString(coords);
@@ -55,18 +74,22 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				var nb_inner = 0;
 				for (var memberId in data.members) {
 					var member = data.members[memberId];
-					if (member.role == "inner") nb_inner++;
-					if (member.role == "outer") nb_outer++;
+					if (member.role == "inner") {
+						nb_inner++;
+					}
+					if (member.role == "outer") {
+						nb_outer++;
+					}
 				}
-				if (nb_outer == 1 && nb_inner > 0) {
+				if (nb_outer == 1 && nb_inner > 0) {  // Polygon shall not be used when there is no inner
 					var coords = [];
 					for (var memberId in data.members) {
 						var member = data.members[memberId];
+						member.tags = {};
+						var polygeom = this.calculateGeom(null, member, false, allRecords);
 						if (member.role == "outer") {
-							var polygeom = this.calculateGeom(null, member, false);
 							coords.push(polygeom.getCoordinates(false));
 						} else if (member.role == "inner") {
-							var polygeom = this.calculateGeom(null, member, false);
 							coords.push(polygeom.getCoordinates(true));
 						}
 					}
@@ -77,7 +100,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				var geoms = [];
 				for (var memberId in data.members) {
 					var member = data.members[memberId];
-					geoms.push(this.calculateGeom(null, member, false));
+					// Copy the tags from relation and element in the member
+					var subElement = this.getSubElement(allRecords, member.ref);  // member has no copy of tags, need to retrieve it from records list
+					member.tags = data.tags || {};
+					for (var key in subElement.data.tags) {
+						member.tags[key] = subElement.data.tags[key];
+					}
+					geoms.push(this.calculateGeom(null, member, false, allRecords));
 				}
 				geom = new ol.geom.GeometryCollection(geoms);
 			}
@@ -98,15 +127,16 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * no tag area=no
 	 * value of other tags
 	 * see https://wiki.openstreetmap.org/wiki/Overpass_turbo/Polygon_Features for more informations
+	 * @param data Data to be checked.
 	 * 
 	 */
-	isPolygon: function() {
+	isPolygon: function(data) {
 		var polygon = false;
-		if (this.data.type === "way") {
-			var geom = this.data.geometry;
+		if (data.type === "way") {
+			var geom = data.geometry;
 			if (geom[0].lat === geom[geom.length - 1].lat &&
 				geom[0].lon === geom[geom.length - 1].lon) { // Closed way
-				var tags = this.data.tags;
+				var tags = data.tags;
 				/* Check specific values for tags
 				 * Key: the name of the tag
 				 * poly_val: values which indicates that the element IS a polygon
