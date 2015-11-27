@@ -862,7 +862,7 @@ Ext.define('Ck.form.Controller', {
 			var sf = subforms[s];
 			
 			// TODO : manage save callback...
-			if(!sf.name) sf.getController().saveData();
+			//if(!sf.name) sf.getController().saveData();
 		}
 		//
 
@@ -892,7 +892,8 @@ Ext.define('Ck.form.Controller', {
 					}
 				});
 				
-				dtg.push(row);
+				// Need to add extra data (all fields of 'rec' are not displayed in grid columns)
+				dtg.push( Ext.applyIf(row, rec.data) );
 			});
 			
 			// Use Grid url and data for saving form !
@@ -924,7 +925,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(!url){
-			Ck.Notify.info("Forms saveData 'fid' or 'url' not set in "+ this.name);
+			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
 			return false;
 		}
 
