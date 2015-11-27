@@ -1,9 +1,6 @@
 /**
  * This action is used to modify the geometry of a feature.
- * Two interactions are created :
- *
- * - geometryInteraction : to select the feature to modify
- * - vertexModifyInteraction : to modify vertex
+ * A geometryInteraction was created
  */
 Ext.define('Ck.edit.action.Geometry', {
 	extend: 'Ck.edit.Action',
@@ -11,9 +8,19 @@ Ext.define('Ck.edit.action.Geometry', {
 
 	iconCls: 'fa fa-edit',
 	tooltip: 'Edit geometry',
-
+	
 	toggleAction: function(btn, status) {
-		this.used = true;
+		if(!this.used) {
+			this.callParent([btn]);
+			this.controller.addListener("featuresessionstart", function() {
+				this.reset();
+				this.disableInteraction();
+			}, this);
+			this.controller.addListener("vertexsessionstart", function() {
+				this.disableInteraction();
+			}, this);
+			this.controller.addListener("sessioncomplete", function() { this.reset(); this.enableInteraction(); }, this);
+		}
 		
 		var source = this.getLayerSource();
 		
@@ -35,8 +42,10 @@ Ext.define('Ck.edit.action.Geometry', {
 				
 				this.feature = e.selected[0];				
 				
-				this.editController.startGeometryEdition(this.feature);   
+				this.controller.startGeometryEdition(this.feature);   
 			}.bind(this));
+			
+			this.interactions["geometryInteraction"] = this.geometryInteraction;
 		}
 		
 		this.geometryInteraction.setActive(status);
@@ -56,9 +65,4 @@ Ext.define('Ck.edit.action.Geometry', {
 	reset: function() {
 		this.geometryInteraction.getFeatures().clear();
 	},
-	
-	closeAction: function() {
-		this.map.getOlMap().removeInteraction(this.geometryInteraction);
-		delete this.geometryInteraction;
-	}
 });

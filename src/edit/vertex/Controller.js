@@ -19,7 +19,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	geometryChanged: false,
 	
 	/**
-	 * @event beginsession
+	 * @event sessionstart
 	 * Fires at begin of vertex session
 	 * @param {ol.Feature}
 	 */
@@ -27,20 +27,20 @@ Ext.define('Ck.edit.vertex.Controller', {
 	/**
 	 * @event geometrychange
 	 * Fires when the geometry is altered
-	 * @param {ol.geom.SimpleGeometry}
+	 * @param {ol.Feature}
 	 */
 	 
 	/**
 	 * @event validate
 	 * Fires when user want to save vertex change
-	 * @param {ol.geom.SimpleGeometry}
+	 * @param {ol.Feature}
 	 * @param {Boolean} Say if the geometry is changed
 	 */
 	 
 	/**
 	 * @event cancel
 	 * Fires when user want to discard vertex change
-	 * @param {ol.geom.SimpleGeometry}
+	 * @param {ol.Feature}
 	 */
 	
 	/**
@@ -104,7 +104,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {ol.Feature}
 	 */
 	loadFeature: function(feature) {
-		this.fireEvent("beginsession", feature);
+		this.fireEvent("sessionstart", feature);
 		this.geometryChanged = false;
 		
 		this.feature = feature;
@@ -144,6 +144,9 @@ Ext.define('Ck.edit.vertex.Controller', {
 		});
 	},
 	
+	/**
+	 * Load vertex coordinates into the grid. Use this.coords for it.
+	 */
 	loadVertex: function() {
 		this.store.erase();
 		// Remove the duplicate first/last vertex from the store
@@ -307,7 +310,16 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {Number}
 	 */
 	deleteVertex: function(index) {
-		this.store.removeAt(index);
+		if(this.store.getCount() > 3) {
+			this.store.removeAt(index);
+		} else {
+			Ext.Msg.show({
+				title: "Vertex",
+				message: "You must leave at least 3 vertices for a ploygon",
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.WARNING
+			});
+		}
 	},
 	
 	/**
@@ -351,28 +363,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.coords.push(this.coords[0])
 		this.geometry.setCoordinates(this.ftCoords);
 		this.coords.splice(-1, 1);
-		this.fireEvent("geometrychange", this.geometry);
-	},
-	
-	/**
-	 * Save the current geometry
-	 */
-	save: function() {
-		this.unloadGeometry();
-		this.fireEvent("validate", this.geometry, this.geometryChanged);
-	},
-	
-	/**
-	 * Discard change
-	 */
-	cancel: function() {
-		this.unloadGeometry();
-		this.geometry = this.originalGeometry;
-		this.fireEvent("cancel", this.geometry);
-	},
-	
-	close: function() {
-		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+		this.fireEvent("geometrychange", this.feature);
 	},
 	
 	/**************************************************************************************/
@@ -422,6 +413,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 	
 	translateEnd: function(evt) {
+		this.geometryChanged = true;
 		var ft = evt.features.getArray()[0];
 		this.ftCoords = ft.getGeometry().getCoordinates();
 		this.loadVertex();
@@ -481,7 +473,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 			this.updateMarker(null, dataRow);
 			this.coords[this.currentVertexIdx] = coord;
 		}
-		this.fireEvent("geometrychange", this.geometry);
+		this.fireEvent("geometrychange", this.feature);
 	},
 	
 	/**************************************************************************************/
@@ -532,5 +524,27 @@ Ext.define('Ck.edit.vertex.Controller', {
 			coord = parseFloat(sCoord.substring(0, this.maxLength));
 		}
 		return coord;
+	},
+	
+	/**
+	 * Save the current geometry
+	 */
+	save: function() {
+		this.unloadGeometry();
+		this.fireEvent("validate", this.feature, this.geometryChanged);
+	},
+	
+	/**
+	 * Discard change
+	 */
+	cancel: function() {
+		this.unloadGeometry();
+		this.feature.setGeometry(this.originalGeometry);
+		this.fireEvent("cancel", this.feature);
+	},
+	
+	close: function() {
+		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
 	}
+	
 });

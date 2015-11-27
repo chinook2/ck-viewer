@@ -10,11 +10,14 @@ Ext.define('Ck.edit.action.Delete', {
 	 */
 	iconCls: 'fa fa-remove fa-lg fa-flip-horizontal ck-plugin',
 	tooltip: 'Delete feature',
+	
+	/**
+	 * Ask confirmation to the user before remove
+	 */
+	deleteConfirmation: true,
 
 	toggleAction: function(btn, status) {
-		this.used = true;
-		
-		// this.map.getOlMap().registerRemoveEvent(source);
+		this.callParent([btn]);
 		
 		if(!this.delInteraction) {
 			this.delInteraction = new ol.interaction.Select({
@@ -55,6 +58,7 @@ Ext.define('Ck.edit.action.Delete', {
 			}, this);
 		   
 			this.map.getOlMap().addInteraction(this.delInteraction);
+			this.interactions["delInteraction"] = this.delInteraction;
 		}
 
 		this.delInteraction.setActive(status);
@@ -67,11 +71,6 @@ Ext.define('Ck.edit.action.Delete', {
 	removeFeature: function(feature) {
 		var source = this.getLayerSource();
 		source.removeFeature(feature);
-		this.editController.fireEvent("featureremove", feature);
-	},
-	
-	
-	closeAction: function() {
-		this.map.getOlMap().removeInteraction(this.drawInteraction);
+		this.controller.fireEvent("featureremove", feature);
 	}
 });

@@ -371,7 +371,7 @@ Ext.define('Ck.map.Controller', {
 				
 				Ext.apply(olSource, olSourceAdditional);
 				var extent = layer.getExtent(viewProj) || owc.getExtent();
-				
+				window.bbox = extent;
 				// Layer creation	
 				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 					id: layer.getId(),

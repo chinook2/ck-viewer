@@ -46,6 +46,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			height: 300,
 			layout: 'fit',
 			collapsible: true,
+			closable: false,
 			items: {
 				xtype: 'ckedit',
 				layer: layer

@@ -1,5 +1,7 @@
 /**
- * Controller what manage multiple-feature layer modification
+ * Controller what manage multiple-feature layer modification.
+ * To edit the multi-feature layer easily we create a layer to host simple feature.
+ * In short we manipulate an ol.source.Vector (of simple geom) instead of an ol.Feature of Multi[type]
  */
 Ext.define('Ck.edit.feature.Controller', {
 	extend: 'Ck.Controller',
@@ -11,6 +13,12 @@ Ext.define('Ck.edit.feature.Controller', {
 	 * Say if change occurred
 	 */
 	featureChanged: false,
+	
+	/**
+	 * The original feature from this.layer
+	 * @property {ol.Feature}
+	 */
+	feature: null,
 	
 	/**
 	 * @event validate
@@ -26,8 +34,26 @@ Ext.define('Ck.edit.feature.Controller', {
 	 */
 	
 	/**
-	 * @event beginsession
+	 * @event sessionstart
 	 * Fires at begin of feature session
+	 * @param {ol.Feature}
+	 */
+	 
+	/**
+	 * @event featurecrop
+	 * Fires after feature cropping
+	 * @param {ol.Feature}
+	 */
+	 
+	/**
+	 * @event featureunion
+	 * Fires after feature gathering
+	 * @param {ol.Feature}
+	 */
+	
+	/**
+	 * @event featurecreate
+	 * Fires after feature creation
 	 * @param {ol.Feature}
 	 */
 	
@@ -37,10 +63,12 @@ Ext.define('Ck.edit.feature.Controller', {
 	init: function(view) {
 		this.olMap = Ck.getMap().getOlMap();
 		this.layer = view.layer;
+		this.editController = view.editController;
 		
 		this.grid = view.items.get(0);
 		this.store = this.grid.getStore();
-				
+		this.multi = this.editController.multi;
+		
 		this.control({
 			"ckedit-feature button#save": {
 				click: this.save,
@@ -50,10 +78,10 @@ Ext.define('Ck.edit.feature.Controller', {
 				click: this.cancel,
 				scope: this
 			},
-			"ckedit-feature button#create": {
-				click: this.startDrawing,
-				scope: this
-			},
+			// "ckedit-feature button#create": {
+				// click: this.startDrawing,
+				// scope: this
+			// },
 			"ckedit-feature button#geometry": {
 				click: this.editVertex,
 				scope: this
@@ -65,32 +93,51 @@ Ext.define('Ck.edit.feature.Controller', {
 		});
 		
 		var featureLayerId = view.config.layer.getProperties().id + "_subgeom-marker";
-		this.featureLayer = Ck.getMap().getLayerById(featureLayerId);
-		
-		this.selectInteraction = Ck.create("ol.interaction.Interaction", {handleEvent: Ext.emptyFn});
+		this.overlayLayer = Ck.getMap().getLayerById(featureLayerId);
 		
 		// Layer to frame focused feature
-		if(!this.featureLayer) {
-			this.featureLayer = Ck.create("ol.layer.Vector", {
+		if(!this.overlayLayer) {
+			this.overlayLayer = Ck.create("ol.layer.Vector", {
 				id: featureLayerId,
 				source: new ol.source.Vector(),
 				style: Ck.map.Style.overlayStyle,
 				zIndex: Ck.map.Style.zIndex.featureOverlay
 			});
 			
-			this.featureLayer.setMap(this.olMap);
+			this.overlaySource = this.overlayLayer.getSource();
+			this.overlayLayer.setMap(this.olMap);
 		}
 		
 		if(!this.cloneLayer) {
 			this.cloneLayer = Ck.create("ol.layer.Vector", {
 				id: this.layer.getProperties().id + "_clone-editor",
 				source: new ol.source.Vector(),
-				style: Ck.map.Style.selectionStyle,
+				// style: Ck.map.Style.overlayStyle,
+				style: ol.interaction.Select.getDefaultStyleFunction(),
 				zIndex: Ck.map.Style.zIndex.cloneLayer
 			});
-			
-			this.cloneLayer.setMap(this.olMap);
+			this.source = this.cloneLayer.getSource();
+			this.olMap.addLayer(this.cloneLayer);
 		}
+
+		this.on("featurecrop", function() {
+			this.features = this.source.getFeatures();
+			this.feedGridFromFeatures();
+		}, this);
+		
+		this.on("featureunion", function() {
+			this.features = this.source.getFeatures();
+			this.feedGridFromFeatures();
+		}, this);		
+		
+		this.on("featurecreate", function(feature) {
+			this.source.addFeature(feature);
+			this.features = this.source.getFeatures();
+			this.feedGridFromFeatures();
+		}, this);
+		
+		// TODO : selection interaction to ease edition
+		this.selectInteraction = Ck.create("ol.interaction.Interaction", {handleEvent: Ext.emptyFn});
 	},
 	
 	/**
@@ -98,24 +145,23 @@ Ext.define('Ck.edit.feature.Controller', {
 	 * @param {ol.Feature}
 	 */
 	loadFeature: function(feature) {
-		this.fireEvent("beginsession", feature);
+		this.fireEvent("sessionstart", feature);
 		
 		this.feature = feature;
-		this.features = feature.getGeometry().getPolygons();
-		this.originalGeometry = this.feature.getGeometry().clone();
 		
-		var records = [];
-		
-		// Add each feature to the grid
-		for(var i = 0; i < this.features.length; i++) {
-			records.push({
-				number: i + 1,
-				area: this.getFeatureSize(this.features[i]),
-				geometry: this.features[i]
-			});
+		// We loop on all sub-geom to create ol.Feature from them
+		var geoms = feature.getGeometry().getPolygons();
+		this.features = [];
+		for(var i = 0; i < geoms.length; i++) {
+			this.features.push(Ck.create("ol.Feature", { geometry: geoms[i] }));
 		}
+		this.source.addFeatures(this.features);
 		
-		this.store.loadData(records);
+		this.feedGridFromFeatures();
+		
+		// Remove original feature
+		this.layer.getSource().removeFeature(this.feature);
+		
 		
 		this.gridEvent = this.grid.on({
 			destroyable: true,
@@ -136,6 +182,41 @@ Ext.define('Ck.edit.feature.Controller', {
 				scope: this
 			}
 		});
+		
+		// Initialize crop and union interaction
+		this.crop = Ck.getAction("ckEditCrop");
+		this.crop.multi = this.multi;
+		this.crop.createInteraction({
+			layers: [this.cloneLayer]
+		});
+		
+		this.union = Ck.getAction("ckEditUnion");
+		this.union.multi = this.multi;
+		this.union.createInteraction({
+			layers: [this.cloneLayer],
+			filter: function(ft, lyr) {
+				return lyr == this.cloneLayer;
+			}.bind(this)
+		});
+		
+		this.create = Ck.getAction("ckEditCreate");
+		this.create.multi = this.multi;
+		this.create.layer = this.cloneLayer;
+	},
+	
+	feedGridFromFeatures: function() {
+		// Add each feature to the grid
+		var records = [];
+		for(var i = 0; i < this.features.length; i++) {
+			records.push({
+				number: i + 1,
+				area: this.getFeatureSize(this.features[i]),
+				feature: this.features[i]
+			});
+		}
+		this.store.clearData()
+		this.store.loadData(records);
+		this.removeAllMarker();
 	},
 	
 	/**
@@ -145,6 +226,10 @@ Ext.define('Ck.edit.feature.Controller', {
 		this.removeAllMarker();
 		this.gridEvent.destroy();
 		this.storeEvent.destroy();
+		
+		// Remove fake sub-features and add the feature to the original layer
+		this.source.clear();
+		this.layer.getSource().addFeature(this.feature);
 	},
 	
 	/**
@@ -163,9 +248,9 @@ Ext.define('Ck.edit.feature.Controller', {
 		}
 	},
 
-	startDrawing: function() {
+	// startDrawing: function() {
 		// appendPolygon
-	},
+	// },
 
 	/**************************************************************************************/
 	/******************************* Vertex edition methods *******************************/
@@ -176,22 +261,13 @@ Ext.define('Ck.edit.feature.Controller', {
 	editVertex: function() {
 		var selections = this.grid.getSelection();
 		if(selections.length > 0) {
-			var geom = selections[0].getData().geometry;
-			this.currentFeature = selections[0].getData().number - 1;
-			
-			// We remove the sub-feature
-			var coords = this.feature.getGeometry().getCoordinates();
-			coords.splice(this.currentFeature, 1);
-			this.feature.getGeometry().setCoordinates(coords);
-
-			// And create a real feature to be able to edit it
-			var ft = Ck.create("ol.Feature", { geometry: geom });
-			this.cloneLayer.getSource().addFeature(ft); 
+			var geom = selections[0].getData().feature;
+			this.currentFeature = selections[0].getData().number - 1; 
 			
 			// Remove feature overlay
 			this.removeAllMarker();
 			
-			this.editController.startVertexEdition(ft);
+			this.editController.startVertexEdition(geom);
 		}
 	},
 	
@@ -205,23 +281,14 @@ Ext.define('Ck.edit.feature.Controller', {
 	
 	/**
 	 * For vertex panel validating
-	 * @param {ol.geom.SimpleGeometry}
+	 * @param {ol.Feature}
 	 */
-	saveVertexChange: function(geometry, changed) {
+	saveVertexChange: function(feature, changed) {
 		this.editController.switchPanel(this.getView());
 		
-		// Re-create the subfeature
-		var coords = this.feature.getGeometry().getCoordinates();
-		coords.splice(this.currentFeature, 0, geometry.getCoordinates());
-		this.feature.getGeometry().setCoordinates(coords);
-		
-		// And delete the clone
-		this.cloneLayer.getSource().clear();
-		
 		if(changed) {
-			this.fireEvent("featuregeometry", geometry);
 			var it = this.store.getAt(this.currentFeature); 
-			it.set("area", this.getFeatureSize(geometry));
+			it.set("area", this.getFeatureSize(feature));
 		}
 		
 		this.updateMarker();
@@ -229,22 +296,11 @@ Ext.define('Ck.edit.feature.Controller', {
 	
 	/**
 	 * When the user cancel his changes
+	 * @param {ol.Feature}
 	 */
-	cancelVertexChange: function(geometry) {
-		// Re-create the subfeature
-		var coords = this.feature.getGeometry().getCoordinates();
-		coords.splice(this.currentFeature, 0, geometry.getCoordinates());
-		this.feature.getGeometry().setCoordinates(coords);
-		
-		// And delete the clone
-		this.cloneLayer.getSource().clear();
-		
+	cancelVertexChange: function(feature) {		
 		this.editController.switchPanel(this.getView());
-		this.selectInteraction.setActive(true);
-		
-		var it = this.store.getAt(this.currentFeature); 
-		it.set("geometry", geometry);
-		
+		this.selectInteraction.setActive(true);		
 		this.updateMarker();
 	},
 	
@@ -279,12 +335,14 @@ Ext.define('Ck.edit.feature.Controller', {
 	 * @param {Number}
 	 */
 	featureDeleted: function(store, records, index) {
+		// Remove the sub-feature from cloneLayer
+		this.source.removeFeature(records[0].data.feature);
+		
 		// Select a new line
 		var newIdx = (index == this.store.getCount())? index - 1 : index;
 		this.grid.setSelection(this.store.getAt(newIdx));
 		this.grid.getView().focusRow(newIdx);
 		this.featureChanged = true;
-		this.syncGridWithGeom();
 		this.reindexFeature();
 	},
 	
@@ -292,8 +350,9 @@ Ext.define('Ck.edit.feature.Controller', {
 	
 	
 	/**
+	 * DEPRECATED
 	 * Update the current feature with the new coordinates
-	 */
+	 *
 	syncGridWithGeom: function() {
 		var coordinates = [];
 		
@@ -303,7 +362,7 @@ Ext.define('Ck.edit.feature.Controller', {
 		
 		var feature = Ck.create("ol.geom.MultiPolygon", coordinates);
 		this.feature.setGeometry(feature);
-	},
+	},*/
 	
 	/**
 	 * Add a permanent marker on the map to locate the feature.
@@ -318,23 +377,21 @@ Ext.define('Ck.edit.feature.Controller', {
 			record = this.grid.getSelection()[0];
 		}
 		
-		var mk = this.createMarker(record.data.geometry);
-		this.featureLayer.getSource().addFeature(mk);
+		var mk = this.createMarker(record.data.feature);
+		this.overlaySource.addFeature(mk);
 	},
 	
 	/**
 	 * Create a square marker to locate feature.
 	 * Called by showMarker and updateMarker methods
 	 *
-	 * @param {Number[]}	Coordinate
+	 * @param {ol.Feature}	Coordinate
 	 *
 	 * @return {ol.Feature}
 	 */
-	createMarker: function(feature, isHover) {
-		var hover = '';
-		if(isHover) hover = '-hover';
+	createMarker: function(feature) {
 		
-		var polygon = ol.geom.Polygon.fromExtent(feature.getExtent());
+		var polygon = ol.geom.Polygon.fromExtent(feature.getGeometry().getExtent());
 		
 		var marker = new ol.Feature({
 			geometry: polygon
@@ -352,8 +409,8 @@ Ext.define('Ck.edit.feature.Controller', {
 	 * Remove all marker of featureLayer
 	 */
 	removeAllMarker: function() {
-		if(this.featureLayer) {
-			this.featureLayer.getSource().clear();
+		if(this.overlayLayer) {
+			this.overlaySource.clear();
 		}
 	},
 	
@@ -361,7 +418,15 @@ Ext.define('Ck.edit.feature.Controller', {
 	 * Save the current feature
 	 */
 	save: function() {
-		this.unloadFeature();
+		// Creating a multi-feature from multiple simple-feature
+		var geom = this.feature.getGeometry()
+		var features = this.source.getFeatures();
+		geom.setCoordinates([]);
+		for(var i = 0; i < features.length; i++) {
+			geom.appendPolygon(features[i].getGeometry());
+		}
+		
+		this.unloadFeature();		
 		this.fireEvent("validate", this.feature, this.featureChanged);
 	},
 	
@@ -370,12 +435,11 @@ Ext.define('Ck.edit.feature.Controller', {
 	 */
 	cancel: function() {
 		this.unloadFeature();
-		this.feature.setGeometry(this.originalGeometry);
 		this.fireEvent("cancel", this.feature);
 	},
 	
 	close: function() {
-		Ck.getMap().getOlMap().removeLayer(this.featureLayer);
+		Ck.getMap().getOlMap().removeLayer(this.overlayLayer);
 	},
 	
 	/**
@@ -389,10 +453,11 @@ Ext.define('Ck.edit.feature.Controller', {
 	
 	/**
 	 * Format area in kilometers
-	 * @param {ol.geom.SimpleGeometry} Feature
+	 * @param {ol.Feature} Feature
 	 * @return {String} Area or distance in kilometers or meters
 	 */
-	getFeatureSize: function(geometry) {
+	getFeatureSize: function(feature) {
+		var geometry = feature.getGeometry();
 		if(geometry.getArea) {
 			var area = geometry.getArea();
 			area = Math.round(area);

@@ -38,7 +38,7 @@ Ext.define("Ck.edit.Feature", {
 		],
 		store: {
 			storeId: "editFeatureStore",
-			fields: ["number", "area", "geometry"]
+			fields: ["number", "area", "feature"]
 		}
 	}],
 	
@@ -48,14 +48,36 @@ Ext.define("Ck.edit.Feature", {
 	},{
 		iconCls: 'fa fa-remove',
 		itemId: "cancel"
-	},{
-		iconCls: 'fa fa-plus',
-		itemId: "create"
+	},"->",{
+		action: "ckEditCreate",
+		enableToggle: true,
+		toggleGroup: "feature-tools"
 	},{
 		iconCls: 'fa fa-edit',
 		itemId: "geometry"
 	},{
 		iconCls: 'fa fa-remove',
 		itemId: "delete"
+	},{
+		xtype: "splitbutton",
+		itemId: "vertex-live-edit",
+		iconCls: "fa fa-list",
+		tooltip: "Advance operation",
+		dock: "right",
+		menu: [{
+			action: "ckEditCrop",
+			xtype: "button",
+			text: "Crop in half",
+			enableToggle: true,
+			toggleGroup: "feature-tools",
+			iconCls: "fa fa-crop"
+		},{
+			action: "ckEditUnion",
+			xtype: "button",
+			text: "Gathering",
+			enableToggle: true,
+			toggleGroup: "feature-tools",
+			iconCls: "fa fa-compress"
+		}]
 	}]
 });

@@ -23,7 +23,7 @@ Ext.define('Ck.edit.history.Controller', {
 				scope: this
 			},
 			featuregeometry: {
-				fn: this.onFeautreGeometry,
+				fn: this.onFeatureGeometry,
 				scope: this
 			},
 			featureattribute: {
@@ -57,7 +57,7 @@ Ext.define('Ck.edit.history.Controller', {
 	 * Fired when feature geometry was modified
 	 * @param {ol.Feature}
 	 */
-	onFeautreGeometry: function(feature) {
+	onFeatureGeometry: function(feature) {
 		this.store.add(this.createRecord(feature, "Geometry"));
 	},
 	
