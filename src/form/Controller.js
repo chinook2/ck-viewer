@@ -621,6 +621,10 @@ Ext.define('Ck.form.Controller', {
 					values[field] = f.getSubmitValue();
 				}
 
+				if(f.getGroupValue){
+					values[field] = f.getGroupValue();
+				}
+				
 				// TODO : add config option to get display values
 				// if(f.displayField) {
 					// if(!values['__display']) values['__display'] = {}
