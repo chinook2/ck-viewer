@@ -61,6 +61,11 @@ Ext.define('Ck.form.field.Grid', {
 		this.callParent(arguments);
 	},
 	
+	beforeDestroy: function(){
+		this.grid.destroy();
+		this.callParent();
+	},
+	
 	afterRender: function () {
 		this.callParent(arguments);
 		this.grid.render(this.inputEl);
@@ -105,10 +110,6 @@ Ext.define('Ck.form.field.Grid', {
         //this.autoSize();
     },
 	
-	beforeDestroy: function(){
-		// TODO : destroy map, layer ?
-		this.callParent();
-	},
 	
 	getErrors: function(value) {
 		value = arguments.length ? (value == null ? [] : value) : this.processRawValue(this.getRawValue());

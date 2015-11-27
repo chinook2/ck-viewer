@@ -621,6 +621,7 @@ Ext.define('Ck.form.Controller', {
 					values[field] = f.getSubmitValue();
 				}
 
+				// get value for radioGroup
 				if(f.getGroupValue){
 					values[field] = f.getGroupValue();
 				}
