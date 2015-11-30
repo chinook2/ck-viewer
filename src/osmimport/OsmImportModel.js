@@ -13,15 +13,26 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		{name: "id", type: "int"},
 		{name: "lat", type: "number"},
 		{name: "lon", type: "number"},
-		{name: "tags"},
 		{name: "nodes", reference: "OsmImportModel"},
 		{name: "geometry"}, // Array for ways and relations
-		{name: "members", type: "auto"}, // Array for relations
-		{name: "role"}, // Used in relations,
-		{name: "isSearchedTag", type: "boolean", defaultValue: false},
-		{name: "properties"}
+		{name: "members"/*, convert: function(value) {
+				var members = [];
+				for (var i in value) {
+					var m = {
+						type: value[i].type,
+						role: value[i].role,
+						num: value[i].ref
+					};
+					members.push(m);
+				}
+				return members;
+			}*/
+		}, // Array for relations
+		{name: "tags", type: "auto", defaultValue: {}},
+		{name: "ref", type: "int"}, // Used in relations,
+		{name: "role", type: "string"}, // Used in relations,
+		{name: "isSearchedTag", type: "boolean", defaultValue: false}
 	],
-	idProperty: 'id',
 
 	/**
 	 * This method search and return the element given by its id in the records.
@@ -31,7 +42,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	getSubElement: function(records, id) {
 		var subElement;
 		for (var i in records) {
-			if (records[i].data.id == id) {
+			if ((records[i].data.id) == id) {
 				subElement = records[i];
 			}
 		}
@@ -103,10 +114,10 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 					// Copy the tags from relation and element in the member
 					var subElement = this.getSubElement(allRecords, member.ref);  // member has no copy of tags, need to retrieve it from records list
 					member.tags = data.tags || {};
-					for (var key in subElement.data.tags) {
-						member.tags[key] = subElement.data.tags[key];
+					for (var key in member.tags) {
+						subElement.data.tags[key] = member.tags[key] ;
 					}
-					geoms.push(this.calculateGeom(null, member, false, allRecords));
+					geoms.push(this.calculateGeom(null, subElement.data, false, allRecords));
 				}
 				geom = new ol.geom.GeometryCollection(geoms);
 			}
