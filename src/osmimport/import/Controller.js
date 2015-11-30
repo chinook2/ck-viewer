@@ -190,13 +190,14 @@ Ext.define('Ck.osmimport.import.Controller', {
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+=?["\w*\u00C0-\u00FF*:?]*\])+$/g) == null)) {
+				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w*\u00C0-\u00FF*:?]*\])+$/g) == null)) {
 				error = true;
 			} else {  // search other errors
-				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+=?["?\w*\u00C0-\u00FF*:?]*)+/g);
+				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=)?["?\w*\u00C0-\u00FF*:?]*)+/g);
 				for (var kvId in key_val) {  // Check that each tag is in the selected group
 					var kv = key_val[kvId];
 					var k = kv.split("=")[0];
+					k = k.replace(/!/, "");
 					var v = kv.split("=")[1];
 					if ((k.match(/[:\u00C0-\u00FF]/g) != null) &&
 						(k.charAt(0) != "\"" || k.charAt(k.length - 1) != "\"")) {  // Check correct key ":" or "é"
@@ -208,7 +209,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 							error = true;
 						}
 					} else {
-						if (key_val[kvId].indexOf("=") > -1) {  // no [key=]
+						if (key_val[kvId].match(/(=|!=)/)) {  // no [key=] or [key!=]
 							error = true;
 						}
 					}
