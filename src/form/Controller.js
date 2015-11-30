@@ -183,14 +183,17 @@ Ext.define('Ck.form.Controller', {
 			this.dataUrl = null;
 			
 			// Create un dedicated controller form the named form
-			Ext.define('Ck.form.controller.' + form.name, {
-				extend: 'Ck.form.Controller',
-				alias: 'controller.ckform_'+ form.name
-			});
+			var controllerName = 'Ck.form.controller.' + form.name;
+			if(!Ext.ClassManager.get(controllerName)){
+				Ext.define(controllerName, {
+					extend: 'Ck.form.Controller',
+					alias: 'controller.ckform_'+ form.name
+				});
+			}
 
 			// Define new controller to be overriden by application
 			// Use this.oController to access overriden methods !
-			this.oController = Ext.create('Ck.form.controller.' + form.name);
+			this.oController = Ext.create(controllerName);
 			this.oController._parent = this;
 			//
 
