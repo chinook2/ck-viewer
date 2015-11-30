@@ -46,14 +46,12 @@ Ext.define("Ck.osmimport.Import", {
 				enableColumnMove: false,
 				enableColumnResize: false,
 				sortableColumns: false,
-				columns: [
-					{
-						xtype: "gridcolumn",
-						text: "Selected Tags",
-						dataIndex: "text",
-						flex: 1
-					}
-				],
+				columns: [{
+					xtype: "gridcolumn",
+					text: "Selected Tags",
+					dataIndex: "text",
+					flex: 1
+				}],
 				bind: {
 					store: {
 						data: "{checkedTags}" 
@@ -84,25 +82,20 @@ Ext.define("Ck.osmimport.Import", {
 				vertical: true,
 				columns: 1,
 				defaults: {
-					xtype: "radio"
+					xtype: "radio",
+					name: 'selection-mode'
 				},
 				reference: "selectionMode",
 				items:[{
 					checked: true,
 					boxLabel: 'Rectangle',
-					name: 'selection-mode',
-					inputValue: 'rectangle',
-					height: 20
+					inputValue: 'rectangle'
 				}, {
 					boxLabel: 'Polygon',
-					name: 'selection-mode',
-					inputValue: 'polygon',
-					height: 20
+					inputValue: 'polygon'
 				}, {
 					boxLabel: 'Administrative limit from layer',
-					name: 'selection-mode',
 					inputValue: 'admin',
-					height: 20,
 					bind: {
 						disabled: "{!adminSelectAvailable}"
 					}
@@ -118,34 +111,33 @@ Ext.define("Ck.osmimport.Import", {
 		title: "Options",
 		collapsible: true,
 		collapsed: true,
+		layout: {
+			type: "table",
+			columns: 2
+		},
 		items: [{  // Date Selection
-			xtype: 'panel',
-			layout: 'hbox',
-			items: [{
-				xtype: "checkbox",
-				boxLabel: "Modifications since",
-				reference: "sincedate"
-			},{
-				xtype: "component",
-				width: 10
-			},{
-				xtype: "datefield",
-				reference: "datemin",
-				maxValue: new Date(),
-				format: 'd/m/Y',
-				bind: {
-					disabled: "{!sincedate.checked}"
-				}
-			}]
-		},{  // Rendering selection
+			xtype: "checkbox",
+			boxLabel: "Modifications since",
+			reference: "sincedate",
+			margin: "0 10 0 0"
+		},{
+			xtype: "datefield",
+			reference: "datemin",
+			maxValue: new Date(),
+			format: 'd/m/Y',
+			bind: {
+				disabled: "{!sincedate.checked}"
+			}
+		},{
+			xtype: "label",
+			text: "Rendering Style"
+		}, {
 			xtype: "combobox",
 			reference: "rendering",
-			fieldLabel: "Rendering style",
 			bind: {
 				store: "{renderings}"
 			},
-			displayField: "name",
-			editable: false
+			displayField: "name"
 		}]
 	}],
 	
