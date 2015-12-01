@@ -2,8 +2,8 @@
  * @private
  */
 Ext.define('Ck.form.plugin.Subform', {
-    extend: 'Ext.AbstractPlugin',
-    alias: 'plugin.gridsubform',
+	extend: 'Ext.AbstractPlugin',
+	alias: 'plugin.gridsubform',
 
 	clicksToEdit: 1,
 
@@ -14,8 +14,8 @@ Ext.define('Ck.form.plugin.Subform', {
 	_subform: null,
 	_grid: null,
 	
-    init: function(grid) {
-        if(!grid.subform) return;
+	init: function(grid) {
+		if(!grid.subform) return;
 		
 		// Accept param as String or Object
 		if(Ext.isString(grid.subform)){
@@ -28,15 +28,15 @@ Ext.define('Ck.form.plugin.Subform', {
 		grid.on('afterrender', function() {
 			this.initSubForm(grid);
 		}, this, {delay: 50});
-    },
+	},
 
-    /**
-     * @private
-     * Component calls destroy on all its plugins at destroy time.
-     */
-    destroy: function() {
-    },
-    
+	/**
+	 * @private
+	 * Component calls destroy on all its plugins at destroy time.
+	 */
+	destroy: function() {
+	},
+	
 	
 	initSubForm: function(grid) {
 		this._grid = grid;
@@ -173,9 +173,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			// this.actionColumn.ownerGrid = this.grid;
 			
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
-		}       
+		}	   
 		
-        if(this.clicksToEdit != 0) {
+		if(this.clicksToEdit != 0) {
 			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), this.loadItem, this);			
 		}
 		
@@ -197,13 +197,13 @@ Ext.define('Ck.form.plugin.Subform', {
 		this.actionColumn.hide();
 	},
 	
-    addItem: function() {
-        if (!this._subform.isValid()) {
-            return;
-        }
+	addItem: function() {
+		if (!this._subform.isValid()) {
+			return;
+		}
 		
-        // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-        // var res = form.getValues(false, false, false, true);
+		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
+		// var res = form.getValues(false, false, false, true);
 		
 		// Get only values of subform
 		var formController = this._subform.getController();
@@ -215,24 +215,24 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Save if params available
 		formController.saveData();
 		
-        this._subform.reset();
+		this._subform.reset();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
-    },
-    
+	},
+	
 	updateItem: function() {
 		// Init update mode
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
 		
-		var form = this._subform.getForm();
-        if (!form.isValid()) {
-            return;
-        }
+		if (!this._subform.isValid()) {
+			return;
+		}
 		
-        // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-        var res = form.getValues(false, false, false, true);
+		// Get only values of subform
+		var formController = this._subform.getController();
+		var res = formController.getValues();
 		
 		// Update selected record
 		var rec = this._grid.getStore().getAt(this._subform.rowIndex);
@@ -240,19 +240,28 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		delete this._subform.rowIndex;
 		
-		form.reset();
+		this._subform.reset();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
 		
 	},
 
-    deleteItem: function(grid, rowIndex) {
-        grid.getStore().removeAt(rowIndex);
-    },
+	deleteItem: function(grid, rowIndex) {
+		grid.getStore().removeAt(rowIndex);
+		
+ 		// update mode
+		var vm = this._subform.getViewModel();
+		vm.set('updating', false);
+		
+		this._subform.reset();
+		if(this._subformWindow) {
+			this._subformWindow.hide();
+		}
+	},
 	
-    loadItem: function(view, rec, tr, rowIndex) {
-        if(!this._subform) return;
+	loadItem: function(view, rec, tr, rowIndex) {
+		if(!this._subform) return;
 		
 		if(this._subformWindow) {
 			this._subformWindow.show();
@@ -293,9 +302,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 		
-        this._subform.rowIndex = rowIndex;
+		this._subform.rowIndex = rowIndex;
 		
 		// Finally load subform data with fid, url or data
 		formController.loadData(options);
-    }
+	}
 });

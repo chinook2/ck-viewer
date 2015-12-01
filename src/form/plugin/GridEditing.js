@@ -5,7 +5,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.gridediting',
 
-	editrow: true,
+	editrow: false,
 	deleterow: true,
 	
 	init: function(grid) {
