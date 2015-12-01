@@ -213,23 +213,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			case "undefined": result = true;
 			break;
 			case "Point": 
-				if (this.data.type === "node") {
-					result = true;
-				}
+				result = (this.data.type === "node");
 			break;
 			case "LineString":
-				if (this.data.type === "way" &&
-					!(this.data.geometry[0].lat === this.data.geometry[this.data.geometry.length - 1].lat &&
-					  this.data.geometry[0].lon === this.data.geometry[this.data.geometry.length - 1].lon)) {
-					result = true;
-				}
+				result = (this.data.type === "way" && !this.isPolygon(this.data));
 			break;
 			case "Polygon":
-				if (this.data.type === "way" &&
-					(this.data.geometry[0].lat === this.data.geometry[this.data.geometry.length - 1].lat &&
-					 this.data.geometry[0].lon === this.data.geometry[this.data.geometry.length - 1].lon)) {
-					result = true;
-				}
+				result = (this.data.type === "way" && this.isPolygon(this.data));
 			break;
 			case "MultiPoint":
 			break;

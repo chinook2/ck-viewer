@@ -103,10 +103,20 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var records = this.getView().openner.osmapi.getData().items;
 			for (var i in records) {
 				var record = records[i];
-				if (record.containsSearchedTags() &&
-					record.isGeometryType(integrationGeometryType)) {
-					var feature = this.convertData(record, integrationLayer);
-					newFeatures.push(feature);
+				if (record.data.type == "relation" && record.containsSearchedTags()) {
+					for (var i in record.data.members) {
+						var member = record.getSubElement(records, record.data.members[i].ref);
+						if (member.isGeometryType(integrationGeometryType)) {
+							var feature = this.convertData(member, integrationLayer, records);
+							newFeatures.push(feature);
+						}
+					}
+				} else {
+					if (record.containsSearchedTags() &&
+						record.isGeometryType(integrationGeometryType)) {
+						var feature = this.convertData(record, integrationLayer, records);
+						newFeatures.push(feature);
+					}
 				}
 			}
 			integrationLayer.getSource().addFeatures(newFeatures);
@@ -124,10 +134,10 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * This method converts a data from OSM format (as imported) to layer format.
 	 * Conversion is done on geometry (correct projection) and (tags / attributes)
 	 */
-	convertData: function(data, integrationLayer) {
+	convertData: function(data, integrationLayer, records) {
 		var convertedData;
 		var newProjection = Ck.getMap().getOlMap().getView().getProjection();  // TODO change to get the projection of integration layer
-		var geom = data.calculateGeom(newProjection);  // TODO tranform with correct projection
+		var geom = data.calculateGeom(newProjection, undefined, true, records);  // TODO tranform with correct projection
 		var convertedData = new ol.Feature(
 					Ext.apply({
 						geometry: geom
