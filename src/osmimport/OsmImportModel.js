@@ -15,19 +15,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		{name: "lon", type: "number"},
 		{name: "nodes", reference: "OsmImportModel"},
 		{name: "geometry"}, // Array for ways and relations
-		{name: "members"/*, convert: function(value) {
-				var members = [];
-				for (var i in value) {
-					var m = {
-						type: value[i].type,
-						role: value[i].role,
-						num: value[i].ref
-					};
-					members.push(m);
-				}
-				return members;
-			}*/
-		}, // Array for relations
+		{name: "members"}, // Array for relations
 		{name: "tags", type: "auto", defaultValue: {}},
 		{name: "ref", type: "int"}, // Used in relations,
 		{name: "role", type: "string"}, // Used in relations,
@@ -40,13 +28,10 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * @param id Id of the Sub-Element to get.
 	 */
 	getSubElement: function(records, id) {
-		var subElement;
-		for (var i in records) {
-			if ((records[i].data.id) == id) {
-				subElement = records[i];
-			}
-		}
-		return subElement;
+		return Ext.Array.findBy(records,
+			function(record) {
+				return record.data.id == id;
+			});
 	},
 	
 	/**
@@ -69,11 +54,10 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			var point = [data.lon, data.lat];
 			geom = new ol.geom.Point(point);
 		} else if (data.type === "way") {  // Line or Polygon
-			var coords = [];
-			for (var p = 0; p < data.geometry.length; p++) {
-				var point = [data.geometry[p].lon, data.geometry[p].lat];
-				coords.push(point);
-			}
+			var coords = Ext.Array.map(data.geometry,
+				function(geometry) {
+					return [geometry.lon, geometry.lat]
+				});
 			if (this.isPolygon(data)) {
 				geom = new ol.geom.Polygon([coords]);
 			} else {
@@ -81,28 +65,15 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 		} else if (data.type === "relation") {  // OSM Relations
 			if (data.tags.type == "multipolygon") { // handle OSM multipolygon with inners in a Polygon
-				var nb_outer = 0;
-				var nb_inner = 0;
-				for (var memberId in data.members) {
-					var member = data.members[memberId];
-					if (member.role == "inner") {
-						nb_inner++;
-					}
-					if (member.role == "outer") {
-						nb_outer++;
-					}
-				}
+				var nb_outer = Ext.Array.filter(data.members,
+					function(member) {return member.role == "outer";});
+				var nb_inner = Ext.Array.filter(data.members,
+					function(member) {return member.role == "inner";});
 				if (nb_outer == 1 && nb_inner > 0) {  // Polygon shall not be used when there is no inner
 					var coords = [];
 					for (var memberId in data.members) {
 						var member = data.members[memberId];
-						member.tags = {};
-						var polygeom = this.calculateGeom(null, member, false, allRecords);
-						if (member.role == "outer") {
-							coords.push(polygeom.getCoordinates(false));
-						} else if (member.role == "inner") {
-							coords.push(polygeom.getCoordinates(true));
-						}
+						coords.push(polygeom.getCoordinates(member.role == "inner"));
 					}
 					geom = new ol.geom.Polygon(coords);
 				}
@@ -114,9 +85,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 					// Copy the tags from relation and element in the member
 					var subElement = this.getSubElement(allRecords, member.ref);  // member has no copy of tags, need to retrieve it from records list
 					member.tags = data.tags || {};
-					for (var key in member.tags) {
-						subElement.data.tags[key] = member.tags[key] ;
-					}
+					Ext.apply(subElement.data.tags, member.tags);
 					geoms.push(this.calculateGeom(null, subElement.data, false, allRecords));
 				}
 				geom = new ol.geom.GeometryCollection(geoms);
@@ -183,7 +152,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				for (var t in tagsToCheck) {
 					if (tags[tagsToCheck[t].key] &&  // Tag is present
 						((tagsToCheck[t].nopoly_val.length == 0 || tagsToCheck[t].nopoly_val.indexOf(tags[tagsToCheck[t].key]) == -1) &&  // Value for way is absent
-						 (tagsToCheck[t].poly_val.length == 0 || tagsToCheck[t].poly_val.indexOf(tags[tagsToCheck[t].key]) > -1))) {  // values for polygon is present
+						 (tagsToCheck[t].poly_val.length == 0   || tagsToCheck[t].poly_val.indexOf(tags[tagsToCheck[t].key]) > -1))) {  // values for polygon is present
 							polygon = true;
 							break;
 					}
@@ -209,9 +178,9 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 					for (var kvId in key_val) {  // Check that each tag is in the selected group
 						var kv = key_val[kvId];
 						var different = kv.match(/!=/);
-						var k = kv.split("=")[0].replace(/("|!)/g, '');
+						var k = kv.split("=")[0].replace(/"/g, '').replace(/!/g, '');
 						var v = kv.split("=")[1];
-						if (v != undefined) {
+						if (v) {
 							v = v.replace(/"/g, '');
 						}
 						if (different) {
@@ -219,10 +188,8 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 								rec_correct++
 							}
 						} else {
-							if (k in tags) {
-								if ((v !== "" && tags[k] === v) || !v) {
-									rec_correct++;
-								}
+							if ((k in tags) && ((v !== "" && tags[k] === v) || !v)) {
+								rec_correct++;
 							}
 						}
 					}

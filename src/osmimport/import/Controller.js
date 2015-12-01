@@ -234,14 +234,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Returns the list of all the layers that can be used for admin selection.
 	 */
 	getAdminSelectionLayers: function() {
-		var adminLayers = [];
-		var allLayers = Ck.getMap().getLayers().getArray();
-		for (var i in allLayers) {
-			if (allLayers[i].get("admin") && allLayers[i].get("visible")) {
-				adminLayers.push(allLayers[i]);
-			}
-		}
-		return adminLayers;
+		return Ext.Array.filter(Ck.getMap().getLayers().getArray(), 
+			function(layer) {
+				return layer.get("admin");
+			});
 	},
 	
 	/**
@@ -389,6 +385,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.stopZoneSelection();
 				this.waitMsg = Ext.Msg.show({
 					msg: 'Importing data from OpenStreetMap, please wait...',
+					autoShow: true,
 					width: 300,
 					wait: {
 						interval: 200
@@ -537,11 +534,9 @@ Ext.define('Ck.osmimport.import.Controller', {
 					}
 				}
 				this.displayVector.setStyle(style);
+				
 			} catch (exception) {
 				console.log(exception);  // TODO remove this debug log
-				if (this.waitMsg) {
-					this.waitMsg.close();
-				}
 				Ext.MessageBox.show({
 					title: 'OSM Import',
 					msg: 'An error occured while computing the imported data.',
@@ -549,37 +544,39 @@ Ext.define('Ck.osmimport.import.Controller', {
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.ERROR
 				});
-			}
-			
-			// Manage messages for end of import
-			this.waitMsg.close();
-			if (nbFeaturesImported === 0) {  // No Result
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed.<br/>No data found for the selection',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.WARNING
-				});
-			} else if (nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.<br/>'
-						 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.WARNING
-				});
-				this.openner.finishImport();
-			} else {
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.INFO
-				});
-				this.openner.finishImport();
+			} finally {
+				// Manage messages for end of import
+				if (this.waitMsg) {
+					//this.waitMsg.close();
+				}
+				if (nbFeaturesImported === 0) {  // No Result
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed.<br/>No data found for the selection',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
+				} else if (nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.<br/>'
+							 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
+					this.openner.finishImport();
+				} else {
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.INFO
+					});
+					this.openner.finishImport();
+				}
 			}
 
 		} else {  // Request failed
