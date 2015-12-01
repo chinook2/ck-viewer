@@ -16,26 +16,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
          * Init Constants
 		 */
 		
-		
-	
-		/**
-		 * Init the controls from View.
-		 */
-		this.control({
-			"ckosmimportintegration button#cancel": {
-				click: this.onCancelClick
-			},
-			"ckosmimportintegration button#integration": {
-				click: this.onIntegrationClick
-			},
-			"ckosmimportintegration button#integrationfinished": {
-				click: this.onIntegrationFinishedClick
-			},
-			"ckosmimportintegration #layerselection": {
-				change: this.onLayerSelectionChange
-			}
-		});
-		
 		/**
 		 * Init the view
 		 */

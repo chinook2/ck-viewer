@@ -38,6 +38,9 @@ Ext.define("Ck.osmimport.Integration", {
 					fields: ["title", "id"]
 				}
 			},
+			listeners: {
+				change: "onLayerSelectionChange"
+			},
 			displayField: "title",
 			valueField: "id",
 			editable: false
@@ -204,13 +207,19 @@ Ext.define("Ck.osmimport.Integration", {
 	
 	buttons: [{
 		text: "Integration",
-		itemId: "integration"
+		listeners: {
+			click: "onIntegrationClick"
+		}
 	},{
 		text: "Integration Finished",
-		itemId: "integrationfinished"
+		listeners: {
+			click: "onIntegrationFinishedClick"
+		}
 	},{
 		text: "Cancel",
-		itemId: "cancel"
+		listeners: {
+			click: "onCancelClick"
+		}
 	}],
 
 	cls: "ck-osmimport-integration"

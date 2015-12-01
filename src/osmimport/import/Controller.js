@@ -39,25 +39,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				})
 			})
 		});
-	
-		/**
-		 * Init the controls from View.
-		 */
-		this.control({
-			"ckosmimportimport button#cancel": {
-				click: this.cancel
-			},
-			"ckosmimportimport treepanel#osmtags-tree": {
-				load: this.onTreeOsmTagsLoad,
-				checkchange: this.onTreeOsmTagsChange
-			},
-			"ckosmimportimport button#btnSelection": {
-				click: this.onSelectionClick
-			},
-			"ckosmimportimport button#import": {
-				click: this.onImportClick
-			}
-		});
 		
 		this.olMap = Ck.getMap().getOlMap();
 		/**

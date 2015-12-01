@@ -35,7 +35,10 @@ Ext.define("Ck.osmimport.Import", {
 				bind:{
 					store: "{osmtags}"
 				},
-				itemId: 'osmtags-tree'
+				listeners: {
+					load: "onTreeOsmTagsLoad",
+					checkchange: "onTreeOsmTagsChange"
+				}
 			},{
 				xtype: "grid",
 				flex: 0.4,
@@ -103,7 +106,9 @@ Ext.define("Ck.osmimport.Import", {
 			},{
 				xtype: "button",
 				text: "Selection",
-				itemId: "btnSelection"
+				listeners: {
+					click: "onSelectionClick"
+				}
 			}]
 		}]
 	},{  // Options
@@ -143,11 +148,15 @@ Ext.define("Ck.osmimport.Import", {
 	
 	buttons: [{
 		text: "Import",
-		itemId: "import",
-		formBind: true
+		formBind: true,
+		listeners: {
+			click: "onImportClick"
+		}
 	},{
 		text: "Cancel",
-		itemId: "cancel"
+		listeners: {
+			click: "cancel"
+		}
 	}],
 
 	cls: "ck-osmimport-import"
