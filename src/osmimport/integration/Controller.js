@@ -103,12 +103,19 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var records = this.getView().openner.osmapi.getData().items;
 			for (var i in records) {
 				var record = records[i];
-				if (record.data.type == "relation" && record.containsSearchedTags()) {
-					for (var i in record.data.members) {
-						var member = record.getSubElement(records, record.data.members[i].ref);
-						if (member.type != "relation" && member.isGeometryType(integrationGeometryType)) {
-							var feature = this.convertData(member, integrationLayer, records);
+				if (record.data.type == "relation") {
+					if (record.containsSearchedTags()) {
+						var feature = this.convertData(record, integrationLayer, records);
+						if (feature.getGeometry().getType() == "Polygon") {  // Use polygon with inner
 							newFeatures.push(feature);
+						} else {
+							for (var i in record.data.members) {
+								var member = record.getSubElement(records, record.data.members[i].ref);
+								if (member.type != "relation" && member.isGeometryType(integrationGeometryType)) {
+									var feature = this.convertData(member, integrationLayer, records);
+									newFeatures.push(feature);
+								}
+							}
 						}
 					}
 				} else {

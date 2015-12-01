@@ -66,13 +66,16 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		} else if (data.type === "relation") {  // OSM Relations
 			if (data.tags.type == "multipolygon") { // handle OSM multipolygon with inners in a Polygon
 				var nb_outer = Ext.Array.filter(data.members,
-					function(member) {return member.role == "outer";});
+					function(member) {return member.role == "outer";}).length;
 				var nb_inner = Ext.Array.filter(data.members,
-					function(member) {return member.role == "inner";});
+					function(member) {
+						return member.role == "inner";}).length;
 				if (nb_outer == 1 && nb_inner > 0) {  // Polygon shall not be used when there is no inner
 					var coords = [];
 					for (var memberId in data.members) {
 						var member = data.members[memberId];
+						member.tags = {};
+						var polygeom = this.calculateGeom(null, member, false, allRecords);
 						coords.push(polygeom.getCoordinates(member.role == "inner"));
 					}
 					geom = new ol.geom.Polygon(coords);
