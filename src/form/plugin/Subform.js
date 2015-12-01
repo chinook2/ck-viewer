@@ -8,7 +8,10 @@ Ext.define('Ck.form.plugin.Subform', {
 	clicksToEdit: 1,
 
 	editrow: true,
+	
 	deleterow: true,
+	
+	addItemLast: true,
 	
 	_subformWindow: null,
 	_subform: null,
@@ -143,9 +146,12 @@ Ext.define('Ck.form.plugin.Subform', {
 			}
 			if(this.deleterow!==false){
 				actions.push({
-					//iconCls: 'fa fa-close',
 					isDisabled: function(v, r, c, i, rec) {
-						if(rec && rec.get('dummy')) return true;
+						if(!rec) return true;
+						if(rec.get('dummy')) return true;
+						if(this.disableEditrow) {
+							if(rec.get(this.disableEditrow.property) === this.disableEditrow.value) return true
+						}
 						return false;
 					},
 					getClass: function(v, meta, rec) {
@@ -209,8 +215,13 @@ Ext.define('Ck.form.plugin.Subform', {
 		var formController = this._subform.getController();
 		var res = formController.getValues();
 		
-		// Insert new record		
-		this._grid.getStore().insert(0, res);
+		if(this.addItemLast===true){
+			// Add new record at the end
+			this._grid.getStore().add(res);
+		}else{
+			// Insert new record	at the beginning	
+			this._grid.getStore().insert(0, res);
+		}
 
 		// Save if params available
 		formController.saveData();
@@ -222,13 +233,13 @@ Ext.define('Ck.form.plugin.Subform', {
 	},
 	
 	updateItem: function() {
-		// Init update mode
-		var vm = this._subform.getViewModel();
-		vm.set('updating', false);
-		
 		if (!this._subform.isValid()) {
 			return;
 		}
+		
+		// Init update mode
+		var vm = this._subform.getViewModel();
+		vm.set('updating', false);
 		
 		// Get only values of subform
 		var formController = this._subform.getController();
@@ -241,6 +252,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		delete this._subform.rowIndex;
 		
 		this._subform.reset();
+		this._grid.focus();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}

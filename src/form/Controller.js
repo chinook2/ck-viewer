@@ -459,17 +459,17 @@ Ext.define('Ck.form.Controller', {
 						delete o.store.url;
 					}
 					
-					// Apply template if available like dataUrl...
-					var v = me.getView();
-					var fid = v.getDataFid();
-					if(fid){
-						var tpl = new Ext.Template(storeUrl);
-						if(Ext.isString(fid)) fid = [fid];
-						storeUrl = tpl.apply(fid);
-					}
-
 					// Construct store with storeUrl
 					if(storeUrl){
+						// Apply template if available like dataUrl...
+						var v = me.getView();
+						var fid = v.getDataFid();
+						if(fid){
+							var tpl = new Ext.Template(storeUrl);
+							if(Ext.isString(fid)) fid = [fid];
+							storeUrl = tpl.apply(fid);
+						}
+						
 						store = {
 							autoLoad: true,
 							proxy: {
@@ -692,6 +692,19 @@ Ext.define('Ck.form.Controller', {
 		//
 	},
 	
+	// Prevent validate subform fields...
+	isValid: function() {
+		var v = this.getView();
+		var form = v.getForm();
+		
+		this.fields.forEach(function(field){
+			var f = form.findField(field);
+			if(f && !f.isValid()) return false;
+		}, this);
+		
+		return true;
+	},
+	
 	// Load data from
 	//  - fid
 	//  - dataUrl
@@ -870,8 +883,8 @@ Ext.define('Ck.form.Controller', {
 		var url = v.getDataUrl();
 
 
-		// TODO : pose pb avec les subforms...
-		if (!v.isValid()) {
+		// Test if form is valid (all fields of the main form)
+		if (!this.isValid()) {
 			Ck.log("Form is not valid in saveData : "+ this.name);
 			return false;
 		}
