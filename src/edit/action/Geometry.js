@@ -64,5 +64,5 @@ Ext.define('Ck.edit.action.Geometry', {
 	 */
 	reset: function() {
 		this.geometryInteraction.getFeatures().clear();
-	},
+	}
 });
