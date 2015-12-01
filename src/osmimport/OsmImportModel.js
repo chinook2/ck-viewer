@@ -82,11 +82,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				var geoms = [];
 				for (var memberId in data.members) {
 					var member = data.members[memberId];
-					// Copy the tags from relation and element in the member
-					var subElement = this.getSubElement(allRecords, member.ref);  // member has no copy of tags, need to retrieve it from records list
-					member.tags = data.tags || {};
-					Ext.apply(subElement.data.tags, member.tags);
-					geoms.push(this.calculateGeom(null, subElement.data, false, allRecords));
+					if (member.type != "relation") {
+						// Copy the tags from relation and element in the member
+						var subElement = this.getSubElement(allRecords, member.ref);  // member has no copy of tags, need to retrieve it from records list
+						member.tags = data.tags || {};
+						Ext.apply(subElement.data.tags, member.tags);
+						geoms.push(this.calculateGeom(null, subElement.data, false, allRecords));
+					}
 				}
 				geom = new ol.geom.GeometryCollection(geoms);
 			}

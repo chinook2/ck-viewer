@@ -106,7 +106,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				if (record.data.type == "relation" && record.containsSearchedTags()) {
 					for (var i in record.data.members) {
 						var member = record.getSubElement(records, record.data.members[i].ref);
-						if (member.isGeometryType(integrationGeometryType)) {
+						if (member.type != "relation" && member.isGeometryType(integrationGeometryType)) {
 							var feature = this.convertData(member, integrationLayer, records);
 							newFeatures.push(feature);
 						}

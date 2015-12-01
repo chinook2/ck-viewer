@@ -527,9 +527,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				});
 			} finally {
 				// Manage messages for end of import
-				if (this.waitMsg) {
-					//this.waitMsg.close();
-				}
+				this.waitMsg.close();
 				if (nbFeaturesImported === 0) {  // No Result
 					Ext.MessageBox.show({
 						title: 'OSM Import',
