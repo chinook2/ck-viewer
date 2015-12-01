@@ -10,6 +10,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	editrow: true,
 	
 	deleterow: true,
+	disableDeleteRow: null,
 	
 	addItemLast: true,
 	
@@ -149,8 +150,8 @@ Ext.define('Ck.form.plugin.Subform', {
 					isDisabled: function(v, r, c, i, rec) {
 						if(!rec) return true;
 						if(rec.get('dummy')) return true;
-						if(this.disableEditrow) {
-							if(rec.get(this.disableEditrow.property) === this.disableEditrow.value) return true
+						if(this.disableDeleteRow) {
+							if(rec.get(this.disableDeleteRow.property) === this.disableDeleteRow.value) return true
 						}
 						return false;
 					},
