@@ -409,11 +409,14 @@ Ext.define('Ck.form.Controller', {
 
 			
 			Ext.applyIf(c, {
-				plugins: ['formreadonly'],
+				plugins: [],
 				anchor: '100%',
 				labelSeparator: me.layoutConfig.labelSeparator
 			});
-
+			c.plugins.push({
+				ptype: 'formreadonly'
+			});
+			
 			if (c.xtype == "tabpanel") {
 				Ext.applyIf(c, {
 					activeTab: 0,
@@ -516,20 +519,42 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
+				// Try to merge plugins config and default config
+				var applyDefault = function(plugins, defaults) {
+					if(!Ext.isArray(plugins)) return defaults;
+					if(!Ext.isArray(defaults)) return plugins;
+					
+					for(var d=0; d<defaults.length; d++) {
+						var defaultPlugin = defaults[d];
+						
+						var exist = false;
+						for(var p=0; p<plugins.length; p++) {
+							if(plugins[p].ptype === defaultPlugin.ptype) {
+								exist = true;
+								// merge
+								plugins[p] = Ext.applyIf(plugins[p], defaultPlugin);
+								break;
+							}
+						}
+						
+						if(!exist) {
+							plugins.push(defaultPlugin);
+						}						
+					}
+					
+					return plugins;
+				};
+				
 				if(c.subform){
-					// Ext.apply(c, {
-						// plugins: ['gridstore', 'gridsubform']
-					// });
-					c.plugins = Ext.Array.merge(c.plugins,  ['gridsubform']);
+					c.plugins = applyDefault(c.plugins,  [{
+						ptype: 'gridsubform'
+					}]);
 				} else {
-					// Ext.apply(c, {
-						// plugins: ['gridstore', 'gridediting', {
-							// ptype: 'rowediting',
-							// clicksToEdit: 1
-						// }]
-					// });
-					c.plugins = Ext.Array.merge(c.plugins,  ['gridediting', {
+					c.plugins = applyDefault(c.plugins,  [{
+						ptype: 'gridediting'
+					}, {
 						ptype: 'rowediting',
+						pluginId: 'rowediting',
 						clicksToEdit: 1
 					}]);
 				}

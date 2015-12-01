@@ -5,11 +5,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.gridediting',
 
+	editrow: true,
+	deleterow: true,
+	
 	init: function(grid) {
 		this.grid = grid;
-		
-		// Options for the plugin
-		if(!grid.gridediting) grid.gridediting = {};
+				
+		var formController = grid.lookupController();
 		
 		// Init store fields from column definition
 		var store = grid.getStore();
@@ -21,16 +23,27 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		this.actionColumn = this.grid.down('actioncolumn');
 		if(!this.actionColumn) {
 			var actions = [];
-			if(grid.gridediting.editrow!==false){
+			if(this.editrow!==false){
 				actions.push({
-					iconCls: 'fa fa-edit',
+					isDisabled: function(v, r, c, i, rec) {
+						if(rec && rec.get('dummy')) return true;
+						return false;
+					},
+					getClass: function(v, meta, rec) {
+						if(rec && rec.get('dummy')) return false;
+						return 'fa fa-edit';
+					},
 					tooltip: 'Edit row',
-					handler: Ext.emptyFn
+					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
+						var plg = grid.getPlugin('rowediting');
+						// colIndex = actioncolumn index... use column index 0 to start Edit
+						if(plg) plg.startEdit(rec, 0);
+					},
+					scope: this
 				});
 			}
-			if(grid.gridediting.deleterow!==false){
+			if(this.deleterow!==false){
 				actions.push({
-					//iconCls: 'fa fa-close',
 					isDisabled: function(v, r, c, i, rec) {
 						if(rec && rec.get('dummy')) return true;
 						return false;
@@ -40,7 +53,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 						return 'fa fa-close';
 					},
 					tooltip: 'Delete row',
-					handler: this.deleteRow
+					handler: this.deleteRow,
+					scope: this
 				});
 			}
 			
@@ -48,7 +62,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
-				hidden: true,
+				hidden: !formController.getView().getEditing(),
 				items: actions
 			});
 
@@ -60,12 +74,6 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
 		}
-
-		// Get associate form of the grid (assume first parent form)
-		var formView = grid.view.up('form');
-		if(!formView) return;
-
-		var formController = formView.getController();
 
 		// On start editing
 		formController.on({
