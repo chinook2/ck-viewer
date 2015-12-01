@@ -48,7 +48,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			urlTemplate: subForm.urlTemplate || grid.lookupController().getView().getUrlTemplate(),
 			
 			// TODO use param from json
-			layout: 'form',
+			//layout: 'form',
 			scrollable: 'y',
 			
 			formName: '/' + subForm.url,
@@ -58,6 +58,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			dockedItems: [{
 				xtype: 'toolbar',
 				dock: 'bottom',
+				style: {border: 0},
 				items: ['->', {
 					text: 'Add',
 					handler: this.addItem,
@@ -168,21 +169,49 @@ Ext.define('Ck.form.plugin.Subform', {
 		}       
 		
         grid.on('rowclick', this.loadItem, this);
+		
+		// Get associate form of the grid (assume first parent form)
+		var formView = grid.view.up('form');
+		if(!formView) return;
+		
+		var formController = formView.getController();
+		// On start editing
+		formController.on({
+			startEditing: this.startEditing,
+			stopEditing: this.stopEditing,
+			scope: this
+		});
+	},
+	
+	startEditing: function() {
+		// add & show action column
+		this.actionColumn.show();
+	},
+
+	stopEditing: function() {
+		// hide action column
+		this.actionColumn.hide();
 	},
 	
     addItem: function() {
-		var form = this._subform.getForm();		
-        if (!form.isValid()) {
+        if (!this._subform.isValid()) {
             return;
         }
 		
         // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-        var res = form.getValues(false, false, false, true);
+        // var res = form.getValues(false, false, false, true);
+		
+		// Get only values of subform
+		var formController = this._subform.getController();
+		var res = formController.getValues();
 		
 		// Insert new record		
 		this._grid.getStore().insert(0, res);
 
-        form.reset();
+		// Save if params available
+		formController.saveData();
+		
+        this._subform.reset();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}

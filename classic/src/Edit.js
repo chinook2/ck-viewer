@@ -53,14 +53,14 @@ Ext.define("Ck.Edit", {
 			menu: [{
 				action: "ckEditCrop",
 				xtype: "button",
-				text: "Crop in half",
+				text: "Cut",
 				enableToggle: true,
 				toggleGroup: "edit-tools",
 				iconCls: "fa fa-crop"
 			},{
 				action: "ckEditUnion",
 				xtype: "button",
-				text: "Gathering",
+				text: "Gather",
 				enableToggle: true,
 				toggleGroup: "edit-tools",
 				iconCls: "fa fa-compress"

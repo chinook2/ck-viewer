@@ -1,5 +1,6 @@
 /**
- * Edit tool used to create new feature
+ * Edit tool used to create new feature.
+ * this.layer define with layer will be used for snapping
  */
 Ext.define('Ck.edit.action.Create', {
 	extend: 'Ck.edit.Action',
@@ -10,20 +11,21 @@ Ext.define('Ck.edit.action.Create', {
 	 */
 	iconCls: 'fa fa-plus',
 	tooltip: 'Create features',
+	
+	/** 
+	 * True to snap vertex to nearest point
+	 */
+	snap: true,
 
 	/**
 	 * Activate the geometry creation interaction
 	 **/
 	toggleAction: function(btn, status) {
-		this.associatedEl = btn;
-		this.used = true;
-		var source = this.getLayerSource();
+		this.callParent([btn]);
 
 		// Create the interaction if it doesn't already exist
 		if(!this.drawInteraction) {
 			this.drawInteraction = new ol.interaction.Draw({
-				features: new ol.Collection(source.getFeatures()),
-				source: source,
 				type: this.getGeometryType(),
 				snapGeometry: this.snapGeometry
 			});
@@ -70,87 +72,18 @@ Ext.define('Ck.edit.action.Create', {
 					case ol.geom.GeometryType.MULTI_LINE_STRING :
 						sketchFeature.setGeometry(new ol.geom.MultiLineString([coordinates]));
 						break;
-					case ol.geom.GeometryType.MULTI_POLYGON :
 						sketchFeature.setGeometry(new ol.geom.MultiPolygon([coordinates]));
+					case ol.geom.GeometryType.MULTI_POLYGON :
 				}
 
-				if(!goog.isNull(this.drawInteraction.features_)) {
-					this.drawInteraction.features_.push(sketchFeature);
-				}
-				if(!goog.isNull(this.drawInteraction.source_)) {
-					this.drawInteraction.source_.addFeature(sketchFeature);
-				}
-
-				this.endAction(sketchFeature);
 				this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
-				this.editController.fireEvent("featurecreate", sketchFeature);
+				this.controller.fireEvent("featurecreate", sketchFeature);
 			}.bind(this);
+			
+			this.interactions["drawInteraction"] = this.drawInteraction;
 		}
 
 		this.drawInteraction.setActive(status);
-
-
-		/** For GPS
-		if(!this.geolocation) {
-			var app = Panama.app.getApplication();
-			this.geolocation = app.geolocation;
-
-			// add a marker to display the current location
-			if(!Ext.get('location-gps')) {
-				var body = Ext.getBody();
-				body.insertHtml("BeforeEnd", "<div id=\"location-gps\" class=\"marker-gps\"><span class=\"geolocation\"></span></div>");
-			}
-
-			this.geolocationMarker = new ol.Overlay({
-				element: document.getElementById('location-gps'),
-				positioning: 'center-center'
-			});
-			map.addOverlay(this.geolocationMarker);
-
-			// Update geolocationMarker's position via GPS
-			this.geolocation.on('change', function(evt) {
-				var p = this.geolocation.getPosition();
-				this.geolocationMarker.setPosition(p);
-			}, this);
-		}
-
-
-		if(!this.btnCreateGPS) {
-			this.btnCreateGPS = Ext.create('Ext.Button', {
-				text: 'GPS<br>A&ntilde;adir',
-				renderTo: Ext.getBody(),
-				floating: true,
-				style: {
-					bottom: '150px',
-					right: '20px'
-				},
-				handler: function() {
-					var coord = this.geolocation.getPosition();
-
-					if(!coord) {
-						Ck.error("No GPS plugged.");
-						return;
-					}
-
-					var p = map.getPixelFromCoordinate(coord);
-					var e = {
-						map: map,
-						pixel: p,
-						coordinate: coord
-					};
-					this.drawInteraction.downPx_ = e.pixel;
-					this.drawInteraction.handleUpEvent_(e);
-				},
-				scope: this
-			});
-		}
-
-		// Active ou non le GPS / tracking
-		if(this.geolocation) this.geolocation.setTracking(status);
-		if(this.btnCreateGPS) this.btnCreateGPS.setVisible(status);
-		if(Ext.get('location-gps')) Ext.get('location-gps').setVisible(status);
-
-		*/
 	},
 
 	/**
@@ -175,46 +108,22 @@ Ext.define('Ck.edit.action.Create', {
 		var coordinates = coordinates[0];
 		var source = this.getLayerSource();
 
-		// Loop on vertex of the feature
-		for(var i=0; i<coordinates.length - 1; i++ ) {
-			var coordinate = coordinates[i];
-			var feat = source.getClosestFeatureToCoordinate(coordinate);
-			// If nearest feature was found
-			if(!Ext.isEmpty(feat)) {
-				var geom = feat.getGeometry();
-				var point = geom.getClosestPoint(coordinate).slice(0, 2); // Find the nearest point of the feature (force 2D)
-				var line = new ol.geom.LineString([coordinate, point]);
-				var length = line.getLength();
+		if(this.snap) {
+			// Loop on vertex of the feature
+			for(var i=0; i<coordinates.length - 1; i++ ) {
+				var coordinate = coordinates[i];
+				var feat = source.getClosestFeatureToCoordinate(coordinate);
+				// If nearest feature was found
+				if(!Ext.isEmpty(feat)) {
+					var geom = feat.getGeometry();
+					var point = geom.getClosestPoint(coordinate).slice(0, 2); // Find the nearest point of the feature (force 2D)
+					var line = new ol.geom.LineString([coordinate, point]);
+					var length = line.getLength();
 
-				// Si on rentre dans la tolérance
-				if(length <= this.getTolerance()) {
-					coordinates[i] = point;
-					// Pour rajouter le point sur le polygon auquel on se rattache s'il n'est pas présent
-					/*
-					var coords = geom.getCoordinates();
-					var pointFound = false;
-					for(var j=0; j<coords[0].length; j++) {
-						var currPoint = coords[0][j];
-						if(currPoint[0] == point[0] && currPoint[1] == point[1]) {
-							pointFound = true;
-							break;
-						}
+					// Si on rentre dans la tolérance
+					if(length <= this.getTolerance()) {
+						coordinates[i] = point;
 					}
-					if(pointFound === false) {
-						for(var j=0; j<coords[0].length-1; j++) {
-							var currPoint = coords[0][j];
-							var nextPoint = coords[0][j+1];
-							var a = (nextPoint[1] - currPoint[1]) / (nextPoint[0] - currPoint[0]);
-							var b = currPoint[1] - (a * currPoint[0]);
-							var test = (point[1] >= ((a * point[0]) +b) - 1) && (point[1] <= ((a * point[0]) +b) + 1);
-							if(test) {
-								coords[0].splice(j++, 0, point);
-							}
-						}
-					}
-					geom.setCoordinates(coords);
-					feat.setGeometry(geom);
-					*/
 				}
 			}
 		}
@@ -225,19 +134,9 @@ Ext.define('Ck.edit.action.Create', {
 
 		var f = new ol.Feature({
 			geometry: new ol.geom.Polygon([coordinates]),
-			status: "CREATED",
-			date: date,
-			cedula: ced
+			status: "CREATED"
 		});
 
 		return f;
-	},
-	
-	closeAction: function() {
-		if(this.used) {
-			this.drawInteraction.setActive(false);
-			this.map.getOlMap().removeInteraction(this.drawInteraction);
-			delete this.drawInteraction;
-		}
 	}
 });

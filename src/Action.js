@@ -99,12 +99,23 @@ Ext.define('Ck.Action', {
 			tooltip: this.tooltip,
 			toggleGroup: this.toggleGroup,
 			toggleHandler: this.toggleAction,
+			
+			listeners: {
+				render: this.render,
+				destroy: this.destroy,
+				hide: this.hide,
+				scope: this
+			},
 
 			scope: this
 		});
 		Ck.actions.push(this);
 		this.callParent([config]);
 	},
+	
+	render: Ext.emptyFn,
+	destroy: Ext.emptyFn,
+	hide: Ext.emptyFn,
 
     /**
      * A function called when the button is clicked (can be used instead of click event).
@@ -125,7 +136,7 @@ Ext.define('Ck.Action', {
      * @param {Boolean} toggleHandler.state The next state of the Button, true means pressed.
      */
 	toggleAction: Ext.emptyFn,
-
+	
 	/**
 	 * @inheritdoc Ck.Controller
 	 */

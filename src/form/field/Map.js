@@ -20,6 +20,10 @@ Ext.define('Ck.form.field.Map', {
 
 	inputCls: Ext.baseCSSPrefix + 'form-map',
 
+	allowBlank: true,
+	blankText: 'This field is required',
+	invalidCls: 'ck-form-mapfield-invalid',
+	
 	map: null,
 	
 	// Map Controller instance for the mapfield
@@ -84,5 +88,46 @@ Ext.define('Ck.form.field.Map', {
 	beforeDestroy: function(){
 		// TODO : destroy map, layer ?
 		this.callParent();
+	},
+	
+	getErrors: function(value) {
+		value = arguments.length ? (value == null ? '' : value) : this.processRawValue(this.getRawValue());
+
+		var me = this,
+			errors = me.callParent([value]),
+			validator = me.validator,
+			vtype = me.vtype,
+			vtypes = Ext.form.field.VTypes,
+			regex = me.regex,
+			msg;
+
+		if (Ext.isFunction(validator)) {
+			msg = validator.call(me, value);
+			if (msg !== true) {
+				errors.push(msg);
+			}
+		}
+
+		if (!value) {
+			if (!me.allowBlank) {
+				errors.push(me.blankText);
+			}
+			// If we are not configured to validate blank values, there cannot be any additional errors
+			if (!me.validateBlank) {
+				return errors;
+			}
+		}
+
+		if (vtype) {
+			if (!vtypes[vtype](value, me)) {
+				errors.push(me.vtypeText || vtypes[vtype +'Text']);
+			}
+		}
+
+		if (regex && !regex.test(value)) {
+			errors.push(me.regexText || me.invalidText);
+		}
+
+		return errors;
 	}
 });

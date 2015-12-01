@@ -4,14 +4,13 @@
 Ext.define('Ck.edit.Action', {
 	extend: 'Ck.Action',
 
-	alias: 'controller.edit-editpanel',
-
 	layer: null,
 	layerStyle: null,
-	defaultGeometryType: "polygon",
+	defaultGeometryType: "Polygon",
 	defaultTolerance: 10,
 	
 	used: false,
+	interactions: [],
 
 	constructor: function(config) {
 		this.config = config;
@@ -20,6 +19,20 @@ Ext.define('Ck.edit.Action', {
 
 		this.map = Ck.getMap();
 		this.olMap = this.map.getOlMap();
+	},
+	
+	/**
+	 * Save the associated element
+	 * @param {Ext.Component}
+	 */
+	toggleAction: function(el) {
+		this.associatedEl = el;
+		this.controller = el.lookupController();
+		if(this.used == false) {
+			// this.associatedEl.on("hide", this.disableAllInteractions, this);
+			this.controller.getView().on("hide", this.disableAllInteractions, this);
+		}
+		this.used = true;
 	},
 
 	/**
@@ -78,7 +91,15 @@ Ext.define('Ck.edit.Action', {
 	 * @return {String}
 	 **/
 	getGeometryType: function() {
-		return this.layer.getExtension("geometryType") || this.defaultGeometryType;
+		var layer = this.getLayer();
+		var type = this.layer.getExtension("geometryType");
+		if(Ext.isEmpty(type)) {
+			var ft = this.layer.getSource().getFeatures()[0];
+			if(!Ext.isEmpty(ft)) {
+				type = ft.getGeometry().getType();
+			}
+		}
+		return type || this.defaultGeometryType;
 	},
 
 	/**
@@ -88,33 +109,20 @@ Ext.define('Ck.edit.Action', {
 	getTolerance: function() {
 		return this.config.tolerance || this.defaultTolerance;
 	},
-
-	/**
-	 * Called after every change
-	 * @param {ol.feature}
-	 */
-	endAction: function(feature) {
-		
-		switch(this.saveMethod) {
-			case "local":
-				// Init Bdd ...
-				this.storage.save({
-					layer: 'predios',
-					sid: null,
-					data: {
-						cedula: ced
-					}
-				});
-				break;
-			default:
-				
-				break;
+	
+	disableAllInteractions: function() {
+		for(var interaction in this.interactions) {
+			if(!Ext.isEmpty(this.interactions[interaction])) {
+				this.map.getOlMap().removeInteraction(this.interactions[interaction]);
+				delete this[interaction];
+			}
 		}
 	},
 	
-	close: function() {
-		if(this.used) {
-			this.closeAction();
-		}
+	/**
+	 * On destroy remove all interactions from the map
+	 */
+	destroy: function() {
+		this.disableAllInteractions();
 	}
 });

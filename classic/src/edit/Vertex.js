@@ -61,7 +61,7 @@ Ext.define("Ck.edit.Vertex", {
 	},{
 		iconCls: 'fa fa-remove',
 		itemId: "cancel"
-	},{
+	},"->",{
 		text: "Add vertex",
 		itemId: "add-vertex"
 	},{

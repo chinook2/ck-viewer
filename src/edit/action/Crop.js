@@ -10,45 +10,80 @@ Ext.define('Ck.edit.action.Crop', {
 	 */
 	iconCls: 'fa fa-crop',
 	tooltip: 'Crop features',
+	
+	/**
+	 * The layer what host the crop line
+	 */
+	editCropLayer: null,
 
 	/**
-	 * Activate the geometry crop interaction
+	 * The feature what is currently cropping
+	 * @property {ol.Feature}
+	 */
+	cropFeature: null,
+	
+	/**
+	 * Indicate if the edited layer is a multi-feature layer (like MultiLineString)
+	 */
+	multi: null,
+	
+	/**
+	 * Activate the geometry crop interaction. First, select the geom what want to crop.
 	 **/
 	toggleAction: function(btn, status) {
-		this.associatedEl = btn;
-		this.used = true;
+		this.callParent([btn]);
+		
 		var source = this.getLayerSource();
 
 		// Crop the interaction if it doesn't already exist
 		if(!this.cropInteraction) {
-			this.cropInteraction = new ol.interaction.Select({
-				layers: [this.getLayer()],
-				style: this.cropSelectedStyle
-			});
-			this.olMap.addInteraction(this.cropInteraction);
-
-			this.cropInteraction.getFeatures().on('add', function (e) {
-				this.cropFeature = e.element;
-
-				// On a 1 objet en sélection on bloque la sélection
-				this.cropInteraction.setActive(false);
-
-				this.editCropDraw();
-			}, this);
+			this.createInteraction();
 		}
+		
+		this.multi = (Ext.isEmpty(this.multi))? (this.getGeometryType().indexOf("Multi") !== -1) : this.multi;
 
 		this.cropInteraction.setActive(status);
 
-		 if(!status) {
+		if(!status) {
 			this.cropInteraction.getFeatures().clear();
 			if(this.cropDrawInteraction) this.cropDrawInteraction.setActive(false);
 			if(this.editCropLayer) this.editCropLayer.getSource().clear();
 		}
 	},
+	
+	/**
+	 * Create the select interaction.
+	 * @param {Object}
+	 */
+	createInteraction: function(config) {
+		if(Ext.isEmpty(config)) {
+			config = {}
+		}
+		
+		// Set the affected layer
+		this.layer = (Ext.isEmpty(config.layers))? undefined : config.layers[0];
+		
+		Ext.apply(config, {
+			style: this.cropSelectedStyle,
+			layers: [this.getLayer()]
+		});
+		
+		this.cropInteraction = Ck.create("ol.interaction.Select", config);
+		this.olMap.addInteraction(this.cropInteraction);
+
+		this.cropInteraction.getFeatures().on('add', function (e) {
+			this.cropFeature = e.element;
+			// One selected object, we lock selection on it
+			this.cropInteraction.setActive(false);
+			this.editCropDraw();
+		}, this);
+		this.interactions["cropInteraction"] = this.cropInteraction;
+		this.cropInteraction.setActive(false)
+	},
 
 	/**
 	 *	Active the draw mode to draw one line (2 points) for cropping the selected feature
-	 **/
+	 */
 	editCropDraw: function() {
 		// Couche temporaire de dessin
 		if(!this.editCropLayer){
@@ -70,6 +105,7 @@ Ext.define('Ck.edit.action.Crop', {
 				type: "LineString"
 			});
 			this.olMap.addInteraction(this.cropDrawInteraction);
+			this.interactions["cropDrawInteraction"] = this.cropDrawInteraction;
 		}
 		this.cropDrawInteraction.setActive(true);
 	},
@@ -105,7 +141,7 @@ Ext.define('Ck.edit.action.Crop', {
 		}
 
 		// Remove the cropping line
-			this.editCropLayer.getSource().clear();
+		this.editCropLayer.getSource().clear();
 
 		var _axe = turf.buffer(line, 0.0001, 'meters').features[0];		// turf-buffer issue #23
 		var _body = turf.erase(poly, _axe);
@@ -160,94 +196,98 @@ Ext.define('Ck.edit.action.Crop', {
 		}, this);
 		source.addFeatures(features);
 
-		features[0].setStyle(this.cropSelectedStyle);
-
 		// La découpe est terminée, on désactive le dessin de la ligne de découpe
 		this.cropDrawInteraction.setActive(false);
 
 		if(this.winCrop) {
 			this.winCrop.close();
 		}
-
-		// Choice the polygon what keep attributes data
-		this.winCrop = new Ext.window.Window({
-			title: "Witch polygon keep attribute data ?",
-			height: 160,
-			width: 300,
-			defaultAlign: "tr-tr",
-			constrain: true,
-			closable: false,
-			layout: "fit",
-			modal: true,
-			items: [{
-				xtype: "form",
+		
+		// If is not a multi-geom we have to ask to the user witch polygon keep attributes
+		if(this.multi) {
+			this.endCrop(features[0]);
+		} else {
+			features[0].setStyle(this.cropSelectedStyle);
+			// Choice the polygon what keep attributes data
+			this.winCrop = new Ext.window.Window({
+				title: "Witch polygon keep attribute data ?",
+				height: 160,
+				width: 300,
+				defaultAlign: "tr-tr",
+				constrain: true,
+				closable: false,
+				layout: "fit",
+				modal: true,
 				items: [{
-					xtype: "fieldcontainer",
-					defaultType: "radiofield",
-					defaults: {
-						flex: 1
-					},
-					layout: "hbox",
+					xtype: "form",
 					items: [{
-						boxLabel: "First polygon",
-						name: "polygonCrop",
-						inputValue: 1,
-						id: "polygonCrop0",
-						checked: true,
+						xtype: "fieldcontainer",
+						defaultType: "radiofield",
+						defaults: {
+							flex: 1
+						},
+						layout: "hbox",
+						items: [{
+							boxLabel: "First polygon",
+							name: "polygonCrop",
+							inputValue: 1,
+							id: "polygonCrop0",
+							checked: true,
+							listeners: {
+								change: function(rad, newValue, oldValue, eOpts) {
+									var style = (newValue) ? this.cropSelectedStyle : null;
+									features[0].setStyle(style);
+								},
+								scope: this
+							}
+						},{
+							boxLabel: "Second polygon",
+							name: "polygonCrop",
+							inputValue: 2,
+							id: "polygonCrop1",
+							listeners: {
+								change: function(rad, newValue, oldValue, eOpts) {
+									var style = (newValue) ? this.cropSelectedStyle : null;
+									features[1].setStyle(style);
+								},
+								scope: this
+							}
+						}]
+					}],
+					buttons: [{
+						text: 'Validate',
 						listeners: {
-							change: function(rad, newValue, oldValue, eOpts) {
-								var style = (newValue) ? this.cropSelectedStyle : null;
-								features[0].setStyle(style);
+							click: function(btn, e, opt) {
+								var form = btn.up('form').getForm();
+								if(form.isValid()) {
+									var values = form.getFieldValues();
+									features[values.polygonCrop - 1].setProperties(properties);
+									features[values.polygonCrop - 1].setStyle(null);
+									delete cropFeatureBackup;
+
+									this.endCrop(features[values.polygonCrop - 1]);
+								}
 							},
 							scope: this
 						}
 					},{
-						boxLabel: "Second polygon",
-						name: "polygonCrop",
-						inputValue: 2,
-						id: "polygonCrop1",
+						text: 'Cancel',
 						listeners: {
-							change: function(rad, newValue, oldValue, eOpts) {
-								var style = (newValue) ? this.cropSelectedStyle : null;
-								features[1].setStyle(style);
+							click: function(btn, e, opt) {
+								features.forEach(function(f){
+									source.removeFeature(f);
+								})
+								source.addFeature(cropFeatureBackup);
+								this.endCrop();
 							},
 							scope: this
 						}
 					}]
-				}],
-				buttons: [{
-					text: 'Validate',
-					listeners: {
-						click: function(btn, e, opt) {
-							var form = btn.up('form').getForm();
-							if(form.isValid()) {
-								var values = form.getFieldValues();
-								features[values.polygonCrop - 1].setProperties(properties);
-								features[values.polygonCrop - 1].setStyle(null);
-								delete cropFeatureBackup;
-
-								this.endCrop(features[values.polygonCrop - 1]);
-							}
-						},
-						scope: this
-					}
-				},{
-					text: 'Cancel',
-					listeners: {
-						click: function(btn, e, opt) {
-							features.forEach(function(f){
-								source.removeFeature(f);
-							})
-					  		source.addFeature(cropFeatureBackup);
-							this.endCrop();
-						},
-						scope: this
-					}
 				}]
-			}]
-		});
+			});
 
-		this.winCrop.show();
+			this.winCrop.show();
+		}
 	},
 
 	/**
@@ -255,10 +295,12 @@ Ext.define('Ck.edit.action.Crop', {
 	 */
 	endCrop: function(ft) {
 		if(!Ext.isEmpty(ft)) {
-			this.editController.fireEvent("featurecrop", ft);
+			this.controller.fireEvent("featurecrop", ft);
 		}
 		this.cropInteraction.setActive(true);
-		this.winCrop.close();
+		if(this.winCrop) {
+			this.winCrop.close();
+		}
 	},
 
 	/**
@@ -277,13 +319,5 @@ Ext.define('Ck.edit.action.Crop', {
 				zIndex: 10000
 			})
 		];
-	},
-
-	closeAction: function() {
-		if(this.used) {
-			this.drawInteraction.setActive(false);
-			this.olMap.removeInteraction(this.drawInteraction);
-			delete this.drawInteraction;
-		}
 	}
 });

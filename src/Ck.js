@@ -425,7 +425,7 @@ Ext.apply(Ck, {
 					var obj = Ext.create(cls, config);
 					break;
 				default:
-					var obj = new constructor(config);
+					var obj = new (Function.prototype.bind.apply(constructor, arguments));
 			}
 		} else {
 			Ck.error("The class \"" + cls + "\" does not exists.");
