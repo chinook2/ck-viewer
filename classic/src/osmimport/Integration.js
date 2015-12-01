@@ -109,6 +109,7 @@ Ext.define("Ck.osmimport.Integration", {
 			xtype: "panel",
 			layout: "hbox",
 			border: true,
+			bodyPadding: 10,
 			bind: {
 				hidden: "{!coordstags.checked}"
 			},
@@ -126,6 +127,7 @@ Ext.define("Ck.osmimport.Integration", {
 					text: "Integration Layer"
 				},{
 					xtype: "grid",
+					border: true,
 					width: 400,
 					height: 180,
 					enableColumnHide: false,
@@ -157,7 +159,7 @@ Ext.define("Ck.osmimport.Integration", {
 					align: "middle",
 					pack: "center"
 				},
-				width: 60,
+				flex:1,
 				defaults: {
 					xtype: "button",
 					margin: "10"
@@ -180,6 +182,7 @@ Ext.define("Ck.osmimport.Integration", {
 					xtype: "grid",
 					width: 200,
 					height: 180,
+					border: true,
 					enableColumnHide: false,
 					enableColumnMove: false,
 					enableColumnResize: false,
