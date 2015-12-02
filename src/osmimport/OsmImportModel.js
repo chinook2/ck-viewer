@@ -241,7 +241,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 */
 	convertToPoint: function(records) {
 		var geom = undefined;
-		if (this.data.type != "way" || this.isPolygon(this)) {  // Don't copy way not closed
+		if (this.data.type != "way" || this.isPolygon(this.data)) {  // Don't copy way not closed
 			geom = this.calculateGeom(undefined, undefined, false, records);
 			if (this.data.type != "node") {  // Convert polygons and relations
 				var extent = geom.getExtent();
@@ -249,5 +249,48 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 		}
 		return geom;
+	},
+	
+	/**
+	 * Method to convert a record in a LineString geometry.
+	 */
+	convertToLineString: function(records) {
+		var geom = undefined;
+		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
+			geom = this.calculateGeom(undefined, undefined, false, records);
+		}
+		return geom;
+	},
+	
+	/**
+	 * Method to convert a record in a Polygon geometry.
+	 */
+	convertToPolygon: function(records) {
+		var geom = undefined;
+		if (this.data.type == "node") {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.getSquareFromPoint(geom);
+		} else if (this.data.type == "relation") {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = ol.geom.Polygon.fromExtent(geom.getExtent());
+		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+		}
+		return geom;
+	},
+	
+	/**
+	 * Create a square from a Point.
+	 * @param sideWidth Width to set to the square. 10 Meters by default.
+	 * Point is supposed to be in EPSG:4326 projection.
+	 * Square is generated in EPSG:4326 projection.
+	 */
+	getSquareFromPoint: function(point, sideWidth) {
+		var sideWidth = Ext.isNumber(sideWidth) ? sideWidth : 10;
+		point.transform("EPSG:4326", "EPSG:3857");  // Goes in a projection which use meters.
+		point = new ol.geom.Circle(point.getCoordinates(), sideWidth);  // Create a circle with given point as center.
+		point = ol.geom.Polygon.fromCircle(point, 4, 0.785398);  // Create square inside the circle. starts with 45° angle (0.78 rad)
+		point.transform("EPSG:3857", "EPSG:4326");
+		return point;
 	}
 });
