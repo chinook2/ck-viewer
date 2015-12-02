@@ -449,7 +449,21 @@ Ext.define('Ck.form.Controller', {
 					// storeUrl : alias to define proxy type ajax with url.
 					var store = o.store;
 					var storeUrl = o.storeUrl;
-					if(Ext.isString(o.store) && !Ext.StoreManager.get(o.store)){
+					
+					if(Ext.isString(o.store) ){
+						if(o.store.indexOf("/") == -1) {
+							// Get store in ViewModel (global store pre-loaded)
+							// if(me.getViewModel().get(o.store)){
+								// return me.getViewModel().get(o.store);
+							// }
+							// >> ViewModel is not ready (hierarchy) the form is not yet added to the view...
+							
+							// Get store in Application
+							if(Ext.getStore(o.store)){
+								return Ext.StoreManager.get(o.store);
+							}
+						}
+						
 						// Should be a short alias to define storeUrl
 						storeUrl = o.store;
 					}
@@ -742,11 +756,13 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
-			this.setValues(data);
 			this.getViewModel().setData({
 				layer: lyr,
 				data: data
-			});			
+			});
+			this.getViewModel().notify();
+			this.setValues(data);
+			
 			this.fireEvent('afterload', data);
 
 			if(v.getEditing()===true) this.startEditing();
@@ -803,12 +819,13 @@ Ext.define('Ck.form.Controller', {
 						return;
 					}
 
-					this.setValues(data);
 					this.getViewModel().set({
 						layer: lyr,
 						fid: fid,
 						data: Ext.apply(this.getViewModel().get('data') || {}, data)
 					});
+					this.getViewModel().notify();
+					this.setValues(data);
 					
 					this.fireEvent('afterload', data);
 				}
