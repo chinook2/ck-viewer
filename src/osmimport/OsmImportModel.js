@@ -241,11 +241,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 */
 	convertToPoint: function(records) {
 		var geom = undefined;
-		geom = this.calculateGeom(undefined, undefined, false, records);
-		if ((this.data.type == "way" && !geom.getType().match(/LineString$/)) ||
-			(this.data.type == "relation")) {  // Convert polygons and relations
-			var extent = geom.getExtent();
-			geom = new ol.geom.Point([(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]);
+		if (this.data.type != "way" || this.isPolygon(this)) {  // Don't copy way not closed
+			geom = this.calculateGeom(undefined, undefined, false, records);
+			if (this.data.type != "node") {  // Convert polygons and relations
+				var extent = geom.getExtent();
+				geom = new ol.geom.Point([(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]);
+			}
 		}
 		return geom;
 	}
