@@ -6,11 +6,15 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	alias: 'plugin.gridcolumnrenderer',
 
 	store: null,
+	
 	displayField: null,
+	
 	valueField: null,
 	
-	// TODO : On passe ici 2 fois !! a cause du this.grid.reconfigure(conf.columns); des autres plugins (actions)
+	filters: null,
 	
+	
+	// TODO : On passe ici 2 fois !! a cause du this.grid.reconfigure(conf.columns); des autres plugins (actions)
 	init: function(column) {
 		this.column = column;
 		var grid = column.up('grid');
@@ -66,20 +70,32 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	},
 	
 	updateRecords: function(grid, column) {
+		if(!this.dataStore) return;
+		
 		grid.getStore().each(function(rec){
-			rec.set(column.dataIndex, this.renderer(rec.get(this.valueField)), {
+			rec.set(column.dataIndex, this.renderer(rec), {
 				dirty: false
 			} );
 		}, this);
 	},
 	
-	renderer: function(val) {
-		if(!this.dataStore) return val;
+	renderer: function(rec) {
 		if(!this.dataStore.isLoaded()) return '...';
 		
-		var rec = this.dataStore.findRecord(this.valueField, val);
-		if(rec) val = rec.get(this.displayField);
+		var val = rec.get(this.valueField);
 		
+		if(this.filters){
+			this.filters.forEach(function(f, idx, fs){
+				f.value = rec.get(f.property);
+				fs[idx] = f;
+			}, this);
+			this.dataStore.filter(this.filters);
+		}
+		
+		var frec = this.dataStore.findRecord(this.valueField, val);
+		if(frec) val = frec.get(this.displayField);
+		
+		this.dataStore.clearFilter();		
 		return val;
 	}
 });
