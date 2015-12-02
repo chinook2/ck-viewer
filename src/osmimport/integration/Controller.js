@@ -118,10 +118,10 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var records = this.getView().openner.osmapi.getData().items;
 		for (var i in records) {
 			var record = records[i];
-			if (record.containsSearchedTags()) {
+			if (record.containsSearchedTags()) {  // Filter records to get only searched elements (not sub nodes or members)
 				var feature = this.convertData(record, integrationLayer, records);
 				if (feature) {
-					if (feature.getGeometry().getType() == "GeometryCollection") {
+					if (feature.getGeometry().getType() == "GeometryCollection") {  // Compute each member of relations
 						var geometries = feature.getGeometry().getGeometries();
 						for (var memberId in geometries) {
 							var member = new ol.Feature(
@@ -157,11 +157,12 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (integrateAllGeometry) {  // Need some conversions
 				geom = data["convertTo" + integrationGeometryType](records);
 			} else {  // Copy only if geometry corresponds
-				if (data.data.type == "relation") {
+				if (data.data.type == "relation") {  // Get members of relation.
 					var relGeom = geom = data.calculateGeom(undefined, undefined, false, records);
+					// Relation with inner
 					if (relGeom.getGeometry && relGeom.getGeometry().getType() == "Polygon" && integrationGeometryType == "Polygon") {
 						geom = relGeom
-					} else {
+					} else {  // Other relations
 						var geoms = []
 						for (var i in data.data.members) {
 							var member = data.getSubElement(records, data.data.members[i].ref);
@@ -172,15 +173,17 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						geom = new ol.geom.GeometryCollection(geoms);
 					}
 					
-				} else {
+				} else {  // Copy node and ways if geometry corresponds to layer
 					if (data.isGeometryType(integrationGeometryType)) {
 						geom = data.calculateGeom(undefined, undefined, false, records);
 					}
 				}
 			}
 		}
+		
+		// Transform into layer's projection.
 		if (geom != undefined) {
-			geom.transform("EPSG:4326", newProjection); // TODO Apply correct elements?
+			geom.transform("EPSG:4326", newProjection);
 			var convertedData = new ol.Feature(
 						Ext.apply({
 							geometry: geom

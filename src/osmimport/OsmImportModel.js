@@ -244,8 +244,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		if (this.data.type != "way" || this.isPolygon(this.data)) {  // Don't copy way not closed
 			geom = this.calculateGeom(undefined, undefined, false, records);
 			if (this.data.type != "node") {  // Convert polygons and relations
-				var extent = geom.getExtent();
-				geom = new ol.geom.Point([(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]);
+				geom = this.getCenterPoint(geom);
 			}
 		}
 		return geom;
@@ -266,17 +265,23 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * Method to convert a record in a Polygon geometry.
 	 */
 	convertToPolygon: function(records) {
-		var geom = undefined;
+		var geom = this.calculateGeom(undefined, undefined, false, records);
 		if (this.data.type == "node") {
-			geom = this.calculateGeom(undefined, undefined, false, records);
 			geom = this.getSquareFromPoint(geom);
 		} else if (this.data.type == "relation") {
-			geom = this.calculateGeom(undefined, undefined, false, records);
 			geom = ol.geom.Polygon.fromExtent(geom.getExtent());
-		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
-			geom = this.calculateGeom(undefined, undefined, false, records);
+		} else if (this.data.type == "way" && !this.isPolygon(this.data)) {
+			geom = undefined;
 		}
 		return geom;
+	},
+	
+	/**
+	 * Return a new Point positionned on the center of the bounding box of a geometry.
+	 */
+	getCenterPoint: function(geom) {
+		var extent = geom.getExtent();
+		return new ol.geom.Point([(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2]);
 	},
 	
 	/**
