@@ -96,36 +96,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onIntegrationClick: function() {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-		var integrationGeometryType;
-		var newFeatures = [];
 		if (typeof integrationLayer.getSource().getFeatures === "function") {
-			integrationGeometryType = this.getGeometryType(integrationLayer);
-			var records = this.getView().openner.osmapi.getData().items;
-			for (var i in records) {
-				var record = records[i];
-				if (record.data.type == "relation") {
-					if (record.containsSearchedTags()) {
-						var feature = this.convertData(record, integrationLayer, records);
-						if (feature.getGeometry().getType() == "Polygon") {  // Use polygon with inner
-							newFeatures.push(feature);
-						} else {
-							for (var i in record.data.members) {
-								var member = record.getSubElement(records, record.data.members[i].ref);
-								if (member.type != "relation" && member.isGeometryType(integrationGeometryType)) {
-									var feature = this.convertData(member, integrationLayer, records);
-									newFeatures.push(feature);
-								}
-							}
-						}
-					}
-				} else {
-					if (record.containsSearchedTags() &&
-						record.isGeometryType(integrationGeometryType)) {
-						var feature = this.convertData(record, integrationLayer, records);
-						newFeatures.push(feature);
-					}
-				}
-			}
+			var newFeatures = this.getFeaturesToIntegrate(integrationLayer);
 			integrationLayer.getSource().addFeatures(newFeatures);
 		}
 		Ext.MessageBox.show({
@@ -138,18 +110,83 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	},
 	
 	/**
+	 * This method return a list of features ready to integrate according the configuration. 
+	 */
+	getFeaturesToIntegrate: function(integrationLayer) {
+		var featuresToIntegrate = [];
+		var integrationGeometryType = this.getGeometryType(integrationLayer);
+		var records = this.getView().openner.osmapi.getData().items;
+		for (var i in records) {
+			var record = records[i];
+			if (record.containsSearchedTags()) {
+				var feature = this.convertData(record, integrationLayer, records);
+				if (feature) {
+					if (feature.getGeometry().getType() == "GeometryCollection") {
+						var geometries = feature.getGeometry().getGeometries();
+						for (var memberId in geometries) {
+							var member = new ol.Feature(
+								Ext.apply({
+									geometry: geometries[memberId]
+								})
+							);
+							featuresToIntegrate.push(member);
+						}
+					} else {
+						featuresToIntegrate.push(feature);
+					}
+				}
+			}
+		}
+		return featuresToIntegrate;
+	},
+	
+	/**
 	 * This method converts a data from OSM format (as imported) to layer format.
 	 * Conversion is done on geometry (correct projection) and (tags / attributes)
 	 */
 	convertData: function(data, integrationLayer, records) {
-		var convertedData;
+		var convertedData = undefined;
 		var newProjection = Ck.getMap().getOlMap().getView().getProjection();  // TODO change to get the projection of integration layer
-		var geom = data.calculateGeom(newProjection, undefined, true, records);  // TODO tranform with correct projection
-		var convertedData = new ol.Feature(
-					Ext.apply({
-						geometry: geom
-					})
-				);	
+		var geom = undefined;
+		var integrateAllGeometry = this.lookupReference("selectAllGeometries").checked;
+		var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
+		
+		if (integrationGeometryType == "undefined") { // Copy all
+			geom = data.calculateGeom(undefined, undefined, false, records);
+		} else {
+			if (integrateAllGeometry) {  // Need some conversions
+				geom = data["convertTo" + integrationGeometryType](records);
+			} else {  // Copy only if geometry corresponds
+				if (data.data.type == "relation") {
+					var relGeom = geom = data.calculateGeom(undefined, undefined, false, records);
+					if (relGeom.getGeometry && relGeom.getGeometry().getType() == "Polygon" && integrationGeometryType == "Polygon") {
+						geom = relGeom
+					} else {
+						var geoms = []
+						for (var i in data.data.members) {
+							var member = data.getSubElement(records, data.data.members[i].ref);
+							if ((member.type != "relation") && (member.isGeometryType(integrationGeometryType))) {
+								geoms.push(member.calculateGeom(undefined, undefined, false, records));
+							}
+						}
+						geom = new ol.geom.GeometryCollection(geoms);
+					}
+					
+				} else {
+					if (data.isGeometryType(integrationGeometryType)) {
+						geom = data.calculateGeom(undefined, undefined, false, records);
+					}
+				}
+			}
+		}
+		if (geom != undefined) {
+			geom.transform("EPSG:4326", newProjection); // TODO Apply correct elements?
+			var convertedData = new ol.Feature(
+						Ext.apply({
+							geometry: geom
+						})
+					);
+		}
 		return convertedData;
 	},
 	
