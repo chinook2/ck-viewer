@@ -1,16 +1,23 @@
 /**
- *
+ * 
  */
 Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.gridcolumnrenderer',
 
+	// Id or Url of Store 
 	store: null,
 	
+	// Field of store to display in the columun
 	displayField: null,
 	
+	// Field of store to match record to read for display (match with dataField)
 	valueField: null,
 	
+	// Field of the grid record to match with valueField - default to valueField
+	dataField: null,
+	
+	// Filters for the store (optionnal)
 	filters: null,
 	
 	
@@ -20,6 +27,7 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 		var grid = column.up('grid');
 		var formController = grid.lookupController();
 		
+		if(!this.dataField) this.dataField = this.valueField;
 
 		// Init Store
 		// Default StoreID
@@ -82,7 +90,7 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	renderer: function(rec) {
 		if(!this.dataStore.isLoaded()) return '...';
 		
-		var val = rec.get(this.valueField);
+		var val = rec.get(this.dataField);
 		
 		if(this.filters){
 			this.filters.forEach(function(f, idx, fs){

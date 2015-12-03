@@ -1050,7 +1050,7 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().setData({
 			layer: null,
 			fid: null,
-			record: null
+			data: null
 		});
 
 		this.fireEvent('afterreset');
