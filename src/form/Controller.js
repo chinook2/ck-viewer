@@ -710,13 +710,14 @@ Ext.define('Ck.form.Controller', {
 	isValid: function() {
 		var v = this.getView();
 		var form = v.getForm();
+		var isValid = true;
 		
 		this.fields.forEach(function(field){
 			var f = form.findField(field);
-			if(f && !f.isValid()) return false;
+			if(f && !f.isValid()) isValid = false;
 		}, this);
 		
-		return true;
+		return isValid;
 	},
 	
 	// Load data from
