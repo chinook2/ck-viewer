@@ -1053,6 +1053,7 @@ Ext.define('Ck.form.Controller', {
 			fid: null,
 			data: null
 		});
+		this.getViewModel().notify();
 
 		this.fireEvent('afterreset');
 

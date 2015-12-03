@@ -227,7 +227,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Save if params available
 		formController.saveData();
 		
-		this._subform.reset();
+		formController.resetData();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
@@ -252,12 +252,14 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		delete this._subform.rowIndex;
 		
-		this._subform.reset();
+		// Save if params available
+		// formController.saveData();
+		
+		formController.resetData();
 		this._grid.focus();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
-		
 	},
 
 	deleteItem: function(grid, rowIndex) {
@@ -267,7 +269,8 @@ Ext.define('Ck.form.plugin.Subform', {
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
 		
-		this._subform.reset();
+		var formController = this._subform.getController();
+		formController.resetData();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
