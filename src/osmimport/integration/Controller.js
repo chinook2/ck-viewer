@@ -113,6 +113,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						icon: Ext.Msg.INFO
 					});
 				} catch (exception) {
+					console.log(exception.stack);  // TODO Remove this exception log
 					Ext.MessageBox.show({
 						title: 'OSM Import',
 						msg: 'An error occured while integrating the data.',
@@ -177,8 +178,11 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				if (data.data.type == "relation") {  // Get members of relation.
 					var relGeom = geom = data.calculateGeom(undefined, undefined, false, records);
 					// Relation with inner
-					if (relGeom.getGeometry && relGeom.getGeometry().getType() == "Polygon" && integrationGeometryType == "Polygon") {
-						geom = relGeom
+					if (relGeom.getGeometry && relGeom.getGeometry().getType() == "Polygon" && integrationGeometryType in ["Polygon", "MultiPolygon"]) {
+						geom = relGeom;
+						if (integrationGeometryType == "MultiPolygon") {
+							geom = new ol.geom.MultiPolygon([geom.getCoordinates()]);
+						}
 					} else {  // Other relations
 						var geoms = []
 						for (var i in data.data.members) {
@@ -187,12 +191,23 @@ Ext.define('Ck.osmimport.integration.Controller', {
 								geoms.push(member.calculateGeom(undefined, undefined, false, records));
 							}
 						}
-						geom = new ol.geom.GeometryCollection(geoms);
+						switch (integrationGeometryType) {
+							case "MultiPolygon": 
+								geom = new ol.geom.MultiPolygon();
+								for (var polyId in geoms) {
+									geom.appendPolygon(geoms[polyId]);
+								}
+							break;
+							default: geom = new ol.geom.GeometryCollection(geoms);
+						}
 					}
 					
 				} else {  // Copy node and ways if geometry corresponds to layer
 					if (data.isGeometryType(integrationGeometryType)) {
 						geom = data.calculateGeom(undefined, undefined, false, records);
+						if (integrationGeometryType.match(/^Multi/)) {
+							geom = new ol.geom[integrationGeometryType]([geom.getCoordinates()]);
+						}
 					}
 				}
 			}

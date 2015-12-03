@@ -231,6 +231,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			case "MultiLineString":
 			break;
 			case "MultiPolygon": 
+				result = (this.data.type === "way" && this.isPolygon(this.data));
 			break;
 		}
 		return result;
@@ -271,6 +272,37 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		} else if (this.data.type == "relation") {
 			geom = ol.geom.Polygon.fromExtent(geom.getExtent());
 		} else if (this.data.type == "way" && !this.isPolygon(this.data)) {
+			geom = undefined;
+		}
+		return geom;
+	},
+	
+	convertToMultiPolygon: function(records) {
+		var geom = new ol.geom.MultiPolygon();
+		if (this.data.type == "node") {
+			var poly = this.getSquareFromPoint(geom);
+			geom.appendPolygon(poly);
+		} else if (this.data.type == "relation") {
+			var poly = this.calculateGeom(undefined, undefined, false, records);
+			if (poly.getType() == "Polygon") {
+				geom.appendPolygon(poly);
+			} else {
+				for (var memberId in this.data.members) {
+					var member = this.data.members[memberId];
+					if (this.isPolygon(member)) {
+						var poly = this.calculateGeom(undefined, member, false, records);
+						geom.appendPolygon(poly);
+					} else if (member.type == "node") {
+						var poly = this.calculateGeom(undefined, member, false, records);
+						poly = this.getSquareFromPoint(poly);
+						geom.appendPolygon(poly);
+					}
+				}
+			}
+		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
+			var poly = this.calculateGeom(undefined, undefined, false, records);
+			geom.appendPolygon(poly);
+		} else {
 			geom = undefined;
 		}
 		return geom;

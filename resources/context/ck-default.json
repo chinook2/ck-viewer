@@ -137,6 +137,28 @@
 		}
 	},{
 		"type": "Feature",
+		"id": "forest",
+		"properties": {
+			"title" : "Forêts",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/forets.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Nature"
+			}
+		}
+	},{
+		"type": "Feature",
 		"id": "oppositecycleway",
 		"properties": {
 			"title" : "Contre-sens Cyclistes",
