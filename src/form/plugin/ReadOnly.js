@@ -37,6 +37,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 		cmp.on('afterrender', this.onRender, this, {delay: 50});
 		cmp.on('change', this.onChange, this);
+		
+		// if(cmp.getStore){
+			// cmp.getStore().on('load', this.setReadOnly, this);
+		// }
 
 		this.formController.on('startEditing', this.setReadOnly, this);
 		this.formController.on('stopEditing', this.setReadOnly, this);

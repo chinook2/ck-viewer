@@ -91,7 +91,8 @@ Ext.define('Ck.form.field.Grid', {
 				}
 			});
 			
-			dtg.push(row);
+			// Need to add extra data (all fields of 'rec' are not displayed in grid columns)
+			dtg.push( Ext.applyIf(row, rec.data) );
         });
         return dtg;
 	},
