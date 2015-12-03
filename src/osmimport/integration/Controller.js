@@ -94,19 +94,37 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Execute the integration according the user's configuration on panel.
 	 */
 	onIntegrationClick: function() {
-		var selectedLayer = this.lookupReference("layerselection").getValue();
-		var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-		if (typeof integrationLayer.getSource().getFeatures === "function") {
-			var newFeatures = this.getFeaturesToIntegrate(integrationLayer);
-			integrationLayer.getSource().addFeatures(newFeatures);
-		}
-		Ext.MessageBox.show({
-			title: 'OSM Import',
-			msg: 'Integration of data from OpenStreetMap succeed. ' + newFeatures.length + ' elements integrated.',
-			width: 500,
-			buttons: Ext.MessageBox.OK,
-			icon: Ext.Msg.INFO
-		});
+		this.waitMsg = Ext.MessageBox.wait("Integrating data, please wait...");
+		Ext.defer(
+			function() {
+				try {
+					var selectedLayer = this.lookupReference("layerselection").getValue();
+					var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+					if (typeof integrationLayer.getSource().getFeatures === "function") {
+						var newFeatures = this.getFeaturesToIntegrate(integrationLayer);
+						integrationLayer.getSource().addFeatures(newFeatures);
+					}
+					this.waitMsg.close();
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Integration of data from OpenStreetMap succeed. ' + newFeatures.length + ' elements integrated.',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.INFO
+					});
+				} catch (exception) {
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'An error occured while integrating the data.',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.ERROR
+					});
+				}
+			},
+			100,
+			this
+		);
 	},
 	
 	/**
@@ -150,7 +168,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var geom = undefined;
 		var integrateAllGeometry = this.lookupReference("selectAllGeometries").checked;
 		var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
-		
 		if (integrationGeometryType == "undefined") { // Copy all
 			geom = data.calculateGeom(undefined, undefined, false, records);
 		} else {
