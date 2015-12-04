@@ -115,9 +115,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "postbox",
+		"id": "schools",
 		"properties": {
-			"title" : "Boîtes aux lettres",
+			"title" : "Ecoles",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -128,11 +128,11 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/geojson_boitesauxlettres.geojson"
+					"href" : "/packages/local/ck-viewer/resources/data/ecoles.geojson"
 				}]
 			}],
 			"extension" : {
-				"path": "Divers"
+				"path": "Education"
 			}
 		}
 	},{
@@ -159,9 +159,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "oppositecycleway",
+		"id": "waterway",
 		"properties": {
-			"title" : "Contre-sens Cyclistes",
+			"title": "Cours d'eau",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -172,18 +172,18 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/contresens_cyclistes.geojson"
+					"href" : "/packages/local/ck-viewer/resources/data/cours_d_eau.geojson"
 				}]
 			}],
 			"extension" : {
-				"path": "Déplacements/Vélos, Piétons"
+				"path": "Nature"
 			}
 		}
 	},{
 		"type": "Feature",
-		"id": "commercialzones",
+		"id": "arrets_bus",
 		"properties": {
-			"title" : "Zones d'Activités Commerciales",
+			"title" : "Arrêts de bus",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -194,11 +194,99 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/zones_commerciales.geojson"
+					"href" : "/packages/local/ck-viewer/resources/data/arrets_bus.geojson"
 				}]
 			}],
 			"extension" : {
-				"path": "Activités"
+				"path": "Déplacements"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "lignes_bus_tan",
+		"properties": {
+			"title" : "Lignes de Bus",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/lignes_bus_tan.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Déplacements"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "rues_pietonnes",
+		"properties": {
+			"title" : "Rues piétonnes",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/rues_pietonnes.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Déplacements"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "terrains_sport",
+		"properties": {
+			"title" : "Terrains de sport",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/terrains_sport.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Equipements/Loisirs"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "parcs_eoliens",
+		"properties": {
+			"title" : "Parcs éoliens",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/parcs_eoliens.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Equipements/Divers"
 			}
 		}
 	}]

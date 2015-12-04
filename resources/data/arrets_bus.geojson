@@ -1,0 +1,6 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3857" } },
+"features": [
+{ "type": "Feature", "properties": { "Nom": "Centre de Carquefou", "Abri": "Oui", "Lignes": ["E5", "75", "85"]}, "bbox": [ 280973.0, 6649968.0, 404193.0, 6757772.0 ], "geometry": { "type": "Point", "coordinates": [-166023.28006272315, 5990704.265607059] } },]
+}

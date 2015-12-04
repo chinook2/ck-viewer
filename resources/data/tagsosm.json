@@ -10,10 +10,6 @@
             "tag": "[landuse=grass]",
             "leaf": true
         },{
-			"text": "Terrain de Sport",
-			"tag": "[leisure=pitch]",
-			"leaf": true
-		},{
 			"text": "Zone d'Activités Commerciales",
 			"tag": "[landuse=commercial]",
 			"leaf": true
@@ -25,11 +21,46 @@
             "tag": "[amenity=school][\"school:FR\"=primaire]",
             "leaf": true
   		},{
+			"text": "Ecoles Maternelles",
+			"tag": "[amenity=school][\"school:FR\"=maternelle]",
+			"leaf": true
+		},{
+			"text": "Ecoles Elémentaires",
+			"tag": "[amenity=school][\"school:FR\"=\"élémentaire\"]",
+			"leaf": true
+		},{
+			"text": "Collèges",
+			"tag": "[amenity=school][\"school:FR\"=\"collège\"]",
+			"leaf": true
+		},{
+			"text": "Lycées",
+			"tag": "[amenity=school][\"school:FR\"=\"lycée\"]",
+			"leaf": true
+		},{
             "text": "Bibliothèques",
             "tag": "[amenity=library]",
             "leaf": true
         }]
     },{
+		"text": "Nature",
+		"children": [{
+			"text": "Forêts",
+			"tag": "[landuse=forest]",
+			"leaf": true
+		},{
+			"text": "Fleuves, Rivières",
+			"tag": "[waterway=river]",
+			"leaf": true
+		},{
+			"text": "Ruisseaux",
+			"tag": "[waterway=stream]",
+			"leaf": true
+		},{
+			"text": "Canaux",
+			"tag": "[waterway=canal]",
+			"leaf": true
+		}]
+	},{
 		"text": "Déplacements",
 		"children": [{
 			"text": "Transports en Commun",
@@ -76,6 +107,10 @@
 	},{
 		"text": "Sports, Loisirs",
 		"children": [{
+			"text": "Terrain de Sport",
+			"tag": "[leisure=pitch]",
+			"leaf": true
+		},{
 			"text": "Circuits automobiles",
 			"tag": "[highway=raceway]",
 			"leaf": true

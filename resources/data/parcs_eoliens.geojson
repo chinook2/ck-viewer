@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::3857" } },
+"features": [
+{ "type": "Feature", "properties": { "Nom": "Parc éolien Saint-Vincent-des-Landes", "Nombre d'éoliennes": 6, "Puissance": "0.0 MW"}, "bbox": [ 280973.0, 6649968.0, 404193.0, 6757772.0 ], "geometry": { "type": "MultiPoint", "coordinates": [ [-167138.90173555518, 6046590.973032932], [-166225.62550113804, 6046675.392501615], [-165316.7797824545, 6046757.830313778], [-164396.82437858984, 6046842.400101921], [-163472.92826475107, 6046924.476047043], [-162503.13512485824, 6047012.847336306]] } },
+]
+}
+
