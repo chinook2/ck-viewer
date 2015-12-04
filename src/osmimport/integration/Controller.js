@@ -5,16 +5,18 @@
 Ext.define('Ck.osmimport.integration.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckosmimportintegration',
+
+	/**
+     * Init Constants
+	 */
+	OSM_PROJECTION = "EPSG:4326",
+
 	/**
 	 * Initialisation of components.
 	 * @protected
 	 */
 	init: function() {
 		this.openner = this.getView().openner;
-
-		/**
-         * Init Constants
-		 */
 		
 		/**
 		 * Init the view
@@ -133,27 +135,12 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	getFeaturesToIntegrate: function(integrationLayer) {
 		var featuresToIntegrate = [];
-		var integrationGeometryType = this.getGeometryType(integrationLayer);
 		var records = this.getView().openner.osmapi.getData().items;
 		for (var i in records) {
 			var record = records[i];
 			if (record.containsSearchedTags()) {  // Filter records to get only searched elements (not sub nodes or members)
-				var feature = this.convertData(record, integrationLayer, records);
-				if (feature) {
-					if (feature.getGeometry().getType() == "GeometryCollection") {  // Compute each member of relations
-						var geometries = feature.getGeometry().getGeometries();
-						for (var memberId in geometries) {
-							var member = new ol.Feature(
-								Ext.apply({
-									geometry: geometries[memberId]
-								})
-							);
-							featuresToIntegrate.push(member);
-						}
-					} else {
-						featuresToIntegrate.push(feature);
-					}
-				}
+				var features = this.convertData(record, integrationLayer, records);
+				featuresToIntegrate = featuresToIntegrate.concat(features);
 			}
 		}
 		return featuresToIntegrate;
@@ -164,63 +151,42 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Conversion is done on geometry (correct projection) and (tags / attributes)
 	 */
 	convertData: function(data, integrationLayer, records) {
-		var convertedData = undefined;
+		var convertedData = [];
 		var newProjection = Ck.getMap().getOlMap().getView().getProjection();  // TODO change to get the projection of integration layer
 		var geom = undefined;
 		var integrateAllGeometry = this.lookupReference("selectAllGeometries").checked;
 		var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
 		if (integrationGeometryType == "undefined") { // Copy all
-			geom = data.calculateGeom(undefined, undefined, false, records);
+			geom = data.calculateGeom(newProjection, undefined, true, records);  // TODO Change to not use GeometryCollection
 		} else {
 			if (integrateAllGeometry) {  // Need some conversions
 				geom = data["convertTo" + integrationGeometryType](records);
 			} else {  // Copy only if geometry corresponds
-				if (data.data.type == "relation") {  // Get members of relation.
-					var relGeom = geom = data.calculateGeom(undefined, undefined, false, records);
-					// Relation with inner
-					if (relGeom.getGeometry && relGeom.getGeometry().getType() == "Polygon" && integrationGeometryType in ["Polygon", "MultiPolygon"]) {
-						geom = relGeom;
-						if (integrationGeometryType == "MultiPolygon") {
-							geom = new ol.geom.MultiPolygon([geom.getCoordinates()]);
-						}
-					} else {  // Other relations
-						var geoms = []
-						for (var i in data.data.members) {
-							var member = data.getSubElement(records, data.data.members[i].ref);
-							if ((member.type != "relation") && (member.isGeometryType(integrationGeometryType))) {
-								geoms.push(member.calculateGeom(undefined, undefined, false, records));
-							}
-						}
-						switch (integrationGeometryType) {
-							case "MultiPolygon": 
-								geom = new ol.geom.MultiPolygon();
-								for (var polyId in geoms) {
-									geom.appendPolygon(geoms[polyId]);
-								}
-							break;
-							default: geom = new ol.geom.GeometryCollection(geoms);
-						}
-					}
-					
-				} else {  // Copy node and ways if geometry corresponds to layer
-					if (data.isGeometryType(integrationGeometryType)) {
-						geom = data.calculateGeom(undefined, undefined, false, records);
-						if (integrationGeometryType.match(/^Multi/)) {
-							geom = new ol.geom[integrationGeometryType]([geom.getCoordinates()]);
-						}
-					}
-				}
+				geom = data["copyTo" + integrationGeometryType](records);
 			}
+			// TODO geometry undefined
+			// TODO others geometries
 		}
 		
-		// Transform into layer's projection.
+		// Transform into layer's projection and create Feature.
 		if (geom != undefined) {
-			geom.transform("EPSG:4326", newProjection);
-			var convertedData = new ol.Feature(
+			if (Ext.isArray(geom)) {
+				for (var i in geom) {
+					geom[i].transform(this.OSM_PROJECTION, newProjection);
+					convertedData.push(new ol.Feature(
+						Ext.apply({
+							geometry: geom[i]
+						})
+					));
+				}
+			} else {
+				geom.transform(this.OSM_PROJECTION, newProjection);
+				convertedData = [new ol.Feature(
 						Ext.apply({
 							geometry: geom
 						})
-					);
+					)];
+			}
 		}
 		return convertedData;
 	},

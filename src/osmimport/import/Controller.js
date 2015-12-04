@@ -5,6 +5,13 @@
 Ext.define('Ck.osmimport.import.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckosmimportimport',
+	
+	/**
+     * Init Constants
+	 */
+	OSM_PROJECTION = "EPSG:4326",
+	NB_FEATURES_MAX = 200,
+
 	/**
 	 * Initialisation of components.
 	 * @protected
@@ -13,11 +20,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.vm = this.getViewModel();
 		this.openner = this.getView().openner;
 
-		/**
-         * Init Constants
-		 */
-		this.OSM_PROJECTION = "EPSG:4326";
-		this.NB_FEATURES_MAX = 200;
 		
 		// Style to be applied by default to the imported data.
 		this.DEFAULT_STYLE = new ol.style.Style({

@@ -21,6 +21,11 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		{name: "role", type: "string"}, // Used in relations,
 		{name: "isSearchedTag", type: "boolean", defaultValue: false}
 	],
+	
+	/**
+	 * Projection used by OpenStreetMap.
+	 */
+	OSM_PROJECTION = "EPSG:4326",
 
 	/**
 	 * This method search and return the element given by its id in the records.
@@ -65,18 +70,16 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 		} else if (data.type === "relation") {  // OSM Relations
 			if (data.tags.type == "multipolygon") { // handle OSM multipolygon with inners in a Polygon
-				var nb_outer = Ext.Array.filter(data.members,
-					function(member) {return member.role == "outer";}).length;
 				var nb_inner = Ext.Array.filter(data.members,
 					function(member) {
 						return member.role == "inner";}).length;
-				if (nb_outer == 1 && nb_inner > 0) {  // Polygon shall not be used when there is no inner
+				if (nb_inner > 0) {  // Polygon shall not be used when there is no inner
 					var coords = [];
 					for (var memberId in data.members) {
 						var member = data.members[memberId];
 						member.tags = {};
 						var polygeom = this.calculateGeom(null, member, false, allRecords);
-						coords.push(polygeom.getCoordinates(member.role == "inner"));
+						coords.push(polygeom.getCoordinates(member.role == "inner"));  // Direction is inverted for inners
 					}
 					geom = new ol.geom.Polygon(coords);
 				}
@@ -99,7 +102,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 
 		// Transform the OSM projection into Map projection
 		if (geom != undefined && convertGeom) {
-			geom.transform("EPSG:4326", newProjection);
+			geom.transform(this.OSM_PROJECTION, newProjection);
 		}
 		return geom;
 	},
@@ -210,35 +213,96 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	},
 	
 	/**
-	 * Method indicates if the record is the same geometry type as the geometry type of a layer.
+	 * Returns the geometry of the record if it is compatible with Point geometry.
+	 * If not compatible, undefined is returned.
+	 * If record is a relation, returns a list of Point.
 	 */
-	isGeometryType: function(type) {
-		var result = false;
-		switch(type) {
-			case "undefined": result = true;
-			break;
-			case "Point": 
-				result = (this.data.type === "node");
-			break;
-			case "LineString":
-				result = (this.data.type === "way" && !this.isPolygon(this.data));
-			break;
-			case "Polygon":
-				result = (this.data.type === "way" && this.isPolygon(this.data));
-			break;
-			case "MultiPoint":
-			break;
-			case "MultiLineString":
-			break;
-			case "MultiPolygon": 
-				result = (this.data.type === "way" && this.isPolygon(this.data));
-			break;
+	copyToPoint: function(records) {
+		var geom = undefined;
+		if (this.data.type == "node") {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+		} else if (this.data.type == "relation") {
+			geom = [];
+			for (var memberId in this.data.members) {
+				var member = this.data.members[memberId];
+				if (member.type == "node") {
+					geom.push(this.calculateGeom(undefined, member, false, records));
+				}
+			}
 		}
-		return result;
+		return geom;
+	},
+	
+	/**
+	 * Returns the geometry of the record if it is compatible with LineString geometry.
+	 * If not compatible, undefined is returned.
+	 * If record is a relation, returns a list of LineString.
+	 */
+	copyToLineString: function(records) {
+		var geom = undefined;
+		if (this.data.type == "way" && !this.isPolygon(this.data)) {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+		} else if (this.data.type == "relation") {
+			geom = [];
+			for (var memberId in this.data.members) {
+				var member = this.data.members[memberId];
+				if (member.type == "way" && !this.isPolygon(member)) {
+					geom.push(this.calculateGeom(undefined, member, false, records));
+				}
+			}
+		}
+		return geom;
+	},
+	
+	/**
+	 * Returns the geometry of the record if it is compatible with Polygon geometry.
+	 * If not compatible, undefined is returned.
+	 * If record is a relation, returns a list of Polygon.
+	 */
+	copyToPolygon: function(records) {
+		var geom = undefined;
+		if (this.data.type == "way" && this.isPolygon(this.data)) {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+		} else if (this.data.type == "relation") {
+			geom = this.calculateGeom(undefined, undefined, false, records);
+			if (geom.getType() != "Polygon") {
+				geom = Ext.Array.filter(geom.getGeometries(),
+					function(geometry) {
+						return geometry.getType() == "Polygon";
+					}
+				);
+			}
+		}
+		return geom;
+	},
+	
+	/**
+	 * Returns the geometry of the record if it is compatible with MultiPoint geometry.
+	 * If not compatible, undefined is returned.
+	 */
+	copyToMultiPoint: function(records) {
+		
+	},
+	
+	/**
+	 * Returns the geometry of the record if it is compatible with MultiLineString geometry.
+	 * If not compatible, undefined is returned.
+	 */
+	copyToMultiLineString: function(records) {
+		
+	},
+	
+	/**
+	 * Returns the geometry of the record if it is compatible with MultiPolygon geometry.
+	 * If not compatible, undefined is returned.
+	 */
+	copyToMultiPolygon: function(records) {
+		
 	},
 	
 	/**
 	 * Method to convert a record in a Point geometry.
+	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToPoint: function(records) {
 		var geom = undefined;
@@ -253,6 +317,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	
 	/**
 	 * Method to convert a record in a LineString geometry.
+	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToLineString: function(records) {
 		var geom = undefined;
@@ -264,6 +329,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	
 	/**
 	 * Method to convert a record in a Polygon geometry.
+	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToPolygon: function(records) {
 		var geom = this.calculateGeom(undefined, undefined, false, records);
@@ -277,6 +343,26 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		return geom;
 	},
 	
+	/**
+	 * Method to convert a record in a MultiPoint geometry.
+	 * If conversion is not possible, undefined is returned.
+	 */
+	convertToMultiPoint: function(records) {
+		
+	},
+	
+	/**
+	 * Method to convert a record in a MultiLineString geometry.
+	 * If conversion is not possible, undefined is returned.
+	 */
+	convertToMultiLineString: function(records) {
+		
+	},
+	
+	/**
+	 * Method to convert a record in a MultiPolygon geometry.
+	 * If conversion is not possible, undefined is returned.
+	 */
 	convertToMultiPolygon: function(records) {
 		var geom = new ol.geom.MultiPolygon();
 		if (this.data.type == "node") {
@@ -319,15 +405,15 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	/**
 	 * Create a square from a Point.
 	 * @param sideWidth Width to set to the square. 10 Meters by default.
-	 * Point is supposed to be in EPSG:4326 projection.
-	 * Square is generated in EPSG:4326 projection.
+	 * Point is supposed to be in OSM projection.
+	 * Square is generated in OSM projection.
 	 */
 	getSquareFromPoint: function(point, sideWidth) {
 		var sideWidth = Ext.isNumber(sideWidth) ? sideWidth : 10;
-		point.transform("EPSG:4326", "EPSG:3857");  // Goes in a projection which use meters.
+		point.transform(this.OSM_PROJECTION, "EPSG:3857");  // Goes in a projection which use meters.
 		point = new ol.geom.Circle(point.getCoordinates(), sideWidth);  // Create a circle with given point as center.
 		point = ol.geom.Polygon.fromCircle(point, 4, 0.785398);  // Create square inside the circle. starts with 45° angle (0.78 rad)
-		point.transform("EPSG:3857", "EPSG:4326");
+		point.transform("EPSG:3857", this.OSM_PROJECTION);
 		return point;
 	}
 });
