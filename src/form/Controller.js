@@ -717,6 +717,41 @@ Ext.define('Ck.form.Controller', {
 			if(f && !f.isValid()) isValid = false;
 		}, this);
 		
+		
+		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
+		// GRID : save data only if gridpanel is not linked to main form with a name property
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			if(grid.name) continue;
+			var requiredColumn;
+			
+			// Test all columns for required fields
+			grid.getStore().each(function (rec) {
+				if(rec.data.dummy===true) return;
+				grid.getColumns().forEach(function(col) {
+					if(!col.dataIndex) return;
+					var val = rec.data[col.dataIndex];
+					
+					if((!val) && (col.allowBlank===false)){
+						isValid = false;
+						requiredColumn = col;
+						return false;
+					}
+				});
+				if(!isValid) return false;
+			});
+			
+			if(!isValid){
+				Ext.Msg.alert("Required fields", " This field is required : "+ requiredColumn.text);
+			}
+			
+			// TEMP : assume only one grid !
+			break;
+		}
+		//
+		//
+		
 		return isValid;
 	},
 	
