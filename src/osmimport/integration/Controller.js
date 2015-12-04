@@ -104,6 +104,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
 					if (typeof integrationLayer.getSource().getFeatures === "function") {
 						var newFeatures = this.getFeaturesToIntegrate(integrationLayer);
+						console.log(newFeatures)
 						integrationLayer.getSource().addFeatures(newFeatures);
 					}
 					this.waitMsg.close();
