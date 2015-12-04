@@ -9,7 +9,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	/**
      * Init Constants
 	 */
-	OSM_PROJECTION = "EPSG:4326",
+	OSM_PROJECTION: "EPSG:4326",
 
 	/**
 	 * Initialisation of components.

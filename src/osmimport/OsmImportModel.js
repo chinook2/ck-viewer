@@ -25,7 +25,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	/**
 	 * Projection used by OpenStreetMap.
 	 */
-	OSM_PROJECTION = "EPSG:4326",
+	OSM_PROJECTION: "EPSG:4326",
 
 	/**
 	 * This method search and return the element given by its id in the records.
@@ -281,7 +281,24 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If not compatible, undefined is returned.
 	 */
 	copyToMultiPoint: function(records) {
-		
+		var geom = undefined;
+		if (this.data.type == "node") {
+			var point = this.calculateGeom(undefined, undefined, false, records);
+			geom = new ol.geom.MultiPoint();
+			geom.appendPoint(point);
+		} else if (this.data.type == "relation") {
+			geom = new ol.geom.MultiPoint();;
+			for (var memberId in this.data.members) {
+				var member = this.data.members[memberId];
+				if (member.type == "node") {
+					geom.appendPoint(this.calculateGeom(undefined, member, false, records));
+				}
+			}
+			if (geom.getPoints().length == 0) {
+				geom = undefined;
+			}
+		}
+		return geom;
 	},
 	
 	/**
@@ -289,7 +306,24 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If not compatible, undefined is returned.
 	 */
 	copyToMultiLineString: function(records) {
-		
+		var geom = undefined;
+		if (this.data.type == "way" && !this.isPolygon(this.data)) {
+			var lineString = this.calculateGeom(undefined, undefined, false, records);
+			geom = new ol.geom.MultiLineString();
+			geom.appendLineString(lineString);
+		} else if (this.data.type == "relation") {
+			geom = new ol.geom.MultiLineString();
+			for (var memberId in this.data.members) {
+				var member = this.data.members[memberId];
+				if (member.type == "way" && !this.isPolygon(member)) {
+					geom.appendLineString(this.calculateGeom(undefined, member, false, records));
+				}
+			}
+			if (geom.getLineStrings().length == 0) {
+				geom = undefined;
+			}
+		}
+		return geom;
 	},
 	
 	/**
@@ -297,7 +331,29 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If not compatible, undefined is returned.
 	 */
 	copyToMultiPolygon: function(records) {
-		
+		var geom = undefined;
+		if (this.data.type == "way" && this.isPolygon(this.data)) {
+			var poly = this.calculateGeom(undefined, undefined, false, records);
+			geom = new ol.geom.MultiPolygon();
+			geom.appendPolygon(poly);
+		} else if (this.data.type == "relation") {
+			geom = new ol.geom.MultiPolygon();
+			poly = this.calculateGeom(undefined, undefined, false, records);
+			if (poly.getType() == "Polygon") {
+				geom.appendPolygon(poly);
+			} else {
+				var geometries = geom.getGeometries();
+				for (var i in geometries) {
+					if (geometries[i].getType() == "Polygon") {
+						geom.appendPolygon(geometries[i]);
+					}
+				}
+			}
+			if (geom.getPolygons().length == 0) {
+				geom = undefined;
+			}
+		}
+		return geom;
 	},
 	
 	/**
@@ -332,11 +388,11 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToPolygon: function(records) {
-		var geom = this.calculateGeom(undefined, undefined, false, records);
+		var geom = this.calculateGeom(undefined, undefined, false, records);  // Get way closed and relation multipolygon with inners
 		if (this.data.type == "node") {
 			geom = this.getSquareFromPoint(geom);
 		} else if (this.data.type == "relation") {
-			geom = ol.geom.Polygon.fromExtent(geom.getExtent());
+			geom = ol.geom.Polygon.fromExtent(geom.getExtent()); 
 		} else if (this.data.type == "way" && !this.isPolygon(this.data)) {
 			geom = undefined;
 		}
@@ -348,7 +404,31 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToMultiPoint: function(records) {
-		
+		var geom = undefined;
+		if (this.data.type == "node") {
+			geom = new ol.geom.MultiPoint();
+			var point = this.calculateGeom(undefined, undefined, false, records);
+			geom.appendPoint(point);
+		} else if (this.data.type == "relation") {
+			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			if (relGeom.getType() == "Polygon") {
+				var point = this.getCenterPoint(relGeom);
+				geom.appendPoint(point);
+			} else {
+				for (var i in this.data.members) {
+					var member = this.data.members[i];
+					if (member.type == "node") {
+						var point = this.calculateGeom(undefined, member, false, records);
+						geom.appendPoint(point);
+					} else if (member.type == "way" && this.isPolygon(member)) {
+						var poly = this.calculateGeom(undefined, member, false, records);
+						var point = this.getCenterPoint(poly);
+						geom.appendPoint(point);
+					}
+				}
+			}
+		}
+		return geom;
 	},
 	
 	/**
@@ -356,7 +436,24 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToMultiLineString: function(records) {
-		
+		var geom = undefined;
+		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
+			var lineString = this.calculateGeom(undefined, undefined, false, records);
+			geom = new ol.geom.MultiLineString();
+			geom.appendLineString(lineString);
+		} else if (this.data.type == "relation") {
+			geom = new ol.geom.MultiLineString();
+			for (var i in this.data.members) {
+				if (member.type == "way" && !this.isPolygon(member)) {  // Copy only way not closed
+					var lineString = this.calculateGeom(undefined, member, false, records);
+					geom.appendLineString(lineString);
+				}
+			}
+			if (geom.getLineStrings().length == 0) {
+				geom = undefined;
+			}
+		}
+		return geom;
 	},
 	
 	/**
