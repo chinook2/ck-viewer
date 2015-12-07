@@ -368,6 +368,57 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	},
 	
 	/**
+	 * Returns the geometry of the record if it is compatible undefined geometry.
+	 * Each basic element is copied (Point, LineString, Polygon).
+	 * Elements from relations are placed in specific Multi.
+	 */
+	copyToUndefined : function(records) {
+		var geom = undefined;
+		var elementGeom = this.calculateGeom(undefined, undefined, false, records);
+		if (elementGeom.getType() == "GeometryCollection") {
+			var points = [];
+			var lines = [];
+			var polys = [];
+			geom = [];
+			var geometries = elementGeom.getGeometries();
+			for (var i in geometries) {
+				var member = geometries[i];
+				if (member.getType() == "Point") {
+					points.push(member);
+				} else if (member.getType() == "LineString") {
+					lines.push(member);
+				} else if (member.getType() == "Polygon") {
+					polys.push(member);
+				}
+			}
+			if (points.length > 0) {
+				var geomPoints = new ol.geom.MultiPoint();
+				for (var i in points) {
+					geomPoints.appendPoint(points[i]);
+				}
+				geom.push(geomPoints);
+			}
+			if (lines.length > 0) {
+				var geomLines = new ol.geom.MultiLineString();
+				for (var i in lines) {
+					geomLines.appendLineString(lines[i]);
+				}
+				geom.push(geomLines);
+			}
+			if (polys.length > 0) {
+				var geomPolys = new ol.geom.MultiPolygon();
+				for (var i in polys) {
+					geomPolys.appendPolygon(polys[i]);
+				}
+				geom.push(geomPolys);
+			}
+		} else {
+			geom = elementGeom;
+		}
+		return geom;
+	},
+	
+	/**
 	 * Method to convert a record in a Point geometry.
 	 * If conversion is not possible, undefined is returned.
 	 */

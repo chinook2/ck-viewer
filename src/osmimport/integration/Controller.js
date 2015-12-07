@@ -158,7 +158,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var integrateAllGeometry = this.lookupReference("selectAllGeometries").checked;
 		var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
 		if (integrationGeometryType == "undefined") { // Copy all
-			geom = data.calculateGeom(newProjection, undefined, true, records);  // TODO Change to not use GeometryCollection
+			geom = data.copyToUndefined(records);
 		} else {
 			if (integrateAllGeometry) {  // Need some conversions
 				geom = data["convertTo" + integrationGeometryType](records);
