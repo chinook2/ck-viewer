@@ -243,12 +243,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {
 			geom = this.calculateGeom(undefined, undefined, false, records);
 		} else if (this.data.type == "relation") {
-			geom = [];
-			for (var memberId in this.data.members) {
-				var member = this.data.members[memberId];
-				if (member.type == "way" && !this.isPolygon(member)) {
-					geom.push(this.calculateGeom(undefined, member, false, records));
-				}
+			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			if (relGeom.getType() == "GeometryCollection") {
+				geom = Ext.Array.filter(relGeom.getGeometries(),
+					function(member) {
+						return member.getType() == "LineString";
+					}
+				);
 			}
 		}
 		return geom;
@@ -316,11 +317,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			geom.appendLineString(lineString);
 		} else if (this.data.type == "relation") {
 			var lines = [];
-			for (var memberId in this.data.members) {
-				var member = this.data.members[memberId];
-				if (member.type == "way" && !this.isPolygon(member)) {
-					lines.push(this.calculateGeom(undefined, member, false, records));
-				}
+			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			if (relGeom.getType() == "GeometryCollection") {
+				lines = Ext.Array.filter(relGeom.getGeometries(),
+					function(member) {
+						return member.getType() == "LineString";
+					}
+				);
 			}
 			if (lines.length > 0) {
 				geom = new ol.geom.MultiLineString();
@@ -347,16 +350,15 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			poly = this.calculateGeom(undefined, undefined, false, records);
 			if (poly.getType() == "Polygon") {
 				polys.push(poly);
-			} else {
-				var geometries = geom.getGeometries();
-				for (var i in geometries) {
-					if (geometries[i].getType() == "Polygon") {
-						polys.push(geometries[i]);
+			} else {  // If rel is not Polygon it is a GeometryCollection
+				polys = Ext.Array.filter(poly.getGeometries(),
+					function(geometry) {
+						return geometry.getType() == "Polygon";
 					}
-				}
+				);
 			}
 			if (polys.length > 0) {
-				geom = new ol.new.MultiPolygon();
+				geom = new ol.geom.MultiPolygon();
 				for (var i in polys) {
 					geom.appendPolygon(polys[i]);
 				}
@@ -400,7 +402,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var geom = this.calculateGeom(undefined, undefined, false, records);  // Get way closed and relation multipolygon with inners
 		if (this.data.type == "node") {
 			geom = this.getSquareFromPoint(geom);
-		} else if (this.data.type == "relation") {
+		} else if ((this.data.type == "relation") && (geom.getType() != "Polygon")) {
 			geom = ol.geom.Polygon.fromExtent(geom.getExtent()); 
 		} else if (this.data.type == "way" && !this.isPolygon(this.data)) {
 			geom = undefined;
@@ -418,6 +420,11 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			geom = new ol.geom.MultiPoint();
 			var point = this.calculateGeom(undefined, undefined, false, records);
 			geom.appendPoint(point);
+		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
+			geom = new ol.geom.MultiPoint();
+			var poly = this.calculateGeom(undefined, undefined, false, records);
+			var point = this.getCenterPoint(poly);
+			geom.appendPoint(point);
 		} else if (this.data.type == "relation") {
 			var points = [];
 			var relGeom = this.calculateGeom(undefined, undefined, false, records);
@@ -425,14 +432,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				var point = this.getCenterPoint(relGeom);
 				points.push(point);
 			} else {
-				for (var i in this.data.members) {
-					var member = this.data.members[i];
-					if (member.type == "node") {
-						var point = this.calculateGeom(undefined, member, false, records);
-						points.push(point);
-					} else if (member.type == "way" && this.isPolygon(member)) {
-						var poly = this.calculateGeom(undefined, member, false, records);
-						var point = this.getCenterPoint(poly);
+				var geometries = relGeom.getGeometries();
+				for (var i in geometries) {
+					var member = geometries[i];
+					if (member.getType() == "Point") {
+						points.push(member);
+					} else if (member.getType() == "Polygon") {
+						var point = this.getCenterPoint(member);
 						points.push(point);
 					}
 				}
@@ -459,11 +465,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			geom.appendLineString(lineString);
 		} else if (this.data.type == "relation") {
 			var lines = [];
-			for (var i in this.data.members) {
-				if (member.type == "way" && !this.isPolygon(member)) {  // Copy only way not closed
-					var lineString = this.calculateGeom(undefined, member, false, records);
-					lines.push(lineString);
-				}
+			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			if (relGeom.getType() == "GeometryCollection") {
+				lines = Ext.Array.filter(relGeom.getGeometries(),
+					function(member) {
+						return member.getType() == "LineString";
+					}
+				);
 			}
 			if (lines.length > 0) {
 				geom = new ol.geom.MultiLineString();
@@ -483,23 +491,23 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var geom = undefined;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPolygon();
-			var poly = this.getSquareFromPoint(geom);
+			var point = this.calculateGeom(undefined, undefined, false, records);
+			var poly = this.getSquareFromPoint(point);
 			geom.appendPolygon(poly);
 		} else if (this.data.type == "relation") {
 			var polys = [];
-			var poly = this.calculateGeom(undefined, undefined, false, records);
-			if (poly.getType() == "Polygon") {
-				polys.push(poly);
+			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			if (relGeom.getType() == "Polygon") {
+				polys.push(relGeom);
 			} else {
-				for (var memberId in this.data.members) {
-					var member = this.data.members[memberId];
-					if (this.isPolygon(member)) {
-						var poly = this.calculateGeom(undefined, member, false, records);
+				var geometries = relGeom.getGeometries();
+				for (var i in geometries) {
+					var member = geometries[i];
+					if (member.getType() == "Point") {
+						var poly = this.getSquareFromPoint(member);
 						polys.push(poly);
-					} else if (member.type == "node") {
-						var poly = this.calculateGeom(undefined, member, false, records);
-						poly = this.getSquareFromPoint(poly);
-						polys.push(poly);
+					} else if (member.getType() == "Polygon") {
+						polys.push(member);
 					}
 				}
 			}
@@ -535,8 +543,8 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var sideWidth = Ext.isNumber(sideWidth) ? sideWidth : 10;
 		point.transform(this.OSM_PROJECTION, "EPSG:3857");  // Goes in a projection which use meters.
 		point = new ol.geom.Circle(point.getCoordinates(), sideWidth);  // Create a circle with given point as center.
-		point = ol.geom.Polygon.fromCircle(point, 4, 0.785398);  // Create square inside the circle. starts with 45° angle (0.78 rad)
-		point.transform("EPSG:3857", this.OSM_PROJECTION);
-		return point;
+		var poly = ol.geom.Polygon.fromCircle(point, 4, 0.785398);  // Create square inside the circle. starts with 45° angle (0.78 rad)
+		poly.transform("EPSG:3857", this.OSM_PROJECTION);
+		return poly;
 	}
 });
