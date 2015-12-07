@@ -95,10 +95,12 @@ Ext.define("Ck.osmimport.Integration", {
 			vertical: true,
 			columns: 1,
 			defaults: {
-				xtype: "radio",
-				name: "information-level"
+				xtype: "radio"
 			},
 			id: "informationtointegrate",
+			listeners: {
+				change: "onInfoToIntegrateChange"
+			},
 			items: [{
 				checked: true,
 				boxLabel: "Only coordinates",
@@ -110,6 +112,7 @@ Ext.define("Ck.osmimport.Integration", {
 			}]
 		},{  // Panel Attributes / Tags
 			xtype: "panel",
+			reference: "attrtagspanel",
 			layout: "hbox",
 			border: true,
 			bodyPadding: 10,
@@ -130,6 +133,7 @@ Ext.define("Ck.osmimport.Integration", {
 					text: "Integration Layer"
 				},{
 					xtype: "grid",
+					reference: "attributesgrid",
 					border: true,
 					width: 400,
 					height: 180,
@@ -183,6 +187,7 @@ Ext.define("Ck.osmimport.Integration", {
 					text: "OSM Layer"
 				},{
 					xtype: "grid",
+					reference: "tagsgrid",
 					width: 200,
 					height: 180,
 					border: true,

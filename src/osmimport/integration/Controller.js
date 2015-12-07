@@ -89,6 +89,77 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			geometryType = this.getGeometryType(selectedLayer);
 		}
 		this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
+		this.updateAttributesTagsList();
+	},
+	
+	/**
+	 * Method called when the user change the selection of level of information to integrate.
+	 */
+	onInfoToIntegrateChange: function(radioGroup, newValue, oldValue) {
+		if (newValue.informationtointegrate == "coordstags") {
+			this.updateAttributesTagsList();
+		}
+	},
+	
+	/**
+	 * This method updates the grid of layer's attributes and OSM data tags.
+	 */
+	updateAttributesTagsList: function() {
+		var viewmodel = this.getViewModel();
+		var records = this.getView().openner.osmapi.getData().items;
+		while (viewmodel.data.layersAttributes.length > 0) {
+			viewmodel.data.layersAttributes.pop();
+		}
+		var attrs = this.getIntegrationLayerAttributes();
+		if (attrs.length > 0) {
+			for (var i in attrs) {
+				viewmodel.data.layersAttributes.push(attrs[i]);
+			}
+		}
+		while (viewmodel.data.tagsOsm.length > 0) {
+			viewmodel.data.tagsOsm.pop();
+		}
+		var tags = this.getOsmDataTags(records);
+		if (tags.length > 0) {
+			for (var i in tags) {
+				viewmodel.data.tagsOsm.push(tags[i]);
+			}
+		}
+		this.lookupReference("attributesgrid").getStore().load();
+		this.lookupReference("tagsgrid").getStore().load();
+	},
+	
+	/** 
+	 * Returns the list of all the attributes found in the features of the integration layer.
+	 */
+	getIntegrationLayerAttributes: function() {
+		var attributes = [];
+		var selectedLayer = this.lookupReference("layerselection").getValue();
+		var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+		if (typeof integrationLayer.getSource().getFeatures === "function") {
+			var layerData = integrationLayer.getSource().getFeatures();
+			for (var i in layerData) {
+				attributes = Ext.Array.merge(attributes, Object.keys(layerData[i].getProperties()));  // TODO get only the first if all properties are set in every feature
+			}
+		}
+		attributes = Ext.Array.remove(attributes, "geometry");
+		attributes = Ext.Array.map(Ext.Array.sort(attributes), function(attr) {return {"attr": attr, "tag": ""};});
+		return attributes;
+	},
+	
+	/**
+	 * Returns the list of all the tags (key part) found in the given OSM data.
+	 */
+	getOsmDataTags: function(records) {
+		var tags = [];
+		for (var i in records) {
+			var record = records[i];
+			if (record.containsSearchedTags() && record.data.tags) {
+				tags = Ext.Array.merge(tags, Object.keys(record.data.tags));
+			}
+		}
+		tags = Ext.Array.map(Ext.Array.sort(tags), function(tag) {return {"tag": tag};});
+		return tags;
 	},
 	
 	/**
@@ -165,8 +236,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			} else {  // Copy only if geometry corresponds
 				geom = data["copyTo" + integrationGeometryType](records);
 			}
-			// TODO geometry undefined
-			// TODO others geometries
 		}
 		
 		// Transform into layer's projection and create Feature.
