@@ -92,6 +92,7 @@ Ext.define("Ck.osmimport.Integration", {
 		labelStyle: "font-weight: bold",
 		items: [{
 			xtype: "radiogroup",
+			reference: "informationtointegrate",
 			vertical: true,
 			columns: 1,
 			defaults: {

@@ -322,12 +322,18 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * This method return a list of features ready to integrate according the configuration. 
 	 */
 	getFeaturesToIntegrate: function(integrationLayer) {
+		var attrTagConfig = [];
+		if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
+			var attrList = this.getViewModel().data.layersAttributes;
+			attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
+		}
+		
 		var featuresToIntegrate = [];
 		var records = this.getView().openner.osmapi.getData().items;
 		for (var i in records) {
 			var record = records[i];
 			if (record.containsSearchedTags()) {  // Filter records to get only searched elements (not sub nodes or members)
-				var features = this.convertData(record, integrationLayer, records);
+				var features = this.convertData(record, integrationLayer, records, attrTagConfig);
 				featuresToIntegrate = featuresToIntegrate.concat(features);
 			}
 		}
@@ -338,7 +344,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * This method converts a data from OSM format (as imported) to layer format.
 	 * Conversion is done on geometry (correct projection) and (tags / attributes)
 	 */
-	convertData: function(data, integrationLayer, records) {
+	convertData: function(data, integrationLayer, records, attributesTagsConfig) {
 		var convertedData = [];
 		var newProjection = Ck.getMap().getOlMap().getView().getProjection();  // TODO change to get the projection of integration layer
 		var geom = undefined;
@@ -359,23 +365,37 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (Ext.isArray(geom)) {
 				for (var i in geom) {
 					geom[i].transform(this.OSM_PROJECTION, newProjection);
-					convertedData.push(new ol.Feature(
-						Ext.apply({
-							geometry: geom[i]
-						})
-					));
+					convertedData.push(new ol.Feature(geom[i]));
 				}
 			} else {
 				geom.transform(this.OSM_PROJECTION, newProjection);
-				convertedData = [new ol.Feature(
-						Ext.apply({
-							geometry: geom
-						})
-					)];
+				var feature = new ol.Feature(geom);
+				if (attributesTagsConfig.length > 0) {
+					feature.setProperties(this.convertTagsToAttributes(data, attributesTagsConfig));
+				}
+				convertedData = [feature];
 			}
 		}
 		return convertedData;
 	},
+	
+	/**
+	 * This method converts the record tags into a propertie object according the given configuration.
+	 */
+	convertTagsToAttributes: function(record, attributesTagsConfig) {
+		var attributes = {};
+		for (var i in attributesTagsConfig) {
+			var attr = attributesTagsConfig[i].attr;
+			var tag = attributesTagsConfig[i].tag;
+			var tagValue = "";
+			if (tag in record.data.tags) {
+				tagValue = record.data.tags[tag];
+			}
+			attributes[attr] = tagValue;
+		}
+		return attributes;
+	},
+	
 	
 	/** 
 	 * Method to save the data in the server.
