@@ -64,6 +64,7 @@ Ext.define("Ck.osmimport.Integration", {
 			defaults: {
 				xtype: "radio"
 			},
+			reference: "geometrytointegrate",
 			id: "geometrytointegrate",
 			items: [{
 				checked: true,

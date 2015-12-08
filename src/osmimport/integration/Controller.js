@@ -158,7 +158,26 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var record = records[i];
 			if (record.containsSearchedTags() && record.data.tags) {
 				tags = Ext.Array.merge(tags, Object.keys(record.data.tags));
-				// TODO Add tags for relation members
+				
+				// Get the relation members tags for specific integration (copyTo Point, LineString, Polygon)
+				var selectedLayer = this.lookupReference("layerselection").getValue();
+				var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+				if (typeof integrationLayer.getSource().getFeatures === "function") {
+					var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
+					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
+						(["Point", "LineString", "Polygon"].indexOf(integrationGeometryType) > -1)) {
+						for (var memberId in record.data.members) {
+							var member = record.getSubElement(records, record.data.members[memberId].ref);
+							if (record.calculateGeom(undefined, member.data, false, records).getType() == integrationGeometryType) {
+								for (var key in member.data.tags) {
+									if (tags.indexOf("Rel:" + key) == -1) {
+										tags.push("Rel:" + key);
+									}
+								}
+							}
+						}
+					}
+				}
 			}
 		}
 		tags = Ext.Array.map(Ext.Array.sort(tags), function(tag) {return {"tag": tag};});
@@ -322,10 +341,12 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * This method return a list of features ready to integrate according the configuration. 
 	 */
 	getFeaturesToIntegrate: function(integrationLayer) {
+		// Get the configuration of the conversion for the tags -> attributes
 		var attrTagConfig = [];
 		if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
 			var attrList = this.getViewModel().data.layersAttributes;
 			attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
+			
 		}
 		
 		var featuresToIntegrate = [];
@@ -364,8 +385,15 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		if (geom != undefined) {
 			if (Ext.isArray(geom)) {
 				for (var i in geom) {
-					geom[i].transform(this.OSM_PROJECTION, newProjection);
-					convertedData.push(new ol.Feature(geom[i]));
+					geom[i].geom.transform(this.OSM_PROJECTION, newProjection);
+					var feature = new ol.Feature(geom[i].geom);
+					if (["Point", "LineString", "Polygon"].indexOf(geom[i].geom.getType()) > -1) {
+						var element = data.getSubElement(records, geom[i].id);
+						feature.setProperties(this.convertTagsToAttributes(element, attributesTagsConfig));
+					} else {
+						feature.setProperties(this.convertTagsToAttributes(data, attributesTagsConfig));
+					}
+					convertedData.push(feature);
 				}
 			} else {
 				geom.transform(this.OSM_PROJECTION, newProjection);
@@ -388,8 +416,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var attr = attributesTagsConfig[i].attr;
 			var tag = attributesTagsConfig[i].tag;
 			var tagValue = "";
-			if (tag in record.data.tags) {
-				tagValue = record.data.tags[tag];
+			if (tag.startsWith("Rel:")) {
+				if (tag.substr(4) in record.data.tags) {
+					tagValue = record.data.tags[tag.substr(4)];
+				}
+			} else {
+				if (tag in record.data.tags) {
+					tagValue = record.data.tags[tag];
+				}
 			}
 			attributes[attr] = tagValue;
 		}

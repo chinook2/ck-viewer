@@ -89,11 +89,20 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				for (var memberId in data.members) {
 					var member = data.members[memberId];
 					if (member.type != "relation") {
-						// Copy the tags from relation and element in the member
-						var subElement = this.getSubElement(allRecords, member.ref);  // member has no copy of tags, need to retrieve it from records list
-						member.tags = data.tags || {};
-						Ext.apply(subElement.data.tags, member.tags);
-						geoms.push(this.calculateGeom(null, subElement.data, false, allRecords));
+						// Copy the tags from relation and element in the member without modifying records
+						var tags = {};
+						for (var key in data.tags) {
+							tags[key] = data.tags[key];
+						}
+						for (var key in member.tags) {
+							tags[key] = member.tags[key];
+						}
+						var element = {type: member.type,
+									   tags: tags,
+									   geometry: member.geometry,
+									   lat: member.lat,
+									   lon: member.lon}
+						geoms.push(this.calculateGeom(null, element, false, allRecords));
 					}
 				}
 				geom = new ol.geom.GeometryCollection(geoms);
@@ -215,7 +224,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	/**
 	 * Returns the geometry of the record if it is compatible with Point geometry.
 	 * If not compatible, undefined is returned.
-	 * If record is a relation, returns a list of Point.
+	 * If record is a relation, returns a list of object {geom, id}
 	 */
 	copyToPoint: function(records) {
 		var geom = undefined;
@@ -226,7 +235,9 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			for (var memberId in this.data.members) {
 				var member = this.data.members[memberId];
 				if (member.type == "node") {
-					geom.push(this.calculateGeom(undefined, member, false, records));
+					geom.push(
+						{geom: this.calculateGeom(undefined, member, false, records),
+						 id: member.ref});
 				}
 			}
 		}
@@ -236,20 +247,21 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	/**
 	 * Returns the geometry of the record if it is compatible with LineString geometry.
 	 * If not compatible, undefined is returned.
-	 * If record is a relation, returns a list of LineString.
+	 * If record is a relation, returns a list of object {geom, id}
 	 */
 	copyToLineString: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {
 			geom = this.calculateGeom(undefined, undefined, false, records);
 		} else if (this.data.type == "relation") {
-			var relGeom = this.calculateGeom(undefined, undefined, false, records);
-			if (relGeom.getType() == "GeometryCollection") {
-				geom = Ext.Array.filter(relGeom.getGeometries(),
-					function(member) {
-						return member.getType() == "LineString";
-					}
-				);
+			geom = [];
+			for (var memberId in this.data.members) {
+				var member = this.data.members[memberId];
+				if (member.type == "way" && !this.isPolygon(member)) {
+					geom.push(
+						{geom: this.calculateGeom(undefined, member, false, records),
+						 id: member.ref});
+				}
 			}
 		}
 		return geom;
@@ -258,7 +270,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	/**
 	 * Returns the geometry of the record if it is compatible with Polygon geometry.
 	 * If not compatible, undefined is returned.
-	 * If record is a relation, returns a list of Polygon.
+	 * If record is a relation, returns a list of object {geom, id}
 	 */
 	copyToPolygon: function(records) {
 		var geom = undefined;
@@ -267,11 +279,15 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		} else if (this.data.type == "relation") {
 			geom = this.calculateGeom(undefined, undefined, false, records);
 			if (geom.getType() != "Polygon") {
-				geom = Ext.Array.filter(geom.getGeometries(),
-					function(geometry) {
-						return geometry.getType() == "Polygon";
+				geom = [];
+				for (var memberId in this.data.members) {
+					var member = this.data.members[memberId];
+					if (member.type == "way" && this.isPolygon(member)) {
+						geom.push(
+							{geom: this.calculateGeom(undefined, member, false, records),
+							 id: member.ref});
 					}
-				);
+				}
 			}
 		}
 		return geom;
