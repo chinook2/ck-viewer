@@ -170,8 +170,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 							var member = record.getSubElement(records, record.data.members[memberId].ref);
 							if (record.calculateGeom(undefined, member.data, false, records).getType() == integrationGeometryType) {
 								for (var key in member.data.tags) {
-									if (tags.indexOf("Rel:" + key) == -1) {
-										tags.push("Rel:" + key);
+									if (tags.indexOf("rel:" + key) == -1) {
+										tags.push("rel:" + key);
 									}
 								}
 							}
@@ -387,11 +387,13 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				for (var i in geom) {
 					geom[i].geom.transform(this.OSM_PROJECTION, newProjection);
 					var feature = new ol.Feature(geom[i].geom);
-					if (["Point", "LineString", "Polygon"].indexOf(geom[i].geom.getType()) > -1) {
-						var element = data.getSubElement(records, geom[i].id);
-						feature.setProperties(this.convertTagsToAttributes(element, attributesTagsConfig));
-					} else {
-						feature.setProperties(this.convertTagsToAttributes(data, attributesTagsConfig));
+					if (attributesTagsConfig.length > 0) {
+						if (["Point", "LineString", "Polygon"].indexOf(geom[i].geom.getType()) > -1) {
+							var element = data.getSubElement(records, geom[i].id);
+							feature.setProperties(this.convertTagsToAttributes(element, attributesTagsConfig));
+						} else {
+							feature.setProperties(this.convertTagsToAttributes(data, attributesTagsConfig));
+						}
 					}
 					convertedData.push(feature);
 				}
@@ -416,7 +418,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var attr = attributesTagsConfig[i].attr;
 			var tag = attributesTagsConfig[i].tag;
 			var tagValue = "";
-			if (tag.startsWith("Rel:")) {
+			if (tag.startsWith("rel:")) {
 				if (tag.substr(4) in record.data.tags) {
 					tagValue = record.data.tags[tag.substr(4)];
 				}
