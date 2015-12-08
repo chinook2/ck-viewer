@@ -95,7 +95,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	/**
 	 * Method called when the user change the selection of level of information to integrate.
 	 */
-	onInfoToIntegrateChange: function(radioGroup, newValue, oldValue) {
+	onInformationLevelChange: function(radioGroup, newValue, oldValue) {
 		if (newValue.informationtointegrate == "coordstags") {
 			this.updateAttributesTagsList();
 		}
@@ -110,7 +110,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		while (viewmodel.data.layersAttributes.length > 0) {
 			viewmodel.data.layersAttributes.pop();
 		}
-		var attrs = this.getIntegrationLayerAttributes();
+		var attrs = this.getSelectedLayerAttributs();
 		if (attrs.length > 0) {
 			for (var i in attrs) {
 				viewmodel.data.layersAttributes.push(attrs[i]);
@@ -119,7 +119,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		while (viewmodel.data.tagsOsm.length > 0) {
 			viewmodel.data.tagsOsm.pop();
 		}
-		var tags = this.getOsmDataTags(records);
+		var tags = this.getOsmTags(records);
 		if (tags.length > 0) {
 			for (var i in tags) {
 				viewmodel.data.tagsOsm.push(tags[i]);
@@ -127,12 +127,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		}
 		this.lookupReference("attributesgrid").getStore().load();
 		this.lookupReference("tagsgrid").getStore().load();
+		
+		this.updateAssociationButtons();
 	},
 	
 	/** 
 	 * Returns the list of all the attributes found in the features of the integration layer.
 	 */
-	getIntegrationLayerAttributes: function() {
+	getSelectedLayerAttributs: function() {
 		var attributes = [];
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
@@ -150,16 +152,130 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	/**
 	 * Returns the list of all the tags (key part) found in the given OSM data.
 	 */
-	getOsmDataTags: function(records) {
+	getOsmTags: function(records) {
 		var tags = [];
 		for (var i in records) {
 			var record = records[i];
 			if (record.containsSearchedTags() && record.data.tags) {
 				tags = Ext.Array.merge(tags, Object.keys(record.data.tags));
+				// TODO Add tags for relation members
 			}
 		}
 		tags = Ext.Array.map(Ext.Array.sort(tags), function(tag) {return {"tag": tag};});
 		return tags;
+	},
+	
+	/**
+	 * Method called when the user clicks on the button associate in the attributes/tags panel.
+	 * Associate the selected tag with the selected attribute.
+	 */
+	onAssociateTagClick: function() {
+		var viewmodel = this.getViewModel();
+		var attrList = viewmodel.data.layersAttributes;
+		var tagList = viewmodel.data.tagsOsm;
+		var attrGrid = this.lookupReference("attributesgrid");
+		var tagGrid = this.lookupReference("tagsgrid");
+		var selectedAttr = attrGrid.getSelection();
+		var selectedTag = tagGrid.getSelection();
+		if (selectedAttr.length != 1 || selectedTag.length != 1) { // 1 and only 1 line of each grid shall be selected
+			Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'You shall select 1 and only 1 attribute and 1 and only 1 tag for the association',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.WARNING
+				});
+		} else {
+			var attrName = selectedAttr[0].data.attr;
+			var tagName = selectedTag[0].data.tag;
+			var previousTag = selectedAttr[0].data.tag;
+			
+			// 1 - Add tag to attr
+			for (var i in attrList) {
+				if (attrList[i].attr == attrName) {
+					attrList[i].tag = tagName;
+					break;
+				}
+			}
+			// 2 - Remove tag from tags
+			var indexToRemove = -1;
+			for (var i in tagList) {
+				if (tagList[i].tag == tagName) {
+					indexToRemove = i;
+					break;
+				}
+			}
+			tagList.splice(indexToRemove, 1);
+			// 3 - Add previous tag to tags
+			if (previousTag != "") {
+				var indexToInsert = -1;
+				for (var i in tagList) {
+					if (tagList[i].tag > previousTag) {
+						indexToInsert = i;
+						break;
+					}
+				}
+				tagList.splice(indexToInsert, 0, {tag: previousTag});
+			}
+
+			attrGrid.getStore().load();
+			tagGrid.getStore().load();
+		}
+		this.updateAssociationButtons();
+	},
+	
+	/**
+	 * Method called when the user clicks on the button dissociate in the attributes/tags panel.
+	 * Dissociates the tags from the selected attribute(s).
+	 */
+	onDissociateTagClick: function() {
+		var viewmodel = this.getViewModel();
+		var attrList = viewmodel.data.layersAttributes;
+		var tagList = viewmodel.data.tagsOsm;
+		var attrGrid = this.lookupReference("attributesgrid");
+		var tagGrid = this.lookupReference("tagsgrid");
+		var selectedAttr = attrGrid.getSelection();
+		for (var i in selectedAttr) {
+			// 1 - Add tag in tags
+			if (selectedAttr[i].data.tag !=  "") {
+				var indexToInsert = -1;
+				for (var j in tagList) {
+					if (tagList[j].tag > selectedAttr[i].data.tag) {
+						indexToInsert = j;
+						break;
+					}
+				}
+				tagList.splice(indexToInsert, 0, {tag: selectedAttr[i].data.tag});
+			}
+			// 2 - Remove tag from attribute
+			for (var j in attrList) {
+				if (attrList[j].attr == selectedAttr[i].data.attr) {
+					attrList[j].tag = "";
+					break;
+				}
+			}
+		}
+		attrGrid.getStore().load();
+		tagGrid.getStore().load();
+		this.updateAssociationButtons();
+	},
+	
+	/** 
+	 * This method update the disabled state of the attributes/tags assocation buttons.
+	 * State is defined by list length and selected values
+	 */
+	updateAssociationButtons: function() {
+		var viewmodel = this.getViewModel();
+		var attrList = viewmodel.data.layersAttributes;
+		var tagList = viewmodel.data.tagsOsm;
+		var selectedAttr = this.lookupReference("attributesgrid").getSelection();
+		var selectedTag = this.lookupReference("tagsgrid").getSelection();
+
+		// Button associate
+		this.lookupReference("btnAssociate").setDisabled((tagList.length == 0) || (attrList == 0) || (selectedTag.length == 0));
+		// Button dissociate
+		var nbAttrWithoutTag = Ext.Array.filter(selectedAttr, function(attr) {return attr.data.tag == "";}).length;
+		this.lookupReference("btnDissociate").setDisabled(nbAttrWithoutTag == selectedAttr.length);
 	},
 	
 	/**

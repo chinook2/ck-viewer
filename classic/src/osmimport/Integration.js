@@ -99,7 +99,7 @@ Ext.define("Ck.osmimport.Integration", {
 			},
 			id: "informationtointegrate",
 			listeners: {
-				change: "onInfoToIntegrateChange"
+				change: "onInformationLevelChange"
 			},
 			items: [{
 				checked: true,
@@ -157,6 +157,9 @@ Ext.define("Ck.osmimport.Integration", {
 					},
 					bind: {
 						store: {data: "{layersAttributes}"}
+					},
+					listeners: {
+						selectionchange: "updateAssociationButtons"
 					}
 				}]
 			},{
@@ -172,9 +175,17 @@ Ext.define("Ck.osmimport.Integration", {
 					margin: "10"
 				},
 				items: [{
-					iconCls: "fa fa-caret-left"
+					iconCls: "fa fa-caret-left",
+					reference: "btnAssociate",
+					listeners: {
+						click: "onAssociateTagClick"
+					}
 				},{
-					iconCls: "fa fa-caret-right"
+					iconCls: "fa fa-caret-right",
+					reference: "btnDissociate",
+					listeners: {
+						click: "onDissociateTagClick"
+					}
 				}]
 			},{
 				xtype: "panel",
@@ -204,6 +215,9 @@ Ext.define("Ck.osmimport.Integration", {
 					],
 					bind: {
 						store: {data: "{tagsOsm}"}
+					},
+					listeners: {
+						selectionchange: "updateAssociationButtons"
 					}
 				}]
 			}]
