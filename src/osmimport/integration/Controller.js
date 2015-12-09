@@ -297,13 +297,49 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		this.lookupReference("btnDissociate").setDisabled(nbAttrWithoutTag == selectedAttr.length);
 	},
 	
+	computeFeature: function() {
+		var record = this.records[this.nbFeaturesComputed];
+		var features = this.convertData(record, this.integrationLayer, this.records, this.attrTagConfig);
+		this.featuresToIntegrate = this.featuresToIntegrate.concat(features);
+		this.nbFeaturesComputed++;
+		this.waitMsg.updateProgress(this.nbFeaturesComputed / this.records.length);
+		if (this.nbFeaturesComputed < this.records.length) {
+			Ext.defer(this.computeFeature, 10, this);
+		} else {
+			this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
+			this.waitMsg.close();
+			Ext.MessageBox.show({
+				title: 'OSM Import',
+				msg: 'Integration of data from OpenStreetMap succeed. ' + this.featuresToIntegrate.length + ' elements integrated.',
+				width: 500,
+				buttons: Ext.MessageBox.OK,
+				icon: Ext.Msg.INFO
+			});
+		}
+	},
+	
 	/**
 	 * Method called when the user clicks on the integration button.
 	 * Execute the integration according the user's configuration on panel.
 	 */
 	onIntegrationClick: function() {
-		this.waitMsg = Ext.MessageBox.wait("Integrating data, please wait...");
-		Ext.defer(
+		var selectedLayer = this.lookupReference("layerselection").getValue();
+		this.integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+		this.records = Ext.Array.filter(this.getView().openner.osmapi.getData().items,
+			function(record) {return record.containsSearchedTags();});
+		this.attrTagConfig = [];
+		if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
+			var attrList = this.getViewModel().data.layersAttributes;
+			this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
+			
+		}
+		this.featuresToIntegrate = [];
+		this.nbFeaturesComputed = 0;
+
+
+		this.waitMsg = Ext.MessageBox.progress("Integrating data, please wait...");
+		Ext.defer(this.computeFeature, 10, this);
+	/*	Ext.defer(
 			function() {
 				try {
 					var selectedLayer = this.lookupReference("layerselection").getValue();
@@ -334,7 +370,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			},
 			100,
 			this
-		);
+		);*/
 	},
 	
 	/**
