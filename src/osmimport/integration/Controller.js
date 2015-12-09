@@ -291,7 +291,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var selectedTag = this.lookupReference("tagsgrid").getSelection();
 
 		// Button associate
-		this.lookupReference("btnAssociate").setDisabled((tagList.length == 0) || (attrList == 0) || (selectedTag.length == 0));
+		this.lookupReference("btnAssociate").setDisabled((tagList.length == 0) || (attrList == 0) || (selectedTag.length == 0) || (selectedAttr.length == 0));
 		// Button dissociate
 		var nbAttrWithoutTag = Ext.Array.filter(selectedAttr, function(attr) {return attr.data.tag == "";}).length;
 		this.lookupReference("btnDissociate").setDisabled(nbAttrWithoutTag == selectedAttr.length);
