@@ -530,8 +530,10 @@ Ext.define('Ck.form.Controller', {
 
 				}
 
+				Ext.applyIf(c, {
+					queryMode: 'local'
+				});			
 				Ext.Object.merge(c, {
-					queryMode: 'local',
 					store: processStore(c),
 					listeners: {
 						removed: function(item, ownerCt, eOpts){
@@ -539,7 +541,6 @@ Ext.define('Ck.form.Controller', {
 						}
 					}
 				});
-				
 			}
 
 			if (c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
