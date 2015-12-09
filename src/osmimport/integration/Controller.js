@@ -310,7 +310,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
 					if (typeof integrationLayer.getSource().getFeatures === "function") {
 						var newFeatures = this.getFeaturesToIntegrate(integrationLayer);
-						console.log(newFeatures)
+						console.log(newFeatures)  // TODO remove test log
 						integrationLayer.getSource().addFeatures(newFeatures);
 					}
 					this.waitMsg.close();
@@ -368,70 +368,29 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	convertData: function(data, integrationLayer, records, attributesTagsConfig) {
 		var convertedData = [];
 		var newProjection = Ck.getMap().getOlMap().getView().getProjection();  // TODO change to get the projection of integration layer
-		var geom = undefined;
+		var features = undefined;
 		var integrateAllGeometry = this.lookupReference("selectAllGeometries").checked;
 		var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
 		if (integrationGeometryType == "undefined") { // Copy all
-			geom = data.copyToUndefined(records);
+			features = data.copyToUndefined(records, attributesTagsConfig);
 		} else {
 			if (integrateAllGeometry) {  // Need some conversions
-				geom = data["convertTo" + integrationGeometryType](records);
+				features = data["convertTo" + integrationGeometryType](records, attributesTagsConfig);
 			} else {  // Copy only if geometry corresponds
-				geom = data["copyTo" + integrationGeometryType](records);
+				features = data["copyTo" + integrationGeometryType](records, attributesTagsConfig);
 			}
 		}
 		
-		// Transform into layer's projection and create Feature.
-		if (geom != undefined) {
-			if (Ext.isArray(geom)) {
-				for (var i in geom) {
-					geom[i].geom.transform(this.OSM_PROJECTION, newProjection);
-					var feature = new ol.Feature(geom[i].geom);
-					if (attributesTagsConfig.length > 0) {
-						if (["Point", "LineString", "Polygon"].indexOf(geom[i].geom.getType()) > -1) {
-							var element = data.getSubElement(records, geom[i].id);
-							feature.setProperties(this.convertTagsToAttributes(element, attributesTagsConfig));
-						} else {
-							feature.setProperties(this.convertTagsToAttributes(data, attributesTagsConfig));
-						}
-					}
-					convertedData.push(feature);
-				}
-			} else {
-				geom.transform(this.OSM_PROJECTION, newProjection);
-				var feature = new ol.Feature(geom);
-				if (attributesTagsConfig.length > 0) {
-					feature.setProperties(this.convertTagsToAttributes(data, attributesTagsConfig));
-				}
-				convertedData = [feature];
+		// Transform into layer's projection.
+		if (features != undefined) {
+			for (var i in features) {
+				var feature = features[i];
+				feature.getGeometry().transform(this.OSM_PROJECTION, newProjection);
+				convertedData.push(feature);
 			}
 		}
 		return convertedData;
-	},
-	
-	/**
-	 * This method converts the record tags into a propertie object according the given configuration.
-	 */
-	convertTagsToAttributes: function(record, attributesTagsConfig) {
-		var attributes = {};
-		for (var i in attributesTagsConfig) {
-			var attr = attributesTagsConfig[i].attr;
-			var tag = attributesTagsConfig[i].tag;
-			var tagValue = "";
-			if (tag.startsWith("rel:")) {
-				if (tag.substr(4) in record.data.tags) {
-					tagValue = record.data.tags[tag.substr(4)];
-				}
-			} else {
-				if (tag in record.data.tags) {
-					tagValue = record.data.tags[tag];
-				}
-			}
-			attributes[attr] = tagValue;
-		}
-		return attributes;
-	},
-	
+	},	
 	
 	/** 
 	 * Method to save the data in the server.

@@ -211,87 +211,120 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible with Point geometry.
-	 * If not compatible, undefined is returned.
-	 * If record is a relation, returns a list of object {geom, id}
+	 * This method converts the record tags into a propertie object according the given configuration.
 	 */
-	copyToPoint: function(records) {
-		var geom = undefined;
+	convertTagsToAttributes: function(record, attributesTagsConfig) {
+		var attributes = {};
+		for (var i in attributesTagsConfig) {
+			var attr = attributesTagsConfig[i].attr;
+			var tag = attributesTagsConfig[i].tag;
+			var tagValue = "";
+			if (tag.startsWith("rel:")) {
+				if (tag.substr(4) in record.data.tags) {
+					tagValue = record.data.tags[tag.substr(4)];
+				}
+			} else {
+				if (tag in record.data.tags) {
+					tagValue = record.data.tags[tag];
+				}
+			}
+			attributes[attr] = tagValue;
+		}
+		return attributes;
+	},
+	
+	/**
+	 * Returns a list of Features of the record if it is compatible with Point geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
+	 */
+	copyToPoint: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "node") {
-			geom = this.calculateGeom(undefined, records);
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = this.calculateGeom(undefined, records);
+			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
-			geom = [];
 			for (var memberId in this.data.members) {
 				var member = this.data.members[memberId];
 				if (member.type == "node") {
-					geom.push(
-						{geom: this.calculateGeom(member, records),
-						 id: member.ref});
+					var attr = this.convertTagsToAttributes(this.getSubElement(records, member.ref), attributesTagsConfig);
+					attr.geometry = this.calculateGeom(member, records);
+					features.push(new ol.Feature(attr));
 				}
 			}
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible with LineString geometry.
-	 * If not compatible, undefined is returned.
-	 * If record is a relation, returns a list of object {geom, id}
+	 * Returns a list of Features of the record if it is compatible with LineString geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	copyToLineString: function(records) {
-		var geom = undefined;
+	copyToLineString: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {
-			geom = this.calculateGeom(undefined, records);
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = this.calculateGeom(undefined, records);
+			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
-			geom = [];
 			for (var memberId in this.data.members) {
-				var member = this.data.members[memberId];
+				var member = this.getSubElement(records, this.data.members[memberId].ref);
 				if (member.type == "way" && !this.isPolygon(member)) {
-					geom.push(
-						{geom: this.calculateGeom(member, records),
-						 id: member.ref});
+					var attr = this.convertTagsToAttributes(member, attributesTagsConfig);
+					attr.geometry = this.calculateGeom(member.data, records);
+					features.push(new ol.Feature(attr));
 				}
 			}
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible with Polygon geometry.
-	 * If not compatible, undefined is returned.
-	 * If record is a relation, returns a list of object {geom, id}
+	 * Returns a list of Features of the record if it is compatible with Polygon geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	copyToPolygon: function(records) {
-		var geom = undefined;
+	copyToPolygon: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "way" && this.isPolygon(this.data)) {
-			geom = this.calculateGeom(undefined, records);
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = this.calculateGeom(undefined, records);
+			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
-			geom = this.calculateGeom(undefined, records);
-			if (geom.getType() != "Polygon") {
-				geom = [];
+			var geom = this.calculateGeom(undefined, records);
+			if (geom.getType() == "Polygon") {
+				var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+				attr.geometry = geom;
+				features.push(new ol.Feature(attr));
+			} else {
 				for (var memberId in this.data.members) {
-					var member = this.data.members[memberId];
+					var member = this.getSubElement(records, this.data.members[memberId].ref);
 					if (member.type == "way" && this.isPolygon(member)) {
-						geom.push(
-							{geom: this.calculateGeom(member, records),
-							 id: member.ref});
+						var attr = this.convertTagsToAttributes(member, attributesTagsConfig);
+						attr.geometry = this.calculateGeom(member.data, records);
+						features.push(new ol.Feature(attr));
 					}
 				}
 			}
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible with MultiPoint geometry.
-	 * If not compatible, undefined is returned.
+	 * Returns a list of Features of the record if it is compatible with MultiPoint geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	copyToMultiPoint: function(records) {
-		var geom = undefined;
+	copyToMultiPoint: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "node") {
-			geom = new ol.geom.MultiPoint();
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = new ol.geom.MultiPoint();
 			var point = this.calculateGeom(undefined, records);
-			geom.appendPoint(point);
+			attr.geometry.appendPoint(point);
+			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
 			var points = [];
 			for (var memberId in this.data.members) {
@@ -301,25 +334,30 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				}
 			}
 			if (points.length > 0) {
-				geom = new ol.geom.MultiPoint();
+				var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+				attr.geometry = new ol.geom.MultiPoint();
 				for (var i in points) {
-					geom.appendPoint(points[i]);
+					attr.geometry.appendPoint(points[i]);
 				}
+				features.push(new ol.Feature(attr));
 			}
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible with MultiLineString geometry.
-	 * If not compatible, undefined is returned.
+	 * Returns a list of Features of the record if it is compatible with MultiLineString geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	copyToMultiLineString: function(records) {
-		var geom = undefined;
+	copyToMultiLineString: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {
-			var lineString = this.calculateGeom(undefined, records);
-			geom = new ol.geom.MultiLineString();
-			geom.appendLineString(lineString);
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = new ol.geom.MultiLineString();
+			var line = this.calculateGeom(undefined, records);
+			attr.geometry.appendLineString(line);
+			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
 			var lines = [];
 			var relGeom = this.calculateGeom(undefined, records);
@@ -331,25 +369,30 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				);
 			}
 			if (lines.length > 0) {
-				geom = new ol.geom.MultiLineString();
+				var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+				attr.geometry = new ol.geom.MultiLineString();
 				for (var i in lines) {
-					geom.appendLineString(lines[i]);
+					attr.geometry.appendLineString(lines[i]);
 				}
+				features.push(new ol.Feature(attr));
 			}
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible with MultiPolygon geometry.
-	 * If not compatible, undefined is returned.
+	 * Returns a list of Features of the record if it is compatible with MultiPolygon geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	copyToMultiPolygon: function(records) {
-		var geom = undefined;
+	copyToMultiPolygon: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "way" && this.isPolygon(this.data)) {
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = new ol.geom.MultiPolygon();
 			var poly = this.calculateGeom(undefined, records);
-			geom = new ol.geom.MultiPolygon();
-			geom.appendPolygon(poly);
+			attr.geometry.appendPolygon(poly);
+			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
 			var polys = [];
 			poly = this.calculateGeom(undefined, records);
@@ -363,23 +406,27 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				);
 			}
 			if (polys.length > 0) {
-				geom = new ol.geom.MultiPolygon();
+				var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+				attr.geometry = new ol.geom.MultiPolygon();
 				for (var i in polys) {
-					geom.appendPolygon(polys[i]);
+					attr.geometry.appendPolygon(polys[i]);
 				}
+				features.push(new ol.Feature(attr));
 			}
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Returns the geometry of the record if it is compatible undefined geometry.
+	 * Returns a list of Features of the record if it is compatible with undefined geometry.
 	 * Each basic element is copied (Point, LineString, Polygon).
 	 * Elements from relations are placed in specific Multi.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	copyToUndefined : function(records) {
-		var geom = undefined;
+	copyToUndefined : function(records, attributesTagsConfig) {
+		var features = [];
 		var elementGeom = this.calculateGeom(undefined, records);
+		var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
 		if (elementGeom.getType() == "GeometryCollection") {
 			var points = [];
 			var lines = [];
@@ -397,64 +444,73 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				}
 			}
 			if (points.length > 0) {
-				var geomPoints = new ol.geom.MultiPoint();
+				attr.geometry = new ol.geom.MultiPoint();
 				for (var i in points) {
-					geomPoints.appendPoint(points[i]);
+					attr.geometry.appendPoint(points[i]);
 				}
-				geom.push(geomPoints);
+				features.push(new ol.Feature(attr));
 			}
 			if (lines.length > 0) {
-				var geomLines = new ol.geom.MultiLineString();
+				attr.geometry = new ol.geom.MultiLineString();
 				for (var i in lines) {
-					geomLines.appendLineString(lines[i]);
+					attr.geometry.appendLineString(lines[i]);
 				}
-				geom.push(geomLines);
+				features.push(new ol.Feature(attr));
 			}
 			if (polys.length > 0) {
-				var geomPolys = new ol.geom.MultiPolygon();
+				attr.geometry = new ol.geom.MultiPolygon();
 				for (var i in polys) {
-					geomPolys.appendPolygon(polys[i]);
+					attr.geometry.appendPolygon(polys[i]);
 				}
-				geom.push(geomPolys);
+				features.push(new ol.Feature(attr));
 			}
 		} else {
-			geom = elementGeom;
+			attr.geometry = elementGeom;
+			features.push(new ol.Feature(attr));
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Method to convert a record in a Point geometry.
-	 * If conversion is not possible, undefined is returned.
+	 * Returns a list of Features of the record converted in a Point geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	convertToPoint: function(records) {
-		var geom = undefined;
+	convertToPoint: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type != "way" || this.isPolygon(this.data)) {  // Don't copy way not closed
-			geom = this.calculateGeom(undefined, records);
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = this.calculateGeom(undefined, records);
 			if (this.data.type != "node") {  // Convert polygons and relations
-				geom = this.getCenterPoint(geom);
+				attr.geometry = this.getCenterPoint(attr.geometry);
 			}
+			features.push(new ol.Feature(attr));
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Method to convert a record in a LineString geometry.
-	 * If conversion is not possible, undefined is returned.
+	 * Returns a list of Features of the record converted in a LineString geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	convertToLineString: function(records) {
-		var geom = undefined;
+	convertToLineString: function(records, attributesTagsConfig) {
+		var features = [];
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
-			geom = this.calculateGeom(undefined, records);
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = this.calculateGeom(undefined, records);
+			features.push(new ol.Feature(attr));
 		}
-		return geom;
+		return features;
 	},
 	
 	/**
-	 * Method to convert a record in a Polygon geometry.
-	 * If conversion is not possible, undefined is returned.
+	 * Returns a list of Features of the record converted in a Polygon geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	convertToPolygon: function(records) {
+	convertToPolygon: function(records, attributesTagsConfig) {
+		var features = [];
 		var geom = this.calculateGeom(undefined, records);  // Get way closed and relation multipolygon with inners
 		if (this.data.type == "node") {
 			geom = this.getSquareFromPoint(geom);
@@ -463,14 +519,21 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		} else if (this.data.type == "way" && !this.isPolygon(this.data)) {
 			geom = undefined;
 		}
-		return geom;
+		if (geom) {
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = geom;
+			features.push(new ol.Feature(attr));
+		}
+		return features;
 	},
 	
 	/**
-	 * Method to convert a record in a MultiPoint geometry.
-	 * If conversion is not possible, undefined is returned.
+	 * Returns a list of Features of the record converted in a MultiPoint geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	convertToMultiPoint: function(records) {
+	convertToMultiPoint: function(records, attributesTagsConfig) {
+		var features = [];
 		var geom = undefined;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPoint();
@@ -506,14 +569,21 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				}
 			}
 		}
-		return geom;
+		if (geom) {
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = geom;
+			features.push(new ol.Feature(attr));
+		}
+		return features;
 	},
 	
 	/**
-	 * Method to convert a record in a MultiLineString geometry.
-	 * If conversion is not possible, undefined is returned.
+	 * Returns a list of Features of the record converted in a MultiLineString geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	convertToMultiLineString: function(records) {
+	convertToMultiLineString: function(records, attributesTagsConfig) {
+		var features = [];
 		var geom = undefined;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
 			var lineString = this.calculateGeom(undefined, records);
@@ -536,14 +606,21 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				}
 			}
 		}
-		return geom;
+		if (geom) {
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = geom;
+			features.push(new ol.Feature(attr));
+		}
+		return features;
 	},
 	
 	/**
-	 * Method to convert a record in a MultiPolygon geometry.
-	 * If conversion is not possible, undefined is returned.
+	 * Returns a list of Features of the record converted in a MultiPolygon geometry.
+	 * If not compatible, empty list is returned.
+	 * Tag conversion into feature properties is realized if a configuration is given.
 	 */
-	convertToMultiPolygon: function(records) {
+	convertToMultiPolygon: function(records, attributesTagsConfig) {
+		var features = [];
 		var geom = undefined;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPolygon();
@@ -578,7 +655,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			var poly = this.calculateGeom(undefined, records);
 			geom.appendPolygon(poly);
 		}
-		return geom;
+		if (geom) {
+			var attr = this.convertTagsToAttributes(this, attributesTagsConfig);
+			attr.geometry = geom;
+			features.push(new ol.Feature(attr));
+		}
+		return features;
 	},
 	
 	/**
