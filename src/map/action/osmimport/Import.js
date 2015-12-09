@@ -15,7 +15,10 @@ Ext.define('Ck.map.action.osmimport.Import', {
 	disabled: false,  // available by default, changed once import is finished
 	
 	doAction: function(btn) {
-		if(!this.win) {
+		if(!this.win || this.needClean) {
+			if (this.win) {
+				this.win.close();
+			}
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'OSM Data Import',
 				// height: 400,
@@ -30,6 +33,7 @@ Ext.define('Ck.map.action.osmimport.Import', {
 				}]
 				
 			});
+			this.needClean = false;
 		}
 		this.win.show();
 		this.win.expand();

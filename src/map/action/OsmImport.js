@@ -25,6 +25,7 @@ Ext.define('Ck.map.action.OsmImport', {
 	finishImport: function() {
 		Ck.actions['ckmapOsmImportImport'].setDisabled(true);
 		Ck.actions['ckmapOsmImportIntegration'].setDisabled(false);
+		this.needClean = true;
 	},
 	
 	/**
@@ -34,7 +35,10 @@ Ext.define('Ck.map.action.OsmImport', {
 	finishIntegration: function() {
 		Ck.actions['ckmapOsmImportIntegration'].setDisabled(true);
 		Ck.actions['ckmapOsmImportImport'].setDisabled(false);
-	}
+		this.needClean = true;
+	},
+	
+	needClean: false
 		
 });
 

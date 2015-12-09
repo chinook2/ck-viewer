@@ -47,39 +47,47 @@ Ext.define('Ck.osmimport.import.Controller', {
 		 * Init of the Map Elements for Selection
 		 */
 		this.selectionCoords = ""; // stores the coordinates of the selection ready to be used in OSM API.
-		this.selectionSource = new ol.source.Vector({wrapX:false});
-		this.selectionVector = new ol.layer.Vector({
-			source: this.selectionSource,
-			style: new ol.style.Style({
-				fill: new ol.style.Fill({
-			        color: 'rgba(255, 255, 255, 0.4)'
-			    }),
-			    stroke: new ol.style.Stroke({
-			        color: '#ffcc33',
-			        width: 2
-			    }),
-			    image: new ol.style.Circle({
-			        radius: 7,
-			        fill: new ol.style.Fill({
-				        color: '#ffcc33'
-			        })
-			    })
-			}),
-			id: "osmimport_selection"
-		});
-		this.olMap.addLayer(this.selectionVector);
+		if (Ck.getMap().getLayerById("osmimport_selection")) {
+			this.selectionVector = Ck.getMap().getLayerById("osmimport_selection")
+		} else {
+			this.selectionSource = new ol.source.Vector({wrapX:false});
+			this.selectionVector = new ol.layer.Vector({
+				source: this.selectionSource,
+				style: new ol.style.Style({
+					fill: new ol.style.Fill({
+						color: 'rgba(255, 255, 255, 0.4)'
+					}),
+					stroke: new ol.style.Stroke({
+						color: '#ffcc33',
+						width: 2
+					}),
+					image: new ol.style.Circle({
+						radius: 7,
+						fill: new ol.style.Fill({
+							color: '#ffcc33'
+						})
+					})
+				}),
+				id: "osmimport_selection"
+			});
+			this.olMap.addLayer(this.selectionVector);
+		}
 		this.mapInteraction = undefined;
 		
 		/**
 		 * Init the Map Elements for Display results
 		 */
-		this.displaySource = new ol.source.Vector();
-		this.displayVector = new ol.layer.Vector({
-			source: this.displaySource,
-			style: this.DEFAULT_STYLE,
-			id: "osmimport_data"
-		});
-		this.olMap.addLayer(this.displayVector);
+		if (Ck.getMap().getLayerById("osmimport_data")) {
+			this.displayVector = Ck.getMap().getLayerById("osmimport_data");
+		} else  {
+			this.displaySource = new ol.source.Vector();
+			this.displayVector = new ol.layer.Vector({
+				source: this.displaySource,
+				style: this.DEFAULT_STYLE,
+				id: "osmimport_data"
+			});
+			this.olMap.addLayer(this.displayVector);
+		}
 		
 		/**
 		 * Init elements for admin zone selection.

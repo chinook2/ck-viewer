@@ -16,7 +16,10 @@ Ext.define('Ck.map.action.osmimport.Integration', {
 	disabled: true,  // Disabled by default, changed after import
 	
 	doAction: function(btn) {
-		if(!this.win) {
+		if(!this.win || this.needClean) {
+			if (this.win) {
+				this.win.close();
+			}
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'OSM Data Integration',
 				width: 700,
@@ -30,6 +33,7 @@ Ext.define('Ck.map.action.osmimport.Integration', {
 				}]
 				
 			});
+			this.needClean = false;
 		}
 		this.win.show();
 		this.win.expand();
