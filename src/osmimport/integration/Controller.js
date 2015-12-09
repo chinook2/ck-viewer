@@ -297,23 +297,38 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		this.lookupReference("btnDissociate").setDisabled(nbAttrWithoutTag == selectedAttr.length);
 	},
 	
+	/**
+	 * Method called in defered to compute one record for the integration.
+	 * Call next one or ends the integration (if there is no next one).
+	 */
 	computeFeature: function() {
-		var record = this.records[this.nbFeaturesComputed];
-		var features = this.convertData(record, this.integrationLayer, this.records, this.attrTagConfig);
-		this.featuresToIntegrate = this.featuresToIntegrate.concat(features);
-		this.nbFeaturesComputed++;
-		this.waitMsg.updateProgress(this.nbFeaturesComputed / this.records.length);
-		if (this.nbFeaturesComputed < this.records.length) {
-			Ext.defer(this.computeFeature, 10, this);
-		} else {
-			this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
-			this.waitMsg.close();
+		try {
+			var record = this.records[this.nbFeaturesComputed];
+			var features = this.convertData(record, this.integrationLayer, this.allRecords, this.attrTagConfig);
+			this.featuresToIntegrate = this.featuresToIntegrate.concat(features);
+			this.nbFeaturesComputed++;
+			this.waitMsg.updateProgress(this.nbFeaturesComputed / this.records.length);
+			if (this.nbFeaturesComputed < this.records.length) {
+				Ext.defer(this.computeFeature, 10, this);
+			} else {
+				this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
+				this.waitMsg.close();
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'Integration of data from OpenStreetMap succeed. ' + this.featuresToIntegrate.length + ' elements integrated.',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.INFO
+				});
+			}
+		} catch (exception) {
+			console.log(exception.stack);  // TODO Remove this exception log
 			Ext.MessageBox.show({
 				title: 'OSM Import',
-				msg: 'Integration of data from OpenStreetMap succeed. ' + this.featuresToIntegrate.length + ' elements integrated.',
+				msg: 'An error occured while integrating the data.',
 				width: 500,
 				buttons: Ext.MessageBox.OK,
-				icon: Ext.Msg.INFO
+				icon: Ext.Msg.ERROR
 			});
 		}
 	},
@@ -323,78 +338,35 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Execute the integration according the user's configuration on panel.
 	 */
 	onIntegrationClick: function() {
-		var selectedLayer = this.lookupReference("layerselection").getValue();
-		this.integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-		this.records = Ext.Array.filter(this.getView().openner.osmapi.getData().items,
-			function(record) {return record.containsSearchedTags();});
-		this.attrTagConfig = [];
-		if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
-			var attrList = this.getViewModel().data.layersAttributes;
-			this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
-			
-		}
-		this.featuresToIntegrate = [];
-		this.nbFeaturesComputed = 0;
-
-
-		this.waitMsg = Ext.MessageBox.progress("Integrating data, please wait...");
-		Ext.defer(this.computeFeature, 10, this);
-	/*	Ext.defer(
-			function() {
-				try {
-					var selectedLayer = this.lookupReference("layerselection").getValue();
-					var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-					if (typeof integrationLayer.getSource().getFeatures === "function") {
-						var newFeatures = this.getFeaturesToIntegrate(integrationLayer);
-						console.log(newFeatures)  // TODO remove test log
-						integrationLayer.getSource().addFeatures(newFeatures);
-					}
-					this.waitMsg.close();
-					Ext.MessageBox.show({
-						title: 'OSM Import',
-						msg: 'Integration of data from OpenStreetMap succeed. ' + newFeatures.length + ' elements integrated.',
-						width: 500,
-						buttons: Ext.MessageBox.OK,
-						icon: Ext.Msg.INFO
-					});
-				} catch (exception) {
-					console.log(exception.stack);  // TODO Remove this exception log
-					Ext.MessageBox.show({
-						title: 'OSM Import',
-						msg: 'An error occured while integrating the data.',
-						width: 500,
-						buttons: Ext.MessageBox.OK,
-						icon: Ext.Msg.ERROR
-					});
-				}
-			},
-			100,
-			this
-		);*/
-	},
-	
-	/**
-	 * This method return a list of features ready to integrate according the configuration. 
-	 */
-	getFeaturesToIntegrate: function(integrationLayer) {
-		// Get the configuration of the conversion for the tags -> attributes
-		var attrTagConfig = [];
-		if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
-			var attrList = this.getViewModel().data.layersAttributes;
-			attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
-			
-		}
-		
-		var featuresToIntegrate = [];
-		var records = this.getView().openner.osmapi.getData().items;
-		for (var i in records) {
-			var record = records[i];
-			if (record.containsSearchedTags()) {  // Filter records to get only searched elements (not sub nodes or members)
-				var features = this.convertData(record, integrationLayer, records, attrTagConfig);
-				featuresToIntegrate = featuresToIntegrate.concat(features);
+		try {
+			var selectedLayer = this.lookupReference("layerselection").getValue();
+			this.integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+			this.allRecords = this.getView().openner.osmapi.getData().items;
+			this.records = Ext.Array.filter(this.allRecords,
+				function(record) {return record.containsSearchedTags();});
+			this.attrTagConfig = [];
+			if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
+				var attrList = this.getViewModel().data.layersAttributes;
+				this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
+				
 			}
+			this.featuresToIntegrate = [];
+			this.nbFeaturesComputed = 0;
+
+
+			this.waitMsg = Ext.MessageBox.progress("Integrating data, please wait...");
+			// Compute records one by one in defered call to update the progress bar.
+			Ext.defer(this.computeFeature, 10, this);
+		} catch (exception) {
+			console.log(exception.stack);  // TODO Remove this exception log
+			Ext.MessageBox.show({
+				title: 'OSM Import',
+				msg: 'An error occured while integrating the data.',
+				width: 500,
+				buttons: Ext.MessageBox.OK,
+				icon: Ext.Msg.ERROR
+			});
 		}
-		return featuresToIntegrate;
 	},
 	
 	/**
