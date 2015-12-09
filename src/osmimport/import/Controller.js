@@ -308,7 +308,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				maxPoints = 2;
 				selectType = "LineString";
 				geometryFunction = function(coordinates, geometry) {
-					self.selectionSource.clear();
+					self.selectionVector.getSource().clear();
 					if (!geometry) {
 						geometry = new ol.geom.Polygon(null);
 					}
@@ -322,7 +322,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			} else if (selectType === "polygon") {
 				selectType = "Polygon";
 				geometryFunction = function(coordinates, geometry) {
-					self.selectionSource.clear();
+					self.selectionVector.getSource().clear();
 					if (!geometry) {
 						geometry = new ol.geom.Polygon(null);
 					}
@@ -332,7 +332,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			}
 
 			draw = new ol.interaction.Draw({
-				source: self.selectionSource,
+				source: self.selectionVector.getSource(),
 				type: /** @type {ol.geom.GeometryType} */ (selectType),
 				geometryFunction: geometryFunction,
 				maxPoints: maxPoints
