@@ -495,7 +495,8 @@ Ext.define('Ck.form.Controller', {
 						}
 						
 						store = {
-							autoLoad: true,
+							// If queryMode = 'remote' > autoLoad = false...
+							autoLoad: !(c.queryMode==='remote'),
 							proxy: {
 								type: 'ajax',
 								noCache: false,
@@ -507,7 +508,7 @@ Ext.define('Ck.form.Controller', {
 					// Default in-memory Store
 					if(!store) {
 						store = {
-							"proxy": "memory"
+							proxy: 'memory'
 						}
 					}
 					return store;
