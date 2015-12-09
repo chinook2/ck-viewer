@@ -475,7 +475,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 						nbFeaturesImported++;
 						if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
 							var newProjection = Ck.getMap().getOlMap().getView().getProjection();
-							var geom = record.calculateGeom(newProjection, undefined, true, records);
+							var geom = record.calculateGeom(undefined, records);
+							if (geom != undefined) {
+								geom.transform(this.OSM_PROJECTION, newProjection);
+							}
 							var feature = new ol.Feature(geom);
 							olFeatures.push(feature);
 						}

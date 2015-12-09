@@ -168,7 +168,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						(["Point", "LineString", "Polygon"].indexOf(integrationGeometryType) > -1)) {
 						for (var memberId in record.data.members) {
 							var member = record.getSubElement(records, record.data.members[memberId].ref);
-							if (record.calculateGeom(undefined, member.data, false, records).getType() == integrationGeometryType) {
+							if (record.calculateGeom(member.data, records).getType() == integrationGeometryType) {
 								for (var key in member.data.tags) {
 									if (tags.indexOf("rel:" + key) == -1) {
 										tags.push("rel:" + key);

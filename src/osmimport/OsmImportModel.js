@@ -41,18 +41,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	
 	/**
 	 * Method used to create the geometry of a data according its OSM type.
-	 * Geometry is transformed in the new projection.
-	 * @param newProjection Projection to be used for displaying or saving the data.
 	 * @param data Data for which the geometry is calculated. Defaults is undefined.
-	 * @param convert Indicates if the projection shall be converted or not. Default is true.
 	 * @param allRecords List of all the records as returned by the store after load.
 	 **/
-	calculateGeom: function(newProjection, data, convert, allRecords) {
+	calculateGeom: function(data, allRecords) {
 		var data = data || this.data;
 		var convertGeom = true;
-		if (convert == false) {
-			convertGeom = false;
-		}
 		var geom = undefined;
 		// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
 		if (data.type === "node") {  // Points
@@ -78,7 +72,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 					for (var memberId in data.members) {
 						var member = data.members[memberId];
 						member.tags = {};
-						var polygeom = this.calculateGeom(null, member, false, allRecords);
+						var polygeom = this.calculateGeom(member, allRecords);
 						coords.push(polygeom.getCoordinates(member.role == "inner"));  // Direction is inverted for inners
 					}
 					geom = new ol.geom.Polygon(coords);
@@ -102,16 +96,11 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 									   geometry: member.geometry,
 									   lat: member.lat,
 									   lon: member.lon}
-						geoms.push(this.calculateGeom(null, element, false, allRecords));
+						geoms.push(this.calculateGeom(element, allRecords));
 					}
 				}
 				geom = new ol.geom.GeometryCollection(geoms);
 			}
-		}
-
-		// Transform the OSM projection into Map projection
-		if (geom != undefined && convertGeom) {
-			geom.transform(this.OSM_PROJECTION, newProjection);
 		}
 		return geom;
 	},
@@ -229,14 +218,14 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	copyToPoint: function(records) {
 		var geom = undefined;
 		if (this.data.type == "node") {
-			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.calculateGeom(undefined, records);
 		} else if (this.data.type == "relation") {
 			geom = [];
 			for (var memberId in this.data.members) {
 				var member = this.data.members[memberId];
 				if (member.type == "node") {
 					geom.push(
-						{geom: this.calculateGeom(undefined, member, false, records),
+						{geom: this.calculateGeom(member, records),
 						 id: member.ref});
 				}
 			}
@@ -252,14 +241,14 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	copyToLineString: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {
-			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.calculateGeom(undefined, records);
 		} else if (this.data.type == "relation") {
 			geom = [];
 			for (var memberId in this.data.members) {
 				var member = this.data.members[memberId];
 				if (member.type == "way" && !this.isPolygon(member)) {
 					geom.push(
-						{geom: this.calculateGeom(undefined, member, false, records),
+						{geom: this.calculateGeom(member, records),
 						 id: member.ref});
 				}
 			}
@@ -275,16 +264,16 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	copyToPolygon: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && this.isPolygon(this.data)) {
-			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.calculateGeom(undefined, records);
 		} else if (this.data.type == "relation") {
-			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.calculateGeom(undefined, records);
 			if (geom.getType() != "Polygon") {
 				geom = [];
 				for (var memberId in this.data.members) {
 					var member = this.data.members[memberId];
 					if (member.type == "way" && this.isPolygon(member)) {
 						geom.push(
-							{geom: this.calculateGeom(undefined, member, false, records),
+							{geom: this.calculateGeom(member, records),
 							 id: member.ref});
 					}
 				}
@@ -301,14 +290,14 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var geom = undefined;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPoint();
-			var point = this.calculateGeom(undefined, undefined, false, records);
+			var point = this.calculateGeom(undefined, records);
 			geom.appendPoint(point);
 		} else if (this.data.type == "relation") {
 			var points = [];
 			for (var memberId in this.data.members) {
 				var member = this.data.members[memberId];
 				if (member.type == "node") {
-					points.push(this.calculateGeom(undefined, member, false, records));
+					points.push(this.calculateGeom(member, records));
 				}
 			}
 			if (points.length > 0) {
@@ -328,12 +317,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	copyToMultiLineString: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {
-			var lineString = this.calculateGeom(undefined, undefined, false, records);
+			var lineString = this.calculateGeom(undefined, records);
 			geom = new ol.geom.MultiLineString();
 			geom.appendLineString(lineString);
 		} else if (this.data.type == "relation") {
 			var lines = [];
-			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			var relGeom = this.calculateGeom(undefined, records);
 			if (relGeom.getType() == "GeometryCollection") {
 				lines = Ext.Array.filter(relGeom.getGeometries(),
 					function(member) {
@@ -358,12 +347,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	copyToMultiPolygon: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && this.isPolygon(this.data)) {
-			var poly = this.calculateGeom(undefined, undefined, false, records);
+			var poly = this.calculateGeom(undefined, records);
 			geom = new ol.geom.MultiPolygon();
 			geom.appendPolygon(poly);
 		} else if (this.data.type == "relation") {
 			var polys = [];
-			poly = this.calculateGeom(undefined, undefined, false, records);
+			poly = this.calculateGeom(undefined, records);
 			if (poly.getType() == "Polygon") {
 				polys.push(poly);
 			} else {  // If rel is not Polygon it is a GeometryCollection
@@ -390,7 +379,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 */
 	copyToUndefined : function(records) {
 		var geom = undefined;
-		var elementGeom = this.calculateGeom(undefined, undefined, false, records);
+		var elementGeom = this.calculateGeom(undefined, records);
 		if (elementGeom.getType() == "GeometryCollection") {
 			var points = [];
 			var lines = [];
@@ -441,7 +430,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	convertToPoint: function(records) {
 		var geom = undefined;
 		if (this.data.type != "way" || this.isPolygon(this.data)) {  // Don't copy way not closed
-			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.calculateGeom(undefined, records);
 			if (this.data.type != "node") {  // Convert polygons and relations
 				geom = this.getCenterPoint(geom);
 			}
@@ -456,7 +445,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	convertToLineString: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
-			geom = this.calculateGeom(undefined, undefined, false, records);
+			geom = this.calculateGeom(undefined, records);
 		}
 		return geom;
 	},
@@ -466,7 +455,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * If conversion is not possible, undefined is returned.
 	 */
 	convertToPolygon: function(records) {
-		var geom = this.calculateGeom(undefined, undefined, false, records);  // Get way closed and relation multipolygon with inners
+		var geom = this.calculateGeom(undefined, records);  // Get way closed and relation multipolygon with inners
 		if (this.data.type == "node") {
 			geom = this.getSquareFromPoint(geom);
 		} else if ((this.data.type == "relation") && (geom.getType() != "Polygon")) {
@@ -485,16 +474,16 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var geom = undefined;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPoint();
-			var point = this.calculateGeom(undefined, undefined, false, records);
+			var point = this.calculateGeom(undefined, records);
 			geom.appendPoint(point);
 		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
 			geom = new ol.geom.MultiPoint();
-			var poly = this.calculateGeom(undefined, undefined, false, records);
+			var poly = this.calculateGeom(undefined, records);
 			var point = this.getCenterPoint(poly);
 			geom.appendPoint(point);
 		} else if (this.data.type == "relation") {
 			var points = [];
-			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			var relGeom = this.calculateGeom(undefined, records);
 			if (relGeom.getType() == "Polygon") {
 				var point = this.getCenterPoint(relGeom);
 				points.push(point);
@@ -527,12 +516,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	convertToMultiLineString: function(records) {
 		var geom = undefined;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
-			var lineString = this.calculateGeom(undefined, undefined, false, records);
+			var lineString = this.calculateGeom(undefined, records);
 			geom = new ol.geom.MultiLineString();
 			geom.appendLineString(lineString);
 		} else if (this.data.type == "relation") {
 			var lines = [];
-			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			var relGeom = this.calculateGeom(undefined, records);
 			if (relGeom.getType() == "GeometryCollection") {
 				lines = Ext.Array.filter(relGeom.getGeometries(),
 					function(member) {
@@ -558,12 +547,12 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var geom = undefined;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPolygon();
-			var point = this.calculateGeom(undefined, undefined, false, records);
+			var point = this.calculateGeom(undefined, records);
 			var poly = this.getSquareFromPoint(point);
 			geom.appendPolygon(poly);
 		} else if (this.data.type == "relation") {
 			var polys = [];
-			var relGeom = this.calculateGeom(undefined, undefined, false, records);
+			var relGeom = this.calculateGeom(undefined, records);
 			if (relGeom.getType() == "Polygon") {
 				polys.push(relGeom);
 			} else {
@@ -586,7 +575,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
 			geom = new ol.geom.MultiPolygon();
-			var poly = this.calculateGeom(undefined, undefined, false, records);
+			var poly = this.calculateGeom(undefined, records);
 			geom.appendPolygon(poly);
 		}
 		return geom;
