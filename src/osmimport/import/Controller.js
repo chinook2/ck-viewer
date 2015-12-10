@@ -473,57 +473,29 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.openner.close();
 		if (success) {
 			try {
-				var olFeatures = [];
-				var nbFeaturesImported = 0;
+				this.waitMsg.close();
+				this.nbFeaturesImported = 0;
 				var checkedTags = this.getSelectedTags();
-		
-				for (var r = 0; r < records.length; r++) {
-					var record = records[r];
-					if (record.containsSearchedTags(checkedTags)) {
-						nbFeaturesImported++;
-						if (nbFeaturesImported <= this.NB_FEATURES_MAX) {
-							var newProjection = Ck.getMap().getOlMap().getView().getProjection();
-							var geom = record.calculateGeom(undefined, records);
-							if (geom != undefined) {
-								geom.transform(this.OSM_PROJECTION, newProjection);
-							}
-							var feature = new ol.Feature(geom);
-							olFeatures.push(feature);
-						}
-					}
+				this.olFeatures = [];
+				this.nbRecordComputed = 0;
+				if (records.length > 0) {
+					this.waitMsg = Ext.Msg.progress("OSM Import", "Compute received data, please wait...");
+					this.waitMsg.setWidth(300);
+					this.records = Ext.Array.filter(records,
+						function(record) {return record.containsSearchedTags(checkedTags);}
+					);
+					this.allRecords = records;
+					// Compute each record in a defered call to update the progress bar
+					Ext.defer(this.computeRecord, 1, this);
+				} else {  // No Result found
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Import data from OpenStreetMap succeed.<br/>No data found for the selection',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
 				}
-				this.displayVector.getSource().clear();
-				this.displayVector.getSource().addFeatures(olFeatures);
-				
-				// Apply rendering style to the imported data
-				var style = this.DEFAULT_STYLE;
-				var renderingName = this.lookupReference("rendering").getValue();
-				if (renderingName) {
-					var renderingStore = this.vm.getStore("renderings");
-					var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
-					if (rendering.isValid()) {
-						style = new ol.style.Style({
-							fill: new ol.style.Fill({
-								color: rendering.data.fillcolor
-							}),
-							stroke: new ol.style.Stroke({
-								color: rendering.data.strokecolor,
-								width: 2
-							}),
-							image: new ol.style.Circle({
-								radius: 7,
-								fill: new ol.style.Fill({
-									color: rendering.data.fillcolor
-								}),
-								stroke: new ol.style.Stroke({
-									color: rendering.data.strokecolor,
-									width: 2
-								})
-							})
-						});
-					}
-				}
-				this.displayVector.setStyle(style);
 				
 			} catch (exception) {
 				console.log(exception.stack);  // TODO remove this debug log
@@ -534,36 +506,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.ERROR
 				});
-			} finally {
-				// Manage messages for end of import
-				this.waitMsg.close();
-				if (nbFeaturesImported === 0) {  // No Result
-					Ext.MessageBox.show({
-						title: 'OSM Import',
-						msg: 'Import data from OpenStreetMap succeed.<br/>No data found for the selection',
-						width: 500,
-						buttons: Ext.MessageBox.OK,
-						icon: Ext.Msg.WARNING
-					});
-				} else if (nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
-					Ext.MessageBox.show({
-						title: 'OSM Import',
-						msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.<br/>'
-							 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
-						width: 500,
-						buttons: Ext.MessageBox.OK,
-						icon: Ext.Msg.WARNING
-					});
-					this.openner.finishImport();
-				} else {
-					Ext.MessageBox.show({
-						title: 'OSM Import',
-						msg: 'Import data from OpenStreetMap succeed and returned ' + nbFeaturesImported + ' elements.',
-						width: 500,
-						buttons: Ext.MessageBox.OK,
-						icon: Ext.Msg.INFO
-					});
-					this.openner.finishImport();
+				if (this.waitMsg) {
+					this.waitMsg.close();
 				}
 			}
 
@@ -579,6 +523,114 @@ Ext.define('Ck.osmimport.import.Controller', {
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured during import. ' + errorMessage,
+				width: 500,
+				buttons: Ext.MessageBox.OK,
+				icon: Ext.Msg.ERROR
+			});
+		}
+	},
+	
+	/**
+	 * This method compute a record from imported data.
+	 * This record shall be a tag which contains the searched tags.
+	 * Once the record is computed, progress bar is updated
+	 * and the method call the next record or ends the import is there is no more records.
+	 */
+	computeRecord: function() {
+		try {
+			var record = this.records[this.nbRecordComputed];
+			this.nbFeaturesImported++;
+			if (this.nbFeaturesImported <= this.NB_FEATURES_MAX) {
+				var newProjection = Ck.getMap().getOlMap().getView().getProjection();
+				var geom = record.calculateGeom(undefined, this.allRecords);
+				if (geom != undefined) {
+					geom.transform(this.OSM_PROJECTION, newProjection);
+				}
+				var feature = new ol.Feature(geom);
+				this.olFeatures.push(feature);
+			}
+			this.nbRecordComputed++;
+			this.waitMsg.updateProgress(this.nbRecordComputed / this.records.length);
+			if (this.nbRecordComputed < this.records.length) {
+				Ext.defer(this.computeRecord, 1, this);
+			} else {
+				Ext.defer(this.endImport, 1, this);
+			}
+		} catch (exception) {
+			console.log(exception.stack);  // TODO Remove this debug log
+			Ext.MessageBox.show({
+				title: 'OSM Import',
+				msg: 'An error occured during import.',
+				width: 500,
+				buttons: Ext.MessageBox.OK,
+				icon: Ext.Msg.ERROR
+			});
+		}
+	},
+	
+	/**
+	 * This method ends the import, by displaying all the records 
+	 * and applying the correct style.
+	 */
+	endImport: function() {
+		try {
+			this.displayVector.getSource().clear();
+			this.displayVector.getSource().addFeatures(this.olFeatures);
+			
+			// Apply rendering style to the imported data
+			var style = this.DEFAULT_STYLE;
+			var renderingName = this.lookupReference("rendering").getValue();
+			if (renderingName) {
+				var renderingStore = this.vm.getStore("renderings");
+				var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
+				if (rendering.isValid()) {
+					style = new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: rendering.data.fillcolor
+						}),
+						stroke: new ol.style.Stroke({
+							color: rendering.data.strokecolor,
+							width: 2
+						}),
+						image: new ol.style.Circle({
+							radius: 7,
+							fill: new ol.style.Fill({
+								color: rendering.data.fillcolor
+							}),
+							stroke: new ol.style.Stroke({
+								color: rendering.data.strokecolor,
+								width: 2
+							})
+						})
+					});
+				}
+			}
+			this.displayVector.setStyle(style);
+			if (this.nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'Import data from OpenStreetMap succeed and returned ' + this.nbFeaturesImported + ' elements.<br/>'
+						 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.WARNING
+				});
+				this.openner.finishImport();
+			} else {
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'Import data from OpenStreetMap succeed and returned ' + this.nbFeaturesImported + ' elements.',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.INFO
+				});
+				this.openner.finishImport();
+			}
+		} catch (exception) {
+			console.log(exception.stack);  // TODO Remove this debug log
+			Ext.MessageBox.show({
+				title: 'OSM Import',
+				msg: 'An error occured during import.',
 				width: 500,
 				buttons: Ext.MessageBox.OK,
 				icon: Ext.Msg.ERROR
