@@ -90,12 +90,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		}
 		
 		/**
-		 * Init elements for admin zone selection.
-		 */
-		var adminAvailable = this.isAdminSelectionAvailable();
-		this.vm.data.adminSelectAvailable = adminAvailable;
-		
-		/**
 		 * Init the Message Boxes attributes.
 		 */
 		this.waitMsg = undefined;
@@ -222,23 +216,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 	},
 	
 	/**
-	 * Returns the list of all the layers that can be used for admin selection.
-	 */
-	getAdminSelectionLayers: function() {
-		return Ext.Array.filter(Ck.getMap().getLayers().getArray(), 
-			function(layer) {
-				return layer.get("admin");
-			});
-	},
-	
-	/**
-	 * Method to check if the selection of an admin zone is available.
-	 */
-	isAdminSelectionAvailable: function() {
-		return this.getAdminSelectionLayers().length > 0;
-	},
-	
-	/**
 	 * Method called once the user has finished its selection of a geographical zone.
 	 * - Converts the coordinates
 	 * - Stores the coordinates
@@ -246,7 +223,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	onSelectionDone: function(evt) {
 		var selectionGeometry;
 		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
-		if (selectType === "admin") {
+		if (selectType === "feature") {
 			if (evt.selected.length > 0) {
 				var featureGeom = evt.selected[0].getGeometry();
 				if (featureGeom.getType() === "Polygon") {
@@ -297,9 +274,9 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var newInteraction;
 
 		// Prepare draw interaction and geometryFunction according selection mode
-		if (selectType === "admin") {
+		if (selectType === "feature") {
 			newInteraction = new ol.interaction.Select({
-				layers: this.getAdminSelectionLayers()
+				layers: Ck.getMap().getLayers().getArray()
 			});
 			newInteraction.on("select", this.onSelectionDone, this);
 		} else {

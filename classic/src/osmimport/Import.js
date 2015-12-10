@@ -97,11 +97,8 @@ Ext.define("Ck.osmimport.Import", {
 					boxLabel: 'Polygon',
 					inputValue: 'polygon'
 				}, {
-					boxLabel: 'Administrative limit from layer',
-					inputValue: 'admin',
-					bind: {
-						disabled: "{!adminSelectAvailable}"
-					}
+					boxLabel: 'Polygon Feature from layer',
+					inputValue: 'feature'
 				}]
 			},{
 				xtype: "button",

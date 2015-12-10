@@ -12,8 +12,7 @@ Ext.define("Ck.osmimport.import.Model", {
 		"Ck.osmimport.import.RenderingsStore"
 	],
 	data: {
-		checkedTags: [],
-		adminSelectAvailable: false
+		checkedTags: []
 	},
 		
 	stores: {

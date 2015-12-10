@@ -86,8 +86,7 @@
 				}]
 			}],
 			"extension" : {
-				"path": "Limites Administratives",
-				"admin": true
+				"path": "Limites Administratives"
 			}
 		}
 	},{
@@ -109,8 +108,7 @@
 				}]
 			}],
 			"extension" : {
-				"path": "Limites Administratives",
-				"admin": true
+				"path": "Limites Administratives"
 			}
 		}
 	},{
