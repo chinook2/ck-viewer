@@ -21,6 +21,7 @@ Ext.define("Ck.osmimport.OsmImportStore", {
 		reader: {
 			type: "json",
 			rootProperty: "elements"
-		}
+		},
+		timeout: 180000  // Default OverpassAPI value
 	}
 });

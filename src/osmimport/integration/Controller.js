@@ -307,7 +307,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			var features = this.convertData(record, this.integrationLayer, this.allRecords, this.attrTagConfig);
 			this.featuresToIntegrate = this.featuresToIntegrate.concat(features);
 			this.nbFeaturesComputed++;
-			this.waitMsg.updateProgress(this.nbFeaturesComputed / this.records.length);
+			var progress = this.nbFeaturesComputed / this.records.length;
+			this.waitMsg.updateProgress(progress, Math.round(progress * 100) + "%");
 			if (this.nbFeaturesComputed < this.records.length) {
 				Ext.defer(this.computeFeature, 1, this);
 			} else {

@@ -483,6 +483,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 						closable: false,
 						message: "Computing received data, please wait...",
 						progress: true,
+						progressText: "0%",
 						width: 400
 					});
 					this.records = Ext.Array.filter(records,
@@ -520,7 +521,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var statusCode = operation.getError().status;
 			var errorMessage = "";
 			if (statusCode === 0) {
-				errorMessage = "No connection to Internet available"
+				errorMessage = "No connection to Internet available or no response before timeout"
 			} else if (statusCode === 400) {
 				errorMessage = "Error in the OSM request";
 			}
@@ -554,7 +555,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.olFeatures.push(feature);
 			}
 			this.nbRecordComputed++;
-			this.waitMsg.updateProgress(this.nbRecordComputed / this.records.length);
+			var progress = this.nbRecordComputed / this.records.length;
+			this.waitMsg.updateProgress(progress, Math.round(progress * 100) + "%");
 			if (this.nbRecordComputed < this.records.length) {
 				Ext.defer(this.computeRecord, 1, this);
 			} else {
