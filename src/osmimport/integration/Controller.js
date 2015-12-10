@@ -309,7 +309,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			this.nbFeaturesComputed++;
 			this.waitMsg.updateProgress(this.nbFeaturesComputed / this.records.length);
 			if (this.nbFeaturesComputed < this.records.length) {
-				Ext.defer(this.computeFeature, 10, this);
+				Ext.defer(this.computeFeature, 5, this);
 			} else {
 				this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
 				this.waitMsg.close();
@@ -348,15 +348,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
 				var attrList = this.getViewModel().data.layersAttributes;
 				this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
-				
 			}
 			this.featuresToIntegrate = [];
 			this.nbFeaturesComputed = 0;
 
-
-			this.waitMsg = Ext.MessageBox.progress("Integrating data, please wait...");
+			this.waitMsg = Ext.MessageBox.progress("OSM Import", "Integrating data, please wait...");
+			this.waitMsg.setWidth(300);
 			// Compute records one by one in defered call to update the progress bar.
-			Ext.defer(this.computeFeature, 10, this);
+			Ext.defer(this.computeFeature, 5, this);
 		} catch (exception) {
 			console.log(exception.stack);  // TODO Remove this exception log
 			Ext.MessageBox.show({
