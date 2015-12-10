@@ -681,7 +681,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		var sideWidth = Ext.isNumber(sideWidth) ? sideWidth : 10;
 		point.transform(this.OSM_PROJECTION, "EPSG:3857");  // Goes in a projection which use meters.
 		point = new ol.geom.Circle(point.getCoordinates(), sideWidth);  // Create a circle with given point as center.
-		var poly = ol.geom.Polygon.fromCircle(point, 4, 0.785398);  // Create square inside the circle. starts with 45° angle (0.78 rad)
+		var poly = ol.geom.Polygon.fromExtent(point.getExtent());  // Create square inside the circle. starts with 45° angle (0.78 rad)
 		poly.transform("EPSG:3857", this.OSM_PROJECTION);
 		return poly;
 	}
