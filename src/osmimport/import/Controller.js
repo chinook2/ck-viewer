@@ -377,7 +377,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.waitMsg = Ext.Msg.show({
 					msg: 'Importing data from OpenStreetMap, please wait...',
 					autoShow: true,
-					width: 300,
+					width: 400,
 					wait: {
 						interval: 200
 					}
@@ -479,8 +479,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.olFeatures = [];
 				this.nbRecordComputed = 0;
 				if (records.length > 0) {
-					this.waitMsg = Ext.Msg.progress("OSM Import", "Compute received data, please wait...");
-					this.waitMsg.setWidth(300);
+					this.waitMsg = Ext.Msg.show({
+						closable: false,
+						message: "Computing received data, please wait...",
+						progress: true,
+						width: 400
+					});
 					this.records = Ext.Array.filter(records,
 						function(record) {return record.containsSearchedTags(checkedTags);}
 					);

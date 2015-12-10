@@ -352,8 +352,12 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			this.featuresToIntegrate = [];
 			this.nbFeaturesComputed = 0;
 
-			this.waitMsg = Ext.MessageBox.progress("OSM Import", "Integrating data, please wait...");
-			this.waitMsg.setWidth(300);
+			this.waitMsg = Ext.Msg.show({
+				closable: false,
+				message: "Integrating data, please wait...",
+				progress: true,
+				width: 400
+			});
 			// Compute records one by one in defered call to update the progress bar.
 			Ext.defer(this.computeFeature, 5, this);
 		} catch (exception) {
