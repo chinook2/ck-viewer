@@ -2,15 +2,24 @@
  * @private
  */
 Ext.define('Ck.form.plugin.Subform', {
-    extend: 'Ext.AbstractPlugin',
-    alias: 'plugin.gridsubform',
+	extend: 'Ext.AbstractPlugin',
+	alias: 'plugin.gridsubform',
 
+	clicksToEdit: 1,
+
+	editrow: true,
+	
+	deleterow: true,
+	disableDeleteRow: null,
+	
+	addItemLast: true,
+	
 	_subformWindow: null,
 	_subform: null,
 	_grid: null,
 	
-    init: function(grid) {
-        if(!grid.subform) return;
+	init: function(grid) {
+		if(!grid.subform) return;
 		
 		// Accept param as String or Object
 		if(Ext.isString(grid.subform)){
@@ -23,29 +32,30 @@ Ext.define('Ck.form.plugin.Subform', {
 		grid.on('afterrender', function() {
 			this.initSubForm(grid);
 		}, this, {delay: 50});
-    },
+	},
 
-    /**
-     * @private
-     * Component calls destroy on all its plugins at destroy time.
-     */
-    destroy: function() {
-    },
-    
+	/**
+	 * @private
+	 * Component calls destroy on all its plugins at destroy time.
+	 */
+	destroy: function() {
+	},
+	
 	
 	initSubForm: function(grid) {
 		this._grid = grid;
 		var subForm = grid.subform;
 		
-		// Options for the plugin
-		if(!grid.gridediting) grid.gridediting = {};
+		var formController = grid.lookupController();
 
 		this._subform = Ext.create({
 			xtype: 'ckform',
 			itemId: 'subform',
 			isSubForm: true, 
-			editing: subForm.editing || grid.lookupController().getView().getEditing(),
-			urlTemplate: subForm.urlTemplate || grid.lookupController().getView().getUrlTemplate(),
+			editing: subForm.editing || formController.getView().getEditing(),
+			urlTemplate: subForm.urlTemplate || formController.getView().getUrlTemplate(),
+			// inherit dataFid from main form (used in store url template)
+			dataFid:  formController.getView().getDataFid(),
 			
 			// TODO use param from json
 			//layout: 'form',
@@ -126,19 +136,25 @@ Ext.define('Ck.form.plugin.Subform', {
 		this.actionColumn = grid.down('actioncolumn');
 		if(!this.actionColumn) {
 			var actions = [];
-			if(grid.gridediting.editrow!==false){
+			if(this.editrow!==false || this.clicksToEdit==0){
 				actions.push({
 					iconCls: 'fa fa-edit',
 					tooltip: 'Edit row',
-					handler: Ext.emptyFn,
+					handler: this.loadItem,
+					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
+						this.loadItem(view, rec, row, rowIndex);
+					},
 					scope: this
 				});
 			}
-			if(grid.gridediting.deleterow!==false){
+			if(this.deleterow!==false){
 				actions.push({
-					//iconCls: 'fa fa-close',
 					isDisabled: function(v, r, c, i, rec) {
-						if(rec && rec.get('dummy')) return true;
+						if(!rec) return true;
+						if(rec.get('dummy')) return true;
+						if(this.disableDeleteRow) {
+							if(rec.get(this.disableDeleteRow.property) === this.disableDeleteRow.value) return true
+						}
 						return false;
 					},
 					getClass: function(v, meta, rec) {
@@ -155,7 +171,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
-				hidden: true,
+				hidden: !formController.getView().getEditing(),
 				items: actions
 			});
 
@@ -166,15 +182,12 @@ Ext.define('Ck.form.plugin.Subform', {
 			// this.actionColumn.ownerGrid = this.grid;
 			
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
-		}       
+		}	   
 		
-        grid.on('rowclick', this.loadItem, this);
+		if(this.clicksToEdit != 0) {
+			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), this.loadItem, this);			
+		}
 		
-		// Get associate form of the grid (assume first parent form)
-		var formView = grid.view.up('form');
-		if(!formView) return;
-		
-		var formController = formView.getController();
 		// On start editing
 		formController.on({
 			startEditing: this.startEditing,
@@ -193,42 +206,47 @@ Ext.define('Ck.form.plugin.Subform', {
 		this.actionColumn.hide();
 	},
 	
-    addItem: function() {
-        if (!this._subform.isValid()) {
-            return;
-        }
+	addItem: function() {
+		if (!this._subform.isValid()) {
+			return;
+		}
 		
-        // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-        // var res = form.getValues(false, false, false, true);
+		// [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
+		// var res = form.getValues(false, false, false, true);
 		
 		// Get only values of subform
 		var formController = this._subform.getController();
 		var res = formController.getValues();
 		
-		// Insert new record		
-		this._grid.getStore().insert(0, res);
+		if(this.addItemLast===true){
+			// Add new record at the end
+			this._grid.getStore().add(res);
+		}else{
+			// Insert new record	at the beginning	
+			this._grid.getStore().insert(0, res);
+		}
 
 		// Save if params available
 		formController.saveData();
 		
-        this._subform.reset();
+		formController.resetData();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
-    },
-    
+	},
+	
 	updateItem: function() {
+		if (!this._subform.isValid()) {
+			return;
+		}
+		
 		// Init update mode
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
 		
-		var form = this._subform.getForm();
-        if (!form.isValid()) {
-            return;
-        }
-		
-        // [asString], [dirtyOnly], [includeEmptyText], [useDataValues]
-        var res = form.getValues(false, false, false, true);
+		// Get only values of subform
+		var formController = this._subform.getController();
+		var res = formController.getValues();
 		
 		// Update selected record
 		var rec = this._grid.getStore().getAt(this._subform.rowIndex);
@@ -236,27 +254,40 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		delete this._subform.rowIndex;
 		
-		form.reset();
+		// Save if params available
+		// formController.saveData();
+		
+		formController.resetData();
+		this._grid.focus();
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}
-		
 	},
 
-    deleteItem: function(grid, rowIndex) {
-        grid.getStore().removeAt(rowIndex);
-    },
+	deleteItem: function(grid, rowIndex) {
+		grid.getStore().removeAt(rowIndex);
+		
+ 		// update mode
+		var vm = this._subform.getViewModel();
+		vm.set('updating', false);
+		
+		var formController = this._subform.getController();
+		formController.resetData();
+		if(this._subformWindow) {
+			this._subformWindow.hide();
+		}
+	},
 	
-    loadItem: function(grid, rec, tr, rowIndex) {
-        if(!this._subform) return;
+	loadItem: function(view, rec, tr, rowIndex) {
+		if(!this._subform) return;
 		
 		if(this._subformWindow) {
 			this._subformWindow.show();
 		}
 		
 		var formController = this._subform.getController();
-		// grid = tableview, grid.grid = gridpanel ...
-		grid = grid.grid;
+		// view = tableview, grid.grid = gridpanel ...
+		grid = view.grid;
 		
 		// Init update mode
 		var vm = this._subform.getViewModel();
@@ -289,9 +320,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 		
-        this._subform.rowIndex = rowIndex;
+		this._subform.rowIndex = rowIndex;
 		
 		// Finally load subform data with fid, url or data
 		formController.loadData(options);
-    }
+	}
 });
