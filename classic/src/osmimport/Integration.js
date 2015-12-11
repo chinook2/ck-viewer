@@ -77,7 +77,7 @@ Ext.define("Ck.osmimport.Integration", {
 			}]
 		},{
 			xtype: "label",
-			cls: /*Ext.baseCSSPrefix +*/ "fa fa-warning",
+			cls: Ext.baseCSSPrefix + "fa fa-warning",
 			data: "Some data need a conversion.",
 			style: {
 				"color": "orange"
