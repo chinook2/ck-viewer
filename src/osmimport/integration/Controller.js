@@ -52,7 +52,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var layersList = [];
 		var layersArray = Ck.getMap().getLayers().getArray();  // TODO use a filter to have only the corrects layers.
 		for (var i in layersArray) {
-			if (layersArray[i].get("title") != undefined) {
+			if (layersArray[i].get("title") != undefined &&
+				(layersArray[i] instanceof ol.layer.Vector)) {  // TODO Adapt filter to have correct layer type
 				var layerObj = {title: layersArray[i].get("title"),
 								id: layersArray[i].get("id")};
 				layersList.push(layerObj);
@@ -137,15 +138,17 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	getSelectedLayerAttributs: function() {
 		var attributes = [];
 		var selectedLayer = this.lookupReference("layerselection").getValue();
-		var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-		if (typeof integrationLayer.getSource().getFeatures === "function") {
-			var layerData = integrationLayer.getSource().getFeatures();
-			for (var i in layerData) {
-				attributes = Ext.Array.merge(attributes, Object.keys(layerData[i].getProperties()));  // TODO get only the first if all properties are set in every feature
+		if (selectedLayer) {
+			var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+			if (typeof integrationLayer.getSource().getFeatures === "function") {
+				var layerData = integrationLayer.getSource().getFeatures();
+				for (var i in layerData) {
+					attributes = Ext.Array.merge(attributes, Object.keys(layerData[i].getProperties()));  // TODO get only the first if all properties are set in every feature
+				}
 			}
+			attributes = Ext.Array.remove(attributes, "geometry");
+			attributes = Ext.Array.map(Ext.Array.sort(attributes), function(attr) {return {"attr": attr, "tag": ""};});
 		}
-		attributes = Ext.Array.remove(attributes, "geometry");
-		attributes = Ext.Array.map(Ext.Array.sort(attributes), function(attr) {return {"attr": attr, "tag": ""};});
 		return attributes;
 	},
 	
@@ -161,17 +164,19 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				
 				// Get the relation members tags for specific integration (copyTo Point, LineString, Polygon)
 				var selectedLayer = this.lookupReference("layerselection").getValue();
-				var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-				if (typeof integrationLayer.getSource().getFeatures === "function") {
-					var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
-					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
-						(["Point", "LineString", "Polygon"].indexOf(integrationGeometryType) > -1)) {
-						for (var memberId in record.data.members) {
-							var member = record.getSubElement(records, record.data.members[memberId].ref);
-							if (record.calculateGeom(member.data, records).getType() == integrationGeometryType) {
-								for (var key in member.data.tags) {
-									if (tags.indexOf("rel:" + key) == -1) {
-										tags.push("rel:" + key);
+				if (selectedLayer) {
+					var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+					if (typeof integrationLayer.getSource().getFeatures === "function") {
+						var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
+						if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
+							(["Point", "LineString", "Polygon"].indexOf(integrationGeometryType) > -1)) {
+							for (var memberId in record.data.members) {
+								var member = record.getSubElement(records, record.data.members[memberId].ref);
+								if (record.calculateGeom(member.data, records).getType() == integrationGeometryType) {
+									for (var key in member.data.tags) {
+										if (tags.indexOf("rel:" + key) == -1) {
+											tags.push("rel:" + key);
+										}
 									}
 								}
 							}
@@ -344,26 +349,36 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onIntegrationClick: function() {
 		try {
 			var selectedLayer = this.lookupReference("layerselection").getValue();
-			this.integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-			this.allRecords = this.getView().openner.osmapi.getData().items;
-			this.records = Ext.Array.filter(this.allRecords,
-				function(record) {return record.containsSearchedTags();});
-			this.attrTagConfig = [];
-			if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
-				var attrList = this.getViewModel().data.layersAttributes;
-				this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
-			}
-			this.featuresToIntegrate = [];
-			this.nbFeaturesComputed = 0;
+			if (selectedLayer) {
+				this.integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+				this.allRecords = this.getView().openner.osmapi.getData().items;
+				this.records = Ext.Array.filter(this.allRecords,
+					function(record) {return record.containsSearchedTags();});
+				this.attrTagConfig = [];
+				if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
+					var attrList = this.getViewModel().data.layersAttributes;
+					this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
+				}
+				this.featuresToIntegrate = [];
+				this.nbFeaturesComputed = 0;
 
-			this.waitMsg = Ext.Msg.show({
-				closable: false,
-				message: "Integrating data, please wait...",
-				progress: true,
-				width: 400
-			});
-			// Compute records one by one in defered call to update the progress bar.
-			Ext.defer(this.computeFeature, 5, this);
+				this.waitMsg = Ext.Msg.show({
+					closable: false,
+					message: "Integrating data, please wait...",
+					progress: true,
+					width: 400
+				});
+				// Compute records one by one in defered call to update the progress bar.
+				Ext.defer(this.computeFeature, 5, this);
+			} else {
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'Select a layer for integration',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.ERROR
+				});
+			}
 		} catch (exception) {
 			console.log(exception.stack);  // TODO Remove this exception log
 			Ext.MessageBox.show({
