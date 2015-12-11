@@ -11,39 +11,42 @@ Ext.define('Ck.map.action.osmimport.Integration', {
 	text: '',
 	iconCls: 'fa fa-save',
 	tooltip: 'Integrate Data',
-	toggleGroup: null,
-	enableToggle: false,
+	enableToggle: true,
 	disabled: true,  // Disabled by default, changed after import
 	
-	doAction: function(btn) {
-		if(!this.win || this.needClean) {
-			if (this.win) {
-				this.win.close();
+	toggleAction: function(btn, pressed) {
+		if (pressed) {
+			if(!this.win || this.needClean) {
+				if (this.win) {
+					this.win.close();
+				}
+				this.win = Ext.create('Ext.window.Window', {
+					title: 'OSM Data Integration',
+					width: 700,
+					layout: 'fit',
+					collapsible: true,
+					closable: false,
+					resizable: false,
+					items: [{
+						xtype: "ckosmimportintegration",
+						openner: this
+					}]
+					
+				});
+				this.needClean = false;
 			}
-			this.win = Ext.create('Ext.window.Window', {
-				title: 'OSM Data Integration',
-				width: 700,
-				layout: 'fit',
-				collapsible: true,
-				closable: false,
-				resizable: false,
-				items: [{
-					xtype: "ckosmimportintegration",
-					openner: this
-				}]
-				
-			});
-			this.needClean = false;
+			this.win.show();
+			this.win.expand();
+		} else {
+			this.win.hide();
 		}
-		this.win.show();
-		this.win.expand();
 	},
 	
 	/**
 	 * Used to close the window.
 	 */
 	close: function() {
-		this.win.hide();
+		this.items[0].toggle(false);
 	},
 	
 	/**

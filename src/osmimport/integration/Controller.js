@@ -313,6 +313,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				Ext.defer(this.computeFeature, 1, this);
 			} else {
 				this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
+				
+				console.log(this.featuresToIntegrate); // TODO Remove test log
+				
 				this.waitMsg.close();
 				Ext.MessageBox.show({
 					title: 'OSM Import',
