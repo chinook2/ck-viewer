@@ -53,7 +53,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var layersArray = Ck.getMap().getLayers().getArray();  // TODO use a filter to have only the corrects layers.
 		for (var i in layersArray) {
 			if (layersArray[i].get("title") != undefined &&
-				(layersArray[i] instanceof ol.layer.Vector)) {  // TODO Adapt filter to have correct layer type
+				((layersArray[i] instanceof ol.layer.Vector) ||
+				(layersArray[i] instanceof ol.layer.Image))) {  // TODO Adapt filter to have correct layer type
 				var layerObj = {title: layersArray[i].get("title"),
 								id: layersArray[i].get("id")};
 				layersList.push(layerObj);
@@ -86,8 +87,12 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	onLayerSelectionChange: function(combobox, newValue, oldValue, eOpts) {
 		var selectedLayer = Ck.getMap().getLayerById(newValue);
 		var geometryType = undefined;
+		
 		if (typeof selectedLayer.getSource().getFeatures === "function") {
 			geometryType = this.getGeometryType(selectedLayer);
+		} else {
+			
+			// TODO Get geometry type for WMS/WFS
 		}
 		this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
 		this.updateAttributesTagsList();
@@ -108,15 +113,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	updateAttributesTagsList: function() {
 		var viewmodel = this.getViewModel();
 		var records = this.getView().openner.osmapi.getData().items;
-		while (viewmodel.data.layersAttributes.length > 0) {
-			viewmodel.data.layersAttributes.pop();
-		}
-		var attrs = this.getSelectedLayerAttributs();
-		if (attrs.length > 0) {
-			for (var i in attrs) {
-				viewmodel.data.layersAttributes.push(attrs[i]);
-			}
-		}
+		this.updateSelectedLayerAttributs();
+		
 		while (viewmodel.data.tagsOsm.length > 0) {
 			viewmodel.data.tagsOsm.pop();
 		}
@@ -126,16 +124,15 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				viewmodel.data.tagsOsm.push(tags[i]);
 			}
 		}
-		this.lookupReference("attributesgrid").getStore().load();
 		this.lookupReference("tagsgrid").getStore().load();
 		
 		this.updateAssociationButtons();
 	},
 	
 	/** 
-	 * Returns the list of all the attributes found in the features of the integration layer.
+	 * Update the list of all the attributes found in the features of the integration layer.
 	 */
-	getSelectedLayerAttributs: function() {
+	updateSelectedLayerAttributs: function() {
 		var attributes = [];
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		if (selectedLayer) {
@@ -146,11 +143,53 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				if (layerData.length > 0) {
 					attributes = Object.keys(layerData[0].getProperties());
 				}
+				this.updateAttributesInGrid(attributes);
+			} else {// TODO if WMS/WFS 
+				Ck.Ajax.get({
+					scope: this,
+					url: integrationLayer.getSource().url_,
+					params: {
+						service: "WFS",
+						request: "DescribeFeatureType",
+						typename: integrationLayer.get("id").replace("bdd_", "")
+					},
+					withCredentials: true,
+					useDefaultXhrHeader: false,
+					success: function(response) {
+						var attributes = [];
+						var sequence = response.responseXML.getElementsByTagName("sequence")[0];
+						var elements = sequence.getElementsByTagName("element");
+						for (var elId in elements) {
+							if (typeof elements[elId].getAttribute === "function") {
+								attributes.push(elements[elId].getAttribute("name"));
+							}
+						}
+						this.updateAttributesInGrid(attributes);
+						
+					},
+					failure: function() {
+						this.updateAttributesInGrid(attributes); // Let empty grid
+					}
+				});
 			}
-			attributes = Ext.Array.remove(attributes, "geometry");
-			attributes = Ext.Array.map(Ext.Array.sort(attributes), function(attr) {return {"attr": attr, "tag": ""};});
+		} else {
+			this.updateAttributesInGrid(attributes);
 		}
-		return attributes;
+	},
+	
+	updateAttributesInGrid: function(attributes) {
+		var viewmodel = this.getViewModel();
+		while (viewmodel.data.layersAttributes.length > 0) {
+			viewmodel.data.layersAttributes.pop();
+		}
+		attributes = Ext.Array.remove(attributes, "geometry");
+		attributes = Ext.Array.map(Ext.Array.sort(attributes), function(attr) {return {"attr": attr, "tag": ""};});
+		if (attributes.length > 0) {
+			for (var i in attributes) {
+				viewmodel.data.layersAttributes.push(attributes[i]);
+			}
+		}
+		this.lookupReference("attributesgrid").getStore().load();
 	},
 	
 	/**

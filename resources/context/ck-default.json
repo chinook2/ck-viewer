@@ -309,5 +309,197 @@
 				"path": ""
 			}
 		}
+	},{
+		"type": "Feature",
+		"id": "bdd_busstops",
+		"properties": {
+			"title" : "BDD Arrêts de bus",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=busstops&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_forests-0",
+		"properties": {
+			"title" : "BDD Forêts",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=forests-0&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_cycleopposites",
+		"properties": {
+			"title" : "BDD Contresens cyclistes",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=cycleopposites&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_hydros",
+		"properties": {
+			"title" : "BDD Hydrographie",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=hydros&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_parceols",
+		"properties": {
+			"title" : "BDD Parcs Eoliens",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=parceols&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_publictransports",
+		"properties": {
+			"title" : "BDD Lignes de transport en commun",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=publictransports&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_schools",
+		"properties": {
+			"title" : "BDD Ecoles",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=schools&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "bdd_sportpitches",
+		"properties": {
+			"title" : "BDD Terrains de sport",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=sportpitches&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
 	}]
 }
