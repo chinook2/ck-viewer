@@ -90,11 +90,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		
 		if (typeof selectedLayer.getSource().getFeatures === "function") {
 			geometryType = this.getGeometryType(selectedLayer);
-		} else {
-			
-			// TODO Get geometry type for WMS/WFS
+			this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
 		}
-		this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
+		// For WMS/WFS, the geometry type is set with the attributes
 		this.updateAttributesTagsList();
 	},
 	
@@ -157,15 +155,19 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					useDefaultXhrHeader: false,
 					success: function(response) {
 						var attributes = [];
+						var geometryType = undefined;
 						var sequence = response.responseXML.getElementsByTagName("sequence")[0];
 						var elements = sequence.getElementsByTagName("element");
 						for (var elId in elements) {
 							if (typeof elements[elId].getAttribute === "function") {
 								attributes.push(elements[elId].getAttribute("name"));
+								if (elements[elId].getAttribute("type").startsWith("gml:")) {
+									geometryType = elements[elId].getAttribute("type").replace("gml:", "").replace("PropertyType", "");
+								}
 							}
 						}
 						this.updateAttributesInGrid(attributes);
-						
+						this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
 					},
 					failure: function() {
 						this.updateAttributesInGrid(attributes); // Let empty grid
