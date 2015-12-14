@@ -140,10 +140,11 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		if (selectedLayer) {
 			var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
+			// TODO modify for WMS/WFS layers
 			if (typeof integrationLayer.getSource().getFeatures === "function") {
 				var layerData = integrationLayer.getSource().getFeatures();
-				for (var i in layerData) {
-					attributes = Ext.Array.merge(attributes, Object.keys(layerData[i].getProperties()));  // TODO get only the first if all properties are set in every feature
+				if (layerData.length > 0) {
+					attributes = Object.keys(layerData[0].getProperties());
 				}
 			}
 			attributes = Ext.Array.remove(attributes, "geometry");
