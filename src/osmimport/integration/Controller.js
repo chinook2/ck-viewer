@@ -17,6 +17,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	init: function() {
 		this.openner = this.getView().openner;
+		this.geometryType = undefined;
 		
 		/**
 		 * Init the view
@@ -67,18 +68,23 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Returns the geometry type of a layer.
 	 */
 	getGeometryType: function(layer) {
-		var geometryType = undefined;
-		var layerData = layer.getSource().getFeatures();
-		for (var i in layerData) {
-			var geom = layerData[i].getGeometry().getType();
-			if (geometryType == undefined) {
-				geometryType = geom;
-			} else if (geometryType != geom) {
-				geometryType = undefined;
-				break;
+		if (this.geometryType == undefined) {
+			var geometryType = undefined;
+			if (typeof layer.getSource().getFeatures === "function") {
+				var layerData = layer.getSource().getFeatures();
+				for (var i in layerData) {
+					var geom = layerData[i].getGeometry().getType();
+					if (geometryType == undefined) {
+						geometryType = geom;
+					} else if (geometryType != geom) {
+						geometryType = undefined;
+						break;
+					}
+				}
 			}
+			this.geometryType = geometryType;
 		}
-		return geometryType;
+		return this.geometryType;
 	},
 	
 	/** 
@@ -86,11 +92,10 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	onLayerSelectionChange: function(combobox, newValue, oldValue, eOpts) {
 		var selectedLayer = Ck.getMap().getLayerById(newValue);
-		var geometryType = undefined;
 		
 		if (typeof selectedLayer.getSource().getFeatures === "function") {
-			geometryType = this.getGeometryType(selectedLayer);
-			this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
+			this.geometryType = this.getGeometryType(selectedLayer);
+			this.lookupReference("geometrylabel").setText("Geometry: " + this.geometryType);
 		}
 		// For WMS/WFS, the geometry type is set with the attributes
 		this.updateAttributesTagsList();
@@ -155,19 +160,18 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					useDefaultXhrHeader: false,
 					success: function(response) {
 						var attributes = [];
-						var geometryType = undefined;
 						var sequence = response.responseXML.getElementsByTagName("sequence")[0];
 						var elements = sequence.getElementsByTagName("element");
 						for (var elId in elements) {
 							if (typeof elements[elId].getAttribute === "function") {
 								attributes.push(elements[elId].getAttribute("name"));
 								if (elements[elId].getAttribute("type").startsWith("gml:")) {
-									geometryType = elements[elId].getAttribute("type").replace("gml:", "").replace("PropertyType", "");
+									this.geometryType = elements[elId].getAttribute("type").replace("gml:", "").replace("PropertyType", "");
 								}
 							}
 						}
 						this.updateAttributesInGrid(attributes);
-						this.lookupReference("geometrylabel").setText("Geometry: " + geometryType);
+						this.lookupReference("geometrylabel").setText("Geometry: " + this.geometryType);
 					},
 					failure: function() {
 						this.updateAttributesInGrid(attributes); // Let empty grid
@@ -359,9 +363,11 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (this.nbFeaturesComputed < this.records.length) {
 				Ext.defer(this.computeFeature, 1, this);
 			} else {
-				this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
-				
+				if (typeof this.integrationLayer.getSource().addFeatures === "function") {
+					this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
+				}
 				console.log(this.featuresToIntegrate); // TODO Remove test log
+				this.saveData(this.integrationLayer, this.featuresToIntegrate);
 				
 				this.waitMsg.close();
 				Ext.MessageBox.show({
@@ -467,7 +473,43 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	/** 
 	 * Method to save the data in the server.
 	 */
-	saveData: function() {
-		
+	saveData: function(integrationLayer, features) {
+		var wfs = new ol.format.WFS();
+		var transac = wfs.writeTransaction(
+			features, // Inserts
+			undefined, // Updates
+			undefined, // Deletes
+			{ // Options
+				featureNS: "http://www.opengis.net/wfs",
+				featurePrefix: "",
+				featureType: "feature:" + integrationLayer.get("id").replace("bdd_", ""),
+				nativeElements: []
+			}
+		);
+		console.log(transac);
+		var oSerializer = new XMLSerializer();
+		var sXML = oSerializer.serializeToString(transac);
+		sXML = sXML.replace(/<geometry/g, "<feature:the_geom").replace(/<\/geometry/g, "</feature:the_geom");
+		sXML = sXML.replace(/<Point/g, "<gml:Point").replace(/<\/Point/g, "</gml:Point");
+		sXML = sXML.replace(/<pos/g, "<gml:pos").replace(/<\/pos/g, "</gml:pos");
+		Ck.Ajax.post({
+			scope: this,
+			url: integrationLayer.getSource().url_,
+			xmlData: sXML,
+			password: "admin",
+			username: "admin",
+			withCredentials: true,
+			useDefaultXhrHeader: false,
+			success: function(response) {
+				console.log("success")
+				console.log(response)
+			},
+			failure: function(response, options) {
+				console.log("failure");
+				console.log(response);
+				console.log(options)
+				
+			}
+		});
 	}
 });
