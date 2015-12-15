@@ -40,8 +40,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Indicate to the tool that the user has finished the integration of data.
 	 */
 	onIntegrationFinishedClick: function() {
-		Ck.getMap().getLayerById("osmimport_data").getSource().clear();
-		Ck.getMap().getLayerById("osmimport_selection").getSource().clear();
+		var map = Ck.getMap();
+		map.getLayerById("osmimport_data").getSource().clear();
+		map.getLayerById("osmimport_selection").getSource().clear();
 		this.openner.finishIntegration();
 		this.openner.close();
 	},
@@ -51,13 +52,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	getLayersList: function() {
 		var layersList = [];
-		var layersArray = Ck.getMap().getLayers().getArray();  // TODO use a filter to have only the corrects layers.
+		var layersArray = Ck.getMap().getLayers().getArray();
 		for (var i in layersArray) {
-			if (layersArray[i].get("title") != undefined &&
-				((layersArray[i] instanceof ol.layer.Vector) ||
-				(layersArray[i] instanceof ol.layer.Image))) {  // TODO Adapt filter to have correct layer type
-				var layerObj = {title: layersArray[i].get("title"),
-								id: layersArray[i].get("id")};
+			var layer = layersArray[i];
+			if (layer.get("title") != undefined &&
+				((layer instanceof ol.layer.Vector) ||
+				 (layer instanceof ol.layer.Image))) {  // TODO Adapt filter to have correct layer type
+				var layerObj = {title: layer.get("title"),
+								id: layer.get("id")};
 				layersList.push(layerObj);
 			}
 		}
@@ -114,21 +116,19 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * This method updates the grid of layer's attributes and OSM data tags.
 	 */
 	updateAttributesTagsList: function() {
-		var viewmodel = this.getViewModel();
 		var records = this.getView().openner.osmapi.getData().items;
 		this.updateSelectedLayerAttributs();
-		
-		while (viewmodel.data.tagsOsm.length > 0) {
-			viewmodel.data.tagsOsm.pop();
+		var tagsOsm = this.getViewModel().data.tagsOsm;
+		while (tagsOsm.length > 0) {
+			tagsOsm.pop();
 		}
 		var tags = this.getOsmTags(records);
 		if (tags.length > 0) {
 			for (var i in tags) {
-				viewmodel.data.tagsOsm.push(tags[i]);
+				tagsOsm.push(tags[i]);
 			}
 		}
 		this.lookupReference("tagsgrid").getStore().load();
-		
 		this.updateAssociationButtons();
 	},
 	
@@ -140,21 +140,21 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var selectedLayer = this.lookupReference("layerselection").getValue();
 		if (selectedLayer) {
 			var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-			// TODO modify for WMS/WFS layers
-			if (typeof integrationLayer.getSource().getFeatures === "function") {
-				var layerData = integrationLayer.getSource().getFeatures();
+			var layerSource = integrationLayer.getSource();
+			if (typeof layerSource.getFeatures === "function") {
+				var layerData = layerSource.getFeatures();
 				if (layerData.length > 0) {
 					attributes = Object.keys(layerData[0].getProperties());
 				}
 				this.updateAttributesInGrid(attributes);
-			} else {// TODO if WMS/WFS 
+			} else if (layerSource instanceof ol.source.ImageWMS) {
 				Ck.Ajax.get({
 					scope: this,
-					url: integrationLayer.getSource().url_,
+					url: layerSource.url_,
 					params: {
 						service: "WFS",
 						request: "DescribeFeatureType",
-						typename: integrationLayer.get("id").replace("bdd_", "")
+						typename: layerSource.getParams().LAYERS
 					},
 					withCredentials: true,
 					useDefaultXhrHeader: false,
@@ -163,13 +163,15 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						var sequence = response.responseXML.getElementsByTagName("sequence")[0];
 						var elements = sequence.getElementsByTagName("element");
 						for (var elId in elements) {
-							console.log(elements[elId]);
-							if (typeof elements[elId].getAttribute === "function") {
-								if (elements[elId].getAttribute("type") == "string") {
-									attributes.push(elements[elId].getAttribute("name"));
+							var el = elements[elId];
+							if (typeof el.getAttribute === "function") {
+								if (el.getAttribute("type") == "string") {  // Returns only string attributes
+									attributes.push(el.getAttribute("name"));
 								}
-								if (elements[elId].getAttribute("type").startsWith("gml:")) {
-									this.geometryType = elements[elId].getAttribute("type").replace("gml:", "").replace("PropertyType", "");
+								if (el.getAttribute("type").startsWith("gml:")) {  // Get the geometry type
+									this.geometryType = el.getAttribute("type")
+														  .replace("gml:", "")
+														  .replace("PropertyType", "");
 								}
 							}
 						}
@@ -186,16 +188,19 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		}
 	},
 	
+	/**
+	 * Method to update the grid of layer's attributes.
+	 */
 	updateAttributesInGrid: function(attributes) {
-		var viewmodel = this.getViewModel();
-		while (viewmodel.data.layersAttributes.length > 0) {
-			viewmodel.data.layersAttributes.pop();
+		var layersAttributes = this.getViewModel().data.layersAttributes;
+		while (layersAttributes.length > 0) {
+			layersAttributes.pop();
 		}
 		attributes = Ext.Array.remove(attributes, "geometry");
 		attributes = Ext.Array.map(Ext.Array.sort(attributes), function(attr) {return {"attr": attr, "tag": ""};});
 		if (attributes.length > 0) {
 			for (var i in attributes) {
-				viewmodel.data.layersAttributes.push(attributes[i]);
+				layersAttributes.push(attributes[i]);
 			}
 		}
 		this.lookupReference("attributesgrid").getStore().load();
@@ -484,7 +489,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			{ // Options
 				featureNS: "http://www.opengis.net/wfs",
 				featurePrefix: "",
-				featureType: "feature:" + integrationLayer.get("id").replace("bdd_", ""),
+				featureType: "feature:" + integrationLayer.getSource().getParams().LAYERS,
 				nativeElements: []
 			}
 		);
