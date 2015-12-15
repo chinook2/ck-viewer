@@ -45,8 +45,8 @@ Ext.define('Ck.form.Controller', {
 	//
 	
 	init: function () {
-		this.isSubForm = this.getView().getIsSubForm();
-		if(this.getView().getEditing()===true) this.startEditing();
+		this.isSubForm = this.view.getIsSubForm();
+		if(this.view.getEditing()===true) this.startEditing();
 		this.isInit = false;
 
 		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
@@ -57,7 +57,22 @@ Ext.define('Ck.form.Controller', {
 			});
 		}
 
-		this.initForm();
+		// Get form definition directly in the view (no Ajax request)
+		var inlineForm = this.view.getFormRaw();
+		if(inlineForm){
+			var parentForm = this.view.up('ckform');
+			if(parentForm) {
+				// inherit dataFid from main view form (used in store url template)
+				this.view.setDataFid(parentForm.getDataFid());
+				
+				// Try find parent form name (used for overriden controllers)
+				if(!inlineForm.name){
+					inlineForm.name = parentForm.getController().name;
+				}
+			}
+		}
+		
+		this.initForm(inlineForm);
 	},
 
 	destroy: function() {
@@ -182,16 +197,22 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			this.name = form.name;
+			if(!this.name) {
+				Ck.log("Enable to get form Name.");
+				CkLog(form);
+				return;
+			}
+			
 			this.dataUrl = null;
 			this.dataModel = null;
 			// this.dataStore = null;
 			
 			// Create un dedicated controller form the named form
-			var controllerName = 'Ck.form.controller.' + form.name;
+			var controllerName = 'Ck.form.controller.' + this.name;
 			if(!Ext.ClassManager.get(controllerName)){
 				Ext.define(controllerName, {
 					extend: 'Ck.form.Controller',
-					alias: 'controller.ckform_'+ form.name
+					alias: 'controller.ckform_'+ this.name
 				});
 			}
 
@@ -923,56 +944,12 @@ Ext.define('Ck.form.Controller', {
 				this.oController.loadFailed(response);
 			}
 		});
-
-		/*
-		 // TODO : gestion du retour si erreur...
-		 if(!fid) {
-		 v.setSid(null);
-		 // Assure l'init des champs auto (date / heure)
-		 v.fireEvent('afterload', false, false);
-		 return false;
-		 }
-
-		 // Call Storage to load data
-		 var res = me.storage.load({
-		 layer: lyr,
-		 fid: fid+"",
-		 success: function(res) {
-		 // Garde le Storage ID en cours
-		 v.setSid(res.id);
-
-		 // Ajoute les données au viewModel (binding...)
-		 me.getViewModel().setData({
-		 layer: lyr,
-		 fid: fid,
-		 record: res
-		 });
-
-		 // Model (init in Storage Class) > Record > load...
-		 var md =  'Storage.'+lyr;
-		 var model = Ext.create(md, res);
-		 v.loadRecord(model);
-
-		 // GRID : load data
-		 var grids = v.query('gridpanel');
-		 for(var g=0; g<grids.length; g++){
-		 var grid = grids[g];
-		 var n = grid.name; // nom de la table = nom de la relation = clé dans la table des résultats
-		 grid.getStore().loadData(res[n]);
-		 }
-		 //
-
-		 v.fireEvent('afterload', res, model);
-		 },
-		 failure: function() {
-		 // TODO
-		 }
-		 });
-		 */
 	},
 
 	// Enregistre les données dans le Storage
-	saveData: function (callback) {
+	saveData: function (options) {
+		options = options || {};
+		
 		var me = this;
 		var v = me.getView();
 
@@ -983,6 +960,16 @@ Ext.define('Ck.form.Controller', {
 		var url = v.getDataUrl();
 		var model = me.dataModel || v.getDataModel();
 
+		// Compatibility : pass only success callbak
+		if(Ext.isFunction(options)) {
+			options.success = options;
+			options.scope = this;
+		}
+		options = Ext.applyIf(options, {
+			method: 'PUT'
+		});
+		if(options.create) options.method = 'POST';
+		//
 
 		// Test if form is valid (all fields of the main form)
 		if (!this.isValid()) {
@@ -1058,7 +1045,7 @@ Ext.define('Ck.form.Controller', {
 			model.set(dt);
 			model.save({
 				success: function (record, operation) {
-					Ext.callback(callback, this);
+					Ext.callback(options.success, options.scope, [dt]);
 				},
 				failure: function (record, operation) {
 					// TODO : on Tablet when access local file via ajax, success pass here !!
@@ -1091,12 +1078,13 @@ Ext.define('Ck.form.Controller', {
 
 		if(!url){
 			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
+			Ext.callback(options.success, options.scope, [dt]);
 			return false;
 		}
 
 		// Load data from custom URL ou standard URL
 		url = this.getFullUrl(url);
-		Cks.put({
+		Cks[options.method.toLowerCase()]({
 			url: url,
 			params: dt,
 			scope: this,
@@ -1119,7 +1107,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					*/
 				}
-				Ext.callback(callback, this);
+				Ext.callback(options.success, options.scope, [dt]);
 			},
 			failure: function (response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
@@ -1129,17 +1117,6 @@ Ext.define('Ck.form.Controller', {
 				this.oController.saveFailed(response);
 			}
 		});
-		
-		/*
-		 // Call Storage to save data
-		 var res = me.storage.save({
-		 layer: lyr,
-		 sid: sid,
-		 data: dt,
-		 success: function(res) {
-		 }
-		 });
-		 */
 	},
 
 	resetData: function () {
