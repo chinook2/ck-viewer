@@ -163,8 +163,11 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						var sequence = response.responseXML.getElementsByTagName("sequence")[0];
 						var elements = sequence.getElementsByTagName("element");
 						for (var elId in elements) {
+							console.log(elements[elId]);
 							if (typeof elements[elId].getAttribute === "function") {
-								attributes.push(elements[elId].getAttribute("name"));
+								if (elements[elId].getAttribute("type") == "string") {
+									attributes.push(elements[elId].getAttribute("name"));
+								}
 								if (elements[elId].getAttribute("type").startsWith("gml:")) {
 									this.geometryType = elements[elId].getAttribute("type").replace("gml:", "").replace("PropertyType", "");
 								}
@@ -367,16 +370,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
 				}
 				console.log(this.featuresToIntegrate); // TODO Remove test log
-				this.saveData(this.integrationLayer, this.featuresToIntegrate);
-				
-				this.waitMsg.close();
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Integration of data from OpenStreetMap succeed. ' + this.featuresToIntegrate.length + ' elements integrated.',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.INFO
-				});
+				this.saveData(this.integrationLayer, this.featuresToIntegrate);	
 			}
 		} catch (exception) {
 			console.log(exception.stack);  // TODO Remove this exception log
@@ -474,6 +468,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Method to save the data in the server.
 	 */
 	saveData: function(integrationLayer, features) {
+		this.waitMsg = Ext.Msg.show({
+			msg: 'Sending data to server, please wait...',
+			autoShow: true,
+			width: 400,
+			wait: {
+				interval: 200
+			}
+		});
 		var wfs = new ol.format.WFS();
 		var transac = wfs.writeTransaction(
 			features, // Inserts
@@ -486,29 +488,39 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				nativeElements: []
 			}
 		);
-		console.log(transac);
 		var oSerializer = new XMLSerializer();
 		var sXML = oSerializer.serializeToString(transac);
 		sXML = sXML.replace(/<geometry/g, "<feature:the_geom").replace(/<\/geometry/g, "</feature:the_geom");
-		sXML = sXML.replace(/<Point/g, "<gml:Point").replace(/<\/Point/g, "</gml:Point");
-		sXML = sXML.replace(/<pos/g, "<gml:pos").replace(/<\/pos/g, "</gml:pos");
+		
+		// Send features to server and handle response
 		Ck.Ajax.post({
 			scope: this,
 			url: integrationLayer.getSource().url_,
 			xmlData: sXML,
-			password: "admin",
-			username: "admin",
 			withCredentials: true,
 			useDefaultXhrHeader: false,
 			success: function(response) {
-				console.log("success")
-				console.log(response)
+				var resp = wfs.readTransactionResponse(response.responseXML);
+				var nbInserted = resp.transactionSummary.totalInserted;
+				this.waitMsg.close();
+				// Refresh the map
+				integrationLayer.getSource().updateParams({"time": Date.now()});
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'Integration of data from OpenStreetMap succeed. ' + nbInserted + ' elements integrated.',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.INFO
+				});
 			},
 			failure: function(response, options) {
-				console.log("failure");
-				console.log(response);
-				console.log(options)
-				
+				Ext.MessageBox.show({
+					title: 'OSM Import',
+					msg: 'An error occured while integrating the data.',
+					width: 500,
+					buttons: Ext.MessageBox.OK,
+					icon: Ext.Msg.ERROR
+				});
 			}
 		});
 	}

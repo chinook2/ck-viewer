@@ -335,7 +335,7 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_forests-0",
+		"id": "bdd_forests",
 		"properties": {
 			"title" : "BDD Forêts",
 			"updated" : "2015-07-16T00:00:00Z",
@@ -348,7 +348,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=forests-0&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=forests&VERSION=1.1.1",
 					"request":{},
 					"result":{}
 				}]
