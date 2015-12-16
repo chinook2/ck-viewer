@@ -176,8 +176,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				var fields = response.responseXML.getElementsByTagName("Fields")[0];
 				for (var i in fields.childNodes) {
 					var field = fields.childNodes[i];
-					var tagTypes = ["string", "integer"];
-					
+					var tagTypes = ["string", "integer", "boolean"];
 					if (typeof field.getElementsByTagName === "function" &&
 						tagTypes.indexOf(field.getElementsByTagName("type")[0].childNodes[0].nodeValue) > -1 &&
 						field.getElementsByTagName("stAlias")[0].childNodes[0].nodeValue != idField) {
