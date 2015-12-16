@@ -224,20 +224,21 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				tag = tag.substr(4);
 			} 
 			if (tag in record.data.tags) {
-				// Copy only if value is correct according type
+				// Copy only if value is correct type
 				switch(attributesTagsConfig[i].type) {
 					case "integer":
 						if (!record.data.tags[tag].match(/\D/)) {
 							tagValue = record.data.tags[tag];
 						}
 					break;
-					case "boolean":
+					case "boolean": // Values compatible with server
 						if (["yes", "no"].indexOf(record.data.tags[tag]) > -1) {
 							tagValue = record.data.tags[tag];
 						}
 					break;
-					default: tagValue = record.data.tags[tag];
+					case "string": tagValue = record.data.tags[tag];
 					break;
+					default: break;
 				}
 			}
 			attributes[attr] = tagValue;
