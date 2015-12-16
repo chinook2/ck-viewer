@@ -100,9 +100,6 @@ Ext.define("Ck.osmimport.Integration", {
 				xtype: "radio"
 			},
 			id: "informationtointegrate",
-			listeners: {
-				change: "onInformationLevelChange"
-			},
 			items: [{
 				checked: true,
 				boxLabel: "Only coordinates",
@@ -147,7 +144,7 @@ Ext.define("Ck.osmimport.Integration", {
 						items: [
 							{
 								text: "Attributes",
-								dataIndex: "attr"
+								dataIndex: "alias"
 							},{
 								text: "Associated OSM Tag",
 								dataIndex: "tag"

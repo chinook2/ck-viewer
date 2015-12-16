@@ -303,5 +303,29 @@
 				"path": "BDD CK1"
 			}
 		}
+	},{
+		"type": "Feature",
+		"id": "polices",
+		"properties": {
+			"title" : "Postes de Police / Gendarmerie",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=polices&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
 	}]
 }
