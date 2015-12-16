@@ -172,11 +172,15 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				this.iLayer.projection = srs;
 				
 				var attrs = [];
+				var idField = response.responseXML.getElementsByTagName("FeatureId")[0].childNodes[0].nodeValue;
 				var fields = response.responseXML.getElementsByTagName("Fields")[0];
 				for (var i in fields.childNodes) {
 					var field = fields.childNodes[i];
+					var tagTypes = ["string", "integer"];
+					
 					if (typeof field.getElementsByTagName === "function" &&
-						field.getElementsByTagName("type")[0].childNodes[0].nodeValue == "string") {
+						tagTypes.indexOf(field.getElementsByTagName("type")[0].childNodes[0].nodeValue) > -1 &&
+						field.getElementsByTagName("stAlias")[0].childNodes[0].nodeValue != idField) {
 						var attr = {alias: field.getElementsByTagName("alias")[0].childNodes[0].nodeValue,
 									attr: field.getElementsByTagName("stAlias")[0].childNodes[0].nodeValue,
 									tag: ""};
