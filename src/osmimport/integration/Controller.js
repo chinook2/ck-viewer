@@ -182,7 +182,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						field.getElementsByTagName("stAlias")[0].childNodes[0].nodeValue != idField) {
 						var attr = {alias: field.getElementsByTagName("alias")[0].childNodes[0].nodeValue,
 									attr: field.getElementsByTagName("stAlias")[0].childNodes[0].nodeValue,
-									tag: ""};
+									tag: "",
+									type: field.getElementsByTagName("type")[0].childNodes[0].nodeValue};
 						attrs.push(attr);
 					}
 				}
