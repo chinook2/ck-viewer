@@ -219,7 +219,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		while (layersAttributes.length > 0) {
 			layersAttributes.pop();
 		}
-		var attributes = Ext.Array.sort(this.iLayer.attributes);
+		// Sort attributes by alias
+		var attributes = Ext.Array.sort(this.iLayer.attributes,
+			function(a, b) {
+				result = 0;
+				if (a.alias > b.alias) result = 1;
+				else if (a.alias < b.alias) result = -1;
+				return result;}
+		);
 		if (attributes.length > 0) {
 			for (var i in attributes) {
 				layersAttributes.push(attributes[i]);
