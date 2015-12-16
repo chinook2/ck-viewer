@@ -113,207 +113,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "schools",
-		"properties": {
-			"title" : "Ecoles",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/ecoles.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Education"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "forest",
-		"properties": {
-			"title" : "Forêts",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/forets.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Nature"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "waterway",
-		"properties": {
-			"title": "Cours d'eau",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/cours_d_eau.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Nature"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "arrets_bus",
+		"id": "busstops",
 		"properties": {
 			"title" : "Arrêts de bus",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/arrets_bus.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Déplacements"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "lignes_bus_tan",
-		"properties": {
-			"title" : "Lignes de Bus",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/lignes_bus_tan.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Déplacements"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "rues_pietonnes",
-		"properties": {
-			"title" : "Rues piétonnes",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/rues_pietonnes.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Déplacements"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "terrains_sport",
-		"properties": {
-			"title" : "Terrains de sport",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/terrains_sport.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Equipements/Loisirs"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "parcs_eoliens",
-		"properties": {
-			"title" : "Parcs éoliens",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/parcs_eoliens.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": "Equipements/Divers"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "empty_layer",
-		"properties": {
-			"title" : "Couche vide",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "/packages/local/ck-viewer/resources/data/empty_layer.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": ""
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "bdd_busstops",
-		"properties": {
-			"title" : "BDD Arrêts de bus",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -335,9 +137,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_forests",
+		"id": "forests",
 		"properties": {
-			"title" : "BDD Forêts",
+			"title" : "Forêts",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -359,9 +161,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_cycleopposites",
+		"id": "cycleopposites",
 		"properties": {
-			"title" : "BDD Contresens cyclistes",
+			"title" : "Contresens cyclistes",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -383,9 +185,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_hydros",
+		"id": "hydros",
 		"properties": {
-			"title" : "BDD Hydrographie",
+			"title" : "Hydrographie",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -407,9 +209,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_parceols",
+		"id": "parceols",
 		"properties": {
-			"title" : "BDD Parcs Eoliens",
+			"title" : "Parcs Eoliens",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -431,9 +233,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_publictransports",
+		"id": "publictransports",
 		"properties": {
-			"title" : "BDD Lignes de transport en commun",
+			"title" : "Lignes de transport en commun",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -455,9 +257,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_schools",
+		"id": "schools",
 		"properties": {
-			"title" : "BDD Ecoles",
+			"title" : "Ecoles",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -479,9 +281,9 @@
 		}
 	},{
 		"type": "Feature",
-		"id": "bdd_sportpitches",
+		"id": "sportpitches",
 		"properties": {
-			"title" : "BDD Terrains de sport",
+			"title" : "Terrains de sport",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,

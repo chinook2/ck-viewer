@@ -56,8 +56,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		for (var i in layersArray) {
 			var layer = layersArray[i];
 			if (layer.get("title") != undefined &&
-				((layer instanceof ol.layer.Vector) ||
-				 (layer instanceof ol.layer.Image))) {  // TODO Adapt filter to have correct layer type
+				(layer.getSource() instanceof ol.source.ImageWMS)) {  // TODO Adapt filter to have correct layer type
 				var layerObj = {title: layer.get("title"),
 								id: layer.get("id")};
 				layersList.push(layerObj);
@@ -93,12 +92,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 * Method called when the user changes the selection of layer on which data will be integrated.
 	 */
 	onLayerSelectionChange: function(combobox, newValue, oldValue, eOpts) {
-		var selectedLayer = Ck.getMap().getLayerById(newValue);
-		
-		if (typeof selectedLayer.getSource().getFeatures === "function") {
-			this.geometryType = this.getGeometryType(selectedLayer);
-			this.lookupReference("geometrylabel").setText("Geometry: " + this.geometryType);
-		}
 		// For WMS/WFS, the geometry type is set with the attributes
 		this.updateAttributesTagsList();
 	},
@@ -141,13 +134,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		if (selectedLayer) {
 			var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
 			var layerSource = integrationLayer.getSource();
-			if (typeof layerSource.getFeatures === "function") {
-				var layerData = layerSource.getFeatures();
-				if (layerData.length > 0) {
-					attributes = Object.keys(layerData[0].getProperties());
-				}
-				this.updateAttributesInGrid(attributes);
-			} else if (layerSource instanceof ol.source.ImageWMS) {
+			if (layerSource instanceof ol.source.ImageWMS) {
 				Ck.Ajax.get({
 					scope: this,
 					url: layerSource.url_,
@@ -220,18 +207,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				var selectedLayer = this.lookupReference("layerselection").getValue();
 				if (selectedLayer) {
 					var integrationLayer = Ck.getMap().getLayerById(selectedLayer);
-					if (typeof integrationLayer.getSource().getFeatures === "function") {
-						var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
-						if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
-							(["Point", "LineString", "Polygon"].indexOf(integrationGeometryType) > -1)) {
-							for (var memberId in record.data.members) {
-								var member = record.getSubElement(records, record.data.members[memberId].ref);
-								if (record.calculateGeom(member.data, records).getType() == integrationGeometryType) {
-									for (var key in member.data.tags) {
-										if (tags.indexOf("rel:" + key) == -1) {
-											tags.push("rel:" + key);
-										}
-									}
+					var integrationGeometryType = "" + this.getGeometryType(integrationLayer);
+					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
+						(["Point", "LineString", "Polygon"].indexOf(integrationGeometryType) > -1)) {
+						for (var memberId in record.data.members) {
+							var member = record.getSubElement(records, record.data.members[memberId].ref);
+							if (record.calculateGeom(member.data, records).getType() == integrationGeometryType) {
+								for (var key in member.data.tags) {
+									Ext.Array.include(tags, "rel:" + key);
 								}
 							}
 						}
@@ -371,9 +354,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (this.nbFeaturesComputed < this.records.length) {
 				Ext.defer(this.computeFeature, 1, this);
 			} else {
-				if (typeof this.integrationLayer.getSource().addFeatures === "function") {
-					this.integrationLayer.getSource().addFeatures(this.featuresToIntegrate);
-				}
 				console.log(this.featuresToIntegrate); // TODO Remove test log
 				this.saveData(this.integrationLayer, this.featuresToIntegrate);	
 			}
