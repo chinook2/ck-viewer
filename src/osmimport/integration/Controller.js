@@ -541,18 +541,29 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			withCredentials: true,
 			useDefaultXhrHeader: false,
 			success: function(response) {
-				var resp = wfs.readTransactionResponse(response.responseXML);
-				var nbInserted = resp.transactionSummary.totalInserted;
-				this.waitMsg.close();
-				// Refresh the map
-				integrationLayer.getSource().updateParams({"time": Date.now()});
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Integration of data from OpenStreetMap succeed. ' + nbInserted + ' elements integrated.',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.INFO
-				});
+				try {
+					var resp = wfs.readTransactionResponse(response.responseXML);
+					var nbInserted = resp.transactionSummary.totalInserted;
+					this.waitMsg.close();
+					// Refresh the map
+					integrationLayer.getSource().updateParams({"time": Date.now()});
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Integration of data from OpenStreetMap succeed. ' + nbInserted + ' elements integrated.',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.INFO
+					});
+				} catch (exception) {
+					this.waitMsg.close();
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'Integration of data from OpenStreetMap succeed. Unable to read response.',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
+				}
 			},
 			failure: function(response, options) {
 				Ext.MessageBox.show({
