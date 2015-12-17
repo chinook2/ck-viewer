@@ -270,14 +270,19 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					var integrationGeometryType = this.iLayer.geometry;
 					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
 						(["Point", "LineString", "Polygon"].indexOf(this.iLayer.geometry) > -1)) {
-						var membersRef = Ext.Array.map(record.data.members, function(member) {return member.ref;});
+						var membersRef = [];
+						for (var memberId in record.data.members) {
+							membersRef.push(record.data.members[memberId]);
+						}
 						for (var recId in records) {
 							var rec = records[recId];
 							if (membersRef.indexOf(rec.id) > -1 &&
 								record.calculateGeom(rec.data, records).getType() == this.iLayer.geometry) {
-								tags = Ext.Array.merge(tags,
-									Ext.Array.map(Object.keys(rec.data.tags),
-										function(key) {return "rel:" + key;}));
+								var memberKeys = [];
+								for (key in rec.data.tags) {
+									memberKeys.push(key);
+								}
+								tags = Ext.Array.merge(tags, memberKeys);								
 							}
 						}
 					}
