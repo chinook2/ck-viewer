@@ -35,7 +35,7 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 		
 		// Get store in ViewModel (global store pre-loaded) by default storeId or by store defined by user
 		this.dataStore = formController.getViewModel().get(storeId);
-		if(!this.dataStore) this.dataStore =  formController.getViewModel().get(this.store);
+		// if(!this.dataStore) this.dataStore =  formController.getViewModel().get(this.store);
 		
 		// Get store in Application
 		if(!this.dataStore) this.dataStore = Ext.getStore(storeId);
@@ -58,15 +58,24 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 			});
 		}
 		
-		grid.getStore().on('load', function(){
-			if(!this.dataStore.isLoaded()){
-				this.dataStore.on('load', function(str, records, successful, eOpts) {
-					this.updateRecords(grid, column);				 
-				}, this);
-			} else {
+		grid.getStore().on({
+			load: function(){
+				if(!this.dataStore.isLoaded()){
+					this.dataStore.on('load', function(str, records, successful, eOpts) {
+						this.updateRecords(grid, column);				 
+					}, this);
+				} else {
+					this.updateRecords(grid, column);
+				}
+			},
+			add: function(){
 				this.updateRecords(grid, column);
-			}
-		}, this);
+			},
+			update: function() {
+				this.updateRecords(grid, column);
+			},
+			scope: this
+		});
 	},
 
 	/**
