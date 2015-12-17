@@ -175,10 +175,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w*\u00C0-\u00FF*:?]*\])+$/g) == null)) {
+				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*\])+$/g) == null)) {
 				error = true;
 			} else {  // search other errors
-				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=)?["?\w*\u00C0-\u00FF*:?]*)+/g);
+				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*)+/g);
 				for (var kvId in key_val) {  // Check that each tag is in the selected group
 					var kv = key_val[kvId];
 					var k = kv.split("=")[0];
@@ -189,7 +189,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 						error = true;
 					}
 					if (v) {
-						if ((v.match(/[:\u00C0-\u00FF]/g) != null) &&
+						if ((v.match(/[:#'\u00C0-\u00FF]/g) != null) &&
 							(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check correct value ":" or "é"
 							error = true;
 						}
