@@ -34,14 +34,19 @@ Ext.define('Ck.form.Controller', {
 	
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
-	beforeLoad: Ext.emptyFn,
-	afterLoad: Ext.emptyFn,
-	beforeSave: Ext.emptyFn,
-	afterSave: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
 	
+	beforeLoad: Ext.emptyFn,
+	afterLoad: Ext.emptyFn,
 	loadFailed: Ext.emptyFn,
+	
+	beforeSave: Ext.emptyFn,
+	afterSave: Ext.emptyFn,
 	saveFailed: Ext.emptyFn,
+	
+	beforeDelete: Ext.emptyFn,
+	afterDelete: Ext.emptyFn,
+	deleteFailed: Ext.emptyFn,
 	//
 	
 	init: function () {
@@ -539,6 +544,9 @@ Ext.define('Ck.form.Controller', {
 					c.listConfig = {
 						itemTpl: c.itemTpl
 					}
+					// By default use same template for list and display
+					if(!c.displayTpl) c.displayTpl = c.itemTpl;
+					c.displayTpl = '<tpl for=".">' + c.displayTpl + '</tpl>';
 				}
 				delete c.itemTpl;
 
@@ -750,6 +758,16 @@ Ext.define('Ck.form.Controller', {
 			if(f && !f.isValid()) isValid = false;
 		}, this);
 		
+		// SUBFORM : save data
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			if(!sf.name) continue;
+			if(this.fields.indexOf(sf.name)==-1) continue;
+			
+			if(!sf.getController().isValid()) isValid = false;
+		}
+		//
 		
 		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
 		// GRID : save data only if gridpanel is not linked to main form with a name property
@@ -812,7 +830,7 @@ Ext.define('Ck.form.Controller', {
 			bSilent = true;
 		}
 		var fid = options.fid || v.getDataFid();
-		var url = options.url || v.getDataUrl();
+		var url = options.url || me.dataUrl || v.getDataUrl();
 		var data = options.raw || v.getDataRaw();
 		var model = options.model || me.dataModel || v.getDataModel();
 		// var store = options.store || v.getDataStore();
@@ -875,9 +893,9 @@ Ext.define('Ck.form.Controller', {
 		// Load data by ID - build standard url
 		if (fid) {
 			// TODO : Call un service REST for loading data...
-			if(me.dataUrl){
+			if(url){
 				// Form provide un template URL (or multiples URL) to load data
-				var dataUrl = me.dataUrl;
+				var dataUrl = url;
 				if(Ext.isObject(dataUrl)) {
 					dataUrl = dataUrl.read;
 				}
@@ -956,9 +974,9 @@ Ext.define('Ck.form.Controller', {
 		var sid = v.getSid();
 		var lyr = v.getLayer();
 		
-		var fid = v.getDataFid();
-		var url = v.getDataUrl();
-		var model = me.dataModel || v.getDataModel();
+		var fid = options.fid || v.getDataFid();
+		var url = options.url || me.dataUrl || v.getDataUrl();
+		var model = options.model || me.dataModel || v.getDataModel();
 
 		// Compatibility : pass only success callbak
 		if(Ext.isFunction(options)) {
@@ -999,8 +1017,6 @@ Ext.define('Ck.form.Controller', {
 			//if(!sf.name) sf.getController().saveData();
 		}
 		//
-
-		var url = '';
 		
 
 		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
@@ -1062,11 +1078,12 @@ Ext.define('Ck.form.Controller', {
 		// Load data by ID - build standard url
 		if (fid) {
 			// TODO : Call un service REST for loading data...
-			if(me.dataUrl){
+			if(url){
 				// Form provide un template URL to load data
-				var dataUrl = me.dataUrl;
+				var dataUrl = url;
 				if(Ext.isObject(dataUrl)) {
 					dataUrl = dataUrl.update;
+					if(options.create) dataUrl = dataUrl.create ||  dataUrl.update;
 				}
 				var tpl = new Ext.Template(dataUrl);
 				if(Ext.isString(fid)) fid = [fid];
@@ -1090,7 +1107,7 @@ Ext.define('Ck.form.Controller', {
 			scope: this,
 			success: function (response) {
 				var data = Ext.decode(response.responseText, true);
-				if(response.status == 200) {
+				if(response.status == 200 || response.status == 201) {
 					this.fireEvent('aftersave', data);
 					if(this.oController.afterSave(dt) === false){
 						Ck.log("afterSave cancel saveData.");
@@ -1118,7 +1135,98 @@ Ext.define('Ck.form.Controller', {
 			}
 		});
 	},
+	
+	deleteData: function(options) {
+		options = options || {};
+		
+		var me = this;
+		var v = me.getView();
+		
+		var fid = options.fid || v.getDataFid();
+		var url = options.url || me.dataUrl || v.getDataUrl();
+		var model = options.model || me.dataModel || v.getDataModel();
 
+		// Compatibility : pass only success callbak
+		if(Ext.isFunction(options)) {
+			options.success = options;
+			options.scope = this;
+		}
+		//
+		
+		var dt = fid;	
+
+		if(this.oController.beforeDelete(dt) === false){
+			Ck.log("beforeDelete cancel deleteData.");
+			return false;
+		}
+		
+		if(fid && model){
+			model.set(dt);
+			model.erase({
+				success: function (record, operation) {
+					Ext.callback(options.success, options.scope, [dt]);
+				},
+				failure: function (record, operation) {
+					// TODO : on Tablet when access local file via ajax, success pass here !!
+					Ck.Notify.error("Forms deleteData error when deleting data : "+ url +".");
+					
+					this.fireEvent('deletefailed', record);
+					this.oController.deleteFailed(record);
+				},
+				scope: this
+			});
+			return;
+		}
+		
+		// Delete data by ID - build standard url
+		if (fid) {
+			// TODO : Call un service REST for loading data...
+			if(url){
+				// Form provide un template URL to load data
+				var dataUrl = url;
+				if(Ext.isObject(dataUrl)) {
+					dataUrl = dataUrl['delete'];
+				}
+				var tpl = new Ext.Template(dataUrl);
+				if(Ext.isString(fid)) fid = [fid];
+				url = tpl.apply(fid);
+			} else {
+				Ck.log("fid ("+ fid +") defined but no dataUrl template in "+ this.name);
+			}
+		}
+
+		if(!url){
+			Ck.log("Forms deleteData 'fid' or 'url' not set in "+ this.name);
+			Ext.callback(options.success, options.scope, [dt]);
+			return false;
+		}
+
+		// Load data from custom URL ou standard URL
+		url = this.getFullUrl(url);
+		Cks.del({
+			url: url,
+			scope: this,
+			success: function (response) {
+				var data = Ext.decode(response.responseText, true);
+				if(response.status == 202) {
+					this.fireEvent('afterdelete', data);
+					if(this.oController.afterDelete(dt) === false){
+						Ck.log("afterDelete cancel deleteData.");
+						return false;
+					}
+				}
+				Ext.callback(options.success, options.scope, [dt]);
+			},
+			failure: function (response, opts) {
+				// TODO : on Tablet when access local file via ajax, success pass here !!
+				Ck.Notify.error("Forms deleteData error when deleting data : "+ url +".");
+				
+				this.fireEvent('deletefailed', response);
+				this.oController.deleteFailed(response);
+			}
+		});
+	},
+	
 	resetData: function () {
 		var v = this.getView();
 

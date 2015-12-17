@@ -258,18 +258,23 @@ Ext.define('Ck.form.plugin.Subform', {
 	},
 
 	deleteItem: function(grid, rowIndex) {
-		grid.getStore().removeAt(rowIndex);
 		
  		// End update mode
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
 		
 		var formController = this._subform.getController();
+		var rec = grid.getStore().getAt(rowIndex).getData();
 		
 		// Delete record if params available
-		//formController.deleteData();
-		
-		this.resetSubForm();
+		formController.deleteData({
+			success: function(){
+				grid.getStore().removeAt(rowIndex);
+				this.resetSubForm();				
+			},
+			fid: rec,
+			scope: this
+		});
 	},
 	
 	loadItem: function(view, rec, tr, rowIndex) {
@@ -291,7 +296,20 @@ Ext.define('Ck.form.plugin.Subform', {
 		var fidName = grid.subform.fid || grid.fid || 'fid';	
 		var fidValue = data[fidName];
 		
-		var dataUrl = grid.subform.dataUrl;
+		var dataUrl = grid.subform.dataUrl || formController.dataUrl;
+		
+		// update data fid for current loading item (used by dataUrl templating)
+		var vDataFid = this._subform.getDataFid();
+		var dataFid = {};
+		if(Ext.isString(vDataFid)) {
+			dataFid = Ext.applyIf({
+				fid: vDataFid
+			}, data);
+		} else{
+			dataFid = Ext.applyIf(vDataFid, data);
+		}
+		this._subform.setDataFid(dataFid);
+		//
 		
 		// By default load subform with data from the grid
 		var options = {
@@ -307,9 +325,13 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// If find a Data URL, try load with it instead 
 		if(dataUrl) {
+			if(Ext.isObject(dataUrl)) {
+				dataUrl = dataUrl.read;
+			}
 			var tpl = new Ext.Template(dataUrl);
 			dataUrl = tpl.apply(data);
 			options = {
+				fid: dataFid,
 				url: dataUrl
 			};
 		}

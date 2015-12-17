@@ -63,10 +63,17 @@ Ext.define('Ck.Ajax', {
 		this.request(options);
 	},
 
-	update: function(options) {
-	},
-
 	del: function(options) {
+		options.method = 'DELETE';
+		
+		// TODO : chek if we have file to upload ...
+		// application/x-www-form-urlencoded;charset=UTF-8
+		options.headers = {
+			'Content-Type': 'application/json; charset=UTF-8'
+		};
+		
+		options.params = Ext.encode(options.params);
+		this.request(options);
 	},
 	
 	request: function(options) {
