@@ -240,13 +240,12 @@ Ext.define('Ck.form.Controller', {
 
 			// Manage bottom toolbar
 			var docks = this.view.getDockedItems();
-			var dock  = docks[0];
-			if(!this.defaultDock && dock) {
-				this.defaultDock = dock.initialConfig;
-				this.defaultDock.hidden = false;
-			}
-			// Remove existing toolbar
+			// Init Default toolbar && Remove existing toolbar
 			Ext.each(docks, function(d){
+				if(!this.defaultDock && (d.dock == 'bottom')) {
+					this.defaultDock = d.initialConfig;
+					this.defaultDock.hidden = false;
+				}
 				this.view.removeDocked(d);
 			}, this);
 			
@@ -374,6 +373,7 @@ Ext.define('Ck.form.Controller', {
 		};
 
 		Ext.each(cfg.items, fn, this);
+		if(cfg.dockedItems) Ext.each(cfg.dockedItems, fn, this);
 		return includeForm;
 	},
 
@@ -405,6 +405,7 @@ Ext.define('Ck.form.Controller', {
 					}
 				};
 				Ext.each(formConfig.form.items, fn, this);
+				if(formConfig.form.dockedItems) Ext.each(formConfig.form.dockedItems, fn, this);
 
 				// Find include form recursively
 				var incForms = me.getIncludedForm(subFormConfig.form);
