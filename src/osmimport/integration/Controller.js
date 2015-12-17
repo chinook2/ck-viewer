@@ -270,12 +270,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					var integrationGeometryType = this.iLayer.geometry;
 					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
 						(["Point", "LineString", "Polygon"].indexOf(this.iLayer.geometry) > -1)) {
-						for (var memberId in record.data.members) {
-							var member = record.getSubElement(records, record.data.members[memberId].ref);
-							if (record.calculateGeom(member.data, records).getType() == this.iLayer.geometry) {
-								for (var key in member.data.tags) {
-									Ext.Array.include(tags, "rel:" + key);
-								}
+						var membersRef = Ext.Array.map(record.data.members, function(member) {return member.ref;});
+						for (var recId in records) {
+							var rec = records[recId];
+							if (membersRef.indexOf(rec.id) > -1 &&
+								record.calculateGeom(rec.data, records).getType() == this.iLayer.geometry) {
+								tags = Ext.Array.merge(tags,
+									Ext.Array.map(Object.keys(rec.data.tags),
+										function(key) {return "rel:" + key;}));
 							}
 						}
 					}
@@ -449,7 +451,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 
 				this.waitMsg = Ext.Msg.show({
 					closable: false,
-					message: "Integrating data, please wait...",
+					message: "Computing data for integration, please wait...",
 					progress: true,
 					width: 400
 				});
