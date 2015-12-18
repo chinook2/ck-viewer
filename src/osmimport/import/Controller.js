@@ -7,11 +7,30 @@ Ext.define('Ck.osmimport.import.Controller', {
 	alias: 'controller.ckosmimportimport',
 	
 	/**
-     * Init Constants
+     * Constants
 	 */
 	OSM_PROJECTION: "EPSG:4326",
 	NB_FEATURES_MAX: 200,
-
+	// Style to be applied by default to the imported data.
+	DEFAULT_STYLE: new ol.style.Style({
+		fill: new ol.style.Fill({
+			color: 'rgba(255, 0, 0, 0.4)'
+		}),
+		stroke: new ol.style.Stroke({
+			color: '#FF0000',
+			width: 2
+		}),
+		image: new ol.style.Circle({
+			radius: 7,
+			fill: new ol.style.Fill({
+				color: 'rgba(255, 0, 0, 0.4)'
+			}),
+			stroke: new ol.style.Stroke({
+				color: '#FF0000',
+				width: 2
+			})
+		})
+	}),
 	/**
 	 * Initialisation of components.
 	 * @protected
@@ -19,28 +38,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 	init: function() {
 		this.vm = this.getViewModel();
 		this.openner = this.getView().openner;
-
-		
-		// Style to be applied by default to the imported data.
-		this.DEFAULT_STYLE = new ol.style.Style({
-			fill: new ol.style.Fill({
-				color: 'rgba(255, 0, 0, 0.4)'
-			}),
-			stroke: new ol.style.Stroke({
-				color: '#FF0000',
-				width: 2
-			}),
-			image: new ol.style.Circle({
-				radius: 7,
-				fill: new ol.style.Fill({
-					color: 'rgba(255, 0, 0, 0.4)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: '#FF0000',
-					width: 2
-				})
-			})
-		});
 		
 		this.olMap = Ck.getMap().getOlMap();
 		/**
@@ -96,6 +93,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	},
 		
 	/**
+	 * Method launched on cancel click.
 	 * Hide the import panel
 	 */
 	cancel: function() {
@@ -130,6 +128,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			checkedTags.push(obj);
 		} else {  // Remove the tag
 			var index = -1;
+			
 			for (var i = 0; i < checkedTags.length; i++) {
 				if (checkedTags[i].tag === obj.tag) {
 					index = i;

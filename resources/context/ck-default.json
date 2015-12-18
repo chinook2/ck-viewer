@@ -14,7 +14,7 @@
 		"publisher" : "",
 		"creator" : "Chinook Server",
 		"rights" : "Chinook, licensed under a BSD License",
-		"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+		"bbox" : [-346718.36,5897881.10,-34855.28,6142479.59],
 		"srs": "EPSG:3857",
 		"scales": [
 			{"res": 2.3886571339117578125, "scale": "1 / 8 530"},
@@ -86,18 +86,18 @@
 				}]
 			}],
 			"extension" : {
-				"path": "Limites Administratives"
+				"path": "Limites administratives"
 			}
 		}
 	},{
 		"type": "Feature",
 		"id": "commune",
 		"properties": {
-			"title" : "Limites Communales",
+			"title" : "Limites communales",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "OpenStreetMap",
 			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"bbox" : [-346718.36,5897881.10,-34855.28,6142479.59],
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
 				"operations" : [{ 
@@ -108,7 +108,7 @@
 				}]
 			}],
 			"extension" : {
-				"path": "Limites Administratives"
+				"path": "Limites administratives"
 			}
 		}
 	},{
@@ -211,7 +211,7 @@
 		"type": "Feature",
 		"id": "parceols",
 		"properties": {
-			"title" : "Parcs Eoliens",
+			"title" : "Parcs éoliens",
 			"updated" : "2015-07-16T00:00:00Z",
 			"publisher" : "",
 			"active" : false,
@@ -295,30 +295,6 @@
 					"method" : "GET",
 					"type" : "image/png",
 					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=sportpitches&VERSION=1.1.1",
-					"request":{},
-					"result":{}
-				}]
-			}],
-			"extension" : {
-				"path": "BDD CK1"
-			}
-		}
-	},{
-		"type": "Feature",
-		"id": "polices",
-		"properties": {
-			"title" : "Postes de Police / Gendarmerie",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=polices&VERSION=1.1.1",
 					"request":{},
 					"result":{}
 				}]

@@ -229,7 +229,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				result = 0;
 				if (a.alias > b.alias) result = 1;
 				else if (a.alias < b.alias) result = -1;
-				return result;}
+				return result;
+			}
 		);
 		if (attributes.length > 0) {
 			for (var i in attributes) {
@@ -271,8 +272,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
 						(["Point", "LineString", "Polygon"].indexOf(this.iLayer.geometry) > -1)) {
 						var membersRef = [];
-						for (var memberId in record.data.members) {
-							membersRef.push(record.data.members[memberId]);
+						for (var mId in record.data.members) {
+							membersRef.push(record.data.members[mId].ref);
 						}
 						for (var recId in records) {
 							var rec = records[recId];
@@ -280,7 +281,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 								record.calculateGeom(rec.data, records).getType() == this.iLayer.geometry) {
 								var memberKeys = [];
 								for (key in rec.data.tags) {
-									memberKeys.push(key);
+									memberKeys.push("rel:" + key);
 								}
 								tags = Ext.Array.merge(tags, memberKeys);								
 							}

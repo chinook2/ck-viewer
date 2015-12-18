@@ -26,6 +26,34 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * Projection used by OpenStreetMap.
 	 */
 	OSM_PROJECTION: "EPSG:4326",
+	// This constant contains all the tags to be checked to define if a way is a polygon
+	TAGS_TO_CHECK_POLYGON: [
+		{key: "area", poly_val: [], nopoly_val: ["no"]},
+		{key: "building", poly_val: [], nopoly_val: ["no"]},
+		{key: "highway", poly_val: ["services", "rest_area", "escape"], nopoly_val: ["no"]},
+		{key: "natural", poly_val: [], nopoly_val: ["no", "coastline", "cliff", "ridge", "arete", "tree_row"]},
+		{key: "landuse", poly_val: [], nopoly_val: ["no"]},
+		{key: "waterway", poly_val: ["riverbank", "dock", "boatyard", "dam"], nopoly_val: ["no"]},
+		{key: "amenity", poly_val: [], nopoly_val: ["no"]},
+		{key: "leisure", poly_val: [], nopoly_val: ["no"]},
+		{key: "barrier", poly_val: ["city_wall", "ditch", "hedge", "retaining_wall", "wall", "spikes"], nopoly_val:["no"]},
+		{key: "railway", poly_val: ["station", "turntable", "roundhouse", "platform"], nopoly_val: ["no"]},
+		{key: "boundary", poly_val: [], nopoly_val: ["no"]},
+		{key: "man_made", poly_val: [], nopoly_val: ["no", "cutline", "embankment", "pipeline"]},
+		{key: "power", poly_val: ["plant", "substation", "generator", "tranformer"], nopoly_val: ["no"]},
+		{key: "place", poly_val: [], nopoly_val: ["no"]},
+		{key: "shop", poly_val: [], nopoly_val: ["no"]},
+		{key: "aeroway", poly_val: [], nopoly_val: ["no", "taxiway"]},
+		{key: "tourism", poly_val: [], nopoly_val: ["no"]},
+		{key: "historic", poly_val: [], nopoly_val: ["no"]},
+		{key: "public_transport", poly_val: [], nopoly_val: ["no"]},
+		{key: "office", poly_val: [], nopoly_val: ["no"]},
+		{key: "building:part", poly_val: [], nopoly_val: ["no"]},
+		{key: "ruins", poly_val: [], nopoly_val: ["no"]},
+		{key: "area:highway", poly_val: [], nopoly_val: ["no"]},
+		{key: "craft", poly_val: [], nopoly_val: ["no"]},
+		{key: "golf", poly_val: [], nopoly_val: ["no"]}
+	],
 
 	/**
 	 * This method search and return the element given by its id in the records.
@@ -128,37 +156,14 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				 * poly_val: values which indicates that the element IS a polygon
 				 * nopoly_val: values which indicates that the element IS NOT a polygon
 				 */
-				var tagsToCheck = [
-					{key: "area", poly_val: [], nopoly_val: ["no"]},
-					{key: "building", poly_val: [], nopoly_val: ["no"]},
-					{key: "highway", poly_val: ["services", "rest_area", "escape"], nopoly_val: ["no"]},
-					{key: "natural", poly_val: [], nopoly_val: ["no", "coastline", "cliff", "ridge", "arete", "tree_row"]},
-					{key: "landuse", poly_val: [], nopoly_val: ["no"]},
-					{key: "waterway", poly_val: ["riverbank", "dock", "boatyard", "dam"], nopoly_val: ["no"]},
-					{key: "amenity", poly_val: [], nopoly_val: ["no"]},
-					{key: "leisure", poly_val: [], nopoly_val: ["no"]},
-					{key: "barrier", poly_val: ["city_wall", "ditch", "hedge", "retaining_wall", "wall", "spikes"], nopoly_val:["no"]},
-					{key: "railway", poly_val: ["station", "turntable", "roundhouse", "platform"], nopoly_val: ["no"]},
-					{key: "boundary", poly_val: [], nopoly_val: ["no"]},
-					{key: "man_made", poly_val: [], nopoly_val: ["no", "cutline", "embankment", "pipeline"]},
-					{key: "power", poly_val: ["plant", "substation", "generator", "tranformer"], nopoly_val: ["no"]},
-					{key: "place", poly_val: [], nopoly_val: ["no"]},
-					{key: "shop", poly_val: [], nopoly_val: ["no"]},
-					{key: "aeroway", poly_val: [], nopoly_val: ["no", "taxiway"]},
-					{key: "tourism", poly_val: [], nopoly_val: ["no"]},
-					{key: "historic", poly_val: [], nopoly_val: ["no"]},
-					{key: "public_transport", poly_val: [], nopoly_val: ["no"]},
-					{key: "office", poly_val: [], nopoly_val: ["no"]},
-					{key: "building:part", poly_val: [], nopoly_val: ["no"]},
-					{key: "ruins", poly_val: [], nopoly_val: ["no"]},
-					{key: "area:highway", poly_val: [], nopoly_val: ["no"]},
-					{key: "craft", poly_val: [], nopoly_val: ["no"]},
-					{key: "golf", poly_val: [], nopoly_val: ["no"]}
-				];
-				for (var t in tagsToCheck) {
-					if (tags[tagsToCheck[t].key] &&  // Tag is present
-						((tagsToCheck[t].nopoly_val.length == 0 || tagsToCheck[t].nopoly_val.indexOf(tags[tagsToCheck[t].key]) == -1) &&  // Value for way is absent
-						 (tagsToCheck[t].poly_val.length == 0   || tagsToCheck[t].poly_val.indexOf(tags[tagsToCheck[t].key]) > -1))) {  // values for polygon is present
+				for (var t in this.TAGS_TO_CHECK_POLYGON) {
+					if (tags[this.TAGS_TO_CHECK_POLYGON[t].key] &&  // Tag is present
+						((this.TAGS_TO_CHECK_POLYGON[t].nopoly_val.length == 0 || 
+						  this.TAGS_TO_CHECK_POLYGON[t].nopoly_val.indexOf(
+							tags[this.TAGS_TO_CHECK_POLYGON[t].key]) == -1) &&  // Value for way is absent
+						 (this.TAGS_TO_CHECK_POLYGON[t].poly_val.length == 0 ||
+						  this.TAGS_TO_CHECK_POLYGON[t].poly_val.indexOf(
+							tags[this.TAGS_TO_CHECK_POLYGON[t].key]) > -1))) {  // values for polygon is present
 							polygon = true;
 							break;
 					}
