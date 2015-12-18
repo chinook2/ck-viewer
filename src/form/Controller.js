@@ -7,6 +7,7 @@ Ext.define('Ck.form.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckform',
 
+	autoLoad: true,
 	isSubForm: false,
 	storage: null,
 
@@ -51,6 +52,7 @@ Ext.define('Ck.form.Controller', {
 	
 	init: function () {
 		this.isSubForm = this.view.getIsSubForm();
+		this.autoLoad = this.view.getAutoLoad();
 		if(this.view.getEditing()===true) this.startEditing();
 		this.isInit = false;
 
@@ -294,7 +296,7 @@ Ext.define('Ck.form.Controller', {
 			this.isInit = true;
 			
 			// Auto-load data if params available
-			this.loadData();
+			if(this.autoLoad) this.loadData();
 		}
 
 		return true;

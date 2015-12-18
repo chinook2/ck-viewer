@@ -41,7 +41,8 @@ Ext.define("Ck.Form",{
 		dataModel : null,
 		// dataStore : null,
 		
-		isSubForm: false
+		isSubForm: false,
+		autoLoad: true		// Try populate form after initautoLoad
 	},
 
 	bodyPadding: 10,

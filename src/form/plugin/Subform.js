@@ -52,7 +52,9 @@ Ext.define('Ck.form.plugin.Subform', {
 		this._subform = {
 			xtype: 'ckform',
 			itemId: 'subform',
-			isSubForm: true, 
+			isSubForm: true,
+			// load from grid selection row
+			autoLoad: false,
 			editing: subForm.editing || formController.getView().getEditing(),
 			urlTemplate: subForm.urlTemplate || formController.getView().getUrlTemplate(),
 			// inherit dataFid from main form (used in store url template)
