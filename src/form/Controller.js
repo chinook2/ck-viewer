@@ -66,16 +66,16 @@ Ext.define('Ck.form.Controller', {
 
 		// Get form definition directly in the view (no Ajax request)
 		var inlineForm = this.view.getFormRaw();
-		if(inlineForm){
-			var parentForm = this.view.up('ckform');
-			if(parentForm) {
-				// inherit dataFid from main view form (used in store url template)
+		var parentForm = this.view.up('ckform');
+		if(parentForm) {
+			// inherit dataFid from main view form (used in store url template)
+			if(!this.view.getDataFid){
 				this.view.setDataFid(parentForm.getDataFid());
-				
-				// Try find parent form name (used for overriden controllers)
-				if(!inlineForm.name){
-					inlineForm.name = parentForm.getController().name;
-				}
+			}
+			
+			// Try find parent form name (used for overriden controllers)
+			if(inlineForm && !inlineForm.name){
+				inlineForm.name = parentForm.getController().name;
 			}
 		}
 		
