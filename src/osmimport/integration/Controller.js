@@ -548,6 +548,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			xmlData: sXML,
 			withCredentials: true,
 			useDefaultXhrHeader: false,
+			timeout: 120000,
 			success: function(response) {
 				try {
 					var resp = wfs.readTransactionResponse(response.responseXML);
