@@ -88,7 +88,7 @@ Ext.define("Ck.osmimport.Integration", {
 		}]
 	},{  // Informations to integrate
 		xtype: "fieldcontainer",
-		fieldLabel: "Select informations to integrates",
+		fieldLabel: "Select informations to integrate",
 		labelAlign: "top",
 		labelStyle: "font-weight: bold",
 		items: [{
