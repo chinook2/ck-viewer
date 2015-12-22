@@ -25,6 +25,11 @@ Ext.define('Ck.Ajax', {
 				scope: this
 			});
 		}
+		
+		// Ext.Ajax.setDefaultPostHeader('application/json; charset=UTF-8');
+		// if (Ck.getOption('defaultPostHeader')) {
+			// Ext.Ajax.setDefaultPostHeader(Ck.getOption('defaultPostHeader'));
+		// }
 	},
 	
 	get: function(options) {
@@ -34,6 +39,14 @@ Ext.define('Ck.Ajax', {
 	
 	post: function(options) {
 		options.method = 'POST';
+		
+		// TODO : chek if we have file to upload ...
+		// application/x-www-form-urlencoded;charset=UTF-8
+		options.headers = {
+			'Content-Type': 'application/json; charset=UTF-8'
+		};
+		
+		options.params = Ext.encode(options.params);
 		this.request(options);
 	},
 
@@ -43,19 +56,24 @@ Ext.define('Ck.Ajax', {
 		// TODO : chek if we have file to upload ...
 		// application/x-www-form-urlencoded;charset=UTF-8
 		options.headers = {
-			'Content-Type': 'application/json'
+			'Content-Type': 'application/json; charset=UTF-8'
 		};
 		
-		
 		options.params = Ext.encode(options.params);
-		
 		this.request(options);
 	},
 
-	update: function(options) {
-	},
-
 	del: function(options) {
+		options.method = 'DELETE';
+		
+		// TODO : chek if we have file to upload ...
+		// application/x-www-form-urlencoded;charset=UTF-8
+		options.headers = {
+			'Content-Type': 'application/json; charset=UTF-8'
+		};
+		
+		options.params = Ext.encode(options.params);
+		this.request(options);
 	},
 	
 	request: function(options) {
