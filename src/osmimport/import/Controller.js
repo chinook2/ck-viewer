@@ -362,7 +362,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.executeRequest(request);
 			}
 		} catch (exception) {  // Application is never locked with the "Wait MessageBox" if an error occurs
-			console.log(exception.stack);  // TODO remove this debug log
 			if (this.waitMsg) {
 				this.waitMsg.close();
 			}
@@ -479,7 +478,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				}
 				
 			} catch (exception) {
-				console.log(exception.stack);  // TODO remove this debug log
 				Ext.MessageBox.show({
 					title: 'OSM Import',
 					msg: 'An error occured while computing the imported data.',
@@ -539,7 +537,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				Ext.defer(this.endImport, 1, this);
 			}
 		} catch (exception) {
-			console.log(exception.stack);  // TODO Remove this debug log
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured during import.',
@@ -609,7 +606,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.openner.finishImport();
 			}
 		} catch (exception) {
-			console.log(exception.stack);  // TODO Remove this debug log
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured during import.',

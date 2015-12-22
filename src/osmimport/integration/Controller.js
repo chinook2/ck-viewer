@@ -422,11 +422,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (this.nbFeaturesComputed < this.records.length) {
 				Ext.defer(this.computeFeature, 1, this);
 			} else {
-				console.log(this.featuresToIntegrate); // TODO Remove test log
 				this.saveData(this.iLayer.layer, this.featuresToIntegrate);	
 			}
 		} catch (exception) {
-			console.log(exception.stack);  // TODO Remove this exception log
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured while integrating the data.',
@@ -473,7 +471,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				});
 			}
 		} catch (exception) {
-			console.log(exception.stack);  // TODO Remove this exception log
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured while integrating the data.',
