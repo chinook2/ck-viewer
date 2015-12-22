@@ -17,7 +17,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			color: 'rgba(255, 0, 0, 0.4)'
 		}),
 		stroke: new ol.style.Stroke({
-			color: '#FF0000',
+			color: 'rgb(255, 0, 0)',
 			width: 2
 		}),
 		image: new ol.style.Circle({
@@ -26,7 +26,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				color: 'rgba(255, 0, 0, 0.4)'
 			}),
 			stroke: new ol.style.Stroke({
-				color: '#FF0000',
+				color: 'rgb(255, 0, 0)',
 				width: 2
 			})
 		})
@@ -55,13 +55,13 @@ Ext.define('Ck.osmimport.import.Controller', {
 						color: 'rgba(255, 255, 255, 0.4)'
 					}),
 					stroke: new ol.style.Stroke({
-						color: '#ffcc33',
+						color: 'rgb(255, 204, 51)',
 						width: 2
 					}),
 					image: new ol.style.Circle({
 						radius: 7,
 						fill: new ol.style.Fill({
-							color: '#ffcc33'
+							color: 'rgb(255, 204, 51)'
 						})
 					})
 				}),

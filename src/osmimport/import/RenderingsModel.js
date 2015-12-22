@@ -16,7 +16,7 @@ Ext.define('Ck.osmimport.import.RenderingsModel', {
 		],
 		strokecolor: [
 			{type: "presence"},
-			{type: "format", matcher: /^#[0-9A-Fa-f]{6}$/}
+			{type: "format", matcher: /^rgb\([0-9]+,\s?[0-9]+,\s?[0-9]+\)$/}
 		]
 	}
 });
