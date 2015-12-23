@@ -30,7 +30,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	/**
 	 * 
 	 */
-	fieldIgnored: ["geometry"],
+	fieldIgnored: ["geometry", "shape", "boundedBy"],
 	
 	/**
 	 * FeatureInfo on vector layer
@@ -51,7 +51,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			type		: "Point",
 			map			: map,
 			callback	: this.displayInfo,
-			scope		: this
+			scope		: this,
+			highlight	: false
 		});
 	},
 	
@@ -95,7 +96,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 					data.push({
 						featureid: i + 1,
 						field: f,
-						value: lyr.features[i].values_[f].toString()
+						value: (Ext.isEmpty(lyr.features[i].values_[f]))? "" : lyr.features[i].values_[f].toString()
 					});
 				}
 			}

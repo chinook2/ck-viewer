@@ -85,10 +85,46 @@ Ext.define('Ck.edit.Controller', {
 		
 		this.control({
 			"ckedit button#cancel": {
-				click: this.cancel,
+				click: function() {
+					if(this.history.store.getCount() != 0) {
+						Ext.Msg.show({
+							title: "Edition",
+							message: "Are you sure to cancel all modifications ?",
+							buttons: Ext.Msg.YESNO,
+							icon: Ext.Msg.QUESTION,
+							scope: this,
+							fn: function(btn) {
+								if (btn === 'yes') {
+									this.cancel();
+								}
+							}
+						});
+					}
+				},
 				scope: this
 			},"ckedit button#save": {
 				click: this.save,
+				scope: this
+			},"ckedit button#exit": {
+				click: function() {
+					if(this.history.store.getCount() != 0) {
+						Ext.Msg.show({
+							title: "Edition",
+							message: "Close edit session without save any changes ?",
+							buttons: Ext.Msg.YESNO,
+							icon: Ext.Msg.QUESTION,
+							scope: this,
+							fn: function(btn) {
+								if (btn === 'yes') {
+									this.cancel();
+									this.close();
+								}
+							}
+						});
+					} else {
+						this.close();
+					}
+				},
 				scope: this
 			}
 		});
@@ -355,7 +391,41 @@ Ext.define('Ck.edit.Controller', {
 		}
 	},
 	
+	/**
+	 * Cancel all modifications.
+	 */
+	cancel: function() {
+		var data, ft;
+		
+		if(this.isWMS) {
+			this.wfsSource.clear();
+		} else {
+			for(var i = 0; i < this.history.store.getCount(); i++) {
+				data = this.history.store.getAt(i).data;
+				switch(data.actionId) {
+					case 0:
+						// Create
+						// this.wfsSource.removeFeature(data.feature);
+						break;
+					case 1:
+					case 2:
+					case 4:
+					case 5:
+						// Geometry or attributes, crop or union
+						updates.push(ft);
+						break;
+					case 3:
+						// Remove
+						deletes.push(ft);
+						break;
+				}
+			}
+		}
+		this.history.store.removeAll();
+	},
+	
 	close: function() {
+		
 		if(this.vertex) {
 			this.vertex.close.bind(this.vertex)();
 		}
@@ -505,5 +575,5 @@ Ext.define('Ck.edit.Controller', {
 			src.updateParams(params);
 		}
 		
-	},
+	}
 });

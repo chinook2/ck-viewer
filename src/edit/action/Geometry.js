@@ -42,6 +42,9 @@ Ext.define('Ck.edit.action.Geometry', {
 		}
 
 		this.geometryInteraction.setActive(status);
+		if(!status) {
+			this.geometryInteraction.resetSelection();
+		}
 	},
 	
 	firstUse: function() {
@@ -73,7 +76,9 @@ Ext.define('Ck.edit.action.Geometry', {
 	},
 	
 	disableAllInteractions: function() {
-		this.geometryInteraction.destroy();
-		delete this.geometryInteraction;
+		if(this.used) {
+			this.geometryInteraction.destroy();
+			delete this.geometryInteraction;
+		}
 	}
 });
