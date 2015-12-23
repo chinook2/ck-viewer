@@ -505,5 +505,5 @@ Ext.define('Ck.edit.Controller', {
 			src.updateParams(params);
 		}
 		
-	},
+	}
 });
