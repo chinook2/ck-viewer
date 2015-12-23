@@ -13,12 +13,12 @@ Ext.define("Ck.edit.History", {
 	
 	columns: [
 		{ text: "#", dataIndex: "number", width: 35 },
-		{ text: "FeatureID", dataIndex: "featureid" },
+		{ text: "FeatureID", dataIndex: "featureId" },
 		{ text: "Action", dataIndex: "action" }
 	],
 	store: {
 		storeId: "editHistoryStore",
-		fields: ["number", "featureid", "action"]
+		fields: ["number", "featureId", "action", "id", "actionId",  "feature"]
 	}
 	
 });

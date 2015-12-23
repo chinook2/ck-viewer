@@ -289,9 +289,13 @@
 		"js": [{
 			"path": "libs/ol3/ol-debug.js"
 		},{
+			"path": "libs/ol3/ol.patch.js"
+		},{
 			"path": "libs/proj4js/proj4.js"
 		},{
 			"path": "libs/proj4js/defs/EPSG2154.js"
+		},{
+			"path": "libs/proj4js/defs/EPSG4258.js"
 		},{
 			"path": "libs/turf/turf.min.js"
 		},{
@@ -316,9 +320,13 @@
 		"js": [{
 			"path": "libs/ol3/ol-debug.js"
 		},{
+			"path": "libs/ol3/ol.patch.js"
+		},{
 			"path": "libs/proj4js/proj4-src.js"
 		},{
 			"path": "libs/proj4js/defs/EPSG2154.js"
+		},{
+			"path": "libs/proj4js/defs/EPSG4258.js"
 		},{
 			"path": "libs/turf/turf.js"
 		},{

@@ -118,8 +118,8 @@ Ext.define("Ck.Map", {
 			PinchZoom: {},
 			KeyboardPan: {},
 			KeyboardZoom: {},
-			MouseWheelZoom: {},
-			DragZoom: {}
+			MouseWheelZoom: {}
+			// DragZoom: {}
 		}
 	},
 

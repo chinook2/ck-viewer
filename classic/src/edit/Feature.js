@@ -1,5 +1,8 @@
 /**
- * This panel contains tools to edit layer attributes and layer geometries
+ * This panel list parts of multi-feature object. Actions that can be undertaken are :
+ *  - remove or create sub-feature
+ *  - start vertex edition for one sub-feature
+ *  - crop or merge sub-feature
  */
 
 Ext.define("Ck.edit.Feature", {

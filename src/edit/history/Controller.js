@@ -5,6 +5,15 @@ Ext.define('Ck.edit.history.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckedit.history',
 	
+	actionLabels: [
+		"Add",
+		"Geometry",
+		"Attribute",
+		"Remove",
+		"Crop",
+		"Union"
+	],
+	
 	/**
 	 * @protected
 	 */
@@ -50,7 +59,7 @@ Ext.define('Ck.edit.history.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onFeatureAdd: function(feature) {
-		this.store.add(this.createRecord(feature, "Add"));
+		this.store.add(this.createRecord(feature, 0));
 	},
 	
 	/**
@@ -58,7 +67,12 @@ Ext.define('Ck.edit.history.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onFeatureGeometry: function(feature) {
-		this.store.add(this.createRecord(feature, "Geometry"));
+		var rcd = this.getRecord(feature);
+		if(Ext.isEmpty(rcd)) {
+			this.store.add(this.createRecord(feature, 1));
+		} else {
+			
+		}
 	},
 	
 	/**
@@ -66,7 +80,7 @@ Ext.define('Ck.edit.history.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onFeatureAttribute: function(feature) {
-		this.store.add(this.createRecord(feature, "Attribute"));
+		this.store.add(this.createRecord(feature, 2));
 	},
 	
 	/**
@@ -74,7 +88,7 @@ Ext.define('Ck.edit.history.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onFeatureRemove: function(feature) {
-		this.store.add(this.createRecord(feature, "Remove"));
+		this.store.add(this.createRecord(feature, 3));
 	},
 	
 	/**
@@ -82,7 +96,7 @@ Ext.define('Ck.edit.history.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onFeatureCrop: function(feature) {
-		this.store.add(this.createRecord(feature, "Crop"));
+		this.store.add(this.createRecord(feature, 4));
 	},
 	
 	/**
@@ -90,7 +104,15 @@ Ext.define('Ck.edit.history.Controller', {
 	 * @param {ol.Feature[]}
 	 */
 	onFeatureUnion: function(feature) {
-		this.store.add(this.createRecord(feature, "Union"));
+		this.store.add(this.createRecord(feature, 5));
+	},
+	
+	/**
+	 * Get, if exist, the record corresponding to the passed feature
+	 * @return {Ext.data.Model}
+	 */
+	getRecord: function(feature) {
+		return this.store.getById(feature.getId());
 	},
 	
 	/**
@@ -98,13 +120,20 @@ Ext.define('Ck.edit.history.Controller', {
 	 */
 	createRecord: function(feature, action) {
 		return {
-			number: this.store.getCount() + 1,
-			featureid: feature.getId() || "Unkown",
-			action: action
+			number		: this.store.getCount() + 1,
+			featureId	: feature.getId() || "Unkown",
+			action		: this.actionLabels[action],
+			id			: feature.getId() || Math.floor(Math.random() * 1000000000),
+			actionId	: action,
+			feature		: feature
 		};
 	},
 	
 	close: function() {
 		
+	},
+	
+	reset: function() {
+		this.store.removeAll();
 	}
 });

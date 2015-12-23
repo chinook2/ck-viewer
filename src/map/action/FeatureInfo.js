@@ -46,161 +46,39 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				{name: 'value', type: 'string'}
 			]
 		});
+		
+		this.draw = new Ck.Selection({
+			type		: "Point",
+			map			: map,
+			callback	: this.displayInfo,
+			scope		: this
+		});
 	},
 	
 	/**
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
-		if(pressed) {
-			this.evKey = this.olMap.on("click", this.onClick, this);
+		this.draw.setActive(pressed);
+	},
+	
+	/**
+	 * Display features informations.
+	 * @params {ol.Feature[][]}
+	 */
+	displayInfo: function(res) {
+		this.res = res;
+		if(this.res.length != 0) {
+			this.createContainer();
+			this.panel.removeAll();
+			
+			this.res.forEach(function(lyr) {
+				this.panel.add(this.createTab(lyr));
+			}, this);
+			
+			this.win.show();
 		} else {
-			this.olMap.unByKey(this.evKey);
-		}
-	},
-	
-	onClick: function(evt) {
-		this.res = [];
-		
-		this.curCoord = evt.coordinate;
-		this.curPixel = evt.pixel;
-		
-		// TODO Display mask
-		
-		var lyrs = Ck.getMap().getLayers(function(lyr) {
-			return (lyr.getExtension && lyr.getExtension("queryable") === true
-				&& (!this.onlyVisible || lyr.getVisible()));
-		}.bind(this));
-		
-		// Buffer point
-		var geom = turf.buffer(
-			turf.point(this.curCoord),
-			Ck.getMap().getOlView().getResolution() * this.buffer
-			, "meters"
-		);
-		
-		var bbox = new ol.geom.Polygon(geom.features[0].geometry.coordinates);
-		
-		/*/ Debug to display buffered point
-		if(!window.lyr) {
-			window.lyr = new ol.layer.Vector({
-				id: "onTheFlyLayer",
-				title: "onTheFlyLayer",
-				source: new ol.source.Vector({
-					projection: 'EPSG:3857',
-					format: new ol.format.GeoJSON()
-				}),
-				style: new ol.style.Style({
-					stroke: new ol.style.Stroke({
-						color: 'blue',
-						width: 3
-					}),
-					fill: new ol.style.Fill({
-						color: 'rgba(0, 0, 255, 0.1)'
-					})
-				})
-			});
-			Ck.getMap().getOlMap().addLayer(window.lyr);
-		}
-		window.lyr.getSource().addFeature(new ol.Feature({geometry: bbox}));
-		*/
-		
-		bbox = bbox.getExtent();
-		
-		var size = this.olMap.getSize();
-		var extent = Ck.getMap().getOlView().calculateExtent(size).join(",");
-		var projCode = Ck.getMap().getProjection().getCode();
-		
-		this.nbQueryDone = 0;
-		this.nbQuery = lyrs.getLength();
-		
-		// Loop on queryable layers
-		lyrs.forEach(function(lyr) {
-			var src = lyr.getSource();
-			
-			// Vector type layers else raster type (ImageWMS)
-			if(src.getFeaturesInExtent) {
-				features = src.getFeaturesInExtent(bbox);
-				if(features.length != 0) {
-					// If clustered vector we have to scan sub feature
-					if(src instanceof ol.source.Cluster) {
-						var subFeatures = [];
-						features.forEach(function(ft) {
-							subFeatures = subFeatures.concat(ft.values_.features);
-						});
-						features = subFeatures;
-					}
-					this.res.push({
-						features: features,
-						layer: lyr
-					});
-				}
-				this.displayInfo();
-			} else {
-				url = src.getUrl();
-				Ck.Ajax.get({
-					scope: this,
-					url: url,
-					cors: true,
-					useDefaultXhrHeader : false,
-					nocache: true,
-					params: {
-						service: "WMS",
-						request: "GetFeatureInfo",
-						version: src.getParams().version || src.getParams().VERSION,
-						layers: src.getParams().layers || src.getParams().LAYERS,
-						query_layers: src.getParams().layers || src.getParams().LAYERS,
-						bbox: extent,
-						srs: projCode,
-						feature_count: 10,
-						x: this.curPixel[0],
-						y: this.curPixel[1],
-						width: size[0],
-						height: size[1],
-						info_format: "application/vnd.ogc.gml",
-						geometriefeature: "bounds",
-						mod: "sheet"
-					},
-					success: function(response) {
-						var parser = new ol.format.WMSGetFeatureInfo();
-						var features = parser.readFeatures(response.responseXML);
-						if(features.length != 0) {
-							this.res.push({
-								features: features,
-								layer: lyr
-							});
-						}
-						this.displayInfo();
-					},
-					failure: function() {
-						Ck.log("Request getFeature fail for layer ");
-						this.displayInfo();
-					}
-				});
-			}
-			
-			
-		}, this);
-		
-		
-	},
-	
-	displayInfo: function() {
-		this.nbQueryDone++;
-		
-		if(this.nbQueryDone == this.nbQuery) {
-			if(this.res.length != 0) {
-				this.createContainer();
-				this.panel.removeAll();
-				
-				this.res.forEach(function(lyr) {
-					this.panel.add(this.createTab(lyr));
-				}, this);
-				
-				this.win.show();
-			} else {
-				// alert("Result empty!");
-			}
+			// alert("Result empty!");
 		}
 	},
 	

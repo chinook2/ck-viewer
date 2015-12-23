@@ -4,51 +4,67 @@
 Ext.define('Ck.format.OWSContext', {
 	alternateClassName: ['Ck.owc', 'Ck.Owc'],
 	
+	defaults: {
+		srs: "EPSG:3857",
+		extent: [-180,-90,180,90]
+	},
+	
+	config: {
+		extent		: null,
+		projection	: null,
+		scales		: null,
+		resolutions	: null,
+		layers		: []
+	},
+	
 	requires: [
 		'Ck.format.OWSContextLayer'
 	],
 	
-	constructor: function(owc) {
-		if(!owc.properties || !owc.features) {
-			Ck.error("This context is not a OWS context !");
-			return false;
+	/**
+	 * Constructor
+	 * @params {Object}
+	 */
+	constructor: function(config) {
+		var scales, proj, extent, resolutions = [], data = config.data;
+		
+		// Scales
+		scales = data.properties.scales;
+		
+		// Projection
+		proj = ol.proj.get(data.properties.srs || this.defaults.srs);
+		
+		// Extent
+		if(!data.properties.bbox) {
+			extent = proj.getWorldExtent() || this.defaults.extent;
+		} else {
+			extent = data.properties.bbox;
 		}
 		
-		this.owc = owc;
-	},
-	
-	getExtent: function() {
-		if(!this.owc.properties.bbox) {
-			return this.getProjection().getWorldExtent() || [-180,-90,180,90];
-		} else {
-			return this.owc.properties.bbox;
+		// Resolutions
+		if(!Ext.isEmpty(scales) && !Ext.isArray(scales)) {
+			scales.forEach(function(o) {
+				if(o &&  o.res) resolutions.push(o.res);
+			});
 		}
-	},
-	
-	getProjection: function() {
-		return ol.proj.get(this.owc.properties.srs || "EPSG:3857");
-	},
-	
-	getScales: function() {
-		return this.owc.properties.scales;
-	},
-	
-	getResolutions: function() {
-		var scales = this.getScales();
-		if(!scales) return [];
-		if(!Ext.isArray(scales)) return [];
-		var res = [];
-		scales.forEach(function(o) {
-			if(o &&  o.res) res.push(o.res);
+		
+		Ext.apply(config, {
+			projection	: proj,
+			extent		: extent,
+			scales		: scales,
+			resolutions	: resolutions
 		});
-		return res;
-	},
-	
-	getLayers: function() {
-		return this.owc.features;
-	},
-	
-	getLayer: function(layer) {
-		return new Ck.OwcLayer(layer, this);
+		
+		this.initConfig(config);
+		
+		var layers = this.getLayers();
+		
+		// Layers
+		for(var i = 0; i < data.features.length; i++) {
+			layers.push(new Ck.owcLayer({
+				data: data.features[i],
+				owsContext: this
+			}));
+		}
 	}
 });

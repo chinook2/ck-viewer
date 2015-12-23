@@ -12,21 +12,16 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		var action = {
 			tooltip: this.tooltip,
 			handler: this.handlerAction,
-			isDisabled: function(v, r, c, i, rec) {
-				var lyr = rec.get('layer');
-				if(Ext.isEmpty(lyr)) {
-					return true
-				} else {
-					return !(lyr instanceof ol.layer.Vector);
-				}
-			},
 			getClass: function(v, meta, rec) {
 				var lyr = rec.get('layer');
-				if(Ext.isEmpty(lyr)) {
-					return "";
-				} else {
-					return (lyr instanceof ol.layer.Vector)? this.iconCls : this.disableClass;
+				if(!Ext.isEmpty(lyr)) {
+					var ext = lyr.get("extension");
+					if(ext && ext.editable) {
+						return this.iconCls;
+					}
 				}
+				
+				return this.disableClass;
 				
 			},
 			scope: this

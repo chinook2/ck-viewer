@@ -187,7 +187,9 @@ Ext.define('Ck.map.Controller', {
 			return;
 		}
 		
-		var owc = new Ck.Owc(context);
+		var owc = new Ck.Owc({
+			data: context
+		});
 		if(!owc) {
 			Ck.log("This context is not a OWS context !");
 			return;
@@ -229,121 +231,36 @@ Ext.define('Ck.map.Controller', {
 		// Set the bbox
 		this.setExtent(owc.getExtent());
 		
-		owc.getLayers().forEach(function(lyr) {
-			var params, opt_options, layer = owc.getLayer(lyr);
-			if(!layer) return;
+		owc.getLayers().forEach(function(layer) {
+			var params, opt_options;
 			
 			var olLayer, olLayerType, olSourceOptions, olSource,
 				olSourceAdditional = {},
-				olStyle = false,
-				ckLayerSpec = vm.getData().ckOlLayerConnection[layer.getType()];
+				olStyle = false;
+			var mainOffering = layer.getOffering(0);
+				
+			var olSource = this.createSource(mainOffering, layer);
 			
-			if(Ext.isEmpty(ckLayerSpec)) {
-				Ck.error("Layer of type " + layer.getType() + " is not supported by Chinook 2.");
-			} else {
-				switch(layer.getType()) {
-					case 'osm':
-						olSourceOptions = {
-							layer: 'osm'
-						};
-						break;
-						
-					case 'wms':
-						olSourceOptions = {
-							url: layer.getHref(false),
-							params: layer.getHrefParams()
-						};
-						break;
-						
-					case 'wmts':
-						params = layer.getHrefParams();
-						// get resolution from main view. need inverse order
-						var resolutions = owc.getResolutions();
-						resolutions.reverse();
-						
-						// generate resolutions and matrixIds arrays for this WMTS
-						var matrixIds = [];
-						for (var z = 0; z < resolutions.length; ++z) {
-							matrixIds[z] = z;
-						};
-						
-						olSourceOptions = {
-							url: layer.getHref(false),
-							layer: params.LAYER,
-							matrixSet: params.TILEMATRIXSET,
-							format: params.FORMAT || 'image/png',
-							style: params.STYLE || 'default',
-							
-							// TODO : use extent, resolutions different from main view.
-							tileGrid: new ol.tilegrid.WMTS({
-								origin: ol.extent.getTopLeft(owc.getExtent()),
-								resolutions: resolutions,
-								matrixIds: matrixIds
-							})
-						};
-						break;
-						
-					case "wfs":
-						olSourceOptions = {
-							loader: function(extent, resolution, projection) {
-								var url = this.layer.getHref(true);
-								Ext.Ajax.request({
-									scope: this,
-									url: url,
-									useDefaultXhrHeader: false,
-									success: function(response) {
-										// Reading options (=> reprojection parameters)
-										var readingOpt = {
-											dataProjection: ol.proj.get("EPSG:4326"),
-											featureProjection: projection
-										}
-										var format = new ol.format.WFS();
-										var features = format.readFeatures(response.responseXML, readingOpt);
-										
-										this.addFeatures(features);
-									},
-									failure: function() {
-										Ck.log('Request getFeature fail for layer ' + this.layer.getTitle());
-									}
-								});
-							}
-						};
-						olSourceAdditional = {
-							layer: layer
-						};
-						olStyle = Ck.map.Style.style;
-						break;
-					
-					case 'geojson':
-						olSourceOptions = {
-							url: layer.getHref(false),
-							format: new ol.format.GeoJSON()
-						};
-						olStyle = Ck.map.Style.style;
-						break;
-				}
-				
-				var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
-				
-				// For vector layer only, if we want a clustered representation
-				var cluster = layer.getExtension('cluster');
+			switch(mainOffering.getType()) {					
+				case "wfs":
+				case 'geojson':
+					olStyle = Ck.map.Style.style;
+					break;
+			}
+			
+			
+			if(!Ext.isEmpty(olSource)) {
+				var cluster = layer.getExtension("cluster");
 				if(cluster) {
-					// TODO : check if scope is ok with N layers
 					var styleCache = {};
 					var nbFeatures = false;
-					var olSrcVector = olSource;
-					var dist = cluster.distance || 60;
-					olSource = new ol.source.Cluster({
-						distance: dist,
-						source: olSrcVector
-					});
-					olStyle = function(feature, resolution) {
+					olStyle = function(opt, source, feature, resolution) {
 						var size = feature.get('features').length;
 						var style = styleCache[size];
 						if (!style) {
-							var minSize = cluster.minSize || 10;
-							var maxSize = cluster.maxSize || cluster.distance || 60;
-							if(!nbFeatures) nbFeatures = olSrcVector.getFeatures().length;
+							var minSize = opt.minSize || 10;
+							var maxSize = opt.maxSize || opt.distance || 60;
+							if(!nbFeatures) nbFeatures = source.getFeatures().length;
 							var ptRadius = minSize + ((size * maxSize) / nbFeatures);
 							style = [new ol.style.Style({
 								image: new ol.style.Circle({
@@ -366,17 +283,30 @@ Ext.define('Ck.map.Controller', {
 							styleCache[size] = style;
 						}
 						return style;
-					}
+					}.bind(undefined, cluster, olSource)
 				}
 				
-				Ext.apply(olSource, olSourceAdditional);
 				var extent = layer.getExtent(viewProj) || owc.getExtent();
-				window.bbox = extent;
+				
+				var ckLayerSpec = vm.getData().ckOlLayerConnection[mainOffering.getType()];
+				
+				// Create others source
+				var sources = {};
+				var off, offs = layer.getOfferings();
+				for(var i = 1; i < offs.length; i++) {
+					off = offs[i];
+					if(!Ext.isArray(sources[off.getType()])) {
+						sources[off.getType()] = [];
+					}
+					sources[off.getType()].push(this.createSource(off, layer));
+				}
+					
 				// Layer creation	
 				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 					id: layer.getId(),
 					title: layer.getTitle(),
 					source: olSource,
+					sources: sources,
 					extent: extent,
 					style: olStyle,
 					visible: layer.getVisible(),
@@ -384,7 +314,8 @@ Ext.define('Ck.map.Controller', {
 					extension: layer.getExtension()
 				});
 				
-				if(olLayer) {
+				if(olLayer) {					
+					olLayer.ckLayer = layer;
 					this.getOlMap().addLayer(olLayer);
 				}
 			}
@@ -394,6 +325,120 @@ Ext.define('Ck.map.Controller', {
 		Ck.log('fireEvent ckmapLoaded');
 		this.fireEvent('loaded', this);
 		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
+	},
+	
+	/**
+	 * Create a source from an offering
+	 * @param {Ck.owcLayerOffering}
+	 * @param {Ck.owcLayer}
+	 * @return {ol.Source}
+	 */
+	createSource: function(offering, layer) {
+		var mainOperation;
+		var olSourceAdditional = {
+			layer: layer
+		};
+		var ckLayerSpec = this.getViewModel().getData().ckOlLayerConnection[offering.getType()];
+			
+		if(Ext.isEmpty(ckLayerSpec)) {
+			Ck.error("Layer of type " + offering.getType() + " is not supported by Chinook 2.");
+		} else {
+			switch(offering.getType()) {
+				case 'osm':
+					olSourceOptions = {
+						layer: 'osm'
+					};
+					break;
+					
+				case 'wms':
+					mainOperation = offering.getOperation("GetMap");
+					olSourceOptions = {
+						url: mainOperation.getHref(1),
+						params: {
+							VERSION: offering.getProtocolVersion(),
+							LAYERS: offering.getLayers()
+						}
+					};
+					break;
+					
+				case 'wmts':
+					mainOperation = offering.getOperation("GetMap");
+					params = mainOperation.getHref(2);
+					// get resolution from main view. need inverse order
+					var resolutions = owc.getResolutions();
+					resolutions.reverse();
+					
+					// generate resolutions and matrixIds arrays for this WMTS
+					var matrixIds = [];
+					for (var z = 0; z < resolutions.length; ++z) {
+						matrixIds[z] = z;
+					};
+					
+					olSourceOptions = {
+						url: mainOperation.getHref(1),
+						layer: params.LAYER,
+						matrixSet: params.TILEMATRIXSET,
+						format: params.FORMAT || 'image/png',
+						style: params.STYLE || 'default',
+						
+						// TODO : use extent, resolutions different from main view.
+						tileGrid: new ol.tilegrid.WMTS({
+							origin: ol.extent.getTopLeft(owc.getExtent()),
+							resolutions: resolutions,
+							matrixIds: matrixIds
+						})
+					};
+					break;
+					
+				case "wfs":
+					var format;
+					mainOperation = offering.getOperation("GetFeature");
+					
+					switch(mainOperation.getType()) {
+						case "xml":
+							format = new ol.format.WFS();
+							break;
+						case "json":
+							format = new ol.format.JSONFeature();
+							break;
+						case "text":
+							format = new ol.format.TextFeature();
+							break;
+					}
+					format.defaultDataProjection = ol.proj.get(offering.getSrs());
+					
+					olSourceOptions = {
+						projection	: ol.proj.get(offering.getSrs()),
+						url		: mainOperation.getHref(),
+						format	: format
+					};
+					break;
+				
+				case 'geojson':
+					mainOperation = offering.getOperation("GetMap");
+					olSourceOptions = {
+						url: mainOperation.getHref(1),
+						format: new ol.format.GeoJSON()
+					};
+					break;
+			}
+			
+			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
+			
+			// For vector layer only, if we want a clustered representation
+			var cluster = layer.getExtension('cluster');
+			if(cluster) {
+				// TODO : check if scope is ok with N layers
+				var olSrcVector = olSource;
+				var dist = cluster.distance || 60;
+				olSource = new ol.source.Cluster({
+					distance: dist,
+					source: olSrcVector
+				});
+			}
+		}
+		Ext.apply(olSource, olSourceAdditional);
+		return olSource;
 	},
 	
 	/**

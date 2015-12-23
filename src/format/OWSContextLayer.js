@@ -3,27 +3,59 @@
  */
 Ext.define('Ck.format.OWSContextLayer', {
 	alternateClassName: ['Ck.owcLayer', 'Ck.OwcLayer'],
+	
+	/**
+	 * Config of OWSContextLayer
+	 */
+	config: {
+		id			: null,
+		name		: null,
+		title		: null,
+		visible		: true,
+		offerings	: [],
+		owsContext	: {},
+		data		: {}
+	},
+	
+	defaults: {
+		version: {
+			wfs		: "1.1.0",
+			wms		: "1.1.0"
+		},
+		srs			: "EPSG:4326",
+		crs			: "EPSG:4326"
+	},
+	
+	/**
+	 * Create a offering from an object
+	 * @param {Object}
+	 * @param {Ck.owc}
+	 */
+	constructor: function(config) {
+		// Feed the config
+		var data = config.data;
 		
-	constructor: function(layer, owsContext) {
-		if(!layer.id || !layer.properties) {
-			Ck.error("This layer is not a OWS context Layer !");
-			return false;
+		Ext.apply(config, {
+			id		: data.id,
+			name	: data.properties.name,
+			title	: data.properties.title,
+			visible	: data.properties.active
+		});
+		
+		this.initConfig(config);
+		
+		var offerings = this.getOfferings();
+		
+		for(var i = 0; i < data.properties.offerings.length; i++) {
+			offerings.push(new Ck.owcOffering({
+				data: data.properties.offerings[i],
+				owsLayer: this
+			}));
 		}
 		
-		this.lyr = layer;
-		this.context = owsContext;
-	},
-	
-	getId: function() {
-		return this.lyr.id;
-	},
-	
-	getTitle: function() {
-		return this.lyr.properties.title;
-	},
-	
-	getName: function() {
-		return this.lyr.properties.name;
+		if(offerings.length == 0) {
+			Ck.log("No offering for this layer ("+ this.getTitle() +").");
+		}
 	},
 	
 	/**
@@ -32,56 +64,25 @@ Ext.define('Ck.format.OWSContextLayer', {
 	 * @return {ol.Extent}
 	 */
 	getExtent: function(proj) {
-		if(this.lyr.properties.bbox) {
-			return this.lyr.properties.bbox;
-		} else if(this.lyr.properties.latlongbbox) {
+		var data = this.getData();
+		
+		if(data.properties.bbox) {
+			return data.properties.bbox;
+		} else if(data.properties.latlongbbox) {
 			if(proj) {
 				var srcProj = ol.proj.get("EPSG:4326");
 				var dstProj = ol.proj.get(proj);
 				if(ol.proj.equivalent(srcProj, dstProj)) {
-					return this.lyr.properties.latlongbbox;
+					return data.properties.latlongbbox;
 				} else {
-					return ol.proj.transformExtent(this.lyr.properties.latlongbbox, srcProj, dstProj);
+					return ol.proj.transformExtent(data.properties.latlongbbox, srcProj, dstProj);
 				}
 			} else {
-				return this.lyr.properties.latlongbbox;
+				return data.properties.latlongbbox;
 			}
 		}
 		
 		return null;
-	},
-	
-	/**
-	 * Get the layer projection
-	 * @return {ol.proj.Projection}
-	 */
-	getProjection: function() {
-		return ol.proj.get(this.lyr.properties.sourceProjection);
-	},
-	
-	getProtocolVersion: function() {
-		var offering = this.lyr.properties.offerings[0];
-		return offering.version;
-	},
-	
-	getHref: function(params) {
-		var offering = this.lyr.properties.offerings[0];
-		var operation = offering.operations[0];
-		var href = Ext.htmlDecode(operation.href);
-		
-		var aHref = href.split("?");
-		if(params === false) return aHref[0];
-		return href;
-	},
-	
-	getHrefParams: function() {
-		var href = this.getHref();
-		var aHref = href.split("?");
-		return Ext.Object.fromQueryString( aHref.pop() );
-	},
-	
-	getVisible: function() {
-		return this.lyr.properties.active;
 	},
 	
 	/**
@@ -90,45 +91,32 @@ Ext.define('Ck.format.OWSContextLayer', {
 	 * @return {String/Object}
 	 */
 	getExtension: function(key) {
-		var ext = this.lyr.properties.extension || {};
+		var ext = this.getData().properties.extension || {};
 		if(Ext.isEmpty(key)) {
 			return ext;
 		} else {
 			return ext[key];
 		}
 	},
-	
-	getType: function() {
-		var offering = this.lyr.properties.offerings[0];
-		if(!offering) {
-			Ck.log("No offering for this layer ("+ this.getTitle() +").");
-			return false;
-		}
 		
-		var c = offering.code;
-		if(!c) {
-			Ck.log("No offering code for this layer ("+ this.getTitle() +").");
-			return false;
-		}
+	/**
+	 * Get offering of desired type
+	 * @param {String/Number} Type (wms, wfs, osm...) or index of offering
+	 * @return {Ck.owcLayerOffering/undefined}
+	 */
+	getOffering: function(val) {
+		var offering, offerings = this.getOfferings();
 		
-		if (c.indexOf('google') != -1) {
-			return 'google';
-		} else if (c.indexOf('osm') != -1) {
-			return 'osm';
-		} else if (c.indexOf('wms') != -1) {
-			return 'wms';
-		} else if (c.indexOf('wmts') != -1) {
-			return 'wmts';
-		} else if (c.indexOf('wfs') != -1) {
-			return 'wfs';
-			
-		} else if (c.indexOf('geojson') != -1) {
-			return 'geojson';
-		
-		// WCS, WPS, CSW, GML, KML, GeoTIFF, GMLJP2, GMLCOV
+		if(Ext.isString(val)) {		
+			for(var i = 0; (i < offerings.length && Ext.isEmpty(offering)); i++) {
+				if(offerings[i].getType() == val) {
+					offering = offerings[i];
+				}
+			}
 		} else {
-			Ck.error("Offering code '" + c + "' not available for this layer ("+ this.getTitle() +").");
-			return false;
+			offering = offerings[val];
 		}
+		
+		return offering;
 	}
 });
