@@ -137,6 +137,19 @@ Ext.define('Ck.Action', {
      */
 	toggleAction: Ext.emptyFn,
 	
+    setTooltip : function(text){
+        this.initialConfig.tooltip = text;
+        //this.callEach('setTooltip', [text]);
+		// Need test if setTooltip exist
+        Ext.suspendLayouts();
+		this.each(function(item){
+			if(Ext.isFunction(item.setTooltip)) {
+				item.setTooltip(text);
+			}
+		});
+        Ext.resumeLayouts(true);		
+	},
+	
 	/**
 	 * @inheritdoc Ck.Controller
 	 */

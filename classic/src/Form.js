@@ -28,7 +28,8 @@ Ext.define("Ck.Form",{
 		defaultFormName: 'ck-default',
 		formName: null,	// nom du formulaire
 		formUrl: null,	// URL du formulaire
-
+		formRaw: null, // definition du formulaire inline
+		
 		urlTemplate: {
 			st: '{0}/forms/{1}.json',
 			ws: '{0}/forms/{1}'
@@ -37,8 +38,11 @@ Ext.define("Ck.Form",{
 		dataFid: null,		// Feature ID : recup depuis le geoJSON
 		dataRaw: null,		// Données inline
 		dataUrl : null, //
-
-		isSubForm: false
+		dataModel : null,
+		// dataStore : null,
+		
+		isSubForm: false,
+		autoLoad: true		// Try populate form after initautoLoad
 	},
 
 	bodyPadding: 10,
