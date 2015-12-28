@@ -136,6 +136,10 @@
 			"text": "Boîtes aux Lettres",
 			"tag": "[amenity=post_box]",
 			"leaf": true
+		},{
+			"text": "Cimetières",
+			"tag": "[landuse=cemetery]",
+			"leaf": true
 		}]
 	},{
 		"text": "Diverses Erreurs",

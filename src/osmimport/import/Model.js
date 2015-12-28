@@ -1,4 +1,4 @@
-﻿/**
+/**
  * ViewModel to do Data binding for OSM Import Panel
  * @author Florent RICHARD
  */
