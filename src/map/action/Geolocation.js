@@ -57,29 +57,28 @@ Ext.define('Ck.map.action.Geolocation', {
 				this.getGeolocationMarker().setPosition(evt.target.getPosition());
 			}, this);
 			this.setGeolocation(map.geolocation);
+			
+			map.getOlMap().addOverlay(this.getGeolocationMarker());
 		}
 	},
 	
 	/**
+	 * Update geolocationMarker's position via GPS if pressed == true.
 	 * Zoom to user location
 	 */
 	toggleAction: function(btn, pressed) {
 		var olMap = this.getMap().getOlMap();
+		var mark = this.getGeolocationMarker();
 		
 		if(pressed) {
 			var p = this.getGeolocation().getPosition();                
-			if(!Ext.isEmpty(p)) {
-				olMap.addOverlay(this.getGeolocationMarker());		
-				
-				this.getGeolocationMarker().setPosition(p);
+			if(!Ext.isEmpty(p)) {	
+				mark.setVisible(true);
+				mark.setPosition(p);
 				olMap.getView().setCenter(p);
 			}
 		} else {
-			olMap.removeOverlay(this.getGeolocationMarker())
+			mark.setVisible(false);
 		}
-		
-		
-		// Update geolocationMarker's position via GPS
-		
 	}
 });
