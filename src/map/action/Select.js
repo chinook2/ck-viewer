@@ -66,7 +66,7 @@ Ext.define('Ck.map.action.Select', {
 			callback	: this.processResult,
 			scope		: this,
 			limit		: null,
-			overHighlight	: true,
+			overHighlight	: true
 			// drawStyle	: null
 		});
 	},
