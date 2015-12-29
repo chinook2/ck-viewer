@@ -18,7 +18,7 @@ Ext.define('Ck.map.action.ZoomIn', {
 	
 	itemId: 'zoomin',
 	text: '',
-	iconCls: 'fa fa-tag',
+	iconCls: 'fa fa-search-plus',
 	tooltip: 'Zoom in',
 	
 	/**
