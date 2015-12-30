@@ -42,7 +42,7 @@ Ext.define('Ck.format.OWSContext', {
 		}
 		
 		// Resolutions
-		if(!Ext.isEmpty(scales) && !Ext.isArray(scales)) {
+		if(!Ext.isEmpty(scales) && Ext.isArray(scales)) {
 			scales.forEach(function(o) {
 				if(o &&  o.res) resolutions.push(o.res);
 			});

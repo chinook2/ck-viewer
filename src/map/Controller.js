@@ -244,7 +244,7 @@ Ext.define('Ck.map.Controller', {
 				olStyle = false;
 			var mainOffering = layer.getOffering(0);
 				
-			var olSource = this.createSource(mainOffering, layer);
+			var olSource = this.createSource(mainOffering, layer, owc);
 			
 			switch(mainOffering.getType()) {					
 				case "wfs":
@@ -303,7 +303,7 @@ Ext.define('Ck.map.Controller', {
 					if(!Ext.isArray(sources[off.getType()])) {
 						sources[off.getType()] = [];
 					}
-					sources[off.getType()].push(this.createSource(off, layer));
+					sources[off.getType()].push(this.createSource(off, layer, owc));
 				}
 					
 				// Layer creation	
@@ -350,9 +350,10 @@ Ext.define('Ck.map.Controller', {
 	 * Create a source from an offering
 	 * @param {Ck.owcLayerOffering}
 	 * @param {Ck.owcLayer}
+	 * @param {Ck.owc}
 	 * @return {ol.Source}
 	 */
-	createSource: function(offering, layer) {
+	createSource: function(offering, layer, owc) {
 		var mainOperation;
 		var olSourceAdditional = {
 			layer: layer
@@ -381,8 +382,8 @@ Ext.define('Ck.map.Controller', {
 					break;
 					
 				case 'wmts':
-					mainOperation = offering.getOperation("GetMap");
-					params = mainOperation.getHref(2);
+					mainOperation = offering.getOperation("GetTile");
+					params = mainOperation.getHref(3);
 					// get resolution from main view. need inverse order
 					var resolutions = owc.getResolutions();
 					resolutions.reverse();

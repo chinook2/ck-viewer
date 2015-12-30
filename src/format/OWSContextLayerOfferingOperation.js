@@ -36,21 +36,32 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 	 * @params {Integer} 
 	 * - 1 : Without parameters
 	 * - 2 : Only parameters
-	 * @params {String}
+	 * - 3 : Parameter in object
+	 * @params {String/Object}
 	 */
 	getHref: function(code) {
-		var href = Ext.htmlDecode(this.getData().href);
+		var res, href = Ext.htmlDecode(this.getData().href);
 		var aHref = href.split("?");
 		switch(code) {
 			case 1:
-				return aHref[0];
+				res = aHref[0];
 				break;
 			case 2:
-				return aHref[1];
+				res = aHref[1];
+				break;
+			case 3:
+				res  = {};
+				var part, parts = aHref[1].split("&");
+				for(var i in parts) {
+					part = parts[i].split("=");
+					res[part[0]] = part[1];
+				}
 				break;
 			default:
-				return href;
+				res = href;
 		}
+		
+		return res;
 	},
 	
 	/**
