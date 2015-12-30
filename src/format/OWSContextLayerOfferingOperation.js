@@ -8,6 +8,13 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		code		: null,
 		method		: null,
 		type		: null,
+		href		: null,
+		params		: null,
+		domain		: null,
+		version		: null,
+		layers		: null,
+		srs			: null,
+		crs			: null,
 		owsOffering	: {},
 		data		: {}
 	},
@@ -18,50 +25,29 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 	 * @param {Ck.owcLayer}
 	 */
 	constructor: function(config) {
-		var data = config.data;
+		var params = {}, data = config.data;
+		
+		var href = Ext.htmlDecode(data.href);
+		var aHref = href.split("?");
+		
+		if(aHref[1]) {
+			params = Ext.Object.fromQueryString(aHref[1]);
+		}
 		
 		Ext.apply(config, {
 			code	: data.code,
 			method	: data.method,
 			type	: data.type,
-			
-			layers: data.layers
+			href	: href,
+			params	: params,
+			url		: aHref[0],
+			version	: params.VERSION,
+			layers	: params.LAYERS,
+			srs		: params.SRS,
+			crs		: params.CRS
 		});
 		
 		this.initConfig(config);
-	},
-	
-	/**
-	 * Get the URL with or without parameters or only parameters.
-	 * @params {Integer} 
-	 * - 1 : Without parameters
-	 * - 2 : Only parameters
-	 * - 3 : Parameter in object
-	 * @params {String/Object}
-	 */
-	getHref: function(code) {
-		var res, href = Ext.htmlDecode(this.getData().href);
-		var aHref = href.split("?");
-		switch(code) {
-			case 1:
-				res = aHref[0];
-				break;
-			case 2:
-				res = aHref[1];
-				break;
-			case 3:
-				res  = {};
-				var part, parts = aHref[1].split("&");
-				for(var i in parts) {
-					part = parts[i].split("=");
-					res[part[0]] = part[1];
-				}
-				break;
-			default:
-				res = href;
-		}
-		
-		return res;
 	},
 	
 	/**
@@ -84,5 +70,33 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		
 		// this.type = t;
 		this._type = t;
+	},
+	
+	/**
+	 * Get the layer projection
+	 * @return {ol.proj.Projection}
+	 */
+	getProjection: function() {
+		var projection = this.getSrs() || this.getCrs();
+		if(Ext.isEmpty(projection)) {
+			if(this.getVersion() >= "1.3") {
+				projection = Ck.defaults.crs;
+			} else {
+				projection = Ck.defaults.srs;
+			}
+		}
+		return ol.proj.get(projection);
+	},
+	
+	/**
+	 * Return the operation version or default version
+	 * @return {String}
+	 */
+	getProtocolVersion: function() {
+		var v = this.getVersion();
+		if(Ext.isEmpty(v)) {
+			v = Ck.defaults.version[this.owsOffering.getType()];
+		}
+		return v;
 	}
 });

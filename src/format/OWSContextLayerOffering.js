@@ -6,9 +6,6 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	
 	config: {
 		code		: null,
-		version		: null,
-		layers		: null,
-		srs			: null,
 		type		: null,
 		operations	: [],
 		owsContext	: {},
@@ -44,35 +41,6 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 		if(operations.length == 0) {
 			Ck.log("No operations for the offering.");
 		}
-	},
-	
-	/**
-	 * Get the layer projection
-	 * @return {ol.proj.Projection}
-	 */
-	getProjection: function() {
-		var projection = this.getData().srs || this.getData().crs;
-		if(Ext.isEmpty(projection)) {
-			if(this.getProtocolVersion() >= "1.3") {
-				projection = this.defaults["crs"];
-			} else {
-				projection = this.defaults["srs"];
-			}
-		}
-		return ol.proj.get(projection);
-	},
-	
-	/**
-	 * Get the protocol version of the first offering.
-	 * @return {String}
-	 */
-	getProtocolVersion: function() {
-		var version = this.getData().version;
-		if(Ext.isEmpty(version)) {
-			version = this.defaults.version[this.getType()];
-		}
-		
-		return version;
 	},
 	
 	/**

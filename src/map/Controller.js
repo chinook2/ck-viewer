@@ -375,8 +375,8 @@ Ext.define('Ck.map.Controller', {
 					olSourceOptions = {
 						url: mainOperation.getHref(1),
 						params: {
-							VERSION: offering.getProtocolVersion(),
-							LAYERS: offering.getLayers()
+							VERSION: mainOperation.getProtocolVersion(),
+							LAYERS: mainOperation.getLayers()
 						}
 					};
 					break;
@@ -385,8 +385,7 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetTile");
 					params = mainOperation.getHref(3);
 					// get resolution from main view. need inverse order
-					var resolutions = owc.getResolutions();
-					resolutions.reverse();
+					var resolutions = owc.getResolutions(false);
 					
 					// generate resolutions and matrixIds arrays for this WMTS
 					var matrixIds = [];
@@ -425,10 +424,10 @@ Ext.define('Ck.map.Controller', {
 							format = new ol.format.TextFeature();
 							break;
 					}
-					format.defaultDataProjection = ol.proj.get(offering.getSrs());
+					format.defaultDataProjection = ol.proj.get(mainOperation.getSrs());
 					
 					olSourceOptions = {
-						projection	: ol.proj.get(offering.getSrs()),
+						projection	: ol.proj.get(mainOperation.getSrs()),
 						url		: mainOperation.getHref(),
 						format	: format
 					};

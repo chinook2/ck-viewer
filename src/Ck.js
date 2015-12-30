@@ -197,6 +197,16 @@ Ext.apply(Ck, {
 		]
 	},
 	
+	defaults: {
+		version: {
+			wfs	: "1.1.0",
+			wms	: "1.1.0"
+		},
+		srs		: "EPSG:4326",
+		crs		: "EPSG:4326",
+		extent	: [-180,-90,180,90]
+	},
+	
 	/**
 	 * @property params
 	 * @type Object

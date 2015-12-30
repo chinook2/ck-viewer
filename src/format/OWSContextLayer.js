@@ -17,15 +17,6 @@ Ext.define('Ck.format.OWSContextLayer', {
 		data		: {}
 	},
 	
-	defaults: {
-		version: {
-			wfs		: "1.1.0",
-			wms		: "1.1.0"
-		},
-		srs			: "EPSG:4326",
-		crs			: "EPSG:4326"
-	},
-	
 	/**
 	 * Create a offering from an object
 	 * @param {Object}

@@ -4,11 +4,6 @@
 Ext.define('Ck.format.OWSContext', {
 	alternateClassName: ['Ck.owc', 'Ck.Owc'],
 	
-	defaults: {
-		srs: "EPSG:3857",
-		extent: [-180,-90,180,90]
-	},
-	
 	config: {
 		extent		: null,
 		projection	: null,
@@ -32,11 +27,11 @@ Ext.define('Ck.format.OWSContext', {
 		scales = data.properties.scales;
 		
 		// Projection
-		proj = ol.proj.get(data.properties.srs || this.defaults.srs);
+		proj = ol.proj.get(data.properties.srs || Ck.defaults.srs);
 		
 		// Extent
 		if(!data.properties.bbox) {
-			extent = proj.getWorldExtent() || this.defaults.extent;
+			extent = proj.getWorldExtent() || Ck.defaults.extent;
 		} else {
 			extent = data.properties.bbox;
 		}
@@ -66,5 +61,18 @@ Ext.define('Ck.format.OWSContext', {
 				owsContext: this
 			}));
 		}
+	},
+	
+	/**
+	 * Return resolutions in an array.
+	 * @param {Boolean} True to return in ascending order
+	 */
+	getResolutions: function(ascending) {
+		if(!Ext.isEmpty(this._resolutions) && Ext.isArray(this._resolutions) && this._resolutions.length > 1) {
+			if((ascending && this._resolutions[0] > this._resolutions[1]) || (!ascending && this._resolutions[0] < this._resolutions[1])) {
+				this._resolutions.reverse();
+			}	
+		}
+		return this._resolutions;
 	}
 });
