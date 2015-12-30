@@ -14,15 +14,11 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			handler: this.handlerAction,
 			getClass: function(v, meta, rec) {
 				var lyr = rec.get('layer');
-				if(!Ext.isEmpty(lyr)) {
-					var ext = lyr.get("extension");
-					if(ext && ext.editable) {
-						return this.iconCls;
-					}
+				if(this.isEditable(lyr)) {
+					return this.iconCls;
+				} else {
+					return this.disableClass;
 				}
-				
-				return this.disableClass;
-				
 			},
 			scope: this
 		}
@@ -49,6 +45,18 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		});
 
 		this.win.show();
+	},
+	
+	/**
+	 * @param {ol.layer.Base}
+	 */
+	isEditable: function(layer) {
+		if(!Ext.isEmpty(layer)) {
+			if(layer.getExtension("editable")) {
+				return true;
+			}
+		}
+		return false;
 	},
 	
 	close: function() {
