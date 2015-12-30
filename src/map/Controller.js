@@ -373,7 +373,7 @@ Ext.define('Ck.map.Controller', {
 				case 'wms':
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
-						url: mainOperation.getHref(1),
+						url: mainOperation.getUrl(),
 						params: {
 							VERSION: mainOperation.getProtocolVersion(),
 							LAYERS: mainOperation.getLayers()
@@ -383,7 +383,7 @@ Ext.define('Ck.map.Controller', {
 					
 				case 'wmts':
 					mainOperation = offering.getOperation("GetTile");
-					params = mainOperation.getHref(3);
+					params = mainOperation.getParams();
 					// get resolution from main view. need inverse order
 					var resolutions = owc.getResolutions(false);
 					
@@ -394,7 +394,7 @@ Ext.define('Ck.map.Controller', {
 					};
 					
 					olSourceOptions = {
-						url: mainOperation.getHref(1),
+						url: mainOperation.getUrl(),
 						layer: params.LAYER,
 						matrixSet: params.TILEMATRIXSET,
 						format: params.FORMAT || 'image/png',
@@ -436,7 +436,7 @@ Ext.define('Ck.map.Controller', {
 				case 'geojson':
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
-						url: mainOperation.getHref(1),
+						url: mainOperation.getUrl(),
 						format: new ol.format.GeoJSON()
 					};
 					break;

@@ -10,7 +10,7 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		type		: null,
 		href		: null,
 		params		: null,
-		domain		: null,
+		url			: null,
 		version		: null,
 		layers		: null,
 		srs			: null,
