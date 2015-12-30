@@ -112,7 +112,6 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			title: lyr.layer.get("title"),
 			store: store,
 			layout: "fit",
-			// height: 200,
 			scrollable: true,
 			features: [{
 				ftype: "groupingsummary",
@@ -124,10 +123,14 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			columns: [{
 				text: 'Attribut',
 				dataIndex: 'field',
+				width: 150,
+				menuDisabled: true,
 				hideable: false
 			},{
 				text: 'Value',
 				dataIndex: 'value',
+				flex: 1,
+				menuDisabled: true,
 				hideable: false
 			}]
 		});
