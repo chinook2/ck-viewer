@@ -83,6 +83,9 @@ Ext.define('Ck.Action', {
 	ckLoaded: Ext.emptyFn,
 
 	constructor: function(config) {
+		// If init action after app load (in new popup like edit) map is here, try to init it
+		this.setMap(Ck.getMap());
+		
 		// Use global event to call function when map is ready.
 		// ckmap isn't avaible when first pass here...
 		Ext.on('ckmapReady', function(map) {

@@ -435,9 +435,12 @@ Ext.define('Ck.edit.Controller', {
 		if(this.feature) {
 			this.feature.close.bind(this.feature)();
 		}
+		
 		var win = this.view.up('window');
-		if (win) {
+		if(win) {
 			win.close();
+		} else {
+			this.view.close();
 		}
 	},
 	
