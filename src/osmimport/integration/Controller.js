@@ -422,7 +422,17 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			if (this.nbFeaturesComputed < this.records.length) {
 				Ext.defer(this.computeFeature, 1, this);
 			} else {
-				this.saveData(this.iLayer.layer, this.featuresToIntegrate);	
+				if (this.featuresToIntegrate.length > 0) {
+					this.saveData(this.iLayer.layer, this.featuresToIntegrate);	
+				} else {
+					Ext.MessageBox.show({
+						title: 'OSM Import',
+						msg: 'There are no feature to integrate according the configuration',
+						width: 500,
+						buttons: Ext.MessageBox.OK,
+						icon: Ext.Msg.WARNING
+					});
+				}
 			}
 		} catch (exception) {
 			Ext.MessageBox.show({
