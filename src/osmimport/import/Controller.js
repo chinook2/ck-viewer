@@ -211,6 +211,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var selectionGeometry;
 		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
 		if (selectType === "feature") {
+			this.selectionVector.getSource().clear();
 			if (evt.selected.length > 0) {
 				var featureGeom = evt.selected[0].getGeometry();
 				if (featureGeom.getType() === "Polygon") {
@@ -227,7 +228,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				}
 			}
 			if (selectionGeometry) {  // Selection success
-				this.selectionVector.getSource().clear();
 				this.selectionVector.getSource().addFeature(evt.selected[0]);
 			} else {  // Select other geometry or click on place where there is no feature
 				Ext.MessageBox.show({
@@ -262,10 +262,21 @@ Ext.define('Ck.osmimport.import.Controller', {
 
 		// Prepare draw interaction and geometryFunction according selection mode
 		if (selectType === "feature") {
+			var layers = Ext.Array.filter(Ck.getMap().getLayers().getArray(),
+				function(lyr) {
+					return (lyr.getVisible() && lyr.get("id") != "measureLayer"
+											 && lyr.get("id") != "osmimport_selection");
+				});
 			newInteraction = new ol.interaction.Select({
-				layers: Ck.getMap().getLayers().getArray()
+				layers: layers
 			});
 			newInteraction.on("select", this.onSelectionDone, this);
+			// Add a draw point interaction to have same style
+			this.drawPointInteraction = new ol.interaction.Draw({
+				source: self.selectionVector.getSource(),
+				type: /** @type {ol.geom.GeometryType} */ ("Point")
+			});
+			this.olMap.addInteraction(this.drawPointInteraction);
 		} else {
 			var draw, geometryFunction, maxPoints;
 			if (selectType === "rectangle") {
@@ -307,6 +318,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		this.olMap.removeInteraction(this.mapInteraction);
 		this.mapInteraction = newInteraction;
         this.olMap.addInteraction(this.mapInteraction);
+		
+		
+		
+		
 	},
 	
 	/**
@@ -315,6 +330,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	stopZoneSelection: function() {
 		this.olMap.removeInteraction(this.mapInteraction);
+		this.olMap.removeInteraction(this.drawPointInteraction);
 		this.mapInteraction = undefined;
 	},
 	
