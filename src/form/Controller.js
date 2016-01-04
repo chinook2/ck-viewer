@@ -69,7 +69,7 @@ Ext.define('Ck.form.Controller', {
 		var parentForm = this.view.up('ckform');
 		if(parentForm) {
 			// inherit dataFid from main view form (used in store url template)
-			if(!this.view.getDataFid){
+			if(!this.view.getDataFid()){
 				this.view.setDataFid(parentForm.getDataFid());
 			}
 			
