@@ -1130,11 +1130,12 @@ Ext.define('Ck.form.Controller', {
 				Ext.callback(options.success, options.scope, [dt]);
 			},
 			failure: function (response, opts) {
-				// TODO : on Tablet when access local file via ajax, success pass here !!
-				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
-				
 				this.fireEvent('savefailed', response);
-				this.oController.saveFailed(response);
+				if(this.oController.saveFailed(response) === false){
+					return false;
+				}
+				
+				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
 			}
 		});
 	},
