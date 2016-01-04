@@ -36,7 +36,6 @@ Ext.define("Ck.osmimport.Import", {
 					store: "{osmtags}"
 				},
 				listeners: {
-					load: "onTreeOsmTagsLoad",
 					checkchange: "onTreeOsmTagsChange"
 				}
 			},{

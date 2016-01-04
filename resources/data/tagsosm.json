@@ -1,192 +1,231 @@
 {
-    "children" : [{
-        "text": "Terrains",
-        "children": [{
-            "text": "Résidentiel",
-            "tag": "[landuse=residential]",
-            "leaf": true
-  		},{
-            "text": "Herbe",
-            "tag": "[landuse=grass]",
-            "leaf": true
-        },{
+	"children": [{
+		"text": "Terrains",
+		"children": [{
+			"text": "Résidentiel",
+			"tag": "[landuse=residential]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Herbe",
+			"tag": "[landuse=grass]",
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Zone d'Activités Commerciales",
 			"tag": "[landuse=commercial]",
-			"leaf": true
+			"leaf": true,
+			"checked": false
 		}]
-    },{
-        "text": "Education",
-        "children": [{
-            "text": "Ecoles Primaires",
-            "tag": "[amenity=school][\"school:FR\"=primaire]",
-            "leaf": true
-  		},{
+	}, {
+		"text": "Education",
+		"children": [{
+			"text": "Ecoles Primaires",
+			"tag": "[amenity=school][\"school:FR\"=primaire]",
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Ecoles Maternelles",
 			"tag": "[amenity=school][\"school:FR\"=maternelle]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Ecoles Elémentaires",
 			"tag": "[amenity=school][\"school:FR\"=\"élémentaire\"]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Collèges",
 			"tag": "[amenity=school][\"school:FR\"=\"collège\"]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Lycées",
 			"tag": "[amenity=school][\"school:FR\"=\"lycée\"]",
-			"leaf": true
-		},{
-            "text": "Bibliothèques",
-            "tag": "[amenity=library]",
-            "leaf": true
-        }]
-    },{
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Bibliothèques",
+			"tag": "[amenity=library]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
 		"text": "Nature",
 		"children": [{
 			"text": "Forêts",
 			"tag": "[landuse=forest]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Fleuves, Rivières",
 			"tag": "[waterway=river]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Ruisseaux",
 			"tag": "[waterway=stream]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Canaux",
 			"tag": "[waterway=canal]",
-			"leaf": true
+			"leaf": true,
+			"checked": false
 		}]
-	},{
+	}, {
 		"text": "Déplacements",
 		"children": [{
 			"text": "Transports en Commun",
 			"children": [{
 				"text": "Lignes de Tramway",
 				"tag": "[type=route][route=tram]",
-				"leaf": true
-			},{
+				"leaf": true,
+				"checked": false
+			}, {
 				"text": "Lignes de Bus TAN",
 				"tag": "[type=route][route=bus][network=TAN]",
-				"leaf": true
-			},{
+				"leaf": true,
+				"checked": false
+			}, {
 				"text": "Lignes de Car LILA",
 				"tag": "[type=route][route=bus][network=\"FR:Lila\"]",
-				"leaf": true
+				"leaf": true,
+				"checked": false
 			}]
-		},{
+		}, {
 			"text": "Vélos, Piétons",
 			"children": [{
 				"text": "Parking Vélos, Accroche-vélo",
 				"tag": "[amenity=bicycle_parking]",
-				"leaf": true
-			},{
+				"leaf": true,
+				"checked": false
+			}, {
 				"text": "Chemin Piétonnier",
 				"tag": "[highway=footway]",
-				"leaf": true
-			},{
+				"leaf": true,
+				"checked": false
+			}, {
 				"text": "Rues Piétonnes",
 				"tag": "[highway=pedestrian]",
-				"leaf": true
-			},{
+				"leaf": true,
+				"checked": false
+			}, {
 				"text": "Contre-sens cyclistes",
 				"tag": "[cycleway=opposite_lane]",
-				"leaf": true
+				"leaf": true,
+				"checked": false
 			}]
-		},{
+		}, {
 			"text": "Automobiles",
 			"children": [{
 				"text": "Parking",
 				"tag": "[amenity=parking]",
-				"leaf": true
+				"leaf": true,
+				"checked": false
 			}]
 		}]
-	},{
+	}, {
 		"text": "Sports, Loisirs",
 		"children": [{
 			"text": "Terrain de Sport",
 			"tag": "[leisure=pitch]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Circuits automobiles",
 			"tag": "[highway=raceway]",
-			"leaf": true
+			"leaf": true,
+			"checked": false
 		}]
-	},{
+	}, {
 		"text": "Urgences, Sécurité",
 		"children": [{
 			"text": "Caserne Pompiers",
 			"tag": "[amenity=fire_station]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Police, Gendarmerie",
 			"tag": "[amenity=police]",
-			"leaf": true
+			"leaf": true,
+			"checked": false
 		}]
-	},{
+	}, {
 		"text": "Divers",
 		"children": [{
 			"text": "Centrales de production d'énergie",
 			"tag": "[type=site][power=plant]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Boîtes aux Lettres",
 			"tag": "[amenity=post_box]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Cimetières",
 			"tag": "[landuse=cemetery]",
-			"leaf": true
+			"leaf": true,
+			"checked": false
 		}]
-	},{
+	}, {
 		"text": "Diverses Erreurs",
 		"children": [{
 			"text": "Erreur no tag",
 			"tag": "",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Erreur tag sans key",
 			"tag": "[=residential]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Erreur tag vide",
 			"tag": "[]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Erreur tag vide avec 1 tag erreur",
 			"tag": "[amenity=school][=residential]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Erreur tag vide avec 1 tag erreur 2",
 			"tag": "[amenity=school]private",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "texte sans crochet",
 			"tag": "amenity=school",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Point-virgule présent",
 			"tag": "[amenity=school];",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Double point sans guillemets dans la clé",
 			"tag": "[amenity=school][school:FR=primaire]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Double point sans guillemets dans la valeur",
 			"tag": "[type=route][network=FR:Lila]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Accent sans guillemets dans la clé",
 			"tag": "[amenity=school][lycée=\"school:FR\"]",
-			"leaf": true
-		},{
+			"leaf": true,
+			"checked": false
+		}, {
 			"text": "Accent sans guillemets dans la valeur",
 			"tag": "[amenity=school][\"school:FR\"=lycée]",
-			"leaf": true
+			"leaf": true,
+			"checked": false
 		}]
 	}]
 }
