@@ -218,32 +218,51 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	/**
 	 * This method converts the record tags into a propertie object according the given configuration.
 	 */
-	convertTagsToAttributes: function(record, attributesTagsConfig) {
+	convertTagsToAttributes: function(record, attributesTagsConfig, member) {
 		var attributes = {};
 		for (var i in attributesTagsConfig) {
 			var attr = attributesTagsConfig[i].attr;
 			var tag = attributesTagsConfig[i].tag;
 			var tagValue = "";
 			
-			if (tag.startsWith("rel:")) {
+			if (tag.startsWith("rel:") && member) {
 				tag = tag.substr(4);
-			} 
-			if (tag in record.data.tags) {
-				// Copy only if value is correct type
-				switch(attributesTagsConfig[i].type) {
-					case "integer":
-						if (!record.data.tags[tag].match(/\D/)) {
-							tagValue = record.data.tags[tag];
-						}
-					break;
-					case "boolean": // Values compatible with server
-						if (["yes", "no"].indexOf(record.data.tags[tag]) > -1) {
-							tagValue = record.data.tags[tag];
-						}
-					break;
-					case "string": tagValue = record.data.tags[tag];
-					break;
-					default: break;
+				if (tag in member.data.tags) {
+					// Copy only if value is correct type
+					switch(attributesTagsConfig[i].type) {
+						case "integer":
+							if (!member.data.tags[tag].match(/\D/)) {
+								tagValue = member.data.tags[tag];
+							}
+						break;
+						case "boolean": // Values compatible with server
+							if (["yes", "no"].indexOf(member.data.tags[tag]) > -1) {
+								tagValue = member.data.tags[tag];
+							}
+						break;
+						case "string": tagValue = member.data.tags[tag];
+						break;
+						default: break;
+					}
+				}
+			} else {
+				if (tag in record.data.tags) {
+					// Copy only if value is correct type
+					switch(attributesTagsConfig[i].type) {
+						case "integer":
+							if (!record.data.tags[tag].match(/\D/)) {
+								tagValue = record.data.tags[tag];
+							}
+						break;
+						case "boolean": // Values compatible with server
+							if (["yes", "no"].indexOf(record.data.tags[tag]) > -1) {
+								tagValue = record.data.tags[tag];
+							}
+						break;
+						case "string": tagValue = record.data.tags[tag];
+						break;
+						default: break;
+					}
 				}
 			}
 			attributes[attr] = tagValue;
@@ -266,7 +285,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			for (var memberId in this.data.members) {
 				var member = this.data.members[memberId];
 				if (member.type == "node") {
-					var attr = this.convertTagsToAttributes(this.getSubElement(records, member.ref), attributesTagsConfig);
+					var attr = this.convertTagsToAttributes(this, attributesTagsConfig, this.getSubElement(records, member.ref));
 					attr.geometry = this.calculateGeom(member, records);
 					features.push(new ol.Feature(attr));
 				}
@@ -302,7 +321,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 							   lat: member.data.lat,
 							   lon: member.data.lon};
 				if (element.type == "way" && !this.isPolygon(element)) {
-					var attr = this.convertTagsToAttributes(member, attributesTagsConfig);
+					var attr = this.convertTagsToAttributes(this, attributesTagsConfig, member);
 					attr.geometry = this.calculateGeom(element, records);
 					features.push(new ol.Feature(attr));
 				}
@@ -345,7 +364,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 								   lat: member.data.lat,
 								   lon: member.data.lon};
 					if (element.type == "way" && this.isPolygon(element)) {
-						var attr = this.convertTagsToAttributes(member, attributesTagsConfig);
+						var attr = this.convertTagsToAttributes(this, attributesTagsConfig, member);
 						attr.geometry = this.calculateGeom(element, records);
 						features.push(new ol.Feature(attr));
 					}
