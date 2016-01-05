@@ -33,6 +33,8 @@ Ext.define('Ck.form.Controller', {
 	
 	//afterreset
 	
+	//afterclose
+	
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
@@ -69,7 +71,7 @@ Ext.define('Ck.form.Controller', {
 		var parentForm = this.view.up('ckform');
 		if(parentForm) {
 			// inherit dataFid from main view form (used in store url template)
-			if(!this.view.getDataFid){
+			if(!this.view.getDataFid()){
 				this.view.setDataFid(parentForm.getDataFid());
 			}
 			
@@ -146,6 +148,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			this.stopEditing();
+			this.fireEvent('afterclose');
 
 			var win = this.view.up('window');
 			if (win) {
@@ -153,6 +156,7 @@ Ext.define('Ck.form.Controller', {
 			} else {
 				this.view.destroy();
 			}
+			
 		}.bind(this);
 
 		if(btn && btn.force === true){
@@ -1130,11 +1134,12 @@ Ext.define('Ck.form.Controller', {
 				Ext.callback(options.success, options.scope, [dt]);
 			},
 			failure: function (response, opts) {
-				// TODO : on Tablet when access local file via ajax, success pass here !!
-				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
-				
 				this.fireEvent('savefailed', response);
-				this.oController.saveFailed(response);
+				if(this.oController.saveFailed(response) === false){
+					return false;
+				}
+				
+				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
 			}
 		});
 	},

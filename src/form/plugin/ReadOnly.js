@@ -54,7 +54,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	// private
 	onRender : function(cmp){
 		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)
-		if(cmp.triggerWrap) this.labelEl.insertAfter(cmp.triggerWrap);
+		if(cmp.triggerWrap && this.labelEl.dom) this.labelEl.insertAfter(cmp.triggerWrap);
 
 		// Masque par défaut les input si form.readOnly est true
 		this.setReadOnly();
