@@ -136,12 +136,18 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				// Read next part:
 				this.readSelectedLayerInfo();
 			},
-			failure: function() {
+			failure: function(response, opts) {
 				this.lookupReference("geometrylabel").setText("Geometry: " + "undefined");
 				this.waitMsg.close();
+				var msg = "";
+				if (response.status == 0) {
+					msg = "No connection to Internet available or no response before timeout";
+				} else {
+					msg = "Unable to read layer information";
+				}
 				Ext.MessageBox.show({
 					title: 'OSM Import',
-					msg: 'Unable to read layer information',
+					msg: msg,
 					width: 500,
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.ERROR
@@ -192,11 +198,17 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				
 				this.waitMsg.close();
 			},
-			failure: function() {
+			failure: function(response, opts) {
 				this.waitMsg.close();
+				var msg = "";
+				if (response.status == 0) {
+					msg = "No connection to Internet available or no response before timeout";
+				} else {
+					msg = "Unable to read layer information";
+				}
 				Ext.MessageBox.show({
 					title: 'OSM Import',
-					msg: 'Unable to read layer information',
+					msg: msg,
 					width: 500,
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.ERROR
@@ -595,9 +607,15 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				}
 			},
 			failure: function(response, options) {
+				var msg = "";
+				if (response.status == 0) {
+					msg = "No connection to Internet available or no response before timeout";
+				} else {
+					msg = "An error occured while integrating the data.";
+				}
 				Ext.MessageBox.show({
 					title: 'OSM Import',
-					msg: 'An error occured while integrating the data.',
+					msg: msg,
 					width: 500,
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.ERROR
