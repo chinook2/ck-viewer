@@ -33,6 +33,8 @@ Ext.define('Ck.form.Controller', {
 	
 	//afterreset
 	
+	//afterclose
+	
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
@@ -146,6 +148,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			this.stopEditing();
+			this.fireEvent('afterclose');
 
 			var win = this.view.up('window');
 			if (win) {
@@ -153,6 +156,7 @@ Ext.define('Ck.form.Controller', {
 			} else {
 				this.view.destroy();
 			}
+			
 		}.bind(this);
 
 		if(btn && btn.force === true){
