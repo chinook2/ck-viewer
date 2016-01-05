@@ -289,7 +289,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		} else if (this.data.type == "relation") {
 			for (var memberId in this.data.members) {
 				var member = this.getSubElement(records, this.data.members[memberId].ref);
-				if (member.type == "way" && !this.isPolygon(member)) {
+				if (member.data.type == "way" && !this.isPolygon(member.data)) {
 					var attr = this.convertTagsToAttributes(member, attributesTagsConfig);
 					attr.geometry = this.calculateGeom(member.data, records);
 					features.push(new ol.Feature(attr));
@@ -319,9 +319,22 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			} else {
 				for (var memberId in this.data.members) {
 					var member = this.getSubElement(records, this.data.members[memberId].ref);
-					if (member.type == "way" && this.isPolygon(member)) {
-						var attr = this.convertTagsToAttributes(member, attributesTagsConfig);
-						attr.geometry = this.calculateGeom(member.data, records);
+					// Copy the tags from relation and element in the member without modifying records
+					var tags = {};
+					for (var key in this.data.tags) {
+						tags[key] = this.data.tags[key];
+					}
+					for (var key in member.data.tags) {
+						tags[key] = member.data.tags[key];
+					}
+					var element = {type: member.data.type,
+								   tags: tags,
+								   geometry: member.data.geometry,
+								   lat: member.data.lat,
+								   lon: member.data.lon};
+					if (element.type == "way" && this.isPolygon(element)) {
+						var attr = this.convertTagsToAttributes({data: element}, attributesTagsConfig);
+						attr.geometry = this.calculateGeom(element, records);
 						features.push(new ol.Feature(attr));
 					}
 				}
