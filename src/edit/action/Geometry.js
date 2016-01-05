@@ -58,6 +58,9 @@ Ext.define('Ck.edit.action.Geometry', {
 		this.controller.addListener("sessioncomplete", function() {
 			this.reset(); this.enableInteraction();
 		}, this);
+		this.controller.addListener("savesuccess", function() {
+			this.geometryInteraction.resetSelection();
+		}, this);
 	},
 	
 	disableInteraction: function() {

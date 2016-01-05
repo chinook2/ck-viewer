@@ -113,6 +113,7 @@ Ext.define('Ck.edit.Action', {
 	disableAllInteractions: function() {
 		for(var interaction in this.interactions) {
 			if(!Ext.isEmpty(this.interactions[interaction])) {
+				this.interactions[interaction].setActive(false);
 				this.map.getOlMap().removeInteraction(this.interactions[interaction]);
 				delete this[interaction];
 			}

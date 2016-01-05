@@ -71,7 +71,17 @@ Ext.define('Ck.edit.Controller', {
 	 
 	/**
 	 * @event sessioncomplete
-	 * Fires when feature or vertex session is complete
+	 * Fires when feature or vertex session is complete (not saved)
+	 */
+	 
+	/**
+	 * @event savesuccess
+	 * Fires when change saved successfully
+	 */
+	 
+	/**
+	 * @event savefailed
+	 * Fires when change saved successfully
 	 */
 	
 	/**
@@ -288,7 +298,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.geom.SimpleGeometry}
 	 */
 	startVertexEdition: function(feature) {
-		if(feature.getGeometry().getType() == "Point") {
+		if(this.layer.getExtension("geometryType") == "Point") {
 			if(this.moveInteraction) {
 				this.olMap.removeInteraction(this.moveInteraction);
 			}
@@ -323,7 +333,7 @@ Ext.define('Ck.edit.Controller', {
 		if(changed) {
 			this.fireEvent("featuregeometry", feature);
 		}
-		this.fireEvent("sessioncomplete", feature);;
+		this.fireEvent("sessioncomplete", feature);
 	},
 	
 	/**
@@ -449,16 +459,17 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	save: function() {
 		if(this.isWMS) {
-			var data, ft, inserts = [], updates = [], deletes = [], off = this.layer.ckLayer.getOffering("wfs");
+			var data, ft, inserts = [], updates = [], deletes = [], ope = this.layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
 			var geometryName = this.layer.getExtension("geometryColumn");
+			var multiForReal = this.layer.getExtension("multiForReal");
 			
 			var currSrs = this.map.getProjection().getCode();
-			var lyrSrs = off.getSrs();
+			var lyrSrs = ope.getSrs();
 			
 			var f = Ck.create("ol.format.WFS", {
 				featureNS: "http://mapserver.gis.umn.edu/mapserver",
 				gmlFormat: Ck.create("ol.format.GML2"),
-				featureType: off.getLayers()
+				featureType: ope.getLayers()
 			});
 			
 			// Loop on history store items
@@ -473,8 +484,14 @@ Ext.define('Ck.edit.Controller', {
 				if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
 					ft.set(geometryName, ft.getGeometry());
 					ft.unset("geometry");
-					ft.setGeometryName(geometryName);
-					
+					ft.setGeometryName(geometryName);	
+				}
+				
+				// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
+				var geom = ft.getGeometry();
+				if(multiForReal === true && data.actionId != 3 && !Ext.isEmpty(geom) && geom.getType().indexOf("Multi") == -1) {
+					var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
+					ft.setGeometry(mGeom);
 				}
 				
 				switch(data.actionId) {
@@ -496,26 +513,34 @@ Ext.define('Ck.edit.Controller', {
 				}
 			}
 			
-			var transac = f.writeTransaction(inserts, updates, deletes, {
+			var lyr = ope.getLayers().split(":");
+			
+			transacOpt = {
 				featureNS		: "feature",
-				featurePrefix	: "test",
 				srsName			: currSrs,
-				featureType		: off.getLayers(),
+				featureType		: lyr[0],
 				gmlOptions: {
 					schemaLocation: "wfs"
 				}
-			});
+			};
+			
+			if(!Ext.isEmpty(lyr[1])) {
+				transacOpt.featurePrefix = lyr[1];
+			}
+			
+			var transac = f.writeTransaction(inserts, updates, deletes, transacOpt);
 			
 			// Temporary parent to get the whole innerHTML
-			var pTemp = document.createElement("dvi");
+			var pTemp = document.createElement("div");
 			pTemp.appendChild(transac);
 			
 			// Do the getFeature query
 			Ck.Ajax.post({
 				scope: this,
-				url: off.getOperation(0).getHref(1),
+				url: ope.getUrl(),
 				rawData: pTemp.innerHTML,
 				success: function(response) {
+					this.fireEvent("savesuccess");
 					var ins, upd, del;
 					ins = response.responseXML.getElementsByTagName("totalInserted")[0];
 					upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
@@ -543,6 +568,7 @@ Ext.define('Ck.edit.Controller', {
 					}
 				},
 				failure: function(response) {
+					this.fireEvent("savefailed");
 					var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
 					var msg = "Layer edition failed";
 					if(exception) {

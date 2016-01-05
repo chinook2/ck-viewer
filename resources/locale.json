@@ -6,12 +6,16 @@
         "es": "Cambiar idioma",
     },{
         "en": "AppDemo",
-        "fr": "App FR",
-        "es": "App ES"
+        "fr": "AppDemo - FR",
+        "es": "AppDemo - ES"
     },{
         "en": "Display overview",
         "fr": "Vue générale",
         "es": "en espagnol..."
+    },{
+        "en": "Close",
+        "fr": "Fermer",
+        "es": "Close ES"
     },{
         "en": "Save",
         "fr": "Enregistrer",
@@ -24,6 +28,10 @@
         "en": "Print",
         "fr": "Imprimer",
         "es": "Print ES"
+    },{
+        "en": "Edit",
+        "fr": "Editer",
+        "es": "Editar"
     },{
         "en": "Title",
         "fr": "Titre",
@@ -44,6 +52,14 @@
         "en": "Zoom on layer",
         "fr": "Zoomer sur la couche",
         "es": "Ver todo !"
+    },{
+        "en": "Measure tools",
+        "fr": "Outils de mesure",
+        "es": " - "
+    },{
+        "en": "Get feature info",
+        "fr": "Outils 'i'",
+        "es": " - "
     }
     ]
 }

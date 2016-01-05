@@ -27,7 +27,7 @@ Ext.define('Ck.login.action.Login', {
 		
 		var params = form.getValues();
 		
-		Cks.post({
+		Cks.get({
 			// CORS Authent
 			withCredentials: true,
 			url: Ck.getApi() + 'login',

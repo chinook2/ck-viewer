@@ -374,10 +374,7 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
 						url: mainOperation.getUrl(),
-						params: {
-							VERSION: mainOperation.getProtocolVersion(),
-							LAYERS: mainOperation.getLayers()
-						}
+						params: mainOperation.getParams()
 					};
 					break;
 					

@@ -395,16 +395,17 @@ Ext.define('Ck.Selection', {
 	
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
+		var ope = off.getOperation("GetFeature");
 		var selGeom = new ol.geom.Polygon(selFt.geometry.coordinates);
 		var selBBox = selGeom.getExtent();
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
 			gmlFormat: Ck.create("ol.format.GML2"),
-			featureType: off.getLayers().split(",")
+			featureType: ope.getLayers().split(",")
 		});
 		var gf = f.writeGetFeature({
 			srsName			: this.getMap().getProjection().getCode(),
-			featureTypes	: off.getLayers().split(","),
+			featureTypes	: ope.getLayers().split(","),
 			geometryName	: layer.getExtension("geometryColumn"),
 			count			: this.getLimit(),
 			maxFeatures		: this.getLimit(),
@@ -412,24 +413,36 @@ Ext.define('Ck.Selection', {
 		});
 		
 		// Temporary parent to get the whole innerHTML
-		var pTemp = document.createElement("dvi");
+		var pTemp = document.createElement("div");
 		pTemp.appendChild(gf);
 		
 		// Pre make reader options for readFeatures method
 		var readOptions = {
-			dataProjection: "EPSG:4326",
+			dataProjection: ope.getSrs(),
 			featureProjection: this.getMap().getProjection().getCode()
 		};
 		
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
-			url: off.getOperation(0).getHref(1),
+			url: ope.getUrl(),
 			rawData: pTemp.innerHTML,
-			success: function(layer, format, readOptions, response) {
+			success: function(layer, ope, readOptions, response) {
+				var lyr = ope.getLayers().split(",");
+				// Fix Chinook 1 context prefix in getFeature response
+				for(var i in lyr) {
+					lyr[i] = lyr[i].split(":")[0];
+				}
+				
+				var format = Ck.create("ol.format.WFS", {
+					featureNS: "http://mapserver.gis.umn.edu/mapserver",
+					gmlFormat: Ck.create("ol.format.GML2"),
+					featureType: lyr
+				});
+				
 				var features = format.readFeatures(response.responseXML, readOptions);
 				this.onSelect(features, layer);
-			}.bind(this, layer, f, readOptions),
+			}.bind(this, layer, ope, readOptions),
 			failure: function() {
 				Ck.log("Request getFeature fail for layer ");
 				this.onSelect();
