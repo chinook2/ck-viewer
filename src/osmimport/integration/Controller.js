@@ -267,7 +267,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				tags = Ext.Array.merge(tags, Object.keys(record.data.tags));
 				
 				// Get the relation members tags for specific integration (copyTo Point, LineString, Polygon)
-				if (this.iLayer.id) {
+				if (this.iLayer.id && record.data.members) {
 					var integrationGeometryType = this.iLayer.geometry;
 					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
 						(["Point", "LineString", "Polygon"].indexOf(this.iLayer.geometry) > -1)) {
