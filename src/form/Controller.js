@@ -21,6 +21,9 @@ Ext.define('Ck.form.Controller', {
 
 	fields: [],
 	
+	// TODO in config param in form json...
+	compatibiltyMode: false,
+	
 	//startEditing
 	//stopEditing
 	
@@ -450,6 +453,12 @@ Ext.define('Ck.form.Controller', {
 			// Default textfield si propriété name et pas de xtype
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
+			// Compatibility forms V1
+			if(c.xtype.substr(0,3) == 'ck_') {
+				c.xtype = c.xtype.substr(3);
+				this.compatibiltyMode = true;
+			}
+			//
 			
 			Ext.applyIf(c, {
 				plugins: [],
@@ -724,6 +733,17 @@ Ext.define('Ck.form.Controller', {
 			}
 		}, this);
 
+		if(this.compatibiltyMode){
+			var fid = v.getDataFid();
+			var lyr = v.getLayer();
+			var res = {
+				fid: fid.fid,
+				params: values
+			};
+			values = {};
+			values['main'] = res;
+		}
+
 		// SUBFORM : save data
 		var subforms = v.query('ckform');
 		for (var s = 0; s < subforms.length; s++) {
@@ -735,6 +755,12 @@ Ext.define('Ck.form.Controller', {
 		}
 		//
 		
+		if(this.compatibiltyMode){
+			return {
+				name: fid.layer,
+				data: encodeURIComponent(Ext.encode(values))
+			}
+		}
 		return values;
 	},
 	
@@ -943,6 +969,12 @@ Ext.define('Ck.form.Controller', {
 						return false;
 					}
 
+					// Compatibility
+					if(data.success===true && data.data) {
+						data = data.data;
+					}
+					//
+					
 					if(this.oController.afterLoad(data) === false){
 						Ck.log("afterLoad cancel loadData.");
 						return;
@@ -994,6 +1026,7 @@ Ext.define('Ck.form.Controller', {
 			method: 'PUT'
 		});
 		if(options.create) options.method = 'POST';
+		if(this.compatibiltyMode) option.method = 'POST';
 		//
 
 		// Test if form is valid (all fields of the main form)
