@@ -278,11 +278,20 @@ Ext.define('Ck.osmimport.integration.Controller', {
 						for (var recId in records) {
 							// Add relation tags to determine member's geometry
 							var rec = records[recId];
+							var membertags = {};
 							for (var key in record.data.tags) {
-								rec.data.tags[key] = record.data.tags[key];
+								membertags[key] = record.data.tags[key];
 							}
+							for (var key in rec.data.tags) {
+								membertags[key] = rec.data.tags[key];
+							}
+							var element = {type: rec.data.type,
+										   tags: membertags,
+										   geometry: rec.data.geometry,
+										   lat: rec.data.lat,
+										   lon: rec.data.lon};
 							if (membersRef.indexOf(rec.id) > -1 &&
-								record.calculateGeom(rec.data, records).getType() == this.iLayer.geometry) {
+								record.calculateGeom(element, records).getType() == this.iLayer.geometry) {
 								var memberKeys = [];
 								for (key in rec.data.tags) {
 									memberKeys.push("rel:" + key);
