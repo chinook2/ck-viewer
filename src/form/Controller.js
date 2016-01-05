@@ -454,7 +454,7 @@ Ext.define('Ck.form.Controller', {
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
 			// Compatibility forms V1
-			if(c.xtype.substr(0,3) == 'ck_') {
+			if(c.xtype && c.xtype.substr(0,3) == 'ck_') {
 				c.xtype = c.xtype.substr(3);
 				this.compatibiltyMode = true;
 			}
