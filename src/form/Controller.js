@@ -1149,7 +1149,7 @@ Ext.define('Ck.form.Controller', {
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200 || response.status == 201) {
 					this.fireEvent('aftersave', data);
-					if(this.oController.afterSave(dt) === false){
+					if(this.oController.afterSave(data) === false){
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
@@ -1164,7 +1164,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					*/
 				}
-				Ext.callback(options.success, options.scope, [dt]);
+				Ext.callback(options.success, options.scope, [data]);
 			},
 			failure: function (response, opts) {
 				this.fireEvent('savefailed', response);
