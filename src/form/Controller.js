@@ -36,6 +36,7 @@ Ext.define('Ck.form.Controller', {
 	
 	//afterreset
 	
+	//beforeclose
 	//afterclose
 	
 	// Override by named controller of the form Ck.form.controller.{name}
@@ -163,6 +164,7 @@ Ext.define('Ck.form.Controller', {
 		}.bind(this);
 
 		if(btn && btn.force === true){
+			this.fireEvent('beforeclose', btn);
 			closeMe();
 		} else {
 			Ext.Msg.show({
@@ -171,6 +173,7 @@ Ext.define('Ck.form.Controller', {
 				buttons: Ext.Msg.YESNOCANCEL,
 				icon: Ext.Msg.QUESTION,
 				fn: function(btn) {
+					this.fireEvent('beforeclose', btn);
 					if (btn === 'yes') {
 						this.saveData();
 						closeMe();
