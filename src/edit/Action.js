@@ -29,7 +29,6 @@ Ext.define('Ck.edit.Action', {
 		this.associatedEl = el;
 		this.controller = el.lookupController();
 		if(this.used == false) {
-			// this.associatedEl.on("hide", this.disableAllInteractions, this);
 			this.controller.getView().on("hide", this.disableAllInteractions, this);
 		}
 		this.used = true;
@@ -43,12 +42,12 @@ Ext.define('Ck.edit.Action', {
 			return this.layer;
 		}
 
-		this.layer = this.associatedEl.lookupController().layer;
+		this.layer = this.controller.getLayer();
 		if(this.layer) {
 			return this.layer;
 		}
 		
-		var layerId = this.openner.getView().layerId;
+		var layerId = this.controller.getView().editConfig.layerId;
 		this.layer = this.map.getLayerById(layerId);
 
 		if(!this.layer) {

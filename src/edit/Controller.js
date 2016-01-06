@@ -11,22 +11,21 @@ Ext.define('Ck.edit.Controller', {
 	
 	editPanelVisible: true,
 	
-	/**
-	 * Indicate if the edited layer is a multi-feature layer (like MultiLineString)
-	 */
-	multi: false,
-	
-	/**
-	 * If the edited layer is a WMS layer
-	 */
-	isWMS: false,
-	
-	/**
-	 * Format to use for getFeature and writeTransaction. Only set when isWMS is true
-	 * @var {ol.format.WFS}
-	 */
-	format: null,
-	 
+	config: {
+		openner: null,
+		
+		layer: null,
+		
+		/**
+		 * Indicate if the edited layer is a multi-feature layer (like MultiLineString)
+		 */
+		multi: false,
+		
+		/**
+		 * If the edited layer is a WMS layer
+		 */
+		isWMS: false
+	},
 	
 	/**
 	 * @event featurecreate
@@ -88,10 +87,11 @@ Ext.define('Ck.edit.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		this.layer = view.layer;
-		this.map = Ck.getMap();
-		this.olMap = this.map.getOlMap();
-		this.multi = (this.layer.getExtension("geometryType").indexOf("Multi") != -1);
+		this.callParent([view]);
+		
+		this.setLayer(view.initialConfig.layer);
+		this.setOpenner(view.initialConfig.openner);
+		this.setMulti((view.initialConfig.layer.getExtension("geometryType").indexOf("Multi") != -1));
 		
 		this.control({
 			"ckedit button#cancel": {
@@ -115,7 +115,7 @@ Ext.define('Ck.edit.Controller', {
 			},"ckedit button#save": {
 				click: this.save,
 				scope: this
-			},"ckedit button#exit": {
+			},"ckedit button#close": {
 				click: function() {
 					if(this.history.store.getCount() != 0) {
 						Ext.Msg.show({
@@ -140,14 +140,13 @@ Ext.define('Ck.edit.Controller', {
 		});
 		
 		// Check if the layer is a WMS or WFS
-		if(!(this.layer.getSource() instanceof ol.source.Vector)) {
-			source = this.layer.get("sources");
+		if(!(this.getLayer().getSource() instanceof ol.source.Vector)) {
+			source = this.getLayer().get("sources");
 			if(source["wfs"]) {
 				source = source["wfs"][0];
-				this.isWMS = true;
-				this.format = Ck.create("ol.format.WFS");
+				this.setIsWMS(true);
 			} else {
-				Ck.error("Layer \"" + this.layer.get("title") + "\" doesn't have WFS parameters");
+				Ck.error("Layer \"" + this.getLayer().get("title") + "\" doesn't have WFS parameters");
 				return false;
 			}
 		}
@@ -155,23 +154,23 @@ Ext.define('Ck.edit.Controller', {
 		// Create a vector layer to host features of WMS layer
 		if(!this.wfsLayer) {
 			this.wfsLayer = Ck.create("ol.layer.Vector", {
-				id: this.layer.getProperties().id + "vector-features",
+				id: this.getLayer().getProperties().id + "vector-features",
 				source: new ol.source.Vector(),
 				style: Ck.map.Style.orangeStroke,
 				zIndex: Ck.map.Style.zIndex.featureOverlay
 			});
 			this.wfsFeatures = [];
 			this.wfsSource = this.wfsLayer.getSource();
-			this.wfsLayer.setMap(this.olMap);
+			this.wfsLayer.setMap(this.getOlMap());
 		}
 		
 		var conf = view.editConfig;
 		conf.editController = this;
 		conf.layer = view.layer;
-		conf.multi = this.multi;
+		conf.multi = this.getMulti();
 		
 		// When user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
-		if(this.multi) {
+		if(this.getMulti()) {
 			var featureContainer = Ext.getCmp("edit-featurepanel");
 			featureContainer = (Ext.isEmpty(featureContainer))? view : featureContainer;
 		
@@ -204,20 +203,20 @@ Ext.define('Ck.edit.Controller', {
 			this.vertex = this.vertexPanel.getController();
 			Ext.apply(this.vertex, conf);
 			
-			var receiver = (this.multi)? this.feature : this;
+			var receiver = (this.getMulti())? this.feature : this;
 			this.relayEvents(this.vertex, ["sessionstart"], "vertex");
 			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
 			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
 		}
 		
+		this.historyView = Ext.create("widget.ckedit-history", conf);
+		this.history = this.historyView.getController();
+		Ext.apply(this.history, conf);
+		this.history.createListeners(this);
 		
 		this.historyPanel = Ext.getCmp("edit-historypanel");
 		if(this.historyPanel) {
-			this.historyView = Ext.create("widget.ckedit-history", conf);
 			this.historyPanel.add(this.historyView);
-			this.history = this.historyView.getController();
-			Ext.apply(this.history, conf);
-			this.history.createListeners(this);
 		}
 		
 		this.on("featurecreate", this.onCreate, this);
@@ -231,7 +230,7 @@ Ext.define('Ck.edit.Controller', {
 	onCreate: function(feature) {
 		feature.setStyle(Ck.map.Style.greenStroke);
 		var source = this.getSource();
-		if(this.multi) {
+		if(this.getMulti()) {
 			var type = "Multi" + feature.getGeometry().getType();
 			feature = Ck.create("ol.Feature", {
 				geometry: Ck.create("ol.geom." + type, [feature.getGeometry().getCoordinates()])
@@ -251,7 +250,7 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	startGeometryEdition: function(feature) {
 		// Add the feature, if not already added, to the collection
-		if(this.isWMS) {
+		if(this.getIsWMS()) {
 			var ft = this.wfsSource.getFeatureById(feature.getId());
 			
 			if(Ext.isEmpty(ft)) {
@@ -260,7 +259,7 @@ Ext.define('Ck.edit.Controller', {
 				feature.setGeometry(ft.getGeometry());
 			}
 		}
-		if(this.multi) {
+		if(this.getMulti()) {
 			this.startFeatureEdition(feature);
 		} else {
 			this.startVertexEdition(feature);
@@ -273,8 +272,8 @@ Ext.define('Ck.edit.Controller', {
 	deleteFeature: function(feature) {
 		this.wfsSource.addFeature(feature);
 		feature.setStyle(Ck.map.Style.redStroke);
-		if(!this.isWMS) {
-			var src = this.layer.getSource();
+		if(!this.getIsWMS()) {
+			var src = this.getLayer().getSource();
 			src.removeFeature(feature);
 		}
 		this.fireEvent("featureremove", feature);
@@ -298,15 +297,15 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.geom.SimpleGeometry}
 	 */
 	startVertexEdition: function(feature) {
-		if(this.layer.getExtension("geometryType") == "Point") {
+		if(this.getLayer().getExtension("geometryType") == "Point") {
 			if(this.moveInteraction) {
-				this.olMap.removeInteraction(this.moveInteraction);
+				this.getOlMap().removeInteraction(this.moveInteraction);
 			}
 			this.moveInteraction = new ol.interaction.Translate({
 				features: new ol.Collection([feature])
 			});
 			this.moveInteraction.on("translateend", this.pointTranslateEnd, this);
-			this.olMap.addInteraction(this.moveInteraction);
+			this.getOlMap().addInteraction(this.moveInteraction);
 			
 			// delete this.moveInteraction.previousCursor_;
 			this.moveInteraction.setActive(true);
@@ -378,10 +377,10 @@ Ext.define('Ck.edit.Controller', {
 	 * @return {ol.source}
 	 */
 	getSource: function() {
-		if(this.isWMS && this.wfsLayer) {
+		if(this.getIsWMS() && this.wfsLayer) {
 			return this.wfsSource;
 		} else {
-			return this.layer.getSource();
+			return this.getLayer().getSource();
 		}
 	},
 	
@@ -407,7 +406,7 @@ Ext.define('Ck.edit.Controller', {
 	cancel: function() {
 		var data, ft;
 		
-		if(this.isWMS) {
+		if(this.getIsWMS()) {
 			this.wfsSource.clear();
 		} else {
 			for(var i = 0; i < this.history.store.getCount(); i++) {
@@ -446,24 +445,19 @@ Ext.define('Ck.edit.Controller', {
 			this.feature.close.bind(this.feature)();
 		}
 		
-		var win = this.view.up('window');
-		if(win) {
-			win.close();
-		} else {
-			this.view.close();
-		}
+		this.getOpenner().close();
 	},
 	
 	/**
 	 * Save the changes. If it concerne
 	 */
 	save: function() {
-		if(this.isWMS) {
-			var data, ft, inserts = [], updates = [], deletes = [], ope = this.layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
-			var geometryName = this.layer.getExtension("geometryColumn");
-			var multiForReal = this.layer.getExtension("multiForReal");
+		if(this.getIsWMS()) {
+			var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
+			var geometryName = this.getLayer().getExtension("geometryColumn");
+			var multiForReal = this.getLayer().getExtension("multiForReal");
 			
-			var currSrs = this.map.getProjection().getCode();
+			var currSrs = this.getMap().getProjection().getCode();
 			var lyrSrs = ope.getSrs();
 			
 			var f = Ck.create("ol.format.WFS", {
@@ -594,11 +588,11 @@ Ext.define('Ck.edit.Controller', {
 			this.history.reset.bind(this.history)();
 		}
 		
-		if(this.isWMS) {
+		if(this.getIsWMS()) {
 			this.wfsSource.clear();
 			
 			// Redraw
-			src = this.layer.getSource();
+			src = this.getLayer().getSource();
 			var params = src.getParams();
 			params.t = new Date().getMilliseconds();
 			src.updateParams(params);
