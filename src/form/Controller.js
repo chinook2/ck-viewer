@@ -36,6 +36,7 @@ Ext.define('Ck.form.Controller', {
 	
 	//afterreset
 	
+	//beforeclose
 	//afterclose
 	
 	// Override by named controller of the form Ck.form.controller.{name}
@@ -163,6 +164,7 @@ Ext.define('Ck.form.Controller', {
 		}.bind(this);
 
 		if(btn && btn.force === true){
+			this.fireEvent('beforeclose', btn);
 			closeMe();
 		} else {
 			Ext.Msg.show({
@@ -171,6 +173,7 @@ Ext.define('Ck.form.Controller', {
 				buttons: Ext.Msg.YESNOCANCEL,
 				icon: Ext.Msg.QUESTION,
 				fn: function(btn) {
+					this.fireEvent('beforeclose', btn);
 					if (btn === 'yes') {
 						this.saveData();
 						closeMe();
@@ -454,7 +457,7 @@ Ext.define('Ck.form.Controller', {
 			if (c.name && !c.xtype) c.xtype = 'textfield';
 
 			// Compatibility forms V1
-			if(c.xtype.substr(0,3) == 'ck_') {
+			if(c.xtype && c.xtype.substr(0,3) == 'ck_') {
 				c.xtype = c.xtype.substr(3);
 				this.compatibiltyMode = true;
 			}
@@ -1149,7 +1152,7 @@ Ext.define('Ck.form.Controller', {
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200 || response.status == 201) {
 					this.fireEvent('aftersave', data);
-					if(this.oController.afterSave(dt) === false){
+					if(this.oController.afterSave(data) === false){
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
@@ -1164,7 +1167,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					*/
 				}
-				Ext.callback(options.success, options.scope, [dt]);
+				Ext.callback(options.success, options.scope, [data]);
 			},
 			failure: function (response, opts) {
 				this.fireEvent('savefailed', response);
