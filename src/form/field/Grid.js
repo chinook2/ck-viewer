@@ -68,7 +68,9 @@ Ext.define('Ck.form.field.Grid', {
 	
 	afterRender: function () {
 		this.callParent(arguments);
-		this.grid.render(this.inputEl);
+		Ext.defer(function(){
+			this.grid.render(this.inputEl);
+		}, 50, this);
 	},
 
 	getValue: function(){
