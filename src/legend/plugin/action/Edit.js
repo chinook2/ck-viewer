@@ -67,8 +67,9 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			case "docked":
 				var view = map.getView();
 				this.win = view.addDocked(Ext.apply({
-					dock: 'top'
+					dock : "top"
 				}, this.targetOpt, editOpt));
+				this.getMap().getOlMap().updateSize()
 				break;
 		}
 		
