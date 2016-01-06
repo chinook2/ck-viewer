@@ -113,7 +113,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			params: {
 				service: "WFS",
 				request: "DescribeFeatureType",
-				typename: layerSource.getParams().LAYERS
+				typename: layerSource.getParams().layers
 			},
 			withCredentials: true,
 			useDefaultXhrHeader: false,
@@ -169,7 +169,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			params: {
 				service: "repository",
 				request: "getLayer",
-				layer: layerSource.getParams().LAYERS
+				layer: layerSource.getParams().layers
 			},
 			withCredentials: true,
 			useDefaultXhrHeader: false,
@@ -565,7 +565,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			{ // Options
 				featureNS: "http://www.opengis.net/wfs",
 				featurePrefix: "",
-				featureType: "feature:" + integrationLayer.getSource().getParams().LAYERS,
+				featureType: "feature:" + integrationLayer.getSource().getParams().layers,
 				nativeElements: []
 			}
 		);

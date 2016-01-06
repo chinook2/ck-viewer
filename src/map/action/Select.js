@@ -207,9 +207,10 @@ Ext.define('Ck.map.action.Select', {
 		
 		// Query vector layers
 		var vectorLayers = Ck.getMap().getLayers(function(lyr) {
-			return (lyr.getVisible() && lyr instanceof ol.layer.Vector && lyr.getProperties("id") != "measureLayer");
+			return (lyr.getVisible() && lyr instanceof ol.layer.Vector && lyr.get("id") != "measureLayer"
+																	   && lyr.get("id") != "osmimport_selection"
+																	   && lyr.get("id") != "osmimport_data");
 		});
-		
 		vectorLayers.forEach(function(lyr) {
 			var lyrFts, lyrFt;
 			res[i] = [];

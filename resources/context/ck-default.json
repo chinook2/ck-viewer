@@ -126,7 +126,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=busstops&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=busstops&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -150,7 +150,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=forests&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=forests&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -174,7 +174,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=cycleopposites&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=cycleopposites&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -198,7 +198,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=hydros&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=hydros&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -222,7 +222,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=parceols&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=parceols&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -246,7 +246,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=publictransports&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=publictransports&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -270,7 +270,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=schools&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=schools&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -294,7 +294,7 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=sportpitches&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=sportpitches&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
@@ -318,7 +318,55 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=polices&VERSION=1.1.1",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=polices&version=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "buildings",
+		"properties": {
+			"title" : "Bâtiments",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-180, -90, 180, 90],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=buildings&version=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "streets",
+		"properties": {
+			"title" : "Rues",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-180, -90, 180, 90],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?layers=streets&version=1.1.1",
 					"request":{},
 					"result":{}
 				}]
