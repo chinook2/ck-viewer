@@ -41,6 +41,7 @@ Ext.define('Ck.form.Controller', {
 
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
+	afterShow: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
 
 	beforeLoad: Ext.emptyFn,
@@ -304,7 +305,12 @@ Ext.define('Ck.form.Controller', {
 			// }
 
 			this.isInit = true;
-
+			
+			if(this.oController.afterShow(form) === false){
+				Ck.log("afterShow cancel initForm.");
+				return;
+			}
+			
 			// Auto-load data if params available
 			if(this.autoLoad) this.loadData();
 		}
