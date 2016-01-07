@@ -325,7 +325,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var lyrFts = layer.getSource().getFeatures();
 			for(var j = 0; j < lyrFts.length; j++) {
 				lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
-				if(lyrFt.geometry.type.endsWith("Polygon") && turf.intersect(lyrFt, polyTurf)) {
+				console.log(lyrFt)
+				if(["Polygon", "MultiPolygon"].indexOf(lyrFt.geometry.type) > -1 && turf.intersect(lyrFt, polyTurf)) {
 					featureGeom = lyrFts[j];
 					break;
 				}
@@ -359,7 +360,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				success: function(response) {
 					var features = wfs.readFeatures(response.responseXML);
 					if (features.length > 0) {
-						if (features[0].getGeometry().getType().endsWith("Polygon")) {
+						if (["Polygon", "MultiPolygon"].indexOf(features[0].getGeometry().getType()) > -1) {
 							featureGeom = features[0];
 							this.selectionVector.getSource().addFeature(featureGeom);
 						}
