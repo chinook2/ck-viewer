@@ -32,12 +32,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	fieldIgnored: ["geometry", "shape", "boundedBy"],
 	
-	/**
-	 * FeatureInfo on vector layer
-	 */
-	ckLoaded: function(map) {
-		this.olMap = map.getOlMap();
-		
+	constructor: function(config) {
 		Ext.define('FeatureInfoResult', {
 			extend: 'Ext.data.Model',
 			fields: [
@@ -46,6 +41,14 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				{name: 'value', type: 'string'}
 			]
 		});
+		this.callParent([config]);
+	},
+	
+	/**
+	 * FeatureInfo on vector layer
+	 */
+	ckLoaded: function(map) {
+		this.olMap = map.getOlMap();
 		
 		this.draw = new Ck.Selection({
 			type		: "Point",
