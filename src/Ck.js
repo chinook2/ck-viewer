@@ -359,7 +359,9 @@ Ext.apply(Ck, {
 
 		//<debug>
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		path = basePath + '/resources';
+		if(Ext.manifest.paths) {
+			path = basePath + '/resources';
+		}
 		//</debug>	
 		
 		return path;
