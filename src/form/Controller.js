@@ -567,8 +567,8 @@ Ext.define('Ck.form.Controller', {
 							if(Ext.isString(store)) {
 								if(store.indexOf("/") == -1) {
 									// Get store in ViewModel (global store pre-loaded)
-									if(me.getViewModel().get(o.store)) {
-										return me.getViewModel().get(o.store);
+									if(me.getViewModel().get(store)) {
+										return me.getViewModel().get(store);
 									}
 									// >> ViewModel is not ready (hierarchy) the form is not yet added to the view...
 
@@ -579,6 +579,7 @@ Ext.define('Ck.form.Controller', {
 								} else {
 									// If store is an URL that automatic store is created
 									storeUrl = o.store;
+									store = {};
 								}
 							}
 							
@@ -601,21 +602,33 @@ Ext.define('Ck.form.Controller', {
 									storeUrl = tpl.apply(fid);
 								}
 
-								store = Ext.Object.mergeIf(store, {
-									autoLoad: !(c.queryMode==='remote'),
-									fields: [{name: "value", type: "string"}],
-									proxy: {
-										type: "ajax",
-										noCache: false,
-										url: me.getFullUrl(storeUrl),
-										reader: {
-											type: "array"
+								if(this.compatibiltyMode) {
+									// Need default reader Array for Chinook V1 store
+									store = Ext.Object.mergeIf(store, {
+										autoLoad: !(c.queryMode==='remote'),
+										fields: [{name: "value", type: "string"}],
+										proxy: {
+											type: "ajax",
+											noCache: false,
+											url: me.getFullUrl(storeUrl),
+											reader: {
+												type: "array"
+											}
 										}
-									}
-								});
+									});
+								} else {
+									// Need default JSON reader
+									store = Ext.Object.mergeIf(store, {
+										autoLoad: !(c.queryMode==='remote'),
+										proxy: {
+											type: "ajax",
+											noCache: false,
+											url: me.getFullUrl(storeUrl)
+										}
+									});
+								}
 							} else if(Ext.isObject(store)) {
 								// Inline data
-								
 							}
 
 							// Default in-memory Store
@@ -644,7 +657,6 @@ Ext.define('Ck.form.Controller', {
 									cols[idx].editor.store = processStore(col.editor)
 								}
 							});
-
 						}
 
 						Ext.applyIf(c, {
