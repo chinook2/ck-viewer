@@ -45,7 +45,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		 */
 		this.selectionCoords = ""; // stores the coordinates of the selection ready to be used in OSM API.
 		if (Ck.getMap().getLayerById("osmimport_selection")) {
-			this.selectionVector = Ck.getMap().getLayerById("osmimport_selection")
+			this.selectionVector = Ck.getMap().getLayerById("osmimport_selection");
 		} else {
 			this.selectionSource = new ol.source.Vector({wrapX:false});
 			this.selectionVector = new ol.layer.Vector({
@@ -203,44 +203,226 @@ Ext.define('Ck.osmimport.import.Controller', {
 	},
 	
 	/**
+	 * Prepare the selector for the geographical zone according user's configuration.
+	 */
+	prepareSelector: function() {
+		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
+		var self = this;
+
+		// Prepare draw interaction and geometryFunction according selection mode
+		var draw, geometryFunction, maxPoints, source;
+		if (selectType === "rectangle") {
+			source = this.selectionVector.getSource();
+			maxPoints = 2;
+			selectType = "LineString";
+			geometryFunction = function(coordinates, geometry) {
+				if (!geometry) {
+					geometry = new ol.geom.Polygon(null);
+				}
+				var start = coordinates[0];
+				var end = coordinates[1];
+				geometry.setCoordinates([
+					[start, [start[0], end[1]], end, [end[0], start[1]], start]
+				]);
+				return geometry;
+			};
+		} else if (selectType === "polygon") {
+			source = this.selectionVector.getSource();
+			selectType = "Polygon";
+			geometryFunction = function(coordinates, geometry) {
+				if (!geometry) {
+					geometry = new ol.geom.Polygon(null);
+				}
+				geometry.setCoordinates(coordinates);
+				return geometry;
+			};
+		} else if (selectType === "feature") {
+			selectType = "Point";
+		}
+
+		draw = new ol.interaction.Draw({
+			source: source,
+			type: selectType,
+			geometryFunction: geometryFunction,
+			maxPoints: maxPoints
+		});
+		draw.on('drawend', this.onSelectionDone, this);
+
+		this.olMap.removeInteraction(this.mapInteraction);
+		this.mapInteraction = draw;
+        this.olMap.addInteraction(this.mapInteraction);
+	},
+	
+	/**
 	 * Method called once the user has finished its selection of a geographical zone.
 	 * - Converts the coordinates
 	 * - Stores the coordinates
 	 */
 	onSelectionDone: function(evt) {
+		this.stopZoneSelection();
+		this.selectionVector.getSource().clear();
 		var selectionGeometry;
 		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
-		if (selectType === "feature") {
-			this.selectionVector.getSource().clear();
-			if (evt.selected.length > 0) {
-				var featureGeom = evt.selected[0].getGeometry();
-				if (featureGeom.getType() === "Polygon") {
-					selectionGeometry = featureGeom.getCoordinates();
-				} else if (featureGeom.getType() === "MultiPolygon") {
-					var coords = [];
-					var multipoly = featureGeom.getCoordinates();
-					for (var poly in multipoly) {
-						for (var coord in multipoly[poly][0]) {
-							coords.push(multipoly[poly][0][coord]);
-						}
+		
+		if (selectType === "feature") {  // Polygon feature selection
+			// List of Vector and WMS Layers (in correct order)
+			this.selectionLayers = Ck.getMap().getLayers(function(lyr) {
+				return (lyr.getVisible() && (lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)
+										 && lyr.get("id") != "measureLayer"
+										 && lyr.get("id") != "osmimport_selection"
+										 && lyr.get("id") != "osmimport_data");
+			}).getArray().reverse();
+			
+			if (this.selectionLayers.length > 0) {
+				this.waitMsg = Ext.Msg.show({
+					msg: 'Computing feature selection, please wait...',
+					autoShow: true,
+					width: 400,
+					wait: {
+						interval: 200
 					}
-					selectionGeometry = [coords];
+				});
+				
+				// Create a polygon around the drawn point
+				var ft = evt.feature.getGeometry();
+				ft.transform(Ck.getMap().getProjection().code_, "EPSG:3857");  // Goes in a projection which use meters.
+				ft = new ol.geom.Circle(ft.getCoordinates(), 10);  // Create a circle with given point as center.
+				this.selectionPoly = ol.geom.Polygon.fromExtent(ft.getExtent());  // Create square inside the circle. starts with 45° angle (0.78 rad)
+				this.selectionPoly.transform("EPSG:3857", Ck.getMap().getProjection().code_);
+				
+				this.currentSelectionLayerIndex = 0;
+				Ext.defer(this.computeFeatureSelection, 1, this);
+			} else {
+				this.showPolygonFeatureSelectionError();
+			}
+		} else {// Polygon and Rectangle selection
+			selectionGeometry = evt.feature.getGeometry().getCoordinates();
+			this.convertGeometryToOverpassCoords(selectionGeometry);
+		}
+	},
+
+	/**
+	 * This method is called for each layer to check if a polygon feature can be selected.
+	 * If no feature is selected at the end of this method, call again with next layer or stop if there is no more layer
+	 * Use: 
+	 *  * this.selectionLayers: list of all layers to check
+	 *  * this.currentSelectionLayerIndex: index of the current layer to check in the previous list
+	 *  * this.selectionPoly: polygon around the point set by user for the selection
+	 * this.waitMsg: Pop-up to indicate to user to wait
+	 */
+	computeFeatureSelection: function() {
+		var featureGeom;
+		var geoJSON = new ol.format.GeoJSON();
+		var layer = this.selectionLayers[this.currentSelectionLayerIndex];
+				
+		if (layer instanceof ol.layer.Vector) {  // Vector Layer
+			var polyTurf = {type: "Feature",
+							properties: {},
+							geometry: {
+								coordinates: this.selectionPoly.getCoordinates(),
+								type: this.selectionPoly.getType()
+							}};
+			var lyrFts = layer.getSource().getFeatures();
+			for(var j = 0; j < lyrFts.length; j++) {
+				lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+				if(lyrFt.geometry.type.endsWith("Polygon") && turf.intersect(lyrFt, polyTurf)) {
+					featureGeom = lyrFts[j];
+					break;
 				}
 			}
-			if (selectionGeometry) {  // Selection success
-				this.selectionVector.getSource().addFeature(evt.selected[0]);
-			} else {  // Select other geometry or click on place where there is no feature
-				Ext.MessageBox.show({
-					title: 'OSM Import',
-					msg: 'Incorrect selection. You shall select one Polygon or MultiPolygon',
-					width: 500,
-					buttons: Ext.MessageBox.OK,
-					icon: Ext.Msg.ERROR
-				});
-			}
-		} else {
-			selectionGeometry = evt.feature.getGeometry().getCoordinates();
+			this.computeFeatureGeom(featureGeom);
+		} else if (layer instanceof ol.layer.Image) {  // WMS layer
+			var wfs = new ol.format.WFS();
+			var getFtXml = wfs.writeGetFeature({
+				featureTypes: [layer.getSource().getParams().layers],
+				srsName: Ck.getMap().getProjection().code_,
+				bbox: this.selectionPoly.getExtent(),
+				geometryName: "the_geom"
+			});
+			var oSerializer = new XMLSerializer();
+			var getFtXml = oSerializer.serializeToString(getFtXml);
+			getFtXml = getFtXml.replace(/<Filter/g, "<ogc:Filter").replace(/<\/Filter/g, "</ogc:Filter");
+			getFtXml = getFtXml.replace(/<BBOX/g, "<ogc:BBOX").replace(/<\/BBOX/g, "</ogc:BBOX");
+			getFtXml = getFtXml.replace(/<PropertyName/g, "<ogc:PropertyName").replace(/<\/PropertyName/g, "</ogc:PropertyName");
+			getFtXml = getFtXml.replace(/<Envelope/g, "<gml:Envelope").replace(/<\/Envelope/g, "</gml:Envelope");
+			getFtXml = getFtXml.replace(/<lowerCorner/g, "<gml:lowerCorner").replace(/<\/lowerCorner/g, "</gml:lowerCorner");
+			getFtXml = getFtXml.replace(/<upperCorner/g, "<gml:upperCorner").replace(/<\/upperCorner/g, "</gml:upperCorner");
+			getFtXml = getFtXml.replace("xmlns=\"http://www.opengis.net/ogc", "xmlns:ogc=\"http://www.opengis.net/ogc");
+			getFtXml = getFtXml.replace("xmlns=\"http://www.opengis.net/gml", "xmlns:gml=\"http://www.opengis.net/gml");
+			Ck.Ajax.post({
+				scope: this,
+				url: layer.getSource().url_,
+				xmlData: getFtXml,
+				withCredentials: true,
+				useDefaultXhrHeader: false,
+				timeout: 120000,
+				success: function(response) {
+					var features = wfs.readFeatures(response.responseXML);
+					if (features.length > 0) {
+						if (features[0].getGeometry().getType().endsWith("Polygon")) {
+							featureGeom = features[0];
+							this.selectionVector.getSource().addFeature(featureGeom);
+						}
+					}
+					this.computeFeatureGeom(featureGeom)
+				},
+				failure: function(response, options) {
+					console.log("fail to get the layer feature");
+				}
+			});
 		}
+	},
+	
+	/** Compute results on Layer feature selection 
+	 * Call next layer if no feature found
+	 */
+	computeFeatureGeom: function(featureGeom) {
+		// Get polygon coordinates (transform multipolygon in polygon)
+		if (featureGeom) {
+			var selectionGeometry;
+			if (featureGeom.getGeometry().getType() === "Polygon") {
+				selectionGeometry = featureGeom.getGeometry().getCoordinates();
+			} else if (featureGeom.getGeometry().getType() === "MultiPolygon") {
+				var coords = [];
+				var multipoly = featureGeom.getGeometry().getCoordinates();
+				for (var poly in multipoly) {
+					for (var coord in multipoly[poly][0]) {
+						coords.push(multipoly[poly][0][coord]);
+					}
+				}
+				selectionGeometry = [coords];
+			}
+			// Draw the selected feature in highlight
+			this.selectionVector.getSource().addFeature(featureGeom);
+			this.convertGeometryToOverpassCoords(selectionGeometry);
+			this.waitMsg.close();
+		} else {  // No feature found in this layer, go to next
+			this.currentSelectionLayerIndex++;
+			if (this.currentSelectionLayerIndex < this.selectionLayers.length) {
+				Ext.defer(this.computeFeatureSelection, 1, this);
+			} else {
+				this.waitMsg.close();
+				this.showPolygonFeatureSelectionError();
+			}
+		}
+	},
+	
+	/** Method to show an error for polygon Feature selection.
+	 */
+	showPolygonFeatureSelectionError: function() {
+		Ext.MessageBox.show({
+			title: 'OSM Import',
+			msg: 'Incorrect selection. You shall select one Polygon or MultiPolygon',
+			width: 500,
+			buttons: Ext.MessageBox.OK,
+			icon: Ext.Msg.ERROR
+		});
+	},
+	
+	/** This method convert a Geometry in a coordinates string usable by the Overpass API
+	 * The string is then saved in attribute this.selectionCoords
+	 */
+	convertGeometryToOverpassCoords: function(selectionGeometry) {
 		if (selectionGeometry) {
 			var transformGeometry = new ol.geom.Polygon(selectionGeometry);
 			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
@@ -249,79 +431,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
 			}
 		}
-		this.stopZoneSelection();
-	},
-	
-	/**
-	 * Prepare the selector for the geographical zone according user's configuration.
-	 */
-	prepareSelector: function() {
-		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
-		var self = this;
-		var newInteraction;
-
-		// Prepare draw interaction and geometryFunction according selection mode
-		if (selectType === "feature") {
-			var layers = Ext.Array.filter(Ck.getMap().getLayers().getArray(),
-				function(lyr) {
-					return (lyr.getVisible() && lyr.get("id") != "measureLayer"
-											 && lyr.get("id") != "osmimport_selection");
-				});
-			newInteraction = new ol.interaction.Select({
-				layers: layers
-			});
-			newInteraction.on("select", this.onSelectionDone, this);
-			// Add a draw point interaction to have same style
-			this.drawPointInteraction = new ol.interaction.Draw({
-				source: self.selectionVector.getSource(),
-				type: /** @type {ol.geom.GeometryType} */ ("Point")
-			});
-			this.olMap.addInteraction(this.drawPointInteraction);
-		} else {
-			var draw, geometryFunction, maxPoints;
-			if (selectType === "rectangle") {
-				maxPoints = 2;
-				selectType = "LineString";
-				geometryFunction = function(coordinates, geometry) {
-					self.selectionVector.getSource().clear();
-					if (!geometry) {
-						geometry = new ol.geom.Polygon(null);
-					}
-					var start = coordinates[0];
-					var end = coordinates[1];
-					geometry.setCoordinates([
-						[start, [start[0], end[1]], end, [end[0], start[1]], start]
-					]);
-					return geometry;
-				};
-			} else if (selectType === "polygon") {
-				selectType = "Polygon";
-				geometryFunction = function(coordinates, geometry) {
-					self.selectionVector.getSource().clear();
-					if (!geometry) {
-						geometry = new ol.geom.Polygon(null);
-					}
-					geometry.setCoordinates(coordinates);
-					return geometry;
-				};
-			}
-
-			draw = new ol.interaction.Draw({
-				source: self.selectionVector.getSource(),
-				type: /** @type {ol.geom.GeometryType} */ (selectType),
-				geometryFunction: geometryFunction,
-				maxPoints: maxPoints
-			});
-			draw.on('drawend', this.onSelectionDone, this);
-			newInteraction = draw;
-		}
-		this.olMap.removeInteraction(this.mapInteraction);
-		this.mapInteraction = newInteraction;
-        this.olMap.addInteraction(this.mapInteraction);
-		
-		
-		
-		
 	},
 	
 	/**
@@ -330,7 +439,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	stopZoneSelection: function() {
 		this.olMap.removeInteraction(this.mapInteraction);
-		this.olMap.removeInteraction(this.drawPointInteraction);
 		this.mapInteraction = undefined;
 	},
 	
