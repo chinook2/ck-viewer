@@ -463,7 +463,6 @@ Ext.define('Ck.form.Controller', {
 			// Subforms : init default params and exit
 			if(c.xtype == "ckform") {
 				Ext.applyIf(c, {
-					isSubForm: true,
 					editing:true,
 					urlTemplate: {ws: "{0}/{1}"},
 					bodyPadding: 0,
@@ -660,11 +659,11 @@ Ext.define('Ck.form.Controller', {
 						}
 
 						Ext.applyIf(c, {
+							displayField: "value",
 							queryMode: 'local'
 						});
 						Ext.Object.merge(c, {
 							store		: processStore(c),
-							displayField: "value",
 							listeners	: {
 								removed	: function(item, ownerCt, eOpts) {
 									item.removeBindings()
@@ -763,7 +762,7 @@ Ext.define('Ck.form.Controller', {
 		var values = {};
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f) {
+			if(f && f.isVisible()) {
 				values[field] = f.getValue();
 
 				// allow formatting date before send to server
@@ -839,7 +838,7 @@ Ext.define('Ck.form.Controller', {
 
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f && !f.isValid()) isValid = false;
+			if(f && f.isVisible() && !f.isValid()) isValid = false;
 		}, this);
 
 		// SUBFORM : save data
@@ -1093,7 +1092,7 @@ Ext.define('Ck.form.Controller', {
 
 		var dt = this.getValues();
 
-		if(this.oController.beforeSave(dt) === false) {
+		if(this.oController.beforeSave(dt, options) === false) {
 			Ck.log("beforeSave cancel saveData.");
 			return false;
 		}
@@ -1105,7 +1104,10 @@ Ext.define('Ck.form.Controller', {
 			var sf = subforms[s];
 
 			// TODO : manage save callback...
-			//if(!sf.name) sf.getController().saveData();
+			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
+			if(!sf.name && !sf.isSubForm) {
+				sf.getController().saveData();
+			}
 		}
 		//
 
