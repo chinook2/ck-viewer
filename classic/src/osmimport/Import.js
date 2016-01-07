@@ -31,7 +31,7 @@ Ext.define("Ck.osmimport.Import", {
 				header: {xtype: "container", height: 0},
 				border: true,
 				height: 200,
-				flex: 0.5,
+				width: 300,
 				bind:{
 					store: "{osmtags}"
 				},
@@ -40,7 +40,7 @@ Ext.define("Ck.osmimport.Import", {
 				}
 			},{
 				xtype: "grid",
-				flex: 0.4,
+				width: 230,
 				height: 200,
 				margin: "0 0 0 10",
 				border: true,
