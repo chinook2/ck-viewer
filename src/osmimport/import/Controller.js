@@ -5,7 +5,7 @@
 Ext.define('Ck.osmimport.import.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckosmimportimport',
-	
+
 	/**
      * Constants
 	 */
@@ -31,6 +31,9 @@ Ext.define('Ck.osmimport.import.Controller', {
 			})
 		})
 	}),
+	OSM_SEL_LYR_ID: "osmimport_selection",
+	OSM_DATA_LYR_ID: "osmimport_data",
+	
 	/**
 	 * Initialisation of components.
 	 * @protected
@@ -38,14 +41,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 	init: function() {
 		this.vm = this.getViewModel();
 		this.openner = this.getView().openner;
-		
 		this.olMap = Ck.getMap().getOlMap();
-		/**
-		 * Init of the Map Elements for Selection
-		 */
-		this.selectionCoords = ""; // stores the coordinates of the selection ready to be used in OSM API.
-		if (Ck.getMap().getLayerById("osmimport_selection")) {
-			this.selectionVector = Ck.getMap().getLayerById("osmimport_selection");
+		
+		// Init of the Map Elements for Selection
+		if (Ck.getMap().getLayerById(this.OSM_SEL_LYR_ID)) {
+			this.selectionVector = Ck.getMap().getLayerById(this.OSM_SEL_LYR_ID);
+			this.selectionSource = this.selectionVector.getSource();
 		} else {
 			this.selectionSource = new ol.source.Vector({wrapX:false});
 			this.selectionVector = new ol.layer.Vector({
@@ -65,7 +66,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 						})
 					})
 				}),
-				id: "osmimport_selection"
+				id: this.OSM_SEL_LYR_ID
 			});
 			this.olMap.addLayer(this.selectionVector);
 		}
@@ -74,14 +75,14 @@ Ext.define('Ck.osmimport.import.Controller', {
 		/**
 		 * Init the Map Elements for Display results
 		 */
-		if (Ck.getMap().getLayerById("osmimport_data")) {
-			this.displayVector = Ck.getMap().getLayerById("osmimport_data");
+		if (Ck.getMap().getLayerById(this.OSM_DATA_LYR_ID)) {
+			this.displayVector = Ck.getMap().getLayerById(this.OSM_DATA_LYR_ID);
 		} else  {
 			this.displaySource = new ol.source.Vector();
 			this.displayVector = new ol.layer.Vector({
 				source: this.displaySource,
 				style: this.DEFAULT_STYLE,
-				id: "osmimport_data"
+				id: this.OSM_DATA_LYR_ID
 			});
 			this.olMap.addLayer(this.displayVector);
 		}
@@ -114,17 +115,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 		};
 		if (checked) {  // Add the tag
 			checkedTags.push(obj);
-		} else {  // Remove the tag
-			var index = -1;
-			
+		} else {  // Remove the tag			
 			for (var i = 0; i < checkedTags.length; i++) {
 				if (checkedTags[i].tag === obj.tag) {
-					index = i;
+					checkedTags.splice(i, 1);
 					break;
 				}
-			}
-			if (index > -1) {
-				checkedTags.splice(index, 1);
 			}
 		}
 		var textexpert = checkedTags.map(function(a) {return a.tag;}).join(";");
@@ -140,10 +136,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var tagList = [];
 		if (this.lookupReference("tagsexpert").getValue()) {  // Expert Mode
 			var tagsText = this.lookupReference("tagsexperttext").getValue().split(";");
-			for (var i in tagsText) {
-				var tagObj = {"tag": tagsText[i], "text": "Custom Tag"};
+			tagsText.forEach(function(tag) {
+				var tagObj = {"tag": tag, "text": "Custom Tag"};
 				tagList.push(tagObj);
-			}
+			});
 		} else {  // Classic Mode
 			tagList = this.vm.data.checkedTags;
 		}
@@ -162,7 +158,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*\])+$/g) == null)) {
+				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*\])+$/g) === null)) {
 				error = true;
 			} else {  // search other errors
 				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*)+/g);
@@ -171,12 +167,12 @@ Ext.define('Ck.osmimport.import.Controller', {
 					var k = kv.split("=")[0];
 					k = k.replace(/!/, "");
 					var v = kv.split("=")[1];
-					if ((k.match(/[:\u00C0-\u00FF]/g) != null) &&
+					if ((k.match(/[:\u00C0-\u00FF]/g) !== null) &&
 						(k.charAt(0) != "\"" || k.charAt(k.length - 1) != "\"")) {  // Check correct key ":" or "é"
 						error = true;
 					}
 					if (v) {
-						if ((v.match(/[:#'\u00C0-\u00FF]/g) != null) &&
+						if ((v.match(/[:#'\u00C0-\u00FF]/g) !== null) &&
 							(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check correct value ":" or "é"
 							error = true;
 						}
@@ -207,50 +203,56 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	prepareSelector: function() {
 		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
-		var self = this;
 
 		// Prepare draw interaction and geometryFunction according selection mode
-		var draw, geometryFunction, maxPoints, source;
-		if (selectType === "rectangle") {
-			source = this.selectionVector.getSource();
-			maxPoints = 2;
-			selectType = "LineString";
-			geometryFunction = function(coordinates, geometry) {
-				if (!geometry) {
-					geometry = new ol.geom.Polygon(null);
-				}
-				var start = coordinates[0];
-				var end = coordinates[1];
-				geometry.setCoordinates([
-					[start, [start[0], end[1]], end, [end[0], start[1]], start]
-				]);
-				return geometry;
-			};
-		} else if (selectType === "polygon") {
-			source = this.selectionVector.getSource();
-			selectType = "Polygon";
-			geometryFunction = function(coordinates, geometry) {
-				if (!geometry) {
-					geometry = new ol.geom.Polygon(null);
-				}
-				geometry.setCoordinates(coordinates);
-				return geometry;
-			};
-		} else if (selectType === "feature") {
-			selectType = "Point";
+		var selectMode, draw, geometryFunction, maxPoints, source;
+		switch (selectType) {
+			case "rectangle":
+				source = this.selectionVector.getSource();
+				maxPoints = 2;
+				selectMode = "LineString";
+				geometryFunction = function(coordinates, geometry) {
+					if (!geometry) {
+						geometry = new ol.geom.Polygon(null);
+					}
+					var start = coordinates[0];
+					var end = coordinates[1];
+					geometry.setCoordinates([
+						[start, [start[0], end[1]], end, [end[0], start[1]], start]
+					]);
+					return geometry;
+				};
+			break;
+			case "polygon":
+				source = this.selectionVector.getSource();
+				selectMode = "Polygon";
+				geometryFunction = function(coordinates, geometry) {
+					if (!geometry) {
+						geometry = new ol.geom.Polygon(null);
+					}
+					geometry.setCoordinates(coordinates);
+					return geometry;
+				};
+			break;
+			case "feature": selectMode = "Point";
+			break;
+			default:
+			break;
 		}
 
-		draw = new ol.interaction.Draw({
-			source: source,
-			type: selectType,
-			geometryFunction: geometryFunction,
-			maxPoints: maxPoints
-		});
-		draw.on('drawend', this.onSelectionDone, this);
+		if (selectMode) {
+			draw = new ol.interaction.Draw({
+				source: source,
+				type: selectMode,
+				geometryFunction: geometryFunction,
+				maxPoints: maxPoints
+			});
+			draw.on('drawend', this.onSelectionDone, this);
 
-		this.olMap.removeInteraction(this.mapInteraction);
-		this.mapInteraction = draw;
-        this.olMap.addInteraction(this.mapInteraction);
+			this.olMap.removeInteraction(this.mapInteraction);
+			this.mapInteraction = draw;
+			this.olMap.addInteraction(this.mapInteraction);
+		}
 	},
 	
 	/**
@@ -261,16 +263,17 @@ Ext.define('Ck.osmimport.import.Controller', {
 	onSelectionDone: function(evt) {
 		this.stopZoneSelection();
 		this.selectionVector.getSource().clear();
-		var selectionGeometry;
 		var selectType = this.lookupReference("selectionMode").items.get(0).getGroupValue();
-		
+
+		// Nothing else to do for Polygon and Rectangle selection
+
 		if (selectType === "feature") {  // Polygon feature selection
 			// List of Vector and WMS Layers (in correct order)
 			this.selectionLayers = Ck.getMap().getLayers(function(lyr) {
-				return (lyr.getVisible() && (lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)
-										 && lyr.get("id") != "measureLayer"
-										 && lyr.get("id") != "osmimport_selection"
-										 && lyr.get("id") != "osmimport_data");
+				return (lyr.getVisible() && (lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
+											lyr.get("id") != "measureLayer" &&
+											lyr.get("id") != this.OSM_SEL_LYR_ID &&
+											lyr.get("id") != this.OSM_DATA_LYR_ID);
 			}).getArray().reverse();
 			
 			if (this.selectionLayers.length > 0) {
@@ -295,10 +298,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			} else {
 				this.showPolygonFeatureSelectionError();
 			}
-		} else {// Polygon and Rectangle selection
-			selectionGeometry = evt.feature.getGeometry().getCoordinates();
-			this.convertGeometryToOverpassCoords(selectionGeometry);
-		}
+		} 
 	},
 
 	/**
@@ -308,7 +308,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 *  * this.selectionLayers: list of all layers to check
 	 *  * this.currentSelectionLayerIndex: index of the current layer to check in the previous list
 	 *  * this.selectionPoly: polygon around the point set by user for the selection
-	 * this.waitMsg: Pop-up to indicate to user to wait
+	 *  * this.waitMsg: Pop-up to indicate to user to wait
 	 */
 	computeFeatureSelection: function() {
 		var featureGeom;
@@ -323,10 +323,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 								type: this.selectionPoly.getType()
 							}};
 			var lyrFts = layer.getSource().getFeatures();
-			for(var j = 0; j < lyrFts.length; j++) {
-				lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
-				console.log(lyrFt)
-				if(["Polygon", "MultiPolygon"].indexOf(lyrFt.geometry.type) > -1 && turf.intersect(lyrFt, polyTurf)) {
+			for (var j = 0; j < lyrFts.length; j++) {
+				var lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+				if (["Polygon", "MultiPolygon"].indexOf(lyrFt.geometry.type) > -1 &&
+					turf.intersect(lyrFt, polyTurf)) {
 					featureGeom = lyrFts[j];
 					break;
 				}
@@ -341,7 +341,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 				geometryName: "the_geom"
 			});
 			var oSerializer = new XMLSerializer();
-			var getFtXml = oSerializer.serializeToString(getFtXml);
+			getFtXml = oSerializer.serializeToString(getFtXml);
+			// TODO check if all the following replacements are necessary
 			getFtXml = getFtXml.replace(/<Filter/g, "<ogc:Filter").replace(/<\/Filter/g, "</ogc:Filter");
 			getFtXml = getFtXml.replace(/<BBOX/g, "<ogc:BBOX").replace(/<\/BBOX/g, "</ogc:BBOX");
 			getFtXml = getFtXml.replace(/<PropertyName/g, "<ogc:PropertyName").replace(/<\/PropertyName/g, "</ogc:PropertyName");
@@ -354,8 +355,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 				scope: this,
 				url: layer.getSource().url_,
 				xmlData: getFtXml,
-				withCredentials: true,
-				useDefaultXhrHeader: false,
+				withCredentials: true,  // TODO remove cross-domain
+				useDefaultXhrHeader: false,  // TODO remove cross-domain
 				timeout: 120000,
 				success: function(response) {
 					var features = wfs.readFeatures(response.responseXML);
@@ -365,7 +366,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 							this.selectionVector.getSource().addFeature(featureGeom);
 						}
 					}
-					this.computeFeatureGeom(featureGeom)
+					this.computeFeatureGeom(featureGeom);
 				},
 				failure: function(response, options) {
 					console.log("fail to get the layer feature");
@@ -380,22 +381,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 	computeFeatureGeom: function(featureGeom) {
 		// Get polygon coordinates (transform multipolygon in polygon)
 		if (featureGeom) {
-			var selectionGeometry;
-			if (featureGeom.getGeometry().getType() === "Polygon") {
-				selectionGeometry = featureGeom.getGeometry().getCoordinates();
-			} else if (featureGeom.getGeometry().getType() === "MultiPolygon") {
-				var coords = [];
-				var multipoly = featureGeom.getGeometry().getCoordinates();
-				for (var poly in multipoly) {
-					for (var coord in multipoly[poly][0]) {
-						coords.push(multipoly[poly][0][coord]);
-					}
-				}
-				selectionGeometry = [coords];
-			}
 			// Draw the selected feature in highlight
 			this.selectionVector.getSource().addFeature(featureGeom);
-			this.convertGeometryToOverpassCoords(selectionGeometry);
 			this.waitMsg.close();
 		} else {  // No feature found in this layer, go to next
 			this.currentSelectionLayerIndex++;
@@ -420,20 +407,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		});
 	},
 	
-	/** This method convert a Geometry in a coordinates string usable by the Overpass API
-	 * The string is then saved in attribute this.selectionCoords
-	 */
-	convertGeometryToOverpassCoords: function(selectionGeometry) {
-		if (selectionGeometry) {
-			var transformGeometry = new ol.geom.Polygon(selectionGeometry);
-			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
-			this.selectionCoords = "";
-			for (var i = 0; i < coords.length; i++) {
-				this.selectionCoords += coords[i][1] + " " + coords[i][0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
-			}
-		}
-	},
-	
 	/**
 	 * Method to remove the interaction on map for the geographical zone selection.
 	 * Used on several actions (cancel, import done)
@@ -448,8 +421,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	checkSelection: function() {
 		var errorMessage = "";
-		if (this.selectionCoords === "") {
-			errorMessage += " - No geographical zone selected<br/>"
+		if (this.selectionSource.getFeatures().length === 0) {
+			errorMessage += " - No geographical zone selected<br/>";
 		}
 		return errorMessage;
 	},
@@ -462,7 +435,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 		try {
 			var paramsOK = this.checkParams();
 			if (paramsOK) {
-				this.stopZoneSelection();
 				this.waitMsg = Ext.Msg.show({
 					msg: 'Importing data from OpenStreetMap, please wait...',
 					autoShow: true,
@@ -473,6 +445,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 				});
 				var request = this.prepareRequest();
 				this.executeRequest(request);
+				this.stopZoneSelection();
 			}
 		} catch (exception) {  // Application is never locked with the "Wait MessageBox" if an error occurs
 			if (this.waitMsg) {
@@ -519,22 +492,29 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	prepareRequest: function() {
 		var checkedTags = this.getSelectedTags();
-		
+		// Prepare geo zone 
+		var poly = "";
+		var transformGeometry = new ol.geom.Polygon(this.selectionSource.getFeatures()[0].getGeometry().getCoordinates());
+		var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
+		coords.forEach(function(coord) {
+			poly += coord[1] + " " + coord[0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
+		});
+
 		// Prepare date filter
 		var minDateString = "";
 		var minDate = this.lookupReference("datemin").getValue();
-		if (this.lookupReference("sincedate").checked == true && minDate !== null) {
+		if (this.lookupReference("sincedate").checked === true && minDate !== null) {
 			minDateString = '(newer:"'+ Ext.Date.format(minDate, 'Y-m-d') + 'T00:00:00Z")';
 		}
-		
+
 		// Prepare the request
 		var request = "[out:json];";
 		request += "(";
-		for (var i = 0; i < checkedTags.length; i++) {
-			request += 'node' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '")' + minDateString + ';';
-			request += 'way' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '")' + minDateString + ';';
-			request += 'rel' + checkedTags[i].tag + '(poly:"' + this.selectionCoords + '")' + minDateString + ';';
-		}
+		checkedTags.forEach(function(tag) {
+			request += 'node' + tag.tag + '(poly:"' + poly + '")' + minDateString + ';';
+			request += 'way' + tag.tag + '(poly:"' + poly + '")' + minDateString + ';';
+			request += 'rel' + tag.tag + '(poly:"' + poly + '")' + minDateString + ';';
+		});
 		request += ");";
 		request += "(._;>;);";
 		request += "out geom;";
@@ -589,7 +569,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 						icon: Ext.Msg.WARNING
 					});
 				}
-				
 			} catch (exception) {
 				Ext.MessageBox.show({
 					title: 'OSM Import',
@@ -608,7 +587,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			var statusCode = operation.getError().status;
 			var errorMessage = "";
 			if (statusCode === 0) {
-				errorMessage = "No connection to Internet available or no response before timeout"
+				errorMessage = "No connection to Internet available or no response before timeout";
 			} else if (statusCode === 400) {
 				errorMessage = "Error in the OSM request";
 			}
@@ -635,7 +614,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			if (this.nbFeaturesImported <= this.NB_FEATURES_MAX) {
 				var newProjection = Ck.getMap().getOlMap().getView().getProjection();
 				var geom = record.calculateGeom(undefined, this.allRecords);
-				if (geom != undefined) {
+				if (geom !== undefined) {
 					geom.transform(this.OSM_PROJECTION, newProjection);
 				}
 				var feature = new ol.Feature(geom);
@@ -701,8 +680,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 			if (this.nbFeaturesImported > this.NB_FEATURES_MAX) {  // Too Much features for the layer
 				Ext.MessageBox.show({
 					title: 'OSM Import',
-					msg: 'Import data from OpenStreetMap succeed and returned ' + this.nbFeaturesImported + ' elements.<br/>'
-						 + 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
+					msg: 'Import data from OpenStreetMap succeed and returned ' + this.nbFeaturesImported + ' elements.<br/>' +
+						 'Only the ' + this.NB_FEATURES_MAX + ' first elements will be displayed',
 					width: 500,
 					buttons: Ext.MessageBox.OK,
 					icon: Ext.Msg.WARNING

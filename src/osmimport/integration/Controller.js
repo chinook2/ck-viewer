@@ -58,15 +58,14 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	getLayersList: function() {
 		var layersList = [];
 		var layersArray = Ck.getMap().getLayers().getArray();
-		for (var i in layersArray) {
-			var layer = layersArray[i];
-			if (layer.get("title") != undefined &&
+		layersArray.forEach(function(layer) {
+			if (layer.get("title") !== undefined &&
 				(layer.getSource() instanceof ol.source.ImageWMS)) {  // TODO Adapt filter to have correct layer type
 				var layerObj = {title: layer.get("title"),
 								id: layer.get("id")};
 				layersList.push(layerObj);
 			}
-		}
+		});
 		return layersList;
 	},
 	
@@ -115,8 +114,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				request: "DescribeFeatureType",
 				typename: layerSource.getParams().layers
 			},
-			withCredentials: true,
-			useDefaultXhrHeader: false,
+			withCredentials: true,  // TODO remove cross-domain
+			useDefaultXhrHeader: false,  // TODO remove cross-domain
 			success: function(response) {
 				var sequence = response.responseXML.getElementsByTagName("sequence")[0];
 				var elements = sequence.getElementsByTagName("element");
@@ -140,7 +139,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				this.lookupReference("geometrylabel").setText("Geometry: " + "undefined");
 				this.waitMsg.close();
 				var msg = "";
-				if (response.status == 0) {
+				if (response.status === 0) {
 					msg = "No connection to Internet available or no response before timeout";
 				} else {
 					msg = "Unable to read layer information";
@@ -171,8 +170,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				request: "getLayer",
 				layer: layerSource.getParams().layers
 			},
-			withCredentials: true,
-			useDefaultXhrHeader: false,
+			withCredentials: true,  // TODO remove cross-domain
+			useDefaultXhrHeader: false,  // TODO remove cross-domain
 			success: function(response) {
 				var srs = response.responseXML.getElementsByTagName("SRS")[0].childNodes[0].nodeValue;
 				this.iLayer.projection = srs;
@@ -201,7 +200,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			failure: function(response, opts) {
 				this.waitMsg.close();
 				var msg = "";
-				if (response.status == 0) {
+				if (response.status === 0) {
 					msg = "No connection to Internet available or no response before timeout";
 				} else {
 					msg = "Unable to read layer information";
@@ -238,16 +237,16 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		// Sort attributes by alias
 		var attributes = Ext.Array.sort(this.iLayer.attributes,
 			function(a, b) {
-				result = 0;
+				var result = 0;
 				if (a.alias > b.alias) result = 1;
 				else if (a.alias < b.alias) result = -1;
 				return result;
 			}
 		);
 		if (attributes.length > 0) {
-			for (var i in attributes) {
-				layersAttributes.push(attributes[i]);
-			}
+			attributes.forEach(function(attr) {
+				layersAttributes.push(attr);
+			});
 		}
 		this.lookupReference("attributesgrid").getStore().load();
 		
@@ -258,9 +257,9 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		}
 		var tags = this.getOsmTags(records);
 		if (tags.length > 0) {
-			for (var i in tags) {
-				tagsOsm.push(tags[i]);
-			}
+			tags.forEach(function(tag) {
+				tagsOsm.push(tag);
+			});
 		}
 		this.lookupReference("tagsgrid").getStore().load();
 		
@@ -280,7 +279,6 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				
 				// Get the relation members tags for specific integration (copyTo Point, LineString, Polygon)
 				if (this.iLayer.id && record.data.members) {
-					var integrationGeometryType = this.iLayer.geometry;
 					if ((this.lookupReference("geometrytointegrate").getValue().geometrytointegrate == "selectedone") &&
 						(["Point", "LineString", "Polygon"].indexOf(this.iLayer.geometry) > -1)) {
 						var membersRef = [];
@@ -361,7 +359,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			}
 			tagList.splice(indexToRemove, 1);
 			// 3 - Add previous tag to tags
-			if (previousTag != "") {
+			if (previousTag !== "") {
 				var indexToInsert = -1;
 				for (var i in tagList) {
 					if (tagList[i].tag > previousTag) {
@@ -389,26 +387,26 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var attrGrid = this.lookupReference("attributesgrid");
 		var tagGrid = this.lookupReference("tagsgrid");
 		var selectedAttr = attrGrid.getSelection();
-		for (var i in selectedAttr) {
+		selectedAttr.forEach(function(selAttr) {
 			// 1 - Add tag in tags
-			if (selectedAttr[i].data.tag !=  "") {
+			if (selAttr.data.tag !==  "") {
 				var indexToInsert = -1;
 				for (var j in tagList) {
-					if (tagList[j].tag > selectedAttr[i].data.tag) {
+					if (tagList[j].tag > selAttr.data.tag) {
 						indexToInsert = j;
 						break;
 					}
 				}
-				tagList.splice(indexToInsert, 0, {tag: selectedAttr[i].data.tag});
+				tagList.splice(indexToInsert, 0, {tag: selAttr.data.tag});
 			}
 			// 2 - Remove tag from attribute
 			for (var j in attrList) {
-				if (attrList[j].attr == selectedAttr[i].data.attr) {
+				if (attrList[j].attr == selAttr.data.attr) {
 					attrList[j].tag = "";
 					break;
 				}
 			}
-		}
+		});
 		attrGrid.getStore().load();
 		tagGrid.getStore().load();
 		this.updateAssociationButtons();
@@ -426,9 +424,13 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		var selectedTag = this.lookupReference("tagsgrid").getSelection();
 
 		// Button associate
-		this.lookupReference("btnAssociate").setDisabled((tagList.length == 0) || (attrList == 0) || (selectedTag.length == 0) || (selectedAttr.length == 0));
+		var disabled = (tagList.length === 0) ||
+					   (attrList === 0) ||
+					   (selectedTag.length === 0) ||
+					   (selectedAttr.length === 0);
+		this.lookupReference("btnAssociate").setDisabled(disabled);
 		// Button dissociate
-		var nbAttrWithoutTag = Ext.Array.filter(selectedAttr, function(attr) {return attr.data.tag == "";}).length;
+		var nbAttrWithoutTag = Ext.Array.filter(selectedAttr, function(attr) {return attr.data.tag === "";}).length;
 		this.lookupReference("btnDissociate").setDisabled(nbAttrWithoutTag == selectedAttr.length);
 	},
 	
@@ -483,7 +485,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 				this.attrTagConfig = [];
 				if (this.lookupReference("informationtointegrate").getValue().informationtointegrate == "coordstags") {
 					var attrList = this.getViewModel().data.layersAttributes;
-					this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag != "";});
+					this.attrTagConfig = Ext.Array.filter(attrList, function(attr) {return attr.tag !== "";});
 				}
 				this.featuresToIntegrate = [];
 				this.nbFeaturesComputed = 0;
@@ -522,7 +524,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 	 */
 	convertData: function(data, integrationLayer, records, attributesTagsConfig) {
 		var convertedData = [];
-		var features = undefined;
+		var features;
 		var integrateAllGeometry = this.lookupReference("selectAllGeometries").checked;
 		if (this.iLayer.geometry == "undefined") { // Copy all
 			features = data.copyToUndefined(records, attributesTagsConfig);
@@ -535,7 +537,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 		}
 		
 		// Transform into layer's projection.
-		if (features != undefined) {
+		if (features !== undefined) {
 			for (var i in features) {
 				var feature = features[i];
 				feature.getGeometry().transform(this.OSM_PROJECTION, this.iLayer.projection);
@@ -578,8 +580,8 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			scope: this,
 			url: integrationLayer.getSource().url_,
 			xmlData: sXML,
-			withCredentials: true,
-			useDefaultXhrHeader: false,
+			withCredentials: true,  // TODO remove cross-domain
+			useDefaultXhrHeader: false,  // TODO remove cross-domain
 			timeout: 120000,
 			success: function(response) {
 				try {
@@ -608,7 +610,7 @@ Ext.define('Ck.osmimport.integration.Controller', {
 			},
 			failure: function(response, options) {
 				var msg = "";
-				if (response.status == 0) {
+				if (response.status === 0) {
 					msg = "No connection to Internet available or no response before timeout";
 				} else {
 					msg = "An error occured while integrating the data.";

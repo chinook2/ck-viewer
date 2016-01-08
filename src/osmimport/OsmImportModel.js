@@ -73,9 +73,8 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * @param allRecords List of all the records as returned by the store after load.
 	 **/
 	calculateGeom: function(data, allRecords) {
-		var data = data || this.data;
-		var convertGeom = true;
-		var geom = undefined;
+		data = data || this.data;
+		var geom;
 		// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
 		if (data.type === "node") {  // Points
 			var point = [data.lon, data.lat];
@@ -83,7 +82,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		} else if (data.type === "way") {  // Line or Polygon
 			var coords = Ext.Array.map(data.geometry,
 				function(geometry) {
-					return [geometry.lon, geometry.lat]
+					return [geometry.lon, geometry.lat];
 				});
 			if (this.isPolygon(data)) {
 				geom = new ol.geom.Polygon([coords]);
@@ -106,7 +105,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 					geom = new ol.geom.Polygon(coords);
 				}
 			}
-			if (geom == undefined) {  // Not OSM multipolygon with inner(s)
+			if (geom === undefined) {  // Not OSM multipolygon with inner(s)
 				var geoms = [];
 				for (var memberId in data.members) {
 					var member = data.members[memberId];
@@ -123,7 +122,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 									   tags: tags,
 									   geometry: member.geometry,
 									   lat: member.lat,
-									   lon: member.lon}
+									   lon: member.lon};
 						geoms.push(this.calculateGeom(element, allRecords));
 					}
 				}
@@ -158,10 +157,10 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				 */
 				for (var t in this.TAGS_TO_CHECK_POLYGON) {
 					if (tags[this.TAGS_TO_CHECK_POLYGON[t].key] &&  // Tag is present
-						((this.TAGS_TO_CHECK_POLYGON[t].nopoly_val.length == 0 || 
+						((this.TAGS_TO_CHECK_POLYGON[t].nopoly_val.length === 0 || 
 						  this.TAGS_TO_CHECK_POLYGON[t].nopoly_val.indexOf(
 							tags[this.TAGS_TO_CHECK_POLYGON[t].key]) == -1) &&  // Value for way is absent
-						 (this.TAGS_TO_CHECK_POLYGON[t].poly_val.length == 0 ||
+						 (this.TAGS_TO_CHECK_POLYGON[t].poly_val.length === 0 ||
 						  this.TAGS_TO_CHECK_POLYGON[t].poly_val.indexOf(
 							tags[this.TAGS_TO_CHECK_POLYGON[t].key]) > -1))) {  // values for polygon is present
 							polygon = true;
@@ -181,8 +180,8 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	containsSearchedTags: function(searchedTags) {
 		var correct = this.data.isSearchedTag;
 		var tags = this.data.tags;
-		if (searchedTags != undefined) {
-			if (tags != undefined) {
+		if (searchedTags !== undefined) {
+			if (tags !== undefined) {
 				for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
 					var key_val = searchedTags[i].tag.match(/["?\w+\u00C0-\u00FF*:?]+!?=?["\w\u00C0-\u00FF:'\-#]*/g);
 					var rec_correct = 0;
@@ -196,7 +195,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 						}
 						if (different) {
 							if (!(k in tags) || ((k in tags) && (tags[k] != v))) {
-								rec_correct++
+								rec_correct++;
 							}
 						} else {
 							if ((k in tags) && ((v !== "" && tags[k] === v) || !v)) {
@@ -204,7 +203,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 							}
 						}
 					}
-					if (key_val != null && rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
+					if (key_val !== null && rec_correct === key_val.length) {  // If all the tags in the group selected are present in the record, it's ok.
 						correct = true;
 						break;
 					}
@@ -457,7 +456,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			features.push(new ol.Feature(attr));
 		} else if (this.data.type == "relation") {
 			var polys = [];
-			poly = this.calculateGeom(undefined, records);
+			var poly = this.calculateGeom(undefined, records);
 			if (poly.getType() == "Polygon") {
 				polys.push(poly);
 			} else {  // If rel is not Polygon it is a GeometryCollection
@@ -493,10 +492,8 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			var points = [];
 			var lines = [];
 			var polys = [];
-			geom = [];
 			var geometries = elementGeom.getGeometries();
-			for (var i in geometries) {
-				var member = geometries[i];
+			geometries.forEach(function(member) {
 				if (member.getType() == "Point") {
 					points.push(member);
 				} else if (member.getType() == "LineString") {
@@ -504,26 +501,26 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 				} else if (member.getType() == "Polygon") {
 					polys.push(member);
 				}
-			}
+			});
 			if (points.length > 0) {
 				attr.geometry = new ol.geom.MultiPoint();
-				for (var i in points) {
-					attr.geometry.appendPoint(points[i]);
-				}
+				points.forEach(function(point) {
+					attr.geometry.appendPoint(point);
+				});
 				features.push(new ol.Feature(attr));
 			}
 			if (lines.length > 0) {
 				attr.geometry = new ol.geom.MultiLineString();
-				for (var i in lines) {
-					attr.geometry.appendLineString(lines[i]);
-				}
+				lines.forEach(function(line) {
+					attr.geometry.appendLineString(line);
+				});
 				features.push(new ol.Feature(attr));
 			}
 			if (polys.length > 0) {
 				attr.geometry = new ol.geom.MultiPolygon();
-				for (var i in polys) {
-					attr.geometry.appendPolygon(polys[i]);
-				}
+				polys.forEach(function(poly) {
+					attr.geometry.appendPolygon(poly);
+				});
 				features.push(new ol.Feature(attr));
 			}
 		} else {
@@ -596,7 +593,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 */
 	convertToMultiPoint: function(records, attributesTagsConfig) {
 		var features = [];
-		var geom = undefined;
+		var geom;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPoint();
 			var point = this.calculateGeom(undefined, records);
@@ -626,9 +623,9 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 			if (points.length > 0) {
 				geom = new ol.geom.MultiPoint();
-				for (var i in points) {
-					geom.appendPoint(points[i]);
-				}
+				points.forEach(function(point) {
+					geom.appendPoint(point);
+				});
 			}
 		}
 		if (geom) {
@@ -646,7 +643,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 */
 	convertToMultiLineString: function(records, attributesTagsConfig) {
 		var features = [];
-		var geom = undefined;
+		var geom;
 		if (this.data.type == "way" && !this.isPolygon(this.data)) {  // Copy only way not closed
 			var lineString = this.calculateGeom(undefined, records);
 			geom = new ol.geom.MultiLineString();
@@ -663,9 +660,9 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 			if (lines.length > 0) {
 				geom = new ol.geom.MultiLineString();
-				for (var i in lines) {
-					geom.appendLineString(lines[i]);
-				}
+				lines.forEach(function(line) {
+					geom.appendLineString(line);
+				});
 			}
 		}
 		if (geom) {
@@ -683,7 +680,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 */
 	convertToMultiPolygon: function(records, attributesTagsConfig) {
 		var features = [];
-		var geom = undefined;
+		var geom;
 		if (this.data.type == "node") {
 			geom = new ol.geom.MultiPolygon();
 			var point = this.calculateGeom(undefined, records);
@@ -708,9 +705,9 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 			}
 			if (polys.length > 0) {
 				geom = new ol.geom.MultiPolygon();
-				for (var i in polys) {
-					geom.appendPolygon(polys[i]);
-				}
+				polys.forEach(function(poly) {
+					geom.appendPolygon(poly);
+				});
 			}
 		} else if (this.data.type == "way" && this.isPolygon(this.data)) {
 			geom = new ol.geom.MultiPolygon();
@@ -740,7 +737,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * Square is generated in OSM projection.
 	 */
 	getSquareFromPoint: function(point, sideWidth) {
-		var sideWidth = Ext.isNumber(sideWidth) ? sideWidth : 10;
+		sideWidth = Ext.isNumber(sideWidth) ? sideWidth : 10;
 		point.transform(this.OSM_PROJECTION, "EPSG:3857");  // Goes in a projection which use meters.
 		point = new ol.geom.Circle(point.getCoordinates(), sideWidth);  // Create a circle with given point as center.
 		var poly = ol.geom.Polygon.fromExtent(point.getExtent());  // Create square inside the circle. starts with 45° angle (0.78 rad)
