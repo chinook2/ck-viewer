@@ -762,7 +762,7 @@ Ext.define('Ck.form.Controller', {
 		var values = {};
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f && f.isVisible()) {
+			if(f && (f.xtype=='hidden' || f.isVisible())) {
 				values[field] = f.getValue();
 
 				// allow formatting date before send to server

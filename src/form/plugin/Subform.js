@@ -287,8 +287,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		}
 		
 		var formController = this._subform.getController();
-		// view = tableview, grid.grid = gridpanel ...
-		grid = view.grid;
+		var grid = this._grid;
 		
 		// Init update mode
 		var vm = this._subform.getViewModel();
@@ -338,7 +337,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 		
-		this._subform.rowIndex = rowIndex;
+		if(Ext.isDefined(rowIndex)) this._subform.rowIndex = rowIndex;
 		
 		// Finally load subform data with fid, url or data
 		formController.loadData(options);
