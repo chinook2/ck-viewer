@@ -616,9 +616,17 @@ Ext.define('Ck.osmimport.import.Controller', {
 				var geom = record.calculateGeom(undefined, this.allRecords);
 				if (geom !== undefined) {
 					geom.transform(this.OSM_PROJECTION, newProjection);
+					// Don't display GeometryCollection to not disturb selection
+					if (geom instanceof ol.geom.GeometryCollection) {
+						geom.getGeometries().forEach(function(member) {
+							var feature = new ol.Feature(member);
+							this.olFeatures.push(feature);
+						}, this);
+					} else {
+						var feature = new ol.Feature(geom);
+						this.olFeatures.push(feature);
+					}
 				}
-				var feature = new ol.Feature(geom);
-				this.olFeatures.push(feature);
 			}
 			this.nbRecordComputed++;
 			var progress = this.nbRecordComputed / this.records.length;
