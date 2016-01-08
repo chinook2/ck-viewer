@@ -1,5 +1,5 @@
 /**
- * This panel contains tools to edit layer attributes and layer geometries
+ * This panel give vertex manipulation possibility.
  */
 
 Ext.define("Ck.edit.Vertex", {

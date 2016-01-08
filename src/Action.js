@@ -49,6 +49,13 @@ Ext.define('Ck.Action', {
 	text: '',
 	iconCls: '',
 
+	config: {
+		/**
+		 * @var {Ck.map.Controller}
+		 */
+		map: null
+	},
+	
 	/**
 	 * @cfg {String/Object} tooltip
 	 * The tooltip for the button - can be a string to be used as innerHTML (html tags are accepted) or
@@ -63,7 +70,7 @@ Ext.define('Ck.Action', {
 	 */
 	toggleGroup: '',
 
-	_map: null,
+	
 
 	/**
 	 * @inheritdoc Ck.Controller
@@ -76,15 +83,18 @@ Ext.define('Ck.Action', {
 	ckLoaded: Ext.emptyFn,
 
 	constructor: function(config) {
+		// If init action after app load (in new popup like edit) map is here, try to init it
+		this.setMap(Ck.getMap());
+		
 		// Use global event to call function when map is ready.
 		// ckmap isn't avaible when first pass here...
 		Ext.on('ckmapReady', function(map) {
-			this._map = map;
+			this.setMap(map);
 			this.ckReady(map);
 		}, this);
 
 		Ext.on('ckmapLoaded', function(map) {
-			this._map = map;
+			this.setMap(map);
 			this.ckLoaded(map);
 		}, this);
 
@@ -148,12 +158,5 @@ Ext.define('Ck.Action', {
 			}
 		});
         Ext.resumeLayouts(true);		
-	},
-	
-	/**
-	 * @inheritdoc Ck.Controller
-	 */
-	getMap: function() {
-		return this._map;
 	}
 });

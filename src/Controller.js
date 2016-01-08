@@ -18,7 +18,11 @@ Ext.define('Ck.Controller', {
 		}
 	},
 	
-	_map: null,
+	config: {
+		map		: null,
+		olMap	: null,
+		olView	: null
+	},
 		
 	/**
 	 * Called when the map is ready.
@@ -33,12 +37,27 @@ Ext.define('Ck.Controller', {
 	ckLoaded: Ext.emptyFn,
 	
 	/**
+	 * Optionnaly called by child class. Init map and olMap component
+	 * @param {Ext.Component}
+	 */
+	init: function(view) {
+		var map = this.getMap();
+		
+		if(!Ext.isObject(map)) {
+			map = Ck.getMap();
+		}
+		
+		if(Ext.isObject(map)) {
+			this.setMap(map);
+		}
+	},
+	
+	/**
 	 * Called by 'ready' event of ckmap controller
 	 * @protected
 	 */
 	onMapReady: function(mapController) {
-		this._map = mapController;
-		
+		this.setMap(mapController);
 		this.ckReady(mapController);
 	},
 	
@@ -46,18 +65,15 @@ Ext.define('Ck.Controller', {
 	 * Called by 'loaded' event of ckmap controller
 	 * @protected
 	 */
-	onMapLoaded: function(mapController) {		
-		this._map = mapController;
-		
+	onMapLoaded: function(mapController) {
+		this.setMap(mapController);
 		this.ckLoaded(mapController);
 	},
 	
-	/**
-	 * Get the current map controller.
-	 * @return {Ck.map.Controller} The map controller
-	 */
-	getMap: function() {
-		return this._map;
+	setMap: function(ckMap) {
+		this._map = ckMap;
+		this._olMap = ckMap.getOlMap();
+		this._olView = ckMap.getOlView();
 	},
 
 	/**

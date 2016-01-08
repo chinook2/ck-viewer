@@ -105,10 +105,13 @@ Ext.define('Ck.edit.action.Create', {
 		var featuresInExtent = [];
 
 		var coordinates = geometry.getCoordinates();
-		var coordinates = coordinates[0];
+		var type = feature.getGeometry().getType();
+		if(type != "Point") {
+			var coordinates = coordinates[0];
+		}
 		var source = this.getLayerSource();
 
-		if(this.snap) {
+		if(type != "Point" && this.snap) {
 			// Loop on vertex of the feature
 			for(var i=0; i<coordinates.length - 1; i++ ) {
 				var coordinate = coordinates[i];
@@ -127,13 +130,17 @@ Ext.define('Ck.edit.action.Create', {
 				}
 			}
 		}
+		
+		if(type.indexOf("multi") != -1) {
+			coordinates = [coordinates];
+		}
 
 		var d = new Date();
 		date = Ext.Date.format(d, 'Y-m-d');
 		var ced = 'A' + Ext.Date.format(d, 'YmdHis');
 
 		var f = new ol.Feature({
-			geometry: new ol.geom.Polygon([coordinates]),
+			geometry: Ck.create("ol.geom." + type, coordinates),
 			status: "CREATED"
 		});
 

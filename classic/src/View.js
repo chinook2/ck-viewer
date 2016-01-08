@@ -8,7 +8,7 @@ Ext.define("Ck.View", {
 	requires: [
 		// require in production
         'Ext.plugin.Viewport',
-        'Ext.window.MessageBox',
+        'Ext.window.*',
         
 		'Ext.layout.*',
         'Ext.form.*',

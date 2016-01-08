@@ -17,51 +17,66 @@ Ext.define('Ck.edit.action.Delete', {
 	deleteConfirmation: true,
 
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		if(!this.used) {
+			this.callParent([btn]);
+		}
+		
+		var source = this.getLayerSource();
 		
 		if(!this.delInteraction) {
-			this.delInteraction = new ol.interaction.Select({
-				layers: [this.getLayer()],
-				style: new ol.style.Style({
-					stroke: new ol.style.Stroke({
-						color: 'yellow',
-						width: 3
-					}),
-					fill: new ol.style.Fill({
-						color: 'rgba(0, 0, 255, 0.1)'
-					})
-				})
+			this.delInteraction = Ck.create("Ck.Selection", {
+				layers			: [this.getLayer()],
+				type			: "Point",
+				callback		: this.onSelect,
+				scope			: this,
+				map				: this.map,
+				drawStyle		: null,
+				selectId		: "ckmapEditDelete",
+				overHighlight	: true,
+				highlightStyle	: Ck.map.Style.redStroke,
+				stackSelection	: true
 			});
-			
-			this.delInteraction.on('select', function(e) {
-				if(e.selected.length != 0) {
-					var feature = e.selected[0];
-					
-					if(this.deleteConfirmation) {
-						Ext.Msg.show({
-							title: "Edition",
-							message: "Are you sure to delete this feature ?",
-							buttons: Ext.Msg.YESNO,
-							icon: Ext.Msg.QUESTION,
-							scope: this,
-							fn: function(btn) {
-								if (btn === 'yes') {
-									this.removeFeature(feature);
-								}
-							}
-						});
-					} else {
-						this.removeFeature(feature);
-					}
-					this.delInteraction.getFeatures().clear();
-				}
-			}, this);
-		   
-			this.map.getOlMap().addInteraction(this.delInteraction);
 			this.interactions["delInteraction"] = this.delInteraction;
 		}
 
-		this.delInteraction.setActive(status);
+		this.delInteraction.setActive(status);		
+	},
+	
+	/**
+	 * When a feature is selected.
+	 * @params {Object[]}
+	 */
+	onSelect: function(layers) {
+		var feature;
+		
+		if(layers[0]) {
+			var ft = layers[0].features;
+			if(ft.length == 1) {
+				feature = ft[0];
+			}
+		}
+		
+		if(!Ext.isEmpty(feature)) {
+			
+			if(this.deleteConfirmation) {
+				Ext.Msg.show({
+					title: "Edition",
+					message: "Are you sure to delete this feature ?",
+					buttons: Ext.Msg.YESNO,
+					icon: Ext.Msg.QUESTION,
+					scope: this,
+					fn: function(btn) {
+						if (btn === 'yes') {
+							this.controller.deleteFeature(feature);
+						}
+						this.delInteraction.resetSelection();
+					}
+				});
+			} else {
+				this.controller.deleteFeature(feature);
+				this.delInteraction.resetSelection();
+			}
+		}
 	},
 	
 	/**
@@ -69,6 +84,7 @@ Ext.define('Ck.edit.action.Delete', {
 	 * @param {ol.Feature}
 	 */
 	removeFeature: function(feature) {
+		this.delInteraction
 		var source = this.getLayerSource();
 		source.removeFeature(feature);
 		this.controller.fireEvent("featureremove", feature);

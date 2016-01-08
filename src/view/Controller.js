@@ -3,7 +3,8 @@
  */
 //<debug>
 // Mini hack to load Ck.js main static class in dev mode
-Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
+// Ext.manifest.paths doesn't in production and testing !!
+if(Ext.manifest.paths) Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
 //</debug>
 
 Ext.define('Ck.view.Controller', {

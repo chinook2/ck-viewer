@@ -224,12 +224,18 @@ Ext.define('Ck.edit.feature.Controller', {
 	 */
 	unloadFeature: function() {
 		this.removeAllMarker();
-		this.gridEvent.destroy();
-		this.storeEvent.destroy();
+		
+		if(!Ext.isEmpty(this.feature)) {
+			this.gridEvent.destroy();
+			this.storeEvent.destroy();
+		}
 		
 		// Remove fake sub-features and add the feature to the original layer
 		this.source.clear();
-		this.layer.getSource().addFeature(this.feature);
+		if(!Ext.isEmpty(this.feature)) {
+			this.layer.getSource().addFeature(this.feature);
+			delete this.feature;
+		}
 	},
 	
 	/**
@@ -439,7 +445,9 @@ Ext.define('Ck.edit.feature.Controller', {
 	},
 	
 	close: function() {
+		this.unloadFeature();
 		Ck.getMap().getOlMap().removeLayer(this.overlayLayer);
+		Ck.getMap().getOlMap().removeLayer(this.cloneLayer);
 	},
 	
 	/**

@@ -1,5 +1,5 @@
 /**
- * 
+ * Component used to select features with a box
  */
 Ext.define('Ck.map.action.select.Box', {
 	extend: 'Ck.map.action.Select',
@@ -13,7 +13,7 @@ Ext.define('Ck.map.action.select.Box', {
 	continueMsg: 'Drag to draw a rectangle and select features',
 
 	/**
-	 * length or area
+	 * Type used in Selection
 	 */
-	type: 'box'
+	type: 'Box'
 });

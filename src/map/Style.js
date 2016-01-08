@@ -1,5 +1,13 @@
 /**
  * Define default style for vector layer...
+ * Predefine style are :
+ *  - ol.style.defaultStyleFunction
+ *  - ol.style.createDefaultEditingStyles
+ *  - Ck.map.Style.style			: Default OL blue style
+ *  - Ck.map.Style.redStroke		: Red stroke without fill
+ *  - Ck.map.Style.greenStroke		: Green stroke without fill
+ *  - Ck.map.Style.orangeStroke		: Pretty similar to Style.style but with an orange stroke
+ *  - Ck.map.Style.invisibleStyle	: Invisible style
  */
 Ext.define('Ck.map.Style', {
 	alternateClassName: 'Ck.Style',
@@ -21,10 +29,18 @@ Ext.define('Ck.map.Style', {
 	},
 	
 	/**
-	 * Default overlay stroke color and width
+	 * Default red stroke
 	 */
-	overlayStroke: {
+	redStroke: {
 		color: "#FF3333",
+		width: 2
+	},
+	
+	/**
+	 * Default green stroke
+	 */
+	greenStroke: {
+		color: "#33cc33",
 		width: 2
 	},
 	
@@ -35,6 +51,11 @@ Ext.define('Ck.map.Style', {
 		color: "#FF953D",
 		width: 2
 	},
+	
+	/**
+	 * Default minor radius.
+	 */
+	minorRadius: 6,
 	
 	/**
 	 * Default radius.
@@ -141,27 +162,36 @@ Ck.map.Style.style = [
 	})
 ];
 
-Ck.map.Style.overlayStyle = [
+Ck.map.Style.redStroke = [
 	new ol.style.Style({
 		image: new ol.style.RegularShape({
 			points: 4,
-			stroke: new ol.style.Stroke(Ck.map.Style.overlayStroke),
+			stroke: new ol.style.Stroke(Ck.map.Style.redStroke),
 			radius: Ck.map.Style.radius,
 			angle: 0.785398
 		}),
-		// fill: new ol.style.Fill(Ck.map.Style.fill),
-		stroke: new ol.style.Stroke(Ck.map.Style.overlayStroke)
+		stroke: new ol.style.Stroke(Ck.map.Style.redStroke)
 	})
 ];
 
-Ck.map.Style.selectionStyle = [
+Ck.map.Style.greenStroke = [
 	new ol.style.Style({
 		image: new ol.style.Circle({
-			fill: new ol.style.Fill(Ck.map.Style.fill),
-			stroke: new ol.style.Stroke(Ck.map.Style.selectStroke),
-			radius: 10
+			stroke: new ol.style.Stroke(Ck.map.Style.greenStroke),
+			radius: Ck.map.Style.minorRadius
 		}),
-		fill: new ol.style.Fill(Ck.map.Style.fill),
+		stroke: new ol.style.Stroke(Ck.map.Style.greenStroke)
+	})
+];
+
+Ck.map.Style.orangeStroke = [
+	new ol.style.Style({
+		image: new ol.style.Circle({
+			stroke: new ol.style.Stroke(Ck.map.Style.selectStroke),
+			radius: Ck.map.Style.minorRadius
+		}),
 		stroke: new ol.style.Stroke(Ck.map.Style.selectStroke)
 	})
 ];
+
+Ck.map.Style.invisibleStyle = [];

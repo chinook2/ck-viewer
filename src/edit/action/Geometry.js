@@ -9,46 +9,58 @@ Ext.define('Ck.edit.action.Geometry', {
 	iconCls: 'fa fa-edit',
 	tooltip: 'Edit geometry',
 	
+	interactionId: "geometryInteraction",
+	
 	toggleAction: function(btn, status) {
 		if(!this.used) {
 			this.callParent([btn]);
-			this.controller.addListener("featuresessionstart", function() {
-				this.reset();
-				this.disableInteraction();
-			}, this);
-			this.controller.addListener("vertexsessionstart", function() {
-				this.disableInteraction();
-			}, this);
-			this.controller.addListener("sessioncomplete", function() { this.reset(); this.enableInteraction(); }, this);
+			this.firstUse();
 		}
 		
 		var source = this.getLayerSource();
 		
 		if(!this.geometryInteraction) {
-			this.geometryInteraction = new ol.interaction.Select({
-				layers: [this.getLayer()],
-				zIndex: Ck.map.Style.zIndex.editInteraction
+			this.geometryInteraction = Ck.create("Ck.Selection", {
+				layers			: [this.getLayer()],
+				type			: "Point",
+				callback		: function(layers) {
+					if(layers[0]) {
+						var ft = layers[0].features;
+						if(ft.length == 1) {
+							this.controller.startGeometryEdition(ft[0]);
+						}
+					}
+				},
+				scope			: this,
+				map				: this.map,
+				drawStyle		: null,
+				overHighlight	: true,
+				highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
+				selectId		: "ckmapSelectEdit"
 			});
-			this.map.getOlMap().addInteraction(this.geometryInteraction);
-
-			// At the selection we analyse the feature
-			this.geometryInteraction.on('select', function (e) {
-				
-				this.feature = null;
-				this.selectedVertex = null;
-				
-				// If nothing selected -> return
-				if(e.selected.length==0) return;
-				
-				this.feature = e.selected[0];				
-				
-				this.controller.startGeometryEdition(this.feature);   
-			}.bind(this));
-			
 			this.interactions["geometryInteraction"] = this.geometryInteraction;
 		}
-		
+
 		this.geometryInteraction.setActive(status);
+		if(!status) {
+			this.geometryInteraction.resetSelection();
+		}
+	},
+	
+	firstUse: function() {
+		this.controller.addListener("featuresessionstart", function() {
+			this.reset();
+			this.disableInteraction();
+		}, this);
+		this.controller.addListener("vertexsessionstart", function() {
+			this.disableInteraction();
+		}, this);
+		this.controller.addListener("sessioncomplete", function() {
+			this.reset(); this.enableInteraction();
+		}, this);
+		this.controller.addListener("savesuccess", function() {
+			this.geometryInteraction.resetSelection();
+		}, this);
 	},
 	
 	disableInteraction: function() {
@@ -63,6 +75,13 @@ Ext.define('Ck.edit.action.Geometry', {
 	 * Unhighlight feature
 	 */
 	reset: function() {
-		this.geometryInteraction.getFeatures().clear();
+		this.geometryInteraction.resetSelection();
+	},
+	
+	disableAllInteractions: function() {
+		if(this.used) {
+			this.geometryInteraction.destroy();
+			delete this.geometryInteraction;
+		}
 	}
 });

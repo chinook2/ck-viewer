@@ -81,7 +81,9 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			stopEditing: this.stopEditing,
 			scope: this
 		});
-
+		// If already editing (in subform...)
+		if(formController.view.getEditing()===true) this.startEditing();
+		
 		grid.on({
 			validateedit: this.addNewRow,
 			scope: this

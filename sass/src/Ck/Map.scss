@@ -123,3 +123,16 @@
 	right: 0.5em;
     bottom: 5.5em;
 }
+
+/****************************************************************************************/
+/********************************** Geolocation style ***********************************/
+/****************************************************************************************/
+.gps-marker {
+	width: 32px;
+	height: 32px;
+	background-size: 32px;
+}
+
+.marker-blue{
+	background-image: url("/packages/local/ck-viewer/resources/images/marker_gray.png");
+}

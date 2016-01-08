@@ -90,7 +90,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 			this.vertexLayer = Ck.create("ol.layer.Vector", {
 				id: vertexLayerId,
 				source: new ol.source.Vector(),
-				style: Ck.map.Style.overlayStyle,
+				style: Ck.map.Style.redStroke,
 				zIndex: Ck.map.Style.zIndex.vertexOverlay
 			});
 			

@@ -7,27 +7,28 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 
 	iconCls: 'fa fa-pencil fa-lg ck-plugin',
 	tooltip: 'Edit layer',
+	
+	/**
+	 * Where display the edit panel
+	 */
+	target: "window",
+	
+	/**
+	 * Options merged to the target instanciation options
+	 */
+	targetOpt: {},
 
 	setAction: function() {
 		var action = {
 			tooltip: this.tooltip,
 			handler: this.handlerAction,
-			isDisabled: function(v, r, c, i, rec) {
-				var lyr = rec.get('layer');
-				if(Ext.isEmpty(lyr)) {
-					return true
-				} else {
-					return !(lyr instanceof ol.layer.Vector);
-				}
-			},
 			getClass: function(v, meta, rec) {
 				var lyr = rec.get('layer');
-				if(Ext.isEmpty(lyr)) {
-					return "";
+				if(this.isEditable(lyr)) {
+					return this.iconCls;
 				} else {
-					return (lyr instanceof ol.layer.Vector)? this.iconCls : this.disableClass;
+					return this.disableClass;
 				}
-				
 			},
 			scope: this
 		}
@@ -36,27 +37,67 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		this.actionColumn.width = this.actionColumn.items.length * 20;
 	},
 	
-	doAction: function(layer) {
-		if(this.win) {
-			this.win.destroy();
+	doAction: function(layer) {		
+		var map = this.getMap();
+		
+		var editOpt = {
+			xtype	: "ckedit",
+			layer	: layer,
+			openner	: this
+		};
+		
+		if(!Ext.isEmpty(this.win)) {
+			this.close();
 		}
-		this.win = Ext.create('Ext.window.Window', {
-			title: "Edit layer " + layer.get('title'),
-			width: 410,
-			height: 300,
-			layout: 'fit',
-			collapsible: true,
-			closable: false,
-			items: {
-				xtype: 'ckedit',
-				layer: layer
-			}
-		});
+		
+		switch(this.target) {
+			case "window":
+				this.win = Ext.create('Ext.window.Window', Ext.apply({
+					title: "Edit layer " + layer.get('title'),
+					width: 410,
+					height: 300,
+					layout: 'fit',
+					collapsible: true,
+					closable: false,
+					items: [editOpt]
+				}), this.targetOpt);
 
-		this.win.show();
+				this.win.show();
+				break;
+			case "docked":
+				var view = map.getView();
+				this.win = view.addDocked(Ext.apply({
+					dock : "top"
+				}, this.targetOpt, editOpt));
+				this.getMap().getOlMap().updateSize()
+				break;
+		}
+		
+	},
+	
+	/**
+	 * @param {ol.layer.Base}
+	 */
+	isEditable: function(layer) {
+		if(!Ext.isEmpty(layer)) {
+			if(layer.getExtension("editable")) {
+				return true;
+			}
+		}
+		return false;
 	},
 	
 	close: function() {
-		this.win.close();
+		switch(this.target) {
+			case "window":
+				this.win.close();
+				this.win.destroy();
+				break;
+			case "docked":
+				this.win[0].close();
+				this.win[0].destroy();
+				break;
+		}
+		delete this.win;
 	}
 });

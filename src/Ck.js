@@ -197,6 +197,16 @@ Ext.apply(Ck, {
 		]
 	},
 	
+	defaults: {
+		version: {
+			wfs	: "1.1.0",
+			wms	: "1.1.0"
+		},
+		srs		: "EPSG:4326",
+		crs		: "EPSG:4326",
+		extent	: [-180,-90,180,90]
+	},
+	
 	/**
 	 * @property params
 	 * @type Object
@@ -341,7 +351,7 @@ Ext.apply(Ck, {
 	 * @return {String}
 	 */
 	getPath: function() {
-		// Ext.manifest.paths doesn't in production !
+		// Ext.manifest.paths doesn't in production and testing !
 		var path = Ext.manifest.profile + '/resources/ck-viewer';
 		var basePath = 'packages/local/ck-viewer';
 		if(Ext.manifest.paths && Ext.manifest.paths.Ck) basePath = Ext.manifest.paths.Ck.replace('/src','');
@@ -349,8 +359,8 @@ Ext.apply(Ck, {
 
 		//<debug>
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		path = basePath + '/resources';
-		//</debug>	
+		if(Ext.manifest.paths) path = basePath + '/resources';
+		//</debug>
 		
 		return path;
 	},

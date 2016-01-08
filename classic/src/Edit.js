@@ -31,19 +31,19 @@ Ext.define("Ck.Edit", {
 		tbar: [{
 			action: "ckEditCreate",
 			enableToggle: true,
-			toggleGroup: "edit-tools"
+			toggleGroup: "ckmapAction"
 		},{
 			action: "ckEditAttribute",
 			enableToggle: true,
-			toggleGroup: "edit-tools"
+			toggleGroup: "ckmapAction"
 		},{
 			action: "ckEditGeometry",
 			enableToggle: true,
-			toggleGroup: "edit-tools"
+			toggleGroup: "ckmapAction"
 		},{
 			action: "ckEditDelete",
 			enableToggle: true,
-			toggleGroup: "edit-tools"
+			toggleGroup: "ckmapAction"
 		},{
 			xtype: "splitbutton",
 			itemId: "vertex-live-edit",
@@ -55,14 +55,14 @@ Ext.define("Ck.Edit", {
 				xtype: "button",
 				text: "Cut",
 				enableToggle: true,
-				toggleGroup: "edit-tools",
+				toggleGroup: "ckmapAction",
 				iconCls: "fa fa-crop"
 			},{
 				action: "ckEditUnion",
 				xtype: "button",
 				text: "Gather",
 				enableToggle: true,
-				toggleGroup: "edit-tools",
+				toggleGroup: "ckmapAction",
 				iconCls: "fa fa-compress"
 			}]
 		}]
@@ -70,6 +70,12 @@ Ext.define("Ck.Edit", {
 	
 
 	buttons: [{
+		text: "Save",
+		itemId: "save"
+	},{
+		text: "Cancel",
+		itemId: "cancel"
+	},,{
 		text: "Close",
 		itemId: "close"
 	}]

@@ -11,14 +11,29 @@ Ext.define("Ck.edit.History", {
 	cls: "ck-edit-history",
 	itemId: "edit-history",
 	
-	columns: [
-		{ text: "#", dataIndex: "number", width: 35 },
-		{ text: "FeatureID", dataIndex: "featureid" },
-		{ text: "Action", dataIndex: "action" }
-	],
+	columns: [{
+		text: "#",
+		dataIndex: "number",
+		width: 35,
+		menuDisabled: true,
+		sortable: false,
+		resizable: false
+	},{
+		text: "FeatureID",
+		dataIndex: "featureId",
+		width: 250,
+		menuDisabled: true,
+		sortable: false
+	},{
+		text: "Action",
+		dataIndex: "action",
+		menuDisabled: true,
+		sortable: false,
+		flex: 1
+	}],
 	store: {
 		storeId: "editHistoryStore",
-		fields: ["number", "featureid", "action"]
+		fields: ["number", "featureId", "action", "id", "actionId",  "feature"]
 	}
 	
 });
