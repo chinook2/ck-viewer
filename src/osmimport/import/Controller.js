@@ -335,7 +335,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 		} else if (layer instanceof ol.layer.Image) {  // WMS layer
 			var wfs = new ol.format.WFS();
 			var getFtXml = wfs.writeGetFeature({
-				featureTypes: [layer.getSource().getParams().layers],
+				featureTypes: [layer.getSource().getParams().LAYERS],
 				srsName: Ck.getMap().getProjection().code_,
 				bbox: this.selectionPoly.getExtent(),
 				geometryName: "the_geom"
