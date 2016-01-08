@@ -17,18 +17,7 @@ Ext.define('Ck.map.action.Geolocation', {
 
 	itemId: 'geolocation',
 
-	text: '',
-
-	// iconCls: 'fa fa-child',
-
-	// iconCls: 'fa fa-flag',
-	// iconCls: 'fa fa-bullseye',
-
-
-
 	config: {
-		map: null,
-
 		/**
 		 * @var {ol.Geolocation}
 		 */
@@ -39,6 +28,14 @@ Ext.define('Ck.map.action.Geolocation', {
 		 */
 		geolocationMarker: null
 	},
+	
+	/**
+	 * @var {Number[]}
+	 * Offset to translate marker to another location
+	 */
+	offset: [0, 0],
+	
+	geoListener: null,
 
 	/**
 	 * @param {Ck.map.Controller}
@@ -60,9 +57,6 @@ Ext.define('Ck.map.action.Geolocation', {
 				stopEvent: false
 			}));
 
-			map.geolocation.on('change', function(evt) {
-				this.getGeolocationMarker().setPosition(evt.target.getPosition());
-			}, this);
 			this.setGeolocation(map.geolocation);
 
 			map.getOlMap().addOverlay(this.getGeolocationMarker());
@@ -74,18 +68,34 @@ Ext.define('Ck.map.action.Geolocation', {
 	 * Zoom to user location
 	 */
 	toggleAction: function(btn, pressed) {
-		var olMap = this.getMap().getOlMap();
-		var mark = this.getGeolocationMarker();
-
 		if(pressed) {
-			var p = this.getGeolocation().getPosition();
-			if(!Ext.isEmpty(p)) {
-				this.marker.setVisible(true);
-				mark.setPosition(p);
-				olMap.getView().setCenter(p);
+			this.setPosition(this.getGeolocation());
+			
+			if(Ext.isEmpty(this.geoListener)) {
+				this.geoListener = this.getMap().geolocation.on('change', function(evt) {
+					this.setPosition(evt.target);
+				}, this);
 			}
 		} else {
 			this.marker.setVisible(false);
+		}
+	},
+	
+	/**
+	 * Move marker to the Geolocation position.
+	 * Apply the offset.
+	 * @params {ol.Geolocation}
+	 */
+	setPosition: function(geolocation) {
+		var p = geolocation.getPosition();
+		
+		if(Ext.isArray(p)) {
+			var mark = this.getGeolocationMarker();
+			p[0] = p[0] + this.offset[0];
+			p[1] = p[1] + this.offset[1];
+			this.marker.setVisible(true);
+			mark.setPosition(p);
+			this.getOlView().setCenter(p);
 		}
 	}
 });
