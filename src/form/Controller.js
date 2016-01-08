@@ -601,7 +601,7 @@ Ext.define('Ck.form.Controller', {
 									storeUrl = tpl.apply(fid);
 								}
 
-								if(this.compatibiltyMode) {
+								if(me.compatibiltyMode) {
 									// Need default reader Array for Chinook V1 store
 									store = Ext.Object.mergeIf(store, {
 										autoLoad: !(c.queryMode==='remote'),
