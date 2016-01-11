@@ -166,6 +166,8 @@ Ext.define('Ck.osmimport.import.Controller', {
 					var kv = key_val[kvId];
 					var k, v;
 					var regex = false;
+					
+					// Get the key and the val
 					if (kv.match(/~/)) {
 						regex = true;
 						k = kv.split("~")[0];
@@ -174,25 +176,26 @@ Ext.define('Ck.osmimport.import.Controller', {
 						k = kv.split("=")[0];
 						v = kv.split("=")[1];
 					}
-					k = k.replace(/!/, "");
+					k = k.replace(/!/, ""); // Ignore difference for checks
+					
 					if ((k.match(/[:\u00C0-\u00FF]/g) !== null) &&
-						(k.charAt(0) != "\"" || k.charAt(k.length - 1) != "\"")) {  // Check correct key ":" or "é"
+						(k.charAt(0) != "\"" || k.charAt(k.length - 1) != "\"")) {  // Check double quotes for special char and accents
 						error = true;
 					}
 					if (v) {
 						if ((regex && !v.match(/[,i|"]$/)) || (v.match(/[,|i|,i]$/) && !regex)) { // Case insensitive checks
 							error = true;
 						} else {
-							if (v.match(/,i$/)) {
+							if (v.match(/,i$/)) {  // Remove case insensitive from value if present
 								v = v.substr(0, v.length - 2);
 							}
 							if ((regex || v.match(/[:# \.\-'\u00C0-\u00FF]/g) !== null) &&
-								(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check correct value ":" or "é"
+								(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check double quotes for special char and accents
 								error = true;
 							}
 						}
 					} else {
-						if (key_val[kvId].match(/(=|!=|~|!~)/)) {  // no [key=] or [key!=] or [key~] or [key!~]
+						if (k.match(/(=|!=|~|!~)/)) {  // no [key=] or [key!=] or [key~] or [key!~]
 							error = true;
 						}
 						if (k.match(/[,i|,|i]$/)) {  // No case insensitive without value
@@ -397,7 +400,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 * Call next layer if no feature found
 	 */
 	computeFeatureGeom: function(featureGeom) {
-		// Get polygon coordinates (transform multipolygon in polygon)
 		if (featureGeom) {
 			// Draw the selected feature in highlight
 			this.selectionVector.getSource().addFeature(featureGeom);
@@ -510,24 +512,24 @@ Ext.define('Ck.osmimport.import.Controller', {
 	 */
 	prepareRequest: function() {
 		var checkedTags = this.getSelectedTags();
+
 		// Prepare geo zone 
 		var poly = "";
-		var selectionZone = this.selectionSource.getFeatures()[0];
-		if (selectionZone.getGeometry() instanceof ol.geom.Polygon) {
-			var transformGeometry = new ol.geom.Polygon(selectionZone.getGeometry().getCoordinates());
-			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
-			coords.forEach(function(coord) {
+		var selectionZone = this.selectionSource.getFeatures()[0].getGeometry();
+		var transformGeometry = new ol.geom[selectionZone.getType()](selectionZone.getCoordinates());
+		var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates();
+		if (selectionZone instanceof ol.geom.Polygon) {
+			coords[0].forEach(function(coord) {
 				poly += coord[1] + " " + coord[0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
 			});
 		} else { // MultiPolygon
-			var transformGeometry = new ol.geom.MultiPolygon(selectionZone.getGeometry().getCoordinates());
-			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates();
 			coords.forEach(function(polygon) {
 				polygon[0].forEach(function(coord) {
 					poly += coord[1] + " " + coord[0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
 				});
 			});
 		}
+
 		// Prepare date filter
 		var minDateString = "";
 		var minDate = this.lookupReference("datemin").getValue();

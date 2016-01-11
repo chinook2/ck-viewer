@@ -26,7 +26,14 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 * Projection used by OpenStreetMap.
 	 */
 	OSM_PROJECTION: "EPSG:4326",
-	// This constant contains all the tags to be checked to define if a way is a polygon
+	/**
+	 * This constant contains all the tags to be checked to define if a way is a polygon
+	 * TODO update the list according OSM modification
+	 * This page gives the rules: http://wiki.openstreetmap.org/wiki/Overpass_turbo/Polygon_Features
+	 * key : tag name to check
+	 * poly_val: list of values which indicate that the way IS a polygon
+	 * nopoly_val: list of values which indicate that the way IS NOT a polygon
+	 */
 	TAGS_TO_CHECK_POLYGON: [
 		{key: "area", poly_val: [], nopoly_val: ["no"]},
 		{key: "building", poly_val: [], nopoly_val: ["no"]},
@@ -74,13 +81,13 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 	 **/
 	calculateGeom: function(data, allRecords) {
 		data = data || this.data;
-		var geom;
+		var geom, coords;
 		// Create coords with lon/lat format (openlayer use lon/lat while OSM use lat/lon).
 		if (data.type === "node") {  // Points
 			var point = [data.lon, data.lat];
 			geom = new ol.geom.Point(point);
 		} else if (data.type === "way") {  // Line or Polygon
-			var coords = Ext.Array.map(data.geometry,
+			coords = Ext.Array.map(data.geometry,
 				function(geometry) {
 					return [geometry.lon, geometry.lat];
 				});
@@ -95,7 +102,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 					function(member) {
 						return member.role == "inner";}).length;
 				if (nb_inner > 0) {  // Polygon shall not be used when there is no inner
-					var coords = [];
+					coords = [];
 					for (var memberId in data.members) {
 						var member = data.members[memberId];
 						member.tags = {};
