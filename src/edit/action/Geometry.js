@@ -10,7 +10,7 @@ Ext.define('Ck.edit.action.Geometry', {
 	tooltip: 'Edit geometry',
 	
 	interactionId: "geometryInteraction",
-	
+
 	toggleAction: function(btn, status) {
 		if(!this.used) {
 			this.callParent([btn]);
@@ -76,12 +76,5 @@ Ext.define('Ck.edit.action.Geometry', {
 	 */
 	reset: function() {
 		this.geometryInteraction.resetSelection();
-	},
-	
-	disableAllInteractions: function() {
-		if(this.used) {
-			this.geometryInteraction.destroy();
-			delete this.geometryInteraction;
-		}
 	}
 });

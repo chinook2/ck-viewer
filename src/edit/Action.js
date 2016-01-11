@@ -113,8 +113,6 @@ Ext.define('Ck.edit.Action', {
 		for(var interaction in this.interactions) {
 			if(!Ext.isEmpty(this.interactions[interaction])) {
 				this.interactions[interaction].setActive(false);
-				this.map.getOlMap().removeInteraction(this.interactions[interaction]);
-				delete this[interaction];
 			}
 		}
 	},
@@ -123,6 +121,12 @@ Ext.define('Ck.edit.Action', {
 	 * On destroy remove all interactions from the map
 	 */
 	destroy: function() {
-		this.disableAllInteractions();
+		for(var key in this.interactions) {
+			this.interactions[key].setActive(false)
+			if(Ext.isFunction(this.interactions[key].destroy)) {
+				this.interactions[key].destroy()
+			}
+		}
+		this.callParent(arguments);
 	}
 });

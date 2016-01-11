@@ -174,6 +174,7 @@ Ext.define('Ck.map.action.Measure', {
 	toggleAction: function(btn, pressed) {
 		if(!this.draw) return;
 		this.draw.setActive(pressed);
+		this.tip.setVisible(pressed);
 		if(pressed) {
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
 		} else {
@@ -218,7 +219,7 @@ Ext.define('Ck.map.action.Measure', {
 	 * Creates a new help tooltip
 	 */
 	createHelpTooltip: function() {
-		Ext.create('Ext.tip.ToolTip', {
+		this.tip = Ext.create('Ext.tip.ToolTip', {
 			target: this.olMap.getViewport(),
 			trackMouse: true,
 			dismissDelay: 0,

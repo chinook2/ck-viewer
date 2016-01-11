@@ -1076,8 +1076,7 @@ Ext.define('Ck.form.Controller', {
 			method: 'PUT'
 		});
 		if(options.create) options.method = 'POST';
-		if(this.compatibiltyMode) option.method = 'POST';
-		//
+		if(this.compatibiltyMode) options.method = 'POST';
 
 		// Test if form is valid (all fields of the main form)
 		if (!this.isValid()) {

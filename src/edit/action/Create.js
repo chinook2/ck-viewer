@@ -25,9 +25,11 @@ Ext.define('Ck.edit.action.Create', {
 
 		// Create the interaction if it doesn't already exist
 		if(!this.drawInteraction) {
+			this.drawSource = new ol.source.Vector();
 			this.drawInteraction = new ol.interaction.Draw({
-				type: this.getGeometryType(),
-				snapGeometry: this.snapGeometry
+				type			: this.getGeometryType(),
+				snapGeometry	: this.snapGeometry,
+				source			: this.drawSource
 			});
 			this.map.getOlMap().addInteraction(this.drawInteraction);
 			

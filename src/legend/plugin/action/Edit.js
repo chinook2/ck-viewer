@@ -96,6 +96,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			case "docked":
 				this.win[0].close();
 				this.win[0].destroy();
+				this.getMap().getOlMap().updateSize()
 				break;
 		}
 		delete this.win;
