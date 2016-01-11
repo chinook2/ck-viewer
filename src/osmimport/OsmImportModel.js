@@ -183,23 +183,53 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		if (searchedTags !== undefined) {
 			if (tags !== undefined) {
 				for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
-					var key_val = searchedTags[i].tag.match(/["?\w+\u00C0-\u00FF*:?]+!?=?["\w\u00C0-\u00FF:'\-#]*/g);
+					var key_val = searchedTags[i].tag.match(/["?\w+\u00C0-\u00FF*:?]+!?=?~?["\w\u00C0-\u00FF:\\'\^\$\.\-#]*,?i?/g);
 					var rec_correct = 0;
 					for (var kvId in key_val) {  // Check that each tag is in the selected group
 						var kv = key_val[kvId];
-						var different = kv.match(/!=/);
-						var k = kv.split("=")[0].replace(/"/g, '').replace(/!/g, '');
-						var v = kv.split("=")[1];
+						var different = kv.match(/(!=|!~)/);
+						var regex = false;
+						var regMatchExp;
+						var k, v;
+						if (kv.match(/~/)) {
+							regex = true;
+							k = kv.split("~")[0].replace(/"/g, '').replace(/!/g, '');
+							v = kv.split("~")[1];
+						} else {
+							k = kv.split("=")[0].replace(/"/g, '').replace(/!/g, '');
+							v = kv.split("=")[1];
+						}
+						
 						if (v) {
 							v = v.replace(/"/g, '');
+							if (regex) {
+								v = v.replace(/\\\\/, "\\");
+								if (v.match(/,i$/)) {
+									regMatchExp = new RegExp(v.substr(0, v.length - 2), "i");
+								} else {
+									regMatchExp = new RegExp(v);
+								}
+							}
 						}
 						if (different) {
-							if (!(k in tags) || ((k in tags) && (tags[k] != v))) {
-								rec_correct++;
+							if (regex) {
+								if (!(k in tags) || ((k in tags) && !tags[k].match(regMatchExp))) {
+									rec_correct++;
+								}
+							} else {
+								if (!(k in tags) || ((k in tags) && (tags[k] != v))) {
+									rec_correct++;
+								}
 							}
 						} else {
-							if ((k in tags) && ((v !== "" && tags[k] === v) || !v)) {
-								rec_correct++;
+							if (regex) {
+								if ((k in tags) && ((v !== "" && tags[k].match(regMatchExp)) || !v)) {
+									rec_correct++;
+								}								
+							} else {
+								if ((k in tags) && ((v !== "" && tags[k] === v) || !v)) {
+									rec_correct++;
+								}	
 							}
 						}
 					}

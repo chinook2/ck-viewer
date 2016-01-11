@@ -158,26 +158,44 @@ Ext.define('Ck.osmimport.import.Controller', {
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*\])+$/g) === null)) {
+				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=|~|!~)?["\w\u00C0-\u00FF:'\\\^\$\.\-#]*,?i?\])+$/g) === null)) {
 				error = true;
 			} else {  // search other errors
-				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=)?["\w\u00C0-\u00FF:'\-#]*)+/g);
+				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=|~|!~)?["\w\u00C0-\u00FF:'\\\^\$\.\-#]*,?i?)+/g);
 				for (var kvId in key_val) {  // Check that each tag is in the selected group
 					var kv = key_val[kvId];
-					var k = kv.split("=")[0];
+					var k, v;
+					var regex = false;
+					if (kv.match(/~/)) {
+						regex = true;
+						k = kv.split("~")[0];
+						v = kv.split("~")[1];
+					} else {
+						k = kv.split("=")[0];
+						v = kv.split("=")[1];
+					}
 					k = k.replace(/!/, "");
-					var v = kv.split("=")[1];
 					if ((k.match(/[:\u00C0-\u00FF]/g) !== null) &&
 						(k.charAt(0) != "\"" || k.charAt(k.length - 1) != "\"")) {  // Check correct key ":" or "é"
 						error = true;
 					}
 					if (v) {
-						if ((v.match(/[:#'\u00C0-\u00FF]/g) !== null) &&
-							(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check correct value ":" or "é"
+						if ((regex && !v.match(/[,i|"]$/)) || (v.match(/[,|i|,i]$/) && !regex)) { // Case insensitive checks
 							error = true;
+						} else {
+							if (v.match(/,i$/)) {
+								v = v.substr(0, v.length - 2);
+							}
+							if ((regex || v.match(/[:# \.\-'\u00C0-\u00FF]/g) !== null) &&
+								(v.charAt(0) != "\"" || v.charAt(v.length - 1) != "\"")) {  // Check correct value ":" or "é"
+								error = true;
+							}
 						}
 					} else {
-						if (key_val[kvId].match(/(=|!=)/)) {  // no [key=] or [key!=]
+						if (key_val[kvId].match(/(=|!=|~|!~)/)) {  // no [key=] or [key!=] or [key~] or [key!~]
+							error = true;
+						}
+						if (k.match(/[,i|,|i]$/)) {  // No case insensitive without value
 							error = true;
 						}
 					}
