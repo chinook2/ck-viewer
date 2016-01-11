@@ -303,11 +303,11 @@ Ext.define('Ck.form.plugin.Subform', {
 		var vDataFid = this._subform.getDataFid();
 		var dataFid = {};
 		if(Ext.isString(vDataFid)) {
-			dataFid = Ext.applyIf({
+			dataFid = Ext.apply({
 				fid: vDataFid
 			}, data);
 		} else{
-			dataFid = Ext.applyIf(vDataFid, data);
+			dataFid = Ext.apply(vDataFid, data);
 		}
 		this._subform.setDataFid(dataFid);
 		//
@@ -330,7 +330,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				dataUrl = dataUrl.read;
 			}
 			var tpl = new Ext.Template(dataUrl);
-			dataUrl = tpl.apply(data);
+			dataUrl = tpl.apply(dataFid);
 			options = {
 				fid: dataFid,
 				url: dataUrl
