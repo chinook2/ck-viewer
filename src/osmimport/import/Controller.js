@@ -158,10 +158,10 @@ Ext.define('Ck.osmimport.import.Controller', {
 		for (var t = 0; t < tagList.length; t++) {  // Check the RegEx of each tag
 			var error = false;
 			if ((tagList[t].tag.indexOf(";") > -1) ||
-				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=|~|!~)?["\w\u00C0-\u00FF:'\^\$\.\-#]*,?i?\])+$/g) === null)) {
+				(tagList[t].tag.match(/^(\[["?\w+\u00C0-\u00FF*:?]+(=|!=|~|!~)?["\w\u00C0-\u00FF:'\\\^\$\.\-#]*,?i?\])+$/g) === null)) {
 				error = true;
 			} else {  // search other errors
-				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=|~|!~)?["\w\u00C0-\u00FF:'\^\$\.\-#]*,?i?)+/g);
+				var key_val = tagList[t].tag.match(/(["?\w+\u00C0-\u00FF*:?]+(=|!=|~|!~)?["\w\u00C0-\u00FF:'\\\^\$\.\-#]*,?i?)+/g);
 				for (var kvId in key_val) {  // Check that each tag is in the selected group
 					var kv = key_val[kvId];
 					var k, v;
@@ -466,7 +466,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				this.stopZoneSelection();
 			}
 		} catch (exception) {  // Application is never locked with the "Wait MessageBox" if an error occurs
-			console.log(exception.stack)
 			if (this.waitMsg) {
 				this.waitMsg.close();
 			}
@@ -656,7 +655,6 @@ Ext.define('Ck.osmimport.import.Controller', {
 				Ext.defer(this.endImport, 1, this);
 			}
 		} catch (exception) {
-			console.log(exception.stack)
 			Ext.MessageBox.show({
 				title: 'OSM Import',
 				msg: 'An error occured during import.',
