@@ -494,12 +494,22 @@ Ext.define('Ck.osmimport.import.Controller', {
 		var checkedTags = this.getSelectedTags();
 		// Prepare geo zone 
 		var poly = "";
-		var transformGeometry = new ol.geom.Polygon(this.selectionSource.getFeatures()[0].getGeometry().getCoordinates());
-		var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
-		coords.forEach(function(coord) {
-			poly += coord[1] + " " + coord[0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
-		});
-
+		var selectionZone = this.selectionSource.getFeatures()[0];
+		if (selectionZone.getGeometry() instanceof ol.geom.Polygon) {
+			var transformGeometry = new ol.geom.Polygon(selectionZone.getGeometry().getCoordinates());
+			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates()[0];
+			coords.forEach(function(coord) {
+				poly += coord[1] + " " + coord[0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
+			});
+		} else { // MultiPolygon
+			var transformGeometry = new ol.geom.MultiPolygon(selectionZone.getGeometry().getCoordinates());
+			var coords = transformGeometry.transform(this.olMap.getView().getProjection(), this.OSM_PROJECTION).getCoordinates();
+			coords.forEach(function(polygon) {
+				polygon[0].forEach(function(coord) {
+					poly += coord[1] + " " + coord[0] + " "; // OSM coords is lat/lon while OpenLayers is lon/lat
+				});
+			});
+		}
 		// Prepare date filter
 		var minDateString = "";
 		var minDate = this.lookupReference("datemin").getValue();
