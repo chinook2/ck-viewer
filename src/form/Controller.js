@@ -838,7 +838,10 @@ Ext.define('Ck.form.Controller', {
 
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f && f.isVisible() && !f.isValid()) isValid = false;
+			if(f && f.isVisible() && !f.isValid()) {
+				isValid = false;
+				Ck.log(f.name + ' not Valid !');
+			}
 		}, this);
 
 		// SUBFORM : save data
@@ -870,6 +873,7 @@ Ext.define('Ck.form.Controller', {
 					if((!val) && (col.allowBlank===false)) {
 						isValid = false;
 						requiredColumn = col;
+						Ck.log(col + ' not Valid !');
 						return false;
 					}
 				});
