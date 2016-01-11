@@ -183,7 +183,7 @@ Ext.define('Ck.osmimport.OsmImportModel', {
 		if (searchedTags !== undefined) {
 			if (tags !== undefined) {
 				for (var i = 0; i < searchedTags.length; i++) {  // Check for each type of group selected
-					var key_val = searchedTags[i].tag.match(/["?\w+\u00C0-\u00FF*:?]+!?=?~?["\w\u00C0-\u00FF:'\^\$\-#]*,?i?/g);
+					var key_val = searchedTags[i].tag.match(/["?\w+\u00C0-\u00FF*:?]+!?=?~?["\w\u00C0-\u00FF:'\^\$\.\-#]*,?i?/g);
 					var rec_correct = 0;
 					for (var kvId in key_val) {  // Check that each tag is in the selected group
 						var kv = key_val[kvId];
