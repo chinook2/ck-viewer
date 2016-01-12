@@ -94,6 +94,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		// add subform in a panel
 		if(subForm.renderTo) {
 				var ct = Ext.getCmp(subForm.renderTo);
+				if(!ct) ct = formController.lookupReference(subForm.renderTo);
 				if(!ct){
 					Ck.Notify.error("Enable to render subform '"+ subForm.url +"' in '"+ subForm.renderTo +"'")
 					return;
