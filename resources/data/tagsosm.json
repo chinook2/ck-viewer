@@ -227,5 +227,86 @@
 			"leaf": true,
 			"checked": false
 		}]
+	},{
+		"text": "Expressions régulières",
+		"children": [{
+			"text": "Magasins.com",
+			"tag": "[shop][name~\"\\\\.com\"]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Postes de police (sauf gendarmeries)",
+			"tag": "[amenity=police][name!~\"Gendarmerie\",i]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Lignes TAN Chronobus",
+			"tag": "[type=route][route=bus][network=TAN][ref~\"^C\"]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Magasins sans nom",
+			"tag": "[shop][name!~\".\"]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Cas d'erreurs",
+			"children": [{
+				"text": "Clé~ sans valeur",
+				"tag": "[name~]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Clé!~ sans valeur",
+				"tag": "[name!~]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "~valeur sans clé",
+				"tag": "[~\"^C\"]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "!~valeur sans clé",
+				"tag": "[!~\"^C\"]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Valeur sans guillemets",
+				"tag": "[name~^C]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Valeur sans guillemet initial",
+				"tag": "[name~^C\"]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Valeur sans guillemet final",
+				"tag": "[name~\"^C]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive incorrect 1",
+				"tag": "[name~\"^C\",c]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive incorrect 2",
+				"tag": "[name~\"^C\"i]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive incorrect 3",
+				"tag": "[name~\"^C\",]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive sans valeur",
+				"tag": "[name,i]",
+				"leaf": true,
+				"checked": false
+			}]
+		}]
 	}]
 }
