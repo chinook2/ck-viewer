@@ -9,6 +9,7 @@ Ext.define('Ck.form.Controller', {
 
 	autoLoad: true,
 	isSubForm: false,
+	parentForm: false,
 	storage: null,
 
 	dataUrl: null,
@@ -75,6 +76,7 @@ Ext.define('Ck.form.Controller', {
 		var inlineForm = this.view.getFormRaw();
 		var parentForm = this.view.up('ckform');
 		if(parentForm) {
+			this.parentForm = parentForm;
 			// inherit dataFid from main view form (used in store url template)
 			vDataFid = this.view.getDataFid() || {};
 			pDataFid = parentForm.getDataFid() || {};
@@ -380,6 +382,17 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
+	// Get the main form controller (the 1st)
+	getRootForm: function() {
+		var rootForm = this.getView().findParentBy(function(cmp) {
+			if(cmp.xtype != 'ckform') return false;
+			return (cmp.getController().parentForm === false);
+		});
+		if(rootForm) return rootForm.getController();
+		// By default return the current controller !
+		return this;
+	},
+	
 	// List all included form in a form.
 	getIncludedForm: function (cfg) {
 		if(!cfg) return;
