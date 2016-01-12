@@ -195,7 +195,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 							}
 						}
 					} else {
-						if (k.match(/(=|!=|~|!~)/)) {  // no [key=] or [key!=] or [key~] or [key!~]
+						if (key_val[kvId].match(/(=|!=|~|!~)/)) {  // no [key=] or [key!=] or [key~] or [key!~]
 							error = true;
 						}
 						if (k.match(/[,i|,|i]$/)) {  // No case insensitive without value
