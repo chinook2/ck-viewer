@@ -76,9 +76,12 @@ Ext.define('Ck.form.Controller', {
 		var parentForm = this.view.up('ckform');
 		if(parentForm) {
 			// inherit dataFid from main view form (used in store url template)
-			if(!this.view.getDataFid()) {
-				this.view.setDataFid(parentForm.getDataFid());
+			vDataFid = this.view.getDataFid() || {};
+			pDataFid = parentForm.getDataFid() || {};
+			if(Ext.isString(vDataFid)) {
+				vDataFid ={fid: vDataFid};
 			}
+			this.view.setDataFid(Ext.apply(vDataFid, pDataFid));
 
 			// Try find parent form name (used for overriden controllers)
 			if(inlineForm && !inlineForm.name) {
