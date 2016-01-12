@@ -71,6 +71,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			dockedItems: [{
 				xtype: 'toolbar',
 				dock: 'bottom',
+				hidden: true,
 				style: {border: 0},
 				items: ['->', {
 					text: 'Add',

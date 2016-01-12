@@ -61,7 +61,7 @@ Ext.define('Ck.form.Controller', {
 	init: function () {
 		this.isSubForm = this.view.getIsSubForm();
 		this.autoLoad = this.view.getAutoLoad();
-		if(this.view.getEditing()===true) this.startEditing();
+		this.editing = this.view.getEditing();
 		this.isInit = false;
 
 		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
@@ -77,6 +77,9 @@ Ext.define('Ck.form.Controller', {
 		var parentForm = this.view.up('ckform');
 		if(parentForm) {
 			this.parentForm = parentForm;
+			
+			this.editing = parentForm.getEditing();
+			
 			// inherit dataFid from main view form (used in store url template)
 			vDataFid = this.view.getDataFid() || {};
 			pDataFid = parentForm.getDataFid() || {};
@@ -91,6 +94,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}
 
+		if(this.editing===true) this.startEditing();
 		this.initForm(inlineForm);
 	},
 
@@ -262,7 +266,11 @@ Ext.define('Ck.form.Controller', {
 			Ext.each(docks, function(d) {
 				if(!this.defaultDock && (d.dock == 'bottom')) {
 					this.defaultDock = d.initialConfig;
-					this.defaultDock.hidden = false;
+					if(this.isSubForm && !this.editing) {
+						this.defaultDock.hidden = true;
+					}else{
+						this.defaultDock.hidden = false;
+					}
 				}
 				this.view.removeDocked(d);
 			}, this);
@@ -479,7 +487,7 @@ Ext.define('Ck.form.Controller', {
 			// Subforms : init default params and exit
 			if(c.xtype == "ckform") {
 				Ext.applyIf(c, {
-					editing:true,
+					editing: this.editing,
 					urlTemplate: {ws: "{0}/{1}"},
 					bodyPadding: 0,
 					dockedItems: []
