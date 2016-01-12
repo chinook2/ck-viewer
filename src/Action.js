@@ -53,7 +53,17 @@ Ext.define('Ck.Action', {
 		/**
 		 * @var {Ck.map.Controller}
 		 */
-		map: null
+		map: null,
+		
+		/**
+		 * @var {Ck.map.Controller}
+		 */
+		olMap: null,
+		
+		/**
+		 * @var {Ck.map.Controller}
+		 */
+		olView: null
 	},
 	
 	/**
@@ -158,5 +168,16 @@ Ext.define('Ck.Action', {
 			}
 		});
         Ext.resumeLayouts(true);		
+	},
+	
+	/**
+	 * @param {Ck.map.Controller}
+	 */
+	setMap: function(map) {
+		if(map !== false) {
+			this._map = map;
+			this.setOlMap(map.getOlMap());
+			this.setOlView(map.getOlView());
+		}
 	}
 });

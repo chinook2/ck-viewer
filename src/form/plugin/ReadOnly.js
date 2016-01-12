@@ -37,10 +37,6 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 		cmp.on('afterrender', this.onRender, this, {delay: 50});
 		cmp.on('change', this.onChange, this);
-		
-		// if(cmp.getStore){
-			// cmp.getStore().on('load', this.setReadOnly, this);
-		// }
 
 		this.formController.on('startEditing', this.setReadOnly, this);
 		this.formController.on('stopEditing', this.setReadOnly, this);
@@ -53,8 +49,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 	// private
 	onRender : function(cmp){
+		if(!this.labelEl.dom) return;
+		
 		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)
-		if(cmp.triggerWrap && this.labelEl.dom) this.labelEl.insertAfter(cmp.triggerWrap);
+		if(cmp.triggerWrap) this.labelEl.insertAfter(cmp.triggerWrap);
 
 		// Masque par défaut les input si form.readOnly est true
 		this.setReadOnly();
@@ -65,10 +63,12 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	},
 
 	setReadOnly: function() {
+		if(!this.labelEl.dom) return;
+		
 		var cmp = this.getCmp();
 		if(!cmp.rendered) return;
 		if(!cmp.triggerWrap) return;
-
+		
 		// r for readOnly is true when editing is false
 		var r = !this.formViewModel.get("editing");
 

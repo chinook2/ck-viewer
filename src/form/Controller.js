@@ -601,7 +601,7 @@ Ext.define('Ck.form.Controller', {
 									storeUrl = tpl.apply(fid);
 								}
 
-								if(this.compatibiltyMode) {
+								if(me.compatibiltyMode) {
 									// Need default reader Array for Chinook V1 store
 									store = Ext.Object.mergeIf(store, {
 										autoLoad: !(c.queryMode==='remote'),
@@ -762,7 +762,7 @@ Ext.define('Ck.form.Controller', {
 		var values = {};
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f && f.isVisible()) {
+			if(f && (f.xtype=='hidden' || f.isVisible())) {
 				values[field] = f.getValue();
 
 				// allow formatting date before send to server
@@ -838,7 +838,10 @@ Ext.define('Ck.form.Controller', {
 
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f && f.isVisible() && !f.isValid()) isValid = false;
+			if(f && f.isVisible() && !f.isValid()) {
+				isValid = false;
+				Ck.log(f.name + ' not Valid !');
+			}
 		}, this);
 
 		// SUBFORM : save data
@@ -870,6 +873,7 @@ Ext.define('Ck.form.Controller', {
 					if((!val) && (col.allowBlank===false)) {
 						isValid = false;
 						requiredColumn = col;
+						Ck.log(col + ' not Valid !');
 						return false;
 					}
 				});
