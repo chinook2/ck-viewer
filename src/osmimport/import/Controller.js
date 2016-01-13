@@ -390,7 +390,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 					this.computeFeatureGeom(featureGeom);
 				},
 				failure: function(response, options) {
-					console.log("fail to get the layer feature");
+					this.computeFeatureGeom();
 				}
 			});
 		}
