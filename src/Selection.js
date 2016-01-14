@@ -566,7 +566,7 @@ Ext.define('Ck.Selection', {
 		}
 	},
 	
-	destroy: function(a,b,c) {
+	destroy: function() {
 		this.resetSelection();
 		var olMap = this.getOlMap();
 		var draw = this.getDraw();

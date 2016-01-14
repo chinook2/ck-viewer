@@ -25,21 +25,6 @@ Ext.define('Ck.form.Controller', {
 	// TODO in config param in form json...
 	compatibiltyMode: false,
 
-	//startEditing
-	//stopEditing
-
-	//afterload
-	//loadfailed
-
-	//beforesave
-	//aftersave
-	//savefailed
-
-	//afterreset
-
-	//beforeclose
-	//afterclose
-
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	afterShow: Ext.emptyFn,
@@ -58,7 +43,7 @@ Ext.define('Ck.form.Controller', {
 	deleteFailed: Ext.emptyFn,
 	//
 
-	init: function () {
+	init: function() {
 		this.isSubForm = this.view.getIsSubForm();
 		this.autoLoad = this.view.getAutoLoad();
 		this.editing = this.view.getEditing();
@@ -103,7 +88,7 @@ Ext.define('Ck.form.Controller', {
 		this.callParent();
 	},
 
-	formLoad: function (options) {
+	formLoad: function(options) {
 		this.loadData(options);
 	},
 
@@ -111,7 +96,7 @@ Ext.define('Ck.form.Controller', {
 		this.startEditing();
 	},
 
-	formSave: function (btn) {
+	formSave: function(btn) {
 		var res = this.saveData(function() {
 			//After save success.
 
@@ -145,11 +130,11 @@ Ext.define('Ck.form.Controller', {
 		this.stopEditing();
 	},
 
-	formPrint: function () {
+	formPrint: function() {
 		Ext.alert("WIP.");
 	},
 
-	formClose: function (btn) {
+	formClose: function(btn) {
 
 		var closeMe = function() {
 			if(this.oController.beforeClose() === false) {
@@ -165,7 +150,7 @@ Ext.define('Ck.form.Controller', {
 			this.fireEvent('afterclose');
 
 			var win = this.view.up('window');
-			if (win) {
+			if(win) {
 				win.destroy();
 			} else {
 				this.view.destroy();
@@ -184,10 +169,10 @@ Ext.define('Ck.form.Controller', {
 				icon: Ext.Msg.QUESTION,
 				fn: function(btn) {
 					this.fireEvent('beforeclose', btn);
-					if (btn === 'yes') {
+					if(btn === 'yes') {
 						this.saveData();
 						closeMe();
-					} else if (btn === 'no') {
+					} else if(btn === 'no') {
 						closeMe()
 					} else {
 						// Nothing don't close
@@ -201,7 +186,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 
-	getOption: function (opt) {
+	getOption: function(opt) {
 		var formOpt = Ck.getOption('form');
 		if(formOpt && formOpt[opt]) {
 			return formOpt[opt];
@@ -212,12 +197,12 @@ Ext.define('Ck.form.Controller', {
 	/**
 	 * PRIVATE
 	 */
-	initForm: function (form) {
-		if (!this.isInit) {
-			if (!form) {
+	initForm: function(form) {
+		if(!this.isInit) {
+			if(!form) {
 				var formUrl = this.view.getFormUrl();
 				var formName = this.view.getFormName();
-				if (!formUrl && formName) formUrl = this.getFullUrl(formName);
+				if(!formUrl && formName) formUrl = this.getFullUrl(formName);
 
 				this.getForm(formUrl);
 				return;
@@ -286,24 +271,24 @@ Ext.define('Ck.form.Controller', {
 
 
 			/**/
-			if (this.isSubForm) {
+			if(this.isSubForm) {
 				// Sous-formulaire les contrôles sont différents
 				// var bbar = this.getView().getDockedItems('toolbar[dock="bottom"]');
-				// if (bbar[0]) bbar[0].hide();
+				// if(bbar[0]) bbar[0].hide();
 			} else {
 				// Init la popup qui contient le formulaire
 				var fcw = form.window;
 				var win = this.view.up('window');
-				if (win) {
+				if(win) {
 					// Ext.apply(win, fcw);
 					// win.show();
 
 					// TODO : binding ou surcharge complète du config...
 					// if(fcw) win.setBind(fcw);
 
-					if (fcw.title) win.setTitle(fcw.title);
-					if (fcw.width) win.setWidth(fcw.width);
-					if (fcw.height) win.setHeight(fcw.height);
+					if(fcw.title) win.setTitle(fcw.title);
+					if(fcw.width) win.setWidth(fcw.width);
+					if(fcw.height) win.setHeight(fcw.height);
 				}
 			}
 
@@ -335,8 +320,8 @@ Ext.define('Ck.form.Controller', {
 	 * Get Form definition
 	 * @param
 	 */
-	getForm: function (formUrl) {
-		if (!formUrl) {
+	getForm: function(formUrl) {
+		if(!formUrl) {
 			Ck.Notify.error("'formUrl' or 'formName' not set in getForm.");
 			return false;
 		}
@@ -354,7 +339,7 @@ Ext.define('Ck.form.Controller', {
 			url: formUrl,
 			disableCaching: false,
 			scope: this,
-			success: function (response) {
+			success: function(response) {
 				var me = this;
 				var formConfig = Ext.decode(response.responseText, true);
 				if(!formConfig) {
@@ -402,14 +387,14 @@ Ext.define('Ck.form.Controller', {
 	},
 	
 	// List all included form in a form.
-	getIncludedForm: function (cfg) {
+	getIncludedForm: function(cfg) {
 		if(!cfg) return;
 		var includeForm = [];
-		var fn = function (c) {
+		var fn = function(c) {
 			if(c['@include']) {
 				includeForm.push(c['@include']);
 			}
-			if (c.items) {
+			if(c.items) {
 				Ext.each(c.items, fn, this);
 			}
 		};
@@ -421,7 +406,7 @@ Ext.define('Ck.form.Controller', {
 
 	includeForm: function(formConfig, formName, callback) {
 		var formUrl = this.getFullUrl(formName);
-		if (!formUrl) {
+		if(!formUrl) {
 			Ck.Notify.error("'formUrl' or 'formName' not set in includeForm.");
 			return false;
 		}
@@ -429,7 +414,7 @@ Ext.define('Ck.form.Controller', {
 			url: formUrl,
 			disableCaching: false,
 			scope: this,
-			success: function (response) {
+			success: function(response) {
 				var me = this;
 				var subFormConfig = Ext.decode(response.responseText, true);
 				if(!subFormConfig) {
@@ -437,8 +422,8 @@ Ext.define('Ck.form.Controller', {
 					return false;
 				}
 
-				var fn = function (c, idx, frm) {
-					if (c.items) {
+				var fn = function(c, idx, frm) {
+					if(c.items) {
 						Ext.each(c.items, fn, this);
 					}
 					if(c['@include'] == formName) {
@@ -465,18 +450,18 @@ Ext.define('Ck.form.Controller', {
 	 * Create Ext components from JSON
 	 * @params {Object}
 	 */
-	applyFormDefaults: function (cfg) {
+	applyFormDefaults: function(cfg) {
 		var me = this;
 		this.fields = [];
 
-		var fn = function (c) {
+		var fn = function(c) {
 			// Get Alls direct fields of the form with includes (exclude subform)
 			if(c.name) {
 				this.fields.push(c.name);
 			}
 
 			// Default component is textfield
-			if (c.name && !c.xtype) c.xtype = 'textfield';
+			if(c.name && !c.xtype) c.xtype = 'textfield';
 
 			// Compatibility forms V1
 			if(c.xtype && c.xtype.substr(0,3) == 'ck_') {
@@ -499,10 +484,11 @@ Ext.define('Ck.form.Controller', {
 					anchor: '100%',
 					labelSeparator: me.layoutConfig.labelSeparator
 				});
-				c.plugins.push({
-					ptype: 'formreadonly'
-				});
-
+				if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
+					c.plugins.push({
+						ptype: 'formreadonly'
+					});
+				}
 				switch(c.xtype) {
 					case "tabpanel":
 						Ext.applyIf(c, {
@@ -517,12 +503,12 @@ Ext.define('Ck.form.Controller', {
 						});
 						break;
 					case "radiogroup":
-						Ext.each(c.items, function (c) {
+						Ext.each(c.items, function(c) {
 							c.xtype = 'radiofield';
 						});
 						break;
 					case "checkboxgroup":
-						Ext.each(c.items, function (c) {
+						Ext.each(c.items, function(c) {
 							c.xtype = 'checkboxfield';
 						});
 						break;
@@ -532,10 +518,10 @@ Ext.define('Ck.form.Controller', {
 						});
 
 						// Init-Actualise avec la date du jour (après le chargement)
-						if (c.value == 'now') {
-							me.view.on('afterload', function () {
+						if(c.value == 'now') {
+							me.view.on('afterload', function() {
 								var f = me.view.form.findField(c.name);
-								if (f) f.setValue(Ext.Date.clearTime(new Date()));
+								if(f) f.setValue(Ext.Date.clearTime(new Date()));
 							});
 						}
 						break;
@@ -545,11 +531,72 @@ Ext.define('Ck.form.Controller', {
 						});
 
 						// Init-Actualise avec la date du jour (après le chargement)
-						if (c.value == 'now') {
-							me.view.on('afterload', function () {
+						if(c.value == 'now') {
+							me.view.on('afterload', function() {
 								var f = me.view.form.findField(c.name);
-								if (f) f.setValue(Ext.Date.format(new Date(), c.format));
+								if(f) f.setValue(Ext.Date.format(new Date(), c.format));
 							});
+						}
+						break;
+					case "fileuploadfield":
+					case "filefield":
+						// If photo taking is allow
+						if(c.uploadImage !== false) {
+							var panelId = Ext.id();
+							var pictureBtn = {
+								xtype: "button",
+								iconCls: "fa fa-camera",
+								width: 30,
+								style: {
+									"margin-top": "6px",
+									"margin-left": "5px"
+								},
+								handler: function() {
+									navigator.camera.getPicture(function(panelId, b64_image) {
+										var panel = Ext.getCmp(panelId);
+										panel.items.getAt(0).camera = Ck.b64toBlob(b64_image, "image/jpeg");
+										panel.items.getAt(0).setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
+									}.bind(this, panelId), function() {
+										alert('error');
+									},{
+										destinationType: navigator.camera.DestinationType.DATA_URL
+									})
+								}
+							}
+							var removeBtn = {
+								xtype: "button",
+								iconCls: "fa fa-remove",
+								width: 30,
+								style: {
+									"margin-top": "6px",
+									"margin-left": "5px"
+								},
+								handler: function() {
+									var panel = Ext.getCmp(panelId);
+									panel.items.getAt(0).camera = "";
+									panel.items.getAt(0).setValue("");
+								}
+							}
+							
+							// Delete camera picture when file is choosen from explorer
+							c.listeners = {
+								change: function() {
+									this.camera = "";
+								}
+							},
+							c.columnWidth = 1;
+							
+							// Fix form.setValue
+							c.setValue = Ext.form.field.File.prototype.setRawValue;
+							
+							c = {
+								xtype: "panel",
+								id: panelId,
+								processItems: false,
+								width: "100%",
+								layout: "column",
+								items: [c, pictureBtn, removeBtn]
+							}
 						}
 						break;
 					case "combo":
@@ -697,7 +744,7 @@ Ext.define('Ck.form.Controller', {
 						break;
 				}
 				
-				if (c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
+				if(c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
 					// Try to merge plugins config and default config
 					var applyDefault = function(plugins, defaults) {
 						if(!Ext.isArray(plugins)) return defaults;
@@ -739,7 +786,7 @@ Ext.define('Ck.form.Controller', {
 					}
 				}
 
-				if (c.layout == 'column') {
+				if(c.layout == 'column') {
 					// TODO : simplifié l'ajout auto de xtype container mais pas tjrs...
 					Ext.applyIf(c, {
 						defaults: {
@@ -750,17 +797,20 @@ Ext.define('Ck.form.Controller', {
 					});
 				}
 
-				if (c.name && !c.fieldLabel && !c.boxLabel) {
+				if(c.name && !c.fieldLabel && !c.boxLabel) {
 					c.fieldLabel = c.name;
 				}
 
-				if (c.items) {
+				if(c.items && c.processItems !== false) {
 					Ext.each(c.items, fn, this);
 				}
 			};
-		};
+			return c;
+		}.bind(this);
 		
-		Ext.each(cfg.items, fn, this);
+		for(var key in cfg.items) {
+			cfg.items[key] = fn(cfg.items[key]);
+		}
 		return cfg;
 	},
 
@@ -771,71 +821,118 @@ Ext.define('Ck.form.Controller', {
 		this.fireEvent('startEditing');
 	},
 
-	stopEditing: function () {
+	stopEditing: function() {
 		this.getViewModel().set("editing", false);
 		this.getViewModel().set("isEditable", true);
 
 		this.fireEvent('stopEditing');
 	},
 
-	// Prevent getting values from subform...
-	getValues: function() {
+	
+	/**
+	 * Collect all data from form. Recursively called for the subforms.
+	 * @param {Function}
+	 */
+	getValues: function(callback, values) {
+		this.fieldsProcessed++;
+		if(Ext.isEmpty(values)) {
+			var values = {};
+		}
 		var v = this.getView();
 		var form = v.getForm();
+		var fid = v.getDataFid();
+		
+		if(this.fieldsProcessed == (this.fieldsToProcess + 1)) {
+			if(this.compatibiltyMode) {
+				var lyr = v.getLayer();
+				var res = {
+					fid: fid.fid,
+					params: values
+				};
+				values = {};
+				values['main'] = res;
+			}
 
-		var values = {};
-		this.fields.forEach(function(field) {
+			// Loop on subforms. Now there is no subforms
+			var subforms = v.query('ckform');
+			for (var s = 0; s < subforms.length; s++) {
+				var sf = subforms[s];
+				if(!sf.name || this.fields.indexOf(sf.name)==-1) {
+					continue;
+				}
+
+				values[sf.name] = sf.getController().getValues.apply(this, arguments);
+			}
+
+			if(this.compatibiltyMode) {
+				values = {
+					name: fid.layer,
+					data: encodeURIComponent(Ext.encode(values))
+				}
+			}
+			// First argument will be delete (is the callback), the second must be placed at last
+			var fn = callback;
+			var args = Array.prototype.slice.apply(arguments);
+			args.splice(0, 1);
+			
+			fn.apply(this, [args[1], args[0]]);
+		} else {
+			field = this.fields[this.fieldsProcessed];
 			var f = form.findField(field);
-			if(f && (f.xtype=='hidden' || f.isVisible())) {
-				values[field] = f.getValue();
+			if(!Ext.isEmpty(f)) {
+				var xtype = f.getXType();
+				if(xtype == 'hidden' || f.isVisible()) {
+					values[field] = f.getValue();
 
-				// allow formatting date before send to server
-				if(f.submitFormat) {
-					values[field] = f.getSubmitValue();
+					// Allow formatting date before send to server
+					if(f.submitFormat) {
+						values[field] = f.getSubmitValue();
+					}
+
+					// Get value for radioGroup
+					if(f.getGroupValue) {
+						values[field] = f.getGroupValue();
+					}
+					
+					// Get value for file field
+					if(xtype == "filefield") {
+						var fName = f.getValue().split("/").pop().split("\\").pop();
+						var inp = f.getEl().dom.getElementsByTagName("input");
+						if(inp[0].type == "file") {
+							inp = inp[0];
+						} else {
+							inp = inp[1];
+						}
+						
+						if(!Ext.isEmpty(f.camera)) {
+							values[field] = f.getValue();
+							this.files.push({
+								name: field,
+								value: f.camera,
+								filename: f.getValue()
+							});
+						} else {
+							var reader  = new FileReader();
+							reader.onloadend = function(args, fName, evt) {
+								values[field] = fName;
+								this.files.push({
+									name: field,
+									value: Ck.dataURItoBlob(reader.result),
+									filename: fName
+								});
+								this.getValues.apply(this, args);
+							}.bind(this, arguments, fName);
+							
+							if(inp.files.length != 0) {
+								reader.readAsDataURL(inp.files[0]);
+								return;
+							}
+						}
+					}
 				}
-
-				// get value for radioGroup
-				if(f.getGroupValue) {
-					values[field] = f.getGroupValue();
-				}
-
-				// TODO : add config option to get display values
-				// if(f.displayField) {
-					// if(!values['__display']) values['__display'] = {}
-					// values['__display'][field] = f.getDisplayValue();
-				// }
 			}
-		}, this);
-
-		if(this.compatibiltyMode) {
-			var fid = v.getDataFid();
-			var lyr = v.getLayer();
-			var res = {
-				fid: fid.fid,
-				params: values
-			};
-			values = {};
-			values['main'] = res;
+			this.getValues.apply(this, arguments);
 		}
-
-		// SUBFORM : save data
-		var subforms = v.query('ckform');
-		for (var s = 0; s < subforms.length; s++) {
-			var sf = subforms[s];
-			if(!sf.name) continue;
-			if(this.fields.indexOf(sf.name)==-1) continue;
-
-			values[sf.name] = sf.getController().getValues();
-		}
-		//
-
-		if(this.compatibiltyMode) {
-			return {
-				name: fid.layer,
-				data: encodeURIComponent(Ext.encode(values))
-			}
-		}
-		return values;
 	},
 
 	setValues: function(data) {
@@ -888,7 +985,7 @@ Ext.define('Ck.form.Controller', {
 			var requiredColumn;
 
 			// Test all columns for required fields
-			grid.getStore().each(function (rec) {
+			grid.getStore().each(function(rec) {
 				if(rec.data.dummy===true) return;
 				grid.getColumns().forEach(function(col) {
 					if(!col.dataIndex) return;
@@ -917,12 +1014,11 @@ Ext.define('Ck.form.Controller', {
 		return isValid;
 	},
 
-	// Load data from
-	//  - fid
-	//  - dataUrl
-	//  - dataRaw
-	// ...
-	loadData: function (options) {
+	/**
+	 * Load data for a specific feature
+	 * @param {Object}
+	 */
+	loadData: function(options) {
 		var me = this;
 		var v = me.getView();
 
@@ -950,7 +1046,7 @@ Ext.define('Ck.form.Controller', {
 		me.resetData();
 
 		// Load inline data
-		if (data) {
+		if(data) {
 			if(this.oController.afterLoad(data) === false) {
 				Ck.log("afterLoad cancel loadData.");
 				return;
@@ -970,7 +1066,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load data from model (offline websql Database - model is linked to a websql proxy)
-		if (fid && model) {
+		if(fid && model) {
 			model.setId(fid);
 			model.load({
 				success: function(record, operation) {
@@ -1002,7 +1098,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load data by ID - build standard url
-		if (fid) {
+		if(fid) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL (or multiples URL) to load data
@@ -1038,7 +1134,7 @@ Ext.define('Ck.form.Controller', {
 		Cks.get({
 			url: url,
 			scope: this,
-			success: function (response) {
+			success: function(response) {
 				if(response.responseText=="") response.responseText = "{}";
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200) {
@@ -1071,7 +1167,7 @@ Ext.define('Ck.form.Controller', {
 
 				if(v.getEditing()===true) this.startEditing();
 			},
-			failure: function (response, opts) {
+			failure: function(response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
 				Ck.Notify.error("Forms loadData error when loading data from : "+ url +".");
 
@@ -1081,8 +1177,22 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
-	// Enregistre les données dans le Storage
-	saveData: function (options) {
+	/**
+	 * Save data
+	 * @param {Object}
+	 * @param {Object}
+	 * @return {Boolean}
+	 */
+	saveData: function(options, values) {
+		if(Ext.isEmpty(values)) {
+			this.files = [];
+			this.fieldsProcessed = 0;
+			this.fieldsToProcess = this.fields.length;
+			
+			this.getValues(this.saveData, {}, options);
+			return;
+		}
+		
 		options = options || {};
 
 		var me = this;
@@ -1103,28 +1213,22 @@ Ext.define('Ck.form.Controller', {
 		options = Ext.applyIf(options, {
 			method: 'PUT'
 		});
-		if(options.create) options.method = 'POST';
-		if(this.compatibiltyMode) option.method = 'POST';
-		//
+		if(options.create || this.compatibiltyMode) {
+			options.method = 'POST';
+		}
 
 		// Test if form is valid (all fields of the main form)
-		if (!this.isValid()) {
+		if(!this.isValid()) {
 			Ck.log("Form is not valid in saveData : "+ this.name);
 			return false;
 		}
 
 		this.fireEvent('beforesave');
 
-		// We need to stopEditing too, plugins can process data before saving...
-		//this.stopEditing();
-
-		var dt = this.getValues();
-
-		if(this.oController.beforeSave(dt, options) === false) {
+		if(this.oController.beforeSave(values, options) === false) {
 			Ck.log("beforeSave cancel saveData.");
 			return false;
 		}
-
 
 		// SUBFORM : save data only if subform is not linked to main form with a name property
 		var subforms = v.query('ckform');
@@ -1137,8 +1241,6 @@ Ext.define('Ck.form.Controller', {
 				sf.getController().saveData();
 			}
 		}
-		//
-
 
 		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
 		// GRID : save data only if gridpanel is not linked to main form with a name property
@@ -1150,7 +1252,7 @@ Ext.define('Ck.form.Controller', {
 			var dtg = [];
 
 			// Get all records with special formatting for date...
-			grid.getStore().each(function (rec) {
+			grid.getStore().each(function(rec) {
 				if(rec.data.dummy===true) return;
 				var row = {};
 				grid.getColumns().forEach(function(col) {
@@ -1170,21 +1272,20 @@ Ext.define('Ck.form.Controller', {
 			// Use Grid url and data for saving form !
 			// Need rework ;)
 			url = grid.getStore().getProxy().getUrl();
-			dt = dtg;
+			values = dtg;
 
 			// TEMP : assume only one grid !
 			break;
 		}
-		//
-		//
 
+		// If a model is set we use it
 		if(fid && model) {
-			model.set(dt);
+			model.set(values);
 			model.save({
-				success: function (record, operation) {
-					Ext.callback(options.success, options.scope, [dt]);
+				success: function(record, operation) {
+					Ext.callback(options.success, options.scope, [values]);
 				},
-				failure: function (record, operation) {
+				failure: function(record, operation) {
 					// TODO : on Tablet when access local file via ajax, success pass here !!
 					Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
 
@@ -1193,11 +1294,11 @@ Ext.define('Ck.form.Controller', {
 				},
 				scope: this
 			});
-			return;
+			return true;
 		}
 
 		// Load data by ID - build standard url
-		if (fid) {
+		if(fid) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL to load data
@@ -1216,17 +1317,18 @@ Ext.define('Ck.form.Controller', {
 
 		if(!url) {
 			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
-			Ext.callback(options.success, options.scope, [dt]);
+			Ext.callback(options.success, options.scope, [values]);
 			return false;
 		}
-
-		// Load data from custom URL ou standard URL
-		url = this.getFullUrl(url);
-		Cks[options.method.toLowerCase()]({
-			url: url,
-			params: dt,
+		
+		var opt  = {
+			method: options.method.toUpperCase(),
+			url: this.getFullUrl(url),
+			params: values,
+			files: this.files,
 			scope: this,
-			success: function (response) {
+			success: function(response) {
+				this.saveMask.hide();
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200 || response.status == 201) {
 					this.fireEvent('aftersave', data);
@@ -1234,20 +1336,11 @@ Ext.define('Ck.form.Controller', {
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
-					/*
-					var vm = this.getViewModel();
-					if(vm) {
-						vm.set({
-							layer: lyr,
-							fid: fid,
-							data: Ext.apply(vm.get('data'), dt)
-						});
-					}
-					*/
 				}
 				Ext.callback(options.success, options.scope, [data]);
 			},
-			failure: function (response, opts) {
+			failure: function(response, opts) {
+				this.saveMask.hide();
 				this.fireEvent('savefailed', response);
 				if(this.oController.saveFailed(response) === false) {
 					return false;
@@ -1255,8 +1348,21 @@ Ext.define('Ck.form.Controller', {
 
 				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
 			}
+		};
+		
+		this.saveMask = new Ext.LoadMask({
+			target: v,
+			msg: "Save in progress..."
 		});
+		this.saveMask.show();
+		
+		
+		// Load data from custom URL ou standard URL
+		Ck.Ajax.xhr(opt);
 	},
+	
+	
+	
 
 	deleteData: function(options) {
 		options = options || {};
@@ -1285,10 +1391,10 @@ Ext.define('Ck.form.Controller', {
 		if(fid && model) {
 			model.set(dt);
 			model.erase({
-				success: function (record, operation) {
+				success: function(record, operation) {
 					Ext.callback(options.success, options.scope, [dt]);
 				},
-				failure: function (record, operation) {
+				failure: function(record, operation) {
 					// TODO : on Tablet when access local file via ajax, success pass here !!
 					Ck.Notify.error("Forms deleteData error when deleting data : "+ url +".");
 
@@ -1301,7 +1407,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Delete data by ID - build standard url
-		if (fid) {
+		if(fid) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL to load data
@@ -1328,7 +1434,7 @@ Ext.define('Ck.form.Controller', {
 		Cks.del({
 			url: url,
 			scope: this,
-			success: function (response) {
+			success: function(response) {
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 202) {
 					this.fireEvent('afterdelete', data);
@@ -1339,7 +1445,7 @@ Ext.define('Ck.form.Controller', {
 				}
 				Ext.callback(options.success, options.scope, [dt]);
 			},
-			failure: function (response, opts) {
+			failure: function(response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
 				Ck.Notify.error("Forms deleteData error when deleting data : "+ url +".");
 
@@ -1349,7 +1455,7 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
-	resetData: function () {
+	resetData: function() {
 		var v = this.getView();
 
 		// Init le form 'vide'
@@ -1377,7 +1483,7 @@ Ext.define('Ck.form.Controller', {
 			// TODO : revoir le clean pour le subform...
 			// Récup le subform
 			var form = grid.getDockedComponent('subform');
-			if (form) {
+			if(form) {
 				form.reset();
 				delete form.rowIndex;
 			}

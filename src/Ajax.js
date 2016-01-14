@@ -37,16 +37,24 @@ Ext.define('Ck.Ajax', {
 		this.request(options);
 	},
 	
+	/**
+	 * Perform a POST request
+	 * @param {Object}
+	 * @todo Chek if we have file to upload. Use this if yes : application/x-www-form-urlencoded;charset=UTF-8
+	 */
 	post: function(options) {
-		options.method = 'POST';
+		Ext.applyIf(options, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json; charset=UTF-8'
+			}
+		});
+				
+		if(options.encode !== false) {
+			options.params = Ext.encode(options.params);
+			delete options.encode;
+		}
 		
-		// TODO : chek if we have file to upload ...
-		// application/x-www-form-urlencoded;charset=UTF-8
-		options.headers = {
-			'Content-Type': 'application/json; charset=UTF-8'
-		};
-		
-		options.params = Ext.encode(options.params);
 		this.request(options);
 	},
 
@@ -81,6 +89,44 @@ Ext.define('Ck.Ajax', {
 
 		
 		Ext.Ajax.request(options);	
+	},
+
+	/**
+	 * Perform an AJAX request using XHR Level 2.
+	 * @param {Object}
+	 */
+	xhr: function(options) {
+		Ext.applyIf(options, {
+			method	: "POST",
+			url		: "index.php",
+			params	: {},
+			files	: [],
+			scope	: this,
+			success	: Ext.emptyFn,
+			failure	: Ext.emptyFn
+		});
+		
+		var xhr = new XMLHttpRequest();
+
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) {
+				options.success.call(options.scope, xhr);
+			}
+		};
+		
+		var fData = new FormData();
+		for(var key in options.params) {
+			fData.append(key, options.params[key]);
+		}
+		
+		var f;
+		for(var i in options.files) {
+			f = options.files[i];
+			fData.append(f.name, f.value, f.filename);
+		}
+
+		xhr.open(options.method, options.url, true);
+		xhr.send(fData);
 	},
 	
 	isCacheAvailable: function(options) {

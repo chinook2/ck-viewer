@@ -258,7 +258,34 @@
      * Each item is an object with the following format:
      * see app.json for complete description
      */
-    "js": [],
+    "js": [{
+		"path": "libs/ol3/ol-debug.js"
+	},{
+		"path": "libs/ol3/ol.patch.js"
+	},{
+		"path": "libs/proj4js/proj4-src.js"
+	},{
+		"path": "libs/proj4js/defs/EPSG2154.js"
+	},{
+		"path": "libs/proj4js/defs/EPSG4258.js"
+	},{
+		"path": "libs/turf/turf.js"
+	},{
+		"path": "libs/turf/turf-snap.js"
+	},{
+		// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
+		"path": "libs/jspdf/jspdf.min.js"
+	},{
+		"path": "libs/pdf.js/pdf.js"
+	},{
+		"path": "libs/pdf.js/pdf.worker.js"
+	},{
+		"path": "libs/html2canvas/html2canvas.js"
+	},{
+		"path": "libs/zip/zip.js"
+	},{
+		"path": "libs/shapefile-js/shp.js"
+	}],
     
     /**
      * List of all CSS assets in the right inclusion order.
@@ -315,38 +342,6 @@
 			"path": "libs/shapefile-js/shp.min.js"
 		}]
 	},
-	"development": {
-		"environment": "development",
-		"js": [{
-			"path": "libs/ol3/ol-debug.js"
-		},{
-			"path": "libs/ol3/ol.patch.js"
-		},{
-			"path": "libs/proj4js/proj4-src.js"
-		},{
-			"path": "libs/proj4js/defs/EPSG2154.js"
-		},{
-			"path": "libs/proj4js/defs/EPSG4258.js"
-		},{
-			"path": "libs/turf/turf.js"
-		},{
-			"path": "libs/turf/turf-snap.js"
-		},{
-			// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
-			"path": "libs/jspdf/jspdf.min.js"
-		},{
-			"path": "libs/pdf.js/pdf.js"
-		},{
-			"path": "libs/pdf.js/pdf.worker.js"
-		},{
-			"path": "libs/html2canvas/html2canvas.js"
-		},{
-			"path": "libs/zip/zip.js"
-		},{
-			"path": "libs/shapefile-js/shp.js"
-		}]
-	},
-	"testing": {
-		"environment": "testing"
-	}
+	"development": {"environment": "development"},
+	"testing": {"testing": "testing"}
 }
