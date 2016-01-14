@@ -477,7 +477,7 @@ Ext.define('Ck.form.Controller', {
 					bodyPadding: 0,
 					dockedItems: []
 				});
-				return;
+				return c;
 			} else {
 				Ext.applyIf(c, {
 					plugins: [],
