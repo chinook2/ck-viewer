@@ -61,8 +61,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			dataFid:  formController.getView().getDataFid(),
 			
 			// TODO use param from json
-			//layout: 'form',
-			scrollable: 'y',
+			//layout: 'fit',
+			layout: subForm.layout || '',
+			scrollable: subForm.scrollable || 'y',
 			
 			formName: '/' + subForm.url,
 			layer: grid.name,
