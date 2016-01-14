@@ -9,6 +9,7 @@ Ext.define('Ck.form.Controller', {
 
 	autoLoad: true,
 	isSubForm: false,
+	parentForm: false,
 	storage: null,
 
 	dataUrl: null,
@@ -45,7 +46,7 @@ Ext.define('Ck.form.Controller', {
 	init: function() {
 		this.isSubForm = this.view.getIsSubForm();
 		this.autoLoad = this.view.getAutoLoad();
-		if(this.view.getEditing()===true) this.startEditing();
+		this.editing = this.view.getEditing();
 		this.isInit = false;
 
 		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
@@ -60,10 +61,17 @@ Ext.define('Ck.form.Controller', {
 		var inlineForm = this.view.getFormRaw();
 		var parentForm = this.view.up('ckform');
 		if(parentForm) {
+			this.parentForm = parentForm;
+			
+			this.editing = parentForm.getEditing();
+			
 			// inherit dataFid from main view form (used in store url template)
-			if(!this.view.getDataFid()) {
-				this.view.setDataFid(parentForm.getDataFid());
+			vDataFid = this.view.getDataFid() || {};
+			pDataFid = parentForm.getDataFid() || {};
+			if(Ext.isString(vDataFid)) {
+				vDataFid ={fid: vDataFid};
 			}
+			this.view.setDataFid(Ext.apply(vDataFid, pDataFid));
 
 			// Try find parent form name (used for overriden controllers)
 			if(inlineForm && !inlineForm.name) {
@@ -71,6 +79,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}
 
+		if(this.editing===true) this.startEditing();
 		this.initForm(inlineForm);
 	},
 
@@ -242,7 +251,11 @@ Ext.define('Ck.form.Controller', {
 			Ext.each(docks, function(d) {
 				if(!this.defaultDock && (d.dock == 'bottom')) {
 					this.defaultDock = d.initialConfig;
-					this.defaultDock.hidden = false;
+					if(this.isSubForm && !this.editing) {
+						this.defaultDock.hidden = true;
+					}else{
+						this.defaultDock.hidden = false;
+					}
 				}
 				this.view.removeDocked(d);
 			}, this);
@@ -362,6 +375,17 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
+	// Get the main form controller (the 1st)
+	getRootForm: function() {
+		var rootForm = this.getView().findParentBy(function(cmp) {
+			if(cmp.xtype != 'ckform') return false;
+			return (cmp.getController().parentForm === false);
+		});
+		if(rootForm) return rootForm.getController();
+		// By default return the current controller !
+		return this;
+	},
+	
 	// List all included form in a form.
 	getIncludedForm: function(cfg) {
 		if(!cfg) return;
@@ -448,7 +472,7 @@ Ext.define('Ck.form.Controller', {
 			// Subforms : init default params and exit
 			if(c.xtype == "ckform") {
 				Ext.applyIf(c, {
-					editing:true,
+					editing: this.editing,
 					urlTemplate: {ws: "{0}/{1}"},
 					bodyPadding: 0,
 					dockedItems: []

@@ -71,6 +71,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			dockedItems: [{
 				xtype: 'toolbar',
 				dock: 'bottom',
+				hidden: true,
 				style: {border: 0},
 				items: ['->', {
 					text: 'Add',
@@ -94,6 +95,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		// add subform in a panel
 		if(subForm.renderTo) {
 				var ct = Ext.getCmp(subForm.renderTo);
+				if(!ct) ct = formController.lookupReference(subForm.renderTo);
 				if(!ct){
 					Ck.Notify.error("Enable to render subform '"+ subForm.url +"' in '"+ subForm.renderTo +"'")
 					return;
@@ -147,8 +149,8 @@ Ext.define('Ck.form.plugin.Subform', {
 				actions.push({
 					iconCls: 'fa fa-edit',
 					tooltip: 'Edit row',
-					handler: this.loadItem,
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
+						// e.stopPropagation();
 						this.loadItem(view, rec, row, rowIndex);
 					},
 					scope: this
@@ -169,7 +171,10 @@ Ext.define('Ck.form.plugin.Subform', {
 						return 'fa fa-close';
 					},
 					tooltip: 'Delete row',
-					handler: this.deleteItem,
+					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
+						// e.stopPropagation();
+						this.deleteItem(view, rowIndex);
+					},
 					scope: this
 				});
 			}
@@ -192,7 +197,12 @@ Ext.define('Ck.form.plugin.Subform', {
 		}	   
 		
 		if(this.clicksToEdit != 0) {
-			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), this.loadItem, this);			
+			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), function(cmp, record, tr, rowIndex, e, eOpts) {
+				// Prevent load data when clic on action column ! handler of the action already pass...
+				if(!Ext.fly(e.target).hasCls('x-action-col-icon')){
+					this.loadItem(cmp, record);
+				}
+			}, this);			
 		}
 		
 		// On start editing
@@ -268,13 +278,18 @@ Ext.define('Ck.form.plugin.Subform', {
 		var formController = this._subform.getController();
 		var rec = grid.getStore().getAt(rowIndex).getData();
 		
+		// update data fid for current item (used by dataUrl templating)
+		var dataFid = Ext.apply(this._subform.getDataFid(), rec);
+		this._subform.setDataFid(dataFid);
+		//
+		
 		// Delete record if params available
 		formController.deleteData({
 			success: function(){
 				grid.getStore().removeAt(rowIndex);
 				this.resetSubForm();				
 			},
-			fid: rec,
+			fid: dataFid,
 			scope: this
 		});
 	},
@@ -303,11 +318,11 @@ Ext.define('Ck.form.plugin.Subform', {
 		var vDataFid = this._subform.getDataFid();
 		var dataFid = {};
 		if(Ext.isString(vDataFid)) {
-			dataFid = Ext.applyIf({
+			dataFid = Ext.apply({
 				fid: vDataFid
 			}, data);
 		} else{
-			dataFid = Ext.applyIf(vDataFid, data);
+			dataFid = Ext.apply(vDataFid, data);
 		}
 		this._subform.setDataFid(dataFid);
 		//
@@ -330,7 +345,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				dataUrl = dataUrl.read;
 			}
 			var tpl = new Ext.Template(dataUrl);
-			dataUrl = tpl.apply(data);
+			dataUrl = tpl.apply(dataFid);
 			options = {
 				fid: dataFid,
 				url: dataUrl
