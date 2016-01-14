@@ -72,12 +72,14 @@ Ext.define('Ck.map.action.Geolocation', {
 			this.setPosition(this.getGeolocation());
 			
 			if(Ext.isEmpty(this.geoListener)) {
-				this.geoListener = this.getMap().geolocation.on('change', function(evt) {
+				this.geoListener = this.getGeolocation().on('change', function(evt) {
 					this.setPosition(evt.target);
 				}, this);
 			}
 		} else {
 			this.marker.setVisible(false);
+			this.getGeolocation().unByKey(this.geoListener);
+			delete this.geoListener;
 		}
 	},
 	

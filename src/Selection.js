@@ -109,7 +109,17 @@ Ext.define('Ck.Selection', {
 		/**
 		 * Stack selection or not
 		 */
-		stackSelection: false
+		stackSelection: false,
+		
+		/**
+		 *
+		 */
+		maskMsg: "Selection in progress...",
+		
+		/**
+		 * Loading mask
+		 */
+		mask: null
 	},
 	
 	/**
@@ -211,6 +221,12 @@ Ext.define('Ck.Selection', {
 			});
 			this.setSelect(select);
 		}
+		
+		// Create the mask
+		this.setMask(new Ext.LoadMask({
+			msg: this.getMaskMsg(),
+			target: this.getMap().getView()
+		}));
 	},
 	
 	/**
@@ -218,6 +234,7 @@ Ext.define('Ck.Selection', {
 	 * @param {ol.interaction.DrawEvent}
 	 */
 	processSelection: function(evntParams) {
+		this.getMask().show();
 		this.inAddition = event[this.getMergeKey()];
 		var feature = evntParams.feature;
 		var draw = this.getDraw();
@@ -514,6 +531,7 @@ Ext.define('Ck.Selection', {
 		this.nbQueryDone++;
 		
 		if(this.nbQueryDone == this.nbQuery) {
+			this.getMask().hide();
 			this.getCallback()(this.selection);
 		}
 	},
