@@ -1356,9 +1356,12 @@ Ext.define('Ck.form.Controller', {
 		});
 		this.saveMask.show();
 		
-		
-		// Load data from custom URL ou standard URL
-		Ck.Ajax.xhr(opt);
+		if(this.files.length>0){
+			// Save data from custom URL ou standard URL
+			Ck.Ajax.xhr(opt);
+		} else {
+			Cks[options.method.toLowerCase()](opt);
+		}
 	},
 	
 	
