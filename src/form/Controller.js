@@ -386,6 +386,14 @@ Ext.define('Ck.form.Controller', {
 		return this;
 	},
 	
+	// Get subForms by Name or formName
+	getSubForm: function(val) {
+		var sub = this.getView().down('ckform[name='+val+']');
+		if(!sub) sub = this.getView().down('ckform[formName='+val+']');
+		if(sub) return sub.getController();
+		return false;
+	},
+	
 	// List all included form in a form.
 	getIncludedForm: function(cfg) {
 		if(!cfg) return;
@@ -1103,21 +1111,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Load inline data
 		if(data) {
-			if(this.oController.afterLoad(data) === false) {
-				Ck.log("afterLoad cancel loadData.");
-				return;
-			}
-
-			this.getViewModel().setData({
-				layer: lyr,
-				data: data
-			});
-			this.getViewModel().notify();
-			this.setValues(data);
-
-			this.fireEvent('afterload', data);
-
-			if(v.getEditing()===true) this.startEditing();
+			this.loadRawData(data);
 			return;
 		}
 
@@ -1127,22 +1121,7 @@ Ext.define('Ck.form.Controller', {
 			model.load({
 				success: function(record, operation) {
 					var data = record.getData();
-
-					//do something if the load succeeded
-					if(this.oController.afterLoad(data) === false) {
-						Ck.log("afterLoad cancel loadData.");
-						return;
-					}
-
-					this.getViewModel().setData({
-						data: data
-					});
-					this.getViewModel().notify();
-					this.setValues(data);
-
-					this.fireEvent('afterload', data);
-
-					if(v.getEditing()===true) this.startEditing();
+					this.loadRawData(data);
 					return;
 				},
 				failure: function(record, operation) {
@@ -1205,20 +1184,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					//
 
-					if(this.oController.afterLoad(data) === false) {
-						Ck.log("afterLoad cancel loadData.");
-						return;
-					}
-
-					this.getViewModel().set({
-						layer: lyr,
-						fid: fid,
-						data: Ext.apply(this.getViewModel().get('data') || {}, data)
-					});
-					this.getViewModel().notify();
-					this.setValues(data);
-
-					this.fireEvent('afterload', data);
+					this.loadRawData(data);
 				}
 
 				if(v.getEditing()===true) this.startEditing();
@@ -1233,6 +1199,28 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
+	loadRawData: function(data) {
+		var me = this;
+		var v = me.getView();
+		var lyr = v.getLayer();
+		
+		if(this.oController.afterLoad(data) === false) {
+			Ck.log("afterLoad cancel loadData.");
+			return;
+		}
+
+		this.getViewModel().setData({
+			layer: lyr,
+			data: data
+		});
+		this.getViewModel().notify();
+		this.setValues(data);
+
+		this.fireEvent('afterload', data);
+
+		if(v.getEditing()===true) this.startEditing();
+	},
+	
 	/**
 	 * Save data
 	 * @param {Object}
