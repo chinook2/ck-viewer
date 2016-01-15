@@ -692,7 +692,7 @@ Ext.define('Ck.osmimport.import.Controller', {
 			if (renderingName) {
 				var renderingStore = this.vm.getStore("renderings");
 				var rendering = renderingStore.findRecord("name", renderingName, false, false, false, true);
-				if (rendering.isValid()) {
+				if (rendering && rendering.isValid()) {
 					style = new ol.style.Style({
 						fill: new ol.style.Fill({
 							color: rendering.data.fillcolor
