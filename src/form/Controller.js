@@ -833,6 +833,7 @@ Ext.define('Ck.form.Controller', {
 	 * Collect all data from form. Recursively called for the subforms.
 	 * @param {Function}
 	 */
+	 /*
 	getValues: function(callback, values) {
 		this.fieldsProcessed++;
 		if(Ext.isEmpty(values)) {
@@ -934,7 +935,62 @@ Ext.define('Ck.form.Controller', {
 			this.getValues.apply(this, arguments);
 		}
 	},
+	*/
 
+	// Prevent getting values from subform...
+	getValues: function() {
+		var v = this.getView();
+		var form = v.getForm();
+
+		var values = {};
+		this.fields.forEach(function(field) {
+			var f = form.findField(field);
+			if(f && (f.xtype=='hidden' || f.isVisible())) {
+				values[field] = f.getValue();
+
+				// allow formatting date before send to server
+				if(f.submitFormat) {
+					values[field] = f.getSubmitValue();
+				}
+
+				// get value for radioGroup
+				if(f.getGroupValue) {
+					values[field] = f.getGroupValue();
+				}
+			}
+		}, this);
+
+		if(this.compatibiltyMode) {
+			var fid = v.getDataFid();
+			var lyr = v.getLayer();
+			var res = {
+				fid: fid.fid,
+				params: values
+			};
+			values = {};
+			values['main'] = res;
+		}
+
+		// SUBFORM : save data
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			if(!sf.name) continue;
+			if(this.fields.indexOf(sf.name)==-1) continue;
+
+			values[sf.name] = sf.getController().getValues();
+		}
+		//
+
+		if(this.compatibiltyMode) {
+			return {
+				name: fid.layer,
+				data: encodeURIComponent(Ext.encode(values))
+			}
+		}
+		return values;
+	},
+	
 	setValues: function(data) {
 		if(!data) return;
 
@@ -1184,6 +1240,7 @@ Ext.define('Ck.form.Controller', {
 	 * @return {Boolean}
 	 */
 	saveData: function(options, values) {
+		/*
 		if(Ext.isEmpty(values)) {
 			this.files = [];
 			this.fieldsProcessed = 0;
@@ -1192,7 +1249,7 @@ Ext.define('Ck.form.Controller', {
 			this.getValues(this.saveData, {}, options);
 			return;
 		}
-		
+		*/
 		options = options || {};
 
 		var me = this;
@@ -1225,6 +1282,10 @@ Ext.define('Ck.form.Controller', {
 
 		this.fireEvent('beforesave');
 
+		// 
+		var values = this.getValues();
+		//
+		
 		if(this.oController.beforeSave(values, options) === false) {
 			Ck.log("beforeSave cancel saveData.");
 			return false;
@@ -1356,7 +1417,7 @@ Ext.define('Ck.form.Controller', {
 		});
 		this.saveMask.show();
 		
-		if(this.files.length>0){
+		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
 			Ck.Ajax.xhr(opt);
 		} else {
