@@ -1,0 +1,33 @@
+/**
+ * Style for the OSM Import Tool - Panel Import.
+ */
+
+$panel-border-color: #D0D0D0;
+ 
+.ck-osmimport-import {
+	fieldset  {
+		background-color: #FFFFFF !important;
+
+		.x-table-layout-cell {
+			vertical-align: top;
+		}
+	}
+
+	.x-tree-icon-leaf {
+		display: none !important;
+	}
+	
+	.x-tree-node-text {
+		margin-left: 5px;
+	}
+	
+	.x-tree-checkbox {
+		margin-right: 0px;
+	}
+	
+	.x-grid-cell-inner-treecolumn {
+		max-width: 290px ! important;
+	}
+}
+
+	

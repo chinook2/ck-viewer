@@ -76,6 +76,17 @@
 				},{
 					"action": "ckmapSelectBox"
 				}]
+			},{
+				"xtype": "ckgroup",
+				"tooltip": "Import Data from OpenStreetMap",
+				"iconCls": "iconosm",
+				"items": [{
+					"action": "ckmapOsmImportAttributions"
+				},{
+					"action": "ckmapOsmImportIntegration"
+				},{
+					"action": "ckmapOsmImportImport"
+				}]
 			}]
 		},{
             "xtype": "toolbar",

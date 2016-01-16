@@ -14,7 +14,7 @@
 		"publisher" : "",
 		"creator" : "Chinook Server",
 		"rights" : "Chinook, licensed under a BSD License",
-		"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+		"bbox" : [-346718.36,5897881.10,-34855.28,6142479.59],
 		"srs": "EPSG:3857",
 		"scales": [
 			{"res": 2.3886571339117578125, "scale": "1 / 8 530"},
@@ -42,9 +42,9 @@
 		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/wmts/1",
 		"geometry": {},
 		"properties": {
-			"title" : "Open Stree Map",
+			"title" : "Open Street Map",
 			"updated" : "2015-07-22T00:00:00Z",
-			"content" : "Open Stree Map",
+			"content" : "Open Street Map",
 			"authors" : [],
 			"publisher" : "OSM Server",
 			"categories" : [],
@@ -82,11 +82,297 @@
 					"code" : "GetMap",
 					"method" : "GET",
 					"type" : "application/json",
-					"href" : "https://raw.githubusercontent.com/chinook2/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
+					"href" : "https://raw.githubusercontent.com/florentrichard44/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
 				}]
 			}],
 			"extension" : {
-				"path": ""
+				"path": "Limites administratives"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "commune",
+		"properties": {
+			"title" : "Limites communales",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "OpenStreetMap",
+			"active" : false,
+			"bbox" : [-346718.36,5897881.10,-34855.28,6142479.59],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "application/json",
+					"href" : "/packages/local/ck-viewer/resources/data/communes_loireatlantique.geojson"
+				}]
+			}],
+			"extension" : {
+				"path": "Limites administratives"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "busstops",
+		"properties": {
+			"title" : "Arrêts de bus",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=busstops&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "forests",
+		"properties": {
+			"title" : "Forêts",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=forests&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "cycleopposites",
+		"properties": {
+			"title" : "Contresens cyclistes",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=cycleopposites&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "hydros",
+		"properties": {
+			"title" : "Hydrographie",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=hydros&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "parceols",
+		"properties": {
+			"title" : "Parcs éoliens",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=parceols&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "publictransports",
+		"properties": {
+			"title" : "Lignes de transport en commun",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=publictransports&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "schools",
+		"properties": {
+			"title" : "Ecoles",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=schools&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "sportpitches",
+		"properties": {
+			"title" : "Terrains de sport",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=sportpitches&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "polices",
+		"properties": {
+			"title" : "Police / Gendarmerie",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=polices&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "buildings",
+		"properties": {
+			"title" : "Bâtiments",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-180, -90, 180, 90],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=buildings&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
+			}
+		}
+	},{
+		"type": "Feature",
+		"id": "streets",
+		"properties": {
+			"title" : "Rues",
+			"updated" : "2015-07-16T00:00:00Z",
+			"publisher" : "",
+			"active" : false,
+			"bbox" : [-180, -90, 180, 90],
+			"offerings" : [{
+				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/wms",
+				"operations" : [{ 
+					"code" : "GetMap",
+					"method" : "GET",
+					"type" : "image/png",
+					"href" : "http://localhost:8080/projets/__Chinookgs/app/1.6/demo_osm/www/index.php?LAYERS=streets&VERSION=1.1.1",
+					"request":{},
+					"result":{}
+				}]
+			}],
+			"extension" : {
+				"path": "BDD CK1"
 			}
 		}
 	}]

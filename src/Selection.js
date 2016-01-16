@@ -372,6 +372,7 @@ Ext.define('Ck.Selection', {
 				scope: this,
 				url: url,
 				cors: true,
+				withCredentials: true, // TODO remove cross-domain
 				useDefaultXhrHeader : false,
 				nocache: true,
 				params: {

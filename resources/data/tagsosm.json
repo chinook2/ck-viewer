@@ -1,0 +1,312 @@
+{
+	"children": [{
+		"text": "Terrains",
+		"children": [{
+			"text": "Résidentiel",
+			"tag": "[landuse=residential]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Herbe",
+			"tag": "[landuse=grass]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Zone d'Activités Commerciales",
+			"tag": "[landuse=commercial]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
+		"text": "Education",
+		"children": [{
+			"text": "Ecoles Primaires",
+			"tag": "[amenity=school][\"school:FR\"=primaire]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Ecoles Maternelles",
+			"tag": "[amenity=school][\"school:FR\"=maternelle]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Ecoles Elémentaires",
+			"tag": "[amenity=school][\"school:FR\"=\"élémentaire\"]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Collèges",
+			"tag": "[amenity=school][\"school:FR\"=\"collège\"]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Lycées",
+			"tag": "[amenity=school][\"school:FR\"=\"lycée\"]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Bibliothèques",
+			"tag": "[amenity=library]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
+		"text": "Nature",
+		"children": [{
+			"text": "Forêts",
+			"tag": "[landuse=forest]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Fleuves, Rivières",
+			"tag": "[waterway=river]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Ruisseaux",
+			"tag": "[waterway=stream]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Canaux",
+			"tag": "[waterway=canal]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
+		"text": "Déplacements",
+		"children": [{
+			"text": "Transports en Commun",
+			"children": [{
+				"text": "Lignes de Tramway",
+				"tag": "[type=route][route=tram]",
+				"leaf": true,
+				"checked": false
+			}, {
+				"text": "Lignes de Bus TAN",
+				"tag": "[type=route][route=bus][network=TAN]",
+				"leaf": true,
+				"checked": false
+			}, {
+				"text": "Lignes de Car LILA",
+				"tag": "[type=route][route=bus][network=\"FR:Lila\"]",
+				"leaf": true,
+				"checked": false
+			}]
+		}, {
+			"text": "Vélos, Piétons",
+			"children": [{
+				"text": "Parking Vélos, Accroche-vélo",
+				"tag": "[amenity=bicycle_parking]",
+				"leaf": true,
+				"checked": false
+			}, {
+				"text": "Chemin Piétonnier",
+				"tag": "[highway=footway]",
+				"leaf": true,
+				"checked": false
+			}, {
+				"text": "Rues Piétonnes",
+				"tag": "[highway=pedestrian]",
+				"leaf": true,
+				"checked": false
+			}, {
+				"text": "Contre-sens cyclistes",
+				"tag": "[cycleway=opposite_lane]",
+				"leaf": true,
+				"checked": false
+			}]
+		}, {
+			"text": "Automobiles",
+			"children": [{
+				"text": "Parking",
+				"tag": "[amenity=parking]",
+				"leaf": true,
+				"checked": false
+			}]
+		}]
+	}, {
+		"text": "Sports, Loisirs",
+		"children": [{
+			"text": "Terrain de Sport",
+			"tag": "[leisure=pitch]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Circuits automobiles",
+			"tag": "[highway=raceway]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
+		"text": "Urgences, Sécurité",
+		"children": [{
+			"text": "Caserne Pompiers",
+			"tag": "[amenity=fire_station]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Police, Gendarmerie",
+			"tag": "[amenity=police]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
+		"text": "Divers",
+		"children": [{
+			"text": "Centrales de production d'énergie",
+			"tag": "[type=site][power=plant]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Boîtes aux Lettres",
+			"tag": "[amenity=post_box]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Cimetières",
+			"tag": "[landuse=cemetery]",
+			"leaf": true,
+			"checked": false
+		}]
+	}, {
+		"text": "Diverses Erreurs",
+		"children": [{
+			"text": "Erreur no tag",
+			"tag": "",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Erreur tag sans key",
+			"tag": "[=residential]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Erreur tag vide",
+			"tag": "[]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Erreur tag vide avec 1 tag erreur",
+			"tag": "[amenity=school][=residential]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Erreur tag vide avec 1 tag erreur 2",
+			"tag": "[amenity=school]private",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "texte sans crochet",
+			"tag": "amenity=school",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Point-virgule présent",
+			"tag": "[amenity=school];",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Double point sans guillemets dans la clé",
+			"tag": "[amenity=school][school:FR=primaire]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Double point sans guillemets dans la valeur",
+			"tag": "[type=route][network=FR:Lila]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Accent sans guillemets dans la clé",
+			"tag": "[amenity=school][lycée=\"school:FR\"]",
+			"leaf": true,
+			"checked": false
+		}, {
+			"text": "Accent sans guillemets dans la valeur",
+			"tag": "[amenity=school][\"school:FR\"=lycée]",
+			"leaf": true,
+			"checked": false
+		}]
+	},{
+		"text": "Expressions régulières",
+		"children": [{
+			"text": "Magasins.com",
+			"tag": "[shop][name~\"\\\\.com\"]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Postes de police (sauf gendarmeries)",
+			"tag": "[amenity=police][name!~\"Gendarmerie\",i]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Lignes TAN Chronobus",
+			"tag": "[type=route][route=bus][network=TAN][ref~\"^C\"]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Magasins sans nom",
+			"tag": "[shop][name!~\".\"]",
+			"leaf": true,
+			"checked": false
+		},{
+			"text": "Cas d'erreurs",
+			"children": [{
+				"text": "Clé~ sans valeur",
+				"tag": "[name~]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Clé!~ sans valeur",
+				"tag": "[name!~]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "~valeur sans clé",
+				"tag": "[~\"^C\"]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "!~valeur sans clé",
+				"tag": "[!~\"^C\"]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Valeur sans guillemets",
+				"tag": "[name~^C]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Valeur sans guillemet initial",
+				"tag": "[name~^C\"]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Valeur sans guillemet final",
+				"tag": "[name~\"^C]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive incorrect 1",
+				"tag": "[name~\"^C\",c]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive incorrect 2",
+				"tag": "[name~\"^C\"i]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive incorrect 3",
+				"tag": "[name~\"^C\",]",
+				"leaf": true,
+				"checked": false
+			},{
+				"text": "Case insensitive sans valeur",
+				"tag": "[name,i]",
+				"leaf": true,
+				"checked": false
+			}]
+		}]
+	}]
+}
