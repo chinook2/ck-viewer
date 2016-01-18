@@ -295,8 +295,10 @@ Ext.define('Ck.form.Controller', {
 			if(form.dataUrl) {
 				this.dataUrl = form.dataUrl;
 			}
-			if(form.dataModel) {
-				this.dataModel = Ext.create(form.dataModel, {});
+			// Init Model from view or form
+			var model = form.dataModel || this.view.getDataModel();
+			if(model) {
+				this.dataModel = Ext.create(model, {});
 			}
 			// if(form.dataStore) {
 				// this.dataStore = Ext.getStore(form.dataStore);
