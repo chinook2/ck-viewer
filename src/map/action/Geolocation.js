@@ -12,7 +12,7 @@ Ext.define('Ck.map.action.Geolocation', {
 	alias: "widget.ckmapGeolocation",
 
 	toggleGroup: 'geolocation-toggle',
-	tooltip: 'Zoom to your location',
+	tooltip: 'Mark your location',
 	iconCls: 'fa fa-street-view',
 
 	itemId: 'geolocation',

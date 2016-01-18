@@ -45,6 +45,11 @@ Ext.define('Ck.map.action.Select', {
 	type: 'point',
 	
 	multi: true,
+		
+	/**
+	 * Where display the edit panel
+	 */
+	target: "window",
 	
 	/**
 	 * Select on vector layer :
@@ -86,6 +91,56 @@ Ext.define('Ck.map.action.Select', {
 		for(var i = 0; i < res.length; i++) {
 			Ck.log("The layer \"" + res[i].layer.get("title") + "\" return " + res[i].features.length + " result");
 		}
+		
+		if(res.length == 0) {
+			return false;
+		}
+		
+		var resOpt = {
+			xtype	: "ckresult",
+			result	: res,
+			openner	: this
+		};
+		
+		switch(this.target) {
+			case "window":
+				if(Ext.isEmpty(this.win)) {
+					this.result = Ext.create(resOpt);
+					this.win = Ext.create('Ext.window.Window', Ext.apply({
+						title: "Result selection",
+						width: 800,
+						height: 600,
+						layout: 'fit',
+						collapsible: true,
+						closable: false,
+						maximizable: true,
+						items: [this.result]
+					}), this.targetOpt);
+					this.result = this.result.getController();
+				}
+				
+				this.result.loadData(res);
+				this.win.show();
+				break;
+			case "docked":
+				if(Ext.isEmpty(this.result)) {
+					this.result = Ext.create(
+						Ext.apply({
+							dock : "top"
+						}, this.targetOpt, resOpt)
+					);
+					
+					var view = map.getView();
+					this.win = view.addDocked(this.result);
+					this.getMap().getOlMap().updateSize();
+					this.result = this.result.getController();
+				}
+				
+				this.result.loadData(res);
+				this.win.show();
+				break;
+		}
+		
 	},
 	
 	/**
@@ -114,5 +169,23 @@ Ext.define('Ck.map.action.Select', {
 				scope: this
 			}
 		});
-	}	
+	},
+	
+	resetSelection: function() {
+		this.select.resetSelection();
+	},
+	
+	/**
+	 *
+	 */
+	close: function() {
+		switch(this.target) {
+			case "window":
+				this.win.hide();
+				break;
+			case "docked":
+				this.win.show();
+				break;
+		}
+	}
 });

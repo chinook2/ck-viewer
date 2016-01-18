@@ -57,8 +57,68 @@
         "fr": "Outils de mesure",
         "es": " - "
     },{
-        "en": "Get feature info",
-        "fr": "Outils 'i'",
+        "en": "Clear history",
+        "fr": "Vider l'historique",
+        "es": " - "
+    },{
+        "en": "Displaying features",
+        "fr": "Afficher les entités",
+        "es": " - "
+    },{
+        "en": "of",
+        "fr": "sur",
+        "es": " - "
+    },{
+        "en": "Features",
+        "fr": "Entités",
+        "es": " - "
+    },{
+        "en": "Result selection",
+        "fr": "Résultats des sélections",
+        "es": " - "
+    },{
+        "en": "Select tools",
+        "fr": "Outils de sélections",
+        "es": " - "
+    },{
+        "en": "Select by click",
+        "fr": "Sélection par clic",
+        "es": " - "
+    },{
+        "en": "Select by circle",
+        "fr": "Sélection par cercle",
+        "es": " - "
+    },{
+        "en": "Select by polygon",
+        "fr": "Sélection par polygone",
+        "es": " - "
+    },{
+        "en": "Reset view",
+        "fr": "Vue initiale",
+        "es": " - "
+    },{
+        "en": "Mark your location",
+        "fr": "Marquer votre position",
+        "es": " - "
+    },{
+        "en": "Features",
+        "fr": "Entités",
+        "es": " - "
+    },{
+        "en": "Zoom in",
+        "fr": "Zoomer",
+        "es": " - "
+    },{
+        "en": "Zoom out",
+        "fr": "Dézoomer",
+        "es": " - "
+    },{
+        "en": "Collapse panel",
+        "fr": "Entités",
+        "es": " - "
+    },{
+        "en": "Selection in progress",
+        "fr": "Sélection en cours",
         "es": " - "
     }
     ]

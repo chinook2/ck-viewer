@@ -75,7 +75,7 @@ Ext.define("Ck.Edit", {
 	},{
 		text: "Cancel",
 		itemId: "cancel"
-	},,{
+	},{
 		text: "Close",
 		itemId: "close"
 	}]

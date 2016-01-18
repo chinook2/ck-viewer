@@ -55,7 +55,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			map			: map,
 			callback	: this.displayInfo,
 			scope		: this,
-			highlight	: false
+			highlight	: false,
+			limit		: null
 		});
 	},
 	
