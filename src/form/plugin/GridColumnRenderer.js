@@ -14,7 +14,7 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	// Field of store to match record to read for display (match with dataField)
 	valueField: null,
 	
-	// Field of the grid record to match with valueField - default to valueField
+	// Field of the grid record to match with valueField - default to column dataIndex
 	dataField: null,
 	
 	// Filters for the store (optionnal)
@@ -22,12 +22,12 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	
 	
 	// TODO : On passe ici 2 fois !! a cause du this.grid.reconfigure(conf.columns); des autres plugins (actions)
-	init: function(column) {
+	init: function(column) {	
 		this.column = column;
 		var grid = column.up('grid');
 		var formController = grid.lookupController();
 		
-		if(!this.dataField) this.dataField = this.valueField;
+		if(!this.dataField) this.dataField =  column.dataIndex;
 
 		// Init Store
 		// Default StoreID
@@ -62,20 +62,24 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 			load: function(){
 				if(!this.dataStore.isLoaded()){
 					this.dataStore.on('load', function(str, records, successful, eOpts) {
-						this.updateRecords(grid, column);				 
+						grid.getView().refresh();
 					}, this);
 				} else {
-					this.updateRecords(grid, column);
+					grid.getView().refresh();
 				}
 			},
 			add: function(){
-				this.updateRecords(grid, column);
+				grid.getView().refresh();
 			},
 			update: function() {
-				this.updateRecords(grid, column);
+				grid.getView().refresh();
 			},
 			scope: this
 		});
+		
+		// Assign the renderer
+		column.scope = this;
+		column.renderer = this.renderer;
 	},
 
 	/**
@@ -86,24 +90,14 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 		// this.dataStore.destroy();
 	},
 	
-	updateRecords: function(grid, column) {
-		if(!this.dataStore) return;
-		
-		grid.getStore().each(function(rec){
-			rec.set(column.dataIndex, this.renderer(rec), {
-				dirty: false
-			} );
-		}, this);
-	},
-	
-	renderer: function(rec) {
+	renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
 		if(!this.dataStore.isLoaded()) return '...';
 		
-		var val = rec.get(this.dataField);
+		var val = record.get(this.dataField);
 		
 		if(this.filters){
 			this.filters.forEach(function(f, idx, fs){
-				f.value = rec.get(f.property);
+				f.value = record.get(f.property);
 				fs[idx] = f;
 			}, this);
 			this.dataStore.filter(this.filters);

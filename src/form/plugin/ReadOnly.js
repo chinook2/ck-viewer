@@ -28,6 +28,12 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.formController = cmp.lookupController();
 		this.formViewModel = cmp.lookupViewModel();
 
+		// Init on first show - hide trigger if not editing
+		var editing = this.formViewModel.get("editing");
+		if(!editing) {
+			//cmp.hidden = true;
+		}
+
 		if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
 
 		this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
@@ -36,7 +42,6 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
 
 		cmp.on('afterrender', this.onRender, this, {delay: 50});
-		cmp.on('change', this.onChange, this);
 
 		this.formController.on('startEditing', this.setReadOnly, this);
 		this.formController.on('stopEditing', this.setReadOnly, this);
@@ -56,10 +61,13 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 		// Masque par défaut les input si form.readOnly est true
 		this.setReadOnly();
+		
+		// When update field need to update readonly label
+		cmp.on('change', this.setReadOnly, this);
 	},
 
 	onChange : function(cmp, newValue, oldValue, eOpts){
-		this.setReadOnly();
+		// this.setReadOnly();
 	},
 
 	setReadOnly: function() {
@@ -68,6 +76,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		var cmp = this.getCmp();
 		if(!cmp.rendered) return;
 		if(!cmp.triggerWrap) return;
+		// cmp.show();
 		
 		// r for readOnly is true when editing is false
 		var r = !this.formViewModel.get("editing");
@@ -97,7 +106,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			if(!cmp.hideLabel) cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
 
 			var val = cmp.getValue();
+			// For combobox
 			if(cmp.displayField) val = cmp.getDisplayValue();
+			// For Datefields
+			if(cmp.submitFormat) val = cmp.getSubmitValue();
 			
 			if(val != '') {
 				val = this.prefix + val + this.suffix;

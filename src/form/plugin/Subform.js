@@ -184,7 +184,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
-				hidden: !formController.getView().getEditing(),
+				//hidden: !formController.getView().getEditing(),
 				items: actions
 			});
 
@@ -197,14 +197,6 @@ Ext.define('Ck.form.plugin.Subform', {
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
 		}	   
 		
-		if(this.clicksToEdit != 0) {
-			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), function(cmp, record, tr, rowIndex, e, eOpts) {
-				// Prevent load data when clic on action column ! handler of the action already pass...
-				if(!Ext.fly(e.target).hasCls('x-action-col-icon')){
-					this.loadItem(cmp, record);
-				}
-			}, this);			
-		}
 		
 		// On start editing
 		formController.on({
@@ -212,16 +204,44 @@ Ext.define('Ck.form.plugin.Subform', {
 			stopEditing: this.stopEditing,
 			scope: this
 		});
+		// Init editing state
+		if(this._subform.editing === true) {
+			this.startEditing();
+		} 
+		if(this._subform.editing === false) {
+			this.stopEditing();	
+		}
+		//
+		
+		if(this.clicksToEdit != 0) {
+			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), function(cmp, record, tr, rowIndex, e, eOpts) {
+				// Prevent load data when clic on action column ! handler of the action already pass...
+				if(!Ext.fly(e.target).hasCls('x-action-col-icon')){
+					this.loadItem(cmp, record, tr, rowIndex);
+				}
+			}, this);			
+		}
 	},
 	
 	startEditing: function() {
 		// add & show action column
 		this.actionColumn.show();
+		
+		// Enable rowediting plugin
+		var sfplugin = this._grid.findPlugin('rowediting');
+		if(sfplugin) sfplugin.enable();
 	},
 
 	stopEditing: function() {
 		// hide action column
 		this.actionColumn.hide();
+		
+		// Disable rowediting plugin
+		var sfplugin = this._grid.findPlugin('rowediting');
+		if(sfplugin) sfplugin.disable();
+		
+		// Force 
+		this.clicksToEdit = 1;				
 	},
 	
 	addItem: function() {				
@@ -239,6 +259,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					// Insert new record	at the beginning	
 					this._grid.getStore().insert(0, res);
 				}
+				this._grid.getView().refresh();
 				
 				this.resetSubForm();
 			},
@@ -261,6 +282,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				// Update selected record
 				var rec = this._grid.getStore().getAt(this._subform.rowIndex);
 				if(rec) rec.set(res);
+				this._grid.getView().refresh();
 				
 				delete this._subform.rowIndex;
 				
