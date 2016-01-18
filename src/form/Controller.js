@@ -42,7 +42,10 @@ Ext.define('Ck.form.Controller', {
 	afterDelete: Ext.emptyFn,
 	deleteFailed: Ext.emptyFn,
 	//
-
+	
+	fieldsProcessed: 0,
+	formsProcessed: 0,
+	
 	init: function() {
 		this.isSubForm = this.view.getIsSubForm();
 		this.autoLoad = this.view.getAutoLoad();
@@ -295,8 +298,10 @@ Ext.define('Ck.form.Controller', {
 			if(form.dataUrl) {
 				this.dataUrl = form.dataUrl;
 			}
-			if(form.dataModel) {
-				this.dataModel = Ext.create(form.dataModel, {});
+			// Init Model from view or form
+			var model = form.dataModel || this.view.getDataModel();
+			if(model) {
+				this.dataModel = Ext.create(model, {});
 			}
 			// if(form.dataStore) {
 				// this.dataStore = Ext.getStore(form.dataStore);
@@ -384,6 +389,14 @@ Ext.define('Ck.form.Controller', {
 		if(rootForm) return rootForm.getController();
 		// By default return the current controller !
 		return this;
+	},
+	
+	// Get subForms by Name or formName
+	getSubForm: function(val) {
+		var sub = this.getView().down('ckform[name='+val+']');
+		if(!sub) sub = this.getView().down('ckform[formName='+val+']');
+		if(sub) return sub.getController();
+		return false;
 	},
 	
 	// List all included form in a form.
@@ -833,8 +846,8 @@ Ext.define('Ck.form.Controller', {
 	 * Collect all data from form. Recursively called for the subforms.
 	 * @param {Function}
 	 */
+	 /*
 	getValues: function(callback, values) {
-		this.fieldsProcessed++;
 		if(Ext.isEmpty(values)) {
 			var values = {};
 		}
@@ -842,7 +855,7 @@ Ext.define('Ck.form.Controller', {
 		var form = v.getForm();
 		var fid = v.getDataFid();
 		
-		if(this.fieldsProcessed == (this.fieldsToProcess + 1)) {
+		if(this.fieldsProcessed == this.fieldsToProcess) {
 			if(this.compatibiltyMode) {
 				var lyr = v.getLayer();
 				var res = {
@@ -853,29 +866,35 @@ Ext.define('Ck.form.Controller', {
 				values['main'] = res;
 			}
 
-			// Loop on subforms. Now there is no subforms
-			var subforms = v.query('ckform');
-			for (var s = 0; s < subforms.length; s++) {
-				var sf = subforms[s];
-				if(!sf.name || this.fields.indexOf(sf.name)==-1) {
-					continue;
+			// Loop on subforms
+			if(this.formsProcessed < this.formsToProcess) {
+				var subforms = v.query('ckform');
+				var sf = subforms[this.formsProcessed++];
+				if(!sf.name || this.fields.indexOf(sf.name) == -1) {
+					this.getValues.apply(this, arguments);
+					return;
 				}
 
-				values[sf.name] = sf.getController().getValues.apply(this, arguments);
-			}
-
-			if(this.compatibiltyMode) {
-				values = {
-					name: fid.layer,
-					data: encodeURIComponent(Ext.encode(values))
+				// Add the callback
+				var args = Array.prototype.slice.apply(arguments);
+				args.unshift(this.getValues);
+				
+				var ctrl = sf.getController();
+				ctrl.getValues.apply(ctrl, arguments);
+			} else {
+				if(this.compatibiltyMode) {
+					values = {
+						name: fid.layer,
+						data: encodeURIComponent(Ext.encode(values))
+					}
 				}
+				// First argument will be delete (is the callback)
+				var fn = callback;
+				var args = Array.prototype.slice.apply(arguments);
+				args.splice(0, 1);
+				
+				fn.apply(this, args);
 			}
-			// First argument will be delete (is the callback), the second must be placed at last
-			var fn = callback;
-			var args = Array.prototype.slice.apply(arguments);
-			args.splice(0, 1);
-			
-			fn.apply(this, [args[1], args[0]]);
 		} else {
 			field = this.fields[this.fieldsProcessed];
 			var f = form.findField(field);
@@ -912,18 +931,19 @@ Ext.define('Ck.form.Controller', {
 								filename: f.getValue()
 							});
 						} else {
-							var reader  = new FileReader();
-							reader.onloadend = function(args, fName, evt) {
-								values[field] = fName;
-								this.files.push({
-									name: field,
-									value: Ck.dataURItoBlob(reader.result),
-									filename: fName
-								});
-								this.getValues.apply(this, args);
-							}.bind(this, arguments, fName);
-							
 							if(inp.files.length != 0) {
+								// Read the file to create a Blob
+								var reader  = new FileReader();
+								reader.onloadend = function(args, fName, evt) {
+									values[field] = fName;
+									this.files.push({
+										name: field,
+										value: Ck.dataURItoBlob(reader.result),
+										filename: fName
+									});
+									this.fieldsProcessed++;
+									this.getValues.apply(this, args);
+								}.bind(this, arguments, fName);
 								reader.readAsDataURL(inp.files[0]);
 								return;
 							}
@@ -931,10 +951,66 @@ Ext.define('Ck.form.Controller', {
 					}
 				}
 			}
+			this.fieldsProcessed++;
 			this.getValues.apply(this, arguments);
 		}
 	},
+	*/
 
+	// Prevent getting values from subform...
+	getValues: function() {
+		var v = this.getView();
+		var form = v.getForm();
+
+		var values = {};
+		this.fields.forEach(function(field) {
+			var f = form.findField(field);
+			if(f && (f.xtype=='hidden' || f.isVisible())) {
+				values[field] = f.getValue();
+
+				// allow formatting date before send to server
+				if(f.submitFormat) {
+					values[field] = f.getSubmitValue();
+				}
+
+				// get value for radioGroup
+				if(f.getGroupValue) {
+					values[field] = f.getGroupValue();
+				}
+			}
+		}, this);
+
+		if(this.compatibiltyMode) {
+			var fid = v.getDataFid();
+			var lyr = v.getLayer();
+			var res = {
+				fid: fid.fid,
+				params: values
+			};
+			values = {};
+			values['main'] = res;
+		}
+
+		// SUBFORM : save data
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			if(!sf.name) continue;
+			if(this.fields.indexOf(sf.name)==-1) continue;
+
+			values[sf.name] = sf.getController().getValues();
+		}
+		//
+
+		if(this.compatibiltyMode) {
+			return {
+				name: fid.layer,
+				data: encodeURIComponent(Ext.encode(values))
+			}
+		}
+		return values;
+	},
+	
 	setValues: function(data) {
 		if(!data) return;
 
@@ -1047,21 +1123,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Load inline data
 		if(data) {
-			if(this.oController.afterLoad(data) === false) {
-				Ck.log("afterLoad cancel loadData.");
-				return;
-			}
-
-			this.getViewModel().setData({
-				layer: lyr,
-				data: data
-			});
-			this.getViewModel().notify();
-			this.setValues(data);
-
-			this.fireEvent('afterload', data);
-
-			if(v.getEditing()===true) this.startEditing();
+			this.loadRawData(data);
 			return;
 		}
 
@@ -1071,22 +1133,7 @@ Ext.define('Ck.form.Controller', {
 			model.load({
 				success: function(record, operation) {
 					var data = record.getData();
-
-					//do something if the load succeeded
-					if(this.oController.afterLoad(data) === false) {
-						Ck.log("afterLoad cancel loadData.");
-						return;
-					}
-
-					this.getViewModel().setData({
-						data: data
-					});
-					this.getViewModel().notify();
-					this.setValues(data);
-
-					this.fireEvent('afterload', data);
-
-					if(v.getEditing()===true) this.startEditing();
+					this.loadRawData(data);
 					return;
 				},
 				failure: function(record, operation) {
@@ -1149,20 +1196,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					//
 
-					if(this.oController.afterLoad(data) === false) {
-						Ck.log("afterLoad cancel loadData.");
-						return;
-					}
-
-					this.getViewModel().set({
-						layer: lyr,
-						fid: fid,
-						data: Ext.apply(this.getViewModel().get('data') || {}, data)
-					});
-					this.getViewModel().notify();
-					this.setValues(data);
-
-					this.fireEvent('afterload', data);
+					this.loadRawData(data);
 				}
 
 				if(v.getEditing()===true) this.startEditing();
@@ -1177,6 +1211,28 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
+	loadRawData: function(data) {
+		var me = this;
+		var v = me.getView();
+		var lyr = v.getLayer();
+		
+		if(this.oController.afterLoad(data) === false) {
+			Ck.log("afterLoad cancel loadData.");
+			return;
+		}
+
+		this.getViewModel().setData({
+			layer: lyr,
+			data: data
+		});
+		this.getViewModel().notify();
+		this.setValues(data);
+
+		this.fireEvent('afterload', data);
+
+		if(v.getEditing()===true) this.startEditing();
+	},
+	
 	/**
 	 * Save data
 	 * @param {Object}
@@ -1184,6 +1240,7 @@ Ext.define('Ck.form.Controller', {
 	 * @return {Boolean}
 	 */
 	saveData: function(options, values) {
+		/*
 		if(Ext.isEmpty(values)) {
 			this.files = [];
 			this.fieldsProcessed = 0;
@@ -1192,7 +1249,7 @@ Ext.define('Ck.form.Controller', {
 			this.getValues(this.saveData, {}, options);
 			return;
 		}
-		
+		*/
 		options = options || {};
 
 		var me = this;
@@ -1225,6 +1282,10 @@ Ext.define('Ck.form.Controller', {
 
 		this.fireEvent('beforesave');
 
+		// 
+		var values = this.getValues();
+		//
+		
 		if(this.oController.beforeSave(values, options) === false) {
 			Ck.log("beforeSave cancel saveData.");
 			return false;
@@ -1356,7 +1417,7 @@ Ext.define('Ck.form.Controller', {
 		});
 		this.saveMask.show();
 		
-		if(this.files.length>0){
+		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
 			Ck.Ajax.xhr(opt);
 		} else {
