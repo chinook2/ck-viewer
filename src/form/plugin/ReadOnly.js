@@ -28,35 +28,36 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.formController = cmp.lookupController();
 		this.formViewModel = cmp.lookupViewModel();
 
-		// Init on first show - hide trigger if not editing
-		var editing = this.formViewModel.get("editing");
-		if(!editing) {
-			//cmp.hidden = true;
-		}
-
 		if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
 
-		this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
-		this.labelEl = new Ext.Element(document.createElement('label')).addCls('x-form-item-label x-form-item-label-default');
-		this.textEl.appendTo(this.labelEl);
-		this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
+		// Init Text/Label for readOnly after cmp rendered
+		cmp.on('afterrender', this.onRenderCmp, this);
 
-		cmp.on('afterrender', this.onRender, this, {delay: 50});
-
+		// Update readOnly status on start/stop editing
 		this.formController.on('startEditing', this.setReadOnly, this);
 		this.formController.on('stopEditing', this.setReadOnly, this);
 	},
 
 	destroy: function () {
 		this.cmp.lookupController().clearListeners();
+		if(this.textEl) this.textEl.destroy();
+		if(this.labelEl) this.labelEl.destroy();
+		delete this.textEl;
+		delete this.labelEl;
+		
 		this.callParent();
 	},
 
 	// private
-	onRender : function(cmp){
-		if(!this.labelEl.dom) return;
+	onRenderCmp : function(cmp){
+		// Ck.log("onRenderCmp for : " + cmp.name);
 		
 		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)
+		this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
+		this.labelEl = new Ext.Element(document.createElement('label')).addCls('x-form-item-label x-form-item-label-default');
+		this.textEl.appendTo(this.labelEl);
+		this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
+		
 		if(cmp.triggerWrap) this.labelEl.insertAfter(cmp.triggerWrap);
 
 		// Masque par défaut les input si form.readOnly est true
@@ -66,17 +67,17 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		cmp.on('change', this.setReadOnly, this);
 	},
 
-	onChange : function(cmp, newValue, oldValue, eOpts){
-		// this.setReadOnly();
-	},
-
 	setReadOnly: function() {
-		if(!this.labelEl.dom) return;
-		
 		var cmp = this.getCmp();
 		if(!cmp.rendered) return;
 		if(!cmp.triggerWrap) return;
-		// cmp.show();
+		
+		if(!this.labelEl || !this.labelEl.dom) {
+			// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
+			return;
+		}
+		
+		// Ck.log("setReadOnly : " + cmp.name );
 		
 		// r for readOnly is true when editing is false
 		var r = !this.formViewModel.get("editing");
