@@ -91,8 +91,13 @@ Ext.define('Ck.form.Controller', {
 		this.callParent();
 	},
 
-	formLoad: function(options) {
-		this.loadData(options);
+	formLoad: function(btn) {
+		if(btn && btn.formName) {
+			this.view.setFormName(btn.formName);
+			this.isInit = false;
+			this.initForm();
+			return;
+		}
 	},
 
 	formEdit: function() {
@@ -273,23 +278,19 @@ Ext.define('Ck.form.Controller', {
 			}
 
 
-			/**/
-			if(this.isSubForm) {
-				// Sous-formulaire les contrôles sont différents
-				// var bbar = this.getView().getDockedItems('toolbar[dock="bottom"]');
-				// if(bbar[0]) bbar[0].hide();
-			} else {
-				// Init la popup qui contient le formulaire
-				var fcw = form.window;
-				var win = this.view.up('window');
-				if(win) {
-					// Ext.apply(win, fcw);
-					// win.show();
+			// Init la popup qui contient le formulaire
+			var fcw = form.window;
+			var win = this.view.up('window');
+			if(win && fcw) {
+				// Ext.apply(win, fcw);
+				// win.show();
 
-					// TODO : binding ou surcharge complète du config...
-					// if(fcw) win.setBind(fcw);
+				// TODO : binding ou surcharge complète du config...
+				// if(fcw) win.setBind(fcw);
 
-					if(fcw.title) win.setTitle(fcw.title);
+				if(fcw.title) win.setTitle(fcw.title);
+				// Adjust form popup Size on PC (tablet is full screen)
+				if(Ext.os.is.desktop) {
 					if(fcw.width) win.setWidth(fcw.width);
 					if(fcw.height) win.setHeight(fcw.height);
 				}
@@ -1372,7 +1373,7 @@ Ext.define('Ck.form.Controller', {
 				if(Ext.isString(fid)) fid = [fid];
 				url = tpl.apply(fid);
 			} else {
-				Ck.log("fid ("+ fid +") defined but no dataUrl template in "+ this.name);
+				//Ck.log("fid defined but no dataUrl template in "+ this.name);
 			}
 		}
 
