@@ -148,7 +148,18 @@ Ext.define('Ck.form.plugin.Subform', {
 			var actions = [];
 			if(this.editrow!==false || this.clicksToEdit==0){
 				actions.push({
-					iconCls: 'fa fa-edit',
+					isDisabled: function(v, r, c, i, rec) {
+						if(!rec) return true;
+						if(rec.get('dummy')) return true;
+						if(this.disableEditRow) {
+							if(rec.get(this.disableEditRow.property) === this.disableEditRow.value) return true
+						}
+						return false;
+					},
+					getClass: function(v, meta, rec) {
+						if(rec && rec.get('dummy')) return false;
+						return 'fa fa-edit';
+					},
 					tooltip: 'Edit row',
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
 						// e.stopPropagation();
