@@ -662,17 +662,22 @@ Ext.define('Ck.form.Controller', {
 									}
 								} else {
 									// If store is an URL that automatic store is created
-									storeUrl = o.store;
+									storeUrl = store;
 									store = {};
 								}
 							}
 							
-							// Store conf can be an object
+							// Store conf can be an object (test original conf)
 							if(Ext.isObject(o.store)) {
 								if(Ext.isString(store.url)) {
 									// Another alias to define storeUrl
 									storeUrl = store.url;
 									delete store.url;
+								}
+								if(store.proxy && store.proxy.url) {
+									// Standard way to define URL but need to get it for templating and format
+									storeUrl = store.proxy.url;
+									delete store.proxy.url;
 								}
 							}
 
@@ -702,7 +707,7 @@ Ext.define('Ck.form.Controller', {
 									});
 								} else {
 									// Need default JSON reader
-									store = Ext.Object.mergeIf(store, {
+									store = Ext.Object.merge(store, {
 										autoLoad: !(c.queryMode==='remote'),
 										proxy: {
 											type: "ajax",
