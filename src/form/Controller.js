@@ -1010,7 +1010,8 @@ Ext.define('Ck.form.Controller', {
 			if(!sf.name) continue;
 			if(this.fields.indexOf(sf.name)==-1) continue;
 
-			values[sf.name] = sf.getController().getValues();
+			if(!values[sf.name]) values[sf.name] = {};
+			values[sf.name] = Ext.Object.merge(values[sf.name], sf.getController().getValues());
 		}
 		//
 
