@@ -39,7 +39,11 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	},
 
 	destroy: function () {
-		this.cmp.lookupController().clearListeners();
+		if(this.cmp){
+			var ctrl = this.cmp.lookupController();
+			if(ctrl) ctrl.clearListeners();
+		}
+		
 		if(this.textEl) this.textEl.destroy();
 		if(this.labelEl) this.labelEl.destroy();
 		delete this.textEl;
