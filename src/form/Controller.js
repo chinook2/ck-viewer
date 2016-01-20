@@ -538,6 +538,12 @@ Ext.define('Ck.form.Controller', {
 								if(f) f.setValue(Ext.Date.clearTime(new Date()));
 							});
 						}
+						if(c.maxValue == 'now') {
+							c.maxValue = new Date();
+						}
+						if(c.minValue == 'now') {
+							c.minValue = new Date();
+						}
 						break;
 					case "timefield":
 						Ext.applyIf(c, {
