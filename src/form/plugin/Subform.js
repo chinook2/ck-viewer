@@ -393,8 +393,12 @@ Ext.define('Ck.form.plugin.Subform', {
 	},
 	
 	resetSubForm: function() {
+		var vm = this._subform.getViewModel();
+		vm.set('updating', false);
+		
 		this._subform.getController().resetData();
 		this._grid.focus();
+		
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}

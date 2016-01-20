@@ -1534,10 +1534,30 @@ Ext.define('Ck.form.Controller', {
 	resetData: function() {
 		var v = this.getView();
 
-		// Init le form 'vide'
+		// Reset main form
 		v.reset();
-
-		// Reset les données du viewModel (binding...)
+		
+		// SUBFORM : reset data
+		var subforms = v.query('ckform');
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			sf.reset();
+			if(sf.getViewModel().get('updating')===true) {
+				sf.getViewModel().set('updating', false);
+			}
+			sf.getController().fireEvent('afterreset');
+		}
+		//
+		
+		// GRID : reset data
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			grid.getStore().removeAll();
+		}
+		//
+		
+		// Reset viewModel data (binding...)
 		this.getViewModel().setData({
 			layer: null,
 			fid: null,
@@ -1546,24 +1566,6 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().notify();
 
 		this.fireEvent('afterreset');
-
-		/*
-		// GRID : reset data
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			// Suppr tous les enregistrements du grid.
-			grid.getStore().removeAll();
-			// TODO : revoir le clean pour le subform...
-			// Récup le subform
-			var form = grid.getDockedComponent('subform');
-			if(form) {
-				form.reset();
-				delete form.rowIndex;
-			}
-		}
-		*/
-
 		return true;
 	}
 });
