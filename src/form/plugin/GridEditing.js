@@ -9,6 +9,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	deleterow: true,
 	
 	init: function(grid) {
+		if(this.disabled) return;
 		this.grid = grid;
 				
 		var formController = grid.lookupController();

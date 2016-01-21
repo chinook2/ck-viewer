@@ -340,11 +340,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		var formController = this._subform.getController();
 		var grid = this._grid;
-		
-		// Init update mode
-		var vm = this._subform.getViewModel();
-		vm.set('updating', true);
-		
+				
 		var data = rec.getData();
 		var fidName = grid.subform.fid || grid.fid || 'fid';	
 		var fidValue = data[fidName];
@@ -393,6 +389,10 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// Finally load subform data with fid, url or data
 		formController.loadData(options);
+		
+		// Init update mode
+		var vm = this._subform.getViewModel();
+		vm.set('updating', true);		
 	},
 	
 	resetSubForm: function() {
