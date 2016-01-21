@@ -74,6 +74,9 @@ Ext.define('Ck.form.plugin.Subform', {
 				dock: 'bottom',
 				hidden: true,
 				style: {border: 0},
+				bind: {
+					hidden: '{!editing}'
+				},
 				items: ['->', {
 					text: 'Add',
 					handler: this.addItem,

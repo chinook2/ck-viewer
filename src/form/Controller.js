@@ -259,11 +259,11 @@ Ext.define('Ck.form.Controller', {
 			Ext.each(docks, function(d) {
 				if(!this.defaultDock && (d.dock == 'bottom')) {
 					this.defaultDock = d.initialConfig;
-					if(this.isSubForm && !this.editing) {
-						this.defaultDock.hidden = true;
-					}else{
+					// if(this.isSubForm && !this.editing) {
+						// this.defaultDock.hidden = true;
+					// }else{
 						this.defaultDock.hidden = false;
-					}
+					// }
 				}
 				this.view.removeDocked(d);
 			}, this);
@@ -1537,6 +1537,9 @@ Ext.define('Ck.form.Controller', {
 
 		// Reset main form
 		v.reset();
+		if(this.getViewModel().get('updating')===true) {
+			this.getViewModel().set('updating', false);
+		}
 		
 		// SUBFORM : reset data
 		var subforms = v.query('ckform');
