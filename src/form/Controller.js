@@ -1312,7 +1312,10 @@ Ext.define('Ck.form.Controller', {
 			// TODO : manage save callback...
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
 			if(!sf.name && !sf.isSubForm) {
-				sf.getController().saveData();
+				if(sf.getController().saveData()===false){
+					Ck.log("Subform " + sf.formName + " cancel saveData.");
+					return false;
+				}
 			}
 		}
 
@@ -1392,7 +1395,7 @@ Ext.define('Ck.form.Controller', {
 		if(!url) {
 			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
 			Ext.callback(options.success, options.scope, [values]);
-			return false;
+			return true;
 		}
 		
 		var opt  = {
