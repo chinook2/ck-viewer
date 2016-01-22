@@ -13,6 +13,22 @@
         "fr": "Vue générale",
         "es": "en espagnol..."
     },{
+        "en": "Login",
+        "fr": "Connexion",
+        "es": "-"
+    },{
+        "en": "User ID",
+        "fr": "Utilisateur",
+        "es": "-"
+    },{
+        "en": "Password",
+        "fr": "Mot de passe",
+        "es": "-"
+    },{
+        "en": "Logout",
+        "fr": "Déconnexion",
+        "es": "-"
+    },{
         "en": "Close",
         "fr": "Fermer",
         "es": "Close ES"
@@ -57,6 +73,22 @@
         "fr": "Outils de mesure",
         "es": " - "
     },{
+        "en": "Measure length",
+        "fr": "Mesurer une longueur",
+        "es": " - "
+    },{
+        "en": "Measure area",
+        "fr": "Mesurer une surface",
+        "es": " - "
+    },{
+        "en": "Clear all measures",
+        "fr": "Effacer tout",
+        "es": " - "
+    },{
+        "en": "Get feature info",
+        "fr": "Information",
+        "es": " - "
+    },{
         "en": "Clear history",
         "fr": "Vider l'historique",
         "es": " - "
@@ -91,6 +123,10 @@
     },{
         "en": "Select by polygon",
         "fr": "Sélection par polygone",
+        "es": " - "
+    },{
+        "en": "Select by rectangle",
+        "fr": "Sélection par rectangle",
         "es": " - "
     },{
         "en": "Reset view",
