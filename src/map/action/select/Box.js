@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.select.Box', {
 	
 	itemId: 'selectbox',
 	text: '',
-	iconCls: 'fa fa-asterisk',
+	iconCls: 'ck ck-select-box',
 	tooltip: 'Select by rectangle',
 	
 	continueMsg: 'Drag to draw a rectangle and select features',

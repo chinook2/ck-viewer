@@ -11,7 +11,7 @@ Ext.define('Ck.map.action.Measure', {
 	
 	itemId: 'measure',
 	text: '',
-	iconCls: 'fa fa-gear',
+	iconCls: 'ck ck-measures',
 	tooltip: '',
 	
 	toggleGroup: 'ckmapAction',
