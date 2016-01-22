@@ -373,7 +373,7 @@ Ext.define('Ck.map.Controller', {
 				case 'wms':
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
-						url: mainOperation.getUrl(),
+						url: this.getMapUrl(mainOperation.getUrl()),
 						params: mainOperation.getParams()
 					};
 					break;
@@ -391,7 +391,7 @@ Ext.define('Ck.map.Controller', {
 					};
 					
 					olSourceOptions = {
-						url: mainOperation.getUrl(),
+						url: this.getMapUrl(mainOperation.getUrl()),
 						layer: params.LAYER,
 						matrixSet: params.TILEMATRIXSET,
 						format: params.FORMAT || 'image/png',
@@ -425,7 +425,7 @@ Ext.define('Ck.map.Controller', {
 					
 					olSourceOptions = {
 						projection	: ol.proj.get(mainOperation.getSrs()),
-						url		: mainOperation.getHref(),
+						url		: this.getMapUrl(mainOperation.getHref()),
 						format	: format
 					};
 					break;
@@ -433,7 +433,7 @@ Ext.define('Ck.map.Controller', {
 				case 'geojson':
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
-						url: mainOperation.getUrl(),
+						url: this.getMapUrl(mainOperation.getUrl()),
 						format: new ol.format.GeoJSON()
 					};
 					break;
@@ -455,6 +455,13 @@ Ext.define('Ck.map.Controller', {
 		}
 		Ext.apply(olSource, olSourceAdditional);
 		return olSource;
+	},
+	
+	getMapUrl: function(url) {
+		if(!Ext.manifest.ckClient) return url;
+		
+		var tpl = new Ext.Template(url);
+		return tpl.apply(Ext.manifest.ckClient);
 	},
 	
 	/**
