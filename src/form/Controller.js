@@ -978,17 +978,24 @@ Ext.define('Ck.form.Controller', {
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
 			if(f && (f.xtype=='hidden' || f.isVisible())) {
-				values[field] = f.getValue();
+				val = f.getValue();
 
 				// allow formatting date before send to server
 				if(f.submitFormat) {
-					values[field] = f.getSubmitValue();
+					val = f.getSubmitValue();
 				}
 
 				// get value for radioGroup
 				if(f.getGroupValue) {
-					values[field] = f.getGroupValue();
+					val = f.getGroupValue();
 				}
+				
+				// TODO : add config option to trim or not
+				if(Ext.isString(val)){
+					val = Ext.String.trim(val);
+				}
+				
+				values[field] = val;
 			}
 		}, this);
 
