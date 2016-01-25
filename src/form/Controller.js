@@ -1026,11 +1026,29 @@ Ext.define('Ck.form.Controller', {
 	
 	setValues: function(data) {
 		if(!data) return;
-
+		
 		var v = this.getView();
 		var form = v.getForm();
-		form.setValues(data);
 
+		// FIX Ext 
+		// Combo setValues with bind filters (who depends on previous field in form).
+		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
+		this.fields.forEach(function(field) {
+			var f = form.findField(field);
+			if(f && (f.xtype=='combobox')) {
+				var filters = f.getFilters();
+				if(filters.length>0) {
+					f.getStore().on('filterchange', function(){
+						f.setValue(data[f.name]);
+					}, this);
+				}
+			}
+		}, this);
+		//
+		
+		// Classic Ext setValues
+		form.setValues(data);
+		
 		// SUBFORM : load data
 		var subforms = v.query('ckform');
 		for (var s = 0; s < subforms.length; s++) {
