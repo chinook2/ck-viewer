@@ -71,8 +71,11 @@ Ext.define('Ck.form.Controller', {
 			// inherit dataFid from main view form (used in store url template)
 			vDataFid = this.view.getDataFid() || {};
 			pDataFid = parentForm.getDataFid() || {};
-			if(Ext.isString(vDataFid)) {
+			if(!Ext.isObject(vDataFid)) {
 				vDataFid ={fid: vDataFid};
+			}
+			if(!Ext.isObject(pDataFid)) {
+				pDataFid ={fid: pDataFid};
 			}
 			this.view.setDataFid(Ext.apply(vDataFid, pDataFid));
 
@@ -664,7 +667,9 @@ Ext.define('Ck.form.Controller', {
 
 									// Get store in Application
 									if(Ext.getStore(store)) {
-										return Ext.StoreManager.get(store);
+										var st = Ext.StoreManager.get(store);
+										st.setAutoLoad(true);
+										return st;
 									}
 								} else {
 									// If store is an URL that automatic store is created
@@ -675,6 +680,7 @@ Ext.define('Ck.form.Controller', {
 							
 							// Store conf can be an object (test original conf)
 							if(Ext.isObject(o.store)) {
+							
 								if(Ext.isString(store.url)) {
 									// Another alias to define storeUrl
 									storeUrl = store.url;
@@ -1167,6 +1173,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Load data from model (offline websql Database - model is linked to a websql proxy)
 		if(fid && model) {
+			if(Ext.isObject(fid)) fid = fid.fid;
 			model.setId(fid);
 			model.load({
 				success: function(record, operation) {
@@ -1494,7 +1501,8 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(fid && model) {
-			model.set(dt);
+			if(Ext.isObject(fid)) fid = fid.fid;
+			model.set(fid);
 			model.erase({
 				success: function(record, operation) {
 					Ext.callback(options.success, options.scope, [dt]);
