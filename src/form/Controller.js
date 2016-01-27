@@ -655,8 +655,8 @@ Ext.define('Ck.form.Controller', {
 							// storeUrl : alias to define proxy type ajax with url.
 							var store = o.store;
 							var storeUrl = o.storeUrl;
-
 							
+							// Store conf is a string - get existing store or store Url
 							if(Ext.isString(store)) {
 								if(store.indexOf("/") == -1) {
 									// Get store in ViewModel (global store pre-loaded)
@@ -672,15 +672,13 @@ Ext.define('Ck.form.Controller', {
 										return st;
 									}
 								} else {
-									// If store is an URL that automatic store is created
+									// If store is an URL then automatic store is created
 									storeUrl = store;
-									store = {};
 								}
 							}
 							
-							// Store conf can be an object (test original conf)
-							if(Ext.isObject(o.store)) {
-							
+							// Store Url - alternative config
+							if(Ext.isObject(store)) {
 								if(Ext.isString(store.url)) {
 									// Another alias to define storeUrl
 									storeUrl = store.url;
@@ -691,8 +689,35 @@ Ext.define('Ck.form.Controller', {
 									storeUrl = store.proxy.url;
 									delete store.proxy.url;
 								}
+							} else {
+								// store can be string or undefined, init with empty object for merge
+								store = {};
 							}
+							
+							// Build default Fields (use for rowediting on grid)
+							if(!Ext.isArray(store.fields) && Ext.isArray(o.columns)){
+								 // Init store fields from column definition
+								var fields = [];
+								var cols = o.columns;
 
+								// Column Model
+								for(var col in cols){
+									if(cols[col] && cols[col].dataIndex) {
+										// var colname = cols[col].text;
+										var colindex = cols[col].dataIndex;
+
+										fields.push({
+											name: colindex,
+											type: cols[col].type || 'auto'
+											// defaultValue: colname,
+											// rendererOption: cols[col].rendererOption || {},
+											// convert: function(v, n) {return n[v];}
+										});
+									}
+								}
+								store.fields = fields;
+							}
+							
 							if(storeUrl) {
 								// Apply template if available like dataUrl. Typically to insert object id in the URL
 								var v = me.getView();
@@ -701,8 +726,8 @@ Ext.define('Ck.form.Controller', {
 									var tpl = new Ext.Template(storeUrl);
 									if(Ext.isString(fid)) fid = [fid];
 									storeUrl = tpl.apply(fid);
-								}
-
+								}								
+								
 								if(me.compatibiltyMode) {
 									// Need default reader Array for Chinook V1 store
 									store = Ext.Object.mergeIf(store, {
@@ -728,16 +753,14 @@ Ext.define('Ck.form.Controller', {
 										}
 									});
 								}
-							} else if(Ext.isObject(store)) {
-								// Inline data
+							} else {
+								
+								// Default in-memory Store
+								store = Ext.Object.merge(store, {
+									proxy: 'memory'
+								});								
 							}
 
-							// Default in-memory Store
-							if(!store) {
-								store = {
-									proxy: 'memory'
-								}
-							}
 							return store;
 						}
 

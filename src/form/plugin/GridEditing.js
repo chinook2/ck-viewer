@@ -13,13 +13,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		this.grid = grid;
 				
 		var formController = grid.lookupController();
-		
-		// Init store fields from column definition
-		var store = grid.getStore();
-		if(!store.getFields()){
-			store.setFields(this.getFields());
-		}
-		
+				
 		// Get the Action Column
 		this.actionColumn = this.grid.down('actioncolumn');
 		if(!this.actionColumn) {
@@ -137,32 +131,5 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	
 	deleteRow: function(grid, rowIndex) {
         grid.getStore().removeAt(rowIndex);
-	},
-	
-	getFields: function(){
-		if(!this.grid.columns) return;
-		var fields = [];
-		var cols = this.grid.columns;
-
-		// Column Model
-		for(var col in cols){
-			if(cols[col] && cols[col].dataIndex) {
-				var colname = cols[col].text;
-				var colindex = cols[col].dataIndex;
-
-				fields.push({
-					name: colindex,
-					//defaultValue: colname,
-					type: cols[col].type || 'auto' //,
-					// rendererOption: cols[col].rendererOption || {},
-					// convert: function(v, n) {
-						// return n[v];
-					// }
-				});
-			}
-		}
-		
-		return fields;
 	}
-	
 });
