@@ -1006,7 +1006,7 @@ Ext.define('Ck.form.Controller', {
 		var values = {};
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
-			if(f && (f.xtype=='hidden' || f.isVisible())) {
+			if(f && (f.xtype=='hidden' || f.xtype=='hiddenfield' || f.isVisible())) {
 				val = f.getValue();
 
 				// allow formatting date before send to server
@@ -1197,18 +1197,20 @@ Ext.define('Ck.form.Controller', {
 		// Load data from model (offline websql Database - model is linked to a websql proxy)
 		if(fid && model) {
 			if(Ext.isObject(fid)) fid = fid.fid;
-			model.setId(fid);
-			model.load({
-				success: function(record, operation) {
-					var data = record.getData();
-					this.loadRawData(data);
-					return;
-				},
-				failure: function(record, operation) {
-					//do something if the load failed
-				},
-				scope: this
-			});
+			if(fid){
+				model.setId(fid);
+				model.load({
+					success: function(record, operation) {
+						var data = record.getData();
+						this.loadRawData(data);
+						return;
+					},
+					failure: function(record, operation) {
+						//do something if the load failed
+					},
+					scope: this
+				});
+			}
 			return;
 		}
 
