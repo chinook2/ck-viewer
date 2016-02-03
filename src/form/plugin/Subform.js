@@ -316,7 +316,9 @@ Ext.define('Ck.form.plugin.Subform', {
 		var rec = grid.getStore().getAt(rowIndex).getData();
 		
 		// update data fid for current item (used by dataUrl templating)
-		var dataFid = Ext.apply(this._subform.getDataFid(), rec);
+		var vDataFid = this._subform.getDataFid();
+		this.mainDataFid = Ext.clone(vDataFid);
+		var dataFid = Ext.apply(vDataFid, rec);
 		this._subform.setDataFid(dataFid);
 		//
 		
@@ -349,6 +351,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// update data fid for current loading item (used by dataUrl templating)
 		var vDataFid = this._subform.getDataFid();
+		this.mainDataFid = Ext.clone(vDataFid);
 		var dataFid = {};
 		if(Ext.isString(vDataFid)) {
 			dataFid = Ext.apply({
@@ -401,6 +404,9 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		this._subform.getController().resetData();
 		this._grid.focus();
+		
+		// Reset dataFid too
+		if(this.mainDataFid) this._subform.setDataFid(this.mainDataFid);
 		
 		if(this._subformWindow) {
 			this._subformWindow.hide();
