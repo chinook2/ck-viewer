@@ -41,10 +41,40 @@ Ext.define('Ck.form.Controller', {
 	beforeDelete: Ext.emptyFn,
 	afterDelete: Ext.emptyFn,
 	deleteFailed: Ext.emptyFn,
+	
+	onClick: Ext.emptyFn,
+	onChange: Ext.emptyFn,
+	onSelect: Ext.emptyFn,
 	//
 	
 	fieldsProcessed: 0,
 	formsProcessed: 0,
+	
+	// Global intercept events to add custom action in controller
+	listen: {
+		component: {
+			'*': {
+				click: function(cmp, e, eOpts ) {
+					// Try to call dedicated function using handler
+					if(cmp.handler) {
+						if(!this[cmp.handler] && this.oController[cmp.handler]){
+							this.oController[cmp.handler](cmp, e, eOpts);
+							return false;
+						}
+					}
+					
+					// Call global onClick function
+					return this.oController.onClick(cmp, e, eOpts);
+				},
+				change: function(cmp, newValue, oldValue, eOpts) {
+					return this.oController.onChange(cmp, newValue, oldValue, eOpts);
+				},
+				select: function(cmp, record, eOpts) {
+					return this.oController.onSelect(cmp, record, eOpts);
+				}
+			}
+		}
+	},
 	
 	init: function() {
 		this.isSubForm = this.view.getIsSubForm();
