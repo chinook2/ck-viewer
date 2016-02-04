@@ -1,10 +1,10 @@
 /**
- * 
+ *
  */
 Ext.define('Ck.legend.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.cklegend',
-	
+
 	listen: {
 		controller: {
 			'ckmap': {
@@ -15,40 +15,42 @@ Ext.define('Ck.legend.Controller', {
 			}
 		}
 	},
-	
+
 	linkToMap: function(ckMap) {
 		ckMap.legend = this;
 	},
-	
+
 	ckLoaded: function() {
 		var v = this.getView();
-		
-		var layers = this.getMap().getLayers().getArray();
+
+		// var layers = this.getMap().getLayers().getArray();
 		// Reverse layer order
-		for(li=layers.length-1; li>=0; li--){
-			this.addLayer(layers[li]);
-		}
-		
+		// for(li=layers.length-1; li>=0; li--){
+			// this.addLayer(layers[li]);
+		// }
+
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
-		
+
 		v.getView().on({
 			drop: this.onDrop,
 			scope: this
 		});
-		
+
 		// var olMap = this.getMap().getOlMap();
 		// olMap.on('addlayer', function() {
 			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
 		// });
-		
-		this.fireEvent('ready', this);		
+
+		this.fireEvent('ready', this);
 	},
-	
+
 	onMapAddLayer: function(layer) {
-		// this.addLayer(layer);
+		if(layer.ckLayer && layer.ckLayer.getExtension("displayInLayerSwitcher") !== false) {
+			this.addLayer(layer);
+		}
 	},
-	
+
 	/**
 	 * Called when a layer is removed from the map
 	 * @param {ol.layer}
@@ -59,7 +61,7 @@ Ext.define('Ck.legend.Controller', {
 			node.remove();
 		}
 	},
-	
+
 	/**
 	 * Find the node of the tree view corresponding to the specified layer
 	 * @param {ol.layer}
@@ -85,23 +87,23 @@ Ext.define('Ck.legend.Controller', {
 		var node = searchNode(root, layer);
 		return node;
 	},
-	
+
 	getLayers: function() {
         var layers = [];
 		var root = this.getView().getRootNode();
-		
+
         root.cascadeBy(function(rec){
             if (rec.get('layer')) {
                 layers.push(rec.get('layer'));
             }
         });
-        return layers.reverse();	
+        return layers.reverse();
 	},
-	
+
 	addLayer: function(layer) {
 		var root = this.getView().getRootNode();
 		var pNode = root;
-		
+
 		var node = {
 			leaf: true,
 			text: layer.get('title'),
@@ -109,12 +111,12 @@ Ext.define('Ck.legend.Controller', {
 			iconCls: 'x-tree-noicon',
 			layer: layer
 		};
-		
+
 		var path = layer.get('path')
 		if(path) {
 			var keys = path.split('/');
 			var keyId = pKeyId = '';
-			
+
 			for(i=0; i<keys.length; i++) {
 				keyId += '_' + keys[i];
 				var isNode = root.findChild('id', keyId);
@@ -130,27 +132,29 @@ Ext.define('Ck.legend.Controller', {
 				}
 			};
 		}
-		
-		pNode.appendChild(node);		
+
+		pNode.appendChild(node);
 	},
-	
-	// Allow change layer visibility for groups / sub layers. Bind tree store property to ol Layers
-	// If we use onCheckChange event update only when click on layer chekbox and not for groups.
+
+	/**
+	 * Allow change layer visibility for groups / sub layers. Bind tree store property to ol Layers
+	 * If we use onCheckChange event update only when click on layer chekbox and not for groups.
+	 */
 	onUpdate: function(store, rec, operation, modifiedFieldNames, details, eOpts) {
 		var layer = rec.get('layer');
 		if(!layer) return;
-		
+
 		if(modifiedFieldNames=='checked') {
 			layer.set('visible', rec.get('checked'));
 		}
 	},
-	
-	onDrop: function(node, data, overModel, dropPosition, eOpts) {		
+
+	onDrop: function(node, data, overModel, dropPosition, eOpts) {
         var ckLayers = this.getLayers();
-		
+
 		var olLayers = this.getMap().getLayers();
 		olLayers.clear();
-		
+
 		for(i=0; i<ckLayers.length; i++) {
 			olLayers.push(ckLayers[i]);
 		}
