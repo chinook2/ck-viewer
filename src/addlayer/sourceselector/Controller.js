@@ -28,14 +28,14 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 		container: null,
 
 		/**
-		 * For chinook source selection only. If true list context otherwise hide this selector
-		 */
-		context: false,
-
-		/**
 		 * One of "wms", "wfs", "chinook" to display
 		 */
-		source: null
+		source: null,
+		
+		/**
+		 * Configuration of this datasource selector
+		 */
+		 conf: {}
 	},
 
 	/**
@@ -60,8 +60,12 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 					url: "resources/conf/addlayer.json",
 					scope: this,
 					success: function(response){
-						var conf = Ext.decode(response.responseText);
-						this.initStore(conf.chinook);
+						var conf = Ext.decode(response.responseText).chinook;
+						if(Ext.isString(conf)) {
+							conf = {url: conf};
+						}
+						this.setConf(conf);
+						this.initStore(conf);
 					},
 					failure: function(response, opts) {
 						Ck.error('Error when loading AddLayer configuration');
@@ -76,18 +80,25 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 	},
 
 	initStore: function(conf) {
+		if(Ext.isEmpty(conf)) {
+			conf = this.getConf();
+		}
+		
 		switch(this.getSource()) {
 			case "chinook":
-				if(this.getContext() === true) {
+				if(conf.context === true) {
 					// TODO wmc getCapabilities
 				} else {
 					this.store.add({
 						name: "repository",
 						title: "Repository",
-						url: conf,
+						url: conf.url,
 						type: "chinook"
 					});
+					this.getView().setVisible(false);
 				}
+				
+				// Select the first item to load the capabilities directly
 				if(this.getView().rendered) {
 					this.selectFirst();
 				} else {
