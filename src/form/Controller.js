@@ -510,12 +510,18 @@ Ext.define('Ck.form.Controller', {
 			// Default component is textfield
 			if(c.name && !c.xtype) c.xtype = 'textfield';
 
+			// All items should have a Name
+			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer'];
+			if(!c.name && c.xtype && !Ext.Array.contains(ignoreTypes, c.xtype)) {
+				Ck.log("Name undefined for xtype " + c.xtype);
+			}
+			
 			// Compatibility forms V1
 			if(c.xtype && c.xtype.substr(0,3) == 'ck_') {
 				c.xtype = c.xtype.substr(3);
 				this.compatibiltyMode = true;
 			}
-
+			
 			// Subforms : init default params and exit
 			if(c.xtype == "ckform") {
 				Ext.applyIf(c, {
@@ -525,370 +531,372 @@ Ext.define('Ck.form.Controller', {
 					dockedItems: []
 				});
 				return c;
-			} else {
-				Ext.applyIf(c, {
-					plugins: [],
-					anchor: '100%',
-					labelSeparator: me.layoutConfig.labelSeparator
+			}
+			
+			Ext.applyIf(c, {
+				plugins: [],
+				anchor: '100%',
+				labelSeparator: me.layoutConfig.labelSeparator
+			});
+			if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
+				c.plugins.push({
+					ptype: 'formreadonly'
 				});
-				if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
-					c.plugins.push({
-						ptype: 'formreadonly'
-					});
-				}
-				switch(c.xtype) {
-					case "tabpanel":
-						Ext.applyIf(c, {
-							activeTab: 0,
-							bodyPadding: 10,
-							deferredRender: false,
-							border: false,
-							defaults: {
-								anchor: '100%',
-								labelSeparator: me.layoutConfig.labelSeparator
-							}
-						});
-						break;
-					case "radiogroup":
-						Ext.each(c.items, function(c) {
-							c.xtype = 'radiofield';
-						});
-						break;
-					case "checkboxgroup":
-						Ext.each(c.items, function(c) {
-							c.xtype = 'checkboxfield';
-						});
-						break;
-					case "datefield":
-						Ext.applyIf(c, {
-							format: "d/m/Y"
-						});
-
-						// Init-Actualise avec la date du jour (après le chargement)
-						if(c.value == 'now') {
-							me.view.on('afterload', function() {
-								var f = me.view.form.findField(c.name);
-								if(f) f.setValue(Ext.Date.clearTime(new Date()));
-							});
-						}
-						if(c.maxValue == 'now') {
-							c.maxValue = new Date();
-						}
-						if(c.minValue == 'now') {
-							c.minValue = new Date();
-						}
-						break;
-					case "timefield":
-						Ext.applyIf(c, {
-							format: "H:i"
-						});
-
-						// Init-Actualise avec la date du jour (après le chargement)
-						if(c.value == 'now') {
-							me.view.on('afterload', function() {
-								var f = me.view.form.findField(c.name);
-								if(f) f.setValue(Ext.Date.format(new Date(), c.format));
-							});
-						}
-						break;
-					case "fileuploadfield":
-					case "filefield":
-						// If photo taking is allow
-						if(c.uploadImage !== false) {
-							var panelId = Ext.id();
-							var pictureBtn = {
-								xtype: "button",
-								iconCls: "fa fa-camera",
-								width: 30,
-								style: {
-									"margin-top": "6px",
-									"margin-left": "5px"
-								},
-								handler: function() {
-									navigator.camera.getPicture(function(panelId, b64_image) {
-										var panel = Ext.getCmp(panelId);
-										panel.items.getAt(0).camera = Ck.b64toBlob(b64_image, "image/jpeg");
-										panel.items.getAt(0).setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
-									}.bind(this, panelId), function() {
-										alert('error');
-									},{
-										destinationType: navigator.camera.DestinationType.DATA_URL
-									})
-								}
-							}
-							var removeBtn = {
-								xtype: "button",
-								iconCls: "fa fa-remove",
-								width: 30,
-								style: {
-									"margin-top": "6px",
-									"margin-left": "5px"
-								},
-								handler: function() {
-									var panel = Ext.getCmp(panelId);
-									panel.items.getAt(0).camera = "";
-									panel.items.getAt(0).setValue("");
-								}
-							}
-							
-							// Delete camera picture when file is choosen from explorer
-							c.listeners = {
-								change: function() {
-									this.camera = "";
-								}
-							},
-							c.columnWidth = 1;
-							
-							// Fix form.setValue
-							c.setValue = Ext.form.field.File.prototype.setRawValue;
-							
-							c = {
-								xtype: "panel",
-								id: panelId,
-								processItems: false,
-								width: "100%",
-								layout: "column",
-								items: [c, pictureBtn, removeBtn]
-							}
-						}
-						break;
-					case "combo":
-					case "combobox":
-					case "grid":
-					case "gridpanel":
-					case "gridfield":
-						/**
-						 * Internal function to initialse store definition. This is the defaults params :
-						 *	{
-						 *		autoLoad: true,
-						 *		fields: [{name: "value", type: "value"}],
-						 *		proxy	: {
-						 *			type	: "ajax",
-						 *			reader	: {
-						 *				type	: "array"
-						 *			}
-						 *		}
-						 *	}
-						 *
-						 * To use inline data, params should be like this :
-						 *	["item1", "item2", "item3"]
-						 * or
-						 *	{
-						 *		fields: [{name: "value", "string"},{name: "label", "string"}],
-						 *		data: [{value: "id1", "label": "foo"},{value: "id2", "label": "bar"}]
-						 *	}
-						 *
-						 * @param {Object} Store params from JSON
-						 * @return {Object} Config object passed to Ext.data.Store constructor
-						 */
-						var processStore = function(o) {
-							// storeUrl : alias to define proxy type ajax with url.
-							var store = o.store;
-							var storeUrl = o.storeUrl;
-							
-							// Store conf is a string - get existing store or store Url
-							if(Ext.isString(store)) {
-								if(store.indexOf("/") == -1) {
-									// Get store in ViewModel (global store pre-loaded)
-									if(me.getViewModel().get(store)) {
-										return me.getViewModel().get(store);
-									}
-									// >> ViewModel is not ready (hierarchy) the form is not yet added to the view...
-
-									// Get store in Application
-									if(Ext.getStore(store)) {
-										var st = Ext.StoreManager.get(store);
-										st.setAutoLoad(true);
-										return st;
-									}
-								} else {
-									// If store is an URL then automatic store is created
-									storeUrl = store;
-								}
-							}
-							
-							// Store Url - alternative config
-							if(Ext.isObject(store)) {
-								if(Ext.isString(store.url)) {
-									// Another alias to define storeUrl
-									storeUrl = store.url;
-									delete store.url;
-								}
-								if(store.proxy && store.proxy.url) {
-									// Standard way to define URL but need to get it for templating and format
-									storeUrl = store.proxy.url;
-									delete store.proxy.url;
-								}
-							} else {
-								// store can be string or undefined, init with empty object for merge
-								store = {};
-							}
-							
-							// Build default Fields (use for rowediting on grid)
-							if(!Ext.isArray(store.fields) && Ext.isArray(o.columns)){
-								 // Init store fields from column definition
-								var fields = [];
-								var cols = o.columns;
-
-								// Column Model
-								for(var col in cols){
-									if(cols[col] && cols[col].dataIndex) {
-										// var colname = cols[col].text;
-										var colindex = cols[col].dataIndex;
-
-										fields.push({
-											name: colindex,
-											type: cols[col].type || 'auto'
-											// defaultValue: colname,
-											// rendererOption: cols[col].rendererOption || {},
-											// convert: function(v, n) {return n[v];}
-										});
-									}
-								}
-								store.fields = fields;
-							}
-							
-							if(storeUrl) {
-								// Apply template if available like dataUrl. Typically to insert object id in the URL
-								var v = me.getView();
-								var fid = v.getDataFid();
-								if(fid) {
-									var tpl = new Ext.Template(storeUrl);
-									if(Ext.isString(fid)) fid = [fid];
-									storeUrl = tpl.apply(fid);
-								}								
-								
-								if(me.compatibiltyMode) {
-									// Need default reader Array for Chinook V1 store
-									store = Ext.Object.mergeIf(store, {
-										autoLoad: !(c.queryMode==='remote'),
-										fields: [{name: "value", type: "string"}],
-										proxy: {
-											type: "ajax",
-											noCache: false,
-											url: me.getFullUrl(storeUrl),
-											reader: {
-												type: "array"
-											}
-										}
-									});
-								} else {
-									// Need default JSON reader
-									store = Ext.Object.merge(store, {
-										autoLoad: !(c.queryMode==='remote'),
-										proxy: {
-											type: "ajax",
-											noCache: false,
-											url: me.getFullUrl(storeUrl)
-										}
-									});
-								}
-							} else {
-								
-								// Default in-memory Store
-								store = Ext.Object.merge(store, {
-									proxy: 'memory'
-								});								
-							}
-
-							return store;
-						}
-
-						if(c.itemTpl) {
-							c.listConfig = {
-								itemTpl: c.itemTpl
-							}
-							// By default use same template for list and display
-							if(!c.displayTpl) c.displayTpl = c.itemTpl;
-							c.displayTpl = '<tpl for=".">' + c.displayTpl + '</tpl>';
-						}
-						delete c.itemTpl;
-
-						// Init stores for grid editor
-						if(Ext.isArray(c.columns)) {
-							Ext.each(c.columns, function(col, idx, cols) {
-								if(col.editor && col.editor.store) {
-									cols[idx].editor.store = processStore(col.editor)
-								}
-							});
-						}
-
-						Ext.applyIf(c, {
-							displayField: "value",
-							queryMode: 'local'
-						});
-						Ext.Object.merge(c, {
-							store		: processStore(c),
-							listeners	: {
-								removed	: function(item, ownerCt, eOpts) {
-									item.removeBindings()
-								}
-							}
-						});
-						break;
-				}
-				
-				if(c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
-					// Try to merge plugins config and default config
-					var applyDefault = function(plugins, defaults) {
-						if(!Ext.isArray(plugins)) return defaults;
-						if(!Ext.isArray(defaults)) return plugins;
-
-						for(var d=0; d<defaults.length; d++) {
-							var defaultPlugin = defaults[d];
-
-							var exist = false;
-							for(var p=0; p<plugins.length; p++) {
-								if(plugins[p].ptype === defaultPlugin.ptype) {
-									exist = true;
-									// merge
-									plugins[p] = Ext.applyIf(plugins[p], defaultPlugin);
-									break;
-								}
-							}
-
-							if(!exist) {
-								plugins.push(defaultPlugin);
-							}
-						}
-
-						return plugins;
-					};
-
-					if(c.subform) {
-						c.plugins = applyDefault(c.plugins,  [{
-							ptype: 'gridsubform'
-						}]);
-					} else {
-						c.plugins = applyDefault(c.plugins,  [{
-							ptype: 'gridediting'
-						}, {
-							ptype: 'rowediting',
-							pluginId: 'rowediting',
-							clicksToEdit: 1
-						}]);
-					}
-				}
-
-				if(c.layout == 'column') {
-					// TODO : simplifié l'ajout auto de xtype container mais pas tjrs...
+			}
+						
+			switch(c.xtype) {
+				case "tabpanel":
 					Ext.applyIf(c, {
+						activeTab: 0,
+						bodyPadding: 10,
+						deferredRender: false,
+						border: false,
 						defaults: {
-							layout: 'form',
-							labelSeparator: me.layoutConfig.labelSeparator,
-							border: false
+							anchor: '100%',
+							labelSeparator: me.layoutConfig.labelSeparator
 						}
 					});
-				}
+					break;
+				case "radiogroup":
+					Ext.each(c.items, function(c) {
+						c.xtype = 'radiofield';
+					});
+					break;
+				case "checkboxgroup":
+					Ext.each(c.items, function(c) {
+						c.xtype = 'checkboxfield';
+					});
+					break;
+				case "datefield":
+					Ext.applyIf(c, {
+						format: "d/m/Y"
+					});
 
-				if(c.name && !c.fieldLabel && !c.boxLabel) {
-					c.fieldLabel = c.name;
-				}
+					// Init-Actualise avec la date du jour (après le chargement)
+					if(c.value == 'now') {
+						me.view.on('afterload', function() {
+							var f = me.view.form.findField(c.name);
+							if(f) f.setValue(Ext.Date.clearTime(new Date()));
+						});
+					}
+					if(c.maxValue == 'now') {
+						c.maxValue = new Date();
+					}
+					if(c.minValue == 'now') {
+						c.minValue = new Date();
+					}
+					break;
+				case "timefield":
+					Ext.applyIf(c, {
+						format: "H:i"
+					});
 
-				if(c.items && c.processItems !== false) {
-					Ext.each(c.items, fn, this);
+					// Init-Actualise avec la date du jour (après le chargement)
+					if(c.value == 'now') {
+						me.view.on('afterload', function() {
+							var f = me.view.form.findField(c.name);
+							if(f) f.setValue(Ext.Date.format(new Date(), c.format));
+						});
+					}
+					break;
+				case "fileuploadfield":
+				case "filefield":
+					// If photo taking is allow
+					if(c.uploadImage !== false) {
+						var panelId = Ext.id();
+						var pictureBtn = {
+							xtype: "button",
+							iconCls: "fa fa-camera",
+							width: 30,
+							style: {
+								"margin-top": "6px",
+								"margin-left": "5px"
+							},
+							handler: function() {
+								navigator.camera.getPicture(function(panelId, b64_image) {
+									var panel = Ext.getCmp(panelId);
+									panel.items.getAt(0).camera = Ck.b64toBlob(b64_image, "image/jpeg");
+									panel.items.getAt(0).setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
+								}.bind(this, panelId), function() {
+									alert('error');
+								},{
+									destinationType: navigator.camera.DestinationType.DATA_URL
+								})
+							}
+						}
+						var removeBtn = {
+							xtype: "button",
+							iconCls: "fa fa-remove",
+							width: 30,
+							style: {
+								"margin-top": "6px",
+								"margin-left": "5px"
+							},
+							handler: function() {
+								var panel = Ext.getCmp(panelId);
+								panel.items.getAt(0).camera = "";
+								panel.items.getAt(0).setValue("");
+							}
+						}
+						
+						// Delete camera picture when file is choosen from explorer
+						c.listeners = {
+							change: function() {
+								this.camera = "";
+							}
+						},
+						c.columnWidth = 1;
+						
+						// Fix form.setValue
+						c.setValue = Ext.form.field.File.prototype.setRawValue;
+						
+						c = {
+							xtype: "panel",
+							id: panelId,
+							processItems: false,
+							width: "100%",
+							layout: "column",
+							items: [c, pictureBtn, removeBtn]
+						}
+					}
+					break;
+				case "combo":
+				case "combobox":
+				case "grid":
+				case "gridpanel":
+				case "gridfield":
+					/**
+					 * Internal function to initialse store definition. This is the defaults params :
+					 *	{
+					 *		autoLoad: true,
+					 *		fields: [{name: "value", type: "value"}],
+					 *		proxy	: {
+					 *			type	: "ajax",
+					 *			reader	: {
+					 *				type	: "array"
+					 *			}
+					 *		}
+					 *	}
+					 *
+					 * To use inline data, params should be like this :
+					 *	["item1", "item2", "item3"]
+					 * or
+					 *	{
+					 *		fields: [{name: "value", "string"},{name: "label", "string"}],
+					 *		data: [{value: "id1", "label": "foo"},{value: "id2", "label": "bar"}]
+					 *	}
+					 *
+					 * @param {Object} Store params from JSON
+					 * @return {Object} Config object passed to Ext.data.Store constructor
+					 */
+					var processStore = function(o) {
+						// storeUrl : alias to define proxy type ajax with url.
+						var store = o.store;
+						var storeUrl = o.storeUrl;
+						
+						// Store conf is a string - get existing store or store Url
+						if(Ext.isString(store)) {
+							if(store.indexOf("/") == -1) {
+								// Get store in ViewModel (global store pre-loaded)
+								if(me.getViewModel().get(store)) {
+									return me.getViewModel().get(store);
+								}
+								// >> ViewModel is not ready (hierarchy) the form is not yet added to the view...
+
+								// Get store in Application
+								if(Ext.getStore(store)) {
+									var st = Ext.StoreManager.get(store);
+									st.setAutoLoad(true);
+									return st;
+								}
+							} else {
+								// If store is an URL then automatic store is created
+								storeUrl = store;
+							}
+						}
+						
+						// Store Url - alternative config
+						if(Ext.isObject(store)) {
+							if(Ext.isString(store.url)) {
+								// Another alias to define storeUrl
+								storeUrl = store.url;
+								delete store.url;
+							}
+							if(store.proxy && store.proxy.url) {
+								// Standard way to define URL but need to get it for templating and format
+								storeUrl = store.proxy.url;
+								delete store.proxy.url;
+							}
+						} else {
+							// store can be string or undefined, init with empty object for merge
+							store = {};
+						}
+						
+						// Build default Fields (use for rowediting on grid)
+						if(!Ext.isArray(store.fields) && Ext.isArray(o.columns)){
+							 // Init store fields from column definition
+							var fields = [];
+							var cols = o.columns;
+
+							// Column Model
+							for(var col in cols){
+								if(cols[col] && cols[col].dataIndex) {
+									// var colname = cols[col].text;
+									var colindex = cols[col].dataIndex;
+
+									fields.push({
+										name: colindex,
+										type: cols[col].type || 'auto'
+										// defaultValue: colname,
+										// rendererOption: cols[col].rendererOption || {},
+										// convert: function(v, n) {return n[v];}
+									});
+								}
+							}
+							store.fields = fields;
+						}
+						
+						if(storeUrl) {
+							// Apply template if available like dataUrl. Typically to insert object id in the URL
+							var v = me.getView();
+							var fid = v.getDataFid();
+							if(fid) {
+								var tpl = new Ext.Template(storeUrl);
+								if(Ext.isString(fid)) fid = [fid];
+								storeUrl = tpl.apply(fid);
+							}								
+							
+							if(me.compatibiltyMode) {
+								// Need default reader Array for Chinook V1 store
+								store = Ext.Object.mergeIf(store, {
+									autoLoad: !(c.queryMode==='remote'),
+									fields: [{name: "value", type: "string"}],
+									proxy: {
+										type: "ajax",
+										noCache: false,
+										url: me.getFullUrl(storeUrl),
+										reader: {
+											type: "array"
+										}
+									}
+								});
+							} else {
+								// Need default JSON reader
+								store = Ext.Object.merge(store, {
+									autoLoad: !(c.queryMode==='remote'),
+									proxy: {
+										type: "ajax",
+										noCache: false,
+										url: me.getFullUrl(storeUrl)
+									}
+								});
+							}
+						} else {
+							
+							// Default in-memory Store
+							store = Ext.Object.merge(store, {
+								proxy: 'memory'
+							});								
+						}
+
+						return store;
+					}
+
+					if(c.itemTpl) {
+						c.listConfig = {
+							itemTpl: c.itemTpl
+						}
+						// By default use same template for list and display
+						if(!c.displayTpl) c.displayTpl = c.itemTpl;
+						c.displayTpl = '<tpl for=".">' + c.displayTpl + '</tpl>';
+					}
+					delete c.itemTpl;
+
+					// Init stores for grid editor
+					if(Ext.isArray(c.columns)) {
+						Ext.each(c.columns, function(col, idx, cols) {
+							if(col.editor && col.editor.store) {
+								cols[idx].editor.store = processStore(col.editor)
+							}
+						});
+					}
+
+					Ext.applyIf(c, {
+						displayField: "value",
+						queryMode: 'local'
+					});
+					Ext.Object.merge(c, {
+						store		: processStore(c),
+						listeners	: {
+							removed	: function(item, ownerCt, eOpts) {
+								item.removeBindings()
+							}
+						}
+					});
+					break;
+			}
+			
+			if(c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
+				// Try to merge plugins config and default config
+				var applyDefault = function(plugins, defaults) {
+					if(!Ext.isArray(plugins)) return defaults;
+					if(!Ext.isArray(defaults)) return plugins;
+
+					for(var d=0; d<defaults.length; d++) {
+						var defaultPlugin = defaults[d];
+
+						var exist = false;
+						for(var p=0; p<plugins.length; p++) {
+							if(plugins[p].ptype === defaultPlugin.ptype) {
+								exist = true;
+								// merge
+								plugins[p] = Ext.applyIf(plugins[p], defaultPlugin);
+								break;
+							}
+						}
+
+						if(!exist) {
+							plugins.push(defaultPlugin);
+						}
+					}
+
+					return plugins;
+				};
+
+				if(c.subform) {
+					c.plugins = applyDefault(c.plugins,  [{
+						ptype: 'gridsubform'
+					}]);
+				} else {
+					c.plugins = applyDefault(c.plugins,  [{
+						ptype: 'gridediting'
+					}, {
+						ptype: 'rowediting',
+						pluginId: 'rowediting',
+						clicksToEdit: 1
+					}]);
 				}
-			};
+			}
+
+			if(c.layout == 'column') {
+				// TODO : simplifié l'ajout auto de xtype container mais pas tjrs...
+				Ext.applyIf(c, {
+					defaults: {
+						layout: 'form',
+						labelSeparator: me.layoutConfig.labelSeparator,
+						border: false
+					}
+				});
+			}
+
+			if(c.name && !c.fieldLabel && !c.boxLabel) {
+				c.fieldLabel = c.name;
+			}
+
+			if(c.items && c.processItems !== false) {
+				Ext.each(c.items, fn, this);
+			}
+		
 			return c;
 		}.bind(this);
 		
@@ -1037,7 +1045,7 @@ Ext.define('Ck.form.Controller', {
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
 			if(f && (f.xtype=='hidden' || f.xtype=='hiddenfield' || f.isVisible())) {
-				val = f.getValue();
+				var val = f.getValue();
 
 				// allow formatting date before send to server
 				if(f.submitFormat) {
@@ -1058,6 +1066,13 @@ Ext.define('Ck.form.Controller', {
 			}
 		}, this);
 
+		// Juste one gridfield return a simple array
+		var aValues = Ext.Object.getValues(values);
+		if(aValues.length==1 && Ext.isArray(aValues[0])){
+			values = aValues[0];
+		}
+		//
+		
 		if(this.compatibiltyMode) {
 			var fid = v.getDataFid();
 			var lyr = v.getLayer();
@@ -1112,8 +1127,14 @@ Ext.define('Ck.form.Controller', {
 		}, this);
 		//
 		
-		// Classic Ext setValues
-		form.setValues(data);
+		if(Ext.isArray(data)){
+			// Find first gridfield to assign array !
+			var grid = v.down('gridfield');
+			if(grid) grid.setValue(data);
+		} else {
+			// Classic Ext setValues
+			form.setValues(data);
+		}
 		
 		// SUBFORM : load data
 		var subforms = v.query('ckform');
@@ -1148,7 +1169,7 @@ Ext.define('Ck.form.Controller', {
 			if(!sf.getController().isValid()) isValid = false;
 		}
 		//
-
+/*
 		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
 		// GRID : save data only if gridpanel is not linked to main form with a name property
 		var grids = v.query('gridpanel');
@@ -1183,7 +1204,7 @@ Ext.define('Ck.form.Controller', {
 		}
 		//
 		//
-
+*/
 		return isValid;
 	},
 
@@ -1405,7 +1426,7 @@ Ext.define('Ck.form.Controller', {
 				}
 			}
 		}
-
+/*
 		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
 		// GRID : save data only if gridpanel is not linked to main form with a name property
 		var grids = v.query('gridpanel');
@@ -1441,7 +1462,7 @@ Ext.define('Ck.form.Controller', {
 			// TEMP : assume only one grid !
 			break;
 		}
-
+*/
 		// If a model is set we use it
 		if(fid && model) {
 			model.set(values);
@@ -1643,7 +1664,7 @@ Ext.define('Ck.form.Controller', {
 			sf.getController().fireEvent('afterreset');
 		}
 		//
-		
+/*		
 		// GRID : reset data
 		var grids = v.query('gridpanel');
 		for (var g = 0; g < grids.length; g++) {
@@ -1651,7 +1672,7 @@ Ext.define('Ck.form.Controller', {
 			grid.getStore().removeAll();
 		}
 		//
-		
+*/		
 		// Reset viewModel data (binding...)
 		this.getViewModel().setData({
 			layer: null,

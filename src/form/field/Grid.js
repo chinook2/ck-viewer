@@ -32,28 +32,24 @@ Ext.define('Ck.form.field.Grid', {
 	initComponent: function() {
 
 		this.grid = Ext.create(Ext.applyIf({
-			xtype: 'grid'
+			xtype: 'grid',
+			scrollable: 'y'
 		}, this.initialConfig));
 		
 		// Plugins are attached to the internal grid not the gridfield component
 		this.plugins = null;
-
-		/*
-		this.on('resize', function(){
-			//this.grid.setSize(this.getSize());
-		}, this);
-		*/
+		// Reference is unique and attached to the underlaying grid (not the gridfield)
+		this.reference = null;
 		
-		/*
-		this.relayEvents(this.grid, [
-			'resize',
-			'change'
-		]);
-		*/
-		
+		// Ensure clear invalid mark when updating grid
 		this.grid.on({
 			validateedit: function() {
 				this.checkChange();
+			},
+			render: function() {
+				this.grid.getStore().on('datachanged', function() {
+					if(Ext.isArray(this.lastValue) && this.lastValue.length>0) this.checkChange();
+				}, this);
 			},
 			scope: this
 		});
@@ -71,12 +67,20 @@ Ext.define('Ck.form.field.Grid', {
 		Ext.defer(function(){
 			this.grid.render(this.inputEl);
 		}, 50, this);
+		
+		this.on('resize', function(){
+			var size = this.getSize();
+			size.width-=2;
+			size.height-=2;
+			this.inputEl.setSize(this.getSize());
+			this.grid.setSize(size);
+		}, this);
 	},
 
 	getValue: function(){
 		var grid = this.grid;
-        var dtg = [];
-        grid.getStore().each( function (rec) {
+		var dtg = [];
+		grid.getStore().each( function (rec) {
 			// Empty field when plugin gridediting is active to add new record to the grid...
 			if(rec.data.dummy===true) return;
 			
@@ -99,8 +103,8 @@ Ext.define('Ck.form.field.Grid', {
 			
 			// Need to add extra data (all fields of 'rec' are not displayed in grid columns)
 			dtg.push( Ext.applyIf(row, rec.data) );
-        });
-        return dtg;
+		});
+		return dtg;
 	},
 	
 	getRawValue: function() {
@@ -108,21 +112,23 @@ Ext.define('Ck.form.field.Grid', {
 	},
 	
 	setValue: function (val) {
-        if(!val) return;
+		if(!val) return;
 		this.grid.getStore().loadData(val);
 	},
 	
-    onChange: function(newVal, oldVal) {
-        this.callParent(arguments);
-        //this.autoSize();
-    },
+	onChange: function(newVal, oldVal) {
+		this.callParent(arguments);
+	},
 	
+	getStore: function() {
+		return this.grid.getStore();
+	},
 	
 	getErrors: function(value) {
 		value = arguments.length ? (value == null ? [] : value) : this.processRawValue(this.getRawValue());
 
 		if(!Ext.isArray(value)) {
-			errors.push(me.blankText);
+			errors.push(this.blankText);
 			return errors;
 		}
 		
@@ -161,6 +167,54 @@ Ext.define('Ck.form.field.Grid', {
 			errors.push(me.regexText || me.invalidText);
 		}
 
+		//
+		// Test all columns for required fields
+		var grid = me.grid;
+		grid.getStore().each(function(rec) {
+			if(rec.data.dummy===true) return;
+			grid.getColumns().forEach(function(col) {
+				if(!col.dataIndex) return;
+				var val = rec.data[col.dataIndex];
+
+				if((!val) && (col.allowBlank===false)) {
+					//isValid = false;
+					errors.push(col.blankText || me.blankText);
+					Ck.log((col.text || col.dataIndex) + ' in '+ me.name +' not Valid !');
+					return false;
+				}
+			});
+		});
+		//
+		
 		return errors;
-	}
+	},
+	
+	markInvalid: function(errors) {
+		// Save the message and fire the 'invalid' event
+		var me = this,
+			ariaDom = me.ariaEl.dom,
+			oldMsg = me.getActiveError(),
+			active;
+			
+		me.setActiveErrors(Ext.Array.from(errors));
+		active = me.getActiveError();
+		if (oldMsg !== active) {
+			me.setError(active);
+			if (!me.ariaStaticRoles[me.ariaRole] && ariaDom) {
+				ariaDom.setAttribute('aria-invalid', true);
+			}
+		}
+		
+		// Allow display message in popup warning (!me.dirty prevent fire when reset/removeAll form)
+		if(me.invalidMsgText && !me.dirty) {
+			Ext.MessageBox.show({
+				title: 'Warning',
+				msg: me.invalidMsgText,
+				icon: Ext.MessageBox['WARNING'],
+				buttons: Ext.MessageBox.OK,
+				scope: this
+			});
+		}
+		//
+	}	
 });
