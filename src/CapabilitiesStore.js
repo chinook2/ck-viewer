@@ -165,6 +165,12 @@ Ext.define('Ck.CapabilitiesStore', {
 
 				for(var i=0;i< childNodes.length;i++) {
 					switch(childNodes[i].tagName) {
+						case "Layer":
+							var t = this.getWMSRecord(childNodes[i], [], this.projList);
+							if(t) {
+								mData.push(t);
+							}
+							
 						case "SRS":
 							proj = childNodes[i].childNodes[0].nodeValue.split(" ");
 							for(var x=0; x<proj.length; x++) {
@@ -184,8 +190,8 @@ Ext.define('Ck.CapabilitiesStore', {
 					}
 				}
 
-				record = this.getWMSRecord(capabilities, [], this.projList);
-				mData.push(record);
+				// record = this.getWMSRecord(capabilities, [], this.projList);
+				// mData.push(record);
 			break;
 			case "WFS" :
 				for(var i = 0; i < childNodes.length; i++) {
@@ -210,7 +216,7 @@ Ext.define('Ck.CapabilitiesStore', {
 			break;
 		}
 
-		return mData ;
+		return mData;
 	},
 
 	/**
@@ -625,7 +631,7 @@ Ext.define("Ck.CapabilitiesTreeStore", {
 	 * To replace abstract root with real capabilities root
 	 */
 	onLoad: function(store, records) {
-		store.setRoot(records[0]);
-		records[0].expand();
+		// store.setRoot(records[0]);
+		// records[0].expand();
 	}
 });

@@ -13,6 +13,7 @@ Ext.define("Ck.Context", {
 		valueField: "Name",
 		queryMode: "local",
 		bodyPadding: 10,
+		editable: false,
 		defaults: {
 			width: "100%"
 		}

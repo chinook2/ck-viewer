@@ -366,7 +366,7 @@ Ext.define('Ck.map.Controller', {
 
 			if(olLayer) {
 				olLayer.ckLayer = layer;
-				this.getOlMap().addLayer(olLayer);
+				this.getOlMap().getLayers().insertAt(0, olLayer);
 			}
 		}
 	},
@@ -399,8 +399,8 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
 						url: mainOperation.getUrl(),
-						params: mainOperation.getParams(),
-						projection: mainOperation.getSrs()
+						params: mainOperation.getParams()
+						// projection: mainOperation.getSrs()
 					};
 					break;
 

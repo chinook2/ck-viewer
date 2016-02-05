@@ -9,7 +9,7 @@ Ext.define("Ck.View", {
 		// require in production
         'Ext.plugin.Viewport',
         'Ext.window.*',
-        
+        'Ext.data.reader.*',
 		'Ext.layout.*',
         'Ext.form.*',
         'Ext.tab.*',

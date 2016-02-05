@@ -113,7 +113,7 @@ Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 						code: "GetFeature",
 						method: "GET",
 						type: "application/xml",
-						href: this.source.url + "?SERVICE=WFS&REQUEST=GetFeature&TYPENAME=" + opt.name + "&VERSION=1.1.0&LAYERS=" + opt.name + "&SRS=" + opt.srs
+						href: this.getFullUrl(this.source.url) + "SERVICE=WFS&REQUEST=GetFeature&TYPENAME=" + opt.name + "&VERSION=1.1.0&LAYERS=" + opt.name + "&SRS=" + opt.srs
 					}]
 				}];
 				break;
@@ -124,7 +124,7 @@ Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 						code	: "GetMap",
 						method	: "GET",
 						type	: "application/image",
-						href	: this.source.url + "?SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.0&LAYERS=" + opt.name + "&SRS=" + opt.srs
+						href	: this.getFullUrl(this.source.url) + "SERVICE=WMS&REQUEST=GetMap&VERSION=1.1.0&LAYERS=" + opt.name + "&SRS=" + opt.srs
 					}]
 				}];
 				break;
@@ -171,7 +171,7 @@ Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 
 	reload: function() {
 		this.getView().getStore().load({
-			url: this.source.url + "?service=wms&request=getCapabilities"
+			url: this.getFullUrl(this.source.url) + "service=wms&request=getCapabilities"
 		});
 	}
 });
