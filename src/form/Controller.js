@@ -82,12 +82,15 @@ Ext.define('Ck.form.Controller', {
 		this.editing = this.view.getEditing();
 		this.isInit = false;
 
-		var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
-		this.ls = Ext.util.LocalStorage.get(isStorage);
-		if(!this.ls) {
-			this.ls = new Ext.util.LocalStorage({
-				id: isStorage
-			});
+		// Init local Storage for production mode (test if it's disable in global conf app.json)
+		if(Ck.getOption('ajaxCache') !== false){
+			var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
+			this.ls = Ext.util.LocalStorage.get(isStorage);
+			if(!this.ls) {
+				this.ls = new Ext.util.LocalStorage({
+					id: isStorage
+				});
+			}
 		}
 
 		// Get form definition directly in the view (no Ajax request)
