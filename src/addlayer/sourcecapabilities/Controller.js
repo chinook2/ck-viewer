@@ -5,18 +5,6 @@
  * - History grid to log modification (optionnal)
  * - Vertex grid to modify geometry accurately (optionnal)
  */
- Ext.define("Layer", {
-	extend: "Ext.data.Model",
-	fields: [
-		{name: "Name", type: "string"},
-		{name: "Title", type: "string"},
-		{name: "Text", type: "string"},
-		{name: "BoundingBox", type: "auto"},
-		{name: "Group", type: "auto"},
-		{name: "LatLonBoundingBox", type: "string"},
-		{name: "SRS", type: "auto"}
-	]
-});
 Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer.sourcecapabilities',
@@ -45,23 +33,15 @@ Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-
-
 		this.callParent([view]);
 
-		this.setContainer(view.up("panel"));
+		var container = view.up("panel");
+		this.setContainer(container);
 
 		view.on("itemclick", this.onNodeClick, this);
 
 		// Initialisation du TreeLoader
-		view.setStore(Ck.create("Ck.CapabilitiesTreeStore", {
-			model: "Layer",
-			clearOnLoad: true
-			// ,listeners: {
-				// load: this.onLoad,
-				// scope: this
-			// }
-		}));
+		view.setStore(Ck.create("Ck.CapabilitiesTreeStore", {service: container.source.toUpperCase()}));
 
 	},
 

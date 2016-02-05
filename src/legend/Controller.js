@@ -11,7 +11,8 @@ Ext.define('Ck.legend.Controller', {
 				// Called when add layer to map
 				addlayer: 'onMapAddLayer',
 				removelayer: 'onMapRemoveLayer',
-				ready: 'linkToMap'
+				ready: 'linkToMap',
+				contextloading: 'clearLegend'
 			}
 		}
 	},
@@ -23,12 +24,6 @@ Ext.define('Ck.legend.Controller', {
 	ckLoaded: function() {
 		var v = this.getView();
 
-		// var layers = this.getMap().getLayers().getArray();
-		// Reverse layer order
-		// for(li=layers.length-1; li>=0; li--){
-			// this.addLayer(layers[li]);
-		// }
-
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
 
@@ -36,12 +31,7 @@ Ext.define('Ck.legend.Controller', {
 			drop: this.onDrop,
 			scope: this
 		});
-
-		// var olMap = this.getMap().getOlMap();
-		// olMap.on('addlayer', function() {
-			// root.insertBefore(lyr, root); // Pour inserer le layer dans un dossier après
-		// });
-
+		
 		this.fireEvent('ready', this);
 	},
 
@@ -60,6 +50,10 @@ Ext.define('Ck.legend.Controller', {
 		if(node) {
 			node.remove();
 		}
+	},
+	
+	clearLegend: function() {
+		this.getView().getRootNode().removeAll();
 	},
 
 	/**

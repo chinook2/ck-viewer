@@ -6,6 +6,9 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	
 	config: {
 		code		: null,
+		version		: null,
+		layers		: null,
+		srs			: null,
 		type		: null,
 		operations	: [],
 		owsContext	: {},

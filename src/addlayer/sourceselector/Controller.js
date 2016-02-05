@@ -5,22 +5,14 @@
  * - History grid to log modification (optionnal)
  * - Vertex grid to modify geometry accurately (optionnal)
  */
-/**
- * Used by AddLayer component
- */
-Ext.define("DataSource", {
-	extend: "Ext.data.Model",
-	fields: [
-		{name: "name", type: "string"},
-		{name: "title", type: "string"},
-		{name: "url", type: "string"},
-		{name: "type", type: "string"}
-	]
-});
 Ext.define('Ck.addlayer.sourceselector.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer.sourceselector',
 
+	requires: [
+		'DataSource'
+	],
+	
 	config: {
 		/**
 		 * Add layer view

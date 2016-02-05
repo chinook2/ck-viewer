@@ -45,21 +45,27 @@ Ext.define('Ck.map.Controller', {
 	 *
 	 * @param {Ck.map.Controller} this
 	 */
-
+	 
+	/**
+	 * @event contextloading
+	 * Fires when context begin to load
+	 * @param {Ck.Owc}
+	 */
+	 
+	/**
+	 * @event layersloading
+	 * Fires when layers data begin to load
+	 */
+	
+	/**
+	 * @event layersloaded
+	 * Fires when all layers data are loaded
+	 */
+	 
 	/**
 	 * @event loaded
 	 * Fires when the map is ready (rendered) and all the layers of the current context are loaded
 	 * @param {Ck.map.Controller} this
-	 */
-
-	/**
-	 * @event layersloaded
-	 * Fires when all layers are loaded
-	 */
-
-	/**
-	 * @event layersloading
-	 * Fires when layers begin to load
 	 */
 
 	/**
@@ -201,6 +207,8 @@ Ext.define('Ck.map.Controller', {
 			Ck.log("This context is not a OWS context !");
 			return;
 		}
+		
+		this.fireEvent("contextloading", owc);
 
 		this.originOwc = owc;
 
@@ -239,8 +247,9 @@ Ext.define('Ck.map.Controller', {
 		this.setExtent(owc.getExtent());
 		this.currentOwsContext = owc;
 
+		// Load all layers. Reverse the loading for right order displaying
 		var layers = owc.getLayers();
-		for(var i = 0; i < layers.length; i++) {
+		for(var i = layers.length - 1; i >= 0; i--) {
 			this.addLayer(layers[i], owc);
 		}
 
@@ -328,7 +337,7 @@ Ext.define('Ck.map.Controller', {
 				}.bind(undefined, cluster, olSource)
 			}
 
-			var extent = layer.getExtent(viewProj) || owc.getExtent();
+			var extent = owc.getExtent();
 
 			var ckLayerSpec = this.getViewModel().getData().ckOlLayerConnection[mainOffering.getType()];
 
@@ -390,7 +399,8 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
 						url: mainOperation.getUrl(),
-						params: mainOperation.getParams()
+						params: mainOperation.getParams(),
+						projection: mainOperation.getSrs()
 					};
 					break;
 
@@ -480,18 +490,20 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	getContext: function(contextName) {
-		Cks.get({
-			url: this.getFullUrl(contextName),
-			scope: this,
-			success: function(response){
-				var owc = Ext.decode(response.responseText);
-				this.initContext(owc);
-			},
-			failure: function(response, opts) {
-				Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
-				this.getContext('ck-default');
-			}
-		});
+		if(contextName !== false) {
+			Cks.get({
+				url: this.getFullUrl(contextName),
+				scope: this,
+				success: function(response){
+					var owc = Ext.decode(response.responseText);
+					this.initContext(owc);
+				},
+				failure: function(response, opts) {
+					Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
+					this.getContext('ck-default');
+				}
+			});
+		}
 	},
 
 	/**

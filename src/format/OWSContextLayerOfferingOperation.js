@@ -50,6 +50,14 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		this.initConfig(config);
 	},
 	
+	getSrs: function() {
+		if(this._srs) {
+			return this._srs;
+		} else {
+			return this.getOwsOffering().getSrs();
+		}
+	},
+	
 	/**
 	 * Get the format.
 	 * @return {String} Can be : xml, json, text

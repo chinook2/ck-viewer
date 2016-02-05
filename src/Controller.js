@@ -86,10 +86,14 @@ Ext.define('Ck.Controller', {
 	 * @param {string} name of the resource
 	 * @return {string} the full Url
 	 */
-	getFullUrl: function (name) {
+	getFullUrl: function(name) {
 		var url = '';
 		
+		// Remote ressource. Add ? if not present
 		if(Ext.String.startsWith(name, 'http')) {
+			if(name.indexOf("?") == -1) {
+				name += "?";
+			}
 			return name;
 		}
 		

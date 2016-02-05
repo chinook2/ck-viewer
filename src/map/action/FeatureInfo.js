@@ -11,6 +11,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	extend: 'Ck.Action',
 	alias: 'widget.ckmapFeatureInfo',
 	
+	requires: ["FeatureInfoResult"],
+	
 	toggleGroup: 'ckmapAction',
 	tooltip: "Get feature info",
 	iconCls: "fa fa-info-circle",
@@ -31,19 +33,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 * 
 	 */
 	fieldIgnored: ["geometry", "shape", "boundedBy"],
-	
-	constructor: function(config) {
-		Ext.define('FeatureInfoResult', {
-			extend: 'Ext.data.Model',
-			fields: [
-				{name: 'featureid', type: 'int'},
-				{name: 'field', type: 'string'},
-				{name: 'value', type: 'string'}
-			]
-		});
-		this.callParent([config]);
-	},
-	
+
 	/**
 	 * FeatureInfo on vector layer
 	 */

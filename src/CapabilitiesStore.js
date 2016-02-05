@@ -5,6 +5,11 @@ Ext.define('Ck.CapabilitiesStore', {
 	extend: "Ext.data.Store",
 	alternateClassName: 'CkCapabilitiesLoader',
 
+	requires: [
+		"Layer",
+		"Context"
+	],
+	
 	config: {
 		/**
 		 * Configuration du template d'un getCapabilities du type en cours
@@ -20,7 +25,7 @@ Ext.define('Ck.CapabilitiesStore', {
 		/**
 		 * Le service dont il faut parser le getCapabilities (wfs, wms ou wmc)
 		 */
-		service: "WMS",
+		service: "WMC",
 
 		/**
 		 * True to build non-structures result
@@ -41,7 +46,7 @@ Ext.define('Ck.CapabilitiesStore', {
 		/**
 		 * Template for displayed text (must be a combination of fields)
 		 */
-		template:'{Title - Name}',
+		template: '{Title}',
 
 		version: null,
 
@@ -67,7 +72,8 @@ Ext.define('Ck.CapabilitiesStore', {
 			},
 			WMC: {
 				nodePath: 'Capability',
-				nodeName: 'Context'
+				nodeName: 'Context',
+				model: "Context"
 			},
 			USER: {
 				nodePath: 'Capability',
@@ -83,16 +89,24 @@ Ext.define('Ck.CapabilitiesStore', {
 
 
 	constructor: function(config) {
+		config = (Ext.isEmpty(config))? {} : config;
+		
+		switch(config.service) {
+			case "WMC":
+				config.model = "Context";
+				break;
+			default:
+				config.model = "Layer";
+		}
+		
 		this.callParent([config]);
-
+		
 		var reader = Ck.create("Ext.data.reader." + this.type);
 
 		if(this.getNodePath() === null || this.getNodeName() === null) {
 			this.setNodePath(this.getCapabilitiesConfig()[this.getService()].nodePath);
 			this.setNodeName(this.getCapabilitiesConfig()[this.getService()].nodeName);
 		}
-
-		this.setTemplate(new Ext.Template(this.getTemplate()));
 
 		Ext.override(reader, {
 			extractData: this.parseCapabilities.bind(this)
@@ -102,6 +116,16 @@ Ext.define('Ck.CapabilitiesStore', {
 			model: "Layer",
 			reader: reader
 		});
+	},
+	
+	setTemplate: function(template) {
+		this.template = new Ext.Template(template);
+	},
+	
+	setService: function(service) {
+		service = service.toUpperCase();
+		service = (service == "CHINOOK")? "WMS" : service;
+		this.service = service;
 	},
 
 	/**
@@ -181,7 +205,7 @@ Ext.define('Ck.CapabilitiesStore', {
 			case "COMPONENT" :
 				for(var i = 0; i < childNodes.length; i++) {
 					if(childNodes[i].tagName == nodeName)
-						aData.push(this.getDefaultAttributes(childNodes[i]));
+						mData.push(this.getDefaultRecord(childNodes[i]));
 				}
 			break;
 		}
@@ -190,14 +214,14 @@ Ext.define('Ck.CapabilitiesStore', {
 	},
 
 	/**
-	 * @method getDefaultAttributes
+	 * @method getDefaultRecord
 	 * Récupère les attributs d'un getCapbilities simple : <br/>
 	 * - pas de parents / enfants
 	 * - pas de traitement sur les attributs
 	 *
 	 * @return Object Objet contenant les attributs de l'élément
 	 */
-	getDefaultAttributes: function(data) {
+	getDefaultRecord: function(data) {
 		var attr = {
 			leaf: true
 		};
@@ -218,9 +242,9 @@ Ext.define('Ck.CapabilitiesStore', {
 		}
 
 		// Applique le template qui formate le texte affiché
-		attr.text = this.getTemplate().applyTemplate(attr);
-
-		return attr;
+		attr.Text = this.getTemplate().applyTemplate(attr);
+		
+		return new window[this.getCapabilitiesConfig()[this.getService()].model](attr);
 	},
 
 	/**
