@@ -415,6 +415,16 @@ Ext.define('Ck.map.Controller', {
 					for (var z = 0; z < resolutions.length; ++z) {
 						matrixIds[z] = z;
 					};
+					
+					// OpenLayers 2 zoomOffset backward capability
+					var zoomOffset = layer.getExtension().zoomOffset;
+					if(typeof zoomOffset == "number") {
+						var minZoom = resolutions[0];
+						for(var i = 0; i < zoomOffset; i++) {
+							matrixIds.push(matrixIds[matrixIds.length - 1] + 1);
+							resolutions.splice(0, 0, (minZoom * Math.pow(2, i + 1)));
+						}
+					}
 
 					olSourceOptions = {
 						url: mainOperation.getUrl(),

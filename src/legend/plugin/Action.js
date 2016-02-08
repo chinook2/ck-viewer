@@ -25,42 +25,45 @@ Ext.define('Ck.legend.plugin.Action', {
 			this.actionColumn.items = [];
 		}
 		
-		// Show/Hide Actions icons
-		var tview = this.tree.getView();
-		if(!tview.hasListener('highlightitem') ) {
-			tview.on({
-				// Hide actions for first items show
-				viewready: function(tree, eOpts ) {
-					var el = tree.getEl();
-					el.select('.x-action-col-cell').hide();
-				},
-				// Hide actions on collapse (global refresh)
-				refresh: function(tree, eOpts) {
-					var el = tree.getEl();
-					el.select('.x-action-col-cell').hide();
-				},
-				// Hide actions on expand (first childs show)
-				itemadd: function(records, index, node, eOpts ) {
-					node.forEach(function(n){
-						var rowEl = Ext.get(n);
-						rowEl.down('.x-action-col-cell').hide();
-					})
-				},
-				
-				// Show actions when mouse enter item
-				highlightitem: function(view, node, eOpts) {
-					var rowEl = Ext.get(node);
-					rowEl.down('.x-action-col-cell').show();
-				},
-				// Hide actions when mouse leave item
-				unhighlightitem: function(view, node, eOpts) {
-					var rowEl = Ext.get(node);
-					rowEl.down('.x-action-col-cell').hide();
-				},
-				scope: this
-			});
-		}
 		
+		if(this.tree.autoHideActions !== false) {
+			// Show/Hide Actions icons
+			var tview = this.tree.getView();
+			if(!tview.hasListener('highlightitem') ) {
+				tview.on({
+					// Hide actions for first items show
+					viewready: function(tree, eOpts ) {
+						var el = tree.getEl();
+						el.select('.x-action-col-cell').hide();
+					},
+					// Hide actions on collapse (global refresh)
+					refresh: function(tree, eOpts) {
+						var el = tree.getEl();
+						el.select('.x-action-col-cell').hide();
+					},
+					// Hide actions on expand (first childs show)
+					itemadd: function(records, index, node, eOpts ) {
+						node.forEach(function(n){
+							var rowEl = Ext.get(n);
+							rowEl.down('.x-action-col-cell').hide();
+						})
+					},
+					
+					// Show actions when mouse enter item
+					highlightitem: function(view, node, eOpts) {
+						var rowEl = Ext.get(node);
+						rowEl.down('.x-action-col-cell').show();
+					},
+					// Hide actions when mouse leave item
+					unhighlightitem: function(view, node, eOpts) {
+						var rowEl = Ext.get(node);
+						rowEl.down('.x-action-col-cell').hide();
+					},
+					scope: this
+				});
+			}
+		}
+
 		this.setAction();
 	},
 	
