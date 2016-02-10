@@ -84,6 +84,7 @@ Ext.define('Ck.map.Controller', {
 	 * @event addlayer
 	 * Fires when layer is added to the map
 	 * @param {ol.layer.*} layer
+	 * @param {Number} Index of inserted layer in its group
 	 */
 
 	/**
@@ -162,20 +163,6 @@ Ext.define('Ck.map.Controller', {
 		this.on("layersloading", this.layersLoading, this);
 		this.on("layersloaded", this.layersLoaded, this);
 		this.layersAreLoading = false;
-
-		// Relay olMap events
-		olMap.getLayers().on('add', function(colEvent) {
-			var layer = colEvent.element;
-			// Alias to get extension property directly
-			layer.getExtension = function(key) {
-				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
-			};
-			this.fireEvent('addlayer', layer);
-		}, this);
-		olMap.getLayers().on('remove', function(colEvent) {
-			var layer = colEvent.element;
-			this.fireEvent('removelayer', layer);
-		}, this);
 	},
 
 	layersLoading: function() {
@@ -246,13 +233,22 @@ Ext.define('Ck.map.Controller', {
 		// Set the bbox
 		this.setExtent(owc.getExtent());
 		this.currentOwsContext = owc;
-
+		
+		this.relayMapEvents(olMap.getLayerGroup());
+		
+		// Add a layer group to host special layer (draw, measure...)
+		this.specialGroup = Ck.create("ol.layer.Group", {
+			title: "CkOverlayGroup",
+			path: "CkOverlayGroup",
+			zIndex: 1
+		});
+		olMap.addLayer(this.specialGroup);
+		
 		// Load all layers. Reverse the loading for right order displaying
 		var layers = owc.getLayers();
 		for(var i = layers.length - 1; i >= 0; i--) {
 			this.addLayer(layers[i], owc);
 		}
-
 
 		// Init GPS manager
 		this.geolocation = new ol.Geolocation({
@@ -273,15 +269,23 @@ Ext.define('Ck.map.Controller', {
 		this.fireEvent('loaded', this);
 		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
 	},
+	
+	addSpecialLayer: function(layer) {
+		this.specialGroup.getLayers().insertAt(0, layer);
+	},
 
 	/**
 	 * Create ol.Source and ol.Layer and add it to the ol.Map
 	 * @param {Ck.format.OWSContextLayer}
 	 * @param {Ck.format.OWSContext}
+	 * @param {Number} Index to insert in the legend. Infinity to insert at last
 	 */
-	addLayer: function(layer, owc) {
+	addLayer: function(layer, owc, index) {
 		if(Ext.isEmpty(owc)) {
 			owc = this.currentOwsContext;
+		}
+		if(!(typeof index == "number")) {
+			index = 0;
 		}
 		var olLayer, olLayerType, olSourceOptions, olSource,
 			params, opt_options,
@@ -337,7 +341,7 @@ Ext.define('Ck.map.Controller', {
 				}.bind(undefined, cluster, olSource)
 			}
 
-			var extent = owc.getExtent();
+			var extent = layer.getExtent() || owc.getExtent();
 
 			var ckLayerSpec = this.getViewModel().getData().ckOlLayerConnection[mainOffering.getType()];
 
@@ -351,26 +355,117 @@ Ext.define('Ck.map.Controller', {
 				}
 				sources[off.getType()].push(this.createSource(off, layer, owc));
 			}
-
+			
+			var path = layer.getExtension('path') || "";
+			lyrGroup = this.getLayerGroup(path);
+			
 			// Layer creation
 			olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 				id: layer.getId(),
 				title: layer.getTitle(),
 				source: olSource,
 				sources: sources,
+				group: lyrGroup,
 				extent: extent,
 				style: olStyle,
 				visible: layer.getVisible(),
-				path: layer.getExtension('path') || ""
+				path: path
 			});
 
 			if(olLayer) {
+				if(index == 0) {
+					index = lyrGroup.getLayers().getLength();
+				} else if(index == Infinity) {
+					index = 0;
+				}
 				olLayer.ckLayer = layer;
-				this.getOlMap().getLayers().insertAt(0, olLayer);
+				lyrGroup.getLayers().insertAt(index, olLayer);
 			}
 		}
 	},
+	
+	/**
+	 * Get the layer group corresponding to the path
+	 * 3 cases :
+	 *  - path == ""		-> root layer group
+	 *  - path == "foo"		-> child of root
+	 *  - path == "foo/bar"	-> sub-group
+	 *
+	 * @param {String}
+	 * @param {Boolean} False to return false if group doesn't exist. Create it otherwise
+	 * @return {ol.layer.Group}
+	 */
+	getLayerGroup: function(path, autoCreate) {
+		var lyrGroup, backPath = path;
+		if(path == "") {
+			var lyrGroup = this.getOlMap().getLayerGroup();
+		} else {
+			var layers, parentGroup;
+			var paths = path.split("/");
+			var groupName = paths.pop();
+			
+			// Create parent group recursively
+			if(paths.length > 0) {
+				parentGroup = this.getLayerGroup(paths.join("/"), autoCreate);
+			} else {
+				parentGroup = this.getLayerGroup("", autoCreate);
+			}
+			
+			if(!Ext.isEmpty(parentGroup)) {
+				// Now find the group
+				var layers = parentGroup.getLayers().getArray();
+				for(var i = 0; (i < layers.length && Ext.isEmpty(lyrGroup)); i++) {
+					if(layers[i] instanceof ol.layer.Group && layers[i].get("title") == groupName) {
+						lyrGroup = layers[i];
+					}
+				}
+				
+				// Layer group doesn't exist. Create it
+				if(Ext.isEmpty(lyrGroup) && autoCreate !== false) {
+					var lyrGroup = Ck.create("ol.layer.Group", {
+						title: groupName,
+						path: backPath,
+						group: parentGroup
+					});
+					this.relayMapEvents(lyrGroup);
+					parentGroup.getLayers().insertAt(0, lyrGroup);
+				}
+			}
+		}
+		
+		return lyrGroup;
+	},
 
+	/**
+	 * Relay add and remove layer events
+	 * @param {ol.layer.Group}
+	 */
+	relayMapEvents: function(olGroup) {
+		// Relay olMap events
+		olGroup.getLayers().on('add', function(colEvent) {
+			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.onLayerMove, 6)) {
+				return;
+			}
+			var layer = colEvent.element;
+			var col = colEvent.currentTarget;
+			var idx = col.getArray().indexOf(layer);
+			
+			
+			// Alias to get extension property directly
+			layer.getExtension = function(key) {
+				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
+			};
+			this.fireEvent('addlayer', layer, (col.getArray().length - idx) - 1);
+		}, this);
+		olGroup.getLayers().on('remove', function(colEvent) {
+			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.onLayerMove, 6)) {
+				return;
+			}
+			var layer = colEvent.element;
+			this.fireEvent('removelayer', layer);
+		}, this);
+	},
+	
 	/**
 	 * Create a source from an offering
 	 * @param {Ck.owcLayerOffering}
@@ -666,12 +761,31 @@ Ext.define('Ck.map.Controller', {
 	},
 
 	/**
+	 * Recursive function to return all layers
+	 * @param {ol.layer.Group}
+	 * @return {Array}
+	 */
+	getAllLayers: function(lyrGrp) {
+		var col = lyrGrp.getLayers().getArray();
+		var res = new Array();
+		for(var i = 0; i < col.length; i++) {
+			if(col[i] instanceof ol.layer.Group) {
+				res = res.concat(this.getAllLayers(col[i]));
+			} else {
+				res.push(col[i]);
+			}
+		}
+		return res;
+	},
+	
+	/**
 	 * Get the collection of layers associated with this map.
 	 * @param {Function/undefined} Function with 1 param of ol.layer. Return true to add the layer to the result array
 	 * @return {ol.Collection} If no function was passed so all layers are returned
 	 */
 	getLayers: function(fct) {
-		var res, layers = this.getOlMap().getLayers();
+		var layers = new ol.Collection(this.getAllLayers(this.getOlMap().getLayerGroup()));
+		var res;
 		if(Ext.isEmpty(fct)) {
 			res = layers;
 		} else {

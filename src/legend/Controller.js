@@ -19,6 +19,13 @@ Ext.define('Ck.legend.Controller', {
 
 	linkToMap: function(ckMap) {
 		ckMap.legend = this;
+		
+		// Link main layer group to root node
+		var mainGrp = ckMap.getOlMap().getLayerGroup();
+		var rootNode = this.getView().getRootNode();
+		
+		mainGrp.set("node", rootNode);
+		rootNode.set("layer", mainGrp);
 	},
 
 	ckLoaded: function() {
@@ -27,20 +34,66 @@ Ext.define('Ck.legend.Controller', {
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
 
-		v.getView().on({
-			drop: this.onDrop,
-			scope: this
-		});
+		// v.getView().on({
+			// drop: this.refreshLegend,
+			// scope: this
+		// });
 		
 		this.fireEvent('ready', this);
 	},
 
-	onMapAddLayer: function(layer) {
-		if(layer.ckLayer && layer.ckLayer.getExtension("displayInLayerSwitcher") !== false) {
-			this.addLayer(layer);
+	/**
+	 * @param {ol.layer.Base}
+	 * @param {Number}
+	 */
+	onMapAddLayer: function(layer, idx) {
+		if(!Ext.isEmpty(layer.get("group"))) {
+			var node = {
+				leaf: !(layer instanceof ol.layer.Group),
+				text: layer.get('title'),
+				checked: (layer.get('visible') && !(layer instanceof ol.layer.Group)),
+				iconCls: 'x-tree-noicon',
+				layer: layer,
+				allowDrop: (layer instanceof ol.layer.Group)
+			};
+			
+			node = layer.get("group").get("node").insertChild(idx, node);
+			layer.set("node", node);
+			
+			// Append and remove node events (to manage order for example)
+			node.on("move", this.onLayerMove, this);
 		}
 	},
 
+	/**
+	 * On node move (layer or group), move the layer into the map layer collection
+	 * @param {Ext.data.NodeInterface}
+	 * @param {Ext.data.NodeInterface}
+	 * @param {Ext.data.NodeInterface}
+	 * @param {Number}
+	 */
+	onLayerMove: function(node, oldGrp, newGrp, idx) {
+		var lyr = node.get("layer"),
+		oldCol = oldGrp.get("layer").getLayers(),
+		newCol = newGrp.get("layer").getLayers();
+		
+		// Set new group to layer and invert index to respect layer display order
+		lyr.set("group", newGrp.get("layer"));
+		idx = (newGrp.childNodes.length - idx) - 1;
+		
+		// Exception for root folder
+		if(oldGrp.get("layer") == this.getOlMap().getLayerGroup()) {
+			idx++;
+		}
+		
+		// Inhibit remove and add layer map event (in Ck.map.Controller with Ck.functionInStackTrace)
+		oldCol.remove(lyr);
+		newCol.insertAt(idx, lyr);
+		
+		// Return false to avoid move event recusion. Action already does by OpenLayers group managment
+		return false;
+	},
+	
 	/**
 	 * Called when a layer is removed from the map
 	 * @param {ol.layer}
@@ -91,43 +144,7 @@ Ext.define('Ck.legend.Controller', {
                 layers.push(rec.get('layer'));
             }
         });
-        return layers.reverse();
-	},
-
-	addLayer: function(layer) {
-		var root = this.getView().getRootNode();
-		var pNode = root;
-
-		var node = {
-			leaf: true,
-			text: layer.get('title'),
-			checked: layer.get('visible'),
-			iconCls: 'x-tree-noicon',
-			layer: layer
-		};
-
-		var path = layer.get('path')
-		if(path) {
-			var keys = path.split('/');
-			var keyId = pKeyId = '';
-
-			for(i=0; i<keys.length; i++) {
-				keyId += '_' + keys[i];
-				var isNode = root.findChild('id', keyId);
-				if(!isNode) {
-					pNode = pNode.appendChild({
-						text: keys[i],
-						id: keyId,
-						iconCls: 'x-tree-noicon',
-						checked: false
-					}, true);
-				} else {
-					pNode = isNode;
-				}
-			};
-		}
-
-		pNode.appendChild(node);
+        return layers;
 	},
 
 	/**
@@ -138,19 +155,8 @@ Ext.define('Ck.legend.Controller', {
 		var layer = rec.get('layer');
 		if(!layer) return;
 
-		if(modifiedFieldNames=='checked') {
+		if(modifiedFieldNames=='checked' && !(layer instanceof ol.layer.Group)) {
 			layer.set('visible', rec.get('checked'));
-		}
-	},
-
-	onDrop: function(node, data, overModel, dropPosition, eOpts) {
-        var ckLayers = this.getLayers();
-
-		var olLayers = this.getMap().getLayers();
-		olLayers.clear();
-
-		for(i=0; i<ckLayers.length; i++) {
-			olLayers.push(ckLayers[i]);
 		}
 	}
 });

@@ -170,7 +170,7 @@ Ext.define('Ck.CapabilitiesStore', {
 							if(t) {
 								mData.push(t);
 							}
-							
+							break;
 						case "SRS":
 							proj = childNodes[i].childNodes[0].nodeValue.split(" ");
 							for(var x=0; x<proj.length; x++) {

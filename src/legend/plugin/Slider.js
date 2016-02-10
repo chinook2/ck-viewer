@@ -10,7 +10,7 @@ Ext.define('Ck.legend.plugin.Slider', {
 
 	init: function(cmp) {
 		cmp.on({
-			itemmousedown: this.onItemmousedown,
+			itemclick: this.onItemmousedown,
 			itemremove: this.onItemremove,
 			scope: this
 		});
@@ -18,35 +18,40 @@ Ext.define('Ck.legend.plugin.Slider', {
 	
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(!layer || e.target.tagName != "SPAN") {
-			return false;
-		}
-		
-		var opacity = layer.getOpacity();
-		
-		var slider = record.get('slider');
-		if(slider) {
-			slider.setVisible(slider.hidden);
-		} else {
-			slider = Ext.create('Ext.slider.Single', {
-				width: 200,
-				value: (opacity * 100),
-				increment: 1,
-				minValue: 0,
-				maxValue: 100,
-				renderTo: item,
-				useTips: true,
-				tipPrefix: this.tipPrefix,
-				tipText: function(thumb) {
-					return Ext.String.format(slider.tipPrefix + ' {0} %', thumb.value);
-				},
-				listeners: {
-					change: function(s, v) {
-						layer.setOpacity(v/100);
+		if(layer && e.target.tagName == "SPAN") {
+			var opacity = layer.getOpacity();
+			
+			var slider = record.get('slider');
+			if(slider && slider.getEl().dom && Ext.get(slider.getEl().dom.id)) {
+				slider.setVisible(slider.hidden);
+			} else {
+				slider = Ext.create('Ext.slider.Single', {
+					width: '90%',
+					value: (opacity * 100),
+					increment: 1,
+					minValue: 0,
+					maxValue: 100,
+					renderTo: item,
+					useTips: true,
+					tipPrefix: this.tipPrefix,
+					saveDelay: 300,
+					checkChangeEvents: ["change"],
+					style: {
+						marginLeft: '5%',
+						marginRight: '5%'
+					},
+					tipText: function(thumb) {
+						return Ext.String.format(slider.tipPrefix + ' {0} %', thumb.value);
+					},
+					listeners: {
+						change: function(s, v) {
+							// Ck.log(v.toString());
+							layer.setOpacity(v/100);
+						}
 					}
-				}
-			});
-			record.set('slider', slider);
+				});
+				record.set('slider', slider);
+			}
 		}
 	},
 	

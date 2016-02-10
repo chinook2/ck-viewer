@@ -654,6 +654,25 @@ Ext.apply(Ck, {
 
 		var blob = new Blob(byteArrays, {type: contentType});
 		return blob;
+	},
+	
+	/**
+	 * Check if a function is present in the stack trace
+	 * @param {Function}
+	 * @param {Number} Recursion limit
+	 * @return {Boolean}
+	 */
+	functionInStackTrace: function(fct, limit) {
+		var exist = false, caller = arguments.callee.caller;
+		limit = (Ext.isNumber(limit))? limit : 15;
+		while(caller && !exist && limit > 0) {
+			if(caller == fct) {
+				exist = true;
+			}
+			caller = caller.arguments.callee.caller;
+			limit--;
+		}
+		return exist;
 	}
 
 }).init();

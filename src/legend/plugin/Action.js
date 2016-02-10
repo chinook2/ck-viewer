@@ -26,7 +26,7 @@ Ext.define('Ck.legend.plugin.Action', {
 		}
 		
 		
-		if(this.tree.autoHideActions !== false) {
+		if(Ext.os.is.Desktop && this.tree.autoHideActions !== false) {
 			// Show/Hide Actions icons
 			var tview = this.tree.getView();
 			if(!tview.hasListener('highlightitem') ) {
