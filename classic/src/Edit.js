@@ -15,6 +15,11 @@ Ext.define("Ck.Edit", {
 		"Ck.edit.action.*"
 	],
 	
+	config:{
+		layer: null,
+		openner: null
+	},
+	
 	editConfig: {
 		layerId: "ckedit-layer",
 		snapLayer: "",

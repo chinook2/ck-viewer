@@ -110,14 +110,10 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	init: function(view) {
 		this.callParent(arguments);
-		
 		var geometryType, geometryTypeBehavior;
 		
-		this.setLayer(view.initialConfig.layer);
-		this.setOpenner(view.initialConfig.openner);
-		
 		// Geometry type
-		var geometryType = view.initialConfig.layer.getExtension("geometryType");
+		var geometryType = this.getLayer().getExtension("geometryType");
 		if(geometryType.indexOf("Multi") == -1) {
 			this.setEmulateSimple(false);
 			geometryTypeBehavior = geometryType;

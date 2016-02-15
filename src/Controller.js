@@ -41,6 +41,14 @@ Ext.define('Ck.Controller', {
 	 * @param {Ext.Component}
 	 */
 	init: function(view) {
+		// initConfig hard fix
+		for(var key in view.config) {
+			var setter = this["set" + Ext.String.capitalize(key)];
+			if(Ext.isFunction(setter) && view.config[key] != undefined) {
+				setter.call(this, view.config[key]);
+			}
+		}
+		
 		var map = this.getMap();
 		
 		if(!Ext.isObject(map)) {
@@ -50,6 +58,7 @@ Ext.define('Ck.Controller', {
 		if(Ext.isObject(map)) {
 			this.setMap(map);
 		}
+		
 		this.callParent(arguments);
 	},
 	

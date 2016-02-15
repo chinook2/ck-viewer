@@ -35,15 +35,12 @@ Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
+		view.config.container = view.up("panel");
+		view.config.service = container.service;
+		view.config.request = (container.service == "wmc")? "getContext" : "getCapabilities";
 		this.callParent(arguments);
 
-		var container = view.up("panel");
-		this.setContainer(container);
-
 		view.on("itemclick", this.onNodeClick, this);
-
-		this.setService(container.service);
-		this.setRequest((container.service == "wmc")? "getContext" : "getCapabilities");
 	},
 
 	/**

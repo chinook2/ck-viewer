@@ -37,18 +37,13 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
+		view.config.container = view.up("panel");
+		view.config.service = container.service;
 		this.callParent(arguments);
-
-		var container = view.up("panel");
-		var service = container.service;
 
 		this.store = Ck.create("Ext.data.Store", {
 			model: "DataSource"
 		});
-
-		this.setContainer(container);
-		this.setService(service);
-
 		
 		Cks.get({
 			url: "resources/conf/addlayer.json",

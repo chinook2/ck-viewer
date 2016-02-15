@@ -14,7 +14,20 @@ Ext.define("Ck.AddLayer", {
 
 	config: {
 		layout: "border",
-		source: null
+		/**
+		 * True to insert the layer at first in legend
+		 */
+		insertFirst: false,
+		
+		/**
+		 * wmc, wms or wfs
+		 */
+		service: "wmc",
+		
+		/**
+		 * False to add layer without its group in the legend
+		 */
+		keepStructure: true
 	},
 
 	items: [{

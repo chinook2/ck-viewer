@@ -21,11 +21,6 @@ Ext.define('Ck.action.AddLayer', {
 		panels: ["wmc", "wms", "wfs"]
 	},
 	
-	constructor: function(config) {
-		this.setPanels(config.panels || this.getInitialConfig("panels"));
-		this.callParent(arguments);
-	},
-	
 	/**
 	 * Update geolocationMarker's position via GPS if pressed == true.
 	 * Zoom to user location

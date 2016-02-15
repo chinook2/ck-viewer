@@ -46,12 +46,7 @@ Ext.define('Ck.addlayer.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		
 		this.callParent(arguments);
-		
-		this.setInsertFirst(view.config.insertFirst);
-		this.setService(view.config.service);
-		this.setKeepStructure(view.config.keepStructure);
 
 		this.selector = view.down("#sourceselector");
 		this.capabilities = view.down("#sourcecapabilities");
