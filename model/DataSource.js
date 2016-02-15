@@ -7,6 +7,7 @@ Ext.define("DataSource", {
 		{name: "name", type: "string"},
 		{name: "title", type: "string"},
 		{name: "url", type: "string"},
-		{name: "type", type: "string"}
+		{name: "service", type: "string"},
+		{name: "format", type: "string"}
 	]
 });

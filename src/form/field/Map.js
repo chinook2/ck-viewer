@@ -94,7 +94,7 @@ Ext.define('Ck.form.field.Map', {
 		value = arguments.length ? (value == null ? '' : value) : this.processRawValue(this.getRawValue());
 
 		var me = this,
-			errors = me.callParent([value]),
+			errors = me.callParent(arguments),
 			validator = me.validator,
 			vtype = me.vtype,
 			vtypes = Ext.form.field.VTypes,

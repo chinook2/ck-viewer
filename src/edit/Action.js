@@ -15,7 +15,7 @@ Ext.define('Ck.edit.Action', {
 	constructor: function(config) {
 		this.config = config;
 		this.layer = config.layer;
-		this.callParent([config]);
+		this.callParent(arguments);
 
 		this.map = Ck.getMap();
 		this.olMap = this.map.getOlMap();
@@ -28,6 +28,7 @@ Ext.define('Ck.edit.Action', {
 	toggleAction: function(el) {
 		this.associatedEl = el;
 		this.controller = el.lookupController();
+		
 		if(this.used == false) {
 			this.controller.getView().on("hide", this.disableAllInteractions, this);
 		}
@@ -83,22 +84,6 @@ Ext.define('Ck.edit.Action', {
 	setLayer: function(layer) {
 		this.layer = layer;
 		this.openner.getView().layerId = layer.getProperties().id;
-	},
-
-	/**
-	 * Retourne le type de gémétrie ou "Polygon" par défaut
-	 * @return {String}
-	 **/
-	getGeometryType: function() {
-		var layer = this.getLayer();
-		var type = this.layer.getExtension("geometryType");
-		if(Ext.isEmpty(type)) {
-			var ft = this.layer.getSource().getFeatures()[0];
-			if(!Ext.isEmpty(ft)) {
-				type = ft.getGeometry().getType();
-			}
-		}
-		return type || this.defaultGeometryType;
 	},
 
 	/**

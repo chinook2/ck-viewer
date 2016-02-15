@@ -20,55 +20,51 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 		container: null,
 
 		/**
-		 * One of "wms", "wfs", "chinook" to display
+		 * One of "wms", "wfs", "wmc" to display
 		 */
-		source: null,
+		service: "wmc",
 		
 		/**
 		 * Configuration of this datasource selector
 		 */
-		 conf: {}
+		 conf: {
+			 url	: "http://localhost/",
+			 format	: "Xml"
+		 }
 	},
 
 	/**
 	 * @protected
 	 */
 	init: function(view) {
-		this.callParent([view]);
+		this.callParent(arguments);
 
 		var container = view.up("panel");
-		var source = container.getSource();
+		var service = container.service;
 
 		this.store = Ck.create("Ext.data.Store", {
 			model: "DataSource"
 		});
 
 		this.setContainer(container);
-		this.setSource(source);
+		this.setService(service);
 
-		switch(source) {
-			case "chinook":
-				Cks.get({
-					url: "resources/conf/addlayer.json",
-					scope: this,
-					success: function(response){
-						var conf = Ext.decode(response.responseText).chinook;
-						if(Ext.isString(conf)) {
-							conf = {url: conf};
-						}
-						this.setConf(conf);
-						this.initStore(conf);
-					},
-					failure: function(response, opts) {
-						Ck.error('Error when loading AddLayer configuration');
-					}
-				});
-				break;
-			case "wms":
-				break;
-			case "wfs":
-				break;
-		}
+		
+		Cks.get({
+			url: "resources/conf/addlayer.json",
+			scope: this,
+			success: function(response){
+				var conf = Ext.decode(response.responseText)[service];
+				if(Ext.isString(conf)) {
+					conf = {url: conf};
+				}
+				this.setConf(conf);
+				this.initStore(conf);
+			},
+			failure: function(response, opts) {
+				Ck.error('Error when loading AddLayer configuration');
+			}
+		});
 	},
 
 	initStore: function(conf) {
@@ -76,31 +72,41 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 			conf = this.getConf();
 		}
 		
-		switch(this.getSource()) {
-			case "chinook":
+		switch(this.getService()) {
+			case "wmc":
 				if(conf.context === true) {
 					// TODO wmc getCapabilities
 				} else {
 					this.store.add({
-						name: "repository",
-						title: "Repository",
-						url: conf.url,
-						type: "chinook"
+						name	: "repository",
+						title	: "Repository",
+						url		: conf.url,
+						service	: "wmc",
+						format	: conf.format
 					});
 					this.getView().setVisible(false);
 				}
-				
-				// Select the first item to load the capabilities directly
-				if(this.getView().rendered) {
-					this.selectFirst();
-				} else {
-					this.getView().on("render", this.selectFirst, this);
-				}
 				break;
 			case "wms":
-				break;
 			case "wfs":
-				break;
+				if(Ext.isArray(conf)) {
+					
+				} else {
+					this.store.add({
+						name	: this.getService(),
+						title	: this.getService(),
+						url		: conf.url,
+						service	: this.getService(),
+						format	: conf.format
+					});
+					this.getView().setVisible(false);
+				}
+		}
+		// Select the first item to load the capabilities directly
+		if(this.getView().rendered) {
+			this.selectFirst();
+		} else {
+			this.getView().on("render", this.selectFirst, this);
 		}
 	},
 

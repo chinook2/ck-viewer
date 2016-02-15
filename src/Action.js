@@ -130,7 +130,7 @@ Ext.define('Ck.Action', {
 			scope: this
 		});
 		Ck.actions.push(this);
-		this.callParent([config]);
+		this.callParent(arguments);
 	},
 	
 	render: Ext.emptyFn,

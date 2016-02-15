@@ -79,8 +79,8 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 	 * @param {ol.layer.Base}
 	 */
 	isEditable: function(layer) {
-		if(!Ext.isEmpty(layer)) {
-			if(layer.getExtension("editable")) {
+		if(!Ext.isEmpty(layer) && !(layer instanceof ol.layer.Group)) {
+			if(layer.getExtension("editable") || layer.ckLayer.getPermission("edit")) {
 				return true;
 			}
 		}

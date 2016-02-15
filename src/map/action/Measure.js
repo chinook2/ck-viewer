@@ -95,7 +95,7 @@ Ext.define('Ck.map.action.Measure', {
 					})
 				})
 			});
-			this.olMap.addLayer(this.measureLayer);
+			map.addSpecialLayer(this.measureLayer);
 		}
 		
 		var source = this.measureLayer.getSource();

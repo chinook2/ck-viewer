@@ -45,7 +45,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		delete this.textEl;
 		delete this.labelEl;
 		
-		this.callParent();
+		this.callParent(arguments);
 	},
 
 	// private

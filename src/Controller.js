@@ -50,6 +50,7 @@ Ext.define('Ck.Controller', {
 		if(Ext.isObject(map)) {
 			this.setMap(map);
 		}
+		this.callParent(arguments);
 	},
 	
 	/**

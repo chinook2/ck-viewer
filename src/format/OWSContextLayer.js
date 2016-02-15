@@ -2,7 +2,7 @@
  * 
  */
 Ext.define('Ck.format.OWSContextLayer', {
-	alternateClassName: ['Ck.owcLayer', 'Ck.OwcLayer'],
+	alternateClassName: ['Ck.owsLayer', 'Ck.OwsLayer'],
 	
 	/**
 	 * Config of OWSContextLayer
@@ -89,11 +89,29 @@ Ext.define('Ck.format.OWSContextLayer', {
 			return ext[key];
 		}
 	},
+	
+	/**
+	 * Get a permission
+	 * @param {String}
+	 * @return {Object /Boolean}
+	 */
+	getPermission: function(key) {
+		var perm = this.getExtension("permission");
+		if(Ext.isString(perm)) {
+			perm = Ext.decode(perm);
+		} else {
+			perm = {};
+		}
+		if(Ext.isString(key)) {
+			perm = (perm[key] == "allow");
+		}
+		return perm;
+	},
 		
 	/**
 	 * Get offering of desired type
 	 * @param {String/Number} Type (wms, wfs, osm...) or index of offering
-	 * @return {Ck.owcLayerOffering/undefined}
+	 * @return {Ck.owsLayerOffering/undefined}
 	 */
 	getOffering: function(val) {
 		var offering, offerings = this.getOfferings();

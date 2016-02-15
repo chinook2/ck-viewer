@@ -194,15 +194,17 @@ Ext.define('Ck.map.Controller', {
 			Ck.log("This context is not a OWS context !");
 			return;
 		}
-		
-		this.fireEvent("contextloading", owc);
-
-		this.originOwc = owc;
 
 		var v = this.getView();
 		var olMap = this.getOlMap();
 		var olView = this.getOlView();
+		
+		// Remove all layers
+		olMap.setLayerGroup(Ck.create("ol.layer.Group"));
 
+		this.fireEvent("contextloading", owc);
+		this.originOwc = owc;
+		
 		proj4.defs("EPSG:3943", "+proj=lcc +lat_1=42.25 +lat_2=43.75 +lat_0=43 +lon_0=3 +x_0=1700000 +y_0=2200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
 
 		var viewProj = owc.getProjection();
@@ -226,9 +228,6 @@ Ext.define('Ck.map.Controller', {
 			maxResolution: viewScales[viewScales.length-1].res
 		}));
 		this.bindMap(olMap);
-
-		// Remove all layers
-		this.getLayers().clear();
 
 		// Set the bbox
 		this.setExtent(owc.getExtent());
@@ -453,7 +452,7 @@ Ext.define('Ck.map.Controller', {
 			
 			// Alias to get extension property directly
 			layer.getExtension = function(key) {
-				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
+				return (this.ckLayer && Ext.isFunction(this.ckLayer.getExtension))? this.ckLayer.getExtension(key) : undefined;
 			};
 			this.fireEvent('addlayer', layer, (col.getArray().length - idx) - 1);
 		}, this);
@@ -468,8 +467,8 @@ Ext.define('Ck.map.Controller', {
 	
 	/**
 	 * Create a source from an offering
-	 * @param {Ck.owcLayerOffering}
-	 * @param {Ck.owcLayer}
+	 * @param {Ck.owsLayerOffering}
+	 * @param {Ck.owsLayer}
 	 * @param {Ck.owc}
 	 * @return {ol.Source}
 	 */
@@ -503,7 +502,7 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetTile");
 					params = mainOperation.getParams();
 					// get resolution from main view. need inverse order
-					var resolutions = owc.getResolutions(false);
+					var resolutions = owc.getResolutions(false).slice(0);
 
 					// generate resolutions and matrixIds arrays for this WMTS
 					var matrixIds = [];

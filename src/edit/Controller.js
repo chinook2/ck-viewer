@@ -4,6 +4,8 @@
  * - Edit action add, delete, attribute...
  * - History grid to log modification (optionnal)
  * - Vertex grid to modify geometry accurately (optionnal)
+ *
+ * There are 2 value of type. The real type of the layer and the considered type for edition.
  */
 Ext.define('Ck.edit.Controller', {
 	extend: 'Ck.Controller',
@@ -17,14 +19,34 @@ Ext.define('Ck.edit.Controller', {
 		layer: null,
 		
 		/**
-		 * Indicate if the edited layer is a multi-feature layer (like MultiLineString)
+		 * Emulate single geometry. True to considerate geometry as simple geom
 		 */
-		multi: false,
+		emulateSimple: true,
 		
 		/**
 		 * If the edited layer is a WMS layer
 		 */
-		isWMS: false
+		isWMS: false,
+		
+		/**
+		 * Indicate if the edited layer is a multi-feature layer for real(like MultiLineString)
+		 */
+		multi: false,
+		
+		/**
+		 * Type of the layer. If it's a multi-geometry layer and emulateSimple is true then this value will be simple name geometry type
+		 */
+		geometryType: "",
+		
+		/**
+		 * Indicate if we have to display multi-geometry UI
+		 */
+		multiBehavior: false,
+		
+		/**
+		 * Considerate geometry type. It can be different from geometryType only if emulateSimple is true
+		 */
+		geometryTypeBehavior: ""
 	},
 	
 	/**
@@ -87,11 +109,29 @@ Ext.define('Ck.edit.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		this.callParent([view]);
+		this.callParent(arguments);
+		
+		var geometryType, geometryTypeBehavior;
 		
 		this.setLayer(view.initialConfig.layer);
 		this.setOpenner(view.initialConfig.openner);
-		this.setMulti((view.initialConfig.layer.getExtension("geometryType").indexOf("Multi") != -1));
+		
+		// Geometry type
+		var geometryType = view.initialConfig.layer.getExtension("geometryType");
+		if(geometryType.indexOf("Multi") == -1) {
+			this.setEmulateSimple(false);
+			geometryTypeBehavior = geometryType;
+		} else if(this.getEmulateSimple()) {
+			geometryTypeBehavior = geometryType.substr(5);
+		} else {
+			geometryTypeBehavior = geometryType;
+		}
+		
+		this.setGeometryType(geometryType);
+		this.setGeometryTypeBehavior(geometryTypeBehavior);
+		
+		this.setMulti(geometryType.indexOf("Multi") != -1);
+		this.setMultiBehavior(geometryTypeBehavior.indexOf("Multi") != -1);
 		
 		this.control({
 			"ckedit button#cancel": {
@@ -167,10 +207,10 @@ Ext.define('Ck.edit.Controller', {
 		var conf = view.editConfig;
 		conf.editController = this;
 		conf.layer = view.layer;
-		conf.multi = this.getMulti();
+		conf.multi = this.getMultiBehavior();
 		
 		// When user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
-		if(this.getMulti()) {
+		if(conf.multi) {
 			var featureContainer = Ext.getCmp("edit-featurepanel");
 			featureContainer = (Ext.isEmpty(featureContainer))? view : featureContainer;
 		
@@ -192,7 +232,7 @@ Ext.define('Ck.edit.Controller', {
 		}
 		
 		// Display vertex panel for line and polygon
-		if(view.layer.getExtension("geometryType") != "Point") {
+		if(this.getGeometryTypeBehavior() != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
 			vertexContainer = (Ext.isEmpty(vertexContainer))? view : vertexContainer;
 		
@@ -203,7 +243,7 @@ Ext.define('Ck.edit.Controller', {
 			this.vertex = this.vertexPanel.getController();
 			Ext.apply(this.vertex, conf);
 			
-			var receiver = (this.getMulti())? this.feature : this;
+			var receiver = (this.getMultiBehavior())? this.feature : this;
 			this.relayEvents(this.vertex, ["sessionstart"], "vertex");
 			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
 			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
@@ -230,12 +270,12 @@ Ext.define('Ck.edit.Controller', {
 	onCreate: function(feature) {
 		feature.setStyle(Ck.map.Style.greenStroke);
 		var source = this.getSource();
-		if(this.getMulti()) {
-			var type = "Multi" + feature.getGeometry().getType();
-			feature = Ck.create("ol.Feature", {
-				geometry: Ck.create("ol.geom." + type, [feature.getGeometry().getCoordinates()])
-			});
-		}
+		// if(this.getMultiBehavior()) {
+			// var type = "Multi" + feature.getGeometry().getType();
+			// feature = Ck.create("ol.Feature", {
+				// geometry: Ck.create("ol.geom." + type, [feature.getGeometry().getCoordinates()])
+			// });
+		// }
 		source.addFeature(feature);
 	},
 	
@@ -259,7 +299,7 @@ Ext.define('Ck.edit.Controller', {
 				feature.setGeometry(ft.getGeometry());
 			}
 		}
-		if(this.getMulti()) {
+		if(this.getMultiBehavior()) {
 			this.startFeatureEdition(feature);
 		} else {
 			this.startVertexEdition(feature);
@@ -297,7 +337,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.geom.SimpleGeometry}
 	 */
 	startVertexEdition: function(feature) {
-		if(this.getLayer().getExtension("geometryType") == "Point") {
+		if(this.getGeometryTypeBehavior() == "Point") {
 			if(this.moveInteraction) {
 				this.getOlMap().removeInteraction(this.moveInteraction);
 			}
@@ -455,7 +495,6 @@ Ext.define('Ck.edit.Controller', {
 		if(this.getIsWMS()) {
 			var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
 			var geometryName = this.getLayer().getExtension("geometryColumn");
-			var multiForReal = this.getLayer().getExtension("multiForReal");
 			
 			var currSrs = this.getMap().getProjection().getCode();
 			var lyrSrs = ope.getSrs();
@@ -483,7 +522,7 @@ Ext.define('Ck.edit.Controller', {
 				
 				// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
 				var geom = ft.getGeometry();
-				if(multiForReal === true && data.actionId != 3 && !Ext.isEmpty(geom) && geom.getType().indexOf("Multi") == -1) {
+				if(data.actionId != 3 && !Ext.isEmpty(geom) && (geom.getType() != this.getGeometryType())) {
 					var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
 					ft.setGeometry(mGeom);
 				}

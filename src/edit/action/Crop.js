@@ -31,7 +31,7 @@ Ext.define('Ck.edit.action.Crop', {
 	 * Activate the geometry crop interaction. First, select the geom what want to crop.
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 

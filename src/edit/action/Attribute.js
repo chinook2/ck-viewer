@@ -10,7 +10,7 @@ Ext.define('Ck.edit.action.Attribute', {
 
 	toggleAction: function(btn, status) {
 		if(!this.used) {
-			this.callParent([btn]);
+			this.callParent(arguments);
 		}
 		
 		var source = this.getLayerSource();
@@ -59,8 +59,13 @@ Ext.define('Ck.edit.action.Attribute', {
 		// var source = layer.getSource();
 		var formName = layer.getExtension('form');
 		if(!formName){
-			formName = '/' +  layer.get('id');
+			var lyrName = layer.get('id');
+			var lyrName = lyrName.split(":");
+			lyrName = lyrName.pop();
+			formName = '/' + lyrName
 		}
+		
+		
 		
 		this.mapFormPanel =  Ext.create({
 			xtype: 'ckform',

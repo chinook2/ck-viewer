@@ -7,6 +7,8 @@
 		{name: "BoundingBox", type: "auto"},
 		{name: "Group", type: "auto"},
 		{name: "LatLonBoundingBox", type: "string"},
-		{name: "SRS", type: "auto"}
+		{name: "SRS", type: "auto"},
+		{name: "owsData", type: "auto"},
+		{name: "owcLayer", type: "auto"}
 	]
 });

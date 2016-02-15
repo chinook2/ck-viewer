@@ -18,14 +18,19 @@ Ext.define('Ck.CapabilitiesStore', {
 		nodeName: null,
 
 		/**
-		 * The data type returned by the getCapabilities requets
+		 * The data format returned by the getCapabilities requets
 		 */
-		type: "Xml",
+		format: "Xml",
 
 		/**
-		 * Le service dont il faut parser le getCapabilities (wfs, wms ou wmc)
+		 * The requested web service
 		 */
 		service: "WMC",
+		
+		/**
+		 * The request type processed
+		 */
+		request: "getCapabilities",
 
 		/**
 		 * True to build non-structures result
@@ -49,63 +54,68 @@ Ext.define('Ck.CapabilitiesStore', {
 		template: '{Title}',
 
 		version: null,
+		
+		/**
+		 * Doesn't send the request automatically
+		 */
+		autoLoad: false,
 
 		/**
-		 * Configuration des template des getCapabilities
+		 * Templates
 		 */
-		capabilitiesConfig: {
-			GEOPORTAIL: {
-				nodePath: 'Contents',
-				nodeName: 'Layer'
-			},
-			POSTGIS: {
-				nodePath: 'Capability/Layer',
-				nodeName: 'Layer'
-			},
+		templates: {
 			WMS: {
-				nodePath: 'Capability/Layer',
-				nodeName: 'Layer'
+				getCapabilities: {
+					Xml: {
+						nodePath: 'Capability/Layer',
+						nodeName: 'Layer'
+					},
+					model: "Layer"
+				}
 			},
 			WFS: {
-				nodePath: 'FeatureTypeList',
-				nodeName: 'FeatureType'
+				getCapabilities: {
+					Xml: {
+						nodePath: 'FeatureTypeList',
+						nodeName: 'FeatureType'
+					},
+					model: "Layer"
+				}
 			},
 			WMC: {
-				nodePath: 'Capability',
-				nodeName: 'Context',
-				model: "Context"
-			},
-			USER: {
-				nodePath: 'Capability',
-				nodeName: 'User'
-			},
-			DATASOURCE: {
-				nodePath: 'Capability',
-				nodeName: 'Datasource'
+				getCapabilities: {
+					Xml: {
+						nodePath: 'Capability',
+						nodeName: 'Context'
+					},
+					model: "Context"
+				},
+				getContext: {
+					Json: {
+						nodePath: "features",
+						nodeName: "Feature"
+					},
+					model: "Layer"
+				}
 			}
 		}
 	},
 
-
-
 	constructor: function(config) {
 		config = (Ext.isEmpty(config))? {} : config;
+		config.service = (config.service)? config.service : this.getInitialConfig().service;
+		config.request = (config.request)? config.request : this.getInitialConfig().request;
+		config.templates = (config.templates)? config.templates : this.getInitialConfig().templates;
 		
-		switch(config.service) {
-			case "WMC":
-				config.model = "Context";
-				break;
-			default:
-				config.model = "Layer";
-		}
+		config.model = config.templates[config.service][config.request].model;
 		
-		this.callParent([config]);
+		this.callParent(arguments);
 		
-		var reader = Ck.create("Ext.data.reader." + this.type);
+		var reader = Ck.create("Ext.data.reader." + this.getFormat());
 
 		if(this.getNodePath() === null || this.getNodeName() === null) {
-			this.setNodePath(this.getCapabilitiesConfig()[this.getService()].nodePath);
-			this.setNodeName(this.getCapabilitiesConfig()[this.getService()].nodeName);
+			this.setNodePath(this.getTemplates()[this.getService()][this.getRequest()][this.getFormat()].nodePath);
+			this.setNodeName(this.getTemplates()[this.getService()][this.getRequest()][this.getFormat()].nodeName);
 		}
 
 		Ext.override(reader, {
@@ -113,7 +123,7 @@ Ext.define('Ck.CapabilitiesStore', {
 		});
 
 		Ext.apply(this.proxy, {
-			model: "Layer",
+			model: config.model,
 			reader: reader
 		});
 	},
@@ -132,91 +142,194 @@ Ext.define('Ck.CapabilitiesStore', {
 	 * When XHR query success it will be called with the response
 	 */
 	parseCapabilities: function(root, readOptions) {
+		return this["parse" + this.getFormat() + "Capabilities"](root, readOptions);
+	},
+	
+	parseXmlCapabilities: function(root, readOptions) {
 		var capabilities = Ext.DomQuery.select(this.getNodePath(), root);
 		var nodeName = this.getNodeName();
 		var data, aData = [], mData = [];
 
-		if(capabilities.length == 0) {
-			// Error, no root capabilities
-			return false;
-		}
+		// Check if root capabilities is present
+		if(capabilities.length > 0) {
+			capabilities = capabilities[0];
 
-		capabilities = capabilities[0];
+			// Check s'il n'y a pas une erreur
+			var exceptionNode = Ext.DomQuery.select("ServiceException", root);
+			if(!Ext.isEmpty(exceptionNode[0])) {
+				return false;
+			}
 
-		// Check s'il n'y a pas une erreur
-		var exceptionNode = Ext.DomQuery.select("ServiceException", root);
-		if(!Ext.isEmpty(exceptionNode[0])) {
-			return false;
-		}
-
-		var attrVersion = root.getAttribute("version");
- 		if(!Ext.isEmpty(attrVersion) && typeof attrVersion == "string") {
-			this.version = attrVersion;
-		}
+			var attrVersion = root.getAttribute("version");
+			if(!Ext.isEmpty(attrVersion) && typeof attrVersion == "string") {
+				this.version = attrVersion;
+			}
 
 
-		var record, childNodes = capabilities.childNodes;
+			var record, childNodes = capabilities.childNodes;
 
-		switch(this.getService()) {
-			case "POSTGIS" :
-			case "GEOPORTAIL" :
-			case "WMS" :
-				this.projList = [];
+			switch(this.getService() + this.getRequest()) {
+				case "WMSgetCapabilities" :
+				case "WMCgetContext":
+					this.projList = [];
 
-				for(var i=0;i< childNodes.length;i++) {
-					switch(childNodes[i].tagName) {
-						case "Layer":
-							var t = this.getWMSRecord(childNodes[i], [], this.projList);
-							if(t) {
-								mData.push(t);
-							}
-							break;
-						case "SRS":
-							proj = childNodes[i].childNodes[0].nodeValue.split(" ");
-							for(var x=0; x<proj.length; x++) {
-								this.projList.push(proj[x]);
-							}
-							break;
-						case "CRS":
-							proj = childNodes[i].childNodes[0].nodeValue.split(" ");
-							for(var x=0; x<proj.length; x++) {
-								var tmpProjection = proj[x];
-								if(tmpProjection === "CRS:84") {//si ca contient CRS:84
-									tmpProjection = "EPSG:4326";//CRS:84 is equivalent to EPSG:4326
+					for(var i=0;i< childNodes.length;i++) {
+						switch(childNodes[i].tagName) {
+							case "Layer":
+								var t = this.getXmlWMSRecord(childNodes[i], [], this.projList);
+								if(t) {
+									mData.push(t);
 								}
-								this.projList.push(tmpProjection);
-							}
-							break;
+								break;
+							case "SRS":
+								proj = childNodes[i].childNodes[0].nodeValue.split(" ");
+								for(var x=0; x<proj.length; x++) {
+									this.projList.push(proj[x]);
+								}
+								break;
+							case "CRS":
+								proj = childNodes[i].childNodes[0].nodeValue.split(" ");
+								for(var x=0; x<proj.length; x++) {
+									var tmpProjection = proj[x];
+									if(tmpProjection === "CRS:84") {//si ca contient CRS:84
+										tmpProjection = "EPSG:4326";//CRS:84 is equivalent to EPSG:4326
+									}
+									this.projList.push(tmpProjection);
+								}
+								break;
+						}
 					}
-				}
 
-				// record = this.getWMSRecord(capabilities, [], this.projList);
-				// mData.push(record);
-			break;
-			case "WFS" :
-				for(var i = 0; i < childNodes.length; i++) {
-					if(childNodes[i].tagName == nodeName)
-						aData.push(this.getWFSAttributes(childNodes[i]));
-				}
-			break;
-			case "USER" :
-				for(var i = 0; i < childNodes.length; i++) {
-					if(childNodes[i].tagName == nodeName)
-						aData.push(this.getUserAttributes(childNodes[i]));
-				}
-			break;
-			default:
-			case 'WMC' :
-			case "DATASOURCE" :
-			case "COMPONENT" :
-				for(var i = 0; i < childNodes.length; i++) {
-					if(childNodes[i].tagName == nodeName)
-						mData.push(this.getDefaultRecord(childNodes[i]));
-				}
-			break;
+					// record = this.getXmlWMSRecord(capabilities, [], this.projList);
+					// mData.push(record);
+				break;
+				case "WFS" :
+					for(var i = 0; i < childNodes.length; i++) {
+						if(childNodes[i].tagName == nodeName)
+							aData.push(this.getXmlWFSRecord(childNodes[i]));
+					}
+				break;
+				default:
+				case 'WMC' :
+					for(var i = 0; i < childNodes.length; i++) {
+						if(childNodes[i].tagName == nodeName)
+							mData.push(this.getXmlDefaultRecord(childNodes[i]));
+					}
+				break;
+			}
 		}
 
 		return mData;
+	},
+	
+	parseJsonCapabilities: function(root, readOptions) {
+		var capabilities = root[this.getNodePath()];
+		var nodeName = this.getNodeName();
+		var data, flateData = [];
+		
+		if(!Ext.isEmpty(capabilities)) {
+			switch(this.getService() + this.getRequest()) {
+				case "WMCgetContext":
+					for(var idx in capabilities) {
+						flateData.push(this.getJsonDefaultRecord(capabilities[idx]));
+					}
+					
+					// Structure data with group
+					if(!this.getFlatStore()) {
+						/**
+						 * @param {Layer}
+						 * @param {String}
+						 */
+						getGroupNode = function(path) {
+							var group, backPath = path;
+							if(path == "") {
+								var group = arguments.callee.root;
+							} else {
+								var nodes, parentGroup;
+								var paths = path.split("/");
+								var groupName = paths.pop();
+								
+								// Create parent group recursively
+								if(paths.length > 0) {
+									parentGroup = this.getGroupNode(paths.join("/"));
+								} else {
+									parentGroup = this.getGroupNode("");
+								}
+								
+								if(!Ext.isEmpty(parentGroup)) {
+									// Now find the group
+									var nodes = parentGroup.childNodes;
+									for(var i = 0; (i < nodes.length && Ext.isEmpty(group)); i++) {
+										if(!nodes[i].isLeaf() && nodes[i].get("Name") == groupName) {
+											group = nodes[i];
+										}
+									}
+									
+									// Layer group doesn't exist. Create it
+									if(Ext.isEmpty(group)) {
+										var group = new Layer({
+											Title: groupName,
+											Name: groupName
+										});
+										group.set("loaded", true);
+										group.childNodes = [];
+										group.data.children = [];
+										if(parentGroup.get("Name") != "") {
+											group.parentNode = parentGroup;
+										}
+										parentGroup.childNodes.push(group);
+										parentGroup.data.children.push(group.data);
+									}
+								}
+							}
+							
+							return group;
+						};
+						
+						// Create root record to simplify the recursion
+						rootData = new Layer({Name: ""});
+						rootData.data.children = [];
+						rootData.childNodes = [];
+						rootData.set("loaded", true);
+						getGroupNode.root = rootData;
+						
+						var owcLyr, path, grp;
+						for(var idx in flateData) {
+							node = flateData[idx];
+							owcLyr = node.get("owsLayer");
+							path = owcLyr.getExtension("path");
+							grp = getGroupNode(path);
+							
+							// Link parent / child
+							node.set("loaded", true);
+							node.parentNode = grp;
+							grp.childNodes.push(node);
+							grp.data.children.push(node.data);
+						}
+						data = rootData.childNodes;
+					} else {
+						data = flateData;
+					}
+					data.reverse();
+			}
+		}
+		
+		return data;
+	},
+	
+	getJsonDefaultRecord: function(data) {
+		var prop = data.properties;
+		var attr = {
+			Name: prop.title,
+			Title: prop.title,
+			owsLayer: new Ck.owsLayer({data: data}),
+			owcData: data,
+			leaf: true
+		};
+		
+		attr.Text = this.getTemplate().applyTemplate(attr);
+		
+		return new window[this.getModel().entityName](attr);
 	},
 
 	/**
@@ -227,7 +340,7 @@ Ext.define('Ck.CapabilitiesStore', {
 	 *
 	 * @return Object Objet contenant les attributs de l'élément
 	 */
-	getDefaultRecord: function(data) {
+	getXmlDefaultRecord: function(data) {
 		var attr = {
 			leaf: true
 		};
@@ -250,63 +363,7 @@ Ext.define('Ck.CapabilitiesStore', {
 		// Applique le template qui formate le texte affiché
 		attr.Text = this.getTemplate().applyTemplate(attr);
 		
-		return new window[this.getCapabilitiesConfig()[this.getService()].model](attr);
-	},
-
-	/**
-	 * @method getUserAttributes
-	 * Récupère les attributs d'un contexte à partir d'un noeud XML
-	 *
-	 * @return Object Objet contenant les attributs de l'élément
-	 */
-	getUserAttributes: function(data) {
-		var attr = {};
-		if(this.nodeControls) {
-			attr.controls = this.nodeControls ;
-		}
-		if(this.uiProvider) {
-			attr.uiProvider = this.uiProvider;
-		}
-
-		// Boucle sur les attributs
-		for(var i=0;i< data.childNodes.length;i++) {
-			var child = data.childNodes[i];
-			if(typeof child.tagName == 'string' && child.tagName != this.getNodeName()) {
-				var textContent = Ext.DomQuery.selectValue('', child, ''); // assure compatibilite FF, IE...
-
-				switch(child.tagName) {
-					case "Login" :
-					case "Name" :
-					case "Firstname" :
-						attr[child.tagName] = textContent;
-						break;
-					case "Isgroup" :
-						attr["Isgroup"] = (textContent == "true");
-				}
-			}
-		}
-
-		// Applique le template qui formate le texte affiché
-		attr.text = this.getTemplate().applyTemplate(attr);
-
-		// Si l'élément traité possède des enfants alors on appele cette fonction récursivement
-		if(!Ext.isEmpty(Ext.DomQuery.selectNode(this.getNodeName(), data))) {
-			// Groupe de couche, on boucle + appel récursif
-			attr.children = data.childNodes;
-			attr.Layer = data.childNodes;
-			// for(var i=0;i< data.childNodes.length;i++) {
-				// var cu = data.childNodes[i];
-				// if(cu.tagName == this.getNodeName()) {
-					// attr.children.push(this.getUserAttributes(cu));
-				// }
-			// }
-		} else {
-			attr.leaf = true;
-		}
-
-
-
-		return attr;
+		return new window[this.getModel().entityName](attr);
 	},
 
 	/**
@@ -315,7 +372,7 @@ Ext.define('Ck.CapabilitiesStore', {
 	 *
 	 * @return Object Objet contenant les attributs de l'élément
 	 */
-	getWMSRecord: function(data, curGroup, projList) {
+	getXmlWMSRecord: function(data, curGroup, projList) {
 		curGroup = curGroup || [];
 
 		var attr = {
@@ -466,7 +523,7 @@ Ext.define('Ck.CapabilitiesStore', {
 
 				var cu = data.childNodes[i];
 				if(cu.tagName == this.getNodeName()) {
-					child = this.getWMSRecord(cu, curGroup.slice(0), attr["SRS"]);
+					child = this.getXmlWMSRecord(cu, curGroup.slice(0), attr["SRS"]);
 					if(child != null) {
 						record.childNodes.push(child);
 						// Required to manage tree "tabulation"
@@ -493,7 +550,7 @@ Ext.define('Ck.CapabilitiesStore', {
 	 *
 	 * @return Object Objet contenant les attributs de l'élément
 	 */
-	getWFSAttributes: function(data, curGroup) {
+	getXmlWFSRecord: function(data, curGroup) {
 		curGroup = curGroup || [];
 		// Paramètre par défaut
 		var attr = {

@@ -21,13 +21,13 @@ Ext.define('Ck.edit.action.Create', {
 	 * Activate the geometry creation interaction
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		this.callParent(arguments);
 
 		// Create the interaction if it doesn't already exist
 		if(!this.drawInteraction) {
 			this.drawSource = new ol.source.Vector();
 			this.drawInteraction = new ol.interaction.Draw({
-				type			: this.getGeometryType(),
+				type			: this.controller.getGeometryTypeBehavior(),
 				snapGeometry	: this.snapGeometry,
 				source			: this.drawSource
 			});

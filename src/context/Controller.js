@@ -23,7 +23,7 @@ Ext.define('Ck.context.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		this.callParent([view]);
+		this.callParent(arguments);
 		
 		this.initStore();
 	},

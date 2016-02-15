@@ -18,7 +18,7 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
-	 * @param {Ck.owcLayer}
+	 * @param {Ck.owsLayer}
 	 */
 	constructor: function(config) {
 		var data = config.data;

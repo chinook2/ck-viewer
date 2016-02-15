@@ -16,16 +16,16 @@ Ext.define('Ck.action.AddLayer', {
 	iconCls: 'fa fa-plus-square',
 
 	itemId: 'addlayer',
-
-	// panels	: ["chinook", "wms", "wfs"],
-	panels	: ["chinook"],
-
-	/**
-	 * @param {Ck.map.Controller}
-	 */
-	ckLoaded: function(map) {
+	
+	config: {
+		panels: ["wmc", "wms", "wfs"]
 	},
-
+	
+	constructor: function(config) {
+		this.setPanels(config.panels || this.getInitialConfig("panels"));
+		this.callParent(arguments);
+	},
+	
 	/**
 	 * Update geolocationMarker's position via GPS if pressed == true.
 	 * Zoom to user location
@@ -49,16 +49,12 @@ Ext.define('Ck.action.AddLayer', {
 	},
 
 	createMainPanel: function() {
-		var cls, config, items = [];
+		var cls, conf, config, items = [], panels = this.getPanels();
 
-		for(var i in this.panels) {
-			items.push({
-				xtype	: "ckaddlayer",
-				source	: this.panels[i],
-				config	: {
-					source	: this.panels[i]
-				}
-			})
+		for(var i in panels) {
+			conf = panels[i];
+			conf.xtype = "ckaddlayer"
+			items.push(conf)
 		}
 
 		if(items.length > 1) {

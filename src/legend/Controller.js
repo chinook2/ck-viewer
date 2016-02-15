@@ -11,17 +11,17 @@ Ext.define('Ck.legend.Controller', {
 				// Called when add layer to map
 				addlayer: 'onMapAddLayer',
 				removelayer: 'onMapRemoveLayer',
-				ready: 'linkToMap',
-				contextloading: 'clearLegend'
+				contextloading: 'prepareLegend'
 			}
 		}
 	},
 
-	linkToMap: function(ckMap) {
-		ckMap.legend = this;
+	prepareLegend: function(owc) {
+		this.getView().getRootNode().removeAll();
+		this.getMap().legend = this;
 		
 		// Link main layer group to root node
-		var mainGrp = ckMap.getOlMap().getLayerGroup();
+		var mainGrp = this.getOlMap().getLayerGroup();
 		var rootNode = this.getView().getRootNode();
 		
 		mainGrp.set("node", rootNode);
@@ -33,11 +33,6 @@ Ext.define('Ck.legend.Controller', {
 
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
-
-		// v.getView().on({
-			// drop: this.refreshLegend,
-			// scope: this
-		// });
 		
 		this.fireEvent('ready', this);
 	},
@@ -103,10 +98,6 @@ Ext.define('Ck.legend.Controller', {
 		if(node) {
 			node.remove();
 		}
-	},
-	
-	clearLegend: function() {
-		this.getView().getRootNode().removeAll();
 	},
 
 	/**

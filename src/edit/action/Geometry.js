@@ -13,7 +13,7 @@ Ext.define('Ck.edit.action.Geometry', {
 
 	toggleAction: function(btn, status) {
 		if(!this.used) {
-			this.callParent([btn]);
+			this.callParent(arguments);
 			this.firstUse();
 		}
 		

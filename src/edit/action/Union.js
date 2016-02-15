@@ -20,7 +20,7 @@ Ext.define('Ck.edit.action.Union', {
 	 * Activate the geometry crop interaction
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		this.callParent(arguments);
 		
 		if(!this.unionInteraction) {
 			this.createInteraction();
