@@ -1119,7 +1119,6 @@ Ext.define('Ck.form.Controller', {
 				// getValues can be an Array (merge transform to an Object...)
 				values[name] = sf.getValues();
 			}
-			
 		}
 		//
 
@@ -1192,10 +1191,6 @@ Ext.define('Ck.form.Controller', {
 			var sf = subforms[s];
 			// Subform linked to grid (validation is done when submitting this form, not the main form)
 			if(sf.isSubForm === true) continue;
-			// var name = sf.view.name;
-			// if(!name) continue;
-			// if(this.fields.indexOf(name)==-1) continue;
-
 			if(!sf.isValid()) isValid = false;
 		}
 		//

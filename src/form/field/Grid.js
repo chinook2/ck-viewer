@@ -53,7 +53,7 @@ Ext.define('Ck.form.field.Grid', {
 			},
 			render: function() {
 				this.grid.getStore().on('datachanged', function(store) {
-					if(Ext.isArray(this.lastValue) && this.lastValue.length>0 && store.getCount() ==0) this.checkChange();
+					this.checkChange();
 				}, this);
 			},
 			scope: this
