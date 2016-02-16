@@ -161,6 +161,7 @@ Ext.define('Ck.Selection', {
 			type = "Circle";
 			geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
 		} else if(type.indexOf("box") != -1) {
+			maxPoints = 2;
 			type = "LineString";
 			geometryFunction = function(coordinates, geometry) {
 				if (!geometry) {
