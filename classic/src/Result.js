@@ -40,17 +40,8 @@ Ext.define("Ck.Result", {
 			itemId: "clear-history"
 		}]
 	},{
-		title: "Features",
 		itemId: "feature_grid",
-		xtype: "gridpanel",
-		flex: 1,
-		bbar: [{
-			xtype: "pagingtoolbar",
-			itemId: "feature_paging",
-			displayInfo: true,
-			displayMsg: "Displaying features {0} - {1} of {2}",
-			emptyMsg: "No features to display"
-		}]
+		xtype: "ckresult-feature"
 	}],
 	
 

@@ -5,13 +5,23 @@ Ext.define('Ck.result.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckresult',
 	
-	excludedColumns: ["boundedBy", "the_geom"],
+	excludedColumns: ["boundedBy", "the_geom", "msGeometry"],
 	
 	config: {
 		openner: null
 	},
 	
 	data: [],
+	
+	/**
+	 * @var {Ext.data.Model}
+	 */
+	currentLayer: null,
+	
+	constructor: function(a,b,c) {
+		
+		this.callParent(arguments);
+	},
 	
 	/**
 	 * @protected
@@ -39,6 +49,25 @@ Ext.define('Ck.result.Controller', {
 				click: this.clearHistory
 			}
 		});
+		
+		this.plugins = [{
+			xtype: "gridmenu",
+			text: "Click me"
+		}];
+		
+		// this.on("render", this.addUpdate, this);
+		
+	},
+	
+	addUpdate: function() {
+		var menu = this.headerCt.getMenu();
+		menu.add([{
+			text: 'Custom Item',
+			handler: function() {
+				var columnDataIndex = menu.activeHeader.dataIndex;
+				alert('custom item for column "'+columnDataIndex+'" was pressed');
+			}
+		}]);
 	},
 	
 	/**
@@ -69,15 +98,27 @@ Ext.define('Ck.result.Controller', {
 		}];
 		
 		this.layerRoot.appendChild(result);
-		this.layerTree.selectPath(firstId, null, null, function(success, lastNode) { this.loadFeature(this.layerTree, lastNode) }, this);
-		
-		
+		this.layerTree.selectPath(firstId, null, null, function(success, lastNode) {
+			this.loadFeature(this.layerTree, lastNode)
+		}, this);
 	},
 	
+	/**
+	 * Load all features of one layer. Initialize paging
+	 * @param {Ext.tree.Panel}
+	 * @param {Ext.data.Model} Layer data model (typeof data.data.features == ol.Features[])
+	 */
 	loadFeature: function(tree, record) {
+		if(Ext.isEmpty(record)) {
+			record = this.currentLayer;
+		} else {
+			this.currentLayer = record;
+		}
+		
 		if(Ext.isEmpty(record.data.data)) {
 			return false;
 		}
+		
 		var fts = record.data.data.features;
 		
 		// List columns
@@ -91,9 +132,11 @@ Ext.define('Ck.result.Controller', {
 			}
 		}
 		
-		var features = [];
+		var obj, features = [];
 		for(var i in fts) {
-			features.push(fts[i].values_);
+			obj = fts[i].values_;
+			obj.ckFeature = fts[i];
+			features.push(obj);
 		}
 		
 		this.featureStore = Ck.create("Ext.data.Store", {
@@ -106,6 +149,7 @@ Ext.define('Ck.result.Controller', {
 			}
 		});
 		
+		this.featureStore.ckLayer = record.data.data.layer;
 		this.featurePaging.setStore(this.featureStore);
 		this.featureGrid.reconfigure(this.featureStore, columns);
 	},

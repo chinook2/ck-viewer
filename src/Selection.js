@@ -448,7 +448,7 @@ Ext.define('Ck.Selection', {
 				var lyr = ope.getLayers().split(",");
 				// Fix Chinook 1 context prefix in getFeature response
 				for(var i in lyr) {
-					lyr[i] = lyr[i].split(":")[0];
+					lyr[i] = lyr[i].split(":").pop();
 				}
 				
 				var format = Ck.create("ol.format.WFS", {
