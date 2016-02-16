@@ -54,10 +54,15 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			}
 			
 			var conf = this.grid.getInitialConfig();
+			
+			// Default hide action column when editing = false or no action enable
+			var hide = !formController.getView().getEditing();
+			if(actions.length==0) hide = true;
+			
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
-				hidden: !formController.getView().getEditing(),
+				hidden: hide,
 				items: actions
 			});
 
@@ -95,7 +100,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 
 	startEditing: function() {
 		// add & show action column
-		this.actionColumn.show();
+		if(this.actionColumn.items.length>0) this.actionColumn.show();
 		this.addNewRow();
 	},
 
