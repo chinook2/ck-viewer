@@ -31,6 +31,11 @@ Ext.define('Ck.form.field.Grid', {
 	
 	initComponent: function() {
 
+		// Prevent duplicate id between gridfield and grid (id / reference point to internal grid)
+		if(this.initialConfig.id) {
+			this.setId('gridfield' + '-' + this.getAutoId())
+		}
+		
 		this.grid = Ext.create(Ext.applyIf({
 			xtype: 'grid',
 			scrollable: 'y'
@@ -47,8 +52,8 @@ Ext.define('Ck.form.field.Grid', {
 				this.checkChange();
 			},
 			render: function() {
-				this.grid.getStore().on('datachanged', function() {
-					if(Ext.isArray(this.lastValue) && this.lastValue.length>0) this.checkChange();
+				this.grid.getStore().on('datachanged', function(store) {
+					if(Ext.isArray(this.lastValue) && this.lastValue.length>0 && store.getCount() ==0) this.checkChange();
 				}, this);
 			},
 			scope: this
@@ -116,9 +121,16 @@ Ext.define('Ck.form.field.Grid', {
 		this.grid.getStore().loadData(val);
 	},
 	
-	onChange: function(newVal, oldVal) {
-		this.callParent(arguments);
-	},
+    reset: function() {
+        var me = this;
+        me.beforeReset();
+		// Clear grid data
+        me.grid.getStore().removeAll();
+		//
+        me.clearInvalid();
+        // delete here so we reset back to the original state
+        delete me.wasValid;
+    },
 	
 	getStore: function() {
 		return this.grid.getStore();
