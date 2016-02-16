@@ -21,7 +21,8 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	fields: [],
-
+	subforms: [],
+	
 	// TODO in config param in form json...
 	compatibiltyMode: false,
 
@@ -77,10 +78,12 @@ Ext.define('Ck.form.Controller', {
 	},
 	
 	init: function() {
-		this.isSubForm = this.view.getIsSubForm();
-		this.autoLoad = this.view.getAutoLoad();
-		this.editing = this.view.getEditing();
+		var v = this.view;
+		this.isSubForm = v.getIsSubForm();
+		this.autoLoad = v.getAutoLoad();
+		this.editing = v.getEditing();
 		this.isInit = false;
+		this.subforms = [];
 
 		// Init local Storage for production mode (test if it's disable in global conf app.json)
 		if(Ck.getOption('ajaxCache') !== false){
@@ -94,15 +97,15 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Get form definition directly in the view (no Ajax request)
-		var inlineForm = this.view.getFormRaw();
-		var parentForm = this.view.up('ckform');
+		var inlineForm = v.getFormRaw();
+		var parentForm = v.up('ckform');
 		if(parentForm) {
 			this.parentForm = parentForm;
 			
 			this.editing = parentForm.getEditing();
 			
 			// inherit dataFid from main view form (used in store url template)
-			vDataFid = this.view.getDataFid() || {};
+			vDataFid = v.getDataFid() || {};
 			pDataFid = parentForm.getDataFid() || {};
 			if(!Ext.isObject(vDataFid)) {
 				vDataFid ={fid: vDataFid};
@@ -110,12 +113,15 @@ Ext.define('Ck.form.Controller', {
 			if(!Ext.isObject(pDataFid)) {
 				pDataFid ={fid: pDataFid};
 			}
-			this.view.setDataFid(Ext.apply(vDataFid, pDataFid));
+			v.setDataFid(Ext.apply(vDataFid, pDataFid));
 
 			// Try find parent form name (used for overriden controllers)
 			if(inlineForm && !inlineForm.name) {
 				inlineForm.name = parentForm.getController().name;
 			}
+			
+			// Add reference of this form as subform for the parent...
+			parentForm.getController().registerSubForm(this);
 		}
 
 		if(this.editing===true) this.startEditing();
@@ -128,9 +134,18 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formLoad: function(btn) {
-		if(btn && btn.formName) {
-			this.view.setFormName(btn.formName);
+		if(btn && (btn.nextFormName || btn.formName)) {
+			this.view.setFormName(btn.nextFormName || btn.formName);
 			this.isInit = false;
+			this.subforms = [];
+			this.initForm();
+			return;
+		}
+		
+		if(btn && btn.nextFormUrl) {
+			this.view.setFormUrl(btn.nextFormUrl);
+			this.isInit = false;
+			this.subforms = [];
 			this.initForm();
 			return;
 		}
@@ -145,19 +160,8 @@ Ext.define('Ck.form.Controller', {
 			//After save success.
 
 			// Link to another form
-			if(btn && btn.nextFormName) {
-				this.view.setFormName(btn.nextFormName);
-				this.isInit = false;
-				this.initForm();
-				return;
-			}
-			if(btn && btn.nextFormUrl) {
-				this.view.setFormUrl(btn.nextFormUrl);
-				this.isInit = false;
-				this.initForm();
-				return;
-			}
-
+			this.formLoad(btn);
+			
 			// Close the form
 			if(btn && btn.andClose) {
 				this.formClose({
@@ -436,11 +440,20 @@ Ext.define('Ck.form.Controller', {
 		return false;
 	},
 	
+	getSubForms: function() {
+		return this.subforms;
+	},
+	
+	registerSubForm: function(sform) {
+		this.subforms.push(sform);
+	},
+	
 	// List all included form in a form.
 	getIncludedForm: function(cfg) {
 		if(!cfg) return;
 		var includeForm = [];
 		var fn = function(c) {
+			if(!c) return;
 			if(c['@include']) {
 				includeForm.push(c['@include']);
 			}
@@ -473,6 +486,7 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				var fn = function(c, idx, frm) {
+					if(!c) return;
 					if(c.items) {
 						Ext.each(c.items, fn, this);
 					}
@@ -505,6 +519,8 @@ Ext.define('Ck.form.Controller', {
 		this.fields = [];
 
 		var fn = function(c) {
+			if(!c) return;
+			
 			// Get Alls direct fields of the form with includes (exclude subform)
 			if(c.name) {
 				this.fields.push(c.name);
@@ -904,7 +920,8 @@ Ext.define('Ck.form.Controller', {
 		}.bind(this);
 		
 		for(var key in cfg.items) {
-			cfg.items[key] = fn(cfg.items[key]);
+			var cf = fn(cfg.items[key]);
+			if(cf) cfg.items[key] = cf;
 		}
 		return cfg;
 	},
@@ -1087,15 +1104,22 @@ Ext.define('Ck.form.Controller', {
 			values['main'] = res;
 		}
 
-		// SUBFORM : save data
-		var subforms = v.query('ckform');
+		// SUBFORM
+		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			if(!sf.name) continue;
-			if(this.fields.indexOf(sf.name)==-1) continue;
+			var name = sf.view.name;
+			if(!name) continue;
+			if(this.fields.indexOf(name)==-1) continue;
 
-			if(!values[sf.name]) values[sf.name] = {};
-			values[sf.name] = Ext.Object.merge(values[sf.name], sf.getController().getValues());
+			// We can manage multiple subform with the same name and merge values
+			if(Ext.isObject(values[name])){
+				values[name] = Ext.Object.merge(values[name], sf.getValues());
+			} else {
+				// getValues can be an Array (merge transform to an Object...)
+				values[name] = sf.getValues();
+			}
+			
 		}
 		//
 
@@ -1140,10 +1164,10 @@ Ext.define('Ck.form.Controller', {
 		}
 		
 		// SUBFORM : load data
-		var subforms = v.query('ckform');
+		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			if(data[sf.name]) sf.getController().setValues(data[sf.name]);
+			if(data[sf.view.name]) sf.setValues(data[sf.view.name]);
 		}
 		//
 	},
@@ -1162,52 +1186,20 @@ Ext.define('Ck.form.Controller', {
 			}
 		}, this);
 
-		// SUBFORM : save data
-		var subforms = v.query('ckform');
+		// SUBFORM
+		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			if(!sf.name) continue;
-			if(this.fields.indexOf(sf.name)==-1) continue;
+			// Subform linked to grid (validation is done when submitting this form, not the main form)
+			if(sf.isSubForm === true) continue;
+			// var name = sf.view.name;
+			// if(!name) continue;
+			// if(this.fields.indexOf(name)==-1) continue;
 
-			if(!sf.getController().isValid()) isValid = false;
+			if(!sf.isValid()) isValid = false;
 		}
 		//
-/*
-		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
-		// GRID : save data only if gridpanel is not linked to main form with a name property
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			if(grid.name) continue;
-			var requiredColumn;
-
-			// Test all columns for required fields
-			grid.getStore().each(function(rec) {
-				if(rec.data.dummy===true) return;
-				grid.getColumns().forEach(function(col) {
-					if(!col.dataIndex) return;
-					var val = rec.data[col.dataIndex];
-
-					if((!val) && (col.allowBlank===false)) {
-						isValid = false;
-						requiredColumn = col;
-						Ck.log(col + ' not Valid !');
-						return false;
-					}
-				});
-				if(!isValid) return false;
-			});
-
-			if(!isValid) {
-				Ext.Msg.alert("Required fields", " This field is required : "+ requiredColumn.text);
-			}
-
-			// TEMP : assume only one grid !
-			break;
-		}
-		//
-		//
-*/
+		
 		return isValid;
 	},
 
@@ -1222,6 +1214,8 @@ Ext.define('Ck.form.Controller', {
 		// Getters via config param in the view
 		var lyr = v.getLayer();
 		var bSilent = false;
+		
+		Ck.log("Load data for : "+this.name);
 
 		if(this.oController.beforeLoad(options) === false) {
 			Ck.log("beforeLoad cancel loadData.");
@@ -1398,6 +1392,8 @@ Ext.define('Ck.form.Controller', {
 			options.method = 'POST';
 		}
 
+		Ck.log("Save data for : "+this.name);
+
 		// Test if form is valid (all fields of the main form)
 		if(!this.isValid()) {
 			Ck.log("Form is not valid in saveData : "+ this.name);
@@ -1406,9 +1402,7 @@ Ext.define('Ck.form.Controller', {
 
 		this.fireEvent('beforesave');
 
-		// 
 		var values = this.getValues();
-		//
 		
 		if(this.oController.beforeSave(values, options) === false) {
 			Ck.log("beforeSave cancel saveData.");
@@ -1416,56 +1410,20 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// SUBFORM : save data only if subform is not linked to main form with a name property
-		var subforms = v.query('ckform');
+		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 
 			// TODO : manage save callback...
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
-			if(!sf.name && !sf.isSubForm) {
-				if(sf.getController().saveData()===false){
-					Ck.log("Subform " + sf.formName + " cancel saveData.");
+			if(!sf.view.name && !sf.view.isSubForm) {
+				if(sf.saveData()===false){
+					Ck.log("Subform " + sf.view.formName + " cancel saveData.");
 					return false;
 				}
 			}
 		}
-/*
-		// TODO : manage grid as field with a plugin... AND perform save in the plugin.
-		// GRID : save data only if gridpanel is not linked to main form with a name property
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			if(grid.name) continue;
 
-			var dtg = [];
-
-			// Get all records with special formatting for date...
-			grid.getStore().each(function(rec) {
-				if(rec.data.dummy===true) return;
-				var row = {};
-				grid.getColumns().forEach(function(col) {
-					if(!col.dataIndex) return;
-					var val = rec.data[col.dataIndex];
-					if(col.xtype == 'datecolumn' && col.submitFormat) {
-						row[col.dataIndex] = val ? Ext.Date.format(val, col.submitFormat) : '';
-					}else{
-						row[col.dataIndex] = val;
-					}
-				});
-
-				// Need to add extra data (all fields of 'rec' are not displayed in grid columns)
-				dtg.push( Ext.applyIf(row, rec.data) );
-			});
-
-			// Use Grid url and data for saving form !
-			// Need rework ;)
-			url = grid.getStore().getProxy().getUrl();
-			values = dtg;
-
-			// TEMP : assume only one grid !
-			break;
-		}
-*/
 		// If a model is set we use it
 		if(fid && model) {
 			model.set(values);
@@ -1649,7 +1607,8 @@ Ext.define('Ck.form.Controller', {
 
 	resetData: function() {
 		var v = this.getView();
-
+		if(!v) return;
+		
 		// Reset main form
 		v.reset();
 		if(this.getViewModel().get('updating')===true) {
@@ -1657,25 +1616,13 @@ Ext.define('Ck.form.Controller', {
 		}
 		
 		// SUBFORM : reset data
-		var subforms = v.query('ckform');
+		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			sf.reset();
-			if(sf.getViewModel().get('updating')===true) {
-				sf.getViewModel().set('updating', false);
-			}
-			sf.getController().fireEvent('afterreset');
+			if(sf) sf.resetData();
 		}
 		//
-/*		
-		// GRID : reset data
-		var grids = v.query('gridpanel');
-		for (var g = 0; g < grids.length; g++) {
-			var grid = grids[g];
-			grid.getStore().removeAll();
-		}
-		//
-*/		
+	
 		// Reset viewModel data (binding...)
 		this.getViewModel().setData({
 			layer: null,
