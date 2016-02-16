@@ -7,6 +7,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 
 	editrow: false,
 	deleterow: true,
+	dummyrow: true,
 	
 	init: function(grid) {
 		if(this.disabled) return;
@@ -122,9 +123,11 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		if(store.findRecord('dummy', true)) return;
 
 		// Add empty row at the end
-		store.add({
-			dummy: true
-		});		
+		if(this.dummyrow===true){
+			store.add({
+				dummy: true
+			});
+		}
 	},
 	
 	deleteNewRow: function(){
