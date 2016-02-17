@@ -8,13 +8,17 @@ Ext.define('Ck.format.OWSContextLayer', {
 	 * Config of OWSContextLayer
 	 */
 	config: {
-		id			: null,
-		name		: null,
-		title		: null,
-		visible		: true,
-		offerings	: [],
-		owsContext	: {},
-		data		: {}
+		id				: null,
+		name			: null,
+		title			: null,
+		visible			: true,
+		minScale		: 0,
+		maxScale		: Infinity,
+		minResolution	: 0,
+		maxResolution	: Infinity,
+		offerings		: [],
+		owsContext		: {},
+		data			: {}
 	},
 	
 	/**
@@ -27,10 +31,12 @@ Ext.define('Ck.format.OWSContextLayer', {
 		var data = config.data;
 		
 		Ext.apply(config, {
-			id		: data.id,
-			name	: data.properties.name,
-			title	: data.properties.title,
-			visible	: data.properties.active
+			id			: data.id,
+			name		: data.properties.name,
+			title		: data.properties.title,
+			visible		: data.properties.active,
+			minScale	: data.properties.minscale,
+			maxScale	: data.properties.maxscale
 		});
 		
 		this.initConfig(config);
@@ -46,6 +52,22 @@ Ext.define('Ck.format.OWSContextLayer', {
 		
 		if(offerings.length == 0) {
 			Ck.log("No offering for this layer ("+ this.getTitle() +").");
+		}
+	},
+	
+	setMinScale: function(value) {
+		if(!isNaN(value)) {
+			value = parseFloat(value);
+			this._minScale = value;
+			this._minResolution = Ck.getResolutionForScale(value, this._owsContext.getProjection().units_);
+		}
+	},
+	
+	setMaxScale: function(value) {
+		if(!isNaN(value)) {
+			value = parseFloat(value);
+			this._maxScale = value;
+			this._maxResolution = Ck.getResolutionForScale(value, this._owsContext.getProjection().units_);
 		}
 	},
 	

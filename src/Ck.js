@@ -673,6 +673,11 @@ Ext.apply(Ck, {
 			limit--;
 		}
 		return exist;
+	},
+	
+	getResolutionForScale: function(scale, units) {
+		var mpu = ol.proj.METERS_PER_UNIT[units];
+		return parseFloat(scale) / (mpu * Ck.INCHES_PER_UNIT.m * Ck.DOTS_PER_INCH);
 	}
 
 }).init();

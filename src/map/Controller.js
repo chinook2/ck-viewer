@@ -368,7 +368,9 @@ Ext.define('Ck.map.Controller', {
 				extent: extent,
 				style: olStyle,
 				visible: layer.getVisible(),
-				path: path
+				path: path,
+				minResolution: layer.getMinResolution(),
+				maxResolution: layer.getMaxResolution()
 			});
 
 			if(olLayer) {
