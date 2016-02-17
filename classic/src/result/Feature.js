@@ -12,6 +12,9 @@ Ext.define("Ck.result.Feature", {
 	flex: 1,
 	
 	config: {
+		/**
+		 * @param {Object[]}
+		 */
 		extraMenu: []
 	},
 	

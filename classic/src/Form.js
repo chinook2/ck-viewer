@@ -89,6 +89,10 @@ Ext.define("Ck.Form",{
 		}]
 	}],
 	
+	getLayer: function() {
+		return this.layer.split(":").pop();
+	},
+	
 	cls: 'ckform',
 
 	beforeClose: Ext.emptyFn

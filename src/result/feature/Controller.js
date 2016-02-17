@@ -19,5 +19,47 @@ Ext.define('Ck.result.feature.Controller', {
 			}
 		}
 		
+	},
+	
+	openSheet: function(btn) {
+		var record = btn.getWidgetRecord().data;
+		var layer = this.getView().ownerCt.getController().currentLayer.data.data.layer;
+		
+		var formName = layer.getExtension('form');
+		if(!formName){
+			var lyrName = layer.get('id');
+			var lyrName = lyrName.split(":");
+			lyrName = lyrName.pop();
+			formName = '/' + lyrName
+		}
+		
+		
+		
+		this.mapFormPanel =  Ext.create({
+			xtype: 'ckform',
+			editing: true,
+			formName: formName,
+			layer: layer.get("id"),
+			dataFid: record.objectid
+		});
+		
+		this.mapFormWindow = Ext.create('Ext.window.Window', {
+			// height: 300,
+			// width: 600,
+			layout: 'fit',
+			headerPosition: 'right',
+			
+			maximized: true,
+			closable: false,
+			
+			closeAction: 'hide',
+			listeners:{
+				//close: this.clearSelection,
+				scope: this
+			},
+			items: this.mapFormPanel 
+		});
+		
+		this.mapFormWindow.show();
 	}
 });

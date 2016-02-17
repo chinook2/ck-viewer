@@ -347,6 +347,9 @@ Ext.define('Ck.form.Controller', {
 			success: function(response) {
 				var me = this;
 				var formConfig = Ext.decode(response.responseText, true);
+				if(formConfig.success) {
+					formConfig = formConfig.forms[0];
+				}
 				if(!formConfig) {
 					Ck.Notify.error("Invalid JSON Form in : "+ formUrl);
 					return false;
@@ -1161,7 +1164,11 @@ Ext.define('Ck.form.Controller', {
 			} else {
 				// Build default url
 				if(lyr && Ext.isString(fid)) {
-					url = 'resources/data/' + lyr + '/' + fid + '.json';
+					if(this.compatibiltyMode) {
+						url = Ck.getApi() + "service=forms&request=getData&name=" + lyr + "&fid=" + fid;
+					} else {
+						url = 'resources/data/' + lyr + '/' + fid + '.json';
+					}
 				}
 			}
 		}

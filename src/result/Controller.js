@@ -13,6 +13,26 @@ Ext.define('Ck.result.Controller', {
 	
 	data: [],
 	
+	widgetColumns: {
+		sheet: {
+			width: 40,
+			xtype: 'widgetcolumn',
+			resizable: false,
+			menuDisabled: true,
+			sortable: false,
+			hideable: false,
+			widget: {
+				xtype: 'button',
+				style: {
+					"background-color": "rgba(0,0,0,0)",
+					"border-color": "rgba(0,0,0,0)"
+				},
+				iconCls: "fa fa-align-justify gray",
+				handler: "openSheet"
+			}
+		}
+	},
+	
 	/**
 	 * @var {Ext.data.Model}
 	 */
@@ -54,8 +74,6 @@ Ext.define('Ck.result.Controller', {
 			xtype: "gridmenu",
 			text: "Click me"
 		}];
-		
-		// this.on("render", this.addUpdate, this);
 		
 	},
 	
@@ -123,6 +141,19 @@ Ext.define('Ck.result.Controller', {
 		
 		// List columns
 		var columns = [];
+		
+		// Widget columns
+		var widget, widgetColumns = this.getView().getWidgetColumns();
+		for(var i = 0; i < widgetColumns.length; i++) {
+			if(Ext.isEmpty(widgetColumns[i].type)) {
+				columns.push(widgetColumns[i]);
+			} else {
+				widget = this.widgetColumns[widgetColumns[i].type];
+				// Ext.apply(widget, widgetColumns[i]);
+				columns.push(widget);
+			}
+		}
+		
 		for(var key in fts[0].values_) {
 			if(this.excludedColumns.indexOf(key) == -1) {
 				columns.push({

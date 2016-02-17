@@ -13,7 +13,14 @@ Ext.define("Ck.Result", {
 	requires: [],
 	
 	config: {
-		pageSize: 15
+		pageSize: 15,
+		
+		/**
+		 * @param {Object[]}
+		 */
+		widgetColumns: [{
+			type: "sheet"
+		}]
 	},
 	
 	layout: {
