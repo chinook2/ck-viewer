@@ -301,7 +301,7 @@ Ext.define('Ck.Selection', {
 		
 		if(Ext.isEmpty(layers)) {
 			layers = Ck.getMap().getLayers(function(lyr) {
-				return (lyr.getVisible() &&
+				return (lyr.getVisible() && Ck.getMap().layerInRange(lyr) && 
 					(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
 					lyr.getProperties("id") != "measureLayer"
 				);

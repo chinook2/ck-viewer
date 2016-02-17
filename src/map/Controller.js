@@ -916,5 +916,17 @@ Ext.define('Ck.map.Controller', {
 		} else {
 			this.applyFunction(applyEffect);
 		}
+	},
+	
+	/**
+	 * @param {ol.layer.Base}
+	 */
+	layerInRange: function(layer) {
+		var inRange = false;
+		if(layer.ckLayer) {
+			var res = this.getOlView().getResolution();
+			inRange = (layer.ckLayer.getMaxResolution() > res && layer.ckLayer.getMinResolution() < res);
+		}
+		return inRange;
 	}
 });
