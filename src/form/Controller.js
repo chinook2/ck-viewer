@@ -81,7 +81,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}
 
-		if(this.editing===true) this.startEditing();
+		if(this.editing === true) this.startEditing();
 		this.initForm(inlineForm);
 	},
 
@@ -500,11 +500,9 @@ Ext.define('Ck.form.Controller', {
 					anchor: '100%',
 					labelSeparator: me.layoutConfig.labelSeparator
 				});
-				if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
-					c.plugins.push({
-						ptype: 'formreadonly'
-					});
-				}
+				c.plugins.push({
+					ptype: 'formreadonly'
+				});
 				switch(c.xtype) {
 					case "tabpanel":
 						Ext.applyIf(c, {
@@ -592,7 +590,10 @@ Ext.define('Ck.form.Controller', {
 							c.columnWidth = 1;
 							
 							// Fix form.setValue
-							c.setValue = Ext.form.field.File.prototype.setRawValue;
+							c.setValue = function(value) {
+								this.setRawValue(value);
+								this.fireEvent("change", value);
+							}
 							
 							c = {
 								xtype: "panel",
@@ -712,7 +713,7 @@ Ext.define('Ck.form.Controller', {
 								if(me.compatibiltyMode) {
 									// Need default reader Array for Chinook V1 store
 									store = Ext.Object.mergeIf(store, {
-										autoLoad: !(c.queryMode==='remote'),
+										autoLoad: !(c.queryMode === 'remote'),
 										fields: [{name: "value", type: "string"}],
 										proxy: {
 											type: "ajax",
@@ -726,7 +727,7 @@ Ext.define('Ck.form.Controller', {
 								} else {
 									// Need default JSON reader
 									store = Ext.Object.merge(store, {
-										autoLoad: !(c.queryMode==='remote'),
+										autoLoad: !(c.queryMode === 'remote'),
 										proxy: {
 											type: "ajax",
 											noCache: false,
@@ -845,11 +846,11 @@ Ext.define('Ck.form.Controller', {
 					};
 
 					if(c.subform) {
-						c.plugins = applyDefault(c.plugins,  [{
+						c.plugins = applyDefault(c.plugins, [{
 							ptype: 'gridsubform'
 						}]);
 					} else {
-						c.plugins = applyDefault(c.plugins,  [{
+						c.plugins = applyDefault(c.plugins, [{
 							ptype: 'gridediting'
 						}, {
 							ptype: 'rowediting',
@@ -992,7 +993,7 @@ Ext.define('Ck.form.Controller', {
 						} else {
 							if(inp.files.length != 0) {
 								// Read the file to create a Blob
-								var reader  = new FileReader();
+								var reader = new FileReader();
 								reader.onloadend = function(args, fName, evt) {
 									values[field] = fName;
 									this.files.push({
@@ -1066,12 +1067,12 @@ Ext.define('Ck.form.Controller', {
 
 			// Test all columns for required fields
 			grid.getStore().each(function(rec) {
-				if(rec.data.dummy===true) return;
+				if(rec.data.dummy === true) return;
 				grid.getColumns().forEach(function(col) {
 					if(!col.dataIndex) return;
 					var val = rec.data[col.dataIndex];
 
-					if((!val) && (col.allowBlank===false)) {
+					if((!val) && (col.allowBlank === false)) {
 						isValid = false;
 						requiredColumn = col;
 						Ck.log(col + ' not Valid !');
@@ -1178,7 +1179,7 @@ Ext.define('Ck.form.Controller', {
 			if(!bSilent) Ck.Notify.error("Forms loadData 'fid' or 'url' not set.");
 
 			// If new form with empty data we need to startEditing too...
-			if(v.getEditing()===true) this.startEditing();
+			if(v.getEditing() === true) this.startEditing();
 
 			return;
 		}
@@ -1199,7 +1200,7 @@ Ext.define('Ck.form.Controller', {
 					}
 
 					// Compatibility
-					if(data.success===true && data.data) {
+					if(data.success === true && data.data) {
 						data = data.data;
 					}
 					//
@@ -1207,7 +1208,7 @@ Ext.define('Ck.form.Controller', {
 					this.loadRawData(data);
 				}
 
-				if(v.getEditing()===true) this.startEditing();
+				if(v.getEditing() === true) this.startEditing();
 			},
 			failure: function(response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
@@ -1238,7 +1239,7 @@ Ext.define('Ck.form.Controller', {
 
 					this.fireEvent('afterload', data);
 
-				if(v.getEditing()===true) this.startEditing();
+				if(v.getEditing() === true) this.startEditing();
 			},
 
 	/**
@@ -1322,7 +1323,7 @@ Ext.define('Ck.form.Controller', {
 
 			// Get all records with special formatting for date...
 			grid.getStore().each(function(rec) {
-				if(rec.data.dummy===true) return;
+				if(rec.data.dummy === true) return;
 				var row = {};
 				grid.getColumns().forEach(function(col) {
 					if(!col.dataIndex) return;
@@ -1374,7 +1375,7 @@ Ext.define('Ck.form.Controller', {
 				var dataUrl = url;
 				if(Ext.isObject(dataUrl)) {
 					dataUrl = dataUrl.update;
-					if(options.create) dataUrl = dataUrl.create ||  dataUrl.update;
+					if(options.create) dataUrl = dataUrl.create || dataUrl.update;
 				}
 				var tpl = new Ext.Template(dataUrl);
 				if(Ext.isString(fid)) fid = [fid];
@@ -1390,7 +1391,7 @@ Ext.define('Ck.form.Controller', {
 			return false;
 		}
 		
-		var opt  = {
+		var opt = {
 			method: options.method.toUpperCase(),
 			url: this.getFullUrl(url),
 			params: values,
@@ -1542,7 +1543,7 @@ Ext.define('Ck.form.Controller', {
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 			sf.reset();
-			if(sf.getViewModel().get('updating')===true) {
+			if(sf.getViewModel().get('updating') === true) {
 				sf.getViewModel().set('updating', false);
 			}
 			sf.getController().fireEvent('afterreset');

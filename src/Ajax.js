@@ -26,6 +26,11 @@ Ext.define('Ck.Ajax', {
 			});
 		}
 		
+		// Chinook header to detect Chinook request in server side
+		Ext.Ajax.setDefaultHeaders({
+			'Powered-By': 'Chinook'
+		});
+		
 		// Ext.Ajax.setDefaultPostHeader('application/json; charset=UTF-8');
 		// if (Ck.getOption('defaultPostHeader')) {
 			// Ext.Ajax.setDefaultPostHeader(Ck.getOption('defaultPostHeader'));

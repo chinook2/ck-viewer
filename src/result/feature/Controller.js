@@ -37,7 +37,7 @@ Ext.define('Ck.result.feature.Controller', {
 		
 		this.mapFormPanel =  Ext.create({
 			xtype: 'ckform',
-			editing: true,
+			editing: false,
 			formName: formName,
 			layer: layer.get("id"),
 			dataFid: record.objectid

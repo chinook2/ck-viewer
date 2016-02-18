@@ -1,5 +1,5 @@
 ﻿/**
- * 
+ * Plugin to add to a field to render it as read only
  */
 Ext.define('Ck.form.plugin.ReadOnly', {
 	extend: 'Ext.AbstractPlugin',
@@ -8,34 +8,41 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	readOnly: false,
 
 	// Gestion des liens ou pour ajouter une unitée : 32 m² avec suffix= m²
-	suffix: '',
-	prefix: '',
-	fieldTpl: '',
-
-	target: '_blank',
-	title: '',
+	config: {
+		title			: "",
+		suffix			: "",
+		prefix			: "",
+		target			: "_blank",
+		fieldTpl		: "",
+		template		: null,
+		formController	: null,
+		formViewModel	: null
+	},
 
 	init: function(cmp) {
 		// Apply only on subclass of component/box/field/{xtype}
-		if(cmp.getXTypes().indexOf('/field/') == -1) return;
+		if(cmp.getXTypes().indexOf('/field/') == -1) {
+			return;
+		}
+		
+		var config = {
+			suffix			: cmp.suffix,
+			prefix			: cmp.prefix,
+			fieldTpl		: cmp.fieldTpl || cmp.tpl,
+			target			: cmp.target,
+			title			: cmp.title,
+			formController	: cmp.lookupController(),
+			formViewModel	: cmp.lookupViewModel()
+		};
 
-		if(cmp.suffix) this.suffix = cmp.suffix;
-		if(cmp.prefix) this.prefix = cmp.prefix;
-		if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
-		if(cmp.target) this.target = cmp.target;
-		if(cmp.title) this.title = cmp.title;
-
-		this.formController = cmp.lookupController();
-		this.formViewModel = cmp.lookupViewModel();
-
-		if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
+		this.setConfig(config);
 
 		// Init Text/Label for readOnly after cmp rendered
 		cmp.on('afterrender', this.onRenderCmp, this);
 
 		// Update readOnly status on start/stop editing
-		this.formController.on('startEditing', this.setReadOnly, this);
-		this.formController.on('stopEditing', this.setReadOnly, this);
+		this.getFormController().on('startEditing', this.setReadOnly, this);
+		this.getFormController().on('stopEditing', this.setReadOnly, this);
 	},
 
 	destroy: function () {
@@ -48,63 +55,67 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.callParent(arguments);
 	},
 
-	// private
+	/**
+	 * Replace input field with text field.
+	 */
 	onRenderCmp : function(cmp){
-		// Ck.log("onRenderCmp for : " + cmp.name);
-		
-		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)
+		// And span to display the read only contents (multiligne, lien, code html)
 		this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
 		this.labelEl = new Ext.Element(document.createElement('label')).addCls('x-form-item-label x-form-item-label-default');
 		this.textEl.appendTo(this.labelEl);
 		this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
 		
-		if(cmp.triggerWrap) this.labelEl.insertAfter(cmp.triggerWrap);
+		if(cmp.triggerWrap) {
+			this.labelEl.insertAfter(cmp.triggerWrap);
+		}
 
-		// Masque par défaut les input si form.readOnly est true
+		// By default hide inputs if form.readOnly == true
 		this.setReadOnly();
 		
 		// When update field need to update readonly label
 		cmp.on('change', this.setReadOnly, this);
 	},
-
+	
+	/**
+	 * 
+	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
-		if(!cmp.rendered) return;
-		if(!cmp.triggerWrap) return;
-		
-		if(!this.labelEl || !this.labelEl.dom) {
-			// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
-			return;
+		if(!cmp.rendered || !cmp.triggerWrap || !this.labelEl || !this.labelEl.dom) {
+			return false;
 		}
 		
-		// Ck.log("setReadOnly : " + cmp.name );
+		// Set visibility mode
+		cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
 		
-		// r for readOnly is true when editing is false
-		var r = !this.formViewModel.get("editing");
+		// get("editing") set in startEditing or stopEditing form.Controller methods
+		var readOnly = !this.getFormViewModel().get("editing");
 
 		// Try to put readOnly by default when reset form (value==null)
 		// In some case readOnly is binded with data record, reset > need to revert readOnly state
-		if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) cmp.readOnly = false;
+		if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) {
+			cmp.readOnly = false;
+		}
 		
-		// Force readOnly for specific field
-		if(cmp.readOnly) r = true;
+		// Force readOnly for field if it's explicitly set
+		if(cmp.readOnly) {
+			readOnly = true;
+		}
 		
-		/*
-		 if(this.join) {
-		 this.disable(); // pas envoyer lors du submit
-		 r = true; // non editable
-		 }
-		 */
 		if(cmp.formulaField) {
-			if(this.readOnly === true) cmp.disable(); // pas envoyer lors du submit
-			r = true; // non editable
+			 // To prevent sending value when submitting
+			if(this.readOnly === true) {
+				cmp.disable();
+			}
+			readOnly = true;
 		}
 
-		cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
-		if(r){
-
+		
+		if(readOnly) {
 			cmp.triggerWrap.hide();
-			if(!cmp.hideLabel) cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
+			if(!cmp.hideLabel) {
+				cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
+			}
 
 			var val = cmp.getValue();
 			// For combobox
@@ -113,20 +124,30 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			if(cmp.submitFormat) val = cmp.getSubmitValue();
 			
 			if(val != '') {
-				val = this.prefix + val + this.suffix;
-				if(this.template) {
-					val = this.template.apply({"value": val});
+				val = this.getPrefix() + val + this.getSuffix();
+				if(this.getTemplate()) {
+					val = this.getTemplate().apply({"value": val});
 				}
 			}
-			var title = '';
-			if(this.title) title = "title='"+this.title+"'";
-
+			
+			var title = this.getTitle();
+			
+			// If value begin with "http:" create <a> element
 			var _http = /^http:/i;
-			if(_http.test(val)) val = "<a href='"+val+"' "+ title +" target='"+ this.target +"'>"+val+"</a>";
+			if(_http.test(val)) {
+				val = "<a href='" + val + "' " + title + " target='" + this.getTarget() + "'>" + val + "</a>";
+			}
 
 			this.textEl.update(val);
 			this.labelEl.show();
-
+			
+			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
+				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
+					if(cmp.ownerCt.items.getAt(i) != cmp) {
+						cmp.ownerCt.items.getAt(i).setVisible(false);
+					}
+				}
+			}
 		} else {
 			this.labelEl.hide();
 			cmp.triggerWrap.show();
@@ -135,10 +156,63 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			if(cmp.allowBlank === false) {
 				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="' + Ext.baseCSSPrefix + 'required">*</span>');
 			}
+			
+			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
+				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
+					if(cmp.ownerCt.items.getAt(i) != cmp) {
+						cmp.ownerCt.items.getAt(i).setVisible(true);
+					}
+				}
+			}
 		}
 
 		if(cmp.inputEl) {
-			cmp.inputEl.dom.readOnly = r;
+			cmp.inputEl.dom.readOnly = readOnly;
 		}
-	}
+	},
+	
+	/***************************************************************************/
+	/***************************** Getter / Setter *****************************/
+	/***************************************************************************/
+	setSuffix: function(value) {
+		this.suffix = (Ext.isEmpty(value))? "" : value;
+	},
+	
+	setPrefix: function(value) {
+		this.prefix = (Ext.isEmpty(value))? "" : value;
+	},
+	
+	setTarget: function(value) {
+		this.target = (Ext.isEmpty(value))? "_blank" : value;
+	},
+	
+	setTitle: function(value) {
+		this.title = (Ext.isEmpty(value))? "" : value;
+	},
+	
+	/**
+	 * Automatically set the template
+	 */
+	setFieldTpl: function(value) {
+		if(Ext.isEmpty(value)) {
+			this.fieldTpl = "";
+			this.setTemplate("");
+		} else {
+			this.fieldTpl = value;
+			this.setTemplate(new Ext.Template(value));
+		}
+	},
+	
+	/**
+	 * If title is set return "title='titleval'"
+	 */
+	getTitle: function() {
+		var title = this.title;
+		if(Ext.isEmpty(title)) {
+			title = "";
+		} else {
+			title = "title='" + this.title + "'";
+		}
+		return title;
+	},
 });
