@@ -18,7 +18,7 @@ Ext.define('Ck.legend.plugin.Slider', {
 	
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(layer && e.target.tagName == "SPAN") {
+		if(layer && record.isLeaf() && e.target.tagName == "SPAN") {
 			var opacity = layer.getOpacity();
 			
 			var slider = record.get('slider');

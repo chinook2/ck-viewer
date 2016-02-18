@@ -15,7 +15,7 @@ Ext.define('Ck.legend.plugin.Legend', {
 	
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(layer && e.target.tagName == "SPAN") {
+		if(layer && record.isLeaf() && e.target.tagName == "SPAN") {
 			
 			var legend = record.get('legend');
 			if(legend && legend.getEl().dom && Ext.get(legend.getEl().dom.id)) {
