@@ -214,5 +214,5 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			title = "title='" + this.title + "'";
 		}
 		return title;
-	},
+	}
 });
