@@ -100,12 +100,12 @@ Ext.define('Ck.Action', {
 		// ckmap isn't avaible when first pass here...
 		Ext.on('ckmapReady', function(map) {
 			this.setMap(map);
-			this.ckReady(map);
+			this.ckReady(map, config);
 		}, this);
 
 		Ext.on('ckmapLoaded', function(map) {
 			this.setMap(map);
-			this.ckLoaded(map);
+			this.ckLoaded(map, config);
 		}, this);
 
 		config = Ext.applyIf(config || {}, {

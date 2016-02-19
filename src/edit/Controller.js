@@ -11,9 +11,7 @@ Ext.define('Ck.edit.Controller', {
 	
 	editPanelVisible: true,
 	
-	config: {
-		openner: null,
-		
+	config: {		
 		layer: null,
 		
 		/**
@@ -90,7 +88,7 @@ Ext.define('Ck.edit.Controller', {
 		this.callParent([view]);
 		
 		this.setLayer(view.initialConfig.layer);
-		this.setOpenner(view.initialConfig.openner);
+		//this.setOpenner(view.initialConfig.openner);
 		this.setMulti((view.initialConfig.layer.getExtension("geometryType").indexOf("Multi") != -1));
 		
 		this.control({
@@ -445,7 +443,10 @@ Ext.define('Ck.edit.Controller', {
 			this.feature.close.bind(this.feature)();
 		}
 		
-		this.getOpenner().close();
+		var win = this.view.up('window');
+		if(win) {
+			win.close();
+		}
 	},
 	
 	/**
