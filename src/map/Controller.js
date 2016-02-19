@@ -233,8 +233,14 @@ Ext.define('Ck.map.Controller', {
 		// Remove all layers
 		this.getLayers().clear();
 		
-		// Set the bbox
-		this.setExtent(owc.getExtent());
+		// Use specific user zoom and extent from ckmap view. (different from default values)
+		var cfg = v.initialConfig;
+		if(cfg.zoom) this.setZoom(cfg.zoom);
+		if(cfg.center) this.setCenter(cfg.center);
+		if(cfg.extent) this.setExtent(cfg.extent);
+		
+		// Set the bbox from context only if no zoom / center or extent
+		if(!cfg.zoom && !cfg.center && !cfg.extent) this.setExtent(owc.getExtent());
 		
 		owc.getLayers().forEach(function(layer) {
 			var params, opt_options;
@@ -587,6 +593,13 @@ Ext.define('Ck.map.Controller', {
 	},
 
 	/**
+	 * Get the center of the current view.
+	 */
+	getCenter: function() {
+		return this.getOlView().getCenter();
+	},
+	
+	/**
 	 * Set the center of the current view.
 	 * @param {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
 	 */
@@ -608,6 +621,13 @@ Ext.define('Ck.map.Controller', {
 	 */
 	setRotation: function(rot) {
 		return this.getOlView().setRotation(rot);
+	},
+	
+	/**
+	 * Get the current map extent.
+	 */
+	getExtent: function() {
+		return this.getOlView().calculateExtent(this.getOlMap().getSize());
 	},
 	
 	/**
