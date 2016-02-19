@@ -274,9 +274,6 @@ Ext.define('Ck.CapabilitiesStore', {
 										group.set("loaded", true);
 										group.childNodes = [];
 										group.data.children = [];
-										if(parentGroup.get("Name") != "") {
-											group.parentNode = parentGroup;
-										}
 										parentGroup.childNodes.push(group);
 										parentGroup.data.children.push(group.data);
 									}
@@ -302,7 +299,9 @@ Ext.define('Ck.CapabilitiesStore', {
 							
 							// Link parent / child
 							node.set("loaded", true);
-							node.parentNode = grp;
+							if(!grp.isRoot()) {
+								node.parentNode = grp;
+							}
 							grp.childNodes.push(node);
 							grp.data.children.push(node.data);
 						}
