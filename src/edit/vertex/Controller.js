@@ -53,11 +53,11 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.store = this.grid.getStore();
 		
 		this.control({
-			"ckedit-vertex button#save": {
+			"ckedit-vertex button#save-vertex": {
 				click: this.save,
 				scope: this
 			},
-			"ckedit-vertex button#cancel": {
+			"ckedit-vertex button#cancel-vertex": {
 				click: this.cancel,
 				scope: this
 			},
@@ -82,9 +82,12 @@ Ext.define('Ck.edit.vertex.Controller', {
 			}
 		});
 		
-		var vertexLayerId = view.config.layer.getProperties().id + "_vertex-marker";
+		var id = Ext.id();
+		if(view.config.layer) {
+			id = view.config.layer.getProperties().id
+		}
+		var vertexLayerId =  + "_vertex-marker";
 		this.vertexLayer = Ck.getMap().getLayerById(vertexLayerId);
-		
 		
 		if(!this.vertexLayer) {
 			this.vertexLayer = Ck.create("ol.layer.Vector", {
@@ -96,6 +99,11 @@ Ext.define('Ck.edit.vertex.Controller', {
 			
 			this.vertexLayer.setMap(this.olMap);
 			// olMap.getLayers().setAt(olMap.getLayers().getLength() - 1, this.vertexLayer);
+		}
+		
+		// Auto load feature on init
+		if(view.config.feature) {
+			this.loadFeature(view.config.feature);
 		}
 	},
 	
@@ -117,14 +125,9 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		this.gridEvent = this.grid.on({
 			destroyable: true,
-			select: {
-				fn: this.updateMarker,
-				scope: this
-			},
-			itemkeydown: {
-				fn: this.keyInteraction,
-				scope: this
-			}
+			select: this.updateMarker,
+			itemkeydown: this.keyInteraction,
+			scope: this
 		});
 		
 		this.storeEvent = this.store.on({
@@ -151,6 +154,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.store.erase();
 		// Remove the duplicate first/last vertex from the store
 		this.coords = this.ftCoords[0];
+		if(this.coords.length==0) return;
+		
 		this.coords.splice(this.coords.length - 1, 1);
 		
 		var records = [];
@@ -220,10 +225,10 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		// Update the position field to simplify creation
 		var posCmp = this.getView().getDockedItems()[0].getComponent("vertex-position");
-		posCmp.setValue(record.data.number);
+		if(record.data.number) posCmp.setValue(record.data.number);
 		
 		var mk = this.createMarker(record.data.geometry);
-		this.vertexLayer.getSource().addFeature(mk);
+		if(mk) this.vertexLayer.getSource().addFeature(mk);
 	},
 	
 	/**
@@ -237,6 +242,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	createMarker: function(coords, isHover) {
 		var hover = '';
 		if(isHover) hover = '-hover';
+		if(!coords) return false;
 		
 		var point = new ol.geom.Point(coords);
 		var marker = new ol.Feature({
@@ -266,6 +272,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {Integer}
 	 */
 	addVertex: function(index) {
+		if(this.store.data.length < 3) return;
+
 		var lastPos = this.store.data.length - 1;
 		
 		// index is the position in the store
@@ -279,7 +287,6 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		var lon = (previousCoord[0] + nextCoord[0]) / 2;
 		var lat = (previousCoord[1] + nextCoord[1]) / 2;
-		
 		
 		var record = {
 			number: index + 1,
@@ -347,8 +354,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {String[]}
 	 */
 	updateVertex: function(store, record, operation, fields) {
-		if(fields.length == 1 && (fields[0] == "latitude" || fields[0] == "longitude")) {
-			record.data.geometry = [record.data.longitude, record.data.latitude]
+		if(fields.indexOf('latitude') != -1 || fields.indexOf('longitude') != -1) {
+			record.data.geometry = [record.data.longitude, record.data.latitude];
 			this.coords[record.data.number - 1] = record.data.geometry;
 			this.updateMarker(null, record);
 			this.updateGeometry();
@@ -360,8 +367,10 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	updateGeometry: function() {
 		this.geometryChanged = true;
-		this.coords.push(this.coords[0])
-		this.geometry.setCoordinates(this.ftCoords);
+		this.coords.push(this.coords[0]);
+		if(this.coords.length>3) {
+			this.geometry.setCoordinates(this.ftCoords);
+		}
 		this.coords.splice(-1, 1);
 		this.fireEvent("geometrychange", this.feature);
 	},

@@ -26,8 +26,10 @@ Ext.define("Ck.edit.Vertex", {
 		width: "auto",
 		height: "auto",
 		plugins: [{
-			ptype: "cellediting",
-			clicksToEdit: 2
+			ptype: 'gridediting'
+		},{
+			ptype: "rowediting",
+			clicksToEdit: 1
 		}],
 		columns: [
 			{
@@ -57,10 +59,10 @@ Ext.define("Ck.edit.Vertex", {
 	
 	bbar: [{
 		iconCls: 'fa fa-check',
-		itemId: "save"
+		itemId: "save-vertex"
 	},{
 		iconCls: 'fa fa-remove',
-		itemId: "cancel"
+		itemId: "cancel-vertex"
 	},"->",{
 		text: "Add vertex",
 		itemId: "add-vertex"

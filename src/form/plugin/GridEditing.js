@@ -11,10 +11,21 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	
 	init: function(grid) {
 		if(this.disabled) return;
+		
+		// Init subform after grid rendering
+		grid.on('afterrender', function() {
+			this.initEditing(grid);
+		}, this, {delay: 50});
+	},
+	
+	initEditing: function(grid) {
 		this.grid = grid;
-				
-		var formController = grid.lookupController();
-				
+		
+		// Get parent ckform
+		var formController;
+		var ckform = grid.view.up('ckform');
+		if(ckform) formController = ckform.getController();
+		
 		// Get the Action Column
 		this.actionColumn = this.grid.down('actioncolumn');
 		if(!this.actionColumn) {
@@ -57,7 +68,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			var conf = this.grid.getInitialConfig();
 			
 			// Default hide action column when editing = false or no action enable
-			var hide = !formController.getView().getEditing();
+			var hide = false;
+			if(formController) hide = !formController.getView().getEditing();
 			if(actions.length==0) hide = true;
 			
 			// Add action column for editing by plugin GridEditing
@@ -76,14 +88,16 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
 		}
 
-		// On start editing
-		formController.on({
-			startEditing: this.startEditing,
-			stopEditing: this.stopEditing,
-			scope: this
-		});
-		// If already editing (in subform...)
-		if(formController.view.getEditing()===true) this.startEditing();
+		if(formController){
+			// On start editing
+			formController.on({
+				startEditing: this.startEditing,
+				stopEditing: this.stopEditing,
+				scope: this
+			});
+			// If already editing (in subform...)
+			if(formController.view.getEditing()===true) this.startEditing();
+		}
 		
 		grid.on({
 			validateedit: this.addNewRow,
