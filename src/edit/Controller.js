@@ -12,6 +12,18 @@ Ext.define('Ck.edit.Controller', {
 	alias: 'controller.ckedit',
 
 	editPanelVisible: true,
+	
+	/**
+	 * @var {ol.Feature}
+	 * Current edited feature
+	 */
+	currentFeature: null,
+	
+	/**
+	 * @var {Ext.button.Button}
+	 * Button for geolocation with ckEditGeolocation action
+	 */
+	geolocationBtn: null,
 
 	config: {
 		openner: null,
@@ -49,6 +61,12 @@ Ext.define('Ck.edit.Controller', {
 		geometryTypeBehavior: ""
 	},
 
+	/**
+	 * @event geolocation
+	 * Fire when geolocation informations is send to this controller
+	 * @param {ol.Coordinate}
+	 */
+	 
 	/**
 	 * @event featurecreate
 	 * Fires when a feature was created
@@ -128,6 +146,9 @@ Ext.define('Ck.edit.Controller', {
 
 		this.setMulti(geometryType.indexOf("Multi") != -1);
 		this.setMultiBehavior(geometryTypeBehavior.indexOf("Multi") != -1);
+		
+		// Reference to the main toolbar
+		var tbar = view.items.getAt(0).getDockedItems()[0];
 
 		this.control({
 			"ckedit button#cancel": {
@@ -231,8 +252,10 @@ Ext.define('Ck.edit.Controller', {
 
 
 			// Hide feature splitting button
-			var tbar = this.getView().items.getAt(0).getDockedItems()[0];
-			tbar.items.getAt(4).getMenu().items.getAt(0).setVisible(false);
+			var vertexLive = tbar.getComponent("vertex-live-edit");
+			if(vertexLive) {
+				vertexLive.getComponent("edit-crop").setVisible(false);
+			}
 		}
 
 		
@@ -262,26 +285,29 @@ Ext.define('Ck.edit.Controller', {
 		}
 		
 		
-		// History panel
-		if(view.getUseHistory()) {
-			var historyContainer = Ext.getCmp("edit-historypanel");
-			if(Ext.isEmpty(historyContainer)) {
-				if(view.getPanelContainer() == "same") {
-					historyContainer = view;
-				} else {
-					historyContainer = this.getMainWindow();
-				}
+		// History panel. Everytime used, but not necessarily visible
+		var historyContainer = Ext.getCmp("edit-historypanel");
+		if(Ext.isEmpty(historyContainer)) {
+			if(view.getPanelContainer() == "same") {
+				historyContainer = view;
+			} else {
+				historyContainer = this.getMainWindow();
 			}
-			
-			
-			this.historyView = Ext.create("widget.ckedit-history", conf);
-			this.history = this.historyView.getController();
-			Ext.apply(this.history, conf);
-			this.history.createListeners(this);
-
-			historyContainer.add(this.historyView);
-			this.mainWindow.manageVisibility();
 		}
+		
+		// Geolocation button
+		this.on("geolocation", this.setPosition, this);
+		this.geolocationBtn = tbar.getComponent("edit-geolocation");
+		
+		
+		this.historyView = Ext.create("widget.ckedit-history", conf);
+		this.historyView.setVisible(view.getUseHistory());
+		this.history = this.historyView.getController();
+		Ext.apply(this.history, conf);
+		this.history.createListeners(this);
+
+		historyContainer.add(this.historyView);
+		this.mainWindow.manageVisibility();
 		
 		this.on("featurecreate", this.onCreate, this);
 	},
@@ -366,6 +392,11 @@ Ext.define('Ck.edit.Controller', {
 	 *
 	 */
 	deleteFeature: function(feature) {
+		var ft = this.wfsSource.getFeatureById(feature.getId());
+		if(ft) {
+			this.wfsSource.removeFeature(ft);
+		}
+		
 		this.wfsSource.addFeature(feature);
 		feature.setStyle(Ck.map.Style.redStroke);
 		if(!this.getIsWMS()) {
@@ -393,7 +424,9 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.geom.SimpleGeometry}
 	 */
 	startVertexEdition: function(feature) {
+		this.currentFeature = feature;
 		if(this.getGeometryTypeBehavior() == "Point") {
+			this.geolocationBtn.enable();
 			if(this.moveInteraction) {
 				this.getOlMap().removeInteraction(this.moveInteraction);
 			}
@@ -415,6 +448,25 @@ Ext.define('Ck.edit.Controller', {
 		this.fireEvent("featuregeometry", a.features.item(0));
 	},
 
+	/**
+	 * Set position from GPS location
+	 * @param {ol.Coordinate}
+	 */
+	setPosition: function(coord) {
+		if(!Ext.isEmpty(this.currentFeature)) {
+			if(this.currentFeature.getGeometry().getType().indexOf("Point") == -1) {
+				this.vertex.fireEvent("geolocation", coord);
+			} else {
+				var geom = this.currentFeature.getGeometry();
+				if(this.currentFeature.getGeometry().getType().indexOf("Multi") == -1) {
+					geom.setCoordinates(coord);
+				} else {
+					geom.setCoordinates([coord]);
+				}
+			}
+		}
+	},
+	
 	/**************************************************************************************/
 	/********************************* Sub-feature events *********************************/
 	/**************************************************************************************/
@@ -424,6 +476,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {Boolean}
 	 */
 	saveFeatureChange: function(feature, changed) {
+		this.geolocationBtn.disable();
 		this.switchPanel(this.historyPanel);
 		if(changed) {
 			this.fireEvent("featuregeometry", feature);
@@ -436,6 +489,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.Feature}
 	 */
 	cancelFeatureChange: function(feature) {
+		this.geolocationBtn.disable();
 		this.switchPanel(this.historyPanel);
 		this.fireEvent("sessioncomplete", feature);
 	},

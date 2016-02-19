@@ -5,6 +5,7 @@ Ext.define('Ck.edit.action.Attribute', {
 	extend: 'Ck.edit.Action',
 	alias: 'widget.ckEditAttribute',
 
+	itemId: 'edit-attribute',
 	iconCls: 'fa fa-align-justify',
 	tooltip: 'Edit attribute',
 

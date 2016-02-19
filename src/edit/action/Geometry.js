@@ -7,6 +7,7 @@ Ext.define('Ck.edit.action.Geometry', {
 	extend: 'Ck.edit.Action',
 	alias: 'widget.ckEditGeometry',
 
+	itemId: 'edit-geometry',
 	iconCls: 'fa fa-edit',
 	tooltip: 'Edit geometry',
 	
@@ -41,6 +42,8 @@ Ext.define('Ck.edit.action.Geometry', {
 
 		this.geometryInteraction.setActive(status);
 		if(!status) {
+			this.controller.geolocationBtn.disable();
+			this.controller.moveInteraction.setActive(false);
 			this.geometryInteraction.resetSelection();
 		}
 	},

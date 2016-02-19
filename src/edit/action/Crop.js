@@ -8,6 +8,7 @@ Ext.define('Ck.edit.action.Crop', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-crop',
 	iconCls: 'fa fa-crop',
 	tooltip: 'Crop features',
 	

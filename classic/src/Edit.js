@@ -56,6 +56,9 @@ Ext.define("Ck.Edit", {
 			enableToggle: true,
 			toggleGroup: "ckmapAction"
 		},{
+			action: "ckEditGeolocation",
+			disabled: true
+		},{
 			action: "ckEditDelete",
 			enableToggle: true,
 			toggleGroup: "ckmapAction"

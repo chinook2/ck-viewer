@@ -8,6 +8,7 @@ Ext.define('Ck.edit.action.Delete', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-delete',
 	iconCls: 'fa fa-remove fa-lg fa-flip-horizontal ck-plugin',
 	tooltip: 'Delete feature',
 	

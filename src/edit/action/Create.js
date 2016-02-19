@@ -9,6 +9,7 @@ Ext.define('Ck.edit.action.Create', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-create',
 	iconCls: 'fa fa-plus',
 	tooltip: 'Create features',
 	
@@ -108,16 +109,19 @@ Ext.define('Ck.edit.action.Create', {
 
 		var coordinates = geometry.getCoordinates();
 		var type = feature.getGeometry().getType();
+		
+		// By-pass snapping
+		var f = new ol.Feature({
+			geometry: Ck.create("ol.geom." + type, coordinates),
+			status: "CREATED"
+		});
+		
 		if(type != "Point") {
 			var coordinates = coordinates[0];
 		}
 		var source = this.getLayerSource();
 		
-		// By-pass snapping
-		var f = new ol.Feature({
-			geometry: Ck.create("ol.geom." + type, [coordinates]),
-			status: "CREATED"
-		});
+		
 
 		return f;
 
