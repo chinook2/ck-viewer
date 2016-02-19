@@ -29,6 +29,9 @@ Ext.define('Ck.form.field.Map', {
 	// Map Controller instance for the mapfield
 	ckmap: null,
 
+	// Internal vector layer
+	layer: null,
+	
 	// Internal geometry to show and edit with the map widget
 	geometry: null,
 	
@@ -38,20 +41,57 @@ Ext.define('Ck.form.field.Map', {
 		}, this.initialConfig));
 		this.ckmap = this.map.getController();
 
-		this.on('resize', function(){
-			this.map.setSize(this.getSize());
-		}, this);
+		// Need to add the layer after map loaded...
+		this.ckmap.on({
+			loaded: function(){
+				this.layer = new ol.layer.Vector({
+					id: 'mapfieldLayer',
+					source: new ol.source.Vector(),
+					style: Ck.map.Style.style
+				});
+				this.ckmap.getOlMap().addLayer(this.layer);
+			},
+			scope: this
+		})
 		
 		this.callParent(arguments);
 	},
 	
 	afterRender: function () {
 		this.callParent(arguments);
-		this.map.render(this.inputEl);
+
+		//Ext.defer(function(){
+			this.map.render(this.inputEl);
+		//}, 50, this);
+		
+		this.on('resize', function(){
+			var size = this.getSize();
+			size.width-=2;
+			size.height-=2;
+			this.inputEl.setSize(this.getSize());
+			this.map.setSize(size);
+			//this.map.setSize(this.getSize());
+		}, this);
 	},
 
 	getValue: function(){
-		return this.geometry;
+		if(!this.layer) return;
+
+		var geojson = new ol.format.GeoJSON();
+		var features = this.layer.getSource().getFeatures();
+		var json = geojson.writeFeaturesObject(features, {
+			featureProjection: this.ckmap.getProjection()
+		});
+		
+		// Add CRS...
+		json.crs = {
+			type: "name",
+			properties : {
+				name: "urn:ogc:def:crs:" + this.ckmap.getProjection().getCode()
+			}
+		}
+		
+		return json
 	},
 
 	setValue: function (geojsonObject) {
@@ -59,30 +99,17 @@ Ext.define('Ck.form.field.Map', {
 
 		if(!geojsonObject) return;
 		if(!this.ckmap) return;
-
-		// Need to add the layer after map loaded...
-		this.ckmap.on({
-			loaded: function(){
-				var geojson = new ol.format.GeoJSON();
-				var vectorSource = new ol.source.Vector({
-					features: geojson.readFeatures(geojsonObject, {
-						featureProjection: this.ckmap.getProjection()
-					})
-				});
-				//vectorSource.addFeature(new ol.Feature((new ol.format.GeoJSON()).readGeometry(geomObject) ));
-
-				var vectorLayer = new ol.layer.Vector({
-					source: vectorSource,
-					style: Ck.map.Style.style
-				});
-
-				this.ckmap.getOlMap().addLayer(vectorLayer);
-
-				// Zoom on features
-				this.ckmap.setExtent(vectorSource.getExtent());
-			},
-			scope: this
+		if(!this.layer) return;
+		
+		var geojson = new ol.format.GeoJSON();
+		var feature = geojson.readFeatures(geojsonObject, {
+			featureProjection: this.ckmap.getProjection()
 		})
+		
+		this.layer.getSource().addFeature(feature);
+		
+		// Zoom on features
+		this.ckmap.setExtent(this.layer.getSource().getExtent());
 	},
 
 	beforeDestroy: function(){
