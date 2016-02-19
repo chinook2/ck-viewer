@@ -1109,9 +1109,13 @@ Ext.define('Ck.form.Controller', {
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 			var name = sf.view.name;
+			// No name. subform will be save later with its own dataUrl
 			if(!name) continue;
+			// subform is part of another form (can't be normaly !)
 			if(this.fields.indexOf(name)==-1) continue;
-
+			// subform return one field of the same name - value already get in this.fields.forEach...
+			if(sf.fields.length==1 && sf.fields[0]==name) continue;
+			
 			// We can manage multiple subform with the same name and merge values
 			if(Ext.isObject(values[name])){
 				values[name] = Ext.Object.merge(values[name], sf.getValues());
