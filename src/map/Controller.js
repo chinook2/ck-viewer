@@ -272,6 +272,10 @@ Ext.define('Ck.map.Controller', {
 	addSpecialLayer: function(layer) {
 		this.specialGroup.getLayers().insertAt(0, layer);
 	},
+	
+	removeSpecialLayer: function(layer) {
+		this.specialGroup.getLayers().remove(layer);
+	},
 
 	/**
 	 * Create ol.Source and ol.Layer and add it to the ol.Map

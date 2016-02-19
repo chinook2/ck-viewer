@@ -37,7 +37,8 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		view.config.container = view.up("panel");
+		var container = view.up("panel");
+		view.config.container = container;
 		view.config.service = container.service;
 		this.callParent(arguments);
 
@@ -49,7 +50,7 @@ Ext.define('Ck.addlayer.sourceselector.Controller', {
 			url: "resources/conf/addlayer.json",
 			scope: this,
 			success: function(response){
-				var conf = Ext.decode(response.responseText)[service];
+				var conf = Ext.decode(response.responseText)[this.getService()];
 				if(Ext.isString(conf)) {
 					conf = {url: conf};
 				}

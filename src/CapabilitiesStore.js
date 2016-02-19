@@ -242,7 +242,7 @@ Ext.define('Ck.CapabilitiesStore', {
 						 */
 						getGroupNode = function(path) {
 							var group, backPath = path;
-							if(path == "") {
+							if(Ext.isEmpty(path)) {
 								var group = arguments.callee.root;
 							} else {
 								var nodes, parentGroup;

@@ -11,6 +11,12 @@ Ext.define('Ck.edit.Action', {
 	
 	used: false,
 	interactions: [],
+	
+	/**
+	 * The edit controller
+	 * @var {Ck.Controller}
+	 */
+	controller: null,
 
 	constructor: function(config) {
 		this.config = config;
@@ -29,9 +35,13 @@ Ext.define('Ck.edit.Action', {
 		this.associatedEl = el;
 		this.controller = el.lookupController();
 		
-		if(this.used == false) {
-			this.controller.getView().on("hide", this.disableAllInteractions, this);
+		if(!this.used) {
+			this.firstUse();
 		}
+	},
+	
+	firstUse: function() {
+		this.controller.getView().on("hide", this.disableAllInteractions, this);
 		this.used = true;
 	},
 

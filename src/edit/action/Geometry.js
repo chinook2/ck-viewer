@@ -1,5 +1,6 @@
 /**
  * This action is used to modify the geometry of a feature.
+ * Click on a feature on the map to edit it.
  * A geometryInteraction was created
  */
 Ext.define('Ck.edit.action.Geometry', {
@@ -12,10 +13,7 @@ Ext.define('Ck.edit.action.Geometry', {
 	interactionId: "geometryInteraction",
 
 	toggleAction: function(btn, status) {
-		if(!this.used) {
-			this.callParent(arguments);
-			this.firstUse();
-		}
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 		
@@ -48,6 +46,7 @@ Ext.define('Ck.edit.action.Geometry', {
 	},
 	
 	firstUse: function() {
+		this.callParent();
 		this.controller.addListener("featuresessionstart", function() {
 			this.reset();
 			this.disableInteraction();
@@ -56,10 +55,11 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.disableInteraction();
 		}, this);
 		this.controller.addListener("sessioncomplete", function() {
-			this.reset(); this.enableInteraction();
+			this.reset();
+			this.enableInteraction();
 		}, this);
 		this.controller.addListener("savesuccess", function() {
-			this.geometryInteraction.resetSelection();
+			this.reset();
 		}, this);
 	},
 	

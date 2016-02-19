@@ -544,6 +544,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 	
 	close: function() {
+		this.vertexLayer.setMap(null);
 		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
 	}
 	

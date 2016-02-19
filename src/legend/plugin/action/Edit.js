@@ -80,7 +80,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 	 */
 	isEditable: function(layer) {
 		if(!Ext.isEmpty(layer) && !(layer instanceof ol.layer.Group)) {
-			if(layer.getExtension("editable") || layer.ckLayer.getPermission("edit")) {
+			if((layer.getExtension("editable") || layer.ckLayer.getPermission("edit")) && layer.getExtension("geometryType")) {
 				return true;
 			}
 		}

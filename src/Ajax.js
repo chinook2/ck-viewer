@@ -218,14 +218,14 @@ Ext.define('Ck.Ajax', {
 		transacOpt = {
 			featureNS		: "feature",
 			srsName			: currSrs,
-			featureType		: lyr[0],
+			featureType		: lyr[1],
 			gmlOptions: {
 				schemaLocation: "wfs"
 			}
 		};
 
-		if(!Ext.isEmpty(lyr[1])) {
-			transacOpt.featurePrefix = lyr[1];
+		if(!Ext.isEmpty(lyr[0])) {
+			transacOpt.featurePrefix = lyr[0];
 		}
 		
 		if(!Ext.isArray(features.inserts)) {

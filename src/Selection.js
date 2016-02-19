@@ -418,7 +418,7 @@ Ext.define('Ck.Selection', {
 		var selBBox = selGeom.getExtent();
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
-			gmlFormat: Ck.create("ol.format.GML2"),
+			gmlFormat: Ck.create("ol.format.GML3"),
 			featureType: ope.getLayers().split(",")
 		});
 		var gf = f.writeGetFeature({
@@ -454,7 +454,7 @@ Ext.define('Ck.Selection', {
 				
 				var format = Ck.create("ol.format.WFS", {
 					featureNS: "http://mapserver.gis.umn.edu/mapserver",
-					gmlFormat: Ck.create("ol.format.GML2"),
+					gmlFormat: Ck.create("ol.format.GML3"),
 					featureType: lyr
 				});
 				
@@ -579,9 +579,12 @@ Ext.define('Ck.Selection', {
 			}
 		}
 		this.selection = [];
-		
+		// this.getDraw().source_.clear();
 		if(this.getHighlight()) {
-			this.getSelect().getFeatures().clear()
+			var isActive = this.getSelect().getActive();
+			this.getSelect().setActive(true);
+			this.getSelect().getFeatures().clear();
+			this.getSelect().setActive(isActive);
 		}
 	},
 	

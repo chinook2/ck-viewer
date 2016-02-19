@@ -17,7 +17,18 @@ Ext.define("Ck.Edit", {
 	
 	config:{
 		layer: null,
-		openner: null
+		openner: null,
+		
+		/**
+		 * Container for history, feature and vertex panel.
+		 * same to put in the main panel than tbar / window to create a window
+		 */
+		panelContainer: "same",
+		
+		/**
+		 * Include history panel or not
+		 */
+		useHistory: true
 	},
 	
 	editConfig: {
@@ -32,7 +43,6 @@ Ext.define("Ck.Edit", {
 	},
 	
 	items: [{
-		id: "edit-historypanel",
 		tbar: [{
 			action: "ckEditCreate",
 			enableToggle: true,

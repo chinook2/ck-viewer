@@ -168,6 +168,7 @@ Ext.define('Ck.edit.Controller', {
 							}
 						});
 					} else {
+						this.wfsSource.clear();
 						this.close();
 					}
 				},
@@ -197,21 +198,28 @@ Ext.define('Ck.edit.Controller', {
 			});
 			this.wfsFeatures = [];
 			this.wfsSource = this.wfsLayer.getSource();
-			this.wfsLayer.setMap(this.getOlMap());
+			this.getMap().addSpecialLayer(this.wfsLayer);
 		}
 
 		var conf = view.editConfig;
 		conf.editController = this;
 		conf.layer = view.layer;
 		conf.multi = this.getMultiBehavior();
-
-		// When user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
+		
+		// Feature panel : when user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
 		if(conf.multi) {
 			var featureContainer = Ext.getCmp("edit-featurepanel");
-			featureContainer = (Ext.isEmpty(featureContainer))? view : featureContainer;
+			if(Ext.isEmpty(featureContainer)) {
+				if(view.getPanelContainer() == "same") {
+					featureContainer = view;
+				} else {
+					featureContainer = this.getMainWindow();
+				}
+			}
 
 			this.featurePanel = Ext.create("widget.ckedit-feature", conf);
 			featureContainer.add(this.featurePanel);
+			this.mainWindow.manageVisibility();
 
 			// Add listeners
 			this.feature = this.featurePanel.getController();
@@ -227,13 +235,21 @@ Ext.define('Ck.edit.Controller', {
 			tbar.items.getAt(4).getMenu().items.getAt(0).setVisible(false);
 		}
 
-		// Display vertex panel for line and polygon
+		
+		// Vertex panel : display vertex panel for line and polygon
 		if(this.getGeometryTypeBehavior() != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
-			vertexContainer = (Ext.isEmpty(vertexContainer))? view : vertexContainer;
+			if(Ext.isEmpty(vertexContainer)) {
+				if(view.getPanelContainer() == "same") {
+					vertexContainer = view;
+				} else {
+					vertexContainer = this.getMainWindow();
+				}
+			}
 
 			this.vertexPanel = Ext.create("widget.ckedit-vertex", conf);
 			vertexContainer.add(this.vertexPanel);
+			this.mainWindow.manageVisibility();
 
 			// Add listeners
 			this.vertex = this.vertexPanel.getController();
@@ -244,18 +260,62 @@ Ext.define('Ck.edit.Controller', {
 			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
 			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
 		}
+		
+		
+		// History panel
+		if(view.getUseHistory()) {
+			var historyContainer = Ext.getCmp("edit-historypanel");
+			if(Ext.isEmpty(historyContainer)) {
+				if(view.getPanelContainer() == "same") {
+					historyContainer = view;
+				} else {
+					historyContainer = this.getMainWindow();
+				}
+			}
+			
+			
+			this.historyView = Ext.create("widget.ckedit-history", conf);
+			this.history = this.historyView.getController();
+			Ext.apply(this.history, conf);
+			this.history.createListeners(this);
 
-		this.historyView = Ext.create("widget.ckedit-history", conf);
-		this.history = this.historyView.getController();
-		Ext.apply(this.history, conf);
-		this.history.createListeners(this);
-
-		this.historyPanel = Ext.getCmp("edit-historypanel");
-		if(this.historyPanel) {
-			this.historyPanel.add(this.historyView);
+			historyContainer.add(this.historyView);
+			this.mainWindow.manageVisibility();
 		}
-
+		
 		this.on("featurecreate", this.onCreate, this);
+	},
+	
+	/**
+	 * 
+	 */
+	getMainWindow: function() {
+		if(Ext.isEmpty(this.mainWindow)) {
+			this.mainWindow = Ck.create("Ext.window.Window", {
+				title: "Edition",
+				height: 400,
+				width: 400,
+				layout: "fit",
+				closable: false
+			});
+			
+			this.mainWindow.on("add", function(win, item) {
+				item.on("show", win.manageVisibility);
+				item.on("hide", win.manageVisibility);
+			});
+			
+			this.mainWindow.manageVisibility = function() {
+				var visible = false;
+				for(var i = 0; (i < this.items.getCount() && !visible); i++) {
+					visible = !this.items.getAt(i).hidden;
+				}
+				this.setVisible(visible);
+			}.bind(this.mainWindow);
+			
+			this.mainWindow.show();
+		}
+		
+		return this.mainWindow;
 	},
 
 	/**
@@ -264,7 +324,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onCreate: function(feature) {
-		feature.setStyle(Ck.map.Style.greenStroke);
+		feature.setStyle(Ck.map.Style.orangeStroke);
 		var source = this.getSource();
 		// if(this.getMultiBehavior()) {
 			// var type = "Multi" + feature.getGeometry().getType();
@@ -480,7 +540,18 @@ Ext.define('Ck.edit.Controller', {
 		if(this.feature) {
 			this.feature.close.bind(this.feature)();
 		}
-
+		
+		if(this.mainWindow) {
+			this.mainWindow.close();
+		}
+		if(this.wfsLayer) {
+			this.getMap().removeSpecialLayer(this.wfsLayer);
+		}
+		
+		if(this.moveInteraction) {
+			this.getOlMap().removeInteraction(this.moveInteraction);
+		}
+		
 		this.getOpenner().close();
 	},
 

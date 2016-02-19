@@ -9,9 +9,7 @@ Ext.define('Ck.edit.action.Attribute', {
 	tooltip: 'Edit attribute',
 
 	toggleAction: function(btn, status) {
-		if(!this.used) {
-			this.callParent(arguments);
-		}
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 		

@@ -57,17 +57,31 @@ Ext.define('Ck.format.OWSContextLayer', {
 	
 	setMinScale: function(value) {
 		if(!isNaN(value)) {
+			var units;
 			value = parseFloat(value);
 			this._minScale = value;
-			this._minResolution = Ck.getResolutionForScale(value, this._owsContext.getProjection().units_);
+			// Get the units
+			if(this.getOwsContext() && this.getOwsContext.getProjection) {
+				units = this.getOwsContext().getProjection().units_;
+			} else {
+				units = Ck.getMap().getOlView().getProjection().units_;
+			}
+			this._minResolution = Ck.getResolutionForScale(value, units);
 		}
 	},
 	
 	setMaxScale: function(value) {
 		if(!isNaN(value)) {
+			var units;
 			value = parseFloat(value);
 			this._maxScale = value;
-			this._maxResolution = Ck.getResolutionForScale(value, this._owsContext.getProjection().units_);
+			// Get the units
+			if(this.getOwsContext() && this.getOwsContext.getProjection) {
+				units = this.getOwsContext().getProjection().units_;
+			} else {
+				units = Ck.getMap().getOlView().getProjection().units_;
+			}
+			this._maxResolution = Ck.getResolutionForScale(value, units);
 		}
 	},
 	

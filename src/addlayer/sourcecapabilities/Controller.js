@@ -35,7 +35,8 @@ Ext.define('Ck.addlayer.sourcecapabilities.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		view.config.container = view.up("panel");
+		container = view.up("panel");
+		view.config.container = container;
 		view.config.service = container.service;
 		view.config.request = (container.service == "wmc")? "getContext" : "getCapabilities";
 		this.callParent(arguments);

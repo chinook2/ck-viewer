@@ -17,9 +17,7 @@ Ext.define('Ck.edit.action.Delete', {
 	deleteConfirmation: true,
 
 	toggleAction: function(btn, status) {
-		if(!this.used) {
-			this.callParent(arguments);
-		}
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 		

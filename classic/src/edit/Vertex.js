@@ -29,8 +29,7 @@ Ext.define("Ck.edit.Vertex", {
 			ptype: "cellediting",
 			clicksToEdit: 2
 		}],
-		columns: [
-			{
+		columns: [{
 				text: "#",
 				dataIndex: "number",
 				width: 50,
@@ -47,8 +46,7 @@ Ext.define("Ck.edit.Vertex", {
 				editor: "numberfield",
 				decimalPrecision: 4,
 				width: 115
-			}
-		],
+			}],
 		store: {
 			storeId: "editVertexStore",
 			fields: ["number", "longitude", "latitude", "geometry"]

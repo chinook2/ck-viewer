@@ -15,7 +15,7 @@ Ext.define('Ck.edit.action.Create', {
 	/** 
 	 * True to snap vertex to nearest point
 	 */
-	snap: true,
+	snap: false,
 
 	/**
 	 * Activate the geometry creation interaction
@@ -112,6 +112,14 @@ Ext.define('Ck.edit.action.Create', {
 			var coordinates = coordinates[0];
 		}
 		var source = this.getLayerSource();
+		
+		// By-pass snapping
+		var f = new ol.Feature({
+			geometry: Ck.create("ol.geom." + type, [coordinates]),
+			status: "CREATED"
+		});
+
+		return f;
 
 		if(type != "Point" && this.snap) {
 			// Loop on vertex of the feature
