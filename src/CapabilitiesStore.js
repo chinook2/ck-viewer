@@ -121,7 +121,9 @@ Ext.define('Ck.CapabilitiesStore', {
 		Ext.override(reader, {
 			extractData: this.parseCapabilities.bind(this)
 		});
-
+		
+		this.proxy.setWithCredentials(true);
+		
 		Ext.apply(this.proxy, {
 			model: config.model,
 			reader: reader

@@ -1,12 +1,5 @@
 /**
- * Controller of the edit panel. An edit panel consists of :
- *
- * - Edit action add, delete, attribute...
- * - History grid to log modification (optionnal)
- * - Vertex grid to modify geometry accurately (optionnal)
- */
-/**
- * Used by AddLayer component
+ * Combobox context selection controller
  */
 Ext.define('Ck.context.Controller', {
 	extend: 'Ck.Controller',

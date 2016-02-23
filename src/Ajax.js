@@ -31,6 +31,8 @@ Ext.define('Ck.Ajax', {
 			'Powered-By': 'Chinook'
 		});
 		
+		Ext.Ajax.setWithCredentials(true);
+		
 		// Ext.Ajax.setDefaultPostHeader('application/json; charset=UTF-8');
 		// if (Ck.getOption('defaultPostHeader')) {
 			// Ext.Ajax.setDefaultPostHeader(Ck.getOption('defaultPostHeader'));
@@ -55,7 +57,7 @@ Ext.define('Ck.Ajax', {
 				'Content-Type': 'application/json; charset=UTF-8'
 			}
 		});
-				
+		
 		if(options.encode !== false) {
 			options.params = Ext.encode(options.params);
 			delete options.encode;
