@@ -43,7 +43,9 @@ Ext.define('Ck.edit.action.Geometry', {
 		this.geometryInteraction.setActive(status);
 		if(!status) {
 			this.controller.geolocationBtn.disable();
-			this.controller.moveInteraction.setActive(false);
+			if(this.controller.moveInteraction) {
+				this.controller.moveInteraction.setActive(false);
+			}
 			this.geometryInteraction.resetSelection();
 		}
 	},

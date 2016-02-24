@@ -69,6 +69,11 @@ Ext.define('Ck.map.action.Measure', {
 	draw: null,
 	
 	/**
+	 * Button associate with this action
+	 */
+	btn: null,
+	
+	/**
 	 *
 	 */
 	ckLoaded: function(map) {		
@@ -166,12 +171,20 @@ Ext.define('Ck.map.action.Measure', {
 			
 			this.wgs84Sphere = new ol.Sphere(6378137);
 		}
+		
+		// Disable on context loading
+		map.on("contextloading", function() {
+			if(this.btn) {
+				this.btn.toggle(false);
+			}
+		}, this);
 	},
 	
 	/**
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
+		this.btn = btn;
 		if(!this.draw) return;
 		this.draw.setActive(pressed);
 		this.tip.setVisible(pressed);

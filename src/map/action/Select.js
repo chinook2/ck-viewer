@@ -52,6 +52,11 @@ Ext.define('Ck.map.action.Select', {
 	target: "window",
 	
 	/**
+	 * Button associate with this action
+	 */
+	btn: null,
+	
+	/**
 	 * Select on vector layer :
 	 *
 	 *    - select by geometry (circle, box, polygon)
@@ -74,12 +79,19 @@ Ext.define('Ck.map.action.Select', {
 			overHighlight	: true
 			// drawStyle	: null
 		});
+		
+		map.on("contextloading", function() {
+			if(this.btn) {
+				this.btn.toggle(false);
+			}
+		}, this);
 	},
 	
 	/**
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
+		this.btn = btn;
 		if(!this.select) return;
 		this.select.setActive(pressed);
 	},

@@ -35,6 +35,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	fieldIgnored: ["geometry", "shape", "boundedBy"],
 
 	/**
+	 * Button associate with this action
+	 */
+	btn: null,
+	
+	/**
 	 * FeatureInfo on vector layer
 	 */
 	ckLoaded: function(map) {
@@ -48,12 +53,20 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			highlight	: false,
 			limit		: null
 		});
+		
+		// Disable on context loading
+		map.on("contextloading", function() {
+			if(this.btn) {
+				this.btn.toggle(false);
+			}
+		}, this);
 	},
 	
 	/**
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
+		this.btn = btn;
 		this.draw.setActive(pressed);
 	},
 	

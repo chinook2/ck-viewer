@@ -70,7 +70,7 @@ Ext.define('Ck.edit.action.Attribute', {
 			xtype: 'ckform',
 			editing: true,
 			formName: formName,
-			layer: layer,
+			layer: layer.get("id"),
 			dataFid: dataFid
 		});
 		

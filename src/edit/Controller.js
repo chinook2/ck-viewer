@@ -58,7 +58,12 @@ Ext.define('Ck.edit.Controller', {
 		/**
 		 * Considerate geometry type. It can be different from geometryType only if emulateSimple is true
 		 */
-		geometryTypeBehavior: ""
+		geometryTypeBehavior: "",
+		
+		/**
+		 * The id of the snapping options panel
+		 */
+		snappingOptionsId: "edit-snapping-settings"
 	},
 
 	/**
@@ -522,6 +527,20 @@ Ext.define('Ck.edit.Controller', {
 	/**************************************************************************************/
 	/*************************************** Utils ****************************************/
 	/**************************************************************************************/
+	/**
+	 *
+	 */
+	getSnappingSettings: function() {
+		var config, cmp = Ext.getCmp("edit-snapping-settings");
+		if(cmp) {
+			config = Ext.getCmp("edit-snapping-settings").getController().getSettings();
+		} else {
+			config = [];
+		}
+		
+		return config
+	},
+	
 	/**
 	 * Return the source of the current layer
 	 * @return {ol.source}

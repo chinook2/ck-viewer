@@ -16,7 +16,7 @@ Ext.define('Ck.edit.action.Create', {
 	/** 
 	 * True to snap vertex to nearest point
 	 */
-	snap: false,
+	snap: true,
 
 	/**
 	 * Activate the geometry creation interaction
@@ -95,66 +95,17 @@ Ext.define('Ck.edit.action.Create', {
 	 **/
 	snapGeometry: function(feature) {
 		var geometry = feature.getGeometry();
-		var extent = geometry.getExtent();
-
-		// Récupération des features dans un buffer d'extent du feature
-		var buffer = [
-			extent[0] - this.getTolerance(),
-			extent[1] - this.getTolerance(),
-			extent[2] + this.getTolerance(),
-			extent[3] + this.getTolerance()
-		];
-
-		var featuresInExtent = [];
-
-		var coordinates = geometry.getCoordinates();
-		var type = feature.getGeometry().getType();
 		
-		// By-pass snapping
+		var opt = {
+			layer: this.controller.getSnappingSettings(),
+			geometries: [geometry]
+		}
+		if(opt.layer.length > 0) {
+			var geometry = Ck.Snap.snap(opt);
+		}
+		
 		var f = new ol.Feature({
-			geometry: Ck.create("ol.geom." + type, coordinates),
-			status: "CREATED"
-		});
-		
-		if(type != "Point") {
-			var coordinates = coordinates[0];
-		}
-		var source = this.getLayerSource();
-		
-		
-
-		return f;
-
-		if(type != "Point" && this.snap) {
-			// Loop on vertex of the feature
-			for(var i=0; i<coordinates.length - 1; i++ ) {
-				var coordinate = coordinates[i];
-				var feat = source.getClosestFeatureToCoordinate(coordinate);
-				// If nearest feature was found
-				if(!Ext.isEmpty(feat)) {
-					var geom = feat.getGeometry();
-					var point = geom.getClosestPoint(coordinate).slice(0, 2); // Find the nearest point of the feature (force 2D)
-					var line = new ol.geom.LineString([coordinate, point]);
-					var length = line.getLength();
-
-					// Si on rentre dans la tolérance
-					if(length <= this.getTolerance()) {
-						coordinates[i] = point;
-					}
-				}
-			}
-		}
-		
-		if(type.indexOf("multi") != -1) {
-			coordinates = [coordinates];
-		}
-
-		var d = new Date();
-		date = Ext.Date.format(d, 'Y-m-d');
-		var ced = 'A' + Ext.Date.format(d, 'YmdHis');
-
-		var f = new ol.Feature({
-			geometry: Ck.create("ol.geom." + type, coordinates),
+			geometry: geometry,
 			status: "CREATED"
 		});
 
