@@ -77,7 +77,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	},
 	
 	/**
-	 * 
+	 * Called by 3 events :
+	 * - when editing begins
+	 * - for each field modification
+	 * - when editing ends 
 	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
@@ -119,27 +122,31 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 			var val = cmp.getValue();
 			// For combobox
-			if(cmp.displayField) val = cmp.getDisplayValue();
+			if(cmp.displayField) {
+				val = cmp.getDisplayValue() || cmp.getValue();
+			}
 			// For Datefields
-			if(cmp.submitFormat) val = cmp.getSubmitValue();
+			if(cmp.submitFormat) {
+				val = cmp.getSubmitValue();
+			}
 			
-			if(val != '') {
-				val = this.getPrefix() + val + this.getSuffix();
-				if(this.getTemplate()) {
-					val = this.getTemplate().apply({"value": val});
+			if(val !== null) {
+				if(!Ext.isEmpty(val)) {
+					val = this.getPrefix() + val + this.getSuffix();
+					if(this.getTemplate()) {
+						val = this.getTemplate().apply({"value": val});
+					}
+					
+					// If value begin with "http:" but it's not a create <a> element
+					var _http = /^http:/i;
+					if(_http.test(val)) {
+						var title = this.getTitle();
+						val = "<a href='" + val + "' " + title + " target='" + this.getTarget() + "'>" + val + "</a>";
+					}
 				}
-			}
-			
-			var title = this.getTitle();
-			
-			// If value begin with "http:" create <a> element
-			var _http = /^http:/i;
-			if(_http.test(val)) {
-				val = "<a href='" + val + "' " + title + " target='" + this.getTarget() + "'>" + val + "</a>";
-			}
 
-			this.textEl.update(val);
-			this.labelEl.show();
+				this.textEl.update(val);
+			}
 			
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
@@ -148,6 +155,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 					}
 				}
 			}
+			this.labelEl.show();
 		} else {
 			this.labelEl.hide();
 			cmp.triggerWrap.show();

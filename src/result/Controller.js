@@ -38,11 +38,6 @@ Ext.define('Ck.result.Controller', {
 	 */
 	currentLayer: null,
 	
-	constructor: function(a,b,c) {
-		
-		this.callParent(arguments);
-	},
-	
 	/**
 	 * @protected
 	 */

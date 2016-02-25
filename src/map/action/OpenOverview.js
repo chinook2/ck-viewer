@@ -36,12 +36,11 @@ Ext.define('Ck.map.action.OpenOverview', {
 	toggleAction: function(btn, pressed) {
 		this.button = btn;
 		
-		this.ov = Ext.create({
-			xtype: "ckoverview",
-			openner: this
-		})
-		
 		if(!this.win) {
+			this.ov = Ext.create({
+				xtype: "ckoverview",
+				openner: this
+			});
 			this.win = Ext.create('Ext.window.Window', {
 				resizable: false,
 				layout: 'fit',

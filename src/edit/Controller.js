@@ -449,8 +449,12 @@ Ext.define('Ck.edit.Controller', {
 		}
 	},
 
-	pointTranslateEnd: function(a,b,c,d) {
-		this.fireEvent("featuregeometry", a.features.item(0));
+	/**
+	 * On feature translating
+	 * @param {ol.interaction.TranslateEvent}
+	 */
+	pointTranslateEnd: function(evt) {
+		this.fireEvent("featuregeometry", evt.features.item(0));
 	},
 
 	/**
@@ -468,6 +472,7 @@ Ext.define('Ck.edit.Controller', {
 				} else {
 					geom.setCoordinates([coord]);
 				}
+				this.fireEvent("featuregeometry", this.currentFeature);
 			}
 		}
 	},

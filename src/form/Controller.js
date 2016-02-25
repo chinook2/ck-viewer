@@ -14,7 +14,6 @@ Ext.define('Ck.form.Controller', {
 
 	dataUrl: null,
 	dataModel: null,
-	// dataStore: null,
 
 	layoutConfig: {
 		labelSeparator: ' : '
@@ -44,6 +43,12 @@ Ext.define('Ck.form.Controller', {
 	
 	fieldsProcessed: 0,
 	formsProcessed: 0,
+	
+	/**
+	 * @event aftersave
+	 * Fires when save was successful
+	 * @param {Object}
+	 */
 
 	init: function() {
 		this.isSubForm = this.view.getIsSubForm();
@@ -127,6 +132,13 @@ Ext.define('Ck.form.Controller', {
 					force: true
 				});
 			}
+			
+			Ext.Msg.show({
+				title: "Edition",
+				message: "Mise à jour effectuée",
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.INFO
+			});
 		});
 
 		// If we have error exit here (log message is in saveData())
@@ -153,7 +165,10 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
-			this.stopEditing();
+			// this.stopEditing();
+			this.getViewModel().set("editing", false);
+			this.getViewModel().set("isEditable", true);
+		
 			this.fireEvent('afterclose');
 
 			var win = this.view.up('window');
@@ -192,7 +207,6 @@ Ext.define('Ck.form.Controller', {
 
 	},
 
-
 	getOption: function(opt) {
 		var formOpt = Ck.getOption('form');
 		if(formOpt && formOpt[opt]) {
@@ -224,7 +238,6 @@ Ext.define('Ck.form.Controller', {
 
 			this.dataUrl = null;
 			this.dataModel = null;
-			// this.dataStore = null;
 
 			// Create un dedicated controller form the named form
 			var controllerName = 'Ck.form.controller.' + this.name;
@@ -315,15 +328,22 @@ Ext.define('Ck.form.Controller', {
 			}
 			
 			// Auto-load data if params available
-			if(this.autoLoad) this.loadData();
+			if(this.autoLoad) {
+				var data = this.view.getDataObject();
+				if(Ext.isObject(data)) {
+					this.loadData(data);
+				} else {
+					this.loadFeature();
+				}
+			}
 		}
 
 		return true;
 	},
 
-	/*
+	/**
 	 * Get Form definition
-	 * @param
+	 * @param {String}
 	 */
 	getForm: function(formUrl) {
 		if(!formUrl) {
@@ -383,7 +403,9 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
-	// Get the main form controller (the 1st)
+	/**
+	 * Get the main form controller (the 1st)
+	 */
 	getRootForm: function() {
 		var rootForm = this.getView().findParentBy(function(cmp) {
 			if(cmp.xtype != 'ckform') return false;
@@ -394,7 +416,9 @@ Ext.define('Ck.form.Controller', {
 		return this;
 	},
 	
-	// Get subForms by Name or formName
+	/**
+	 * Get subForms by Name or formName
+	 */
 	getSubForm: function(val) {
 		var sub = this.getView().down('ckform[name='+val+']');
 		if(!sub) sub = this.getView().down('ckform[formName='+val+']');
@@ -402,7 +426,9 @@ Ext.define('Ck.form.Controller', {
 		return false;
 	},
 	
-	// List all included form in a form.
+	/**
+	 * List all included form in a form.
+	 */
 	getIncludedForm: function(cfg) {
 		if(!cfg) return;
 		var includeForm = [];
@@ -563,6 +589,7 @@ Ext.define('Ck.form.Controller', {
 					case "fileuploadfield":
 					case "filefield":
 						// If photo taking is allow
+						c.readOnly = false;
 						if(c.uploadImage !== false) {
 							var panelId = Ext.id();
 							
@@ -719,6 +746,7 @@ Ext.define('Ck.form.Controller', {
 											type: "ajax",
 											noCache: false,
 											url: me.getFullUrl(storeUrl),
+											withCredentials: true,
 											reader: {
 												type: "array"
 											}
@@ -801,6 +829,10 @@ Ext.define('Ck.form.Controller', {
 								}
 								return true;
 							}
+						}
+						
+						if(me.compatibiltyMode) {
+							delete c.displayField;
 						}
 
 						Ext.applyIf(c, {
@@ -915,13 +947,17 @@ Ext.define('Ck.form.Controller', {
 		var form = v.getForm();
 		var fid = v.getDataFid();
 		
+		// If true all field was processed
 		if(this.fieldsProcessed == this.fieldsToProcess) {
+			this.savedValues = values;
+			
 			if(this.compatibiltyMode) {
 				var lyr = v.getLayer();
 				var res = {
-					fid: fid.fid,
+					fid: fid,
 					params: values
 				};
+				
 				values = {};
 				values['main'] = res;
 			}
@@ -944,10 +980,11 @@ Ext.define('Ck.form.Controller', {
 			} else {
 				if(this.compatibiltyMode) {
 					values = {
-						name: fid.layer,
+						name: lyr,
 						data: encodeURIComponent(Ext.encode(values))
 					}
 				}
+				
 				// First argument will be delete (is the callback)
 				var fn = callback;
 				var args = Array.prototype.slice.apply(arguments);
@@ -1022,6 +1059,13 @@ Ext.define('Ck.form.Controller', {
 		var v = this.getView();
 		var form = v.getForm();
 		form.setValues(data);
+		
+		// Fix to fire "change" event for combobox
+		form.getFields().each(function(field) {
+			if(field.xtype == "combobox") {
+				field.fireEvent("change");
+			}
+		});
 
 		// SUBFORM : load data
 		var subforms = v.query('ckform');
@@ -1032,7 +1076,9 @@ Ext.define('Ck.form.Controller', {
 		//
 	},
 
-	// Prevent validate subform fields...
+	/**
+	 * Prevent validate subform fields...
+	 */
 	isValid: function() {
 		var v = this.getView();
 		var form = v.getForm();
@@ -1099,7 +1145,7 @@ Ext.define('Ck.form.Controller', {
 	 * Load data for a specific feature
 	 * @param {Object}
 	 */
-	loadData: function(options) {
+	loadFeature: function(options) {
 		var me = this;
 		var v = me.getView();
 
@@ -1107,12 +1153,13 @@ Ext.define('Ck.form.Controller', {
 		var lyr = v.getLayer();
 		var bSilent = false;
 
+		// Call beforeLoad plugin. If it return false then cancel the loading
 		if(this.oController.beforeLoad(options) === false) {
-			Ck.log("beforeLoad cancel loadData.");
+			Ck.log("beforeLoad cancel loadFeature.");
 			return;
 		}
 
-		//
+		// 
 		if(!options) {
 			options = {};
 			bSilent = true;
@@ -1121,14 +1168,10 @@ Ext.define('Ck.form.Controller', {
 		var url = options.url || me.dataUrl || v.getDataUrl();
 		var data = options.raw || v.getDataRaw();
 		var model = options.model || me.dataModel || v.getDataModel();
-		// var store = options.store || v.getDataStore();
-
-		// Init le form 'vide'
-		me.resetData();
 
 		// Load inline data
 		if(data) {
-			this.loadRawData(data);
+			this.loadData(data);
 				return;
 			}
 
@@ -1138,7 +1181,7 @@ Ext.define('Ck.form.Controller', {
 			model.load({
 				success: function(record, operation) {
 					var data = record.getData();
-					this.loadRawData(data);
+					this.loadData(data);
 						return;
 				},
 				failure: function(record, operation) {
@@ -1160,7 +1203,12 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				var tpl = new Ext.Template(dataUrl);
-				if(Ext.isString(fid)) fid = [fid];
+				if(Ext.isString(fid)) {
+					fid = {
+						fid: fid,
+						layer: lyr
+					};
+				}
 				url = tpl.apply(fid);
 			} else {
 				// Build default url
@@ -1176,7 +1224,7 @@ Ext.define('Ck.form.Controller', {
 
 
 		if(!url) {
-			if(!bSilent) Ck.Notify.error("Forms loadData 'fid' or 'url' not set.");
+			if(!bSilent) Ck.Notify.error("Forms loadFeature 'fid' or 'url' not set.");
 
 			// If new form with empty data we need to startEditing too...
 			if(v.getEditing() === true) this.startEditing();
@@ -1205,14 +1253,14 @@ Ext.define('Ck.form.Controller', {
 					}
 					//
 
-					this.loadRawData(data);
+					this.loadData(data);
 				}
 
 				if(v.getEditing() === true) this.startEditing();
 			},
 			failure: function(response, opts) {
 				// TODO : on Tablet when access local file via ajax, success pass here !!
-				Ck.Notify.error("Forms loadData error when loading data from : "+ url +".");
+				Ck.Notify.error("Forms loadFeature error when loading data from : "+ url +".");
 
 				this.fireEvent('loadfailed', response);
 				this.oController.loadFailed(response);
@@ -1220,32 +1268,43 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
-	loadRawData: function(data) {
+	/**
+	 * Load data from object
+	 * @param {Object}
+	 */
+	loadData: function(data) {
 		var me = this;
 		var v = me.getView();
 		var lyr = v.getLayer();
 		
-					if(this.oController.afterLoad(data) === false) {
-						Ck.log("afterLoad cancel loadData.");
-						return;
-					}
+		// Initialize the submit empty
+		me.resetData();
+
+		if(this.oController.afterLoad(data) === false) {
+			Ck.log("afterLoad cancel loadFeature.");
+			return;
+		}
 
 		this.getViewModel().setData({
-						layer: lyr,
+			layer: lyr,
 			data: data
-					});
-					this.getViewModel().notify();
-					this.setValues(data);
+		});
+		
+		this.getViewModel().notify();
+		this.setValues(data);
 
-					this.fireEvent('afterload', data);
+		this.fireEvent('afterload', data);
 
-				if(v.getEditing() === true) this.startEditing();
-			},
+		// If it's an edit form start the editing
+		if(v.getEditing() === true) {
+			this.startEditing();
+		}
+	},
 
 	/**
 	 * Save data
 	 * @param {Object}
-	 * @param {Object}
+	 * @param {Function/Object}
 	 * @return {Boolean}
 	 */
 	saveData: function(values, options) {
@@ -1366,25 +1425,39 @@ Ext.define('Ck.form.Controller', {
 			});
 			return true;
 		}
+		
+		// Build default url
+		if(Ext.isEmpty(url)) {
+			if(this.compatibiltyMode) {
+				url = Ck.getApi() + "service=forms&request=edit&name={layer}&fid={fid}";
+			} else {
+				url = "resources/data/{layer}/{fid}.json";
+			}
+		}
 
 		// Load data by ID - build standard url
 		if(fid) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
-				// Form provide un template URL to load data
+				// Form provide un template URL (or multiples URL) to load data
 				var dataUrl = url;
 				if(Ext.isObject(dataUrl)) {
-					dataUrl = dataUrl.update;
-					if(options.create) dataUrl = dataUrl.create || dataUrl.update;
+					dataUrl = dataUrl.read;
 				}
+
 				var tpl = new Ext.Template(dataUrl);
-				if(Ext.isString(fid)) fid = [fid];
+				if(Ext.isString(fid)) {
+					fid = {
+						fid: fid,
+						layer: lyr
+					};
+				}
 				url = tpl.apply(fid);
 			} else {
 				Ck.log("fid ("+ fid +") defined but no dataUrl template in "+ this.name);
 			}
 		}
-
+		
 		if(!url) {
 			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
 			Ext.callback(options.success, options.scope, [values]);
@@ -1405,7 +1478,7 @@ Ext.define('Ck.form.Controller', {
 				this.saveMask.hide();
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200 || response.status == 201) {
-					this.fireEvent('aftersave', data);
+					this.fireEvent('aftersave', this.savedValues);
 					if(this.oController.afterSave(data) === false) {
 						Ck.log("afterSave cancel saveData.");
 						return false;
@@ -1431,16 +1504,13 @@ Ext.define('Ck.form.Controller', {
 		this.saveMask.show();
 		
 		if(this.files && this.files.length>0){
-			// Save data from custom URL ou standard URL
-			Ck.Ajax.xhr(opt);
+			// Save data from custom URL or standard URL
+			Cks.xhr(opt);
 		} else {
 			Cks[options.method.toLowerCase()](opt);
 		}
 	},
 	
-	
-	
-
 	deleteData: function(options) {
 		options = options || {};
 

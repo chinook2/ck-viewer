@@ -67,16 +67,18 @@ Ext.define('Ck.edit.action.Attribute', {
 		
 		
 		this.mapFormPanel =  Ext.create({
-			xtype: 'ckform',
-			editing: true,
-			formName: formName,
-			layer: layer.get("id"),
-			dataFid: dataFid
+			xtype		: 'ckform',
+			editing		: true,
+			formName	: formName,
+			layer		: layer.get("id"),
+			dataFid		: feature.getId()
+			// ,dataObject: feature.getProperties()
 		});
 		
+		this.mapFormPanel.getController().on("aftersave", this.editingComplete, this);
+		this.mapFormPanel.getController().on("afterclose", this.editingComplete, this);
+		
 		this.mapFormWindow = Ext.create('Ext.window.Window', {
-			// height: 300,
-			// width: 600,
 			layout: 'fit',
 			headerPosition: 'right',
 			
@@ -85,12 +87,18 @@ Ext.define('Ck.edit.action.Attribute', {
 			
 			closeAction: 'hide',
 			listeners:{
-				//close: this.clearSelection,
 				scope: this
 			},
 			items: this.mapFormPanel 
 		});
 		
 		this.mapFormWindow.show();
+	},
+	
+	/**
+	 * Firered when edit ends (with success or failure)
+	 */
+	editingComplete: function() {
+		this.attributeInteraction.resetSelection();
 	}
 });

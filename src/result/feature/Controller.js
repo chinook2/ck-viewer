@@ -22,7 +22,7 @@ Ext.define('Ck.result.feature.Controller', {
 	},
 	
 	openSheet: function(btn) {
-		var record = btn.getWidgetRecord().data;
+		this.currentRecord = btn.getWidgetRecord();
 		var layer = this.getView().ownerCt.getController().currentLayer.data.data.layer;
 		
 		var formName = layer.getExtension('form');
@@ -40,12 +40,13 @@ Ext.define('Ck.result.feature.Controller', {
 			editing: false,
 			formName: formName,
 			layer: layer.get("id"),
-			dataFid: record.objectid
+			dataFid: this.currentRecord.data.objectid
+			// ,dataObject: feature.getProperties() 
 		});
 		
+		this.mapFormPanel.getController().on("aftersave", this.editingComplete, this);
+		
 		this.mapFormWindow = Ext.create('Ext.window.Window', {
-			// height: 300,
-			// width: 600,
 			layout: 'fit',
 			headerPosition: 'right',
 			
@@ -54,12 +55,25 @@ Ext.define('Ck.result.feature.Controller', {
 			
 			closeAction: 'hide',
 			listeners:{
-				//close: this.clearSelection,
 				scope: this
 			},
 			items: this.mapFormPanel 
 		});
 		
 		this.mapFormWindow.show();
+	},
+	
+	/**
+	 * After sheet saving, update the corresponding row
+	 */
+	editingComplete: function(data) {
+		var config = {};
+		
+		// HARDCOOORE FIX to avoid schema and table prefix in field name
+		for(field in data) {
+			config[field.split(".").pop()] = data[field];
+		}
+		
+		this.currentRecord.set(config);
 	}
 });

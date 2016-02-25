@@ -29,12 +29,6 @@ Ext.define('Ck.map.action.Geolocation', {
 		geolocationMarker: null
 	},
 	
-	/**
-	 * @var {Number[]}
-	 * Offset to translate marker to another location
-	 */
-	offset: [0, 0],
-	
 	geoListener: null,
 
 	/**
@@ -69,35 +63,37 @@ Ext.define('Ck.map.action.Geolocation', {
 	 */
 	toggleAction: function(btn, pressed) {
 		if(pressed) {
-			this.setPosition(this.getGeolocation());
+			var geoloc = this.getMap().geolocation.getPosition();
+			if(Ext.isArray(geoloc)) {
+				this.setPosition();
+				this.getOlView().setCenter(geoloc);
+			}
 			
+			// Add listener to move marker on geolocation change
 			if(Ext.isEmpty(this.geoListener)) {
-				this.geoListener = this.getGeolocation().on('change', function(evt) {
-					this.setPosition(evt.target);
-				}, this);
+				this.geoListener = this.getMap().on({
+					geolocationchange: this.setPosition,
+					destroyable: true,
+					scope: this
+				});
 			}
 		} else {
 			this.marker.setVisible(false);
-			this.getGeolocation().unByKey(this.geoListener);
+			this.geoListener.destroy();
 			delete this.geoListener;
 		}
 	},
 	
 	/**
-	 * Move marker to the Geolocation position.
+	 * Move marker to the geolocation position.
 	 * Apply the offset.
-	 * @params {ol.Geolocation}
+	 * @params {ol.coordinate}
 	 */
-	setPosition: function(geolocation) {
-		var p = geolocation.getPosition();
-		
-		if(Ext.isArray(p)) {
+	setPosition: function(geoloc) {
+		if(Ext.isArray(geoloc)) {
 			var mark = this.getGeolocationMarker();
-			p[0] = p[0] + this.offset[0];
-			p[1] = p[1] + this.offset[1];
 			this.marker.setVisible(true);
-			mark.setPosition(p);
-			this.getOlView().setCenter(p);
+			mark.setPosition(geoloc);
 		}
 	}
 });

@@ -93,14 +93,14 @@ Ext.define('Ck.Ajax', {
 	},
 	
 	request: function(options) {
-		options.disableCaching = false;		
-
+		options.disableCaching = false;
 		
 		Ext.Ajax.request(options);	
 	},
 
 	/**
 	 * Perform an AJAX request using XHR Level 2.
+	 * Useful for file sending
 	 * @param {Object}
 	 */
 	xhr: function(options) {
@@ -133,6 +133,7 @@ Ext.define('Ck.Ajax', {
 			fData.append(f.name, f.value, f.filename);
 		}
 
+		xhr.withCredentials = true;
 		xhr.open(options.method, options.url, true);
 		xhr.send(fData);
 	},
@@ -220,13 +221,13 @@ Ext.define('Ck.Ajax', {
 		transacOpt = {
 			featureNS		: "feature",
 			srsName			: currSrs,
-			featureType		: lyr[1],
+			featureType		: lyr[lyr.length - 1],
 			gmlOptions: {
 				schemaLocation: "wfs"
 			}
 		};
 
-		if(!Ext.isEmpty(lyr[0])) {
+		if(lyr.length > 1) {
 			transacOpt.featurePrefix = lyr[0];
 		}
 		
@@ -318,7 +319,7 @@ Ext.define('Ck.Ajax', {
 		}
 		
 		// Do the getFeature query
-		Ck.Ajax.post({
+		Cks.post({
 			scope: this,
 			url: ope.getUrl(),
 			rawData: pTemp.innerHTML,
