@@ -63,7 +63,7 @@ Ext.define('Ck.edit.Controller', {
 		/**
 		 * The id of the snapping options panel
 		 */
-		snappingOptionsId: "edit-snapping-settings"
+		snappingOptionsId: "edit-snapping-options"
 	},
 
 	/**
@@ -535,10 +535,10 @@ Ext.define('Ck.edit.Controller', {
 	/**
 	 *
 	 */
-	getSnappingSettings: function() {
-		var config, cmp = Ext.getCmp("edit-snapping-settings");
+	getSnappingOptions: function() {
+		var config, cmp = Ext.getCmp("edit-snapping-options");
 		if(cmp) {
-			config = Ext.getCmp("edit-snapping-settings").getController().getSettings();
+			config = cmp.getController().getSettings();
 		} else {
 			config = [];
 		}

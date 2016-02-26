@@ -5,8 +5,8 @@ Ext.define('Ck.action.SnappingOptions', {
 	extend: 'Ck.Action',
 	alias: "widget.ckSnappingOptions",
 
-	text: "Snapping settings",
-	tooltip: "Snapping settings",
+	text: "Snapping options",
+	tooltip: "Snapping options",
 	
 	enableToggle: true,
 	toggleGroup: "snappingOptions",

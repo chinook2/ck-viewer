@@ -531,7 +531,7 @@ Ext.define('Ck.Selection', {
 		
 		this.nbQueryDone++;
 		
-		if(this.nbQueryDone == this.nbQuery) {
+		if(this.nbQueryDone >= this.nbQuery) {
 			this.getMask().hide();
 			this.getCallback()(this.selection);
 		}

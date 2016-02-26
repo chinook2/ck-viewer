@@ -156,6 +156,18 @@
         "en": "Selection in progress",
         "fr": "Sélection en cours",
         "es": " - "
+    },{
+        "en": "Snapping options",
+        "fr": "Options d'accrochages",
+        "es": " - "
+    },{
+        "en": "Layer",
+        "fr": "Couche",
+        "es": " - "
+    },{
+        "en": "Tolerance",
+        "fr": "Tolérance",
+        "es": " - "
     }
     ]
 }

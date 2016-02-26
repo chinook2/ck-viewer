@@ -83,7 +83,7 @@ Ext.define('Ck.overview.Controller', {
 			extent[0] + (width * 0.25),
 			extent[1] + (height * 0.25),
 			extent[2] - (width * 0.25),
-			extent[3] - (height * 0.25),
+			extent[3] - (height * 0.25)
 		]
 		var uniqueRes = this.getOlView().getResolutionForExtent(extent, size);
 		

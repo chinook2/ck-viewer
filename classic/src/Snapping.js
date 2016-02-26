@@ -8,7 +8,7 @@ Ext.define("Ck.Snapping", {
 	
 	controller: "cksnapping",
 	
-	id: "edit-snapping-settings",
+	id: "edit-snapping-options",
 	
 	cls: "ck-snapping",
 
@@ -33,7 +33,17 @@ Ext.define("Ck.Snapping", {
 		widget		: {
 			xtype		: "numberfield",
 			minValue	: 1,
-			maxValue	: 99
+			maxValue	: 99,
+			listeners: {
+				change: function(nbField, value) {
+					if (nbField.getWidgetRecord) {
+						var rec = nbField.getWidgetRecord();
+						if (nbField.isValid() && rec) {
+							rec.set('tolerance', value);
+						}
+					}
+				}
+			}
 		}
 	}],
 	
