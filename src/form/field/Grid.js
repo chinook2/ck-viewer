@@ -189,8 +189,8 @@ Ext.define('Ck.form.field.Grid', {
 				var val = rec.data[col.dataIndex];
 
 				if((!val) && (col.allowBlank===false)) {
-					//isValid = false;
-					errors.push(col.blankText || me.blankText);
+					var errText = col.blankText || ((col.text || col.dataIndex) + ' field is required');
+					if(errors.indexOf(errText)  == -1) errors.push(errText);
 					Ck.log((col.text || col.dataIndex) + ' in '+ me.name +' not Valid !');
 					return false;
 				}
