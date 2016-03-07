@@ -60,6 +60,8 @@ Ext.define('Ck.form.plugin.Subform', {
 			// inherit dataFid from main form (used in store url template)
 			dataFid:  formController.getView().getDataFid(),
 			
+			dataModel: subForm.dataModel,
+			
 			// TODO use param from json
 			//layout: 'fit',
 			layout: subForm.layout || '',
@@ -298,8 +300,6 @@ Ext.define('Ck.form.plugin.Subform', {
 				if(rec) rec.set(res);
 				this._grid.getView().refresh();
 				
-				delete this._subform.rowIndex;
-				
 				this.resetSubForm();
 			},
 			scope: this
@@ -331,6 +331,17 @@ Ext.define('Ck.form.plugin.Subform', {
 			fid: dataFid,
 			scope: this
 		});
+	},
+	
+	newItem: function() {
+		if(!this._subform) return;
+		
+		// Force reset
+		this.resetSubForm();
+		
+		if(this._subformWindow) {
+			this._subformWindow.show();
+		}
 	},
 	
 	loadItem: function(view, rec, tr, rowIndex) {
@@ -407,6 +418,8 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// Reset dataFid too
 		if(this.mainDataFid) this._subform.setDataFid(this.mainDataFid);
+		// Clear current selected rowIndex
+		delete this._subform.rowIndex;
 		
 		if(this._subformWindow) {
 			this._subformWindow.hide();
