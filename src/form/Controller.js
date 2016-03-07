@@ -1428,6 +1428,12 @@ Ext.define('Ck.form.Controller', {
 			model.set(values);
 			model.save({
 				success: function(record, operation) {
+					this.fireEvent('aftersave', record);
+					if(this.oController.afterSave(record, options) === false) {
+						Ck.log("afterSave cancel saveData.");
+						return false;
+					}
+					
 					Ext.callback(options.success, options.scope, [values]);
 				},
 				failure: function(record, operation) {
