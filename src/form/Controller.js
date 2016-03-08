@@ -102,7 +102,10 @@ Ext.define('Ck.form.Controller', {
 		if(parentForm) {
 			this.parentForm = parentForm;
 			
-			this.editing = parentForm.getEditing();
+			// inherit editing from parent only if current form doesn't specify true or false
+			if(!Ext.isDefined(v.initialConfig.editing)){
+				this.editing = parentForm.getEditing();
+			}
 			
 			// inherit dataFid from main view form (used in store url template)
 			vDataFid = v.getDataFid() || {};
