@@ -11,7 +11,7 @@ Ext.define('Ck.map.action.Measure', {
 	
 	itemId: 'measure',
 	text: '',
-	iconCls: 'ck ck-measures',
+	iconCls: 'ckfont ck-measures',
 	tooltip: '',
 	
 	toggleGroup: 'ckmapAction',

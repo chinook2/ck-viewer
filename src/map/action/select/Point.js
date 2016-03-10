@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.select.Point', {
 	
 	itemId: 'selectpoint',
 	text: '',
-	iconCls: 'fa fa-asterisk',
+	iconCls: 'ckfont ck-select-point',
 	tooltip: 'Select by click',
 		
 	//continueMsg: 'Click to select a feature',

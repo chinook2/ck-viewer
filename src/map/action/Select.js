@@ -13,7 +13,7 @@ Ext.define('Ck.map.action.Select', {
 	
 	itemId: 'select',
 	text: '',
-	iconCls: 'ck ck-selects',
+	iconCls: 'ckfont ck-selects',
 	tooltip: '',
 	
 	toggleGroup: 'ckmapAction',

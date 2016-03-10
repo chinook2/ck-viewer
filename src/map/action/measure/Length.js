@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.measure.Length', {
 	
 	itemId: 'measurelength',
 	text: '',
-	iconCls: 'ck ck-measure-length',
+	iconCls: 'ckfont ck-measure-length',
 	tooltip: 'Measure length',
 		
 	continueMsg: 'Click to continue measuring the length',
