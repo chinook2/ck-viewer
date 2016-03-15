@@ -1429,6 +1429,8 @@ Ext.define('Ck.form.Controller', {
 		// If a model is set we use it
 		if(fid && model) {
 			model.set(values);
+			if(options.method.toUpperCase() == 'PUT') model.phantom = false;
+			
 			model.save({
 				success: function(record, operation) {
 					this.fireEvent('aftersave', record);
@@ -1546,8 +1548,9 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(fid && model) {
-			if(Ext.isObject(fid)) fid = fid.fid;
+			// if(Ext.isObject(fid)) fid = fid.fid;
 			model.set(fid);
+			model.phantom = false
 			model.erase({
 				success: function(record, operation) {
 					Ext.callback(options.success, options.scope, [dt]);
