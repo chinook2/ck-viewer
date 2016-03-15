@@ -16,9 +16,12 @@ Ext.define('Ck.legend.plugin.Slider', {
 		});
 	},
 	
+    // itemclick( this, record, item, index, e, eOpts )
+	// rowclick( this, record, tr, rowIndex, e, eOpts )
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(layer && record.isLeaf() && e.target.tagName == "SPAN") {
+
+		if(layer && record.isLeaf() && !e.target.className.trim().startsWith("x-action") && !e.target.className.trim().startsWith("x-tree-checkbox")) {
 			var opacity = layer.getOpacity();
 			
 			var slider = record.get('slider');

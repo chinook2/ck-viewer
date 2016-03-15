@@ -34,6 +34,12 @@ Ext.define('Ck.legend.Controller', {
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
 		
+		// Expand on item click
+		v.on('itemclick', function(view, rec, item, index, e, eOpts){
+			view.toggle(rec);
+		});
+		//
+		
 		this.fireEvent('ready', this);
 	},
 
