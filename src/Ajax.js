@@ -167,18 +167,26 @@ Ext.define('Ck.Ajax', {
 		// TODO : test cache validity
 		
 		var res = this.ls.getItem(options.url);
-		if(res) {
-			//<debug>
-			Ck.Notify.info('Request from Cache : '+ options.url);
-			//</debug>
-			
-			var response = {
-				responseText: res
-			}
-			
-			Ext.callback(options.success, options.scope, [response, options]);
-			return false;
+		if(!res) return true;
+		
+		//<debug>
+		Ck.Notify.info('Request from Cache : '+ options.url);
+		//</debug>
+		
+		var response = {
+			responseText: res,
+			status: 200,
+			statusText: 'Ok from cache'
 		}
+		
+		if(options.callback){
+			Ext.callback(options.callback, options.scope, [options, true, response]);
+			delete options.callback;
+		}
+		if(options.success) {
+			Ext.callback(options.success, options.scope, [response, options]);
+		}
+		return false;
 	},
 	
 	onRequestComplete: function(conn, response, options, eOpts) {

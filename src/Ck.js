@@ -352,17 +352,32 @@ Ext.apply(Ck, {
 	 */
 	getPath: function() {
 		// Ext.manifest.paths doesn't in production and testing !
-		var path = Ext.manifest.profile + '/resources/ck-viewer';
-		var basePath = 'packages/local/ck-viewer';
-		if(Ext.manifest.paths && Ext.manifest.paths.Ck) basePath = Ext.manifest.paths.Ck.replace('/src','');
-		if(!Ext.manifest.profile) path = basePath + '/resources';
-
+		// Ext.manifest.profile can be empty in production mode.
+		
+		// TODO : testing mode not implemented
+		var path = '';
+		
 		//<debug>
+		// In Development
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		if(Ext.manifest.paths) path = basePath + '/resources';
+		if(Ext.manifest.paths && Ext.manifest.paths.Ck) {
+			var basePath = Ext.manifest.paths.Ck.replace('/src','');
+			path = basePath + '/resources';
+			return path;
+		}
 		//</debug>
 		
+		// In Production
+		if(window.cordova){
+			// Mobile app use relative path
+			path = Ext.manifest.profile + '/resources/ck-viewer';
+		} else {
+			// Standard web app need to add full url
+			path = location.href + Ext.manifest.profile + '/resources/ck-viewer';
+		}
+
 		return path;
+		// TODO : when used without CMD - include inline API...
 	},
 
 	getOption: function (opt) {
@@ -390,6 +405,7 @@ Ext.apply(Ck, {
 	 */
 	log: function(opt) {
 		if(opt) Ext.log(opt);
+		console.log(opt);
 	},
 	
 	/**
@@ -407,6 +423,7 @@ Ext.apply(Ck, {
 			level: 'error',
 			msg: msg
 		});
+		console.error(msg);
 	},
 	
 	/**
