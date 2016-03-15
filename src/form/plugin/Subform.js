@@ -53,6 +53,8 @@ Ext.define('Ck.form.plugin.Subform', {
 			xtype: 'ckform',
 			itemId: 'subform',
 			isSubForm: true,
+			parentForm: formController.getView(),
+			
 			// load from grid selection row
 			autoLoad: false,
 			editing: subForm.editing || formController.getView().getEditing(),

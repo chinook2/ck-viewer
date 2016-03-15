@@ -66,7 +66,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Get form definition directly in the view (no Ajax request)
 		var inlineForm = this.view.getFormRaw();
-		var parentForm = this.view.up('ckform');
+		var parentForm = this.view.up('ckform') || this.view.parentForm;
 		if(parentForm) {
 			this.parentForm = parentForm;
 			
@@ -79,7 +79,19 @@ Ext.define('Ck.form.Controller', {
 				vDataFid ={fid: vDataFid};
 			}
 			this.view.setDataFid(Ext.apply(vDataFid, pDataFid));
-
+			
+			// Compatibility
+			if(parentForm.getController().compatibiltyMode===true){
+                for(var k in parentForm.getController().formConfig.subforms) {
+                    var sf = parentForm.getController().formConfig.subforms[k];
+                    if('/'+sf.name == this.view.getFormName() ){
+                        inlineForm = sf;
+						break;
+                    }
+                }
+			}
+			//
+			
 			// Try find parent form name (used for overriden controllers)
 			if(inlineForm && !inlineForm.name) {
 				inlineForm.name = parentForm.getController().name;
@@ -229,6 +241,8 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
+			this.formConfig = form;
+			
 			this.name = form.name;
 			if(!this.name) {
 				Ck.log("Enable to get form Name.");
@@ -537,6 +551,7 @@ Ext.define('Ck.form.Controller', {
 							deferredRender: false,
 							border: false,
 							defaults: {
+								layout: 'form',
 								anchor: '100%',
 								labelSeparator: me.layoutConfig.labelSeparator
 							}
@@ -726,7 +741,34 @@ Ext.define('Ck.form.Controller', {
 									delete store.proxy.url;
 								}
 							}
-
+							
+							// store can be difened inline.
+							// need to build storeUrl...
+							if(me.compatibiltyMode && !store) {
+								var baseparams = {
+									s: 'forms',
+									r: 'getStore',
+									// Précise une couche ou recup la couche associée au form
+									layer: c.layer || me.view.layer,
+									
+									// TODO
+									// Précise un datasource + une table
+									// datasource: this.datasource,
+									// data: this.data,
+									
+									// TODO
+									// Filtres en fonction des parents
+									//params: encodeURIComponent(Ext.encode(c.parentValue)),
+									
+									// Le champ 'valeur' envoyé par le formulaire
+									valuefield: c.valueField,
+									field: c.displayField || c.name
+									// query : param automatique lors du autocomplete
+								};
+								storeUrl = Ck.getApi() + Ext.urlEncode(baseparams);
+								store = {};
+							}
+							
 							if(storeUrl) {
 								// Apply template if available like dataUrl. Typically to insert object id in the URL
 								var v = me.getView();
@@ -792,6 +834,25 @@ Ext.define('Ck.form.Controller', {
 								if(col.editor && col.editor.store) {
 									cols[idx].editor.store = processStore(col.editor)
 								}
+								// Compatibility
+								if(me.compatibiltyMode) {
+									if(col.name && !col.dataIndex){
+										// col.dataIndex = col.name.replace(/\./g, '_');
+										col.dataIndex = col.name;										
+									}										
+									if(col.editor && col.editor.xtype && (col.editor.xtype.substr(0,3) == 'ck_')) {
+										col.editor.xtype = col.editor.xtype.substr(3);
+									}
+									if(col.header) {
+										col.text = col.header;
+										delete col.header;
+									}
+									if(col.renderer) {
+										col.formatter = col.renderer;
+										delete col.renderer;
+									}
+								}
+								//
 							});
 						}
 						
@@ -831,14 +892,6 @@ Ext.define('Ck.form.Controller', {
 							}
 						}
 						
-						if(me.compatibiltyMode) {
-							delete c.displayField;
-						}
-
-						Ext.applyIf(c, {
-							displayField: "value",
-							queryMode: 'local'
-						});
 						Ext.Object.merge(c, {
 							store		: processStore(c),
 							listeners	: {
@@ -846,7 +899,16 @@ Ext.define('Ck.form.Controller', {
 									item.removeBindings()
 								}
 							}
-						});						
+						});
+						
+						if(me.compatibiltyMode) {
+							delete c.displayField;
+							
+							Ext.applyIf(c, {
+								displayField: "value" //,
+								//queryMode: 'local'
+							});
+						}
 						break;
 				}
 				
@@ -1072,6 +1134,17 @@ Ext.define('Ck.form.Controller', {
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 			if(data[sf.name]) sf.getController().setValues(data[sf.name]);
+		}
+		//
+		
+		// Compatibility
+		// GRID : load data
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			if(grid.id && data[grid.id]){
+				grid.getStore().loadData(data[grid.id]);
+			}
 		}
 		//
 	},
@@ -1640,3 +1713,19 @@ Ext.define('Ck.form.Controller', {
 		return true;
 	}
 });
+
+Ext.util.Format.image = function(value, meta, rec, rowIndex, colIndex, store) {
+    var i, p, w = '';
+    var f = store.fields.get(this.dataIndex || this.name);
+    i = "<img src='"+ value +"' alt='Image non disponible'/>";
+    if(f && f.rendererOption) {
+        p = f.rendererOption.path || '';
+        w = f.rendererOption.width || '';
+        h = f.rendererOption.height || '';
+        if(p) p += '/';
+        if(w) w = " width='"+w+"px'";
+        if(h) h = " height='"+h+"px'";
+        i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
+    }
+    return i;
+}
