@@ -57,6 +57,12 @@ Ext.define('Ck.edit.action.Attribute', {
 		
 		// var source = layer.getSource();
 		var formName = layer.getExtension('form');
+		// Filter form fields for mobile (when using Forms serveur)
+		// if(formName) {
+		if(formName && !Ext.os.is.desktop) {
+			formName += '&mod=mobile';
+		}
+		
 		if(!formName){
 			var lyrName = layer.get('id');
 			var lyrName = lyrName.split(":");
