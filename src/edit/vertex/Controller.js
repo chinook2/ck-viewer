@@ -378,7 +378,17 @@ Ext.define('Ck.edit.vertex.Controller', {
 		// Interaction need a feature, not a geometry
 		// var tempFeature = Ck.create("ol.Feature", { geometry : this.geometry });
 		
-		switch(rb.getItemId()) {
+		//JMA Hard fix - temp
+		var action;
+		if(!rb){
+			action = 'action-alter';
+			checked = true;
+		}else{
+			action = rb.getItemId();
+		}
+		//
+		
+		switch(action) {
 			case "action-none":
 				
 				break;
@@ -463,6 +473,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.geometryChanged = true;
 		var coord = event.currentTarget.vertexFeature_.getGeometry().getCoordinates();
 		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
+		if(!dataRow) return;
 		
 		if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
 			dataRow.set({

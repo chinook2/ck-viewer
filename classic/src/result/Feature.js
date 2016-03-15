@@ -8,7 +8,7 @@ Ext.define("Ck.result.Feature", {
 	
 	controller: "ckresult.feature",
 	
-	title: "Features",
+	//title: "Features",
 	flex: 1,
 	
 	config: {

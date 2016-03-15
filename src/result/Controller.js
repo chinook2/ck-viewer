@@ -90,7 +90,25 @@ Ext.define('Ck.result.Controller', {
 		this.data.push(res);
 		var firstId, now = Ext.Date.format(new Date(), "H-i-s");
 		
+		// JMA Hard fix - temp
+		// TODO : option to use/show history or not
+		this.layerRoot.removeAll();
+		var result = [];
+		for(var i in res) {
+			if(Ext.isEmpty(firstId)) {
+				firstId = res[i].layer.get("id") + "-" + now;
+			}
+			result.push({
+				leaf	: true,
+				id		: res[i].layer.get("id") + "-" + now,
+				text	: res[i].layer.get("title") + " (" + res[i].features.length.toString() + ")",
+				data	: res[i]
+			});
+		};
+		//
+		
 		// Layer store tree creation
+		/*
 		var layers = [];
 		for(var i in res) {
 			if(Ext.isEmpty(firstId)) {
@@ -109,6 +127,7 @@ Ext.define('Ck.result.Controller', {
 			children	: layers,
 			expandable	: true
 		}];
+		*/
 		
 		this.layerRoot.appendChild(result);
 		this.layerTree.selectPath(firstId, null, null, function(success, lastNode) {

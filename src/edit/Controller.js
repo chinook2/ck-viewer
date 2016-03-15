@@ -346,6 +346,10 @@ Ext.define('Ck.edit.Controller', {
 			this.mainWindow.show();
 		}
 		
+		// JMA hard fix temp !
+		this.mainWindow.hide();
+		//
+		
 		return this.mainWindow;
 	},
 
@@ -445,6 +449,9 @@ Ext.define('Ck.edit.Controller', {
 			this.moveInteraction.setActive(true);
 		} else {
 			this.vertex.loadFeature(feature);
+			// JMA Hard fix - by defaut live edit
+			this.vertex.liveAction();
+			//
 			this.switchPanel(this.vertexPanel);
 		}
 	},

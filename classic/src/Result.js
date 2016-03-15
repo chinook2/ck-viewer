@@ -44,6 +44,9 @@ Ext.define("Ck.Result", {
 		},
 		bbar: [{
 			text: "Clear history",
+			// JMA Hard fix - temp
+			hidden: true,
+			//
 			itemId: "clear-history"
 		}]
 	},{
