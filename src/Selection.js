@@ -251,21 +251,13 @@ Ext.define('Ck.Selection', {
 		var geoJSON  = new ol.format.GeoJSON();
 		var type = feature.getGeometry().getType();
 		
-		switch(type) {
-			case "Circle" :
-				var radius = feature.getGeometry().getRadius();
-				var pt = turf.point(feature.getGeometry().getCenter());
-				var geom = turf.buffer(pt, radius, "meters");
-				var selFt = geom.features[0];
-				break;
-			case "Point" :
-				var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
-				var pt = turf.point(feature.getGeometry().getCoordinates());
-				var geom = turf.buffer(pt, radius, "meters");
-				var selFt = geom.features[0];
-				break;
-			default :
-				var selFt = geoJSON.writeFeatureObject(feature);
+		var selFt = feature;
+		if(type=="Point"){
+			var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
+			var bbox = feature.getGeometry().getExtent();
+			var selFt = new ol.Feature({
+				geometry: new ol.geom.Polygon.fromExtent(ol.extent.buffer(bbox, radius))
+			});
 		}
 		
 		/* Developper : you can display buffered draw for Circle and Point
@@ -337,6 +329,10 @@ Ext.define('Ck.Selection', {
 		lyrFts = layer.getSource().getFeatures();
 		for(var j = 0; j < lyrFts.length; j++) {
 			lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+			
+			// JMA
+			// TODO : retest !
+			
 			if(turf.intersect(lyrFt, selFt)) {
 				if(lyrFts[j].getProperties().features) {
 					for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
@@ -414,8 +410,8 @@ Ext.define('Ck.Selection', {
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
-		var selGeom = new ol.geom.Polygon(selFt.geometry.coordinates);
-		var selBBox = selGeom.getExtent();
+		var selBBox = selFt.getGeometry().getExtent();
+
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
 			gmlFormat: Ck.create("ol.format.GML3"),
