@@ -26,6 +26,9 @@ Ext.define('Ck.form.Controller', {
 	// TODO in config param in form json...
 	compatibiltyMode: false,
 
+	// create read update delete
+	operation: '',
+	
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	afterShow: Ext.emptyFn,
@@ -342,16 +345,18 @@ Ext.define('Ck.form.Controller', {
 			if(form.dataUrl) {
 				this.dataUrl = form.dataUrl;
 			}
+			
 			// Init Model from view or form
-			var model = form.dataModel || this.view.getDataModel();
-			if(model) {
-				this.dataModel = Ext.create(model, {});
+			if(form.dataModel) {
+				this.dataModel = form.dataModel;
 			}
+			
 			// if(form.dataStore) {
 				// this.dataStore = Ext.getStore(form.dataStore);
 			// }
 
 			this.isInit = true;
+			this.operation = 'create';
 			
 			if(this.oController.afterShow(form) === false){
 				Ck.log("afterShow cancel initForm.");
@@ -1248,8 +1253,9 @@ Ext.define('Ck.form.Controller', {
 		if(fid && model) {
 			if(Ext.isObject(fid)) fid = fid.fid;
 			if(fid){
-				model.setId(fid);
-				model.load({
+				var oModel = Ext.create(model);
+				oModel.setId(fid);
+				oModel.load({
 					success: function(record, operation) {
 						var data = record.getData();
 						this.loadRawData(data);
@@ -1336,6 +1342,7 @@ Ext.define('Ck.form.Controller', {
 		var v = me.getView();
 		var lyr = v.getLayer();
 		
+		this.operation = 'update';
 		if(this.oController.afterLoad(data) === false) {
 			Ck.log("afterLoad cancel loadData.");
 			return;
@@ -1428,10 +1435,13 @@ Ext.define('Ck.form.Controller', {
 
 		// If a model is set we use it
 		if(fid && model) {
-			model.set(values);
-			if(options.method.toUpperCase() == 'PUT') model.phantom = false;
-			
-			model.save({
+			var oModel = Ext.create(model);
+			// Use set() to init fields modified to build create/update query
+			oModel.set(values);
+			// if phantom==false do Update otherwise do Insert
+			if(this.operation == 'update') oModel.phantom = false;
+
+			oModel.save({
 				success: function(record, operation) {
 					this.fireEvent('aftersave', record);
 					if(this.oController.afterSave(record, options) === false) {
@@ -1548,10 +1558,8 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(fid && model) {
-			// if(Ext.isObject(fid)) fid = fid.fid;
-			model.set(fid);
-			model.phantom = false
-			model.erase({
+			var oModel = Ext.create(model, fid);
+			oModel.erase({
 				success: function(record, operation) {
 					Ext.callback(options.success, options.scope, [dt]);
 				},
@@ -1642,6 +1650,8 @@ Ext.define('Ck.form.Controller', {
 		});
 		this.getViewModel().notify();
 
+		this.operation = '';
+		
 		this.fireEvent('afterreset');
 		return true;
 	}
