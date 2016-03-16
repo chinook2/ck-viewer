@@ -530,6 +530,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @return {Number}
 	 */
 	trimCoord: function(coord) {
+		if(!coord) return false;
 		sCoord = coord.toString();
 		if(sCoord.length > this.maxLength) {
 			coord = parseFloat(sCoord.substring(0, this.maxLength));
