@@ -742,31 +742,33 @@ Ext.define('Ck.form.Controller', {
 								}
 							}
 							
-							// store can be difened inline.
+							// For combo store can be defined inline.
 							// need to build storeUrl...
 							if(me.compatibiltyMode && !store) {
-								var baseparams = {
-									s: 'forms',
-									r: 'getStore',
-									// Précise une couche ou recup la couche associée au form
-									layer: c.layer || me.view.layer,
-									
-									// TODO
-									// Précise un datasource + une table
-									// datasource: this.datasource,
-									// data: this.data,
-									
-									// TODO
-									// Filtres en fonction des parents
-									//params: encodeURIComponent(Ext.encode(c.parentValue)),
-									
-									// Le champ 'valeur' envoyé par le formulaire
-									valuefield: c.valueField,
-									field: c.displayField || c.name
-									// query : param automatique lors du autocomplete
-								};
-								storeUrl = Ck.getApi() + Ext.urlEncode(baseparams);
-								store = {};
+								if(o.xtype == 'combo' || o.xtype == 'combobox'){
+									var baseparams = {
+										s: 'forms',
+										r: 'getStore',
+										// Précise une couche ou recup la couche associée au form
+										layer: c.layer || me.view.layer,
+										
+										// TODO
+										// Précise un datasource + une table
+										// datasource: this.datasource,
+										// data: this.data,
+										
+										// TODO
+										// Filtres en fonction des parents
+										//params: encodeURIComponent(Ext.encode(c.parentValue)),
+										
+										// Le champ 'valeur' envoyé par le formulaire
+										valuefield: c.valueField,
+										field: c.displayField || c.name
+										// query : param automatique lors du autocomplete
+									};
+									storeUrl = Ck.getApi() + Ext.urlEncode(baseparams);
+									store = {};
+								}
 							}
 							
 							if(storeUrl) {
@@ -1144,6 +1146,12 @@ Ext.define('Ck.form.Controller', {
 			var grid = grids[g];
 			if(grid.id && data[grid.id]){
 				grid.getStore().loadData(data[grid.id]);
+				
+				grid.getStore().on({
+					datachanged: function() {
+						var a=a;
+					}
+				});
 			}
 		}
 		//
