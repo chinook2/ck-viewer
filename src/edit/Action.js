@@ -49,10 +49,6 @@ Ext.define('Ck.edit.Action', {
 	 * Get the active layer and create it if necessary
 	 **/
 	getLayer: function() {
-		if(this.layer) {
-			return this.layer;
-		}
-
 		this.layer = this.controller.getLayer();
 		if(this.layer) {
 			return this.layer;
