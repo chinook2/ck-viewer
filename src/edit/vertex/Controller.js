@@ -150,7 +150,12 @@ Ext.define('Ck.edit.vertex.Controller', {
 	loadVertex: function() {
 		this.store.erase();
 		// Remove the duplicate first/last vertex from the store
-		this.coords = this.ftCoords[0];
+		if(this.feature.getGeometry().getType().indexOf("Multi") == -1) {
+			this.coords = this.ftCoords;
+		} else {
+			this.coords = this.ftCoords[0];
+		}
+
 		this.coords.splice(this.coords.length - 1, 1);
 		
 		var records = [];
@@ -442,21 +447,22 @@ Ext.define('Ck.edit.vertex.Controller', {
 		if(event.currentTarget.snappedToVertex_) {
 			idx = this.getIndexFromCoord(coord) - 1;
 		} else {			
-			var prevPoint = event.currentTarget.dragSegments_[0][0].segment[0];
-			var idx = this.getIndexFromCoord(prevPoint);
-			
-			var data = {
-				number: idx + 1,
-				longitude: this.trimCoord(coord[0]),
-				latitude: this.trimCoord(coord[1]),
-				geometry: coord
-			};
-			this.grid.getStore().insert(idx, data);
-			
-			this.coords.splice(idx, 0, [data.longitude, data.latitude]);
-			
-			this.reindexVertex();
-			
+			if(event.currentTarget.dragSegments_[0]){
+				var prevPoint = event.currentTarget.dragSegments_[0][0].segment[0];
+				var idx = this.getIndexFromCoord(prevPoint);
+				
+				var data = {
+					number: idx + 1,
+					longitude: this.trimCoord(coord[0]),
+					latitude: this.trimCoord(coord[1]),
+					geometry: coord
+				};
+				this.grid.getStore().insert(idx, data);
+				
+				this.coords.splice(idx, 0, [data.longitude, data.latitude]);
+				
+				this.reindexVertex();
+			}
 			
 			// var nextPoint = event.currentTarget.dragSegments_[1][0].segment[1];
 		}
@@ -473,17 +479,18 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.geometryChanged = true;
 		var coord = event.currentTarget.vertexFeature_.getGeometry().getCoordinates();
 		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
-		if(!dataRow) return;
-		
-		if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
-			dataRow.set({
-				"geometry": coord,
-				"longitude": coord[0],
-				"latitude": coord[1]
-			});
-			this.updateMarker(null, dataRow);
-			this.coords[this.currentVertexIdx] = coord;
+		if(dataRow) {
+			if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
+				dataRow.set({
+					"geometry": coord,
+					"longitude": coord[0],
+					"latitude": coord[1]
+				});
+				this.updateMarker(null, dataRow);
+				this.coords[this.currentVertexIdx] = coord;
+			}
 		}
+		
 		this.fireEvent("geometrychange", this.feature);
 	},
 	

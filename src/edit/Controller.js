@@ -451,7 +451,11 @@ Ext.define('Ck.edit.Controller', {
 			this.vertex.loadFeature(feature);
 			// JMA Hard fix - by defaut live edit
 			this.vertex.liveAction();
+			this.vertex.on("geometrychange", function(feature){
+				this.fireEvent("featuregeometry", feature);
+			}, this);
 			//
+			
 			this.switchPanel(this.vertexPanel);
 		}
 	},
