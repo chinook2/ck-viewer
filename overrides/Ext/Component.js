@@ -47,7 +47,7 @@ Ext.define('Ext.overrides.Component', {
 		var me = this,
 			configurator = me.getConfigurator(),
 			localeConfig = configurator.configs.locale,
-			locale = me.locale || Ext.locale;
+			locale = me.locale || Ck.Locale.get();
 
 		if(!localeConfig) {
 			configurator.add({

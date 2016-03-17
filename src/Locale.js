@@ -35,7 +35,6 @@ Ext.define('Ck.Locale', {
         if(store.isLoaded()){
             this.set(locale);
         } else {
-            //this.locale = Ext.locale = locale;
             store.on('load', function(){
                 this.set(locale);
             }, this);
@@ -43,7 +42,7 @@ Ext.define('Ck.Locale', {
     },
 
     set: function (locale) {
-        this.locale = Ext.locale = locale;
+        this.locale = locale;
         Ext.localeReady = true;
 
         // update the Ck.View page
