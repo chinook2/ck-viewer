@@ -17,7 +17,8 @@ Ext.define('Ck.Ajax', {
 		});
 
 		// Global disable ajax cache and ajax global events
-		if (Ck.getOption('ajaxCache') !== false) {
+		// By default disabled.
+		if (Ck.getOption('ajaxCache') === true) {
 			Ext.Ajax.on({
 				beforerequest: this.onBeforeRequest,
 				requestcomplete: this.onRequestComplete,
