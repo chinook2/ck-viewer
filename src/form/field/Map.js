@@ -60,20 +60,24 @@ Ext.define('Ck.form.field.Map', {
 	afterRender: function () {
 		this.callParent(arguments);
 
-		//Ext.defer(function(){
-			this.map.render(this.inputEl);
-		//}, 50, this);
+		this.map.render(this.inputEl);
 		
-		this.on('resize', function(){
-			var size = this.getSize();
-			size.width-=2;
-			size.height-=2;
-			this.inputEl.setSize(this.getSize());
-			this.map.setSize(size);
-			//this.map.setSize(this.getSize());
-		}, this);
+		// Init size
+		this.resize();
+		// Update size
+		this.on('resize', this.resize, this);
 	},
-
+	
+	resize: function() {
+		var size = this.getSize();
+		// minimize for border (for allowBlank...)
+		size.width-=2;
+		size.height-=2;
+		this.inputEl.setSize(this.getSize());
+		this.map.setSize(size);
+		this.ckmap.resize();
+	},
+	
 	getValue: function(){
 		if(!this.layer) return;
 

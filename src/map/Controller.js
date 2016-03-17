@@ -744,6 +744,10 @@ Ext.define('Ck.map.Controller', {
 			Ext.GlobalEvents.fireEvent('ckmapReady', this);
 			
 			this.initContext();
+			
+			// Force init size
+			var size = v.getSize();
+			m.setSize([size.width, size.height]);
 		} else {
 			m.updateSize();
 		}
