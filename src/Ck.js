@@ -373,6 +373,7 @@ Ext.apply(Ck, {
 			return Ext.manifest.profile + '/resources/ck-viewer';
 		} else {
 			// Standard web app need to add full url
+			// TODO test : location.protocol +'//'+ location.host
 			return location.href + Ext.manifest.profile + '/resources/ck-viewer';
 		}
 		
