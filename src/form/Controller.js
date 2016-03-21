@@ -1293,7 +1293,7 @@ Ext.define('Ck.form.Controller', {
 
 
 		if(!url) {
-			if(!bSilent) Ck.Notify.error("Forms loadData 'fid' or 'url' not set.");
+			Ck.log("Forms loadData 'fid' or 'url' not set.");
 
 			// If new form with empty data we need to startEditing too...
 			if(v.getEditing()===true) this.startEditing();
