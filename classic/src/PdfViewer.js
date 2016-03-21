@@ -58,9 +58,9 @@
 		me.callParent(arguments);
 		
 		// Pass PDF file to load
-		var file = this.getSrc();
-		if(!file) file = this.getFile();
-		if(file) file = '?file='+ this.getFullUrl(file);
+		var file = this.getSrc() || '';
+		if(!file) file = this.getFile() || '';
+		if(file) file = this.getFullUrl(file);
 		
 		// Add iFrame with pdfjs viewer
 		var pdfjsiFrame = new Ext.Component({
@@ -68,7 +68,7 @@
 			autoEl: {
 				tag: 'iframe',
 				style: 'height: 100%; width: 100%; border: none',
-				src: Ck.getPath() + '/pdfjs/web/viewer.html'+ file
+				src: Ck.getPath() + '/pdfjs/web/viewer.html?file='+ file
 			},
 			listeners: {
 				afterrender: function () {
