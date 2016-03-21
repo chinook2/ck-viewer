@@ -96,8 +96,10 @@
 		Ext.each(tools, function(tool, idx, a){
 			this.hideTool(tool);
 		}, this);
-	},
 		
+		this.fireEvent('loaded');
+	},
+	
 	hideTool: function(toolName) {
 		var t = this.doc.getElementById(toolName);
 		var st = this.doc.getElementById('secondary' + Ext.String.capitalize(toolName));
@@ -116,23 +118,51 @@
 	
 	
 	openFile: function(file) {
+		if(!this.win) {
+			this.reCall();
+			return;
+		}
+		
 		this.win.PDFView.open( this.getFullUrl(file) );
 	},
 	
 	gotoPage: function(page) {
+		if(!this.win) {
+			this.reCall();
+			return;
+		}
 		this.win.PDFView.page = page;
 	},
+	
 	nextPage: function() {
+		if(!this.win) {
+			this.reCall();
+			return;
+		}
 		this.win.PDFView.page++;
 	},
+	
 	previousPage: function(){
+		if(!this.win) {
+			this.reCall();
+			return;
+		}
 		this.win.PDFView.page--;
 	},
 	
+	reCall: function() {
+		// Get function caller. function who call the reCall... and need to be re call
+		var caller = arguments.callee.caller;
+		var args = caller.arguments;
+		this.on('loaded', function(){
+			if(Ext.isFunction(caller)) caller.apply(this, args);
+		}, this);
+	},
 	
 	// From Ck.Controller ...
 	getFullUrl: function (name) {
 		var url = '';
+		if(!name) return url;
 		
 		if(Ext.String.startsWith(name, 'http')) {
 			return name;
