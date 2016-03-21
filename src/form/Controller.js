@@ -1438,6 +1438,10 @@ Ext.define('Ck.form.Controller', {
 			var oModel = Ext.create(model);
 			// Use set() to init fields modified to build create/update query
 			oModel.set(values);
+			
+			//fid[oModel.idProperty]
+			//oModel.setId(fid[oModel.idProperty]);
+			
 			// if phantom==false do Update otherwise do Insert
 			if(this.operation == 'update') oModel.phantom = false;
 
