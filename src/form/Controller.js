@@ -293,13 +293,13 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
-			// Ajoute la définition du formulaire au panel
+			// Format form definition - apply custom options and process
 			var fcf = this.applyFormDefaults(form.form);
 
+			// Clear all
 			this.view.removeAll(true);
-			this.view.add(fcf.items);
 
-			// Manage bottom toolbar
+			// Manage toolbars
 			var docks = this.view.getDockedItems();
 			// Init Default toolbar && Remove existing toolbar
 			Ext.each(docks, function(d) {
@@ -313,8 +313,6 @@ Ext.define('Ck.form.Controller', {
 				}
 				this.view.removeDocked(d);
 			}, this);
-
-
 			if(fcf.dockedItems) {
 				// Add custom toolbar
 				this.view.addDocked(fcf.dockedItems);
@@ -323,8 +321,10 @@ Ext.define('Ck.form.Controller', {
 				if(this.defaultDock) this.view.addDocked(this.defaultDock);
 			}
 
+			// Add form to the panel after toolbar (correct size)
+			this.view.add(fcf.items);
 
-			// Init la popup qui contient le formulaire
+			// Init form popup if needed
 			var fcw = form.window;
 			var win = this.view.up('window');
 			if(win && fcw) {
