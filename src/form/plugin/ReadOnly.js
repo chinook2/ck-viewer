@@ -86,12 +86,14 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		// r for readOnly is true when editing is false
 		var r = !this.formViewModel.get("editing");
 
+		
 		// Try to put readOnly by default when reset form (value==null)
 		// In some case readOnly is binded with data record, reset > need to revert readOnly state
-		if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) cmp.readOnly = false;
-		
+		if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
+				
 		// Force readOnly for specific field
-		if(cmp.readOnly) r = true;
+		if(cmp.initialConfig.readOnly === true) r = true;
+		if(cmp.initialConfig.readOnly === false) r = false;
 		
 		/*
 		 if(this.join) {

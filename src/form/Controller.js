@@ -937,15 +937,31 @@ Ext.define('Ck.form.Controller', {
 	startEditing: function() {
 		this.getViewModel().set("editing", true);
 		this.getViewModel().set("isEditable", false);
+		this.getView().setEditing(true);
 
 		this.fireEvent('startEditing');
+		
+		// Process subforms
+		var subforms = this.getSubForms();
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			sf.startEditing();
+		}
 	},
 
 	stopEditing: function() {
 		this.getViewModel().set("editing", false);
 		this.getViewModel().set("isEditable", true);
+		this.getView().setEditing(false);
 
 		this.fireEvent('stopEditing');
+		
+		// Process subforms
+		var subforms = this.getSubForms();
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			sf.stopEditing();
+		}
 	},
 
 	
