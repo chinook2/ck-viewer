@@ -22,8 +22,7 @@
 	alias: "widget.ckpdfviewer",
 	
 	config: {
-		src: null,
-		file: null,
+		file: '',
 		
 		/**
 		 * List of tools & commands to hide
@@ -58,9 +57,10 @@
 		me.callParent(arguments);
 		
 		// Pass PDF file to load
-		var file = this.getSrc() || '';
-		if(!file) file = this.getFile() || '';
-		if(file) file = this.getFullUrl(file);
+		var file = this.getFile();
+		file = this.getFullUrl(file);
+		// Update current file
+		this.setFile(file);
 		
 		// Add iFrame with pdfjs viewer
 		var pdfjsiFrame = new Ext.Component({
@@ -122,7 +122,11 @@
 			this.reCall();
 			return;
 		}
-		this.win.PDFView.open( this.getFullUrl(file) );
+		// Update current file
+		file = this.getFullUrl(file);
+		this.setFile(file);
+		
+		this.win.PDFView.open(file);
 	},
 	
 	gotoPage: function(page) {
