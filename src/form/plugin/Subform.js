@@ -200,17 +200,12 @@ Ext.define('Ck.form.plugin.Subform', {
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
-				//hidden: !formController.getView().getEditing(),
+				width: 6 + (actions.length * 20),
 				items: actions
 			});
 
 			grid.reconfigure(conf.columns);
-			this.actionColumn = grid.down('actioncolumn');
-
-			// Add grid reference to the actionColumn
-			// this.actionColumn.ownerGrid = this.grid;
-			
-			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
+			this.actionColumn = grid.down('actioncolumn');			
 		}	   
 		
 		

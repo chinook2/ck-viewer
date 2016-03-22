@@ -122,7 +122,6 @@
 			this.reCall();
 			return;
 		}
-		
 		this.win.PDFView.open( this.getFullUrl(file) );
 	},
 	
