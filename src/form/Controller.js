@@ -311,7 +311,9 @@ Ext.define('Ck.form.Controller', {
 						this.defaultDock.hidden = false;
 					// }
 				}
-				this.view.removeDocked(d);
+				if(!d.isAccordionHeader) {
+					this.view.removeDocked(d);
+				}
 			}, this);
 			if(fcf.dockedItems) {
 				// Add custom toolbar
