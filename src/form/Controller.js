@@ -88,8 +88,8 @@ Ext.define('Ck.form.Controller', {
 		this.isInit = false;
 		this.subforms = [];
 
-		// Init local Storage for production mode (test if it's disable in global conf app.json)
-		if(Ck.getOption('ajaxCache') !== false){
+		// Init local Storage for production mode (test if it's enable in global conf app.json)
+		if(Ck.getOption('ajaxCache') === true){
 			var isStorage = 'Ck-' + Ext.manifest.name + '-Form';
 			this.ls = Ext.util.LocalStorage.get(isStorage);
 			if(!this.ls) {
@@ -296,6 +296,9 @@ Ext.define('Ck.form.Controller', {
 			// Format form definition - apply custom options and process
 			var fcf = this.applyFormDefaults(form.form);
 
+			// Suspend screen refresh during init
+			// Ext.suspendLayouts();
+			
 			// Clear all
 			this.view.removeAll(true);
 
@@ -311,7 +314,7 @@ Ext.define('Ck.form.Controller', {
 						this.defaultDock.hidden = false;
 					// }
 				}
-				if(!d.isAccordionHeader) {
+				if( !d.isHeader) {
 					this.view.removeDocked(d);
 				}
 			}, this);
@@ -344,6 +347,9 @@ Ext.define('Ck.form.Controller', {
 				}
 			}
 
+			// Refresh screen once all done
+			// Ext.resumeLayouts(true);
+			
 			if(form.dataUrl) {
 				this.dataUrl = form.dataUrl;
 			}
@@ -530,7 +536,8 @@ Ext.define('Ck.form.Controller', {
 
 		var fn = function(c) {
 			if(!c) return;
-			
+			if(Ext.isString(c)) return c;
+						
 			// Get Alls direct fields of the form with includes (exclude subform)
 			if(c.name) {
 				this.fields.push(c.name);
@@ -540,7 +547,7 @@ Ext.define('Ck.form.Controller', {
 			if(c.name && !c.xtype) c.xtype = 'textfield';
 
 			// All items should have a Name
-			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer'];
+			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer', 'toolbar'];
 			if(!c.name && c.xtype && !Ext.Array.contains(ignoreTypes, c.xtype)) {
 				Ck.log("Name undefined for xtype " + c.xtype);
 			}
@@ -929,9 +936,15 @@ Ext.define('Ck.form.Controller', {
 			return c;
 		}.bind(this);
 		
+		// Process Items
 		for(var key in cfg.items) {
 			var cf = fn(cfg.items[key]);
 			if(cf) cfg.items[key] = cf;
+		}
+		// Process dockedItems
+		for(var key in cfg.dockedItems) {
+			var cf = fn(cfg.dockedItems[key]);
+			if(cf) cfg.dockedItems[key] = cf;
 		}
 		return cfg;
 	},
@@ -1431,7 +1444,7 @@ Ext.define('Ck.form.Controller', {
 
 		var values = this.getValues();
 		
-		if(this.oController.beforeSave(values, options) === false) {
+		if(this.oController.beforeSave(values, options, fid, url, model) === false) {
 			Ck.log("beforeSave cancel saveData.");
 			return false;
 		}
