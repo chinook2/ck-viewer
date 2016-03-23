@@ -57,11 +57,8 @@
 		me.callParent(arguments);
 		
 		// Pass PDF file to load
-		var file = this.getFile();
-		file = this.getFullUrl(file);
-		// Update current file
-		this.setFile(file);
-		
+		var file = this.getFullFile();
+
 		// Add iFrame with pdfjs viewer
 		var pdfjsiFrame = new Ext.Component({
 			// id: 'pdfjs_iframe',
@@ -122,11 +119,8 @@
 			this.reCall();
 			return;
 		}
-		// Update current file
-		file = this.getFullUrl(file);
-		this.setFile(file);
 		
-		this.win.PDFView.open(file);
+		this.win.PDFView.open( this.getFullFile() );
 	},
 	
 	gotoPage: function(page) {
@@ -163,31 +157,34 @@
 	},
 	
 	// From Ck.Controller ...
-	getFullUrl: function (name) {
-		var url = '';
-		if(!name) return url;
+	getFullFile: function () {
+		var name = this.getFile();
+		if(!name) return '';
 		
+		// Already full file path/url
 		if(Ext.String.startsWith(name, 'http')) {
-			return name;
+			file = name;
 		}
-
 		// Static resource in ck-viewer package
-		if(Ext.String.startsWith(name, 'ck-')) {
-			url = Ck.getPath() + name;
+		else if(Ext.String.startsWith(name, 'ck-')) {
+			file = Ck.getPath() + name;
 		}
 		// Static resource in application
 		else if(Ext.String.startsWith(name, '/')) {
-			// url = location.protocol +'//'+ location.host +'/resources' + name;
-			url = '/resources' + name;
-			url = url.replace('//', '/');
+			// file = location.protocol +'//'+ location.host +'/resources' + name;
+			file = '/resources' + name;
+			file = file.replace('//', '/');
 		}
 		// Resource from Web Service (API Call)
 		else {
-			url = Ck.getApi() + name;
+			file = Ck.getApi() + name;
 		}
 
-		// Security for url path
-		url = url.replace(/\.\./g, '');
-		return url;
+		// Security for file path
+		file = file.replace(/\.\./g, '');
+		
+		// Update current file
+		this.setFile(file);
+		return file;
 	}
 });
