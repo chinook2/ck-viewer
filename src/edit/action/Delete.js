@@ -29,7 +29,7 @@ Ext.define('Ck.edit.action.Delete', {
 				type			: "Point",
 				callback		: this.onSelect,
 				scope			: this,
-				map				: this.map,
+				map				: this.getMap(),
 				drawStyle		: null,
 				selectId		: "ckmapEditDelete",
 				overHighlight	: true,

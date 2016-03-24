@@ -32,7 +32,7 @@ Ext.define('Ck.edit.action.Geometry', {
 					}
 				},
 				scope			: this,
-				map				: this.map,
+				map				: this.getMap(),
 				drawStyle		: null,
 				overHighlight	: true,
 				highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),

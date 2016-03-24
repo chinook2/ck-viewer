@@ -17,8 +17,8 @@ Ext.define('Ck.edit.Action', {
 		this.layer = config.layer;
 		this.callParent([config]);
 
-		this.map = Ck.getMap();
-		this.olMap = this.map.getOlMap();
+		// this.map = Ck.getMap();
+		// this.olMap = this.map.getOlMap();
 	},
 	
 	/**
@@ -38,24 +38,31 @@ Ext.define('Ck.edit.Action', {
 	 * Get the active layer and create it if necessary
 	 **/
 	getLayer: function() {
-		if(this.layer) {
-			return this.layer;
-		}
+		// if(this.layer) {
+			// return this.layer;
+		// }
 
-		this.layer = this.controller.getLayer();
+		if(Ext.isString(this.layer)){
+			this.layer = this.getMap().getLayerById(this.layer);
+			if(this.layer) {
+				return this.layer;
+			}
+		}
+		
+		if(this.controller.getLayer) this.layer = this.controller.getLayer();
 		if(this.layer) {
 			return this.layer;
 		}
 		
-		var layerId = this.controller.getView().editConfig.layerId;
-		this.layer = this.map.getLayerById(layerId);
+		if(this.controller.getView().editConfig) var layerId = this.controller.getView().editConfig.layerId;
+		if(layerId) this.layer = this.getMap().getLayerById(layerId);
 
 		if(!this.layer) {
 			this.layer = new ol.layer.Vector({
 				id: "editLayer",
 				name: "Edit layer",
 				source: new ol.source.Vector({
-					projection: this.map.getOlView().getProjection().getCode()
+					projection: this.getMap().getOlView().getProjection().getCode()
 				})
 			});
 		}

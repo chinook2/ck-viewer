@@ -131,6 +131,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(this.editing===true) this.startEditing();
+		if(this.editing===false) this.stopEditing(true);
 		this.initForm(inlineForm);
 	},
 
@@ -561,7 +562,7 @@ Ext.define('Ck.form.Controller', {
 			// Subforms : init default params and exit
 			if(c.xtype == "ckform") {
 				Ext.applyIf(c, {
-					editing: this.editing,
+					//editing: this.editing,
 					urlTemplate: {ws: "{0}/{1}"},
 					bodyPadding: 0,
 					dockedItems: []
@@ -960,22 +961,28 @@ Ext.define('Ck.form.Controller', {
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			sf.startEditing();
+			// Only if subform not forcing editing !?
+			if(!Ext.isDefined(sf.view.initialConfig.editing)){
+				sf.startEditing();
+			}
 		}
 	},
 
-	stopEditing: function() {
+	stopEditing: function(bSilent) {
 		this.getViewModel().set("editing", false);
 		this.getViewModel().set("isEditable", true);
 		this.getView().setEditing(false);
 
-		this.fireEvent('stopEditing');
+		if(bSilent!==false) this.fireEvent('stopEditing');
 		
 		// Process subforms
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			sf.stopEditing();
+			
+			if(!Ext.isDefined(sf.view.initialConfig.editing)){
+				sf.stopEditing(bSilent);
+			}
 		}
 	},
 

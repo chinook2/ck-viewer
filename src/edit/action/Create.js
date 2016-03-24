@@ -12,6 +12,8 @@ Ext.define('Ck.edit.action.Create', {
 	iconCls: 'fa fa-plus',
 	tooltip: 'Create features',
 	
+	toggleGroup: 'ckmapAction',
+	
 	/** 
 	 * True to snap vertex to nearest point
 	 */
@@ -26,13 +28,15 @@ Ext.define('Ck.edit.action.Create', {
 		// Create the interaction if it doesn't already exist
 		if(!this.drawInteraction) {
 			this.drawSource = new ol.source.Vector();
+			this.drawSource = this.getLayerSource();  // new ol.source.Vector();
 			this.drawInteraction = new ol.interaction.Draw({
-				type			: this.getGeometryType(),
-				snapGeometry	: this.snapGeometry,
-				source			: this.drawSource
+				type: this.getGeometryType(),
+				//snapGeometry: this.snapGeometry,
+				source: this.drawSource
 			});
-			this.map.getOlMap().addInteraction(this.drawInteraction);
+			this.getMap().getOlMap().addInteraction(this.drawInteraction);
 			
+			/*
 			// Overload the end-drawing callback to use snapGeometry
 			this.drawInteraction.finishDrawing = function() {
 				var sketchFeature = this.drawInteraction.abortDrawing_();
@@ -81,6 +85,7 @@ Ext.define('Ck.edit.action.Create', {
 				this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
 				this.controller.fireEvent("featurecreate", sketchFeature);
 			}.bind(this);
+			*/
 			
 			this.interactions["drawInteraction"] = this.drawInteraction;
 		}

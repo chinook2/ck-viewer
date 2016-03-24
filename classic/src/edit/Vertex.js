@@ -10,7 +10,7 @@ Ext.define("Ck.edit.Vertex", {
 	
 	cls: "ck-edit-vertex",
 	itemId: "edit-vertex",
-	height: "auto",
+	_height: "auto",
 	hidden: true,
 	
 	layout: {
@@ -23,14 +23,16 @@ Ext.define("Ck.edit.Vertex", {
 		selModel: "rowmodel",
 		// Disable buffere for UP and DOWN grid loop (decrease display perf)
 		bufferedRenderer: false,
-		width: "auto",
-		height: "auto",
+		_width: "auto",
+		_height: "auto",
+		
 		plugins: [{
 			ptype: 'gridediting'
 		},{
 			ptype: "rowediting",
 			clicksToEdit: 1
 		}],
+		
 		columns: [
 			{
 				text: "#",
@@ -56,61 +58,70 @@ Ext.define("Ck.edit.Vertex", {
 			fields: ["number", "longitude", "latitude", "geometry"]
 		}
 	}],
-	
-	bbar: [{
-		iconCls: 'fa fa-check',
-		itemId: "save-vertex"
-	},{
-		iconCls: 'fa fa-remove',
-		itemId: "cancel-vertex"
-	},"->",{
-		text: "Add vertex",
-		itemId: "add-vertex"
-	},{
-		xtype: "tbtext",
-		text: "Position :"
-	},{
-		xtype: "numberfield",
-		itemId: "vertex-position",
-		width: 60,
-		value: 1,
-		minValue: 1,
-		allowDecimals: false,
-		allowBlank: false,
-		hideTrigger: true
-	},{
-		xtype: "splitbutton",
-		itemId: "vertex-live-edit",
-		iconCls: "fa fa-list",
-		tooltip: "Dynamic interaction",
-		menu: [{
-			xtype: "radio",
-			itemId: "action-none",
-			checked: true,
-			boxLabel: "None",
-			boxLabelAlign: "before",
-			inputValue: "n",
-			width: 120,
-			dock: "left",
-			margin: "0 5 0 5"
+
+	dockedItems: [{
+		xtype: 'toolbar',
+		dock: 'bottom',
+		_ui: 'footer',
+		bind: {
+			hidden: "{!editing}"
+		},
+		items: [{
+			iconCls: 'fa fa-check',
+			itemId: "save-vertex"
 		},{
-			xtype: "radio",
-			itemId: "action-alter",
-			boxLabel: "Alter vertex",
-			boxLabelAlign: "before",
-			inputValue: "a",
-			width: 120,
-			dock: "left",
-			margin: "0 5 0 5"
+			iconCls: 'fa fa-remove',
+			itemId: "cancel-vertex"
+		},"->",{
+			text: "Add vertex",
+			itemId: "add-vertex"
 		},{
-			xtype: "radio",
-			itemId: "action-move",
-			boxLabel: "Move feature",
-			boxLabelAlign: "before",
-			inputValue: "a",
-			width: 120,
-			dock: "left",
-			margin: "0 5 0 5"
+			xtype: "tbtext",
+			text: "Position :"
+		},{
+			xtype: "numberfield",
+			itemId: "vertex-position",
+			width: 60,
+			value: 1,
+			minValue: 1,
+			allowDecimals: false,
+			allowBlank: false,
+			hideTrigger: true
+		},{
+			xtype: "splitbutton",
+			itemId: "vertex-live-edit",
+			iconCls: "fa fa-list",
+			tooltip: "Dynamic interaction",
+			menu: [{
+				xtype: "radio",
+				itemId: "action-none",
+				checked: true,
+				boxLabel: "None",
+				boxLabelAlign: "before",
+				inputValue: "n",
+				width: 120,
+				dock: "left",
+				margin: "0 5 0 5"
+			},{
+				xtype: "radio",
+				itemId: "action-alter",
+				boxLabel: "Alter vertex",
+				boxLabelAlign: "before",
+				inputValue: "a",
+				width: 120,
+				dock: "left",
+				margin: "0 5 0 5"
+			},{
+				xtype: "radio",
+				itemId: "action-move",
+				boxLabel: "Move feature",
+				boxLabelAlign: "before",
+				inputValue: "a",
+				width: 120,
+				dock: "left",
+				margin: "0 5 0 5"
+			}]
 		}]
-	}]	
+	}]
+	
 });
