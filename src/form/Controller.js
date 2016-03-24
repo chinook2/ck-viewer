@@ -1343,6 +1343,9 @@ Ext.define('Ck.form.Controller', {
 		// Load data from custom URL ou standard URL
 		url = this.getFullUrl(url);
 		Cks.get({
+			headers: {
+				'Content-Type': 'application/json; charset=UTF-8'
+			},			
 			url: url,
 			scope: this,
 			success: function(response) {
