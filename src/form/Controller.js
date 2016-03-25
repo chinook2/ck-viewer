@@ -658,8 +658,10 @@ Ext.define('Ck.form.Controller', {
 									handler: function() {
 										navigator.camera.getPicture(function(panelId, b64_image) {
 											var panel = Ext.getCmp(panelId);
-											panel.items.getAt(0).camera = Ck.b64toBlob(b64_image, "image/jpeg");
-											panel.items.getAt(0).setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
+											var field = panel.items.getAt(0);
+											field.setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
+											field.camera = Ck.b64toBlob(b64_image, "image/jpeg");
+											panel.items.replace(0, field);
 										}.bind(this, panelId), function() {
 											alert('error');
 										},{
@@ -1075,7 +1077,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					
 					// Get value for file field
-					if(xtype == "filefield") {
+					if(xtype == "filefield" || xtype == "fileuploadfield") {
 						var fName = f.getValue().split("/").pop().split("\\").pop();
 						var inp = f.getEl().dom.getElementsByTagName("input");
 						if(inp[0].type == "file") {
