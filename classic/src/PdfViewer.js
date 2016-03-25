@@ -57,7 +57,7 @@
 		me.callParent(arguments);
 		
 		// Pass PDF file to load
-		var file = this.getFullFile();
+		var file = this.getFullFile(this.getFile());
 
 		// Add iFrame with pdfjs viewer
 		var pdfjsiFrame = new Ext.Component({
@@ -120,7 +120,7 @@
 			return;
 		}
 		
-		this.win.PDFView.open( this.getFullFile() );
+		this.win.PDFView.open( this.getFullFile(file) );
 	},
 	
 	gotoPage: function(page) {
@@ -157,31 +157,32 @@
 	},
 	
 	// From Ck.Controller ...
-	getFullFile: function () {
-		var name = this.getFile();
-		if(!name) return '';
-		
-		// Already full file path/url
-		if(Ext.String.startsWith(name, 'http')) {
-			file = name;
-		}
-		// Static resource in ck-viewer package
-		else if(Ext.String.startsWith(name, 'ck-')) {
-			file = Ck.getPath() + name;
-		}
-		// Static resource in application
-		else if(Ext.String.startsWith(name, '/')) {
-			// file = location.protocol +'//'+ location.host +'/resources' + name;
-			file = '/resources' + name;
-			file = file.replace('//', '/');
-		}
-		// Resource from Web Service (API Call)
-		else {
-			file = Ck.getApi() + name;
-		}
+	getFullFile: function (name) {
+		var file = '';
 
-		// Security for file path
-		file = file.replace(/\.\./g, '');
+		if(name){
+			// Already full file path/url
+			if(Ext.String.startsWith(name, 'http')) {
+				file = name;
+			}
+			// Static resource in ck-viewer package
+			else if(Ext.String.startsWith(name, 'ck-')) {
+				file = Ck.getPath() + name;
+			}
+			// Static resource in application
+			else if(Ext.String.startsWith(name, '/')) {
+				// file = location.protocol +'//'+ location.host +'/resources' + name;
+				file = '/resources' + name;
+				file = file.replace('//', '/');
+			}
+			// Resource from Web Service (API Call)
+			else {
+				file = Ck.getApi() + name;
+			}
+
+			// Security for file path
+			file = file.replace(/\.\./g, '');
+		}
 		
 		// Update current file
 		this.setFile(file);
