@@ -17,7 +17,7 @@ Ext.define('Ck.edit.action.Create', {
 	 * True to snap vertex to nearest point
 	 */
 	snap: true,
-
+	
 	/**
 	 * Activate the geometry creation interaction
 	 **/
@@ -28,9 +28,9 @@ Ext.define('Ck.edit.action.Create', {
 		if(!this.drawInteraction) {
 			this.drawSource = new ol.source.Vector();
 			this.drawInteraction = new ol.interaction.Draw({
-				type			: this.controller.getGeometryTypeBehavior(),
-				snapGeometry	: this.snapGeometry,
-				source			: this.drawSource
+				type: this.controller.getGeometryTypeBehavior(),
+				snapGeometry: this.snapGeometry,
+				source: this.drawSource
 			});
 			this.map.getOlMap().addInteraction(this.drawInteraction);
 			
@@ -57,9 +57,30 @@ Ext.define('Ck.edit.action.Create', {
 			this.interactions["drawInteraction"] = this.drawInteraction;
 		}
 
+		if(btn.gps){
+			var geoloc = this.getMap().geolocation.getPosition();
+						
+			var geomType = this.controller.getGeometryTypeBehavior();
+			if(geomType=='Point') {
+				// Create un new  feature
+				var geometry = new ol.geom.Point(geoloc)
+				var feature = new ol.Feature({
+					geometry: geometry,
+					status: "CREATED"
+				});
+				this.drawSource.addFeature(feature);
+				this.endProcess(geometry);
+			}
+		}
+		
 		this.drawInteraction.setActive(status);
 	},
 
+	// Create object with GPS position
+	doAction: function(btn) {
+		this.toggleAction(btn, false);		
+	},
+	
 	/**
 	 * Hang the polygon's points to those nearest according to the tolerance.
 	 * @params {ol.Feature}
