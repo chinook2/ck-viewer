@@ -40,7 +40,13 @@ Ext.define('Ck.legend.Controller', {
 				view.toggle(rec);
 			}
 		});
-		//
+		
+		// Event on ol view resolution change
+		var olv = this.getMap().getOlView();
+			olv.on('change:resolution',	this.setLegendLayersStyle, this
+			);
+		
+		v.getRootNode().on('expand' , this.setLegendLayersStyle, this);
 		
 		this.fireEvent('ready', this);
 	},
@@ -60,8 +66,10 @@ Ext.define('Ck.legend.Controller', {
 				allowDrop: (layer instanceof ol.layer.Group)
 			};
 			
-			node = layer.get("group").get("node").insertChild(idx, node);
-			layer.set("node", node);
+			node = layer.get("group").get("node").insertChild(idx, node);			
+			layer.set("node", node);			
+			
+			this.setLegendLayerStyle(layer, node);
 			
 			// Append and remove node events (to manage order for example)
 			node.on("move", this.onLayerMove, this);
@@ -157,5 +165,55 @@ Ext.define('Ck.legend.Controller', {
 		if(modifiedFieldNames=='checked' && !(layer instanceof ol.layer.Group)) {
 			layer.set('visible', rec.get('checked'));
 		}
+	},
+	
+	/**
+	 * Set legend layers labels style for all layer 
+	 */
+	setLegendLayersStyle: function(){
+			var layers = Ck.getMap().getLayers();
+			var layer;
+			var node;
+			var nodeDom;
+			for(var i = 0; i < layers.array_.length; i++) {				
+				layer = layers.array_[i];
+				node = layer.get("node");
+				if(node){
+					nodeDom = this.getNodeDomElement(node);
+					if(!(layer instanceof ol.layer.Group) && !Ck.getMap().layerInRange(layer) && (nodeDom)){					
+						nodeDom.style.color = '#dbdbdb';
+					}else if(!(layer instanceof ol.layer.Group) && Ck.getMap().layerInRange(layer) && (nodeDom)) {
+						nodeDom.style.color = '#404040';
+					}	
+				}				
+			}
+	},
+	
+	/**
+	 * Set legend layer label style for the selected layer
+	 */
+	setLegendLayerStyle: function(layer, node){
+		var nodeDom = this.getNodeDomElement(node);;	
+		if(!(layer instanceof ol.layer.Group) && !Ck.getMap().layerInRange(layer) && (nodeDom)){				 
+			nodeDom.style.color = '#dbdbdb';
+		}
+	},
+	
+	/**
+	 * Get the generated Dom node of the legend layer from the Layer's node object
+	 */
+	getNodeDomElement: function(node){
+		var nodeDom;
+		var id = node.internalId;
+		var recordId;
+		var treeDom = node.getOwnerTree().getEl().dom;
+		var tablesDom = treeDom.getElementsByTagName("table");
+		for (var i = 0; i < tablesDom.length; i++) { 
+			recordId = tablesDom[i].getAttribute("data-recordid"); 
+			if ( recordId == id) { 
+				nodeDom = tablesDom[i];
+			}
+		}
+		return nodeDom;
 	}
 });
