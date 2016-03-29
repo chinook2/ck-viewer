@@ -30,7 +30,7 @@ Ext.define('Ck.action.AddLayer', {
 			this.mainPanel = this.createMainPanel();
 
 			this.win = Ck.create("Ext.window.Window", {
-				title		: "Additional layer",
+				title		: "Layers",
 				height		: 350,
 				width		: 500,
 				layout		: "fit",

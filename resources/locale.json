@@ -49,6 +49,14 @@
         "fr": "Editer",
         "es": "Editar"
     },{
+        "en": "Add",
+        "fr": "Ajouter",
+        "es": "-"
+    },{
+        "en": "Update",
+        "fr": "Mettre à jour",
+        "es": "-"
+    },{
         "en": "Title",
         "fr": "Titre",
         "es": "Titulo"
@@ -163,6 +171,10 @@
     },{
         "en": "Layer",
         "fr": "Couche",
+        "es": " - "
+    },{
+        "en": "Layers",
+        "fr": "Couches",
         "es": " - "
     },{
         "en": "Tolerance",

@@ -148,6 +148,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				this.textEl.update(val);
 			}
 			
+			/*
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
 					if(cmp.ownerCt.items.getAt(i) != cmp) {
@@ -155,6 +156,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 					}
 				}
 			}
+			*/
 			this.labelEl.show();
 		} else {
 			this.labelEl.hide();
@@ -165,6 +167,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="' + Ext.baseCSSPrefix + 'required">*</span>');
 			}
 			
+			/*
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
 					if(cmp.ownerCt.items.getAt(i) != cmp) {
@@ -172,6 +175,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 					}
 				}
 			}
+			*/
 		}
 
 		if(cmp.inputEl) {

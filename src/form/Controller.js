@@ -556,6 +556,12 @@ Ext.define('Ck.form.Controller', {
 								labelSeparator: me.layoutConfig.labelSeparator
 							}
 						});
+						Ext.each(c.items, function(it){
+							if(it.items && it.items.length==1){
+								it.layout = 'fit'
+							}
+						}, this);
+						
 						break;
 					case "radiogroup":
 						Ext.each(c.items, function(c) {
@@ -752,7 +758,7 @@ Ext.define('Ck.form.Controller', {
 										s: 'forms',
 										r: 'getStore',
 										// Précise une couche ou recup la couche associée au form
-										layer: c.layer || me.view.layer,
+										layer: c.layer || me.formConfig.layername || me.view.layer,
 										
 										// TODO
 										// Précise un datasource + une table
@@ -1017,8 +1023,12 @@ Ext.define('Ck.form.Controller', {
 		if(this.fieldsProcessed == this.fieldsToProcess) {
 			this.savedValues = values;
 			
+			
 			if(this.compatibiltyMode) {
 				var lyr = v.getLayer();
+				if(Ext.isObject(fid)) {
+					fid = fid.fid;
+				}
 				var res = {
 					fid: fid,
 					params: values
@@ -1026,6 +1036,11 @@ Ext.define('Ck.form.Controller', {
 				
 				values = {};
 				values['main'] = res;
+
+				// data des gridpanel (il ne font pas partie du form...)
+				var grdValues = this.getGridValues();
+				Ext.apply(values, grdValues);
+				//
 			}
 
 			// Loop on subforms
@@ -1112,12 +1127,57 @@ Ext.define('Ck.form.Controller', {
 							}
 						}
 					}
-				}
+				}				
 			}
 			this.fieldsProcessed++;
 			this.getValues.apply(this, arguments);
 		}
 	},
+
+	// From ck1 : compatibility
+    getGridValues: function() {
+        var res = {};
+        var grids = this.getView().query('gridpanel');
+
+        // Boucle sur les grid panel de la fiche
+        for(var g=0; g<grids.length; g++){
+            var recs = [];
+            var grid = grids[g];
+            var store = grid.getStore();
+            var mrecs = store.getModifiedRecords();            
+            var drecs = store.getRemovedRecords();
+
+            // Boucle sur les records modifiés du gridpanel
+            for(var r=0; r<mrecs.length; r++){
+                // 0 si nouvelle ligne sinon recup l'id de la ligne (il est dans les data mais pas affiché)
+                var params = mrecs[r].getData();
+				var fid = params.fid;
+				// Clean params used to build sql query
+				if(Ext.String.startsWith(params.id, 'ext')) delete params.id;
+				delete params.fid;
+				
+                // Récup les données modifiés + l'id du record
+                recs.push({
+                    fid: fid,
+                    params: params
+                });
+            }
+            
+            // Boucle sur les records supprimés du gridpanel
+            for(var r=0; r<drecs.length; r++){
+                if(drecs[r].json) {
+                    recs.push({
+                        fid: drecs[r].json.fid,
+                        params: {}
+                    });
+                }
+            }
+            
+            res[grid.id] = recs;
+        }
+
+        return res;
+    },
 	
 	setValues: function(data) {
 		if(!data) return;
@@ -1295,7 +1355,7 @@ Ext.define('Ck.form.Controller', {
 				url = tpl.apply(fid);
 			} else {
 				// Build default url
-				if(lyr && Ext.isString(fid)) {
+				if(lyr && !Ext.isObject(fid)) {
 					if(this.compatibiltyMode) {
 						url = Ck.getApi() + "service=forms&request=getData&name=" + lyr + "&fid=" + fid;
 					} else {
@@ -1490,6 +1550,16 @@ Ext.define('Ck.form.Controller', {
 			break;
 		}
 
+		// If add/edit record in compatibiltyMode in a subform
+		// It's the main form who save the data...
+		// Just populate main grid here with data
+		if(this.compatibiltyMode && this.isSubForm) {
+			var val = Ext.decode(decodeURIComponent(values.data));
+			Ext.callback(options.success, options.scope, [val.main.params]);
+			return true;
+		}
+		//
+		
 		// If a model is set we use it
 		if(fid && model) {
 			model.set(values);
@@ -1519,7 +1589,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load data by ID - build standard url
-		if(fid) {
+		if(fid || lyr) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL (or multiples URL) to load data
@@ -1529,11 +1599,17 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				var tpl = new Ext.Template(dataUrl);
+				if(!fid) fid = '';
 				if(Ext.isString(fid)) {
 					fid = {
 						fid: fid,
 						layer: lyr
 					};
+				} else {
+					fid = Ext.applyIf(fid,{
+						fid: fid,
+						layer: lyr
+					});
 				}
 				url = tpl.apply(fid);
 			} else {

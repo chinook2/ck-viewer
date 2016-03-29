@@ -68,13 +68,19 @@ Ext.define('Ck.form.plugin.Subform', {
 			scrollable: subForm.scrollable || 'y',
 			
 			formName: '/' + subForm.url,
-			layer: grid.name,
+			
+			// TODO verify
+			// for compatibility mode only
+			layer: subForm.url,
+			//
 			
 			// Default toolbar
 			dockedItems: [{
 				xtype: 'toolbar',
 				dock: 'bottom',
-				hidden: true,
+				bind: {
+					hidden: '{!editing}'
+				},
 				style: {border: 0},
 				items: ['->', {
 					text: 'Add',
@@ -117,13 +123,15 @@ Ext.define('Ck.form.plugin.Subform', {
 				docked = subForm.docked;
 			}
 			
-			 grid.addDocked({
+			grid.addDocked({
 				dock: docked.dock,
 				width: docked.width || 500,
 				items: [this._subform]
 			});
+			
 			// Get subform
 			this._subform = grid.down('ckform');
+			
 		// (default) add subform in popup
 		} else {
 			if(!subForm.window) {
@@ -138,6 +146,26 @@ Ext.define('Ck.form.plugin.Subform', {
 				closeAction: 'hide',
 				items: this._subform
 			}, subForm.window));
+			
+			// Add toolbar for adding new item in grid (open window...)
+			grid.addDocked({
+				xtype: 'toolbar',
+				dock: 'top',
+				bind: {
+					hidden: '{!editing}'
+				},
+				style: {border: 0},
+				items: ['->', {
+					text: 'Add',
+					handler: this.newItem,
+					bind: {
+						hidden: '{updating}'
+					},
+					scope: this
+				}]
+			});
+			
+			// Get subform
 			this._subform = this._subformWindow.down('ckform');
 		}
 		
@@ -257,13 +285,30 @@ Ext.define('Ck.form.plugin.Subform', {
 		this.clicksToEdit = 1;				
 	},
 	
+	newItem: function() {
+		if(!this._subform) return;
+		
+		// Force reset
+		this.resetSubForm();
+		
+		// TEMP - compatibility only ?
+		// reset data fid for new item (used by dataUrl templating)
+		this._subform.setDataFid(null);
+		//
+		
+		if(this._subformWindow) {
+			this._subform.getController().startEditing();;
+			this._subformWindow.show();
+		}
+	},
+
 	addItem: function() {				
 		// Get subform controller
 		var formController = this._subform.getController();
 
 		// Save to server if params available, otherwise 
 		// saveData check form validity
-		formController.saveData({
+		formController.saveData(null, {
 			success: function(res) {
 				if(this.addItemLast===true){
 					// Add new record at the end
@@ -286,7 +331,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		var formController = this._subform.getController();
 		
 		// Save if params available
-		formController.saveData({
+		formController.saveData(null, {
 			success: function(res) {
 				// End update mode
 				var vm = this._subform.getViewModel();
@@ -332,13 +377,20 @@ Ext.define('Ck.form.plugin.Subform', {
 	
 	loadItem: function(view, rec, tr, rowIndex) {
 		if(!this._subform) return;
+		var formController = this._subform.getController();
+		var grid = this._grid;
 		
 		if(this._subformWindow) {
+			// If grid is in editing mode > subform is editing too
+			if(grid.lookupViewModel().get('editing')===true){
+				formController.startEditing();
+			} else {
+				formController.stopEditing();
+			}
+			
 			this._subformWindow.show();
 		}
 		
-		var formController = this._subform.getController();
-		var grid = this._grid;
 		
 		// Init update mode
 		var vm = this._subform.getViewModel();
@@ -346,7 +398,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		var data = rec.getData();
 		var fidName = grid.subform.fid || grid.fid || 'fid';	
-		var fidValue = data[fidName];
+		var fidValue = data[fidName] || data.fid ;
 		
 		var dataUrl = grid.subform.dataUrl || formController.dataUrl;
 		
@@ -391,7 +443,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		if(Ext.isDefined(rowIndex)) this._subform.rowIndex = rowIndex;
 		
 		// Finally load subform data with fid, url or data
-		formController.loadData(options);
+		formController.loadFeature(options);
 	},
 	
 	resetSubForm: function() {

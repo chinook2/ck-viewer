@@ -473,7 +473,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.Coordinate}
 	 */
 	setPosition: function(coord) {
-		if(!Ext.isEmpty(this.currentFeature)) {
+		if(coord && !Ext.isEmpty(this.currentFeature)) {
 			if(this.currentFeature.getGeometry().getType().indexOf("Point") == -1) {
 				this.vertex.fireEvent("geolocation", coord);
 			} else {

@@ -195,8 +195,11 @@ Ext.define('Ck.map.action.Measure', {
 		if(this.tip) this.tip.setVisible(pressed);
 		if(pressed) {
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
+			// fix for touch device
+			this.olMap.on('singleclick', this.pointerMoveHandler, this);
 		} else {
 			this.olMap.un('pointermove', this.pointerMoveHandler, this);
+			this.olMap.un('singleclick', this.pointerMoveHandler, this);
 		}
 	},
 	
