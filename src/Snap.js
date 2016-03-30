@@ -174,9 +174,11 @@ Ext.define('Ck.Snap', {
 			
 			var coords;
 			
-			if(geom instanceof ol.geom.Polygon) {
-				coords = coords[0];
-			} else {
+			// Multi
+			// if(geom instanceof ol.geom.Polygon || geom instanceof ol.geom.LineString) {
+				// coords = coords[0];
+			// }
+			if(geom instanceof ol.geom.Point) {
 				coords = [coords]
 			}
 			
@@ -228,9 +230,11 @@ Ext.define('Ck.Snap', {
 				coords[c] = nearCoord;
 			}
 			
-			if(geom instanceof ol.geom.Polygon) {
-				geom.setCoordinates([coords]);
-			} else {
+			// Multi
+			// if(geom instanceof ol.geom.Polygon || geom instanceof ol.geom.LineString) {
+				// geom.setCoordinates([coords]);
+			// }
+			if(geom instanceof ol.geom.Point) {				
 				geom.setCoordinates(coords[0]);
 			}
 		}

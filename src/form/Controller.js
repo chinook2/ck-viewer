@@ -852,6 +852,12 @@ Ext.define('Ck.form.Controller', {
 									}										
 									if(col.editor && col.editor.xtype && (col.editor.xtype.substr(0,3) == 'ck_')) {
 										col.editor.xtype = col.editor.xtype.substr(3);
+										if(col.editor.xtype == 'datefield') {
+											col.xtype= 'datecolumn';
+											col.format='d/m/Y';
+											col.altFormats='Y-m-d';
+											col.submitFormat='d/m/Y';
+										}
 									}
 									if(col.header) {
 										col.text = col.header;
