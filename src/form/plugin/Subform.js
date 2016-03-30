@@ -133,7 +133,8 @@ Ext.define('Ck.form.plugin.Subform', {
 				subForm.window = {
 					//title: "Subform",
 					height: 400,
-					width: 400
+					width: 400,
+					modal: true
 				}
 			}
 			this._subformWindow = Ext.create('Ext.window.Window', Ext.applyIf({
@@ -141,6 +142,25 @@ Ext.define('Ck.form.plugin.Subform', {
 				closeAction: 'hide',
 				items: this._subform
 			}, subForm.window));
+			
+			// Add toolbar for adding new item in grid (open window...)
+			grid.addDocked({
+				xtype: 'toolbar',
+				dock: 'top',
+				bind: {
+					hidden: '{!editing}'
+				},
+				style: {border: 0},
+				items: ['->', {
+					text: 'Add',
+					handler: this.newItem,
+					bind: {
+						hidden: '{updating}'
+					},
+					scope: this
+				}]
+			});
+			
 			this._subform = this._subformWindow.down('ckform');
 		}
 		
@@ -232,6 +252,45 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 			}, this);			
 		}
+		
+		if(this.commitrow === true){
+			grid.on('beforeedit', function (e, context) {
+				formController.getViewModel().set('rowdata', context.record.getData());
+			}, this);
+			
+			grid.on('edit', function (e, context) {
+				// Call on validate new row. The new row is now validated.
+				if(!context) return;
+				
+				if(this._subformWindow) {
+					this._subformWindow.show();
+				}
+				
+				// Get subform controller
+				var formController = this._subform.getController();
+				
+				var data = context.record.getData();
+				formController.loadRawData(data);
+				
+				// Save if params available
+				formController.saveData({
+					success: function(res) {
+						// End update mode
+						var vm = this._subform.getViewModel();
+						vm.set('updating', false);
+						
+						// Update selected record
+						var rec = this._grid.getStore().getAt(this._subform.rowIndex);
+						if(rec) rec.set(res);
+						this._grid.getView().refresh();
+						
+						this.resetSubForm();
+					},
+					scope: this
+				});				
+			}, this);
+		}
+		
 	},
 	
 	startEditing: function() {
