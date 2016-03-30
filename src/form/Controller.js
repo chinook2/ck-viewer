@@ -863,9 +863,24 @@ Ext.define('Ck.form.Controller', {
 										col.text = col.header;
 										delete col.header;
 									}
-									if(col.renderer) {
-										col.formatter = col.renderer;
-										delete col.renderer;
+									if(col.renderer && col.renderer == 'image') {
+										// col.formatter = col.renderer;
+										// col.scope = this;
+										// delete col.renderer;
+										col.renderer = function(value, meta, rec, rowIndex, colIndex, store){
+											var i, p, w = '';
+											i = "<img src='"+ value +"' alt='Image non disponible'/>";
+											if(col.rendererOption) {
+												p = col.rendererOption.path || '';
+												w = col.rendererOption.width || '';
+												h = col.rendererOption.height || '';
+												if(p) p += '/';
+												if(w) w = " width='"+w+"px'";
+												if(h) h = " height='"+h+"px'";
+												i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
+											}
+											return i;
+										};
 									}
 								}
 								//
