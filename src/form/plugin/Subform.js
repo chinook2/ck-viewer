@@ -357,17 +357,21 @@ Ext.define('Ck.form.plugin.Subform', {
 		vm.set('updating', false);
 		
 		var formController = this._subform.getController();
-		var rec = grid.getStore().getAt(rowIndex).getData();
+		var store = grid.getStore();
+		var rec = store.getAt(rowIndex);
 		
 		// update data fid for current item (used by dataUrl templating)
-		var dataFid = Ext.apply(this._subform.getDataFid(), rec);
+		var dataFid = Ext.apply(this._subform.getDataFid(), rec.getData());
 		this._subform.setDataFid(dataFid);
 		//
 		
 		// Delete record if params available
 		formController.deleteData({
 			success: function(){
-				grid.getStore().removeAt(rowIndex);
+				store.remove(rec);
+				// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
+				store.removed.push(rec);
+				
 				this.resetSubForm();				
 			},
 			fid: dataFid,

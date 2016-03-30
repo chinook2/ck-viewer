@@ -1186,9 +1186,10 @@ Ext.define('Ck.form.Controller', {
             
             // Boucle sur les records supprimés du gridpanel
             for(var r=0; r<drecs.length; r++){
-                if(drecs[r].json) {
+                var fid = drecs[r].get('fid');
+                if(fid) {
                     recs.push({
-                        fid: drecs[r].json.fid,
+                        fid: fid,
                         params: {}
                     });
                 }
