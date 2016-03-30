@@ -78,7 +78,7 @@ Ext.define('Ck.edit.action.Create', {
 
 	// Create object with GPS position
 	doAction: function(btn) {
-		this.toggleAction(btn, false);		
+		if(btn.gps) this.toggleAction(btn, false);		
 	},
 	
 	/**
