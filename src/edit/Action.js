@@ -38,7 +38,7 @@ Ext.define('Ck.edit.Action', {
 		if(!this.used) {
 			this.firstUse();
 		} else {
-			this.disableAllInteractions()
+			this.disableAllInteractions();
 		}
 	},
 	
