@@ -20,6 +20,7 @@ Ext.define("Ck.Form",{
 	},
 	
 	config: {
+		fieldset: false,
 		editing: false,
 
 		layer: null,	// nom du layer = nom de la table

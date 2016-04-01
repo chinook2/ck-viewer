@@ -297,6 +297,17 @@ Ext.define('Ck.form.Controller', {
 			// Format form definition - apply custom options and process
 			var fcf = this.applyFormDefaults(form.form);
 
+			// warp form in a fieldset
+			if(this.view.getFieldset()===true){
+				var formItems = fcf.items;
+				fcf.items = [{
+					xtype: 'fieldset',
+					title: form.title || form.name,
+					items: formItems
+				}];
+			}
+			//
+			
 			// Suspend screen refresh during init
 			// Ext.suspendLayouts();
 			
