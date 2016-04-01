@@ -132,8 +132,8 @@ Ext.define('Ck.form.plugin.Subform', {
 			if(!subForm.window) {
 				subForm.window = {
 					//title: "Subform",
-					height: 400,
-					width: 400,
+					height: 500,
+					width: 600,
 					modal: true
 				}
 			}
