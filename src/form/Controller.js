@@ -322,12 +322,23 @@ Ext.define('Ck.form.Controller', {
 			Ext.each(docks, function(d) {
 				if(!this.defaultDock && (d.dock == 'bottom')) {
 					this.defaultDock = d.initialConfig;
-					// if(this.isSubForm && !this.editing) {
-						// this.defaultDock.hidden = true;
-					// }else{
-						this.defaultDock.hidden = false;
-					// }
+					
+					// Add reset button for subform
+					if(this.isSubForm) {
+						this.defaultDock.items.splice(0, 0, {
+							xtype: "component",
+							autoEl: {
+								tag: "span",
+								html: "Reset",
+								// No other way to do this? :-(
+								onClick: "Ext.getCmp('" + this.getView().getId() + "').getController().resetData()",
+								cls: "lookLikeLink"
+							}
+						});
+					}
+					this.defaultDock.hidden = false;
 				}
+				
 				if( !d.isHeader) {
 					this.view.removeDocked(d);
 				}

@@ -10,3 +10,13 @@
 .ck-form-required {
 	color: red;
 }
+
+/* Element look like link */
+.lookLikeLink {
+	cursor: pointer;
+	color: blue;
+}
+
+.lookLikeLink:hover {
+	text-decoration: underline;
+}
