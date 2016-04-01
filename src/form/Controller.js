@@ -955,7 +955,9 @@ Ext.define('Ck.form.Controller', {
 			}
 
 			
-			c.labelAlign = 'right';
+			if(!c.labelAlign) {
+				c.labelAlign = 'right';
+			}
 			
 			if(c.items && c.processItems !== false) {
 				Ext.each(c.items, fn, this);
