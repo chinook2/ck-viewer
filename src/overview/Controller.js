@@ -72,20 +72,28 @@ Ext.define('Ck.overview.Controller', {
 		this.getMap().on("contextloading", this.removeOverview, this);
 	},
 	
+   /**
+    * Initialize the control.OverviewMap. Calculate the extent, first from the owc
+	*/
 	initOverview: function() {
-		var size = this.getView().getSize();
-		size = [size.width, size.height];
-		var extent = this.getOlView().calculateExtent(this.getOlMap().getSize());
+		var extent = this.getMap().originOwc.getExtent();
+		
+		if(!Ext.isArray(extent)) {
+			// Wrong way to calculate. Depend of current view 
+			var extent = this.getOlView().calculateExtent(this.getOlMap().getSize());
+		}
+
 		var width = Math.abs(extent[2]) - Math.abs(extent[0]);
 		var height = Math.abs(extent[3]) - Math.abs(extent[1]);
 		
-		extent = [
-			extent[0] + (width * 0.25),
-			extent[1] + (height * 0.25),
-			extent[2] - (width * 0.25),
-			extent[3] - (height * 0.25)
-		]
-		var uniqueRes = this.getOlView().getResolutionForExtent(extent, size);
+		var size = this.getView().getSize();
+		size = [size.width, size.height];
+		
+		var res = [this.getOlView().getResolutionForExtent(extent, size)];
+		
+		for(var i = 1; i < this.config.nbRes; i++) {
+			res.push(res[0] / (Math.pow(2, i)));
+		}
 		
 		var opt = {
 			collapsed	: false,
@@ -94,9 +102,9 @@ Ext.define('Ck.overview.Controller', {
 			layers		: this.getMap().overviewCollection,
 			view		: new ol.View({
 				projection		: this.getOlView().getProjection(),
-				resolutions		: [uniqueRes],
-				maxResolution	: uniqueRes,
-				minResolution	: uniqueRes
+				resolutions		: res,
+				maxResolution	: res[res.length - 1],
+				minResolution	: res[0]
 			})
 		};
 		

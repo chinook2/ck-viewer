@@ -16,48 +16,68 @@ Ext.define('Ck.map.action.Select', {
 	iconCls: 'ckfont ck-selects',
 	tooltip: '',
 	
-	toggleGroup: 'ckmapAction',
-	
-	/**
-	 * Currently drawn feature.
-	 * @type {ol.Feature}
-	 */
-	sketch: null,
-
-	/**
-	 * Message to show when the user start selection.
-	 */
-	startMsg : 'Click to select feature.<br>Shift+Click to add feature to selection.',
-	
-	/**
-	 * Message to show when the user is measuring.
-	 */
-	continueMsg: 'Drag to select features',
-	
-	/**
-	 * The type of the selection :
-	 *
-	 *    - point
-	 *    - circle
-	 *    - box
-	 *    - ...
-	 */
-	type: 'point',
-	
-	multi: true,
+ 	toggleGroup: 'ckmapAction',
+ 	
+	config: {
+		/**
+		 * Currently drawn feature.
+		 * @type {ol.Feature}
+		 */
+		sketch: null,
+ 
+		/**
+		 * Message to show when the user start selection.
+		 */
+		startMsg : 'Click to select feature.<br>Shift+Click to add feature to selection.',
 		
-	/**
-	 * Where display the edit panel
-	 */
-	target: "window",
+		/**
+		 * Message to show when the user is selecting.
+		 */
+		continueMsg: 'Drag to select features',
+		
+		/**
+		 * The type of the selection :
+		 *
+		 *    - point
+		 *    - circle
+		 *    - box
+		 *    - ...
+		 */
+		type: 'point',
+		
+		/**
+		 * Button associate with this action
+		 */
+		btn: null,
+ 		
+		/**
+		 * ID of the result panel
+		 */
+		resultPanelId: "select-result",
+		
+		/**
+		 * ID of result panel container
+		 */
+		resultPanelContainerId: "select-result-container",
+		
+		/**
+		 * Option to pass to the container
+		 */
+		containerOpt: {}
+	},
 	
-	/**
-	 * Button associate with this action
-	 */
-	btn: null,
-	
-	/**
-	 * Select on vector layer :
+ 	/**
+	 * Result panel
+ 	 */
+	result: null,
+ 	
+ 	/**
+	 * Result panel result
+ 	 */
+	container: null,
+ 	
+ 	/**
+ 	 * Select on vector layer :
 	 *
 	 *    - select by geometry (circle, box, polygon)
 	 *
@@ -71,7 +91,7 @@ Ext.define('Ck.map.action.Select', {
 		this.olMap = map.getOlMap();
 		
 		this.select = new Ck.Selection({
-			type		: this.type,
+			type		: this.getType(),
 			map			: map,
 			callback	: this.processResult,
 			scope		: this,
@@ -81,8 +101,8 @@ Ext.define('Ck.map.action.Select', {
 		});
 		
 		map.on("contextloading", function() {
-			if(this.btn) {
-				this.btn.toggle(false);
+			if(this.getBtn()) {
+				this.getBtn().toggle(false);
 			}
 		}, this);
 	},
@@ -91,7 +111,7 @@ Ext.define('Ck.map.action.Select', {
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
-		this.btn = btn;
+		this.setBtn(btn);
 		if(!this.select) return;
 		this.select.setActive(pressed);
 	},
@@ -100,62 +120,52 @@ Ext.define('Ck.map.action.Select', {
 	 * Process the result
 	 */
 	processResult: function(res) {
-		for(var i = 0; i < res.length; i++) {
-			Ck.log("The layer \"" + res[i].layer.get("title") + "\" return " + res[i].features.length + " result");
+ 		
+ 		if(res.length == 0) {
+ 			return false;
+ 		}
+ 		
+		// Get the result panel from its ID. Maybe created by another component
+		if(Ext.isEmpty(this.result)) {
+			var result = Ext.getCmp(this.getResultPanelId());
+			if(Ext.isEmpty(result)) {
+				this.result = Ext.create({
+					xtype	: "ckresult",
+					id		: this.getResultPanelId(),
+					result	: res,
+					openner	: this
+				});
+			} else {
+				this.result = result;
+			}
 		}
 		
-		if(res.length == 0) {
-			return false;
-		}
-		
-		var resOpt = {
-			xtype	: "ckresult",
-			result	: res,
-			openner	: this
-		};
-		
-		switch(this.target) {
-			case "window":
-				if(Ext.isEmpty(this.win)) {
-					this.result = Ext.create(resOpt);
-					this.win = Ext.create('Ext.window.Window', Ext.apply({
-						title: "Result selection",
-						width: 800,
-						height: 600,
-						layout: 'fit',
-						collapsible: true,
-						closable: false,
-						maximizable: true,
-						items: [this.result]
-					}), this.targetOpt);
-					this.result = this.result.getController();
-				}
-				
-				this.result.loadData(res);
-				this.win.show();
-				break;
-			case "docked":
-				if(Ext.isEmpty(this.result)) {
-					this.result = Ext.create(
-						Ext.apply({
-							dock : "top"
-						}, this.targetOpt, resOpt)
-					);
-					
-					var view = map.getView();
-					this.win = view.addDocked(this.result);
-					this.getMap().getOlMap().updateSize();
-					this.result = this.result.getController();
-				}
-				
-				this.result.loadData(res);
-				this.win.show();
-				break;
-		}
-		
-	},
-	
-	/**
+		if(Ext.isEmpty(this.container)) {
+			var container = Ext.getCmp(this.getResultPanelContainerId());
+			
+			if(Ext.isEmpty(container)) {
+				this.container = Ext.create('Ext.window.Window', Ext.apply({
+					title		: "Result selection",
+					id			: this.getResultPanelContainerId(),
+					width		: 800,
+					height		: 620,
+					layout		: 'fit',
+					collapsible	: true,
+					closable	: false,
+					maximizable	: true,
+					items		: [this.result]
+				}), this.getContainerOpt());
+			} else {
+				this.container = container;
+			}
+			
+ 		}
+ 		
+		this.result.getController().loadData(res);
+		this.container.show();
+ 	},
+ 	
+ 	/**
 	 * Creates a new help tooltip
 	 */
 	createHelpTooltip: function() {
@@ -174,8 +184,8 @@ Ext.define('Ck.map.action.Select', {
 				beforeshow: function(tip) {
 					if(!this.draw.get('active')) return false;
 					
-					var helpMsg = this.startMsg;
-					if (this.sketch && this.type != 'Point') helpMsg = this.continueMsg;
+					var helpMsg = this.getStartMsg();
+					if (this.getSketch() && this.getType() != 'Point') helpMsg = this.getContinueMsg();
 					tip.update(helpMsg);
 				},
 				scope: this
@@ -191,13 +201,6 @@ Ext.define('Ck.map.action.Select', {
 	 *
 	 */
 	close: function() {
-		switch(this.target) {
-			case "window":
-				this.win.hide();
-				break;
-			case "docked":
-				this.win.show();
-				break;
-		}
+		this.container.hide();
 	}
 });

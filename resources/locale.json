@@ -180,6 +180,41 @@
         "en": "Tolerance",
         "fr": "Tolérance",
         "es": " - "
-    }
-    ]
+    },{
+        "en": "Additional layer",
+        "fr": "Ajout de couches",
+        "es": " - "
+    },{
+        "en": "Add layer",
+        "fr": "Ajouter une couche",
+        "es": " - "
+    },{
+        "en": "Create features",
+        "fr": "Créer un objet",
+        "es": " - "
+    },{
+        "en": "Create features at GPS position",
+        "fr": "Créer un objet à la position GPS",
+        "es": " - "
+    },{
+        "en": "Edit attribute",
+        "fr": "Editer les attributs",
+        "es": " - "
+    },{
+        "en": "Edit geometry",
+        "fr": "Editer une géometrie",
+        "es": " - "
+    },{
+        "en": "Move feature at GPS position",
+        "fr": "Déplacer l'objet à la position GPS",
+        "es": " - "
+    },{
+        "en": "Delete feature",
+        "fr": "Supprimer une couche",
+        "es": " - "
+    },{
+		"en": "GPS position not available",
+        "fr": "Position GPS indisponible",
+        "es": " - "
+	}]
 }

@@ -12,8 +12,10 @@ Ext.define('Ck.map.action.select.Box', {
 	
 	continueMsg: 'Drag to draw a rectangle and select features',
 
-	/**
-	 * Type used in Selection
-	 */
-	type: 'Box'
+	config: {
+		/**
+		 * Type of selection
+		 */
+		type: 'Box'
+	}
 });

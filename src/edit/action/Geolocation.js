@@ -11,7 +11,7 @@ Ext.define('Ck.edit.action.Geolocation', {
 	 * Default properties when this action is used through a button
 	 */
 	iconCls: 'fa fa-bullseye',
-	tooltip: 'Place feature at GPS position',
+	tooltip: 'Move feature at GPS position',
 	
 	/**
 	 * Activate the geometry geolocation interaction. First, select the geom what want to geolocation.

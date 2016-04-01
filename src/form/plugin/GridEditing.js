@@ -135,7 +135,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	},
 	
 	deleteRow: function(grid, rowIndex) {
-        grid.getStore().removeAt(rowIndex);
+        var store = grid.getStore();
+		var rec = store.getAt(rowIndex);
+		if(rec){
+			store.remove(rec);
+			// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
+			store.removed.push(rec);		
+		}
 	},
 	
 	getFields: function(){

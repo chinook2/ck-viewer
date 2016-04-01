@@ -48,7 +48,7 @@ Ext.define('Ck.Snap', {
 		selection: null,
 		
 		/**
-		 * The method to call when snapping ends
+		 * The method to call when snapping ends. Receive a ol.geom
 		 * @var {Function}
 		 */
 		callback: Ext.emptyFn,
@@ -97,6 +97,7 @@ Ext.define('Ck.Snap', {
 	 * Query layers with current selection
 	 * @param {Object}
 	 * @return {ol.geom}
+	 * @todo Manage array of geometries
 	 */
 	snap: function(config) {
 		if(Ext.isArray(config)) {
@@ -164,83 +165,114 @@ Ext.define('Ck.Snap', {
 		}
 	},
 	
+	/**
+	 * When all features next the geometry was requested, do the snapping.
+	 */
 	doSnap: function() {
-		var geom = this.currentGeom;
-		if(this.layerInBuffer.length > 0) {
-			var coords = geom.getCoordinates();
-			
-			var trgProj = this.getProjection();
-			var wgs84 = ol.proj.get("EPSG:4326");
-			
-			var coords;
-			
-			// Multi
-			// if(geom instanceof ol.geom.Polygon || geom instanceof ol.geom.LineString) {
-				// coords = coords[0];
-			// }
-			if(geom instanceof ol.geom.Point) {
-				coords = [coords]
-			}
-			
-			var trgCoord, dist, bufCoord, nearCoord;
-			// Loop on coord. Once if is a point, several times if polygon or line
-			for(var c = 0; c < coords.length; c++) {
-					
-				trgCoord = coords[c];
-				if(!ol.proj.equivalent(trgProj, wgs84)) {
-					trgWGSCoord = ol.proj.transform(trgCoord, trgProj, wgs84);
-				}
-				
-				
-				minDist = -1;
-				var features, nearCoord = trgWGSCoord;
-				for(var l = 0; l < this.layerInBuffer.length; l++) {
-				// Loop on feature in buffer
-					features = this.layerInBuffer[l].features;
-					for(var f = 0; f < features.length; f++) {
-						var g = features[f].getGeometry();
-						
-						if(g instanceof ol.geom.Point) {
-							bufCoord = g.getCoordinates();
-						} else {
-							bufCoord = g.getClosestPoint(trgCoord);
-						}
-						
-						
-						
-						if(!ol.proj.equivalent(trgProj, wgs84)) {
-							bufCoord = ol.proj.transform(bufCoord, trgProj, wgs84);
-						}
-						
-						dist = ol.sphere.WGS84.haversineDistance(bufCoord, trgWGSCoord);
-						
-						if((minDist == -1 && dist <= this.layerTolerance[this.layerInBuffer[0].layer]) || dist < minDist) {
-							minDist = dist;
-							// Fix XYZ layout
-							bufCoord.splice(2, 1);
-							nearCoord = bufCoord;
-						}
+ 		var geom = this.currentGeom;
+ 		if(this.layerInBuffer.length > 0) {
+ 			var coords = geom.getCoordinates();
+ 			
+			// Force MultiGeom structure
+			if(geom.getType().indexOf("Multi") == -1) {
+				coords = [coords];
+			};
+ 			
+			if(geom.getType().indexOf("Polygon") != -1) {
+				coords = coords[0];
+			};
+ 			
+			var subgeom;
+			// Loop on sub-geom (only once if we snap a simple geom)
+			for(var sg = 0; sg < coords.length; sg++) {
+				// Loop on vertex for polygon and line
+				if(geom.getType().indexOf("Point") == -1) {
+					for(var v = 0; v < coords[sg].length; v++) {
+						coords[sg][v] = this.snapPoint(coords[sg][v]);
 					}
+				} else {
+					coords[sg] = this.snapPoint(coords[sg]);
 				}
-				
-				if(!ol.proj.equivalent(trgProj, wgs84)) {
-					nearCoord = ol.proj.transform(nearCoord, wgs84, trgProj);
-				}
-				
-				coords[c] = nearCoord;
 			}
 			
-			// Multi
-			// if(geom instanceof ol.geom.Polygon || geom instanceof ol.geom.LineString) {
-				// geom.setCoordinates([coords]);
-			// }
-			if(geom instanceof ol.geom.Point) {				
-				geom.setCoordinates(coords[0]);
+			if(geom.getType().indexOf("Multi") == -1) {
+ 				coords = coords[0];
+ 			}
+ 			
+			if(geom.getType().indexOf("Polygon") != -1) {
+				coords = [coords];
 			}
+			
+			geom.setCoordinates(coords);
 		}
-		this.getCallback().bind(this.getScope())(geom);
-
+		
+		this.getCallback().call(this.getScope(), geom);
 	},
+	
+	/** 
+	 * Snap one vertex
+	 * @param {ol.coordinate}
+	 * @return {ol.coordinate}
+	 */
+	snapPoint: function(vtxCoord) {
+		// Save layout
+		var layout = vtxCoord.length;
+		
+		var trgProj = this.getProjection();
+		var wgs84 = ol.proj.get("EPSG:4326");
+		
+		nearCoord = vtxCoord;
+		if(!ol.proj.equivalent(trgProj, wgs84)) {
+			vtxWGSCoord = ol.proj.transform(vtxCoord, trgProj, wgs84);
+			nearCoord = vtxWGSCoord;
+		}
+		
+		
+		minDist = -1;
+		var dist, bufCoord, features;
+		// Loop on layer containing buffer
+		for(var l = 0; l < this.layerInBuffer.length; l++) {
+			features = this.layerInBuffer[l].features;
+			// Loop on feature in buffer
+			for(var f = 0; f < features.length; f++) {
+				var g = features[f].getGeometry();
+				
+				if(g instanceof ol.geom.Point) {
+					bufCoord = g.getCoordinates();
+				} else {
+					bufCoord = g.getClosestPoint(vtxCoord);
+ 				}
+				
+				if(!ol.proj.equivalent(trgProj, wgs84)) {
+					bufCoord = ol.proj.transform(bufCoord, trgProj, wgs84);
+ 				}
+ 				
+				dist = ol.sphere.WGS84.haversineDistance(bufCoord, vtxWGSCoord);
+				
+				if((minDist == -1 && dist <= this.layerTolerance[this.layerInBuffer[0].layer]) || dist < minDist) {
+					minDist = dist;
+					// Fix XYZ layout
+					bufCoord.splice(2, 1);
+					nearCoord = bufCoord;
+				}
+ 			}
+ 		}
+		
+		if(!ol.proj.equivalent(trgProj, wgs84)) {
+			vtxCoord = ol.proj.transform(nearCoord, wgs84, trgProj);
+		}
+		
+		//Restore layout
+		if(layout == 2 && vtxCoord.length == 3) {
+			vtxCoord.splice(2, 1);
+		}
+		
+		if(layout == 3 && vtxCoord.length == 2) {
+			vtxCoord[2] = 0;
+		}
+		
+		return vtxCoord;
+ 	},
 	
 	/**
 	 * 

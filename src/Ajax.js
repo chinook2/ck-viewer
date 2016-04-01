@@ -334,5 +334,48 @@ Ext.define('Ck.Ajax', {
 			success: successCallback || defSucc,
 			failure: failureCallback || defFail
 		});
+	},
+	
+	/**
+	 * Download a file in the persistent storage
+	 * @param {Object} Object with theses attributes :
+	 *	- url
+	 *	- directory
+	 *	- file
+	 *	- onSuccess
+	 *	- onError
+	 */
+	download: function(opt) {
+		Ext.applyIf(opt, {
+			directory	: Ck.getDefaultDirectory(),
+			file		: Ext.Date.format(new Date(), "Y-m-d-H-i-s"),
+			onSuccess	: Ext.emptyFn,
+			onError		: Ext.emptyFn,
+			scope		: this
+		});
+
+		opt.file = opt.url.split("/").pop();
+		
+		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(opt, fs) {
+				fs.root.getFile(opt.file, {
+						create: true, 
+						exclusive: false
+					}, function(fileEntry) {
+						fileTransfer = new FileTransfer();        
+						fileTransfer.download(
+							opt.url,
+							opt.directory + opt.file,
+							function(opt, entry) {
+								opt.onSuccess.call(opt.scope, entry.nativeURL);
+							}.bind(opt.scope, opt), function (opt, error) {
+								opt.onError.call(opt.scope, error);
+							}.bind(opt.scope, opt)
+						);
+					}.bind(opt.scope, opt),
+					opt.onError.bind(opt.scope)
+				);
+			}.bind(opt.scope, opt),
+			opt.onError.bind(opt.scope)
+		);
 	}
 });

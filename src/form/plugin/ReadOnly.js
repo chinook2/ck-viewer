@@ -133,6 +133,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			if(val !== null) {
 				if(!Ext.isEmpty(val)) {
 					val = this.getPrefix() + val + this.getSuffix();
+					
 					if(this.getTemplate()) {
 						val = this.getTemplate().apply({"value": val});
 					}
@@ -143,20 +144,30 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 						var title = this.getTitle();
 						val = "<a href='" + val + "' " + title + " target='" + this.getTarget() + "'>" + val + "</a>";
 					}
+					
+					if(val.indexOf("<a href") != -1 && Ext.os.name == "Android") {
+						this.textEl.dom.childNodes[0].onclick = function(evt) {
+							var url = evt.srcElement.getAttribute("href");
+							var extension = url.split(".").pop();
+							if(Ext.isEmpty(Ck.EXTENSION_MIMETYPE["extension"])) {
+								navigator.app.loadUrl(url, {loadingDialog:"Wait, loading ressource", loadUrlTimeoutValue: 6000, openExternal: true});
+								return false;
+							}
+						};
+					}
 				}
 
 				this.textEl.update(val);
-			}
+			}		
 			
-			/*
-			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
+			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
 					if(cmp.ownerCt.items.getAt(i) != cmp) {
 						cmp.ownerCt.items.getAt(i).setVisible(false);
 					}
 				}
 			}
-			*/
+			
 			this.labelEl.show();
 		} else {
 			this.labelEl.hide();
@@ -167,15 +178,13 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="' + Ext.baseCSSPrefix + 'required">*</span>');
 			}
 			
-			/*
-			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("filefield") != -1) {
+			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
 					if(cmp.ownerCt.items.getAt(i) != cmp) {
 						cmp.ownerCt.items.getAt(i).setVisible(true);
 					}
 				}
 			}
-			*/
 		}
 
 		if(cmp.inputEl) {

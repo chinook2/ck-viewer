@@ -631,7 +631,7 @@ Ext.define('Ck.map.Controller', {
 				return;
 			}
 			var layer = colEvent.element;
-			var col = colEvent.currentTarget;
+			var col = colEvent.target;
 			var idx = col.getArray().indexOf(layer);
 			
 			

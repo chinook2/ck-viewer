@@ -41,7 +41,7 @@ Ext.define('Ck.result.Controller', {
 	/**
 	 * @protected
 	 */
-	init: function(view) {		
+	init: function(view) {	
 		this.layerTree = view.queryById("layer_tree");
 		this.layerStore = this.layerTree.getStore();
 		this.layerRoot = this.layerTree.getRootNode();
@@ -88,7 +88,7 @@ Ext.define('Ck.result.Controller', {
 	 */
 	loadData: function(res) {
 		this.data.push(res);
-		var firstId, now = Ext.Date.format(new Date(), "H-i-s");
+		var firstId, now = Ext.Date.format(new Date(), "H:i:s");
 		
 		// JMA Hard fix - temp
 		// TODO : option to use/show history or not
@@ -129,6 +129,7 @@ Ext.define('Ck.result.Controller', {
 		}];
 		*/
 		
+		this.layerTree.collapseAll();
 		this.layerRoot.appendChild(result);
 		this.layerTree.selectPath(firstId, null, null, function(success, lastNode) {
 			this.loadFeature(this.layerTree, lastNode)
@@ -203,7 +204,6 @@ Ext.define('Ck.result.Controller', {
 	 * Remove all results
 	 */
 	clearHistory: function() {
-		this.featureGrid.hide();
 		this.layerRoot.removeAll();
 	}
 });

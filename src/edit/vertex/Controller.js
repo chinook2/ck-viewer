@@ -149,11 +149,13 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	loadVertex: function() {
 		this.store.erase();
-		// Remove the duplicate first/last vertex from the store
-		if(this.feature.getGeometry().getType().indexOf("Multi") == -1) {
-			this.coords = this.ftCoords;
-		} else {
+		
+		if(this.editController.getLoopedType()) {
+			// Remove the duplicate first/last vertex from the store
 			this.coords = this.ftCoords[0];
+			this.coords.splice(this.coords.length - 1, 1);
+		} else {
+			this.coords = this.ftCoords;
 		}
 
 		this.coords.splice(this.coords.length - 1, 1);
@@ -361,14 +363,23 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 	
 	/**
-	 * Update the current geometry with the new coordinates
+	 * Update the current geometry with the new coordinates.
+	 * Sync coords array with the displayed feature.
 	 */
 	updateGeometry: function() {
 		this.geometryChanged = true;
-		this.coords.push(this.coords[0])
-		this.geometry.setCoordinates(this.ftCoords);
-		this.coords.splice(-1, 1);
-		this.fireEvent("geometrychange", this.feature);
+		
+		if(this.editController.getLoopedType()) {
+			this.coords.push(this.coords[0]);
+		}
+		
+ 		this.geometry.setCoordinates(this.ftCoords);
+		
+		if(this.editController.getLoopedType()) {
+			this.coords.splice(-1, 1);
+		}
+		
+ 		this.fireEvent("geometrychange", this.feature);
 	},
 	
 	/**************************************************************************************/
@@ -429,10 +440,30 @@ Ext.define('Ck.edit.vertex.Controller', {
 	
 	translateEnd: function(evt) {
 		this.geometryChanged = true;
-		var ft = evt.features.getArray()[0];
-		this.ftCoords = ft.getGeometry().getCoordinates();
-		this.loadVertex();
-		this.removeAllMarker();
+ 		var ft = evt.features.getArray()[0];
+		
+		var terminateTranslate = function(ft, geometry) {
+			this.ftCoords = ft.getGeometry().getCoordinates();
+			this.loadVertex();
+			this.removeAllMarker();
+		};
+		
+		// Do snapping
+		var geometry = ft.getGeometry();
+		
+		var opt = {
+			layers		: this.editController.getSnappingOptions(),
+			layer		: this.editController.getLayer(),
+			geometries	: [geometry],
+			callback	: terminateTranslate.bind(this, ft),
+			scope		: this
+		}
+		
+		if(opt.layers.length > 0) {
+			Ck.Snap.snap(opt);
+		} else {
+			terminateTranslate.call(this, ft, geometry);
+		}
 	},
 	
 	/**
@@ -441,30 +472,26 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {ol.interaction.ModifyEvent}
 	 */
 	focusVertexRow: function(event) {
-		var vertex = event.currentTarget.vertexFeature_.getGeometry();
+		var vertex = event.target.vertexFeature_.getGeometry();
 		var coord = vertex.getCoordinates();
-		
-		if(event.currentTarget.snappedToVertex_) {
-			idx = this.getIndexFromCoord(coord) - 1;
-		} else {			
-			if(event.currentTarget.dragSegments_[0]){
-				var prevPoint = event.currentTarget.dragSegments_[0][0].segment[0];
-				var idx = this.getIndexFromCoord(prevPoint);
-				
-				var data = {
-					number: idx + 1,
-					longitude: this.trimCoord(coord[0]),
-					latitude: this.trimCoord(coord[1]),
-					geometry: coord
-				};
-				this.grid.getStore().insert(idx, data);
-				
-				this.coords.splice(idx, 0, [data.longitude, data.latitude]);
-				
-				this.reindexVertex();
-			}
+ 		
+		// If it's a click on a vertex or not (then create it)
+		if(event.target.snappedToVertex_) {
+ 			idx = this.getIndexFromCoord(coord) - 1;
+ 		} else {			
+			var prevPoint = event.target.dragSegments_[0][0].segment[0];
+ 			var idx = this.getIndexFromCoord(prevPoint);
+ 			
+ 			var data = {
+				number: idx + 1,
+				longitude: this.trimCoord(coord[0]),
+				latitude: this.trimCoord(coord[1]),
+				geometry: coord
+			};
 			
-			// var nextPoint = event.currentTarget.dragSegments_[1][0].segment[1];
+			this.grid.getStore().insert(idx, data);			
+			this.coords.splice(idx, 0, [data.longitude, data.latitude]);			
+			this.reindexVertex();		
 		}
 		
 		this.focusRow(idx);
@@ -477,10 +504,33 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	updateVertexRow: function(event) {
 		this.geometryChanged = true;
-		var coord = event.currentTarget.vertexFeature_.getGeometry().getCoordinates();
-		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
-		if(dataRow) {
-			if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
+		var coord = event.target.vertexFeature_.getGeometry().getCoordinates();
+ 		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
+ 		
+ 		if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
+			
+			// Do snapping
+			var opt = {
+				layers		: this.editController.getSnappingOptions(),
+				layer		: this.editController.getLayer(),
+				geometries	: [new ol.geom.Point(coord)],
+				callback	: function(dataRow, geometry) {
+					var coord = geometry.getCoordinates();
+					dataRow.set({
+						"geometry": coord,
+						"longitude": coord[0],
+						"latitude": coord[1]
+					});
+					this.updateMarker(null, dataRow);
+					this.coords[this.currentVertexIdx] = coord;
+					this.updateGeometry();
+				}.bind(this, dataRow),
+				scope		: this
+			}
+			
+			if(opt.layers.length > 0) {
+				Ck.Snap.snap(opt);
+			} else {
 				dataRow.set({
 					"geometry": coord,
 					"longitude": coord[0],
@@ -488,10 +538,9 @@ Ext.define('Ck.edit.vertex.Controller', {
 				});
 				this.updateMarker(null, dataRow);
 				this.coords[this.currentVertexIdx] = coord;
+				this.fireEvent("geometrychange", this.feature);
 			}
-		}
-		
-		this.fireEvent("geometrychange", this.feature);
+ 		}
 	},
 	
 	/**************************************************************************************/
@@ -515,7 +564,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		var coord, found = false, arVertex = this.store.getData();
 		for(var i = 0; (i < arVertex.getCount() && !found); i++) {
 			geom = arVertex.getAt(i).data.geometry;
-			if(geom[0] == coord[0] && geom[1] == coord[1]) {
+			if(ol.coordinate.equals(geom, coord)) {
 				found = true;
 			}
 		}

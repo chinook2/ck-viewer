@@ -31,10 +31,19 @@ Ext.define('Ck.edit.Action', {
 	 * Save the associated element
 	 * @param {Ext.Component}
 	 */
-	toggleAction: function(el) {
+	toggleAction: function(a) { this.initAction(a) },
+	
+	doAction: function(a) { this.initAction(a) },
+	
+	initAction: function(el) {
 		this.associatedEl = el;
 		this.controller = el.lookupController();
 		
+		// For ckgroup
+		if(!Ext.isFunction(this.controller.getGeometryTypeBehavior)) {
+			this.controller = el.ownerCt.ownerCt.lookupController();
+		}
+
 		if(!this.used) {
 			this.firstUse();
 		} else {
@@ -121,6 +130,7 @@ Ext.define('Ck.edit.Action', {
 			}
 			delete this[key];
 		}
+		delete this.layer;
 		this.callParent(arguments);
 	}
 });

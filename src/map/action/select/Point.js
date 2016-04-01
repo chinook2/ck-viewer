@@ -12,8 +12,10 @@ Ext.define('Ck.map.action.select.Point', {
 		
 	//continueMsg: 'Click to select a feature',
 
-	/**
-	 * length or area
-	 */
-	type: 'point'
+	config: {
+		/**
+		 * Type of selection
+		 */
+		type: 'Point'
+	}
 });

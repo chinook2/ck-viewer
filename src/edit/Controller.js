@@ -49,6 +49,11 @@ Ext.define('Ck.edit.Controller', {
 		 * Type of the layer. If it's a multi-geometry layer and emulateSimple is true then this value will be simple name geometry type
 		 */
 		geometryType: "",
+		
+		/**
+		 * True for looped geometry like polygon
+		 */
+		loopedType: false,
 
 		/**
 		 * Indicate if we have to display multi-geometry UI
@@ -137,6 +142,19 @@ Ext.define('Ck.edit.Controller', {
 
 		// Geometry type
 		var geometryType = this.getLayer().getExtension("geometryType");
+		
+		// Type compatibility
+		switch(geometryType) {
+			case "Line":
+				geometryType = "LineString";
+				break;
+		}
+		
+		// Looped geometry have specific vertex behavior
+		if(geometryType.indexOf("Polygon") != -1) {
+			this.setLoopedType(true);
+		}
+		
 		if(geometryType.indexOf("Multi") == -1) {
 			this.setEmulateSimple(false);
 			geometryTypeBehavior = geometryType;
@@ -300,6 +318,14 @@ Ext.define('Ck.edit.Controller', {
 			}
 		}
 		
+		// Hide "Add to GPS position" button if is not a point layer
+		if(geometryType.indexOf("Line") == -1) {
+			var gpsAdd = tbar.getComponent("edit-create-gps");
+			if(gpsAdd) {
+				gpsAdd.hide();
+			}
+		}
+
 		// Geolocation button
 		this.on("geolocation", this.setPosition, this);
 		this.geolocationBtn = tbar.getComponent("edit-geolocation");
@@ -376,10 +402,17 @@ Ext.define('Ck.edit.Controller', {
 	/**
 	 * Start a geometry edition session.
 	 * If the layer is a multi-features layer, subfeatures panel is displayed, vertex panel otherwise.
-	 * Called by the action Ck.edit.action.Geometry.
+	 * Called by the action Ck.edit.action.Geometry only.
 	 * @param {ol.Feature}
 	 */
 	startGeometryEdition: function(feature) {
+		var geom = feature.getGeometry();
+		
+		// If it's a multi geom and we only edit geom as simple -> simplify geometry
+		if((geom.getType().indexOf("Multi") != -1) && this.getEmulateSimple()) {
+			feature.setGeometry(geom["get" + this.getGeometryTypeBehavior()](0));
+		}
+		
 		// Add the feature, if not already added, to the collection
 		if(this.getIsWMS()) {
 			var ft = this.wfsSource.getFeatureById(feature.getId());
@@ -390,6 +423,7 @@ Ext.define('Ck.edit.Controller', {
 				feature.setGeometry(ft.getGeometry());
 			}
 		}
+		
 		if(this.getMultiBehavior()) {
 			this.startFeatureEdition(feature);
 		} else {
@@ -465,7 +499,26 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.interaction.TranslateEvent}
 	 */
 	pointTranslateEnd: function(evt) {
-		this.fireEvent("featuregeometry", evt.features.item(0));
+		// Do snapping
+		var feature = evt.features.item(0);
+		var geometry = feature.getGeometry();
+		
+		var opt = {
+			layers		: this.getSnappingOptions(),
+			layer		: this.getLayer(),
+			geometries	: [geometry],
+			callback	: function(feature, geometry) {
+				feature.setGeometry(geometry);
+				this.fireEvent("featuregeometry", feature);
+			}.bind(this, feature),
+			scope		: this
+		}
+		
+		if(opt.layers.length > 0) {
+			var geometry = Ck.Snap.snap(opt);
+		} else {
+			this.fireEvent("featuregeometry", feature);
+		}
 	},
 
 	/**

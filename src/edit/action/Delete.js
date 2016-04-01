@@ -37,6 +37,9 @@ Ext.define('Ck.edit.action.Delete', {
 			});
 			this.interactions["delInteraction"] = this.delInteraction;
 		}
+		
+		// Hard fix for inexplicable issue (this.delInteraction.selection.length != 0)
+		this.delInteraction.resetSelection();
 
 		this.delInteraction.setActive(status);		
 	},

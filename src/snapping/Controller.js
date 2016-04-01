@@ -26,6 +26,8 @@ Ext.define('Ck.snapping.Controller', {
 			}
 		});
 		
+		this.getMap().on("addlayer", this.addLayer, this);
+		
 		this.loadPanel();
 	},
 	
@@ -33,22 +35,46 @@ Ext.define('Ck.snapping.Controller', {
 	 * Create panel from layers
 	 */
 	loadPanel: function() {
-		var srcs, data = [],
-			lyrs = Ck.getMap().getLayers().getArray(),
-			items = [];
-		
-		for(var i = 0; i < lyrs.length; i++) {
-			srcs = lyrs[i].get("sources");
-			if(lyrs[i].ckLayer && ((lyrs[i].getSource() instanceof ol.source.Vector) || (srcs.wfs && srcs.wfs[0]))) {
-				data.push({
-					layer		: lyrs[i],
-					title		: lyrs[i].get("title"),
-					tolerance	: Ck.Snap.getTolerance()
-				});
+		var item, data = [];
+		var lyrs = Ck.getMap().getLayers().getArray();
+ 		
+ 		for(var i = 0; i < lyrs.length; i++) {
+			item = this.createItem(lyrs[i]);
+			if(item != null) {
+				data.push(item);
 			}
 		}
 		
 		this.getView().getStore().loadData(data);
+	},
+	
+	/**
+	 * Create an item from a layer to add it into the store.
+	 * Return null if the layer cannot be use for snapping.
+	 * @param {ol.layer.Base}
+	 * @return {Object}
+	 */
+	createItem: function(layer) {
+		var srcs, item;
+		
+		srcs = layer.get("sources");
+		if(layer.ckLayer && ((layer.getSource() instanceof ol.source.Vector) || (srcs.wfs && srcs.wfs[0]))) {
+			item = {
+				layer		: layer,
+				title		: layer.get("title"),
+				tolerance	: Ck.Snap.getTolerance()
+			};
+		}
+		
+		return item;
+	},
+	
+	addLayer: function(layer) {
+		var store = this.getView().getStore();
+		item = this.createItem(layer);
+		if(item != null) {
+			store.add(item);
+		}
 	},
 	
 	/**

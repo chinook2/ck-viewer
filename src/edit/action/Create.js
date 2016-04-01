@@ -19,6 +19,11 @@ Ext.define('Ck.edit.action.Create', {
 	snap: true,
 	
 	/**
+	 * True to add point at GPS geolocation
+	 */
+	gps: false,
+
+	/**
 	 * Activate the geometry creation interaction
 	 **/
 	toggleAction: function(btn, status) {
@@ -76,10 +81,28 @@ Ext.define('Ck.edit.action.Create', {
 		this.drawInteraction.setActive(status);
 	},
 
-	// Create object with GPS position
 	doAction: function(btn) {
-		if(btn.gps) this.toggleAction(btn, false);		
+		this.callParent(arguments);
+		if(!this.enableToggle) {
+			var pos = this.getMap().geolocation.getPosition();
+			if(Ext.isArray(pos)) {
+				this.endProcess(new ol.geom.Point(pos));
+			} else {
+				Ext.Msg.show({
+					title: "Create features",
+					message: "GPS position not available",
+					buttons: Ext.Msg.OK,
+					icon: Ext.Msg.ERROR
+				});
+			}
+		}
 	},
+
+	// A voir si plus fonctionnel !
+	// Create object with GPS position
+	// doAction: function(btn) {
+		// if(btn.gps) this.toggleAction(btn, false);		
+	// },
 	
 	/**
 	 * Hang the polygon's points to those nearest according to the tolerance.
@@ -95,33 +118,36 @@ Ext.define('Ck.edit.action.Create', {
 		goog.asserts.assert(!goog.isNull(sketchFeature));
 		var coordinates;
 		var geometry = sketchFeature.getGeometry();
-		switch(this.drawInteraction.mode_) {
-			case ol.interaction.DrawMode.POINT:
-				goog.asserts.assertInstanceof(geometry, ol.geom.Point);
-				coordinates = geometry.getCoordinates();
-				break;
-			case ol.interaction.DrawMode.LINE_STRING :
-				goog.asserts.assertInstanceof(geometry, ol.geom.LineString);
-				coordinates = geometry.getCoordinates();
-				// Remove the redundant last point
-				coordinates.pop();
-				geometry.setCoordinates(coordinates);
-				break;
-			case ol.interaction.DrawMode.POLYGON :
-				goog.asserts.assertInstanceof(geometry, ol.geom.Polygon);
-				// When we finish drawing a polygon on the last point,
-				// the last coordinate is duplicated as for LineString
-				// we force the replacement by the first point
-				this.drawInteraction.sketchPolygonCoords_ = geometry.getCoordinates();
-				this.drawInteraction.sketchPolygonCoords_[0].pop();
-				this.drawInteraction.sketchPolygonCoords_[0].push(this.drawInteraction.sketchPolygonCoords_[0][0]);
-				geometry.setCoordinates(this.drawInteraction.sketchPolygonCoords_);
-				coordinates = geometry.getCoordinates();
-				break;
+		
+		if(!this.gps) {
+			switch(this.drawInteraction.mode_) {
+				case ol.interaction.DrawMode.POINT:
+					goog.asserts.assertInstanceof(geometry, ol.geom.Point);
+					coordinates = geometry.getCoordinates();
+					break;
+				case ol.interaction.DrawMode.LINE_STRING :
+					goog.asserts.assertInstanceof(geometry, ol.geom.LineString);
+					coordinates = geometry.getCoordinates();
+					// Remove the redundant last point
+					coordinates.pop();
+					geometry.setCoordinates(coordinates);
+					break;
+				case ol.interaction.DrawMode.POLYGON :
+					goog.asserts.assertInstanceof(geometry, ol.geom.Polygon);
+					// When we finish drawing a polygon on the last point,
+					// the last coordinate is duplicated as for LineString
+					// we force the replacement by the first point
+					this.drawInteraction.sketchPolygonCoords_ = geometry.getCoordinates();
+					this.drawInteraction.sketchPolygonCoords_[0].pop();
+					this.drawInteraction.sketchPolygonCoords_[0].push(this.drawInteraction.sketchPolygonCoords_[0][0]);
+					geometry.setCoordinates(this.drawInteraction.sketchPolygonCoords_);
+					coordinates = geometry.getCoordinates();
+					break;
+			}
 		}
 
-		// cast multi-part geometries
-		switch(this.drawInteraction.type_) {
+		// Cast multi-part geometries
+		switch(this.controller.getGeometryTypeBehavior()) {
 			case ol.geom.GeometryType.MULTI_POINT :
 				sketchFeature.setGeometry(new ol.geom.MultiPoint([coordinates]));
 				break;
@@ -132,7 +158,10 @@ Ext.define('Ck.edit.action.Create', {
 			case ol.geom.GeometryType.MULTI_POLYGON :
 		}
 
-		this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
+		if(!this.gps) {
+			this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
+		}
+		
 		this.controller.fireEvent("featurecreate", sketchFeature);
 	}
 });

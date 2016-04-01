@@ -556,8 +556,10 @@ Ext.define('Ck.form.Controller', {
 								labelSeparator: me.layoutConfig.labelSeparator
 							}
 						});
+						
+						// Change layout for panels if there is only one grid
 						Ext.each(c.items, function(it){
-							if(it.items && it.items.length==1){
+							if((it.items && it.items.length==1) || (it.xtype && it.xtype.indexOf('grid')!=-1)) {
 								it.layout = 'fit'
 							}
 						}, this);
@@ -609,7 +611,7 @@ Ext.define('Ck.form.Controller', {
 						break;
 					case "fileuploadfield":
 					case "filefield":
-						// If photo taking is allow
+						// If photo taking is allowed
 						c.readOnly = false;
 						if(c.uploadImage !== false) {
 							var panelId = Ext.id();
@@ -629,7 +631,7 @@ Ext.define('Ck.form.Controller', {
 								}
 							}
 							
-							// Delete camera picture when file is choosen from explorer
+							// Delete camera picture when file is chosen from explorer
 							c.listeners = {
 								change: function() {
 									this.camera = "";
@@ -643,6 +645,8 @@ Ext.define('Ck.form.Controller', {
 								this.fireEvent("change", value);
 							}
 							
+							var useCamera = c.useCamera;
+							
 							c = {
 								xtype: "panel",
 								id: panelId,
@@ -652,7 +656,7 @@ Ext.define('Ck.form.Controller', {
 								items: [c]
 							}
 							
-							if(Ext.isObject(navigator.camera) && Ext.isFunction(navigator.camera.getPicture)) {
+							if(useCamera === true && Ext.isObject(navigator.camera) && Ext.isFunction(navigator.camera.getPicture)) {
 								var pictureBtn = {
 									xtype: "button",
 									iconCls: "fa fa-camera",
@@ -677,7 +681,6 @@ Ext.define('Ck.form.Controller', {
 								}
 								c.items.push(pictureBtn);
 							}
-							
 							
 							c.items.push(removeBtn);
 						}
@@ -760,18 +763,17 @@ Ext.define('Ck.form.Controller', {
 										// Précise une couche ou recup la couche associée au form
 										layer: c.layer || me.formConfig.layername || me.view.layer,
 										
-										// TODO
 										// Précise un datasource + une table
-										// datasource: this.datasource,
-										// data: this.data,
+										datasource: o.datasource,
+										data: o.data,
 										
 										// TODO
 										// Filtres en fonction des parents
 										//params: encodeURIComponent(Ext.encode(c.parentValue)),
 										
 										// Le champ 'valeur' envoyé par le formulaire
-										valuefield: c.valueField,
-										field: c.displayField || c.name
+										valuefield: o.valueField || c.valueField,
+										field: o.name || c.displayField || c.name
 										// query : param automatique lors du autocomplete
 									};
 									storeUrl = Ck.getApi() + Ext.urlEncode(baseparams);
@@ -858,6 +860,12 @@ Ext.define('Ck.form.Controller', {
 											col.altFormats='Y-m-d';
 											col.submitFormat='d/m/Y';
 										}
+										
+										if(col.editor.xtype == 'combobox') {
+											col.editor.name = col.name;
+											col.editor.displayField = "value";
+											col.editor.store = processStore(col.editor);
+										}
 									}
 									if(col.header) {
 										col.text = col.header;
@@ -936,8 +944,7 @@ Ext.define('Ck.form.Controller', {
 							delete c.displayField;
 							
 							Ext.applyIf(c, {
-								displayField: "value" //,
-								//queryMode: 'local'
+								displayField: "value"
 							});
 						}
 						break;
@@ -982,6 +989,9 @@ Ext.define('Ck.form.Controller', {
 							pluginId: 'rowediting',
 							clicksToEdit: 1
 						}]);
+						
+						// To show rowediting bar & btns
+						c.minHeight = 250;
 					}
 				}
 
@@ -1172,6 +1182,10 @@ Ext.define('Ck.form.Controller', {
             for(var r=0; r<mrecs.length; r++){
                 // 0 si nouvelle ligne sinon recup l'id de la ligne (il est dans les data mais pas affiché)
                 var params = mrecs[r].getData();
+				
+				// Empty field when plugin gridediting is active to add new record to the grid...
+				if(params.dummy===true) continue;
+				
 				var fid = params.fid;
 				// Clean params used to build sql query
 				if(Ext.String.startsWith(params.id, 'ext')) delete params.id;
