@@ -191,6 +191,7 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	initContext: function(context) {
+
 		var vm = this.getViewModel();
 
 		if(!context) {
@@ -206,7 +207,7 @@ Ext.define('Ck.map.Controller', {
 			Ck.log("This context is not a OWS context !");
 			return;
 		}
-
+		
 		var v = this.getView();
 		var olMap = this.getOlMap();
 		var olView = this.getOlView();
@@ -214,101 +215,104 @@ Ext.define('Ck.map.Controller', {
 		// Remove all layers
 		olMap.setLayerGroup(Ck.create("ol.layer.Group"));
 
-		this.fireEvent("contextloading", owc);
 		this.originOwc = owc;
 		
-		proj4.defs("EPSG:3943", "+proj=lcc +lat_1=42.25 +lat_2=43.75 +lat_0=43 +lon_0=3 +x_0=1700000 +y_0=2200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
-
-		var viewProj = owc.getProjection();
-		var viewScales = owc.getScales();
-
-		// Set scales for combobox and olView
-		var vmStores = vm.storeInfo;
-		vmStores.scales = new Ext.data.Store({
-			fields: ['res', 'scale'],
-			data: viewScales
-		});
-
-		vm.setStores(vmStores);
-
-		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
-		olMap.setView(new ol.View({
-			projection		: viewProj,
-			center			: v.getCenter(),
-			extent			: owc.getExtent(),
-			zoom			: v.getZoom(),
-			minResolution	: viewScales[0].res,
-			maxResolution	: viewScales[viewScales.length-1].res
-		}));
-		this.bindMap(olMap);
-
-		// Set the bbox
-		this.setExtent(owc.getExtent());
-		this.currentOwsContext = owc;
+		var continueEvent = this.fireEvent("contextloading", owc);
 		
-		this.relayMapEvents(olMap.getLayerGroup());
-		
-		// Add a layer group to host special layer (draw, measure...)
-		this.specialGroup = Ck.create("ol.layer.Group", {
-			title: "CkOverlayGroup",
-			path: "CkOverlayGroup",
-			zIndex: 1
-		});
-		olMap.addLayer(this.specialGroup);
-		
-		// Create overview collection
-		this.overviewCollection = new ol.Collection();
-		
-		// Load all layers. Reverse the loading for right order displaying
-		var layer, layers = owc.getLayers();
-		var olExtent = owc.getExtent();
-		for(var i = layers.length - 1; i >= 0; i--) {
-			if(layers[i].getExtension("overviewLayer") === true) {
-				layer = this.createLayer(layers[i], owc);
-				layer.setVisible(true);
-				layer.setExtent(olExtent);
-				
-				this.overviewCollection.push(layer);
-			} else {
-				this.addLayer(layers[i], owc);
+		if(continueEvent) {	
+			proj4.defs("EPSG:3943", "+proj=lcc +lat_1=42.25 +lat_2=43.75 +lat_0=43 +lon_0=3 +x_0=1700000 +y_0=2200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
+
+			var viewProj = owc.getProjection();
+			var viewScales = owc.getScales();
+
+			// Set scales for combobox and olView
+			var vmStores = vm.storeInfo;
+			vmStores.scales = new Ext.data.Store({
+				fields: ['res', 'scale'],
+				data: viewScales
+			});
+
+			vm.setStores(vmStores);
+
+			// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
+			olMap.setView(new ol.View({
+				projection		: viewProj,
+				center			: v.getCenter(),
+				extent			: owc.getExtent(),
+				zoom			: v.getZoom(),
+				minResolution	: viewScales[0].res,
+				maxResolution	: viewScales[viewScales.length-1].res
+			}));
+			this.bindMap(olMap);
+
+			// Set the bbox
+			this.setExtent(owc.getExtent());
+			this.currentOwsContext = owc;
+			
+			this.relayMapEvents(olMap.getLayerGroup());
+			
+			// Add a layer group to host special layer (draw, measure...)
+			this.specialGroup = Ck.create("ol.layer.Group", {
+				title: "CkOverlayGroup",
+				path: "CkOverlayGroup",
+				zIndex: 1
+			});
+			olMap.addLayer(this.specialGroup);
+			
+			// Create overview collection
+			this.overviewCollection = new ol.Collection();
+			
+			// Load all layers. Reverse the loading for right order displaying
+			var layer, layers = owc.getLayers();
+			var olExtent = owc.getExtent();
+			for(var i = layers.length - 1; i >= 0; i--) {
+				if(layers[i].getExtension("overviewLayer") === true) {
+					layer = this.createLayer(layers[i], owc);
+					layer.setVisible(true);
+					layer.setExtent(olExtent);
+					
+					this.overviewCollection.push(layer);
+				} else {
+					this.addLayer(layers[i], owc);
+				}
 			}
-		}
 
-		// Init GPS manager. Overwrite getPosition to integrate offset to facilitate development
-		// TODO Use navigator.geolocaiton directly because ol.Geolocation sucks
-		this.geolocation = new ol.Geolocation({
-			projection: viewProj,
-			tracking: true,
-			trackingOptions: {
-				enableHighAccuracy: true,
-				// timeout: 5000,
-				maximumAge: 0
-			},
-			geolocationOffset: Ck.getMap().geolocationOffset
-		});
-		this.geolocation.geolocationOffset = this.geolocationOffset;
-		this.geolocation.getRealPosition = this.geolocation.getPosition;
-		this.geolocation.getPosition = function() {
-			var p = this.getRealPosition();
-			if(Ext.isArray(p)) {
-				p[0] = p[0] + this.geolocationOffset[0];
-				p[1] = p[1] + this.geolocationOffset[1];
-			}
-			return p;
-		};
-		
-		this.geolocation.on("change", function(evt) {
-			var p = evt.target.getPosition();
-			this.fireEvent("geolocationchange", p);
-		}, this);
-		this.geolocation.on("error", function(error) {
-			Ck.error("GPS : "+ error.message);
-		});
+			// Init GPS manager. Overwrite getPosition to integrate offset to facilitate development
+			// TODO Use navigator.geolocaiton directly because ol.Geolocation sucks
+			this.geolocation = new ol.Geolocation({
+				projection: viewProj,
+				tracking: true,
+				trackingOptions: {
+					enableHighAccuracy: true,
+					// timeout: 5000,
+					maximumAge: 0
+				},
+				geolocationOffset: Ck.getMap().geolocationOffset
+			});
+			this.geolocation.geolocationOffset = this.geolocationOffset;
+			this.geolocation.getRealPosition = this.geolocation.getPosition;
+			this.geolocation.getPosition = function() {
+				var p = this.getRealPosition();
+				if(Ext.isArray(p)) {
+					p[0] = p[0] + this.geolocationOffset[0];
+					p[1] = p[1] + this.geolocationOffset[1];
+				}
+				return p;
+			};
+			
+			this.geolocation.on("change", function(evt) {
+				var p = evt.target.getPosition();
+				this.fireEvent("geolocationchange", p);
+			}, this);
+			this.geolocation.on("error", function(error) {
+				Ck.error("GPS : "+ error.message);
+			});
 
-		// Fire when layers are loaded
-		Ck.log('fireEvent ckmapLoaded');
-		this.fireEvent('loaded', this);
-		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
+			// Fire when layers are loaded
+			Ck.log('fireEvent ckmapLoaded');
+			this.fireEvent('loaded', this);
+			Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
+		}		
 	},
 	
 	addSpecialLayer: function(layer) {

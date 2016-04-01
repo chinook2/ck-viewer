@@ -14,6 +14,12 @@ Ext.define('Ck.context.plugin.Load', {
 		ckContext.on("select", this.onContextSelect);
 	},
 	
+	/**
+	 * On select context, call context service
+	 * @protected
+	 * @param {Ck.Context}
+	 * @param {Ext.data.Record}
+	 */
 	onContextSelect: function(cbx, rcd) {
 		url = Ck.Controller.prototype.getFullUrl(Ck.getApi()) + "service=wmc&request=getContext&format=json&context=" + rcd.get("Name")
 		Ck.getMap().getContext(url);

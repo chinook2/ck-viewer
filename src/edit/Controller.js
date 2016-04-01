@@ -341,6 +341,10 @@ Ext.define('Ck.edit.Controller', {
 		this.mainWindow.manageVisibility();
 		
 		this.on("featurecreate", this.onCreate, this);
+		
+		Ck.getMap().on("contextloading", function(ctx) {
+			this.close();		
+		}, this);
 	},
 	
 	/**

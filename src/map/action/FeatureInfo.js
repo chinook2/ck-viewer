@@ -158,6 +158,10 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				items: [this.panel],
 				closeAction: "hide"
 			});
+			
+			Ck.getMap().on("contextloading", function(ctx) {
+				this.win.close();	
+			}, this);
 		}
 	}
 });

@@ -70,6 +70,10 @@ Ext.define('Ck.result.Controller', {
 			text: "Click me"
 		}];
 		
+		Ck.getMap().on("contextloading", function(ctx) {
+			this.getOpenner().resetSelection();
+			this.getOpenner().close();	
+		}, this);	
 	},
 	
 	addUpdate: function() {
