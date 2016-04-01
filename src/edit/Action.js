@@ -31,9 +31,15 @@ Ext.define('Ck.edit.Action', {
 	 * Save the associated element
 	 * @param {Ext.Component}
 	 */
-	toggleAction: function(a) { this.initAction(a) },
+	toggleAction: function(a) {
+		this.disableAllInteractions();
+		this.initAction(a);
+	},
 	
-	doAction: function(a) { this.initAction(a) },
+	doAction: function(a) {
+		// this.disableAllInteractions();
+		// this.initAction(a);
+	},
 	
 	initAction: function(el) {
 		this.associatedEl = el;
@@ -46,8 +52,6 @@ Ext.define('Ck.edit.Action', {
 
 		if(!this.used) {
 			this.firstUse();
-		} else {
-			this.disableAllInteractions();
 		}
 	},
 	
