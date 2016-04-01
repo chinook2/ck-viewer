@@ -298,13 +298,15 @@ Ext.define('Ck.form.Controller', {
 			var fcf = this.applyFormDefaults(form.form);
 
 			// warp form in a fieldset
-			if(this.view.getFieldset()===true){
+			var fs = this.view.getFieldset();
+			if(fs===true) fs={};
+			if(Ext.isObject(fs)){
 				var formItems = fcf.items;
-				fcf.items = [{
+				fcf.items = [Ext.apply({
 					xtype: 'fieldset',
 					title: form.title || form.name,
 					items: formItems
-				}];
+				}, fs)];
 			}
 			//
 			
@@ -941,6 +943,9 @@ Ext.define('Ck.form.Controller', {
 				c.fieldLabel = c.name;
 			}
 
+			
+			c.labelAlign = 'right';
+			
 			if(c.items && c.processItems !== false) {
 				Ext.each(c.items, fn, this);
 			}

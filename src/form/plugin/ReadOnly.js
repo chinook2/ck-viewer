@@ -139,7 +139,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 			// Add a marker for required fields when editing
 			if(cmp.allowBlank === false) {
-				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="' + Ext.baseCSSPrefix + 'required">*</span>');
+				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
 			}
 		}
 
