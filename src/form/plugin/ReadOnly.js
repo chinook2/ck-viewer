@@ -146,7 +146,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 					}
 					
 					if(val.indexOf("<a href") != -1 && Ext.os.name == "Android") {
-						this.textEl.dom.childNodes[0].onclick = function(evt) {
+						this.textEl.dom.onclick = function(evt) {
 							var url = evt.srcElement.getAttribute("href");
 							var extension = url.split(".").pop();
 							if(Ext.isEmpty(Ck.EXTENSION_MIMETYPE["extension"])) {
