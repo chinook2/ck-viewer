@@ -80,21 +80,32 @@
 	},
 	
 	initPDFViewer: function(htmlElement){
+		var me = this;
 		// Get document of the iFrame > access DIV ...
-		this.doc = htmlElement.contentDocument;
+		me.doc = htmlElement.contentDocument;
 		// Get window of the iFrame > access PDF JS functions 
-		this.win = htmlElement.contentWindow;
+		me.win = htmlElement.contentWindow;
 		
 		// Activate by defaut Drag mode
-		this.win.HandTool.handTool.activate();
+		me.win.HandTool.handTool.activate();
 		
 		// Check if we need to hide tools
-		var tools = this.getHiddenTools();
+		var tools = me.getHiddenTools();
 		Ext.each(tools, function(tool, idx, a){
-			this.hideTool(tool);
-		}, this);
+			me.hideTool(tool);
+		});
 		
-		this.fireEvent('loaded');
+		// Init event		
+		me.win.addEventListener('pagechange', function(evt) {
+			// console.log('test ' + evt.pageNumber);
+			var page = evt.pageNumber;
+			if (evt.previousPageNumber !== page) {
+				me.fireEvent('pagechange', page);
+			}
+		}, true);
+		
+		// pdfViewer iframe loaded
+		me.fireEvent('loaded');
 	},
 	
 	hideTool: function(toolName) {
