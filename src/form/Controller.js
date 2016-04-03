@@ -77,6 +77,18 @@ Ext.define('Ck.form.Controller', {
 					return this.oController.onSelect(cmp, record, eOpts);
 				}
 			}
+		},
+		global:{
+			mousedown: function(e, eOpts ){
+				Ck.log(e.target.nodeName);
+				if(e.target && e.target.getAttribute("handler")){
+					var h = e.target.getAttribute("handler");
+					if(!this[h] && this.oController[h]){
+						this.oController[h](e, eOpts);
+						return false;
+					}
+				}
+			}
 		}
 	},
 	
@@ -600,9 +612,11 @@ Ext.define('Ck.form.Controller', {
 				labelSeparator: me.layoutConfig.labelSeparator
 			});
 			if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
-				c.plugins.push({
-					ptype: 'formreadonly'
-				});
+				if(c.plugins !== false){
+					c.plugins.push({
+						ptype: 'formreadonly'
+					});
+				}
 			}
 						
 			switch(c.xtype) {
@@ -897,6 +911,7 @@ Ext.define('Ck.form.Controller', {
 					break;
 			}
 			
+			// GRID PLUGINS
 			if(c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
 				// Try to merge plugins config and default config
 				var applyDefault = function(plugins, defaults) {
@@ -924,21 +939,24 @@ Ext.define('Ck.form.Controller', {
 					return plugins;
 				};
 
-				if(c.subform) {
-					c.plugins = applyDefault(c.plugins,  [{
-						ptype: 'gridsubform'
-					}]);
-				} else {
-					c.plugins = applyDefault(c.plugins,  [{
-						ptype: 'gridediting'
-					}, {
-						ptype: 'rowediting',
-						pluginId: 'rowediting',
-						clicksToEdit: 1
-					}]);
+				if(c.plugins !== false){
+					if(c.subform) {
+						c.plugins = applyDefault(c.plugins,  [{
+							ptype: 'gridsubform'
+						}]);
+					} else {
+						c.plugins = applyDefault(c.plugins,  [{
+							ptype: 'gridediting'
+						}, {
+							ptype: 'rowediting',
+							pluginId: 'rowediting',
+							clicksToEdit: 1
+						}]);
+					}
 				}
 			}
-
+			//
+			
 			if(c.layout == 'column') {
 				// TODO : simplifié l'ajout auto de xtype container mais pas tjrs...
 				Ext.applyIf(c, {
