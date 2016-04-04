@@ -80,7 +80,6 @@ Ext.define('Ck.form.Controller', {
 		},
 		global:{
 			mousedown: function(e, eOpts ){
-				Ck.log(e.target.nodeName);
 				if(e.target && e.target.getAttribute("handler")){
 					var h = e.target.getAttribute("handler");
 					if(!this[h] && this.oController && this.oController[h]){
