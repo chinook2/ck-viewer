@@ -92,8 +92,8 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
 				
 		// Force readOnly for specific field
-		if(cmp.initialConfig.readOnly === true) r = true;
-		if(cmp.initialConfig.readOnly === false) r = false;
+		if(cmp.readOnly === true) r = true;
+		if(cmp.readOnly === false) r = false;
 		
 		/*
 		 if(this.join) {

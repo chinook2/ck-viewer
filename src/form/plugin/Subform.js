@@ -79,19 +79,23 @@ Ext.define('Ck.form.plugin.Subform', {
 				bind: {
 					hidden: '{!editing}'
 				},
-				items: ['->', {
+				items: ['->',{
 					text: 'Add',
 					handler: this.addItem,
 					bind: {
 						hidden: '{updating}'
 					},
 					scope: this
-				}, {
+				},{
 					text: 'Update',
 					handler: this.updateItem,
 					bind: {
 						hidden: '{!updating}'
 					},
+					scope: this
+				},{
+					text: 'Cancel',
+					handler: this.resetSubForm,
 					scope: this
 				}]
 			}]
