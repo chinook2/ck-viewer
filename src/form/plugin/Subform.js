@@ -7,6 +7,9 @@ Ext.define('Ck.form.plugin.Subform', {
 
 	clicksToEdit: 1,
 
+	addbutton: true,
+	addbuttonText: 'Add',
+
 	editrow: true,
 	
 	deleterow: true,
@@ -147,23 +150,25 @@ Ext.define('Ck.form.plugin.Subform', {
 				items: this._subform
 			}, subForm.window));
 			
-			// Add toolbar for adding new item in grid (open window...)
-			grid.addDocked({
-				xtype: 'toolbar',
-				dock: 'top',
-				bind: {
-					hidden: '{!editing}'
-				},
-				style: {border: 0},
-				items: ['->', {
-					text: 'Add',
-					handler: this.newItem,
+			if(this.addbutton){
+				// Add toolbar for adding new item in grid (open window...)
+				grid.addDocked({
+					xtype: 'toolbar',
+					dock: 'top',
 					bind: {
-						hidden: '{updating}'
+						hidden: '{!editing}'
 					},
-					scope: this
-				}]
-			});
+					style: {border: 0},
+					items: ['->', {
+						text: this.addbuttonText,
+						handler: this.newItem,
+						bind: {
+							hidden: '{updating}'
+						},
+						scope: this
+					}]
+				});
+			}
 			
 			this._subform = this._subformWindow.down('ckform');
 		}
