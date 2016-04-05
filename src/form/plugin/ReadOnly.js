@@ -36,6 +36,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		// Update readOnly status on start/stop editing
 		this.formController.on('startEditing', this.setReadOnly, this);
 		this.formController.on('stopEditing', this.setReadOnly, this);
+		
+		// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
+		this.formController.on('afterreset', this.setReadOnly, this);
 	},
 
 	destroy: function () {
@@ -89,11 +92,16 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		
 		// Try to put readOnly by default when reset form (value==null)
 		// In some case readOnly is binded with data record, reset > need to revert readOnly state
-		if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
+		// if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
 				
 		// Force readOnly for specific field
-		if(cmp.readOnly === true) r = true;
-		if(cmp.readOnly === false) r = false;
+		if(cmp.initialConfig.readOnly === true) r = true;
+		if(cmp.initialConfig.readOnly === false) r = false;
+		
+		// readOnly can be bind need to get value
+		if(cmp.bind && cmp.bind.readOnly){
+			r = cmp.bind.readOnly.getValue();
+		}
 		
 		/*
 		 if(this.join) {
