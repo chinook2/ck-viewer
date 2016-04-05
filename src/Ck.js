@@ -1400,6 +1400,21 @@ Ext.apply(Ck, {
 				error : opt.onError.bind(opt.scope)
 			} 
 		);
+	},
+	
+	/**
+	 * Returns true if executed on a mobile device
+	 * For testing purposes the deviceType can be overridden by adding a deviceType parameter to the URL of the page, like so: http://localhost/mypage.html?deviceType=Tablet
+	 */
+	isMobileDevice: function() {
+		return Ext.os.deviceType == "Phone" || Ext.os.deviceType == "Tablet";
+	},
+	
+	/**
+	 * Returns true if executed on a desktop
+	 */
+	isDesktop: function() {
+		return Ext.os.deviceType == "Desktop";
 	}
 }).init();
 

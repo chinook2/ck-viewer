@@ -316,7 +316,7 @@ Ext.define('Ck.form.Controller', {
 
 					if(fcw.title) win.setTitle(fcw.title);
 				// Adjust form popup Size on PC (tablet is full screen)
-				if(Ext.os.is.desktop) {
+				if(Ck.isDesktop()) {
 					if(fcw.width) win.setWidth(fcw.width);
 					if(fcw.height) win.setHeight(fcw.height);
 				}

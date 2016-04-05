@@ -176,7 +176,7 @@ Ext.define('Ck.Selection', {
 			};
 		}
 		
-		// Initializ draw interaction		
+		// Initialize draw interaction		
 		var draw = new ol.interaction.Draw({
 			type				: type,
 			geometryFunction	: geometryFunction,
@@ -236,7 +236,12 @@ Ext.define('Ck.Selection', {
 	 */
 	processSelection: function(evntParams) {
 		this.getMask().show();
-		this.inAddition = event[this.getMergeKey()];
+		
+		// Fix if selection is fired from code and not from user interaction
+		if(event !== undefined) {
+			this.inAddition = event[this.getMergeKey()];
+		}
+		
 		var feature = evntParams.feature;
 		var draw = this.getDraw();
 		

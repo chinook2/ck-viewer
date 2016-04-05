@@ -28,7 +28,7 @@ Ext.define('Ck.result.feature.Controller', {
 		var formName = layer.getExtension('form');
 		// Filter form fields for mobile (when using Forms serveur)
 		// if(formName) {
-		if(formName && !Ext.os.is.desktop) {
+		if(formName && Ck.isMobileDevice()) {
 			formName += '&mod=mobile';
 		}
 		if(!formName){
