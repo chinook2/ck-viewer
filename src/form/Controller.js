@@ -284,6 +284,14 @@ Ext.define('Ck.form.Controller', {
 			this.dataUrl = null;
 			this.dataModel = null;
 			// this.dataStore = null;
+			
+			// Apply style and bodyStyle
+			if(form.style) {
+				this.getView().setStyle(form.style);
+			}
+			if(form.bodyStyle) {
+				this.getView().setBodyStyle(form.bodyStyle);
+			}
 
 			// Create un dedicated controller form the named form
 			var controllerName = 'Ck.form.controller.' + this.name;

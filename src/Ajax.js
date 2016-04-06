@@ -110,8 +110,12 @@ Ext.define('Ck.Ajax', {
 		var xhr = new XMLHttpRequest();
 
 		xhr.onreadystatechange = function() {
-			if (xhr.readyState == 4 && (xhr.status == 200 || xhr.status == 0)) {
-				options.success.call(options.scope, xhr);
+			if (xhr.readyState == 4) {
+				if(xhr.status == 200 || xhr.status == 0) {
+					options.success.call(options.scope, xhr);
+				} else {
+					options.failure.call(options.scope, xhr);
+				}
 			}
 		};
 		
