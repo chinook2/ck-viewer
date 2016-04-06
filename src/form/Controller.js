@@ -1474,7 +1474,11 @@ Ext.define('Ck.form.Controller', {
 
 		var me = this;
 		var v = me.getView();
-
+		if(!v) {
+			Ck.log("Form View is not valid in saveData : "+ this.name);
+			return;
+		}
+		
 		var sid = v.getSid();
 		var lyr = v.getLayer();
 
