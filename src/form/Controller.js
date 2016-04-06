@@ -1233,6 +1233,9 @@ Ext.define('Ck.form.Controller', {
 		var v = this.getView();
 		var form = v.getForm();
 
+		// If the entire form is Hidden ignore setValues
+		if(v.isVisible() === false) return;
+
 		// FIX Ext 
 		// Combo setValues with bind filters (who depends on previous field in form).
 		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
@@ -1273,6 +1276,9 @@ Ext.define('Ck.form.Controller', {
 		var form = v.getForm();
 		var isValid = true;
 
+		// If the entire form is Hidden ignore form validity
+		if(v.isVisible() === false) return true;
+		
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
 			if(f && f.isVisible() && !f.isValid()) {
@@ -1510,6 +1516,9 @@ Ext.define('Ck.form.Controller', {
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 
+			// Ignore form when it's hidden
+			if(sf.view.isVisible() === false) continue;
+			
 			// TODO : manage save callback...
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
 			if(!sf.view.name && !sf.view.isSubForm) {
@@ -1643,7 +1652,7 @@ Ext.define('Ck.form.Controller', {
 
 		var dt = fid;
 
-		if(this.oController.beforeDelete(dt) === false) {
+		if(this.oController.beforeDelete(dt, options, fid, url, model) === false) {
 			Ck.log("beforeDelete cancel deleteData.");
 			return false;
 		}

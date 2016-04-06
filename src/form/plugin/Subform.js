@@ -141,7 +141,8 @@ Ext.define('Ck.form.plugin.Subform', {
 					//title: "Subform",
 					height: 500,
 					width: 600,
-					modal: true
+					modal: true,
+					scrollable: 'y'
 				}
 			}
 			this._subformWindow = Ext.create('Ext.window.Window', Ext.applyIf({
