@@ -397,7 +397,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		});
 	},
 	
-	newItem: function() {
+	newItem: function(data) {
 		if(!this._subform) return;
 		
 		// Force reset
@@ -405,6 +405,14 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		if(this._subformWindow) {
 			this._subformWindow.show();
+		}
+		
+		// Load subform data
+		if(data){
+			var formController = this._subform.getController();
+			formController.loadData({
+				raw: data
+			});
 		}
 	},
 	

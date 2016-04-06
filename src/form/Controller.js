@@ -373,10 +373,10 @@ Ext.define('Ck.form.Controller', {
 			// Add form to the panel after toolbar (correct size)
 			this.view.add(fcf.items);
 
-			// Init form popup if needed
+			// Init form popup if needed (juste main form can do that)
 			var fcw = form.window;
 			var win = this.view.up('window');
-			if(win && fcw) {
+			if(win && fcw && !this.parentForm) {
 				// Ext.apply(win, fcw);
 				// win.show();
 
