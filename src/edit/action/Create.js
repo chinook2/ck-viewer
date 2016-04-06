@@ -30,7 +30,7 @@ Ext.define('Ck.edit.action.Create', {
 		this.callParent(arguments);
 
 		// Create the interaction if it doesn't already exist
-		if(!this.drawInteraction) {
+		if(!this.drawInteraction && !btn.gps) {
 			this.drawSource = new ol.source.Vector();
 			this.drawInteraction = new ol.interaction.Draw({
 				type: this.controller.getGeometryTypeBehavior(),
@@ -63,28 +63,36 @@ Ext.define('Ck.edit.action.Create', {
 		}
 
 		if(btn.gps){
-			var geoloc = this.getMap().geolocation.getPosition();
-						
-			var geomType = this.controller.getGeometryTypeBehavior();
-			if(geomType=='Point') {
-				// Create un new  feature
-				var geometry = new ol.geom.Point(geoloc)
-				var feature = new ol.Feature({
-					geometry: geometry,
-					status: "CREATED"
-				});
-				this.drawSource.addFeature(feature);
-				this.endProcess(geometry);
-			}
+			if(status) {
+				var geoloc = this.getMap().geolocation.getPosition();
+				geoloc = [1424431, 2232227];
+				var geomType = this.controller.getGeometryTypeBehavior();
+				if(geomType=='Point') {
+					if(!this.drawSource) {
+						this.drawSource = new ol.source.Vector();
+					}
+					
+					// Create un new  feature
+					var geometry = new ol.geom.Point(geoloc)
+					var feature = new ol.Feature({
+						geometry: geometry,
+						status: "CREATED"
+					});
+					this.drawSource.addFeature(feature);
+					this.endProcess(geometry);
+					this.toggleAction(btn, false);
+				}
+			}			
+		} else {
+			this.drawInteraction.setActive(status);
 		}
-		
-		this.drawInteraction.setActive(status);
 	},
 
 	doAction: function(btn) {
 		this.callParent(arguments);
-		if(!this.enableToggle) {
+		/*if(!this.enableToggle) {
 			var pos = this.getMap().geolocation.getPosition();
+			pos = [1424431, 2232227];
 			if(Ext.isArray(pos)) {
 				this.endProcess(new ol.geom.Point(pos));
 			} else {
@@ -95,7 +103,7 @@ Ext.define('Ck.edit.action.Create', {
 					icon: Ext.Msg.ERROR
 				});
 			}
-		}
+		}*/
 	},
 
 	// A voir si plus fonctionnel !

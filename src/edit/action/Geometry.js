@@ -15,7 +15,7 @@ Ext.define('Ck.edit.action.Geometry', {
 
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
-		
+		this.btn = btn;
 		var source = this.getLayerSource();
 		
 		if(!this.geometryInteraction) {
@@ -47,6 +47,10 @@ Ext.define('Ck.edit.action.Geometry', {
 				this.controller.moveInteraction.setActive(false);
 			}
 			this.geometryInteraction.resetSelection();
+			
+			if(this.controller.vertex !== undefined) {
+				this.controller.vertex.closeAll();
+			}			
 		}
 	},
 	
@@ -81,5 +85,6 @@ Ext.define('Ck.edit.action.Geometry', {
 	 */
 	reset: function() {
 		this.geometryInteraction.resetSelection();
+		this.toggleAction(this.btn, true);
 	}
 });

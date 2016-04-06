@@ -294,7 +294,13 @@ Ext.define('Ck.edit.vertex.Controller', {
 			latitude: this.trimCoord(lat),
 			geometry: [lon, lat]
 		};
-		this.grid.getStore().insert(index, record);
+		
+		if(this.grid.getStore()) {
+			this.grid.getStore().insert(index, record);
+		} else {
+			this.store.insert(index, record);
+		}
+		
 		this.focusRow(index);
 		this.vertexAdded(this.store.getAt(index), index);
 	},
@@ -489,7 +495,12 @@ Ext.define('Ck.edit.vertex.Controller', {
 				geometry: coord
 			};
 			
-			this.grid.getStore().insert(idx, data);			
+			if(this.grid.getStore()) {
+				this.grid.getStore().insert(idx, data);
+			} else {
+				this.store.insert(idx, data);
+			}
+			
 			this.coords.splice(idx, 0, [data.longitude, data.latitude]);			
 			this.reindexVertex();		
 		}
@@ -595,6 +606,21 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 	
 	/**
+	 * Close interactions if opened and remove markers
+	 */
+	closeAll: function() {
+		if(this.modifyInteraction) {
+			this.olMap.removeInteraction(this.modifyInteraction);
+		}
+		if(this.moveInteraction) {
+			this.olMap.removeInteraction(this.moveInteraction);
+		}
+		if(this.feature !== undefined) {
+			this.unloadGeometry();
+		}
+	},
+	
+	/**
 	 * Save the current geometry
 	 */
 	save: function() {
@@ -611,9 +637,10 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.fireEvent("cancel", this.feature);
 	},
 	
-	close: function() {
+	close: function() {		
+		this.closeAll();
 		this.vertexLayer.setMap(null);
-		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);		
 	}
 	
 });

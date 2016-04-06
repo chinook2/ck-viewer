@@ -293,13 +293,15 @@ Ext.define('Ck.edit.Controller', {
 				}
 			}
 
-			this.vertexPanel = Ext.create("widget.ckedit-vertex", conf);
+			var vertexConf = conf;
+			vertexConf.scrollable = false;
+			this.vertexPanel = Ext.create("widget.ckedit-vertex", vertexConf);
 			vertexContainer.add(this.vertexPanel);
 			this.mainWindow.manageVisibility();
 
 			// Add listeners
 			this.vertex = this.vertexPanel.getController();
-			Ext.apply(this.vertex, conf);
+			Ext.apply(this.vertex, vertexConf);
 
 			var receiver = (this.getMultiBehavior())? this.feature : this;
 			this.relayEvents(this.vertex, ["sessionstart"], "vertex");
@@ -319,7 +321,7 @@ Ext.define('Ck.edit.Controller', {
 		}
 		
 		// Hide "Add to GPS position" button if is not a point layer
-		if(geometryType.indexOf("Line") == -1) {
+		if(Ck.isDesktop() || geometryType.includes("Point") === false) {
 			var gpsAdd = tbar.getComponent("edit-create-gps");
 			if(gpsAdd) {
 				gpsAdd.hide();
@@ -329,7 +331,6 @@ Ext.define('Ck.edit.Controller', {
 		// Geolocation button
 		this.on("geolocation", this.setPosition, this);
 		this.geolocationBtn = tbar.getComponent("edit-geolocation");
-		
 		
 		this.historyView = Ext.create("widget.ckedit-history", conf);
 		this.historyView.setVisible(view.getUseHistory());
@@ -743,6 +744,7 @@ Ext.define('Ck.edit.Controller', {
 						inserts.push(ft);
 						break;
 					case 1:
+						this.vertex.closeAll();
 					case 2:
 					case 4:
 					case 5:
@@ -772,8 +774,6 @@ Ext.define('Ck.edit.Controller', {
 				},
 				scope: this
 			});
-			
-			
 		}
 	},
 
