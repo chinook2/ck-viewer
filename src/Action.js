@@ -179,5 +179,17 @@ Ext.define('Ck.Action', {
 			this.setOlMap(map.getOlMap());
 			this.setOlView(map.getOlView());
 		}
+	},
+	
+	setVisible: function(show) {
+		this.executeFnOnItems(function(show, item) {
+			if(Ext.isFunction(item.setVisible)) {
+				item.setVisible(show);
+			}
+		}.bind(this, show));
+	},
+	
+	executeFnOnItems: function(fn) {
+		this.items.forEach(fn);
 	}
 });

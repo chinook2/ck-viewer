@@ -23,6 +23,11 @@ Ext.define('Ck.form.Controller', {
 	fields: [],
 	subforms: [],
 	
+	/**
+	 * Form JSON data definition
+	 */
+	form: null,
+	
 	// TODO in config param in form json...
 	compatibiltyMode: false,
 
@@ -273,8 +278,10 @@ Ext.define('Ck.form.Controller', {
 				this.getForm(formUrl);
 				return;
 			}
-
+			
+			this.form = form;
 			this.name = form.name;
+			
 			if(!this.name) {
 				Ck.log("Enable to get form Name.");
 				CkLog(form);
@@ -307,8 +314,8 @@ Ext.define('Ck.form.Controller', {
 			this.oController = Ext.create(controllerName);
 			this.oController._parent = this;
 			//
-
-			if(this.oController.beforeShow(form) === false) {
+			
+			if(this.oController.beforeShow(form) === false || this.beforeShow(form) === false) {
 				Ck.log("beforeShow cancel initForm.");
 				return;
 			}
@@ -1643,7 +1650,14 @@ Ext.define('Ck.form.Controller', {
 	},
 	
 	
-	
+	getOption: function(key) {
+		var opt = this.form.options || {};
+		if(Ext.isString(key)) {
+			return opt[key];
+		} else {
+			return opt;
+		}
+	},
 
 	deleteData: function(options) {
 		options = options || {};
