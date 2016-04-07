@@ -109,6 +109,11 @@
 	},
 	
 	hideTool: function(toolName) {
+		if(!this.doc) {
+			this.reCall();
+			return;
+		}
+		
 		var t = this.doc.getElementById(toolName);
 		var st = this.doc.getElementById('secondary' + Ext.String.capitalize(toolName));
 		
@@ -117,6 +122,11 @@
 	},
 	
 	showTool: function(toolName) {
+		if(!this.doc) {
+			this.reCall();
+			return;
+		}
+		
 		var t = this.doc.getElementById(toolName);
 		var st = this.doc.getElementById('secondary' + Ext.String.capitalize(toolName));
 		
