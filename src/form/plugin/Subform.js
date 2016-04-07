@@ -66,7 +66,6 @@ Ext.define('Ck.form.plugin.Subform', {
 			dataModel: subForm.dataModel,
 			
 			// TODO use param from json
-			//layout: 'fit',
 			layout: subForm.layout || '',
 			scrollable: subForm.scrollable || 'y',
 			
@@ -84,6 +83,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				},
 				items: ['->',{
 					text: 'Add',
+					cls: 'ck-form-add',
 					handler: this.addItem,
 					bind: {
 						hidden: '{updating}'
@@ -91,6 +91,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				},{
 					text: 'Update',
+					cls: 'ck-form-update',
 					handler: this.updateItem,
 					bind: {
 						hidden: '{!updating}'
@@ -98,6 +99,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				},{
 					text: 'Cancel',
+					cls: 'ck-form-cancel',
 					handler: this.resetSubForm,
 					scope: this
 				}]
@@ -148,7 +150,11 @@ Ext.define('Ck.form.plugin.Subform', {
 			this._subformWindow = Ext.create('Ext.window.Window', Ext.applyIf({
 				layout: 'fit',
 				closeAction: 'hide',
-				items: this._subform
+				items: this._subform,
+				listeners: {
+					close: this.resetSubForm,
+					scope: this
+				}
 			}, subForm.window));
 			
 			if(this.addbutton){
@@ -399,9 +405,12 @@ Ext.define('Ck.form.plugin.Subform', {
 	
 	newItem: function(data) {
 		if(!this._subform) return;
+		var formController = this._subform.getController();
 		
 		// Force reset
 		this.resetSubForm();
+		// Force start editing
+		formController.startEditing();
 		
 		if(this._subformWindow) {
 			this._subformWindow.show();
@@ -409,7 +418,6 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// Load subform data
 		if(data){
-			var formController = this._subform.getController();
 			formController.loadData({
 				raw: data
 			});
