@@ -659,7 +659,7 @@ Ext.define('Ck.form.Controller', {
 					if(c.value == 'now') {
 						me.on('afterload', function() {
 							var f = me.view.form.findField(c.name);
-							if(f) f.setValue(Ext.Date.clearTime(new Date()));
+							if(f && !f.getValue()) f.setValue(Ext.Date.clearTime(new Date()));
 						});
 					}
 					if(c.maxValue == 'now') {
@@ -678,7 +678,7 @@ Ext.define('Ck.form.Controller', {
 					if(c.value == 'now') {
 						me.on('afterload', function() {
 							var f = me.view.form.findField(c.name);
-							if(f) f.setValue(Ext.Date.format(new Date(), c.format));
+							if(f && !f.getValue()) f.setValue(Ext.Date.format(new Date(), c.format));
 						});
 					}
 					break;
