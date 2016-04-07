@@ -405,9 +405,12 @@ Ext.define('Ck.form.plugin.Subform', {
 	
 	newItem: function(data) {
 		if(!this._subform) return;
+		var formController = this._subform.getController();
 		
 		// Force reset
 		this.resetSubForm();
+		// Force start editing
+		formController.startEditing();
 		
 		if(this._subformWindow) {
 			this._subformWindow.show();
@@ -415,7 +418,6 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// Load subform data
 		if(data){
-			var formController = this._subform.getController();
 			formController.loadData({
 				raw: data
 			});
