@@ -12,6 +12,8 @@ Ext.define('Ck.form.Controller', {
 	parentForm: false,
 	storage: null,
 
+	formConfig: null,
+	
 	dataUrl: null,
 	dataModel: null,
 	// dataStore: null,
@@ -274,6 +276,7 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
+			this.formConfig = form;
 			this.name = form.name;
 			if(!this.name) {
 				Ck.log("Enable to get form Name.");
@@ -370,6 +373,11 @@ Ext.define('Ck.form.Controller', {
 				if(this.defaultDock) this.view.addDocked(this.defaultDock);
 			}
 
+			// TODO : Need compatibility or rewrite existing forms :( (for layout border and perhaps other stuff)
+			// remove one level and add "all" in 'form' except dockedItems
+			// delete fcf.dockedItems;
+			// this.view.add(fcf);
+			
 			// Add form to the panel after toolbar (correct size)
 			this.view.add(fcf.items);
 
@@ -380,6 +388,8 @@ Ext.define('Ck.form.Controller', {
 				// Ext.apply(win, fcw);
 				// win.show();
 
+				// TODO : test win.setConfig(fcw) 
+				
 				// TODO : binding ou surcharge complète du config...
 				// if(fcw) win.setBind(fcw);
 
@@ -1536,8 +1546,8 @@ Ext.define('Ck.form.Controller', {
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
 			if(!sf.view.name && !sf.view.isSubForm) {
 				if(sf.saveData()===false){
-					Ck.log("Subform " + sf.view.formName + " cancel saveData.");
-					return false;
+					Ck.log("Subform " + sf.view.formName + " saveData is FALSE.");
+					// return false;
 				}
 			}
 		}

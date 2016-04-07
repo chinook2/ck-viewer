@@ -66,8 +66,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			dataModel: subForm.dataModel,
 			
 			// TODO use param from json
-			//layout: 'fit',
-			layout: subForm.layout || 'fit',
+			layout: subForm.layout || '',
 			scrollable: subForm.scrollable || 'y',
 			
 			formName: '/' + subForm.url,
@@ -151,7 +150,11 @@ Ext.define('Ck.form.plugin.Subform', {
 			this._subformWindow = Ext.create('Ext.window.Window', Ext.applyIf({
 				layout: 'fit',
 				closeAction: 'hide',
-				items: this._subform
+				items: this._subform,
+				listeners: {
+					close: this.resetSubForm,
+					scope: this
+				}
 			}, subForm.window));
 			
 			if(this.addbutton){
