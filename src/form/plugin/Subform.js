@@ -67,7 +67,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			
 			// TODO use param from json
 			//layout: 'fit',
-			layout: subForm.layout || '',
+			layout: subForm.layout || 'fit',
 			scrollable: subForm.scrollable || 'y',
 			
 			formName: '/' + subForm.url,
@@ -84,6 +84,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				},
 				items: ['->',{
 					text: 'Add',
+					cls: 'ck-form-add',
 					handler: this.addItem,
 					bind: {
 						hidden: '{updating}'
@@ -91,6 +92,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				},{
 					text: 'Update',
+					cls: 'ck-form-update',
 					handler: this.updateItem,
 					bind: {
 						hidden: '{!updating}'
@@ -98,6 +100,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				},{
 					text: 'Cancel',
+					cls: 'ck-form-cancel',
 					handler: this.resetSubForm,
 					scope: this
 				}]

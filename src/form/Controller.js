@@ -616,6 +616,7 @@ Ext.define('Ck.form.Controller', {
 			Ext.applyIf(c, {
 				plugins: [],
 				anchor: '100%',
+				msgTarget: 'side',
 				labelSeparator: me.layoutConfig.labelSeparator
 			});
 			if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
@@ -656,7 +657,7 @@ Ext.define('Ck.form.Controller', {
 
 					// Init-Actualise avec la date du jour (après le chargement)
 					if(c.value == 'now') {
-						me.view.on('afterload', function() {
+						me.on('afterload', function() {
 							var f = me.view.form.findField(c.name);
 							if(f) f.setValue(Ext.Date.clearTime(new Date()));
 						});
@@ -675,7 +676,7 @@ Ext.define('Ck.form.Controller', {
 
 					// Init-Actualise avec la date du jour (après le chargement)
 					if(c.value == 'now') {
-						me.view.on('afterload', function() {
+						me.on('afterload', function() {
 							var f = me.view.form.findField(c.name);
 							if(f) f.setValue(Ext.Date.format(new Date(), c.format));
 						});
