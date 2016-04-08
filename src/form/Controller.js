@@ -1021,6 +1021,38 @@ Ext.define('Ck.form.Controller', {
 		return cfg;
 	},
 
+	/**
+	 * @params {Array}
+	 */
+	applyFieldsDefaults: function(cfg, configs){
+		var fn = function(c) {
+			for(var ci=0; ci<configs.length; ci++) {
+				var cf = configs[ci];
+				if(c[cf.property] == cf.value) {
+					Ext.apply(c, cf.config);
+				}
+			}
+			
+			if(c.items && c.processItems !== false) {
+				Ext.each(c.items, fn, this);
+			}
+			return c;
+		}.bind(this);
+
+		for(var key in cfg.items) {
+			var cf = fn(cfg.items[key]);
+			if(cf) cfg.items[key] = cf;
+		}
+		return cfg;
+	},
+	applyFieldDefaults: function(cfg, prop, ref, config){
+		return this.applyFieldsDefaults(cfg, [{
+			property: prop,
+			value: ref,
+			config: config
+		}]);
+	},
+	
 	startEditing: function() {
 		this.getViewModel().set("editing", true);
 		this.getViewModel().set("isEditable", false);
