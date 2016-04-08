@@ -180,6 +180,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			}
 			
 			this._subform = this._subformWindow.down('ckform');
+			
+			//Add reference to parentForm
+			this._subform.getController().parentForm = formController;
 		}
 		
 		var vm = this._subform.getViewModel();
