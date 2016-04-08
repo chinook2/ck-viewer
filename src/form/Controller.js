@@ -359,7 +359,7 @@ Ext.define('Ck.form.Controller', {
 								tag: "span",
 								html: "Reset",
 								// No other way to do this? :-(
-								onClick: "Ext.getCmp('" + this.getView().getId() + "').getController().resetData()",
+								onClick: "Ext.getCmp('" + this.getView().getId() + "').getController().resetData(true)",
 								cls: "lookLikeLink"
 							}
 						});
@@ -1792,24 +1792,42 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
-	resetData: function() {
+	resetData: function(bSoft) {
 		var v = this.getView();
 		if(!v) return;
 		
 		// Reset main form
-		v.reset();
-		if(this.getViewModel().get('updating')===true) {
-			this.getViewModel().set('updating', false);
+		if(bSoft===true){
+			// Soft reset
+			Ext.suspendLayouts();
+			var form = v.getForm();
+			var fields = form.getFields().items,
+				f,
+				fLen = fields.length;
+			for (f = 0; f < fLen; f++) {
+				if(fields[f].readOnly!==true) fields[f].reset();
+			}
+			Ext.resumeLayouts(true);	
+		} else {
+			// Standard reset
+			v.reset();
 		}
 		
 		// SUBFORM : reset data
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			if(sf) sf.resetData();
+			if(sf) sf.resetData(bSoft);
 		}
 		//
-	
+		
+		// In soft reset don't alter viewModel - juste clean allowed fields.
+		if(bSoft===true) return true;
+		
+		if(this.getViewModel().get('updating')===true) {
+			this.getViewModel().set('updating', false);
+		}
+		
 		// Reset viewModel data (binding...)
 		this.getViewModel().setData({
 			layer: null,
