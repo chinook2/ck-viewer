@@ -168,7 +168,9 @@ Ext.define('Ck.form.plugin.Subform', {
 					style: {border: 0},
 					items: ['->', {
 						text: this.addbuttonText,
-						handler: this.newItem,
+						handler: function(){
+							this.newItem();
+						},
 						bind: {
 							hidden: '{updating}'
 						},
@@ -386,10 +388,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		var rec = grid.getStore().getAt(rowIndex).getData();
 		
 		// update data fid for current item (used by dataUrl templating)
-		var vDataFid = this._subform.getDataFid();
-		this.mainDataFid = Ext.clone(vDataFid);
-		var dataFid = Ext.apply(vDataFid, rec);
-		this._subform.setDataFid(dataFid);
+		var dataFid = this.setDataFid(rec);
 		//
 		
 		// Delete record if params available
@@ -418,6 +417,9 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// Load subform data
 		if(data){
+			// update data fid for new item (used by dataUrl templating)
+			this.setDataFid(data);
+			
 			formController.loadData({
 				raw: data
 			});
@@ -441,17 +443,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		var dataUrl = grid.subform.dataUrl || formController.dataUrl;
 		
 		// update data fid for current loading item (used by dataUrl templating)
-		var vDataFid = this._subform.getDataFid();
-		this.mainDataFid = Ext.clone(vDataFid);
-		var dataFid = {};
-		if(Ext.isString(vDataFid)) {
-			dataFid = Ext.apply({
-				fid: vDataFid
-			}, data);
-		} else{
-			dataFid = Ext.apply(vDataFid, data);
-		}
-		this._subform.setDataFid(dataFid);
+		var dataFid = this.setDataFid(data);
 		//
 		
 		// By default load subform with data from the grid
@@ -487,6 +479,22 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Init update mode
 		var vm = this._subform.getViewModel();
 		vm.set('updating', true);		
+	},
+	
+	setDataFid: function(data) {
+		var vDataFid = this._subform.getDataFid();
+		this.mainDataFid = Ext.clone(vDataFid);
+		var dataFid = {};
+		if(Ext.isString(vDataFid)) {
+			dataFid = Ext.apply({
+				fid: vDataFid
+			}, data);
+		} else{
+			dataFid = Ext.apply(vDataFid, data);
+		}
+		this._subform.setDataFid(dataFid);
+		
+		return dataFid;
 	},
 	
 	resetSubForm: function() {
