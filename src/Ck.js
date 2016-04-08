@@ -347,10 +347,11 @@ Ext.apply(Ck, {
 	},
 	
 	/**
-	 * Get default resource path
+	 * Get default resource path for a package
+	 * @param {String} The package name (ck-viewer by default)
 	 * @return {String}
 	 */
-	getPath: function() {
+	getPath: function(pkg) {
 		// Ext.manifest.paths doesn't in production and testing !
 		// Ext.manifest.profile can be empty in production mode.
 		
@@ -359,22 +360,27 @@ Ext.apply(Ck, {
 		//<debug>
 		// In Development
 		// mini hack to load static resource in dev and prod (this is ignored in prod) !
+		
 		var path = '';
 		if(Ext.manifest.paths && Ext.manifest.paths.Ck) {
 			var basePath = Ext.manifest.paths.Ck.replace('/src','');
+			if(!Ext.isEmpty(pkg)) {
+				basePath = basePath.replace("ck-viewer", pkg);
+			}
 			path = basePath + '/resources';
 		}
 		return path;
 		//</debug>
 		
 		// In Production
+		pkg = (Ext.isEmpty(pkg))? "ck-viewer" : pkg;
 		if(window.cordova){
 			// Mobile app use relative path
-			return Ext.manifest.profile + '/resources/ck-viewer';
+			return Ext.manifest.profile + '/resources/' + pkg;
 		} else {
 			// Standard web app need to add full url
 			var baseUrl = location.protocol +'//'+ location.host + location.pathname;
-			return baseUrl + Ext.manifest.profile + '/resources/ck-viewer';
+			return baseUrl + Ext.manifest.profile + '/resources/' + pkg;
 		}
 		
 		// TODO : when used without CMD - include inline API...
