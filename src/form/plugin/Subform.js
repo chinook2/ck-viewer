@@ -98,8 +98,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				}]
 			}]
-		};
-		
+		};		
 		
 		// add subform in a panel
 		if(subForm.renderTo) {
@@ -137,8 +136,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			if(!subForm.window) {
 				subForm.window = {
 					//title: "Subform",
-					height: 400,
-					width: 400
+					// height: 400,
+					// width: 400
+					maximized: true
 				}
 			}
 			this._subformWindow = Ext.create('Ext.window.Window', Ext.applyIf({

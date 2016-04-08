@@ -143,21 +143,24 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 					if(_http.test(val)) {
 						var title = this.getTitle();
 						val = "<a href='" + val + "' " + title + " target='" + this.getTarget() + "'>" + val + "</a>";
-					}
-					
-					if(val.indexOf("<a href") != -1 && Ck.isMobileDevice()) {
-						this.textEl.dom.onclick = function(evt) {
-							var url = evt.srcElement.getAttribute("href");
+					}					
+				}
+
+				this.textEl.update(val);
+				
+				if(val.indexOf("<a href") != -1 && Ck.isMobileDevice()) {
+					this.textEl.dom.onclick = function(evt) {
+						var url = evt.currentTarget.getElementsByTagName("a")[0].getAttribute("href");
+						// var url = evt.srcElement.getAttribute("href");
+						if(url) {
 							var extension = url.split(".").pop();
 							if(Ext.isEmpty(Ck.EXTENSION_MIMETYPE["extension"])) {
 								navigator.app.loadUrl(url, {loadingDialog:"Wait, loading ressource", loadUrlTimeoutValue: 6000, openExternal: true});
 								return false;
 							}
-						};
-					}
+						}						
+					};
 				}
-
-				this.textEl.update(val);
 			}		
 			
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
