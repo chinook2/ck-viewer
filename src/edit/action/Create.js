@@ -65,23 +65,38 @@ Ext.define('Ck.edit.action.Create', {
 		if(btn.gps){
 			if(status) {
 				var geoloc = this.getMap().geolocation.getPosition();
-				geoloc = [1424431, 2232227];
-				var geomType = this.controller.getGeometryTypeBehavior();
-				if(geomType=='Point') {
-					if(!this.drawSource) {
-						this.drawSource = new ol.source.Vector();
+				// geoloc = [1424431, 2232227]; Testing
+				if(Ext.isArray(geoloc)) {
+					var geomType = this.controller.getGeometryTypeBehavior();
+					if(geomType=='Point') {
+						if(!this.drawSource) {
+							this.drawSource = new ol.source.Vector();
+						}
+						
+						// Create un new  feature
+						var geometry = new ol.geom.Point(geoloc)
+						var feature = new ol.Feature({
+							geometry: geometry,
+							status: "CREATED"
+						});
+						this.drawSource.addFeature(feature);
+						this.endProcess(geometry);
+						btn.toggle(false);
+						Ext.Msg.show({
+							title: "Creation",
+							message: "Point added at GPS position : [ " + geoloc[0] + ", "+ geoloc[1] + "]",
+							buttons: Ext.Msg.OK,
+							icon: Ext.Msg.INFO
+						});
 					}
-					
-					// Create un new  feature
-					var geometry = new ol.geom.Point(geoloc)
-					var feature = new ol.Feature({
-						geometry: geometry,
-						status: "CREATED"
+				} else {
+					Ext.Msg.show({
+						title: "Create features",
+						message: "GPS position not available",
+						buttons: Ext.Msg.OK,
+						icon: Ext.Msg.ERROR
 					});
-					this.drawSource.addFeature(feature);
-					this.endProcess(geometry);
-					this.toggleAction(btn, false);
-				}
+				}				
 			}			
 		} else {
 			this.drawInteraction.setActive(status);
@@ -90,20 +105,6 @@ Ext.define('Ck.edit.action.Create', {
 
 	doAction: function(btn) {
 		this.callParent(arguments);
-		/*if(!this.enableToggle) {
-			var pos = this.getMap().geolocation.getPosition();
-			pos = [1424431, 2232227];
-			if(Ext.isArray(pos)) {
-				this.endProcess(new ol.geom.Point(pos));
-			} else {
-				Ext.Msg.show({
-					title: "Create features",
-					message: "GPS position not available",
-					buttons: Ext.Msg.OK,
-					icon: Ext.Msg.ERROR
-				});
-			}
-		}*/
 	},
 
 	// A voir si plus fonctionnel !
