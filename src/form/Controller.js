@@ -1032,6 +1032,14 @@ Ext.define('Ck.form.Controller', {
 					Ext.apply(c, cf.config);
 				}
 			}
+			// For grids
+			if(c.columns) {
+				Ext.each(c.columns, fn, this);
+			}
+			if(c.editor){
+				Ext.each(c.editor, fn, this);
+			}
+			//
 			
 			if(c.items && c.processItems !== false) {
 				Ext.each(c.items, fn, this);
@@ -1042,6 +1050,11 @@ Ext.define('Ck.form.Controller', {
 		for(var key in cfg.items) {
 			var cf = fn(cfg.items[key]);
 			if(cf) cfg.items[key] = cf;
+		}
+		// Process dockedItems
+		for(var key in cfg.dockedItems) {
+			var cf = fn(cfg.dockedItems[key]);
+			if(cf) cfg.dockedItems[key] = cf;
 		}
 		return cfg;
 	},
