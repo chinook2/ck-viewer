@@ -141,7 +141,11 @@
 			return;
 		}
 		
-		this.win.PDFView.open( this.getFullFile(file) );
+		if(file==''){
+			this.win.PDFView.close();
+		} else {			
+			this.win.PDFView.open( this.getFullFile(file) );
+		}
 	},
 	
 	gotoPage: function(page) {
