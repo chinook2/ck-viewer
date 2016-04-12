@@ -148,10 +148,21 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 				this.textEl.update(val);
 				
+				// Fix: resize fileuploadfield's ownerCt (Panel) after image loaded
+				var img = this.textEl.down("img");
+				if(img !== undefined && img) {
+					img.on("load", function(e, target, opt) {
+						var cmp = this.getCmp();
+						cmp.ownerCt.setWidth(target.width);
+						cmp.ownerCt.setHeight(target.height);
+					}, this);										
+				}
+				
+				// Allow to open link on mobile device
 				if(val.indexOf("<a href") != -1 && Ck.isMobileDevice()) {
 					this.textEl.dom.onclick = function(evt) {
 						var url = evt.currentTarget.getElementsByTagName("a")[0].getAttribute("href");
-						// var url = evt.srcElement.getAttribute("href");
+
 						if(url) {
 							var extension = url.split(".").pop();
 							if(Ext.isEmpty(Ck.EXTENSION_MIMETYPE["extension"])) {
@@ -163,6 +174,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				}
 			}		
 			
+			// Hide file fields buttons when read only mode
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
 					if(cmp.ownerCt.items.getAt(i) != cmp) {
@@ -181,6 +193,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="' + Ext.baseCSSPrefix + 'required">*</span>');
 			}
 			
+			// Show file fields buttons when not in read only mode
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
 				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
 					if(cmp.ownerCt.items.getAt(i) != cmp) {

@@ -27,6 +27,8 @@ Ext.define('Ck.login.action.Login', {
 		
 		var params = form.getValues();
 		
+		if(navigator.splashscreen) navigator.splashscreen.show();
+		
 		Cks.get({
 			// CORS Authent
 			withCredentials: true,
@@ -53,8 +55,10 @@ Ext.define('Ck.login.action.Login', {
 					form.getForm().markInvalid( login.errors );
 					Ck.error('Login error for user "'+ params.username +'".');
 				}
+				if(navigator.splashscreen) navigator.splashscreen.hide();
 			},
 			failure: function(response) {
+				if(navigator.splashscreen) navigator.splashscreen.hide();
 			},
 			scope: this
 		});
