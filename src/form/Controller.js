@@ -208,6 +208,14 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function(btn) {
+		// Process subforms
+		var subforms = this.getSubForms();
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			// Allow to call beforeClose in subForms override
+			sf.formClose({force:true});
+			this.unRegisterSubForm(sf);
+		}
 
 		var closeMe = function() {
 			if(this.oController.beforeClose() === false) {
@@ -523,6 +531,9 @@ Ext.define('Ck.form.Controller', {
 	registerSubForm: function(sform) {
 		this.subforms.push(sform);
 	},
+	unRegisterSubForm: function(sform) {
+		Ext.Array.remove(this.subforms, sform);
+	},
 	
 	// List all included form in a form.
 	getIncludedForm: function(cfg) {
@@ -607,7 +618,7 @@ Ext.define('Ck.form.Controller', {
 			if(c.name && !c.xtype) c.xtype = 'textfield';
 
 			// All items should have a Name
-			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer', 'toolbar'];
+			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer', 'toolbar', 'box', 'component','splitter'];
 			if(!c.name && c.xtype && !Ext.Array.contains(ignoreTypes, c.xtype)) {
 				Ck.log("Name undefined for xtype " + c.xtype);
 			}
@@ -1453,7 +1464,7 @@ Ext.define('Ck.form.Controller', {
 
 
 		if(!url) {
-			Ck.log("Forms loadData 'fid' or 'url' not set.");
+			Ck.log("Forms loadData 'fid' or 'url' not set in "+this.name);
 
 			// If new form with empty data we need to startEditing too...
 			if(v.getEditing()===true) this.startEditing();
@@ -1572,7 +1583,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Test if form is valid (all fields of the main form)
 		if(!this.isValid()) {
-			Ck.log("Form is not valid in saveData : "+ this.name);
+			Ck.log("Form is not valid for : "+ this.name);
 			return false;
 		}
 
@@ -1587,6 +1598,7 @@ Ext.define('Ck.form.Controller', {
 
 		// SUBFORM : save data only if subform is not linked to main form with a name property
 		var subforms = this.getSubForms();
+		Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 
@@ -1656,7 +1668,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(!url) {
-			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
+			Ck.log("Save no URL for : "+ this.name);
 			Ext.callback(options.success, options.scope, [values]);
 			return true;
 		}
@@ -1677,6 +1689,7 @@ Ext.define('Ck.form.Controller', {
 						return false;
 					}
 				}
+				Ck.log("Success to save for : "+this.name);
 				Ext.callback(options.success, options.scope, [data]);
 			},
 			failure: function(response, opts) {
@@ -1685,7 +1698,7 @@ Ext.define('Ck.form.Controller', {
 				if(this.oController.saveFailed(response) === false) {
 					return false;
 				}
-
+				Ck.log("Failed to save for : "+this.name);
 				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
 			}
 		};
@@ -1695,6 +1708,7 @@ Ext.define('Ck.form.Controller', {
 			msg: "Save in progress..."
 		});
 		this.saveMask.show();
+		Ck.log("Start save for : "+this.name);
 		
 		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
