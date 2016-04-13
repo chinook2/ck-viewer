@@ -948,6 +948,97 @@ Ext.define('Ck.form.Controller', {
 							});
 						}
 						break;
+					case "numberfield":
+						if(Ck.isMobileDevice() && c.gpsParam !== undefined) {
+							var panelId = Ext.id();
+							var gpsParam = "";
+							
+							switch(c.gpsParam) {
+								case "accuracy":
+									gpsParam = "accuracy";
+									break;
+								case "altitude":
+									gpsParam = "altitude";
+									break;
+								case "altitudeAccuracy":
+									gpsParam = "altitudeAccuracy";
+									break;
+								case "heading":
+									gpsParam = "heading";
+									break;
+								case "latitude":
+									gpsParam = "latitude";
+									break;
+								case "longitude":
+									gpsParam = "longitude";
+									break;
+								case "speed":
+									gpsParam = "speed";
+									break;							
+							}
+							
+							if(gpsParam !== "") {
+								var form = this;
+								var refreshBtn = {
+									xtype: "button",
+									iconCls: "fa fa-refresh",
+									width: 30,
+									style: {
+										"margin-top": "6px",
+										"margin-left": "5px"
+									},
+									handler: function() {
+										var btn = this;
+										btn.mask = new Ext.LoadMask({
+											msg: "Retrieving GPS informations...",
+											target: form.getView()
+										});
+										btn.mask.show();
+										
+										navigator.geolocation.getCurrentPosition(
+											function(position) {
+												var coordinates = position.coords;
+												var panel = Ext.getCmp(panelId);
+												panel.items.getAt(0).setValue(coordinates[gpsParam]);
+												btn.mask.hide();
+											}, function(err) {
+												btn.mask.hide();
+												Ext.Msg.show({
+													title: "Error " + err.code + " retrieving geolocation",
+													message: err.message,
+													buttons: Ext.Msg.OK,
+													icon: Ext.Msg.ERROR
+												});
+											}, {
+												enableHighAccuracy: true,
+												timeout: 5000,
+												maximumAge: 0
+											});
+									}
+								}
+								
+								c.columnWidth = 1;
+								
+								// Fix form.setValue
+								c.setValue = function(value) {
+									this.setRawValue(value);
+									this.fireEvent("change", value);
+								}
+																
+								c = {
+									xtype: "panel",
+									id: panelId,
+									processItems: false,
+									width: "100%",
+									layout: "column",
+									gpsButton: true,
+									items: [c]
+								}
+																
+								c.items.push(refreshBtn);
+							}							
+						}
+						break;
 				}
 				
 				if(c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {

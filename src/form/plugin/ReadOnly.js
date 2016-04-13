@@ -176,11 +176,26 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			
 			// Hide file fields buttons when read only mode
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
-				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
-					if(cmp.ownerCt.items.getAt(i) != cmp) {
-						cmp.ownerCt.items.getAt(i).setVisible(false);
+				var items = cmp.ownerCt.items;
+				for(var i = 0; i < items.getCount(); i++) {
+					if(items.getAt(i) != cmp) {
+						items.getAt(i).setVisible(false);
 					}
 				}
+			}
+			
+			// Hide numeric fields buttons when read only mode
+			if(cmp.getXTypes().indexOf("numberfield") != -1) {
+				var ownerCt = cmp.ownerCt;
+				if(ownerCt.gpsButton === true) {
+					var items = ownerCt.items;
+					for(var i = 0; i < items.getCount(); i++) {
+						if(items.getAt(i) != cmp) {
+							items.getAt(i).setVisible(false);
+						}
+					}
+				}
+				
 			}
 			
 			this.labelEl.show();
@@ -195,11 +210,28 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			
 			// Show file fields buttons when not in read only mode
 			if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
-				for(var i = 0; i < cmp.ownerCt.items.getCount(); i++) {
-					if(cmp.ownerCt.items.getAt(i) != cmp) {
-						cmp.ownerCt.items.getAt(i).setVisible(true);
+				// TODO : get the "52" from config
+				cmp.ownerCt.setHeight(52);
+				var items = cmp.ownerCt.items;
+				for(var i = 0; i < items.getCount(); i++) {
+					if(items.getAt(i) != cmp) {
+						items.getAt(i).setVisible(true);
 					}
 				}
+			}
+			
+			// Show numeric fields buttons when read only mode
+			if(cmp.getXTypes().indexOf("numberfield") != -1) {
+				var ownerCt = cmp.ownerCt;
+				if(ownerCt.gpsButton === true) {
+					var items = ownerCt.items;
+					for(var i = 0; i < items.getCount(); i++) {
+						if(items.getAt(i) != cmp) {
+							items.getAt(i).setVisible(true);
+						}
+					}
+				}
+				
 			}
 		}
 
