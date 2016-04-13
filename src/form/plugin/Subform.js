@@ -330,13 +330,18 @@ Ext.define('Ck.form.plugin.Subform', {
 
 				if(this._subformWindow) {
 					this._subformWindow.show();
+					this._subformWindow.setVisible(false);
 				}
 
 				// Get subform controller
 				var formController = this._subform.getController();
 
 				var data = context.record.getData();
-				formController.loadRawData(data);
+				this.setDataFid(data);
+
+				formController.loadData({
+					raw: data
+				});
 
 				// Save if params available
 				formController.saveData({
@@ -443,13 +448,13 @@ Ext.define('Ck.form.plugin.Subform', {
 		formController.deleteData({
 			success: function(){
 				grid.getStore().removeAt(rowIndex);
-				this.resetSubForm();				
+				// this.resetSubForm(); // Maybe needed for visible subform (not with modal window)
 			},
 			fid: dataFid,
 			scope: this
 		});
 	},
-	
+
 	newItem: function(data) {
 		if(!this._subform) return;
 		var formController = this._subform.getController();
