@@ -95,8 +95,8 @@ Ext.define('Ck.form.field.Grid', {
 				var val = rec.data[col.dataIndex];
 				
 				// Special formatting for date columns !
-				if(col.xtype == 'datecolumn' && col.submitFormat){
-					row[col.dataIndex] = val ? Ext.Date.format(val, col.submitFormat) : '';
+				if(col.xtype == 'datecolumn' && col.submitFormat && Ext.isDate(val)) {
+					row[col.dataIndex] = Ext.Date.format(val, col.submitFormat);
 				}else{
 					// TODO : add config option to trim or not
 					if(Ext.isString(val)){
