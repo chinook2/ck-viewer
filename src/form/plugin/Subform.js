@@ -448,6 +448,10 @@ Ext.define('Ck.form.plugin.Subform', {
 		formController.deleteData({
 			success: function(){
 				grid.getStore().removeAt(rowIndex);
+				
+				// Reset dataFid too
+				if(this.mainDataFid) this._subform.setDataFid(this.mainDataFid);
+
 				// this.resetSubForm(); // Maybe needed for visible subform (not with modal window)
 			},
 			fid: dataFid,

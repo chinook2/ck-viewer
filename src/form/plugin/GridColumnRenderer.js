@@ -56,26 +56,30 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 					noCache: false
 				}
 			});
+			// Ck.log('gridcolumnrenderer init dataStore : '+ this.store);
 		}
 		
 		grid.getStore().on({
 			load: function(){
-				if(!this.dataStore.isLoaded()){
-					this.dataStore.on('load', function(str, records, successful, eOpts) {
-						grid.getView().refresh();
-					}, this);
-				} else {
-					grid.getView().refresh();
-				}
+				// Ck.log('gridcolumnrenderer grid store load');
+				grid.getView().refresh();
 			},
 			add: function(){
+				// Ck.log('gridcolumnrenderer add row');
 				grid.getView().refresh();
 			},
 			update: function() {
+				// Ck.log('gridcolumnrenderer update row');
 				grid.getView().refresh();
 			},
 			scope: this
 		});
+		
+		// Ensure call refresh once on main grid load and on gridcolumnrenderer dataStore load.
+		this.dataStore.on('load', function(str, records, successful, eOpts) {
+			// Ck.log('gridcolumnrenderer dataStore loaded');
+			grid.getView().refresh();
+		}, this);
 		
 		// Assign the renderer
 		column.scope = this;
@@ -91,7 +95,9 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 	},
 	
 	renderer: function(value, metaData, record, rowIndex, colIndex, store, view) {
-		if(!this.dataStore.isLoaded()) return '...';
+		if(!this.dataStore.isLoaded()) {
+			return '...';
+		}
 		
 		var val = record.get(this.dataField);
 		
