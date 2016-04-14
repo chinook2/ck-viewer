@@ -208,16 +208,17 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function(btn) {
-		// Process subforms
-		var subforms = this.getSubForms();
-		for (var s = 0; s < subforms.length; s++) {
-			var sf = subforms[s];
-			// Allow to call beforeClose in subForms override
-			sf.formClose({force:true});
-			this.unRegisterSubForm(sf);
-		}
 
 		var closeMe = function() {
+			// Process subforms
+			var subforms = this.getSubForms();
+			for (var s = 0; s < subforms.length; s++) {
+				var sf = subforms[s];
+				// Allow to call beforeClose in subForms override
+				sf.formClose({force:true});
+				this.unRegisterSubForm(sf);
+			}
+			
 			if(this.oController.beforeClose() === false) {
 				Ck.log("beforeClose cancel formClose.");
 				return;

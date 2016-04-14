@@ -167,9 +167,9 @@ Ext.define('Ck.map.Controller', {
 		olMap.getLayers().on('remove', function(colEvent) {
 			var layer = colEvent.element;
 			this.fireEvent('removelayer', layer);
-		}, this);
+		}, this);		
 	},
-	
+			
 	layersLoading: function() {
 		this.layersAreLoading = true;
 	},
@@ -511,7 +511,12 @@ Ext.define('Ck.map.Controller', {
 		vm.set('olview.projection.units', units);
 		
 		olMap.on('moveend', function(e){
-
+			
+			// TODO : proper destroy panel/controller...
+			if(v.destroyed) return;
+			if(vm.destroyed) return;
+			//
+			
 			var c = olv.getCenter();
 			vm.set('olview.center', c );
 			
