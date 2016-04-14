@@ -21,7 +21,7 @@ Ext.define('Ck.legend.plugin.Slider', {
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
 
-		if(layer && record.isLeaf() && !e.target.className.trim().startsWith("x-action") && !e.target.className.trim().startsWith("x-tree-checkbox")) {
+		if(layer && record.isLeaf() && !Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 			var opacity = layer.getOpacity();
 			
 			var slider = record.get('slider');

@@ -36,7 +36,7 @@ Ext.define('Ck.legend.Controller', {
 		
 		// Expand on item click
 		v.on('itemclick', function(view, rec, item, index, e, eOpts){
-			if(!e.target.className.trim().startsWith("x-action") && !e.target.className.trim().startsWith("x-tree-checkbox")) {
+			if(!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 				view.toggle(rec);
 			}
 		});

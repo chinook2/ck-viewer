@@ -15,7 +15,7 @@ Ext.define('Ck.legend.plugin.Legend', {
 	
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(layer && record.isLeaf() && !e.target.className.trim().startsWith("x-action") && !e.target.className.trim().startsWith("x-tree-checkbox")) {
+		if(layer && record.isLeaf() && !Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 			
 			var legend = record.get('legend');
 			if(legend && legend.getEl().dom && Ext.get(legend.getEl().dom.id)) {
