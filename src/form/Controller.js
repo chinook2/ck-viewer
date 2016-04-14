@@ -396,10 +396,10 @@ Ext.define('Ck.form.Controller', {
 			// Add form to the panel after toolbar (correct size)
 			this.view.add(fcf.items);
 
-			// Init form popup if needed (juste main form can do that)
+			// Init form popup if needed (just main form can do that - main form in popup subForm have also parentForm now)
 			var fcw = form.window;
 			var win = this.view.up('window');
-			if(win && fcw && !this.parentForm) {
+			if(win && fcw && (!this.parentForm || this.isSubForm)) {
 				// Ext.apply(win, fcw);
 				// win.show();
 
@@ -926,9 +926,12 @@ Ext.define('Ck.form.Controller', {
 					// Init stores for grid editor
 					if(Ext.isArray(c.columns)) {
 						Ext.each(c.columns, function(col, idx, cols) {
-							if(col.editor && col.editor.store) {
-								cols[idx].editor.store = processStore(col.editor)
-							}
+							if(col.editor) {
+								if(col.editor.store) cols[idx].editor.store = processStore(col.editor);
+								// Date params
+								if(col.editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
+								if(col.editor.minValue == 'now') cols[idx].editor.minValue = new Date();
+							}							
 						});
 					}
 
@@ -1599,7 +1602,7 @@ Ext.define('Ck.form.Controller', {
 
 		// SUBFORM : save data only if subform is not linked to main form with a name property
 		var subforms = this.getSubForms();
-		Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));
+		if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 
@@ -1611,7 +1614,7 @@ Ext.define('Ck.form.Controller', {
 			if(!sf.view.name && !sf.view.isSubForm) {
 				if(sf.saveData()===false){
 					Ck.log("Subform " + sf.view.formName + " saveData is FALSE.");
-					// return false;
+					return false;
 				}
 			}
 		}

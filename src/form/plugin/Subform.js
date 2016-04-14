@@ -344,24 +344,21 @@ Ext.define('Ck.form.plugin.Subform', {
 				// Get subform controller
 				var formController = this._subform.getController();
 
+				// Load data - allow to use form override if exist
 				var data = context.record.getData();
 				this.setDataFid(data);
-
 				formController.loadData({
 					raw: data
 				});
 
-				// Save if params available
+				// Save subform data - allow to use form override if exist
 				formController.saveData({
 					success: function(res) {
-						// End update mode
-						var vm = this._subform.getViewModel();
-						vm.set('updating', false);
-
-						// Update selected record
-						var rec = this._grid.getStore().getAt(this._subform.rowIndex);
-						if(rec) rec.set(res);
-						this._grid.getView().refresh();
+						// Save main form too
+						if(this.autocommit){
+							var controller = this._grid.lookupController();
+							controller.saveData();
+						}
 
 						this.resetSubForm();
 					},
