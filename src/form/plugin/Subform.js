@@ -6,9 +6,14 @@ Ext.define('Ck.form.plugin.Subform', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.gridsubform',
 
+	// Save the entire grid when add/edit/delete row. Used when subform have no dataUrl.
+	autocommit: false,
+	// Save when update row with rowediting plugin
+	commitrow: false,
+
 	/**
 	 * Enable single click on row to open subform edition pop-up
-	 */
+	 */	
 	clicksToEdit: 1,
 
 	/**
@@ -25,6 +30,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	 * Enable single click to start live edition (without pop-up)
 	 */
 	editrow: true,
+	disableEditRow: null,
 
 	/**
 	 * Add deletion button column
@@ -73,6 +79,8 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 
+		if(this.autocommit===true) this.commitrow=true;
+		
 		// Init subform after grid rendering
 		grid.on('afterrender', function() {
 			this.initSubForm(grid);
@@ -402,6 +410,11 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 				this._grid.getView().refresh();
 
+				if(this.autocommit){
+					var controller = this._grid.lookupController();
+					controller.saveData();
+				}
+				
 				this.resetSubForm();
 			},
 			create: true,
@@ -425,6 +438,11 @@ Ext.define('Ck.form.plugin.Subform', {
 				if(rec) rec.set(res);
 				this._grid.getView().refresh();
 
+				if(this.autocommit){
+					var controller = this._grid.lookupController();
+					controller.saveData();
+				}
+				
 				this.resetSubForm();
 			},
 			scope: this
@@ -448,11 +466,15 @@ Ext.define('Ck.form.plugin.Subform', {
 		formController.deleteData({
 			success: function(){
 				grid.getStore().removeAt(rowIndex);
-				
+
+				if(this.autocommit){
+					var controller = this._grid.lookupController();
+					controller.saveData();
+				}
+
 				// Reset dataFid too
 				if(this.mainDataFid) this._subform.setDataFid(this.mainDataFid);
 
-				// this.resetSubForm(); // Maybe needed for visible subform (not with modal window)
 			},
 			fid: dataFid,
 			scope: this
