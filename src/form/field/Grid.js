@@ -121,6 +121,22 @@ Ext.define('Ck.form.field.Grid', {
 		this.grid.getStore().loadData(val);
 	},
 	
+	isDirty: function() {
+		var isDirty = false;
+		this.grid.getStore().each( function (rec) {
+			// Empty field when plugin gridediting is active to add new record to the grid...
+			if(rec.data.dummy===true) return;			
+			if(rec.dirty == true){
+				isDirty = true;
+			}
+		});
+		if (!isDirty){
+			isDirty = (this.grid.getStore().removed.length > 0);
+		}
+		
+		return isDirty;
+	},
+
     reset: function() {
         var me = this;
         me.beforeReset();

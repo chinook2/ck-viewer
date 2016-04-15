@@ -208,7 +208,9 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function(btn) {
-
+		var forceClose = false;
+		if(btn && btn.force === true) forceClose = true;
+		
 		var closeMe = function() {
 			// Process subforms
 			var subforms = this.getSubForms();
@@ -240,7 +242,10 @@ Ext.define('Ck.form.Controller', {
 
 		}.bind(this);
 
-		if(btn && btn.force === true) {
+		// If nothing to save Force close action
+		if(this.isDirty()==false) forceClose = true;
+		
+		if(forceClose) {
 			this.fireEvent('beforeclose', btn);
 			closeMe();
 		} else {
@@ -252,10 +257,13 @@ Ext.define('Ck.form.Controller', {
 				fn: function(btn) {
 					this.fireEvent('beforeclose', btn);
 					if(btn === 'yes') {
-						this.saveData();
-						closeMe();
+						this.saveData({
+							success: function(){
+								closeMe();
+							}
+						});
 					} else if(btn === 'no') {
-						closeMe()
+						closeMe();
 					} else {
 						// Nothing don't close
 					}
@@ -1234,7 +1242,7 @@ Ext.define('Ck.form.Controller', {
 	*/
 
 	// Prevent getting values from subform...
-	getValues: function() {
+	getValues: function(resetDirty) {
 		var v = this.getView();
 		var form = v.getForm();
 
@@ -1260,6 +1268,9 @@ Ext.define('Ck.form.Controller', {
 				}
 				
 				values[field] = val;
+			}
+			if(f && resetDirty){
+				f.resetOriginalValue();
 			}
 		}, this);
 
@@ -1321,6 +1332,15 @@ Ext.define('Ck.form.Controller', {
 		// If the entire form is Hidden ignore setValues
 		if(v.isVisible() === false) return;
 
+		if(Ext.isArray(data)){
+			// Find first gridfield to assign array !
+			var grid = v.down('gridfield');
+			if(grid) grid.setValue(data);
+		} else {
+			// Classic Ext setValues
+			form.setValues(data);
+		}
+		
 		// FIX Ext 
 		// Combo setValues with bind filters (who depends on previous field in form).
 		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
@@ -1334,17 +1354,10 @@ Ext.define('Ck.form.Controller', {
 					}, this);
 				}
 			}
+			// Reset for isDirty status
+			if(f) f.resetOriginalValue();
 		}, this);
 		//
-		
-		if(Ext.isArray(data)){
-			// Find first gridfield to assign array !
-			var grid = v.down('gridfield');
-			if(grid) grid.setValue(data);
-		} else {
-			// Classic Ext setValues
-			form.setValues(data);
-		}
 		
 		// SUBFORM : load data
 		var subforms = this.getSubForms();
@@ -1353,6 +1366,7 @@ Ext.define('Ck.form.Controller', {
 			if(data[sf.view.name]) sf.setValues(data[sf.view.name]);
 		}
 		//
+		
 	},
 
 	// Prevent validate subform fields...
@@ -1385,6 +1399,36 @@ Ext.define('Ck.form.Controller', {
 		return isValid;
 	},
 
+	// Check form and subform fields change...
+	isDirty: function(){
+		var v = this.getView();
+		var form = v.getForm();
+		var isDirty = false;
+
+		// If the entire form is Hidden ignore form validity
+		if(v.isVisible() === false) return true;
+		
+		this.fields.forEach(function(field) {
+			var f = form.findField(field);
+			if(f && f.isVisible() && f.isDirty()) {
+				isDirty = true;
+				Ck.log(f.name + ' changed !');
+			}
+		}, this);
+
+		// SUBFORM
+		var subforms = this.getSubForms();
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			// Subform linked to grid (validation is done when submitting this form, not the main form)
+			if(sf.isSubForm === true) continue;
+			if(sf.isDirty()) isDirty = true;
+		}
+		//
+		
+		return isDirty;
+	},
+	
 	/**
 	 * Load data for a specific feature
 	 * @param {Object}
@@ -1593,7 +1637,7 @@ Ext.define('Ck.form.Controller', {
 
 		this.fireEvent('beforesave');
 
-		var values = this.getValues();
+		var values = this.getValues(true);
 		
 		if(this.oController.beforeSave(values, options, fid, url, model) === false) {
 			Ck.log("beforeSave cancel saveData.");
@@ -1704,6 +1748,7 @@ Ext.define('Ck.form.Controller', {
 				}
 				Ck.log("Failed to save for : "+this.name);
 				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
+				Ext.callback(options.failure, options.scope, [data], response);
 			}
 		};
 		
