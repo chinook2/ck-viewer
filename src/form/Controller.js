@@ -1873,21 +1873,27 @@ Ext.define('Ck.form.Controller', {
 		if(!v) return;
 		
 		// Reset main form
-		if(bSoft===true){
-			// Soft reset
-			Ext.suspendLayouts();
-			var form = v.getForm();
-			var fields = form.getFields().items,
-				f,
-				fLen = fields.length;
-			for (f = 0; f < fLen; f++) {
-				if(fields[f].readOnly!==true) fields[f].reset();
+		Ext.suspendLayouts();
+		var form = v.getForm();
+		var fields = form.getFields().items,
+			f,
+			fLen = fields.length;
+		for (f = 0; f < fLen; f++) {
+			if(bSoft===true){
+				// Soft reset
+				if(fields[f].readOnly!==true) {
+					fields[f].originalValue = null;
+					fields[f].reset();
+				}
+			}else{
+				// Hard reset
+				// force clear field with empty data
+				fields[f].originalValue = null;
+				fields[f].reset();
 			}
-			Ext.resumeLayouts(true);	
-		} else {
-			// Standard reset
-			v.reset();
 		}
+		Ext.resumeLayouts(true);	
+		//
 		
 		// SUBFORM : reset data
 		var subforms = this.getSubForms();

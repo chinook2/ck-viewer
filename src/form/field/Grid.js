@@ -140,8 +140,8 @@ Ext.define('Ck.form.field.Grid', {
     reset: function() {
         var me = this;
         me.beforeReset();
-		// Clear grid data
-        me.grid.getStore().removeAll();
+		// Clear grid data (silent)
+        me.grid.getStore().removeAll(true);
 		//
         me.clearInvalid();
         // delete here so we reset back to the original state
