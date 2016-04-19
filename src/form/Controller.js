@@ -931,15 +931,20 @@ Ext.define('Ck.form.Controller', {
 					}
 					delete c.itemTpl;
 
-					// Init stores for grid editor
+					// Init stores for grid editor & plugins
 					if(Ext.isArray(c.columns)) {
 						Ext.each(c.columns, function(col, idx, cols) {
 							if(col.editor) {
-								if(col.editor.store) cols[idx].editor.store = processStore(col.editor);
+								if(col.editor.store) col.editor.store = processStore(col.editor);
 								// Date params
 								if(col.editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
 								if(col.editor.minValue == 'now') cols[idx].editor.minValue = new Date();
-							}							
+							}
+							if(col.plugins && Ext.isArray(col.plugins)){
+								Ext.each(col.plugins, function(plugin, pidx, plugins) {
+									if(plugin.store) plugin.store = processStore(plugin);
+								});
+							}
 						});
 					}
 
