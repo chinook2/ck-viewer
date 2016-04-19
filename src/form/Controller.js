@@ -836,6 +836,8 @@ Ext.define('Ck.form.Controller', {
 							 // Init store fields from column definition
 							var fields = [];
 							var cols = o.columns;
+							
+							cols = (Ext.isArray(cols))? cols : cols.items;
 
 							// Column Model
 							for(var col in cols){
@@ -912,8 +914,9 @@ Ext.define('Ck.form.Controller', {
 					delete c.itemTpl;
 
 					// Init stores for grid editor
-					if(Ext.isArray(c.columns)) {
-						Ext.each(c.columns, function(col, idx, cols) {
+					if(c.columns) {
+						var co = (Ext.isArray(c.columns))? c.columns : c.columns.items;
+						Ext.each(co, function(col, idx, cols) {
 							if(col.editor && col.editor.store) {
 								cols[idx].editor.store = processStore(col.editor)
 							}
@@ -1034,7 +1037,8 @@ Ext.define('Ck.form.Controller', {
 			}
 			// For grids
 			if(c.columns) {
-				Ext.each(c.columns, fn, this);
+				var col = (Ext.isArray(c.columns))? c.columns : c.columns.items;
+				Ext.each(col, fn, this);
 			}
 			if(c.editor){
 				Ext.each(c.editor, fn, this);

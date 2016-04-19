@@ -283,14 +283,17 @@ Ext.define('Ck.form.plugin.Subform', {
 			}
 
 			var conf = grid.getInitialConfig();
+			
 			// Add action column for editing by plugin GridEditing
-			conf.columns.push({
+			var col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
+			col.push({
 				xtype: 'actioncolumn',
 				width: 6 + (actions.length * 20),
-				items: actions
+				items: actions,
+				flex: 0
 			});
 
-			grid.reconfigure(conf.columns);
+			grid.reconfigure(col);
 			this.actionColumn = grid.down('actioncolumn');
 		}
 

@@ -68,18 +68,18 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			var conf = this.grid.getInitialConfig();
 			
 			// Default hide action column when editing = false or no action enable
-			var hide = false;
-			if(formController) hide = !formController.getView().getEditing();
-			if(actions.length==0) hide = true;
+			var hide = (formController)? !formController.getView().getEditing() : false;
+			hide = (actions.length == 0)? true : hide;
 			
 			// Add action column for editing by plugin GridEditing
-			conf.columns.push({
+			var col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
+			col.push({
 				xtype: 'actioncolumn',
 				hidden: hide,
 				items: actions
 			});
 
-			this.grid.reconfigure(conf.columns);
+			this.grid.reconfigure(col);
 			this.actionColumn = this.grid.down('actioncolumn');
 
 			// Add grid reference to the actionColumn
