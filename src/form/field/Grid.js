@@ -95,8 +95,8 @@ Ext.define('Ck.form.field.Grid', {
 				var val = rec.data[col.dataIndex];
 				
 				// Special formatting for date columns !
-				if(col.xtype == 'datecolumn' && col.submitFormat){
-					row[col.dataIndex] = val ? Ext.Date.format(val, col.submitFormat) : '';
+				if(col.xtype == 'datecolumn' && col.submitFormat && Ext.isDate(val)) {
+					row[col.dataIndex] = Ext.Date.format(val, col.submitFormat);
 				}else{
 					// TODO : add config option to trim or not
 					if(Ext.isString(val)){
@@ -121,11 +121,27 @@ Ext.define('Ck.form.field.Grid', {
 		this.grid.getStore().loadData(val);
 	},
 	
+	isDirty: function() {
+		var isDirty = false;
+		this.grid.getStore().each( function (rec) {
+			// Empty field when plugin gridediting is active to add new record to the grid...
+			if(rec.data.dummy===true) return;			
+			if(rec.dirty == true){
+				isDirty = true;
+			}
+		});
+		if (!isDirty){
+			isDirty = (this.grid.getStore().removed.length > 0);
+		}
+		
+		return isDirty;
+	},
+
     reset: function() {
         var me = this;
         me.beforeReset();
-		// Clear grid data
-        me.grid.getStore().removeAll();
+		// Clear grid data (silent)
+        me.grid.getStore().removeAll(true);
 		//
         me.clearInvalid();
         // delete here so we reset back to the original state

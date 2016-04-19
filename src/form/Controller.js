@@ -208,8 +208,19 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formClose: function(btn) {
+		var forceClose = false;
+		if(btn && btn.force === true) forceClose = true;
 
 		var closeMe = function() {
+			// Process subforms
+			var subforms = this.getSubForms();
+			for (var s = 0; s < subforms.length; s++) {
+				var sf = subforms[s];
+				// Allow to call beforeClose in subForms override
+				sf.formClose({force:true});
+				this.unRegisterSubForm(sf);
+			}
+			
 			if(this.oController.beforeClose() === false) {
 				Ck.log("beforeClose cancel formClose.");
 				return;
@@ -231,7 +242,10 @@ Ext.define('Ck.form.Controller', {
 
 		}.bind(this);
 
-		if(btn && btn.force === true) {
+		// If nothing to save Force close action
+		if(this.isDirty()==false) forceClose = true;
+		
+		if(forceClose) {
 			this.fireEvent('beforeclose', btn);
 			closeMe();
 		} else {
@@ -243,10 +257,13 @@ Ext.define('Ck.form.Controller', {
 				fn: function(btn) {
 					this.fireEvent('beforeclose', btn);
 					if(btn === 'yes') {
-						this.saveData();
+						this.saveData({
+							success: function(){
 						closeMe();
+							}
+						});
 					} else if(btn === 'no') {
-						closeMe()
+						closeMe();
 					} else {
 						// Nothing don't close
 					}
@@ -387,10 +404,10 @@ Ext.define('Ck.form.Controller', {
 			// Add form to the panel after toolbar (correct size)
 			this.view.add(fcf.items);
 
-			// Init form popup if needed (juste main form can do that)
+			// Init form popup if needed (just main form can do that - main form in popup subForm have also parentForm now)
 			var fcw = form.window;
 			var win = this.view.up('window');
-			if(win && fcw && !this.parentForm) {
+			if(win && fcw && (!this.parentForm || this.isSubForm)) {
 				// Ext.apply(win, fcw);
 				// win.show();
 
@@ -523,6 +540,9 @@ Ext.define('Ck.form.Controller', {
 	registerSubForm: function(sform) {
 		this.subforms.push(sform);
 	},
+	unRegisterSubForm: function(sform) {
+		Ext.Array.remove(this.subforms, sform);
+	},
 	
 	// List all included form in a form.
 	getIncludedForm: function(cfg) {
@@ -607,7 +627,7 @@ Ext.define('Ck.form.Controller', {
 			if(c.name && !c.xtype) c.xtype = 'textfield';
 
 			// All items should have a Name
-			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer', 'toolbar'];
+			var ignoreTypes = ['ckform','panel', 'button', 'label', 'image', 'fieldcontainer', 'toolbar', 'box', 'component','splitter'];
 			if(!c.name && c.xtype && !Ext.Array.contains(ignoreTypes, c.xtype)) {
 				Ck.log("Name undefined for xtype " + c.xtype);
 			}
@@ -913,13 +933,21 @@ Ext.define('Ck.form.Controller', {
 					}
 					delete c.itemTpl;
 
-					// Init stores for grid editor
+					// Init stores for grid editor & plugins
 					if(c.columns) {
 						var co = (Ext.isArray(c.columns))? c.columns : c.columns.items;
 						Ext.each(co, function(col, idx, cols) {
-							if(col.editor && col.editor.store) {
-								cols[idx].editor.store = processStore(col.editor)
+							if(col.editor) {
+								if(col.editor.store) col.editor.store = processStore(col.editor);
+								// Date params
+								if(col.editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
+								if(col.editor.minValue == 'now') cols[idx].editor.minValue = new Date();
 							}
+							if(col.plugins && Ext.isArray(col.plugins)){
+								Ext.each(col.plugins, function(plugin, pidx, plugins) {
+									if(plugin.store) plugin.store = processStore(plugin);
+						});
+					}
 						});
 					}
 
@@ -1223,7 +1251,7 @@ Ext.define('Ck.form.Controller', {
 	*/
 
 	// Prevent getting values from subform...
-	getValues: function() {
+	getValues: function(resetDirty) {
 		var v = this.getView();
 		var form = v.getForm();
 
@@ -1249,6 +1277,9 @@ Ext.define('Ck.form.Controller', {
 				}
 				
 				values[field] = val;
+			}
+			if(f && resetDirty){
+				f.resetOriginalValue();
 			}
 		}, this);
 
@@ -1310,6 +1341,15 @@ Ext.define('Ck.form.Controller', {
 		// If the entire form is Hidden ignore setValues
 		if(v.isVisible() === false) return;
 
+		if(Ext.isArray(data)){
+			// Find first gridfield to assign array !
+			var grid = v.down('gridfield');
+			if(grid) grid.setValue(data);
+		} else {
+			// Classic Ext setValues
+			form.setValues(data);
+		}
+		
 		// FIX Ext 
 		// Combo setValues with bind filters (who depends on previous field in form).
 		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
@@ -1323,17 +1363,10 @@ Ext.define('Ck.form.Controller', {
 					}, this);
 				}
 			}
+			// Reset for isDirty status
+			if(f) f.resetOriginalValue();
 		}, this);
 		//
-		
-		if(Ext.isArray(data)){
-			// Find first gridfield to assign array !
-			var grid = v.down('gridfield');
-			if(grid) grid.setValue(data);
-		} else {
-			// Classic Ext setValues
-			form.setValues(data);
-		}
 		
 		// SUBFORM : load data
 		var subforms = this.getSubForms();
@@ -1342,6 +1375,7 @@ Ext.define('Ck.form.Controller', {
 			if(data[sf.view.name]) sf.setValues(data[sf.view.name]);
 		}
 		//
+		
 	},
 
 	// Prevent validate subform fields...
@@ -1374,6 +1408,36 @@ Ext.define('Ck.form.Controller', {
 		return isValid;
 	},
 
+	// Check form and subform fields change...
+	isDirty: function(){
+		var v = this.getView();
+		var form = v.getForm();
+		var isDirty = false;
+
+		// If the entire form is Hidden ignore form validity
+		if(v.isVisible() === false) return true;
+		
+		this.fields.forEach(function(field) {
+			var f = form.findField(field);
+			if(f && f.isVisible() && f.isDirty()) {
+				isDirty = true;
+				Ck.log(f.name + ' changed !');
+			}
+		}, this);
+
+		// SUBFORM
+		var subforms = this.getSubForms();
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			// Subform linked to grid (validation is done when submitting this form, not the main form)
+			if(sf.isSubForm === true) continue;
+			if(sf.isDirty()) isDirty = true;
+		}
+		//
+		
+		return isDirty;
+	},
+	
 	/**
 	 * Load data for a specific feature
 	 * @param {Object}
@@ -1457,7 +1521,7 @@ Ext.define('Ck.form.Controller', {
 
 
 		if(!url) {
-			Ck.log("Forms loadData 'fid' or 'url' not set.");
+			Ck.log("Forms loadData 'fid' or 'url' not set in "+this.name);
 
 			// If new form with empty data we need to startEditing too...
 			if(v.getEditing()===true) this.startEditing();
@@ -1576,13 +1640,13 @@ Ext.define('Ck.form.Controller', {
 
 		// Test if form is valid (all fields of the main form)
 		if(!this.isValid()) {
-			Ck.log("Form is not valid in saveData : "+ this.name);
+			Ck.log("Form is not valid for : "+ this.name);
 			return false;
 		}
 
 		this.fireEvent('beforesave');
 
-		var values = this.getValues();
+		var values = this.getValues(true);
 		
 		if(this.oController.beforeSave(values, options, fid, url, model) === false) {
 			Ck.log("beforeSave cancel saveData.");
@@ -1591,6 +1655,7 @@ Ext.define('Ck.form.Controller', {
 
 		// SUBFORM : save data only if subform is not linked to main form with a name property
 		var subforms = this.getSubForms();
+		if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
 
@@ -1602,7 +1667,7 @@ Ext.define('Ck.form.Controller', {
 			if(!sf.view.name && !sf.view.isSubForm) {
 				if(sf.saveData()===false){
 					Ck.log("Subform " + sf.view.formName + " saveData is FALSE.");
-					// return false;
+					return false;
 				}
 			}
 		}
@@ -1660,7 +1725,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		if(!url) {
-			Ck.log("Forms saveData 'fid' or 'url' not set in "+ this.name);
+			Ck.log("Save no URL for : "+ this.name);
 			Ext.callback(options.success, options.scope, [values]);
 			return true;
 		}
@@ -1681,6 +1746,7 @@ Ext.define('Ck.form.Controller', {
 						return false;
 					}
 				}
+				Ck.log("Success to save for : "+this.name);
 				Ext.callback(options.success, options.scope, [data]);
 			},
 			failure: function(response, opts) {
@@ -1689,8 +1755,9 @@ Ext.define('Ck.form.Controller', {
 				if(this.oController.saveFailed(response) === false) {
 					return false;
 				}
-
+				Ck.log("Failed to save for : "+this.name);
 				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
+				Ext.callback(options.failure, options.scope, [data], response);
 			}
 		};
 		
@@ -1699,6 +1766,7 @@ Ext.define('Ck.form.Controller', {
 			msg: "Save in progress..."
 		});
 		this.saveMask.show();
+		Ck.log("Start save for : "+this.name);
 		
 		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
@@ -1814,21 +1882,27 @@ Ext.define('Ck.form.Controller', {
 		if(!v) return;
 		
 		// Reset main form
-		if(bSoft===true){
-			// Soft reset
 			Ext.suspendLayouts();
 			var form = v.getForm();
 			var fields = form.getFields().items,
 				f,
 				fLen = fields.length;
 			for (f = 0; f < fLen; f++) {
-				if(fields[f].readOnly!==true) fields[f].reset();
+			if(bSoft===true){
+				// Soft reset
+				if(fields[f].readOnly!==true) {
+					fields[f].originalValue = null;
+					fields[f].reset();
 			}
-			Ext.resumeLayouts(true);	
 		} else {
-			// Standard reset
-			v.reset();
+				// Hard reset
+				// force clear field with empty data
+				fields[f].originalValue = null;
+				fields[f].reset();
 		}
+		}
+		Ext.resumeLayouts(true);	
+		//
 		
 		// SUBFORM : reset data
 		var subforms = this.getSubForms();

@@ -6,9 +6,14 @@ Ext.define('Ck.form.plugin.Subform', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.gridsubform',
 
+	// Save the entire grid when add/edit/delete row. Used when subform have no dataUrl.
+	autocommit: false,
+	// Save when update row with rowediting plugin
+	commitrow: false,
+
 	/**
 	 * Enable single click on row to open subform edition pop-up
-	 */
+	 */	
 	clicksToEdit: 1,
 
 	/**
@@ -25,6 +30,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	 * Enable single click to start live edition (without pop-up)
 	 */
 	editrow: true,
+	disableEditRow: null,
 
 	/**
 	 * Add deletion button column
@@ -73,6 +79,8 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 
+		if(this.autocommit===true) this.commitrow=true;
+		
 		// Init subform after grid rendering
 		grid.on('afterrender', function() {
 			this.initSubForm(grid);
@@ -339,24 +347,21 @@ Ext.define('Ck.form.plugin.Subform', {
 				// Get subform controller
 				var formController = this._subform.getController();
 
+				// Load data - allow to use form override if exist
 				var data = context.record.getData();
 				this.setDataFid(data);
-
 				formController.loadData({
 					raw: data
 				});
 
-				// Save if params available
+				// Save subform data - allow to use form override if exist
 				formController.saveData({
 					success: function(res) {
-						// End update mode
-						var vm = this._subform.getViewModel();
-						vm.set('updating', false);
-
-						// Update selected record
-						var rec = this._grid.getStore().getAt(this._subform.rowIndex);
-						if(rec) rec.set(res);
-						this._grid.getView().refresh();
+						// Save main form too
+						if(this.autocommit){
+							var controller = this._grid.lookupController();
+							controller.saveData();
+						}
 
 						this.resetSubForm();
 					},
@@ -405,6 +410,11 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 				this._grid.getView().refresh();
 
+				if(this.autocommit){
+					var controller = this._grid.lookupController();
+					controller.saveData();
+				}
+				
 				this.resetSubForm();
 			},
 			create: true,
@@ -428,6 +438,11 @@ Ext.define('Ck.form.plugin.Subform', {
 				if(rec) rec.set(res);
 				this._grid.getView().refresh();
 
+				if(this.autocommit){
+					var controller = this._grid.lookupController();
+					controller.saveData();
+				}
+				
 				this.resetSubForm();
 			},
 			scope: this
@@ -441,17 +456,28 @@ Ext.define('Ck.form.plugin.Subform', {
 		vm.set('updating', false);
 
 		var formController = this._subform.getController();
-		var rec = grid.getStore().getAt(rowIndex).getData();
+		var store = grid.getStore();
+		var rec = store.getAt(rowIndex);
 
 		// update data fid for current item (used by dataUrl templating)
-		var dataFid = this.setDataFid(rec);
+		var dataFid = this.setDataFid(rec.getData());
 		//
 
 		// Delete record if params available
 		formController.deleteData({
 			success: function(){
-				grid.getStore().removeAt(rowIndex);
-				// this.resetSubForm(); // Maybe needed for visible subform (not with modal window)
+				store.remove(rec);
+				
+				// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
+				store.removed.push(rec);
+
+				if(this.autocommit){
+					var controller = this._grid.lookupController();
+					controller.saveData();
+				}
+
+				// Reset dataFid only (resetSubForm can fail with popup and destroyed views)
+				if(this.mainDataFid) this._subform.setDataFid(this.mainDataFid);
 			},
 			fid: dataFid,
 			scope: this
