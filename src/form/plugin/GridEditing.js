@@ -76,7 +76,10 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			col.push({
 				xtype		: 'actioncolumn',
 				hidden		: hide,
-				items		: actions
+				items		: actions,
+				editor		: false,
+				cellWrap	: false,
+				flex		: 0
 			});
 
 			this.grid.reconfigure(col);
