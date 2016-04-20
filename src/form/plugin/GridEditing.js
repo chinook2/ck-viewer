@@ -74,9 +74,9 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			// Add action column for editing by plugin GridEditing
 			var col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
 			col.push({
-				xtype: 'actioncolumn',
-				hidden: hide,
-				items: actions
+				xtype		: 'actioncolumn',
+				hidden		: hide,
+				items		: actions
 			});
 
 			this.grid.reconfigure(col);

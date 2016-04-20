@@ -852,12 +852,14 @@ Ext.define('Ck.form.Controller', {
 						}
 						
 						// Build default Fields (use for rowediting on grid)
-						if(!Ext.isArray(store.fields) && Ext.isArray(o.columns)){
+						var cols = o.columns;
+						if(!Ext.isArray(o.columns) && Ext.isObject(o.columns)) {
+							cols = o.columns.items;
+						}
+						
+						if(!Ext.isArray(store.fields) && Ext.isArray(cols)){
 							 // Init store fields from column definition
 							var fields = [];
-							var cols = o.columns;
-							
-							cols = (Ext.isArray(cols))? cols : cols.items;
 
 							// Column Model
 							for(var col in cols){
@@ -936,19 +938,22 @@ Ext.define('Ck.form.Controller', {
 					// Init stores for grid editor & plugins
 					if(c.columns) {
 						var co = (Ext.isArray(c.columns))? c.columns : c.columns.items;
-						Ext.each(co, function(col, idx, cols) {
-							if(col.editor) {
-								if(col.editor.store) col.editor.store = processStore(col.editor);
+						Ext.each(co, function(c, col, idx, cols) {
+							var editor = col.editor || ((c.columns.defaults)? c.columns.defaults.editor : null);
+							if(editor) {
+								if(editor.store) editor.store = processStore(editor);
 								// Date params
-								if(col.editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
-								if(col.editor.minValue == 'now') cols[idx].editor.minValue = new Date();
+								if(editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
+								if(editor.minValue == 'now') cols[idx].editor.minValue = new Date();
 							}
-							if(col.plugins && Ext.isArray(col.plugins)){
-								Ext.each(col.plugins, function(plugin, pidx, plugins) {
+							
+							var plugins = col.plugins || ((c.columns.defaults)? c.columns.defaults.plugins : null);
+							if(plugins && Ext.isArray(plugins)) {
+								Ext.each(plugins, function(plugin, pidx, plugins) {
 									if(plugin.store) plugin.store = processStore(plugin);
-						});
-					}
-						});
+								});
+							}
+						}.bind(this, c));
 					}
 
 					Ext.applyIf(c, {
