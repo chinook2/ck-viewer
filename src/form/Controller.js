@@ -1889,24 +1889,26 @@ Ext.define('Ck.form.Controller', {
 		if(!v) return;
 		
 		// Reset main form
-			Ext.suspendLayouts();
-			var form = v.getForm();
-			var fields = form.getFields().items,
-				f,
-				fLen = fields.length;
-			for (f = 0; f < fLen; f++) {
+		Ext.suspendLayouts();
+		var form = v.getForm();
+		var fields = form.getFields().items,
+			f,
+			fLen = fields.length;
+		for (f = 0; f < fLen; f++) {
 			if(bSoft===true){
 				// Soft reset
-				if(fields[f].readOnly!==true) {
-					fields[f].originalValue = null;
-					fields[f].reset();
-			}
-		} else {
+				if(fields[f].xtype=='hidden' || fields[f].xtype=='hiddenfield') continue;
+				if(!fields[f].isVisible()) continue;
+				if(fields[f].readOnly===true) continue;
+				
+				fields[f].originalValue = null;
+				fields[f].reset();
+			} else {
 				// Hard reset
 				// force clear field with empty data
 				fields[f].originalValue = null;
 				fields[f].reset();
-		}
+			}
 		}
 		Ext.resumeLayouts(true);	
 		//
