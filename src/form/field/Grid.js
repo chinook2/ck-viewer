@@ -261,7 +261,7 @@ Ext.define('Ck.form.field.Grid', {
 		}
 		
 		// Allow display message in popup warning (!me.dirty prevent fire when reset/removeAll form)
-		if(me.invalidMsgText) {
+		if(me.invalidMsgText && !me.dirty) {
 			Ext.MessageBox.show({
 				title: 'Warning',
 				msg: me.invalidMsgText,
