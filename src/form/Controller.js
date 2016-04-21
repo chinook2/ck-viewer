@@ -1068,13 +1068,16 @@ Ext.define('Ck.form.Controller', {
 					Ext.apply(c, cf.config);
 				}
 			}
-			// For grids
+			// For grids and others array items
 			if(c.columns) {
 				var col = (Ext.isArray(c.columns))? c.columns : c.columns.items;
 				Ext.each(col, fn, this);
 			}
 			if(c.editor){
 				Ext.each(c.editor, fn, this);
+			}
+			if(c.plugins){
+				Ext.each(c.plugins, fn, this);
 			}
 			//
 			
@@ -1642,14 +1645,13 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		Ck.log("Save data for : "+this.name);
+		this.fireEvent('beforesave');
 
 		// Test if form is valid (all fields of the main form)
 		if(!this.isValid()) {
 			Ck.log("Form is not valid for : "+ this.name);
 			return false;
 		}
-
-		this.fireEvent('beforesave');
 
 		var values = this.getValues(true);
 		

@@ -121,6 +121,33 @@ Ext.define('Ck.form.field.Grid', {
 		this.grid.getStore().loadData(val);
 	},
 	
+	// Used by checkChange and validation
+	isEqual: function(array1, array2) {
+		var len1 = array1.length,
+			len2 = array2.length,
+			i;
+			
+		// Short circuit if the same array is passed twice
+		if (array1 === array2) {
+			return true;
+		}
+			
+		if (len1 !== len2) {
+			return false;
+		}
+		
+		for (i = 0; i < len1; ++i) {
+			// if (array1[i] !== array2[i]) {
+				// return false;
+			// }
+			if (!Ext.Object.equals(array1[i], array2[i])) {
+				return false;
+			}
+		}
+		
+		return true;		
+	},
+	
 	isDirty: function() {
 		var isDirty = false;
 		this.grid.getStore().each( function (rec) {
@@ -234,7 +261,7 @@ Ext.define('Ck.form.field.Grid', {
 		}
 		
 		// Allow display message in popup warning (!me.dirty prevent fire when reset/removeAll form)
-		if(me.invalidMsgText && !me.dirty) {
+		if(me.invalidMsgText) {
 			Ext.MessageBox.show({
 				title: 'Warning',
 				msg: me.invalidMsgText,
