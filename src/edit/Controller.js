@@ -744,7 +744,9 @@ Ext.define('Ck.edit.Controller', {
 						inserts.push(ft);
 						break;
 					case 1:
-						this.vertex.closeAll();
+						if(this.vertex !== undefined) {
+							this.vertex.closeAll();
+						}
 					case 2:
 					case 4:
 					case 5:
