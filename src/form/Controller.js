@@ -551,7 +551,7 @@ Ext.define('Ck.form.Controller', {
 							deferredRender: false,
 							border: false,
 							defaults: {
-								layout: 'form',
+								xtype: 'form',
 								anchor: '100%',
 								labelSeparator: me.layoutConfig.labelSeparator
 							}
@@ -1102,9 +1102,13 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				if(c.items && c.processItems !== false) {
-					Ext.each(c.items, fn, this);
+					var cpt = 0;
+					Ext.each(c.items, function(item) {
+						c.items[cpt] = fn(item);
+						cpt++;
+					}, this);
 				}
-			};
+			}
 			return c;
 		}.bind(this);
 		
