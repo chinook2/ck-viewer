@@ -126,6 +126,8 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			// For Datefields
 			if(cmp.submitFormat) val = cmp.getSubmitValue();
 			
+			if(val==null) val = '';
+			
 			if(val != '') {
 				val = this.prefix + val + this.suffix;
 				if(this.template) {
