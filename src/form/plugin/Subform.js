@@ -124,6 +124,8 @@ Ext.define('Ck.form.plugin.Subform', {
 
 			formName: '/' + subForm.url,
 			layer: grid.name,
+			
+			owner: this,
 
 			// Default toolbar
 			dockedItems: [{
@@ -370,6 +372,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			}, this);
 		}
 
+		this._subform.owner = this;
 	},
 
 	startEditing: function() {
