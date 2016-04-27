@@ -214,7 +214,7 @@ Ext.define('Ck.form.Controller', {
 						this.saveData();
 						closeMe();
 					} else if(btn === 'no') {
-						closeMe()
+						closeMe();
 					} else {
 						// Nothing don't close
 					}
@@ -881,21 +881,20 @@ Ext.define('Ck.form.Controller', {
 										delete col.header;
 									}
 									if(col.renderer && col.renderer == 'image') {
-										// col.formatter = col.renderer;
-										// col.scope = this;
-										// delete col.renderer;
 										col.renderer = function(value, meta, rec, rowIndex, colIndex, store){
 											var i, p, w = '';
-											i = "<img src='"+ value +"' alt='Image non disponible'/>";
-											if(col.rendererOption) {
-												p = col.rendererOption.path || '';
-												w = col.rendererOption.width || '';
-												h = col.rendererOption.height || '';
-												if(p) p += '/';
-												if(w) w = " width='"+w+"px'";
-												if(h) h = " height='"+h+"px'";
-												i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
-											}
+											if(value) {
+												i = "<img src='"+ value +"' alt='Image non disponible'/>";
+												if(col.rendererOption) {
+													p = col.rendererOption.path || '';
+													w = col.rendererOption.width || '';
+													h = col.rendererOption.height || '';
+													if(p) p += '/';
+													if(w) w = " width='"+w+"px'";
+													if(h) h = " height='"+h+"px'";
+													i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
+												}
+											}											
 											return i;
 										};
 									}
@@ -1942,16 +1941,18 @@ Ext.define('Ck.form.Controller', {
 
 Ext.util.Format.image = function(value, meta, rec, rowIndex, colIndex, store) {
     var i, p, w = '';
-    var f = store.fields.get(this.dataIndex || this.name);
-    i = "<img src='"+ value +"' alt='Image non disponible'/>";
-    if(f && f.rendererOption) {
-        p = f.rendererOption.path || '';
-        w = f.rendererOption.width || '';
-        h = f.rendererOption.height || '';
-        if(p) p += '/';
-        if(w) w = " width='"+w+"px'";
-        if(h) h = " height='"+h+"px'";
-        i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
-    }
+	if(value) {
+		var f = store.fields.get(this.dataIndex || this.name);
+		i = "<img src='"+ value +"' alt='Image non disponible'/>";
+		if(f && f.rendererOption) {
+			p = f.rendererOption.path || '';
+			w = f.rendererOption.width || '';
+			h = f.rendererOption.height || '';
+			if(p) p += '/';
+			if(w) w = " width='"+w+"px'";
+			if(h) h = " height='"+h+"px'";
+			i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
+		}
+	}    
     return i;
 }
