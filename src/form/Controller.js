@@ -103,10 +103,17 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	destroy: function() {
+		this.clearLocalStorage();
 		if(this.ls) this.ls.release();
 		this.callParent();
 	},
 
+	clearLocalStorage: function() {
+		if(this.ls && this.currentFormUrl) {
+			this.ls.removeItem(this.currentFormUrl);
+		}		
+	},
+	
 	formLoad: function(btn) {
 		if(btn && btn.formName) {
 			this.view.setFormName(btn.formName);
@@ -365,6 +372,8 @@ Ext.define('Ck.form.Controller', {
 			return false;
 		}
 
+		this.currentFormUrl = formUrl;
+		
 		// Load Form from LocalStorage (cache form with includes - ajax cache can't save all in one)
 		if(this.ls) {
 			var form = this.ls.getItem(formUrl);
