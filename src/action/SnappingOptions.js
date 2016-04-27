@@ -29,6 +29,7 @@ Ext.define('Ck.action.SnappingOptions', {
 					maximizable	: false,
 					collapsible	: true,
 					closeAction	: "hide",
+					constrain   : true,
 					items		: [{
 						xtype	: "cksnapping",
 						openner	: this

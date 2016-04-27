@@ -27,6 +27,7 @@ Ext.define('Ck.snapping.Controller', {
 		});
 		
 		this.getMap().on("addlayer", this.addLayer, this);
+		this.getMap().on("contextloading", this.contextLoading, this);
 		
 		this.loadPanel();
 	},
@@ -37,7 +38,8 @@ Ext.define('Ck.snapping.Controller', {
 	loadPanel: function() {
 		var item, data = [];
 		var lyrs = Ck.getMap().getLayers().getArray();
- 		
+ 		this.getView().getStore().removeAll();
+		
  		for(var i = 0; i < lyrs.length; i++) {
 			item = this.createItem(lyrs[i]);
 			if(item != null) {
@@ -69,12 +71,24 @@ Ext.define('Ck.snapping.Controller', {
 		return item;
 	},
 	
+	/**
+	 * Create an item from a layer and add it into the store.
+	 * @param {ol.layer.Base}
+	 */
 	addLayer: function(layer) {
 		var store = this.getView().getStore();
 		item = this.createItem(layer);
 		if(item != null) {
 			store.add(item);
 		}
+	},
+	
+	/**
+	 * Clear the store on context loading
+	 * @param {Object} The OWS Context.
+	 */
+	contextLoading: function(context) {
+		this.getView().getStore().removeAll();		
 	},
 	
 	/**
