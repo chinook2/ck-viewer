@@ -562,6 +562,7 @@ Ext.define('Ck.form.Controller', {
 							defaults: {
 								xtype: 'form',
 								anchor: '100%',
+								scrollable: true,
 								labelSeparator: me.layoutConfig.labelSeparator
 							}
 						});
