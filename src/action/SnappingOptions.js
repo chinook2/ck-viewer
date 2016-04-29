@@ -44,7 +44,6 @@ Ext.define('Ck.action.SnappingOptions', {
 	},
 	
 	close: function() {
-		this.win.hide();
-		this.btn.toggle(false);
+		this.win.hide();		
 	}
 });
