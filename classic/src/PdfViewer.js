@@ -56,16 +56,13 @@
 		var me = this;
 		me.callParent(arguments);
 		
-		// Pass PDF file to load
-		var file = this.getFullFile(this.getFile());
-
-		// Add iFrame with pdfjs viewer
+		// Add iFrame with pdfjs viewer (?file= prevent loading default PDF)
 		var pdfjsiFrame = new Ext.Component({
 			// id: 'pdfjs_iframe',
 			autoEl: {
 				tag: 'iframe',
 				style: 'height: 100%; width: 100%; border: none',
-				src: Ck.getPath() + '/pdfjs/web/viewer.html?file='+ file
+				src: Ck.getPath() + '/pdfjs/web/viewer.html?file='
 			},
 			listeners: {
 				afterrender: function () {
@@ -134,16 +131,22 @@
 		if(st) st.classList.remove('hidden');		
 	},
 	
+	// Call when 'file' config update - usefull with bind / load default pdf if 'file' is passed directly too
+	updateFile: function(newFile, oldFile) {
+        this.openFile(newFile, false);
+    },
 	
-	openFile: function(file) {
+	openFile: function(file, bSetter) {
 		if(!this.win) {
 			this.reCall();
 			return;
 		}
 		
 		if(file==''){
-			this.win.PDFView.close();
-		} else {			
+			if(this.win.PDFView.pdfDocument) this.win.PDFView.close();
+		} else {
+			// Update current file using builtIn setter (if not called from updateFile)
+			if(bSetter!==false) this.setFile(file);
 			this.win.PDFView.open( this.getFullFile(file) );
 		}
 	},
@@ -209,8 +212,6 @@
 			file = file.replace(/\.\./g, '');
 		}
 		
-		// Update current file
-		this.setFile(file);
 		return file;
 	}
 });
