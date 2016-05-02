@@ -68,6 +68,10 @@ Ext.define('Ck.map.action.Geolocation', {
 	 * Zoom to user location
 	 */
 	toggleAction: function(btn, pressed) {
+		if(!this.getGeolocation()){
+			Ck.Notify.info("Geolocation is not enable. Please check Map configuration.");
+			return;
+		}
 		if(pressed) {
 			this.setPosition(this.getGeolocation());
 			

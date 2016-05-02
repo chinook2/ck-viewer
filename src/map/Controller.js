@@ -333,18 +333,20 @@ Ext.define('Ck.map.Controller', {
 		}, this);
 		
 		// Init GPS manager
-		this.geolocation = new ol.Geolocation({
-			projection: viewProj,
-			tracking: true,
-			trackingOptions: {
-				enableHighAccuracy: true,
-				// timeout: 5000,
-				maximumAge: 0
-			}
-		});
-		this.geolocation.on('error', function(error) {
-			Ck.error("GPS : "+ error.message);
-		});
+		if(cfg.geolocation === true) {
+			this.geolocation = new ol.Geolocation({
+				projection: viewProj,
+				tracking: true,
+				trackingOptions: {
+					enableHighAccuracy: true,
+					// timeout: 5000,
+					maximumAge: 0
+				}
+			});
+			this.geolocation.on('error', function(error) {
+				Ck.error("GPS : "+ error.message);
+			});
+		}
 		
 		// Fire when layers are loaded
 		Ck.log('fireEvent ckmapLoaded');
