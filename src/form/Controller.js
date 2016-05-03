@@ -1549,7 +1549,7 @@ Ext.define('Ck.form.Controller', {
 			success: function(response) {
 				if(response.responseText=="") response.responseText = "{}";
 				var data = Ext.decode(response.responseText, true);
-				if(response.status == 200) {
+				// if(response.status == 200) {
 					if(!data) {
 						Ck.Notify.error("Invalid JSON Data in : "+ url);
 						return false;
@@ -1562,7 +1562,7 @@ Ext.define('Ck.form.Controller', {
 					//
 
 					this.loadRawData(data);
-				}
+				// }
 
 				if(v.getEditing()===true) this.startEditing();
 			},
