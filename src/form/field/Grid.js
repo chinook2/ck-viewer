@@ -45,7 +45,7 @@ Ext.define('Ck.form.field.Grid', {
 		this.plugins = null;
 		// Reference is unique and attached to the underlaying grid (not the gridfield)
 		this.reference = null;
-		
+				
 		// Ensure clear invalid mark when updating grid
 		this.grid.on({
 			validateedit: function() {
@@ -90,9 +90,16 @@ Ext.define('Ck.form.field.Grid', {
 			if(rec.data.dummy===true) return;
 			
 			var row = {};
+			var ignoreCols = [];
 			grid.getColumns().forEach(function(col) {
 				if(!col.dataIndex) return;
 				var val = rec.data[col.dataIndex];
+				
+				// Add column to ignore list to remove it from getValues
+				if(col.submit===false){
+					ignoreCols.push(col.dataIndex);
+					return;
+				}
 				
 				// Special formatting for date columns !
 				if(col.xtype == 'datecolumn' && col.submitFormat && Ext.isDate(val)) {
@@ -107,7 +114,14 @@ Ext.define('Ck.form.field.Grid', {
 			});
 			
 			// Need to add extra data (all fields of 'rec' are not displayed in grid columns)
-			dtg.push( Ext.applyIf(row, rec.data) );
+			row = Ext.applyIf(row, rec.data);
+			// Remove ignored fields (submit=false)
+			Ext.each(ignoreCols, function(it){
+				delete row[it];
+			});
+			//
+			
+			dtg.push(row);
 		});
 		return dtg;
 	},
