@@ -20,6 +20,7 @@
  Ext.define("Ck.PdfViewer", {
 	extend: "Ext.panel.Panel",
 	alias: "widget.ckpdfviewer",
+	opening: null,
 	
 	config: {
 		file: '',
@@ -133,22 +134,26 @@
 	
 	// Call when 'file' config update - usefull with bind / load default pdf if 'file' is passed directly too
 	updateFile: function(newFile, oldFile) {
-        this.openFile(newFile, false);
-    },
+		if(this.opening) return; // Prevent openFile twice when call setFile from openFile !
+		this.openFile(newFile);
+	},
 	
-	openFile: function(file, bSetter) {
+	openFile: function(file) {
 		if(!this.win) {
 			this.reCall();
 			return;
 		}
+		this.opening = true;
 		
 		if(file==''){
 			if(this.win.PDFView.pdfDocument) this.win.PDFView.close();
 		} else {
-			// Update current file using builtIn setter (if not called from updateFile)
-			if(bSetter!==false) this.setFile(file);
+			// Update current file using builtIn setter
+			this.setFile(file);
 			this.win.PDFView.open( this.getFullFile(file) );
 		}
+		
+		this.opening = false;
 	},
 	
 	gotoPage: function(page) {
