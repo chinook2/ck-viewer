@@ -35,6 +35,14 @@ Ext.define('Ck.Ajax', {
 	
 	get: function(options) {
 		options.method = 'GET';
+		
+		// Prod caching with unique build timestamp param (force reload for new build only)
+		if(Ck.getEnvironment() == 'production'){
+			if(Ext.manifest.loader && Ext.manifest.loader.cache){
+				options.url = Ext.urlAppend(options.url, Ext.Ajax.getDisableCachingParam() + '=' + Ext.manifest.loader.cache);
+			}
+		}
+		
 		this.request(options);
 	},
 	
@@ -86,8 +94,11 @@ Ext.define('Ck.Ajax', {
 	},
 	
 	request: function(options) {
-		options.disableCaching = false;		
-
+		options.disableCaching = false;
+		//<debug>
+		// Dev Mode use standard disable cache system : each call is unique
+		options.disableCaching = true;
+		//</debug>
 		
 		Ext.Ajax.request(options);	
 	},

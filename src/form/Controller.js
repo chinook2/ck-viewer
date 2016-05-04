@@ -476,7 +476,6 @@ Ext.define('Ck.form.Controller', {
 
 		Cks.get({
 			url: formUrl,
-			disableCaching: false,
 			scope: this,
 			success: function(response) {
 				var me = this;
@@ -571,7 +570,6 @@ Ext.define('Ck.form.Controller', {
 		}
 		Cks.get({
 			url: formUrl,
-			disableCaching: false,
 			scope: this,
 			success: function(response) {
 				var me = this;
