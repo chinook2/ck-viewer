@@ -415,7 +415,10 @@ Ext.define('Ck.form.plugin.Subform', {
 
 				if(this.autocommit){
 					var controller = this._grid.lookupController();
-					controller.saveData();
+					// When subform don't save data (global save), need to reload here to sync ID if necessary  
+					controller.saveData({
+						reload: true
+					});
 				}
 				
 				this.resetSubForm();

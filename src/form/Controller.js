@@ -1750,6 +1750,9 @@ Ext.define('Ck.form.Controller', {
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
+					
+					// Allow to reload form after Save. Get back ID generated on save for example
+					if(options.reload===true) this.loadData();
 				}
 				Ck.log("Success to save for : "+this.name);
 				Ext.callback(options.success, options.scope, [data]);
