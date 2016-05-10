@@ -356,9 +356,15 @@ Ext.define('Ck.form.plugin.Subform', {
 					raw: data
 				});
 
+				// Init update mode
+				var vm = this._subform.getViewModel();
+				vm.set('updating', true);
+				
 				// Save subform data - allow to use form override if exist
 				formController.saveData({
 					success: function(res) {
+						vm.set('updating', false);
+
 						// Save main form too
 						if(this.autocommit){
 							var controller = this._grid.lookupController();
