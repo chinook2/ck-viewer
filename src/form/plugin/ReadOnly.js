@@ -12,6 +12,8 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	prefix: '',
 	fieldTpl: '',
 
+	formatter: '',
+	
 	target: '_blank',
 	title: '',
 
@@ -24,6 +26,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
 		if(cmp.target) this.target = cmp.target;
 		if(cmp.title) this.title = cmp.title;
+		if(cmp.formatter) this.formatter = cmp.formatter;
 
 		this.formController = cmp.lookupController();
 		this.formViewModel = cmp.lookupViewModel();
@@ -132,6 +135,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				val = this.prefix + val + this.suffix;
 				if(this.template) {
 					val = this.template.apply({"value": val});
+				}
+				
+				if(this.formatter && Ext.util.Format[this.formatter]) {
+					val = Ext.util.Format[this.formatter](val);
 				}
 			}
 			var title = '';
