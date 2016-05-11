@@ -104,6 +104,16 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		
 		grid.on({
 			validateedit: this.addNewRow,
+			edit: function(e, context){
+				// After edit row select first cell of next row
+				if(this.dummyrow===true && context) {
+					var v = context.view;
+					v.getSelectionModel().selectNext();
+					var pos = v.selectionModel.getCurrentPosition();
+					pos.setColumn(0);
+					v.focusCell(pos);
+				}
+			},
 			scope: this
 		});
 	},
