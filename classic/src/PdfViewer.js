@@ -53,6 +53,9 @@
 		
 	},
 	
+	// To be override to add specific process when pdf viewer is loaded
+	onLoaded: Ext.emptyFn,
+	
 	initComponent: function(){
 		var me = this;
 		me.callParent(arguments);
@@ -104,6 +107,7 @@
 		
 		// pdfViewer iframe loaded
 		me.fireEvent('loaded');
+		me.onLoaded();
 	},
 	
 	hideTool: function(toolName) {
