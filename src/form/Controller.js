@@ -924,9 +924,10 @@ Ext.define('Ck.form.Controller', {
 					}
 
 					if(c.itemTpl) {
-						c.listConfig = {
+						c.listConfig = c.listConfig || {};
+						Ext.apply(c.listConfig, {
 							itemTpl: c.itemTpl
-						}
+						});
 						// By default use same template for list and display
 						if(!c.displayTpl) c.displayTpl = c.itemTpl;
 						c.displayTpl = '<tpl for=".">' + c.displayTpl + '</tpl>';
