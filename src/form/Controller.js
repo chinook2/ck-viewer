@@ -1743,7 +1743,7 @@ Ext.define('Ck.form.Controller', {
 			files: this.files,
 			scope: this,
 			success: function(response) {
-				this.saveMask.hide();
+				if(this.saveMask) this.saveMask.hide();
 				var data = Ext.decode(response.responseText, true);
 				if(response.status == 200 || response.status == 201) {
 					this.fireEvent('aftersave', data);
@@ -1759,7 +1759,7 @@ Ext.define('Ck.form.Controller', {
 				Ext.callback(options.success, options.scope, [data]);
 			},
 			failure: function(response, opts) {
-				this.saveMask.hide();
+				if(this.saveMask) this.saveMask.hide();
 				this.fireEvent('savefailed', response);
 				if(this.oController.saveFailed(response) === false) {
 					return false;
@@ -1770,11 +1770,13 @@ Ext.define('Ck.form.Controller', {
 			}
 		};
 		
-		this.saveMask = new Ext.LoadMask({
-			target: v,
-			msg: "Save in progress..."
-		});
-		this.saveMask.show();
+		if(options.mask!==false){
+			this.saveMask = new Ext.LoadMask({
+				target: v,
+				msg: "Save in progress..."
+			});
+			this.saveMask.show();
+		}
 		Ck.log("Start save for : "+this.name);
 		
 		if(this.files && this.files.length>0){
