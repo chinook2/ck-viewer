@@ -15,6 +15,8 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		layers		: null,
 		srs			: null,
 		crs			: null,
+		resolutions	: [],
+		extent		: [],
 		owsOffering	: {},
 		data		: {}
 	},
@@ -44,7 +46,9 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 			version	: params.VERSION,
 			layers	: params.LAYERS,
 			srs		: params.SRS,
-			crs		: params.CRS
+			crs		: params.CRS,
+			resolutions	: data.resolutions,
+			extent		: data.extent
 		});
 		
 		this.initConfig(config);
