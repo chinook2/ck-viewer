@@ -1109,7 +1109,8 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().set("editing", true);
 		this.getViewModel().set("isEditable", false);
 		this.getView().setEditing(true);
-
+		this.editing = true;
+		
 		this.fireEvent('startEditing');
 		
 		// Process subforms
@@ -1127,6 +1128,7 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().set("editing", false);
 		this.getViewModel().set("isEditable", true);
 		this.getView().setEditing(false);
+		this.editing = false;
 
 		if(bSilent!==false) this.fireEvent('stopEditing');
 		
@@ -1643,6 +1645,13 @@ Ext.define('Ck.form.Controller', {
 			options.method = 'POST';
 		}
 
+		if(!this.editing){
+			Ck.log("Form is readOnly (ignore save data) : "+ this.name);
+			// Use callback to chain if needed
+			Ext.callback(options.success, options.scope, []);
+			return true;
+		}
+		
 		Ck.log("Save data for : "+this.name);
 		this.fireEvent('beforesave');
 

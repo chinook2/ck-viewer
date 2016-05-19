@@ -59,6 +59,17 @@ Ext.define('Ck.form.field.Grid', {
 			scope: this
 		});
 		
+		// Enable / Disable plugins when Start/Stop Editing
+		var formController = this.grid.lookupController();
+		formController.on({
+			startEditing: this.startEditing,
+			stopEditing: this.stopEditing,
+			scope: this
+		});
+		if(formController.editing === true) this.startEditing();
+		if(formController.editing === false) this.stopEditing();
+		//
+		
 		this.callParent(arguments);
 	},
 	
@@ -80,6 +91,18 @@ Ext.define('Ck.form.field.Grid', {
 			this.inputEl.setSize(this.getSize());
 			this.grid.setSize(size);
 		}, this);
+	},
+	
+	startEditing: function() {
+		// Enable rowediting plugin
+		var sfplugin = this.grid.findPlugin('rowediting');
+		if(sfplugin) sfplugin.enable();
+	},
+
+	stopEditing: function() {
+		// Disable rowediting plugin
+		var sfplugin = this.grid.findPlugin('rowediting');
+		if(sfplugin) sfplugin.disable();
 	},
 
 	getValue: function(){
