@@ -160,8 +160,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	deleteNewRow: function(){
 		// Remove empty field for new record...
 		var store = this.grid.getStore();
-		var row = store.find('dummy', true);
-		if(row) store.removeAt(row);
+		var rec = store.findRecord('dummy', true);
+		if(rec) store.remove(rec);
 	},
 	
 	deleteRow: function(grid, rowIndex) {
