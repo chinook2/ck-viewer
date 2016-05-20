@@ -27,7 +27,7 @@ Ext.define('Ck.edit.action.Union', {
 			this.createInteraction();
 		}
 		
-		this.multi = (Ext.isEmpty(this.multi))? (this.getGeometryType().indexOf("Multi") !== -1) : this.multi;
+		this.multi = (Ext.isEmpty(this.multi))? (this.controller.getGeometryType().indexOf("Multi") !== -1) : this.multi;
 		
 		this.unionInteraction.setActive(status);
 		
@@ -78,8 +78,7 @@ Ext.define('Ck.edit.action.Union', {
 	 * @param {ol.Feature[]} The 2 polygons to merge
 	 */
 	editUnionSelected: function(features) {
-		var layer = this.getLayer();
-		var source = this.getLayerSource(layer);
+		var source = this.controller.getSource();
 
 		// Parse les géométries en GeoJSON
 		var geojson  = new ol.format.GeoJSON();
@@ -115,11 +114,25 @@ Ext.define('Ck.edit.action.Union', {
 		var feature = geojson.readFeature(union);
 		
 		for(var i = features.length - 1; i >= 0; i--) {
-			source.removeFeature(features[i]);
+			var feat = features[i];
+			var fid = this.controller.getFid(feat);
+			var ft = this.controller.wfsSource.getFeatureById(fid);
+
+			if(Ext.isEmpty(ft)) {
+				source.addFeature(feat);
+			}
 		}
 		
+		var id = "";
+		if(this.controller.getIsWMS()) {
+			id = "GATHERED_" + this.controller.getSource().getFeatures().length;
+		} else {
+			id = "GATHERED_" + this.controller.getLayer().getSource().getFeatures().length;
+		}
+		
+		feature.setId(id);		
 		source.addFeature(feature);
-		this.controller.fireEvent("featureunion", feature);
+		this.controller.fireEvent("featureunion", feature, features);
 		
 		// Efface la sélection...
 		this.unionInteraction.getFeatures().clear();

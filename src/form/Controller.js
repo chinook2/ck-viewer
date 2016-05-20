@@ -1698,7 +1698,36 @@ Ext.define('Ck.form.Controller', {
 			Ext.callback(options.success, options.scope, [val.main.params]);
 			return true;
 		}
-		//
+		
+		// Save in GeoJSON layer if loaded from DataObject
+		var dataObject = this.view.getDataObject();
+		
+		if(dataObject && lyr && fid) {
+			var map=Ck.getMap();
+			var layer = map.getLayerById(lyr);
+			
+			if(layer) {
+				var offerings = layer.ckLayer.getOfferings();
+				if(offerings) {
+					for(var i=0; i<offerings.length; i++) {
+						var offering = offerings[i];
+						if(offering.getType() == "geojson") {
+							var source = layer.getSource();
+							var feature = source.getFeatureById(fid);
+							
+							if(feature) {
+								feature.setProperties(values);
+								Ext.callback(options.success, options.scope, [values]);
+								return true
+							} else {
+								Ck.Notify.error("Feature " + fid + " not found.");
+								return false;
+							}
+						}
+					}			
+				}				
+			}		
+		}
 		
 		// If a model is set we use it
 		if(fid && model) {

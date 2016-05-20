@@ -95,16 +95,29 @@ Ext.define('Ck.edit.history.Controller', {
 	 * Fired when feature was croped
 	 * @param {ol.Feature}
 	 */
-	onFeatureCrop: function(feature) {
-		this.store.add(this.createRecord(feature, 4));
+	onFeatureCrop: function(feature, features, initialFeature) {
+		this.store.add(this.createRecord(feature, 0));
+		this.store.add(this.createRecord(initialFeature, 3));
+		
+		for(var i = features.length - 1; i >= 0; i--) {
+			var feat = features[i];
+			if(feat != feature) {
+				this.store.add(this.createRecord(feat, 0));
+			}			
+		}
 	},
 	
 	/**
 	 * Fired when features gathered
 	 * @param {ol.Feature[]}
 	 */
-	onFeatureUnion: function(feature) {
-		this.store.add(this.createRecord(feature, 5));
+	onFeatureUnion: function(feature, features) {
+		this.store.add(this.createRecord(feature, 0));
+		
+		for(var i = features.length - 1; i >= 0; i--) {
+			var feat = features[i];
+			this.store.add(this.createRecord(feat, 3));
+		}
 	},
 	
 	/**

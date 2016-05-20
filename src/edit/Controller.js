@@ -392,6 +392,16 @@ Ext.define('Ck.edit.Controller', {
 	onCreate: function(feature) {
 		feature.setStyle(Ck.map.Style.orangeStroke);
 		var source = this.getSource();
+		
+		var id = "";
+		if(this.getIsWMS()) {
+			id = "CREATED_" + this.getSource().getFeatures().length;
+		} else {
+			id = "CREATED_" + this.getLayer().getSource().getFeatures().length;
+		}
+		
+		feature.setId(id);
+		
 		// if(this.getMultiBehavior()) {
 			// var type = "Multi" + feature.getGeometry().getType();
 			// feature = Ck.create("ol.Feature", {
@@ -419,20 +429,21 @@ Ext.define('Ck.edit.Controller', {
 		}
 		
 		// Add the feature, if not already added, to the collection
-		if(this.getIsWMS()) {
-			var ft = this.wfsSource.getFeatureById(feature.getId());
+		var ft = this.wfsSource.getFeatureById(this.getFid(feature));
 
-			if(Ext.isEmpty(ft)) {
-				this.wfsSource.addFeature(feature);
-			} else {
-				feature.setGeometry(ft.getGeometry());
-			}
+		if(Ext.isEmpty(ft)) {
+			var cloneFeat = feature.clone();
+			cloneFeat.setId(feature.getId());
+			this.wfsSource.addFeature(cloneFeat);
+			ft = this.wfsSource.getFeatureById(this.getFid(feature));
+		} else {
+			ft.setGeometry(ft.getGeometry());
 		}
 		
 		if(this.getMultiBehavior()) {
-			this.startFeatureEdition(feature);
+			this.startFeatureEdition(ft);
 		} else {
-			this.startVertexEdition(feature);
+			this.startVertexEdition(ft);
 		}
 	},
 
@@ -440,18 +451,18 @@ Ext.define('Ck.edit.Controller', {
 	 *
 	 */
 	deleteFeature: function(feature) {
-		var ft = this.wfsSource.getFeatureById(feature.getId());
+		var ft = this.wfsSource.getFeatureById(this.getFid(feature));
 		if(ft) {
 			this.wfsSource.removeFeature(ft);
 		}
 		
-		this.wfsSource.addFeature(feature);
-		feature.setStyle(Ck.map.Style.redStroke);
-		if(!this.getIsWMS()) {
-			var src = this.getLayer().getSource();
-			src.removeFeature(feature);
-		}
-		this.fireEvent("featureremove", feature);
+		var cloneFeat = feature.clone();
+		cloneFeat.setId(feature.getId());
+		this.wfsSource.addFeature(cloneFeat);
+		ft = this.wfsSource.getFeatureById(this.getFid(feature));
+				
+		ft.setStyle(Ck.map.Style.redStroke);
+		this.fireEvent("featureremove", ft);
 	},
 
 	/**************************************************************************************/
@@ -620,11 +631,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @return {ol.source}
 	 */
 	getSource: function() {
-		if(this.getIsWMS() && this.wfsLayer) {
-			return this.wfsSource;
-		} else {
-			return this.getLayer().getSource();
-		}
+		return this.wfsSource;
 	},
 
 	/**
@@ -703,82 +710,100 @@ Ext.define('Ck.edit.Controller', {
 	},
 
 	/**
-	 * Save the changes. If it concerne
+	 * Save the changes.
 	 */
 	save: function() {
 		if(this.getIsWMS()) {
-			var layer = this.getLayer();
-			
-			var ope = layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
-			var geometryName = layer.getExtension("geometryColumn");
-
-			var currSrs = this.getMap().getProjection().getCode();
-			var lyrSrs = ope.getSrs();
-
-			// Loop on history store items
-			var ft, inserts = [], updates = [], deletes = [];
-			for(var i = 0; i < this.history.store.getCount(); i++) {
-				data = this.history.store.getAt(i).data;
-				ft = data.feature
-
-				if(currSrs != lyrSrs) {
-					ft.getGeometry().transform(currSrs, lyrSrs);
-				}
-
-				if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
-					ft.set(geometryName, ft.getGeometry());
-					ft.unset("geometry");
-					ft.setGeometryName(geometryName);
-				}
-
-				// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
-				var geom = ft.getGeometry();
-				if(data.actionId != 3 && !Ext.isEmpty(geom) && (geom.getType() != this.getGeometryType())) {
-					var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
-					ft.setGeometry(mGeom);
-				}
-
-				switch(data.actionId) {
-					case 0:
-						// Create
-						inserts.push(ft);
-						break;
-					case 1:
-						if(this.vertex !== undefined) {
-							this.vertex.closeAll();
-						}
-					case 2:
-					case 4:
-					case 5:
-						// Geometry or attributes, crop or union
-						updates.push(ft);
-						break;
-					case 3:
-						// Remove
-						deletes.push(ft);
-						break;
-				}
-			}
-			
-			Ck.Ajax.sendTransaction(layer, {
-				inserts: inserts,
-				updates: updates,
-				deletes: deletes
-			},{
-				fn: function() {
-					this.fireEvent("savesuccess");
-					this.reset();
-				},
-				scope: this
-			},{
-				fn: function() {
-					this.fireEvent("savefailed");
-				},
-				scope: this
-			});
+			this.saveFeatures(this.saveWMS);
 		}
 	},
+	
+	saveFeatures: function(saveFunction) {
+		var layer = this.getLayer();
 
+		var ope = null;
+		if(this.getIsWMS()) {
+			ope = layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
+		} else {
+			ope = layer.ckLayer.getOffering("geojson").getOperation("GetMap");
+		}
+		
+		var geometryName = layer.getExtension("geometryColumn");
+
+		var currSrs = this.getMap().getProjection().getCode();
+		var lyrSrs = ope.getSrs();
+
+		// Loop on history store items
+		var ft, inserts = [], updates = [], deletes = [];
+		for(var i = 0; i < this.history.store.getCount(); i++) {
+			data = this.history.store.getAt(i).data;
+			ft = data.feature
+			ft.setStyle(null);
+			
+			if(currSrs != lyrSrs) {
+				ft.getGeometry().transform(currSrs, lyrSrs);
+			}
+
+			if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
+				ft.set(geometryName, ft.getGeometry());
+				ft.unset("geometry");
+				ft.setGeometryName(geometryName);
+			}
+
+			// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
+			var geom = ft.getGeometry();
+			if(data.actionId != 3 && !Ext.isEmpty(geom) && (geom.getType() != this.getGeometryType())) {
+				var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
+				ft.setGeometry(mGeom);
+			}
+
+			switch(data.actionId) {
+				case 0:
+					// Create
+					inserts.push(ft);
+					break;
+				case 1:
+					if(this.vertex !== undefined) {
+						this.vertex.closeAll();
+					}
+				case 2:
+				case 4:
+				case 5:
+					// Geometry or attributes, crop or union
+					updates.push(ft);
+					break;
+				case 3:
+					// Remove
+					deletes.push(ft);
+					break;
+			}
+		}
+		
+		saveFunction.call(this, inserts, updates, deletes);
+	},
+	
+	/**
+	*	Save the changes for a WMS layer
+	**/
+	saveWMS: function(inserts, updates, deletes) {	
+		Ck.Ajax.sendTransaction(layer, {
+			inserts: inserts,
+			updates: updates,
+			deletes: deletes
+		},{
+			fn: function() {
+				this.fireEvent("savesuccess");
+				this.reset();
+			},
+			scope: this
+		},{
+			fn: function() {
+				this.fireEvent("savefailed");
+			},
+			scope: this
+		});
+	},
+	
 	reset: function() {
 		if(this.history) {
 			this.history.reset.bind(this.history)();
@@ -794,5 +819,19 @@ Ext.define('Ck.edit.Controller', {
 			src.updateParams(params);
 		}
 
+	},
+	
+	/**
+	*	Get the feature ID
+	**/
+	getFid: function(feature) {
+		var layer = this.getLayer();
+		var extension = layer.getExtension("fidColumn");
+		
+		if(!Ext.isEmpty(extension) && feature.getId() === undefined) {
+			feature.setId(feature.get(extension));
+		}
+		
+		return feature.getId();
 	}
 });

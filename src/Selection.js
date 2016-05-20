@@ -332,13 +332,15 @@ Ext.define('Ck.Selection', {
 		var lyrFts, lyrFt;
 		res = [];
 		lyrFts = layer.getSource().getFeatures();
+		selFeature = geoJSON.writeFeatureObject(evntParams.feature);
+		
 		for(var j = 0; j < lyrFts.length; j++) {
 			lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
 			
 			// JMA
 			// TODO : retest !
 			
-			if(turf.intersect(lyrFt, selFt)) {
+			if(turf.intersect(lyrFt, selFeature)) {
 				if(lyrFts[j].getProperties().features) {
 					for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
 						res.push(lyrFts[j].getProperties().features[k]);

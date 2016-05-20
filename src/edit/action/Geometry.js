@@ -16,7 +16,6 @@ Ext.define('Ck.edit.action.Geometry', {
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		this.btn = btn;
-		var source = this.getLayerSource();
 		
 		if(!this.geometryInteraction) {
 			this.geometryInteraction = Ck.create("Ck.Selection", {
