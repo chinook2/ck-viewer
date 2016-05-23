@@ -73,7 +73,7 @@
 					this.getEl().on('load', function (evt, htmlElement, opt) {
 						// Init PDF Viewer when iFrame is loaded
 						me.initPDFViewer(htmlElement);
-					});
+					}, this, {single: true});
 				}
 			}
 		});
@@ -190,7 +190,7 @@
 		var args = caller.arguments;
 		this.on('loaded', function(){
 			if(Ext.isFunction(caller)) caller.apply(this, args);
-		}, this);
+		}, this, {single: true});
 	},
 	
 	// From Ck.Controller ...
