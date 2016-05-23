@@ -386,7 +386,9 @@ Ext.define('Ck.map.Controller', {
 		switch(mainOffering.getType()) {
 			case "wfs":
 			case 'geojson':
-				olStyle = Ck.map.Style.style;
+				var style = layer.getExtension("style");
+				var layerId = layer.getId();
+				olStyle = Ck.map.Style.getStyleFromConfig(style, layerId);
 				break;
 		}
 
