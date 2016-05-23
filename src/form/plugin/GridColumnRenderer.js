@@ -78,7 +78,7 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 		// Ensure call refresh once on main grid load and on gridcolumnrenderer dataStore load.
 		this.dataStore.on('load', function(str, records, successful, eOpts) {
 			// Ck.log('gridcolumnrenderer dataStore loaded');
-			grid.getView().refresh();
+			if(grid.view) grid.getView().refresh();
 		}, this);
 		
 		// Assign the renderer
