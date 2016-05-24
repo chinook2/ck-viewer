@@ -79,6 +79,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 	/**
 	 * Change the rendering of according the field is readonly or not
+	 * r variable indicates if the field is readOnly or not
 	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
@@ -88,44 +89,33 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			return;
 		}
 		
+		if(!this.labelEl || !this.labelEl.dom) {
+			// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
+			return;
+		}
+		
+		// Begin of calcul to check if it's readOnly or not
+		var r = !this.formViewModel.get("editing");
+		
+		// Force readOnly if specified in form
+		if(Ext.isBoolean(cmp.initialConfig.readOnly)) {
+			r = cmp.initialConfig.readOnly;
+		}
+		
+		// ReadOnly can be bind need to get value
+		if(cmp.bind && cmp.bind.readOnly){
+			r = cmp.bind.readOnly.getValue();
+		}
+		
+		if(cmp.formulaField) {
+			if(this.readOnly === true) {
+				cmp.disable(); // No value sent when submitting
+			}
+			r = true;
+		}
+
 		// The field must have a trigger wrap (element which encapsulates the field) or to be a checkbox
 		if(cmp.triggerWrap) {
-		
-			if(!this.labelEl || !this.labelEl.dom) {
-				// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
-				return;
-			}
-			
-			// Ck.log("setReadOnly : " + cmp.name );
-			
-			// r for readOnly is true when editing is false
-			var r = !this.formViewModel.get("editing");
-
-			
-			// Try to put readOnly by default when reset form (value==null)
-			// In some case readOnly is binded with data record, reset > need to revert readOnly state
-			// if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
-					
-			// Force readOnly for specific field
-			if(cmp.initialConfig.readOnly === true) r = true;
-			if(cmp.initialConfig.readOnly === false) r = false;
-			
-			// readOnly can be bind need to get value
-			if(cmp.bind && cmp.bind.readOnly){
-				r = cmp.bind.readOnly.getValue();
-			}
-			
-			/*
-			 if(this.join) {
-			 this.disable(); // pas envoyer lors du submit
-			 r = true; // non editable
-			 }
-			 */
-			if(cmp.formulaField) {
-				if(this.readOnly === true) cmp.disable(); // pas envoyer lors du submit
-				r = true; // non editable
-			}
-
 			cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
 			if(r) {
 
@@ -172,13 +162,23 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			if(cmp.inputEl) {
 				cmp.inputEl.dom.readOnly = r;
 			}
-		} else if(cmp.xtype != "checkbox") {
-			cmp.setDisabled(this.readOnly);
-			if(this.readOnly) {
+		} else if(cmp.xtype == "checkbox") {
+			cmp.setDisabled(r);
+			if(r) {
 				var dom = cmp.getEl().dom;
 				dom.classList.remove("x-item-disabled");
+				// Add listener because Ext re-render field with x-item-disabled on setValue
+				cmp.disableTrigger = cmp.on({
+					destroyable: true,
+					change: function(cbx) {
+						var dom = cbx.getEl().dom;
+						dom.classList.remove("x-item-disabled");
+					}
+				});
+			} else if(cmp.disableTrigger) {
+				Ext.destroy(cmp.disableTrigger);
+				delete cmp.disableTrigger;
 			}
-			
 		}
 	}
 });
