@@ -77,91 +77,108 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		cmp.on('change', this.setReadOnly, this);
 	},
 
+	/**
+	 * Change the rendering of according the field is readonly or not
+	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
-		if(!cmp.rendered) return;
-		if(!cmp.triggerWrap) return;
 		
-		if(!this.labelEl || !this.labelEl.dom) {
-			// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
+		// Field have to be rendered
+		if(!cmp.rendered) {
 			return;
 		}
 		
-		// Ck.log("setReadOnly : " + cmp.name );
+		// The field must have a trigger wrap (element which encapsulates the field) or to be a checkbox
+		if(cmp.triggerWrap) {
 		
-		// r for readOnly is true when editing is false
-		var r = !this.formViewModel.get("editing");
+			if(!this.labelEl || !this.labelEl.dom) {
+				// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
+				return;
+			}
+			
+			// Ck.log("setReadOnly : " + cmp.name );
+			
+			// r for readOnly is true when editing is false
+			var r = !this.formViewModel.get("editing");
 
-		
-		// Try to put readOnly by default when reset form (value==null)
-		// In some case readOnly is binded with data record, reset > need to revert readOnly state
-		// if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
+			
+			// Try to put readOnly by default when reset form (value==null)
+			// In some case readOnly is binded with data record, reset > need to revert readOnly state
+			// if((cmp.getValue() === null) && (!Ext.isDefined(cmp.initialConfig.readOnly) || cmp.initialConfig.readOnly === false)) r = false;
+					
+			// Force readOnly for specific field
+			if(cmp.initialConfig.readOnly === true) r = true;
+			if(cmp.initialConfig.readOnly === false) r = false;
+			
+			// readOnly can be bind need to get value
+			if(cmp.bind && cmp.bind.readOnly){
+				r = cmp.bind.readOnly.getValue();
+			}
+			
+			/*
+			 if(this.join) {
+			 this.disable(); // pas envoyer lors du submit
+			 r = true; // non editable
+			 }
+			 */
+			if(cmp.formulaField) {
+				if(this.readOnly === true) cmp.disable(); // pas envoyer lors du submit
+				r = true; // non editable
+			}
+
+			cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
+			if(r) {
+
+				cmp.triggerWrap.hide();
+				if(!cmp.hideLabel) cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
+
+				var val = cmp.getValue();
+				// For combobox
+				if(cmp.displayField) val = cmp.getDisplayValue();
+				// For Datefields
+				if(cmp.submitFormat) val = cmp.getSubmitValue();
 				
-		// Force readOnly for specific field
-		if(cmp.initialConfig.readOnly === true) r = true;
-		if(cmp.initialConfig.readOnly === false) r = false;
-		
-		// readOnly can be bind need to get value
-		if(cmp.bind && cmp.bind.readOnly){
-			r = cmp.bind.readOnly.getValue();
-		}
-		
-		/*
-		 if(this.join) {
-		 this.disable(); // pas envoyer lors du submit
-		 r = true; // non editable
-		 }
-		 */
-		if(cmp.formulaField) {
-			if(this.readOnly === true) cmp.disable(); // pas envoyer lors du submit
-			r = true; // non editable
-		}
-
-		cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
-		if(r){
-
-			cmp.triggerWrap.hide();
-			if(!cmp.hideLabel) cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
-
-			var val = cmp.getValue();
-			// For combobox
-			if(cmp.displayField) val = cmp.getDisplayValue();
-			// For Datefields
-			if(cmp.submitFormat) val = cmp.getSubmitValue();
-			
-			if(val==null) val = '';
-			
-			if(val != '') {
-				val = this.prefix + val + this.suffix;
-				if(this.template) {
-					val = this.template.apply({"value": val});
+				if(val==null) val = '';
+				
+				if(val != '') {
+					val = this.prefix + val + this.suffix;
+					if(this.template) {
+						val = this.template.apply({"value": val});
+					}
+					
+					if(this.formatter && Ext.util.Format[this.formatter]) {
+						val = Ext.util.Format[this.formatter](val);
+					}
 				}
-				
-				if(this.formatter && Ext.util.Format[this.formatter]) {
-					val = Ext.util.Format[this.formatter](val);
+				var title = '';
+				if(this.title) title = "title='"+this.title+"'";
+
+				var _http = /^http:/i;
+				if(_http.test(val)) val = "<a href='"+val+"' "+ title +" target='"+ this.target +"'>"+val+"</a>";
+
+				this.textEl.update(val);
+				this.labelEl.show();
+
+			} else {
+				this.labelEl.hide();
+				cmp.triggerWrap.show();
+
+				// Add a marker for required fields when editing
+				if(cmp.allowBlank === false) {
+					cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
 				}
 			}
-			var title = '';
-			if(this.title) title = "title='"+this.title+"'";
 
-			var _http = /^http:/i;
-			if(_http.test(val)) val = "<a href='"+val+"' "+ title +" target='"+ this.target +"'>"+val+"</a>";
-
-			this.textEl.update(val);
-			this.labelEl.show();
-
-		} else {
-			this.labelEl.hide();
-			cmp.triggerWrap.show();
-
-			// Add a marker for required fields when editing
-			if(cmp.allowBlank === false) {
-				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
+			if(cmp.inputEl) {
+				cmp.inputEl.dom.readOnly = r;
 			}
-		}
-
-		if(cmp.inputEl) {
-			cmp.inputEl.dom.readOnly = r;
+		} else if(cmp.xtype != "checkbox") {
+			cmp.setDisabled(this.readOnly);
+			if(this.readOnly) {
+				var dom = cmp.getEl().dom;
+				dom.classList.remove("x-item-disabled");
+			}
+			
 		}
 	}
 });
