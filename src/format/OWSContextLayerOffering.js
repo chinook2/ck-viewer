@@ -65,6 +65,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 				this.type = 'wms';
 			} else if (c.indexOf('wmts') != -1) {
 				this.type = 'wmts';
+			} else if (c.indexOf('xyz') != -1) {
+				this.type = 'xyz';
 			} else if (c.indexOf('wfs') != -1) {
 				this.type = 'wfs';
 				

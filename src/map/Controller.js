@@ -175,6 +175,20 @@ Ext.define('Ck.map.Controller', {
 		this.on("layersloading", this.layersLoading, this);
 		this.on("layersloaded", this.layersLoaded, this);
 		this.layersAreLoading = false;
+		
+		// Relay olMap events
+		olMap.getLayers().on('add', function(colEvent) {
+			var layer = colEvent.element;
+			// Alias to get extension property directly
+			layer.getExtension = function(key) {
+				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
+			};
+			this.fireEvent('addlayer', layer);
+		}, this);
+		olMap.getLayers().on('remove', function(colEvent) {
+			var layer = colEvent.element;
+			this.fireEvent('removelayer', layer);
+		}, this);
 	},
 
 	layersLoading: function() {
@@ -415,7 +429,10 @@ Ext.define('Ck.map.Controller', {
 			}
 
 			var extent = layer.getExtent() || owc.getExtent();
-
+			if(mainOffering.getType() == "xyz") {
+				extent = olSource.tileGrid.getExtent() || extent;
+			}
+			
 			var ckLayerSpec = this.getViewModel().getData().ckOlLayerConnection[mainOffering.getType()];
 
 			// Create others source
@@ -520,6 +537,37 @@ Ext.define('Ck.map.Controller', {
 						})
 					};
 					break;
+				
+				case 'xyz':
+					mainOperation = offering.getOperation("GetTile");
+					
+					// get resolution from params or view if not provided
+					var resolutions = mainOperation.getResolutions();
+					if(!resolutions || resolutions.length == 0) {
+						resolutions = owc.getResolutions(false);					
+					}					
+					
+					// get resolution from params or view if not provided
+					var resolutions = mainOperation.getResolutions();
+					if(!resolutions || resolutions.length == 0) {
+						resolutions = owc.getResolutions(false);					
+					}
+					
+					// get extent from params or view if not provided
+					var extent = mainOperation.getExtent();
+					if(!extent || extent.length == 0) {
+						extent = owc.getExtent();					
+					}
+					
+					olSourceOptions = {
+						url: mainOperation.getUrl(),
+						tileGrid: new ol.tilegrid.TileGrid({
+							resolutions: resolutions,
+							extent: extent
+						})
+					};
+					break;
+					
 
 				case "wfs":
 					var format;
@@ -779,6 +827,13 @@ Ext.define('Ck.map.Controller', {
 	},
 
 	/**
+	 * Get the center of the current view.
+	 */
+	getCenter: function() {
+		return this.getOlView().getCenter();
+	},
+	
+	/**
 	 * Set the center of the current view.
 	 * @param {ol.Coordinate} center An array of numbers representing an xy coordinate. Example: [16, 48].
 	 */
@@ -800,6 +855,13 @@ Ext.define('Ck.map.Controller', {
 	 */
 	setRotation: function(rot) {
 		return this.getOlView().setRotation(rot);
+	},
+	
+	/**
+	 * Get the current map extent.
+	 */
+	getExtent: function() {
+		return this.getOlView().calculateExtent(this.getOlMap().getSize());
 	},
 
 	/**
