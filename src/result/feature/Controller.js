@@ -45,7 +45,8 @@ Ext.define('Ck.result.feature.Controller', {
 			editing: false,
 			formName: formName,
 			layer: layer.get("id"),
-			dataFid: this.currentRecord.data.objectid
+			// TODO: better use layer extension to get fid column
+			dataFid: this.currentRecord.data.objectid || this.currentRecord.data.ogc_fid || this.currentRecord.data.ogc_fid || this.currentRecord.data.gid || this.currentRecord.data.id
 			// ,dataObject: feature.getProperties() 
 		});
 		

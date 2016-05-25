@@ -306,18 +306,36 @@ Ext.define('Ck.Selection', {
 			layers = layers.getArray();
 		}
 		
-		var ft;
-		this.nbQueryDone = 0;
-		this.nbQuery = layers.length;
-		
-		for(var i = 0; i < layers.length; i++) {
-			if(layers[i] instanceof ol.layer.Vector) {
-				ft = this.queryWFSLayer(layers[i], selFt, evntParams);
-				this.onSelect(ft, layers[i]);
-			} else {
-				this.queryWMSLayer(layers[i], selFt, evntParams);
+		// Remove non queryable layers
+		for(var i=0; i<layers.length; i++) {
+			var layer = layers[i];
+			
+			if(layer.getExtension("queryable") !== true) {
+				var index = layers.indexOf(layer);
+
+				if (index > -1) {
+					layers.splice(index, 1);
+				}
 			}
 		}
+			
+		if(layers.length > 0) {		
+			var ft;
+			this.nbQueryDone = 0;
+			this.nbQuery = layers.length;
+		
+			for(var i = 0; i < layers.length; i++) {
+				if(layers[i] instanceof ol.layer.Vector) {
+					ft = this.queryWFSLayer(layers[i], selFt, evntParams);
+					this.onSelect(ft, layers[i]);
+				} else {
+					this.queryWMSLayer(layers[i], selFt, evntParams);
+				}
+			}
+		} else {
+			Ext.Msg.alert('Selection', 'No selectable layer displayed.');
+			this.getMask().hide();
+		}		
 	},
 	
 	/**

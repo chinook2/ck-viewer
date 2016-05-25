@@ -175,7 +175,12 @@ Ext.define('Ck.form.Controller', {
 	formClose: function(btn) {
 
 		var closeMe = function() {
-			if(this.oController.beforeClose() === false) {
+			var controller = this;
+			if(controller.type === undefined || controller.type != "ckform") {
+				controller = controller.oController
+			}
+			
+			if(controller.beforeClose() === false) {
 				Ck.log("beforeClose cancel formClose.");
 				return;
 			}
@@ -394,7 +399,10 @@ Ext.define('Ck.form.Controller', {
 					formConfig = formConfig.forms[0];
 				}
 				if(!formConfig) {
-					Ck.Notify.error("Invalid JSON Form in : "+ formUrl);
+					Ck.Notify.error("Form not found at URL : "+ formUrl);
+					this.formClose({
+						force: true
+					});
 					return false;
 				}
 
