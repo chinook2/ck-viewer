@@ -22,7 +22,8 @@ Ext.define("Ck.Form",{
 	config: {
 		fieldset: false,
 		editing: false,
-
+		processing: true,
+		
 		layer: null,	// nom du layer = nom de la table
 		sid: null,		// Storage ID (peut être = au fid) : Identifiant unique de la base (utile avec persistencejs)
 
@@ -43,6 +44,7 @@ Ext.define("Ck.Form",{
 		// dataStore : null,
 		
 		isSubForm: false,
+		parentForm: null, // refrence the parent form view for subForms
 		autoLoad: true		// Try populate form after initautoLoad
 	},
 

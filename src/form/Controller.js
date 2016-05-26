@@ -10,6 +10,7 @@ Ext.define('Ck.form.Controller', {
 	autoLoad: true,
 	isSubForm: false,
 	parentForm: false,
+	rootForm: null,
 	storage: null,
 
 	formConfig: null,
@@ -58,8 +59,11 @@ Ext.define('Ck.form.Controller', {
 	onSelect: Ext.emptyFn,
 	//
 	
-	fieldsProcessed: 0,
-	formsProcessed: 0,
+	// fieldsProcessed: 0,
+	// formsProcessed: 0,
+	
+	processingForm: 0,
+	processingData: 0,
 	
 	// Global intercept events to add custom action in controller
 	listen: {
@@ -119,10 +123,10 @@ Ext.define('Ck.form.Controller', {
 
 		// Get form definition directly in the view (no Ajax request)
 		var inlineForm = v.getFormRaw();
+		
+		// Find parentForm
 		var parentForm = v.up('ckform');
 		if(parentForm) {
-			this.parentForm = parentForm;
-			
 			// inherit editing from parent only if current form doesn't specify true or false
 			if(!Ext.isDefined(v.initialConfig.editing)){
 				this.editing = parentForm.getEditing();
@@ -146,13 +150,32 @@ Ext.define('Ck.form.Controller', {
 			
 			// Add reference of this form as subform for the parent...
 			parentForm.getController().registerSubForm(this);
+			
+			this.parentForm = parentForm.getController();
 		}
-
+		
+		// Keep reference of the main rootForm
+		this.rootForm = this.getRootForm();
+		this.updateProcessing(true, 'Form');
+		this.rootForm.processingForm++;
+		Ck.log("Init form : "+ this.view.formName + " (stack " + (this.rootForm.processingForm) + ")");
+		// Need to Init processing Data here to preserve stack
+		if(this.autoLoad){
+			this.updateProcessing(true, 'Data');
+			this.rootForm.processingData++;
+		}
+		//
+		
 		if(this.editing===true) this.startEditing();
 		if(this.editing===false) this.stopEditing(true);
 		this.initForm(inlineForm);
 	},
-
+	
+	// compatibility
+	getDockedItems: function() {
+		return this.getView().getDockedItems();
+	},
+	
 	destroy: function() {
 		if(this.ls) this.ls.release();
 		this.callParent();
@@ -341,7 +364,7 @@ Ext.define('Ck.form.Controller', {
 
 			// Format form definition - apply custom options and process
 			var fcf = this.applyFormDefaults(form.form);
-
+			
 			// warp form in a fieldset
 			var fs = this.view.getFieldset();
 			if(fs===true) fs={};
@@ -448,6 +471,23 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 			
+			//
+			this.rootForm.processingForm--;
+			if(this.rootForm.processingForm<0) this.rootForm.processingForm = 0;
+			Ck.log("Loaded form : "+ this.name + " (stack "+ this.rootForm.processingForm+")");
+			
+			if(this.rootForm.processingForm==0){
+				Ck.log("!!!! All Forms LOADED !!!! for : " + this.rootForm.name);
+				this.updateProcessing(false, 'Form');
+				this.rootForm.fireEvent('formloaded');
+			}
+			if(this.rootForm.processingForm==0 && this.rootForm.processingData==0){
+				Ck.log("!!!! ALL LOADED !!!! for : " + this.rootForm.name);
+				this.updateProcessing(false);
+				this.rootForm.fireEvent('allloaded');
+			}
+			//
+			
 			// Auto-load data if params available
 			if(this.autoLoad) this.loadData();
 		}
@@ -473,7 +513,8 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 		}
-
+		
+		// Ck.log("Load form : "+ formUrl);
 		Cks.get({
 			url: formUrl,
 			scope: this,
@@ -514,8 +555,9 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	// Get the main form controller (the 1st)
-	getRootForm: function() {
+	getRootForm: function(stopOnSubForm) {
 		var rootForm = this.getView().findParentBy(function(cmp) {
+			if(stopOnSubForm === true && cmp.isSubForm === true) return true; // Main subForm is a rootForm (subRootForm)
 			if(cmp.xtype != 'ckform') return false;
 			return (cmp.getController().parentForm === false);
 		});
@@ -602,7 +644,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		});
 	},
-
+	
 	/**
 	 * Auto config for the form (JSON simplify).
 	 * Create Ext components from JSON
@@ -1109,7 +1151,7 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().set("editing", true);
 		this.getViewModel().set("isEditable", false);
 		this.getView().setEditing(true);
-		this.editing = true;
+		// this.editing = true;
 		
 		this.fireEvent('startEditing');
 		
@@ -1128,7 +1170,7 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().set("editing", false);
 		this.getViewModel().set("isEditable", true);
 		this.getView().setEditing(false);
-		this.editing = false;
+		// this.editing = false;
 
 		if(bSilent!==false) this.fireEvent('stopEditing');
 		
@@ -1143,6 +1185,21 @@ Ext.define('Ck.form.Controller', {
 		}
 	},
 
+	/**
+	*	processingData, processingForm, processing
+	*/
+	updateProcessing: function(status, type){
+		if(type){
+			this.rootForm.getViewModel().set("processing"+ type, status);	
+		}
+
+		// Set global processing 'false' only if no type passed
+		if(type && !status) return;
+		
+		this.rootForm.getView().setProcessing(status);
+		this.rootForm.getViewModel().set("processing", status);
+		this.rootForm.getViewModel().notify();		
+	},
 	
 	/**
 	 * Collect all data from form. Recursively called for the subforms.
@@ -1459,7 +1516,7 @@ Ext.define('Ck.form.Controller', {
 		var lyr = v.getLayer();
 		var bSilent = false;
 		
-		Ck.log("Load data for : "+this.name);
+		Ck.log("Load Data for : "+this.name+" (stack "+ this.rootForm.processingData +")");
 
 		if(this.oController.beforeLoad(options) === false) {
 			Ck.log("beforeLoad cancel loadData.");
@@ -1532,8 +1589,9 @@ Ext.define('Ck.form.Controller', {
 		if(!url) {
 			Ck.log("Forms loadData 'fid' or 'url' not set in "+this.name);
 
+			this.loadRawData();
 			// If new form with empty data we need to startEditing too...
-			if(v.getEditing()===true) this.startEditing();
+			// if(v.getEditing()===true) this.startEditing();
 
 			return;
 		}
@@ -1582,21 +1640,40 @@ Ext.define('Ck.form.Controller', {
 		var v = me.getView();
 		var lyr = v.getLayer();
 		
-		this.operation = 'update';
-		if(this.oController.afterLoad(data) === false) {
-			Ck.log("afterLoad cancel loadData.");
-			return;
+		if(data){
+			this.operation = 'update';
+			if(this.oController.afterLoad(data) === false) {
+				Ck.log("afterLoad cancel loadData.");
+				return;
+			}
+
+			this.getViewModel().setData({
+				layer: lyr,
+				data: data
+			});
+			this.getViewModel().notify();
+			this.setValues(data);
+
+			this.fireEvent('afterload', data);
 		}
-
-		this.getViewModel().setData({
-			layer: lyr,
-			data: data
-		});
-		this.getViewModel().notify();
-		this.setValues(data);
-
-		this.fireEvent('afterload', data);
-
+		
+		// Check if all forms & subForms are loaded
+		this.rootForm.processingData--;
+		if(this.rootForm.processingData<0) this.rootForm.processingData = 0;
+		Ck.log("Loaded Data for : " + this.name + " (stack " + this.rootForm.processingData + ")");
+		
+		if(this.rootForm.processingData==0){
+			Ck.log("!!!! All Data LOADED !!!! for : " + this.rootForm.name);
+			this.updateProcessing(false, 'Data');
+				this.rootForm.fireEvent('dataloaded');
+		}
+		if(this.rootForm.processingForm==0 && this.rootForm.processingData==0){
+			Ck.log("!!!! ALL LOADED !!!! for : " + this.rootForm.name);
+			this.updateProcessing(false);
+				this.rootForm.fireEvent('allloaded');
+		}
+		//
+		
 		if(v.getEditing()===true) this.startEditing();
 	},
 	
@@ -1661,32 +1738,95 @@ Ext.define('Ck.form.Controller', {
 			return false;
 		}
 
+		this.updateProcessing(true, 'Data');
+
 		var values = this.getValues(true);
 		
 		if(this.oController.beforeSave(values, options, fid, url, model) === false) {
 			Ck.log("beforeSave cancel saveData.");
+			this.updateProcessing(false, 'Data');
+			this.updateProcessing(false);
 			return false;
 		}
 
-		// SUBFORM : save data only if subform is not linked to main form with a name property
+		// SUBFORM : Save All forms recursively, waiting callback return to process
 		var subforms = this.getSubForms();
-		if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));
-		for (var s = 0; s < subforms.length; s++) {
-			var sf = subforms[s];
-
-			// Ignore form when it's hidden
-			if(sf.view.isVisible() === false) continue;
-			
-			// TODO : manage save callback...
+		if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));		
+		
+		Ck.asyncForEach(subforms, function(subForm, cb) {			
+			// Save one sub-form...
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
-			if(!sf.view.name && !sf.view.isSubForm) {
-				if(sf.saveData()===false){
-					Ck.log("Subform " + sf.view.formName + " saveData is FALSE.");
-					return false;
-				}
+			// If sub-form is visible
+			if(subForm.view.isVisible() && !subForm.view.name && !subForm.view.isSubForm) {
+				//save data only if subform is not linked to main form with a name property
+				subForm.saveData({
+					success: function(){
+						// Save ok pass to the next one
+						cb();
+					},
+					failure: function(){
+						// Error stop chain.
+						Ck.log("Subform " + subForm.view.formName + " saveData is FALSE.");
+						return false;
+					}
+				});
+			}else{
+				// No save needed but call cb to save next subform...
+				cb();
 			}
+			
+		}, function(newFormConfig) {
+			// All subForms saved, save current Form.
+			me.processSave({
+					success: function(values){
+						this.updateProcessing(false, 'Data');
+						this.updateProcessing(false);
+						Ext.callback(options.success, options.scope, [values]);
+					},
+					failure: function(response){
+						this.updateProcessing(false, 'Data');
+						this.updateProcessing(false);
+						Ext.callback(options.failure, options.scope, [response]);
+						return false;
+					},
+					fid: options.fid,
+					url: options.url,
+					method: options.method,
+					create: options.create,
+					scope: me
+				});
+		});
+		
+	},
+	
+	// Called ONLY by saveData. Do not use this function directly
+	processSave: function(options){
+		options = options || {};
+
+		var me = this;
+		var v = me.getView();
+		
+		var sid = v.getSid();
+		var lyr = v.getLayer();
+
+		var fid = options.fid || v.getDataFid();
+		var url = options.url || me.dataUrl || v.getDataUrl();
+		var model = options.model || me.dataModel || v.getDataModel();
+
+		// Compatibility : pass only success callbak
+		if(Ext.isFunction(options)) {
+			options.success = options;
+			options.scope = this;
+		}
+		options = Ext.applyIf(options, {
+			method: 'PUT'
+		});
+		if(options.create || this.compatibiltyMode) {
+			options.method = 'POST';
 		}
 
+		var values = this.getValues(true);
+		
 		// If a model is set we use it
 		if(fid && model) {
 			var oModel = Ext.create(model);
@@ -1775,7 +1915,7 @@ Ext.define('Ck.form.Controller', {
 				}
 				Ck.log("Failed to save for : "+this.name);
 				Ck.Notify.error("Forms saveData error when saving data : "+ url +".");
-				Ext.callback(options.failure, options.scope, [data], response);
+				Ext.callback(options.failure, options.scope, [response]);
 			}
 		};
 		
@@ -1793,9 +1933,8 @@ Ext.define('Ck.form.Controller', {
 			Ck.Ajax.xhr(opt);
 		} else {
 			Cks[options.method.toLowerCase()](opt);
-		}
+		}		
 	},
-	
 	
 	getOption: function(key) {
 		var opt = this.form.options || {};

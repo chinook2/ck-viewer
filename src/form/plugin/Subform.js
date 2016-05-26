@@ -79,6 +79,12 @@ Ext.define('Ck.form.plugin.Subform', {
 			};
 		}
 
+		// Update internal counter to check when all subforms are loaded.
+		// Add extra count to pass the delay:50 of initSubForm
+		var formController = grid.lookupController();
+		formController.rootForm.processingForm++;
+		Ck.log("Init subForm : "+ grid.subform.url);
+		
 		if(this.autocommit===true) this.commitrow=true;
 		
 		// Init subform after grid rendering
@@ -103,7 +109,10 @@ Ext.define('Ck.form.plugin.Subform', {
 		var subForm = grid.subform;
 
 		var formController = grid.lookupController();
-
+		
+		// Remove extra count to pass the delay:50 of initSubForm
+		formController.rootForm.processingForm--;
+		
 		// Can't create subform instance here. Need to add in page first, to get viewModel hierarchy
 		this._subform = {
 			xtype: 'ckform',
@@ -125,6 +134,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			formName: '/' + subForm.url,
 			layer: grid.name,
 			
+			parentForm: formController.getView(),
 			owner: this,
 
 			// Default toolbar

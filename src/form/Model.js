@@ -11,6 +11,10 @@ Ext.define('Ck.form.Model', {
 		isPrintable: false,
 		editing: false,
 
+		processing: true,
+		processingForm: true,
+		processingData: true,
+		
 		fid: null
 	},
 
