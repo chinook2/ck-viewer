@@ -1691,7 +1691,7 @@ Ext.define('Ck.form.Controller', {
 
 			// Use Grid url and data for saving form !
 			// Need rework ;)
-			url = grid.getStore().getProxy().getUrl();
+			//url = grid.getStore().getProxy().getUrl();
 			values = dtg;
 
 			// TEMP : assume only one grid !
