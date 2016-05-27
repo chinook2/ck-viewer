@@ -82,6 +82,14 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				flex		: 0
 			});
 
+			// Helper to identify by CSS first cell for dummy row
+			col[0].renderer = function(value, metaData, record, rowIndex, colIndex, store, view){
+				if(colIndex==0 && record.get('dummy')){
+					metaData.innerCls = 'ck-dummy-cell-inner';
+				}
+				return value;
+			}
+			
 			this.grid.reconfigure(col);
 			this.actionColumn = this.grid.down('actioncolumn');
 
