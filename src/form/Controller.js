@@ -1509,12 +1509,12 @@ Ext.define('Ck.form.Controller', {
 	 * @param {Object}
 	 */
 	loadData: function(options) {
+		options = options || {};
 		var me = this;
 		var v = me.getView();
 
 		// Getters via config param in the view
 		var lyr = v.getLayer();
-		var bSilent = false;
 		
 		Ck.log("Load Data for : "+this.name+" (stack "+ this.rootForm.processingData +")");
 
@@ -1523,11 +1523,6 @@ Ext.define('Ck.form.Controller', {
 			return;
 		}
 
-		//
-		if(!options) {
-			options = {};
-			bSilent = true;
-		}
 		var fid = options.fid || v.getDataFid();
 		var url = options.url || me.dataUrl || v.getDataUrl();
 		var data = options.raw || v.getDataRaw();
