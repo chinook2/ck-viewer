@@ -1763,7 +1763,8 @@ Ext.define('Ck.form.Controller', {
 						// Error stop chain.
 						Ck.log("Subform " + subForm.view.formName + " saveData is FALSE.");
 						return false;
-					}
+					},
+					create: options.create
 				});
 			}else{
 				// No save needed but call cb to save next subform...

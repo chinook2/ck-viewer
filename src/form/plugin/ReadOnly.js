@@ -18,30 +18,35 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	title: '',
 
 	init: function(cmp) {
-		// Apply only on subclass of component/box/field/{xtype}
-		if(cmp.getXTypes().indexOf('/field/') == -1) return;
-
-		if(cmp.suffix) this.suffix = cmp.suffix;
-		if(cmp.prefix) this.prefix = cmp.prefix;
-		if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
-		if(cmp.target) this.target = cmp.target;
-		if(cmp.title) this.title = cmp.title;
-		if(cmp.formatter) this.formatter = cmp.formatter;
-
 		this.formController = cmp.lookupController();
 		this.formViewModel = cmp.lookupViewModel();
-
-		if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
-
-		// Init Text/Label for readOnly after cmp rendered
-		cmp.on('afterrender', this.onRenderCmp, this);
-
-		// Update readOnly status on start/stop editing
-		this.formController.on('startEditing', this.setReadOnly, this);
-		this.formController.on('stopEditing', this.setReadOnly, this);
 		
-		// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
-		this.formController.on('afterreset', this.setReadOnly, this);
+		// Apply only on subclass of component/box/field/{xtype}
+		if(cmp.getXTypes().indexOf('/field/') != -1) {
+			if(cmp.suffix) this.suffix = cmp.suffix;
+			if(cmp.prefix) this.prefix = cmp.prefix;
+			if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
+			if(cmp.target) this.target = cmp.target;
+			if(cmp.title) this.title = cmp.title;
+			if(cmp.formatter) this.formatter = cmp.formatter;
+
+			if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
+
+			// Init Text/Label for readOnly after cmp rendered
+			cmp.on('afterrender', this.onRenderCmp, this);
+
+			// Update readOnly status on start/stop editing
+			this.formController.on('startEditing', this.setReadOnly, this);
+			this.formController.on('stopEditing', this.setReadOnly, this);
+			
+			// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
+			this.formController.on('afterreset', this.setReadOnly, this);
+		} else {
+			if(cmp.getXTypes().indexOf('/fieldcontainer') != -1) {
+				// Init Text/Label for readOnly after cmp rendered
+				cmp.on('afterrender', this.addRequiredMarker, this);
+			}
+		}
 	},
 
 	destroy: function () {
@@ -154,9 +159,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				cmp.triggerWrap.show();
 
 				// Add a marker for required fields when editing
-				if(cmp.allowBlank === false) {
-					cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
-				}
+				this.addRequiredMarker();
 			}
 
 			if(cmp.inputEl) {
@@ -179,6 +182,18 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				Ext.destroy(cmp.disableTrigger);
 				delete cmp.disableTrigger;
 			}
+		}
+	},
+	
+	/**
+	 * Add red asterix to mark field as mandatory
+	 * Special process for fieldcontainer
+	 */
+	addRequiredMarker: function() {
+		var cmp = this.getCmp();
+		
+		if(!cmp.hideLabel && cmp.allowBlank === false) {
+			cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
 		}
 	}
 });
