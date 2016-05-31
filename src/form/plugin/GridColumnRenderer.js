@@ -99,7 +99,15 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 			return '...';
 		}
 		
-		var val = record.get(this.dataField);
+		// TODO : Check mapping reader, bind...
+		var getValue = function(obj, path){
+			for (var i=0, path=path.split('.'), len=path.length; i<len; i++){
+				if(obj) obj = obj[path[i]];
+			};
+			return obj || '';
+		};	
+		var val = getValue(record.data, this.dataField);
+		//
 		
 		if(this.filters){
 			this.filters.forEach(function(f, idx, fs){
