@@ -168,7 +168,11 @@ Ext.define('Ck.form.Controller', {
 		
 		if(this.editing===true) this.startEditing();
 		if(this.editing===false) this.stopEditing(true);
-		this.initForm(inlineForm);
+		
+		if(!this.initForm(inlineForm)){
+			this.rootForm.processingForm--;
+			if(this.rootForm.processingForm<0) this.rootForm.processingForm = 0;
+		}
 	},
 	
 	// compatibility
@@ -240,7 +244,7 @@ Ext.define('Ck.form.Controller', {
 			for (var s = 0; s < subforms.length; s++) {
 				var sf = subforms[s];
 				// Allow to call beforeClose in subForms override
-				sf.formClose({force:true});
+				if(sf.isInit) sf.formClose({force:true});
 				this.unRegisterSubForm(sf);
 			}
 			
@@ -317,8 +321,10 @@ Ext.define('Ck.form.Controller', {
 				var formName = this.view.getFormName();
 				if(!formUrl && formName) formUrl = this.getFullUrl(formName);
 
+				if(formName === false || formUrl === false) return false;
+				
 				this.getForm(formUrl);
-				return;
+				return true;
 			}
 			this.form = form;
 
@@ -327,7 +333,7 @@ Ext.define('Ck.form.Controller', {
 			if(!this.name) {
 				Ck.log("Enable to get form Name.");
 				CkLog(form);
-				return;
+				return false;
 			}
 
 			this.dataUrl = null;
@@ -359,7 +365,7 @@ Ext.define('Ck.form.Controller', {
 
 			if(this.oController.beforeShow(form) === false || this.beforeShow(form) === false) {
 				Ck.log("beforeShow cancel initForm.");
-				return;
+				return false;
 			}
 
 			// Format form definition - apply custom options and process
@@ -468,7 +474,7 @@ Ext.define('Ck.form.Controller', {
 			
 			if(this.oController.afterShow(form) === false){
 				Ck.log("afterShow cancel initForm.");
-				return;
+				return false;
 			}
 			
 			//
@@ -1511,6 +1517,8 @@ Ext.define('Ck.form.Controller', {
 	loadData: function(options) {
 		options = options || {};
 		var me = this;
+		if(!me.isInit) return;
+		
 		var v = me.getView();
 
 		// Getters via config param in the view
@@ -1692,6 +1700,8 @@ Ext.define('Ck.form.Controller', {
 		options = options || {};
 
 		var me = this;
+		if(!me.isInit) return;
+		
 		var v = me.getView();
 		if(!v) {
 			Ck.log("Form View is not valid in saveData : "+ this.name);
@@ -1752,7 +1762,7 @@ Ext.define('Ck.form.Controller', {
 			// Save one sub-form...
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
 			// If sub-form is visible
-			if(subForm.view.isVisible() && !subForm.view.name && !subForm.view.isSubForm) {
+			if(subForm.isInit && subForm.view.isVisible() && !subForm.view.name && !subForm.view.isSubForm) {
 				//save data only if subform is not linked to main form with a name property
 				subForm.saveData({
 					success: function(){
