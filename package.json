@@ -285,6 +285,8 @@
 		"path": "libs/zip/zip.js"
 	},{
 		"path": "libs/shapefile-js/shp.js"
+	},{
+		"path": "libs/papaparse/papaparse.js"
 	}],
     
     /**
@@ -340,6 +342,8 @@
 			"path": "libs/zip/zip.js"
 		},{
 			"path": "libs/shapefile-js/shp.min.js"
+		},{
+			"path": "libs/papaparse/papaparse.min.js"
 		}]
 	},
 	"development": {"environment": "development"},
