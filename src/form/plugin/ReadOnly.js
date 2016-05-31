@@ -18,33 +18,37 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	title: '',
 
 	init: function(cmp) {
-		this.formController = cmp.lookupController();
-		this.formViewModel = cmp.lookupViewModel();
+		var xtypes = cmp.getXTypes();
 		
-		// Apply only on subclass of component/box/field/{xtype}
-		if(cmp.getXTypes().indexOf('/field/') != -1) {
-			if(cmp.suffix) this.suffix = cmp.suffix;
-			if(cmp.prefix) this.prefix = cmp.prefix;
-			if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
-			if(cmp.target) this.target = cmp.target;
-			if(cmp.title) this.title = cmp.title;
-			if(cmp.formatter) this.formatter = cmp.formatter;
-
-			if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
-
-			// Init Text/Label for readOnly after cmp rendered
-			cmp.on('afterrender', this.onRenderCmp, this);
-
-			// Update readOnly status on start/stop editing
-			this.formController.on('startEditing', this.setReadOnly, this);
-			this.formController.on('stopEditing', this.setReadOnly, this);
+		if(xtypes.indexOf('field') != -1) {
+			this.formController = cmp.lookupController();
+			this.formViewModel = cmp.lookupViewModel();
 			
-			// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
-			this.formController.on('afterreset', this.setReadOnly, this);
-		} else {
-			if(cmp.getXTypes().indexOf('/fieldcontainer') != -1) {
+			// Apply only on subclass of component/box/field/{xtype}
+			if(xtypes.indexOf('/field/') != -1) {
+				if(cmp.suffix) this.suffix = cmp.suffix;
+				if(cmp.prefix) this.prefix = cmp.prefix;
+				if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
+				if(cmp.target) this.target = cmp.target;
+				if(cmp.title) this.title = cmp.title;
+				if(cmp.formatter) this.formatter = cmp.formatter;
+
+				if(this.fieldTpl) this.template = new Ext.Template(this.fieldTpl);
+
 				// Init Text/Label for readOnly after cmp rendered
-				cmp.on('afterrender', this.addRequiredMarker, this);
+				cmp.on('afterrender', this.onRenderCmp, this);
+
+				// Update readOnly status on start/stop editing
+				this.formController.on('startEditing', this.setReadOnly, this);
+				this.formController.on('stopEditing', this.setReadOnly, this);
+				
+				// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
+				this.formController.on('afterreset', this.setReadOnly, this);
+			} else {
+				if(xtypes.indexOf('/fieldcontainer') != -1) {
+					// Init Text/Label for readOnly after cmp rendered
+					cmp.on('afterrender', this.addRequiredMarker, this);
+				}
 			}
 		}
 	},
