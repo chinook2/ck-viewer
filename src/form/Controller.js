@@ -41,7 +41,8 @@ Ext.define('Ck.form.Controller', {
 	beforeShow: Ext.emptyFn,
 	afterShow: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
-
+	onDestroy: Ext.emptyFn,
+	
 	beforeLoad: Ext.emptyFn,
 	afterLoad: Ext.emptyFn,
 	loadFailed: Ext.emptyFn,
@@ -182,6 +183,10 @@ Ext.define('Ck.form.Controller', {
 	
 	destroy: function() {
 		if(this.ls) this.ls.release();
+		if(this.oController){
+			this.oController.onDestroy();
+			this.oController.destroy();
+		}
 		this.callParent();
 	},
 
