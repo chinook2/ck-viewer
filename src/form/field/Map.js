@@ -84,7 +84,10 @@ Ext.define('Ck.form.field.Map', {
 		var geojson = new ol.format.GeoJSON();
 		var features = this.layer.getSource().getFeatures();
 		var json = geojson.writeFeaturesObject(features, {
-			featureProjection: this.ckmap.getProjection()
+			// Proj in
+			featureProjection: this.ckmap.getProjection(),
+			// Proj out (Projection of the data we are writing)
+			dataProjection:  this.ckmap.getProjection()
 		});
 		
 		// Add CRS...
@@ -103,14 +106,29 @@ Ext.define('Ck.form.field.Map', {
 
 		if(!geojsonObject) return;
 		if(!this.ckmap) return;
-		if(!this.layer) return;
+		
+		// Map not loaded... and layer not available yet. waiting for it and recall setValue !
+		if(!this.layer) {
+			this.ckmap.on({
+				loaded: function() {
+					this.setValue(geojsonObject);
+				},
+				scope: this
+			});
+			return;
+		}
+		
+		// TODO : read Proj in from geojson...
 		
 		var geojson = new ol.format.GeoJSON();
-		var feature = geojson.readFeatures(geojsonObject, {
+		var features = geojson.readFeatures(geojsonObject, {
+			// Proj in (Projection of the data we are reading)
+			dataProjection:  this.ckmap.getProjection(),
+			// Proj out
 			featureProjection: this.ckmap.getProjection()
 		})
 		
-		this.layer.getSource().addFeature(feature);
+		this.layer.getSource().addFeatures(features);
 		
 		// Zoom on features
 		this.ckmap.setExtent(this.layer.getSource().getExtent());
