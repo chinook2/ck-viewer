@@ -1820,6 +1820,7 @@ Ext.define('Ck.form.Controller', {
 						Ext.callback(options.failure, options.scope, [response]);
 						return false;
 					},
+					values: values,
 					fid: options.fid,
 					url: options.url,
 					method: options.method,
@@ -1858,7 +1859,7 @@ Ext.define('Ck.form.Controller', {
 			options.method = 'POST';
 		}
 
-		var values = this.getValues(true);
+		var values = options.values || this.getValues(true);
 		
 		// If a model is set we use it
 		if(fid && model) {
