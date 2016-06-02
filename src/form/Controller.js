@@ -57,7 +57,6 @@ Ext.define('Ck.form.Controller', {
 	onClick: Ext.emptyFn,
 	onChange: Ext.emptyFn,
 	onSelect: Ext.emptyFn,
-	//
 	
 	// fieldsProcessed: 0,
 	// formsProcessed: 0,
@@ -65,7 +64,9 @@ Ext.define('Ck.form.Controller', {
 	processingForm: 0,
 	processingData: 0,
 	
-	// Global intercept events to add custom action in controller
+	/**
+	 * Global intercept events to add custom action in controller
+	 */
 	listen: {
 		component: {
 			'*': {
@@ -175,7 +176,9 @@ Ext.define('Ck.form.Controller', {
 		}
 	},
 	
-	// compatibility
+	/**
+	 * Compatibility
+	 */
 	getDockedItems: function() {
 		return this.getView().getDockedItems();
 	},
@@ -301,7 +304,6 @@ Ext.define('Ck.form.Controller', {
 		}
 
 	},
-
 
 	getOption: function(opt) {
 		var formOpt = Ck.getOption('form');
@@ -501,7 +503,7 @@ Ext.define('Ck.form.Controller', {
 		return true;
 	},
 
-	/*
+	/**
 	 * Get Form definition
 	 * @param
 	 */
@@ -560,7 +562,9 @@ Ext.define('Ck.form.Controller', {
 		});
 	},
 
-	// Get the main form controller (the 1st)
+	/**
+	 * Get the main form controller (the 1st)
+	 */ 
 	getRootForm: function(stopOnSubForm) {
 		var rootForm = this.getView().findParentBy(function(cmp) {
 			if(stopOnSubForm === true && cmp.isSubForm === true) return true; // Main subForm is a rootForm (subRootForm)
@@ -572,12 +576,18 @@ Ext.define('Ck.form.Controller', {
 		return this;
 	},
 	
-	// Get subForms by Name or formName
+	/**
+	 * Get subForms by Name or formName
+	 */
 	getSubForm: function(val) {
-		var sub = this.getView().down('ckform[name='+val+']');
-		if(!sub) sub = this.getView().down('ckform[formName='+val+']');
-		if(sub) return sub.getController();
-		return false;
+		var sub = this.getView().down('ckform[name=' + val + ']');
+		if(!sub) sub = this.getView().down('ckform[formName=' + val + ']');
+		if(!sub) sub = this.getView().down('ckform[reference=' + val + ']');
+		if(sub) {
+			return sub.getController();
+		} else {
+			return false;
+		}
 	},
 	
 	getSubForms: function() {
@@ -587,11 +597,14 @@ Ext.define('Ck.form.Controller', {
 	registerSubForm: function(sform) {
 		this.subforms.push(sform);
 	},
+	
 	unRegisterSubForm: function(sform) {
 		Ext.Array.remove(this.subforms, sform);
 	},
 	
-	// List all included form in a form.
+	/**
+	 * List all included form in a form
+	 */
 	getIncludedForm: function(cfg) {
 		if(!cfg) return;
 		var includeForm = [];
@@ -1145,6 +1158,7 @@ Ext.define('Ck.form.Controller', {
 		}
 		return cfg;
 	},
+	
 	applyFieldDefaults: function(cfg, prop, ref, config){
 		return this.applyFieldsDefaults(cfg, [{
 			property: prop,
@@ -1211,7 +1225,7 @@ Ext.define('Ck.form.Controller', {
 	 * Collect all data from form. Recursively called for the subforms.
 	 * @param {Function}
 	 */
-	 /*
+	/*
 	getValues: function(callback, values) {
 		if(Ext.isEmpty(values)) {
 			var values = {};
@@ -1322,7 +1336,9 @@ Ext.define('Ck.form.Controller', {
 	},
 	*/
 
-	// Prevent getting values from subform...
+	/**
+	 * Prevent getting values from subform...
+	 */
 	getValues: function(resetDirty) {
 		var v = this.getView();
 		var form = v.getForm();
@@ -1450,7 +1466,9 @@ Ext.define('Ck.form.Controller', {
 		
 	},
 
-	// Prevent validate subform fields...
+	/**
+	 * Prevent validate subform fields...
+	 */
 	isValid: function() {
 		var v = this.getView();
 		var form = v.getForm();
@@ -1480,7 +1498,9 @@ Ext.define('Ck.form.Controller', {
 		return isValid;
 	},
 
-	// Check form and subform fields change...
+	/**
+	 * Check form and subform fields change...
+	 */
 	isDirty: function(){
 		var v = this.getView();
 		var form = v.getForm();
@@ -1805,7 +1825,9 @@ Ext.define('Ck.form.Controller', {
 		
 	},
 	
-	// Called ONLY by saveData. Do not use this function directly
+	/**
+	 * Called ONLY by saveData. Do not use this function directly
+	 */
 	processSave: function(options){
 		options = options || {};
 
