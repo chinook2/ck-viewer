@@ -6,13 +6,18 @@ Ext.define('Ck.form.plugin.Subform', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.gridsubform',
 
-	// Save the entire grid when add/edit/delete row. Used when subform have no dataUrl.
+	/**
+	 * Save the entire grid when add/edit/delete row. Used when subform have no dataUrl.
+	 */
 	autocommit: false,
-	// Save when update row with rowediting plugin
+	
+	/**
+	 * Save when update row with rowediting plugin
+	 */
 	commitrow: false,
 
 	/**
-	 * Enable single click on row to open subform edition pop-up
+	 * Number of click needed to start editing by openning pop-up
 	 */	
 	clicksToEdit: 1,
 
@@ -30,6 +35,10 @@ Ext.define('Ck.form.plugin.Subform', {
 	 * Enable single click to start live edition (without pop-up)
 	 */
 	editrow: true,
+	
+	/**
+	 * Object with "property" and "value" member to define row without edit button
+	 */
 	disableEditRow: null,
 
 	/**
@@ -73,7 +82,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		if(!grid.subform) return;
 
 		// Accept param as String or Object
-		if(Ext.isString(grid.subform)){
+		if(Ext.isString(grid.subform)) {
 			grid.subform = {
 				url : grid.subform
 			};
@@ -176,7 +185,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		if(subForm.renderTo) {
 				var ct = Ext.getCmp(subForm.renderTo);
 				if(!ct) ct = formController.lookupReference(subForm.renderTo);
-				if(!ct){
+				if(!ct) {
 					Ck.Notify.error("Enable to render subform '"+ subForm.url +"' in '"+ subForm.renderTo +"'")
 					return;
 				}
@@ -184,11 +193,11 @@ Ext.define('Ck.form.plugin.Subform', {
 				this._subform = ct.add(this._subform);
 
 		//  dock subform on right of the grid
-		} else if(subForm.docked){
+		} else if(subForm.docked) {
 			// Adding toolbar for subform on grid
 			if(subForm.docked === true) subForm.docked = 'right';
 			var docked = {};
-			if(Ext.isString(subForm.docked)){
+			if(Ext.isString(subForm.docked)) {
 				docked.dock = subForm.docked;
 			} else {
 				docked = subForm.docked;
@@ -222,7 +231,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 			}, subForm.window));
 
-			if(this.addbutton){
+			if(this.addbutton) {
 				// Add toolbar for adding new item in grid (open window...)
 				grid.addDocked({
 					xtype: 'toolbar',
@@ -233,7 +242,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					style: {border: 0},
 					items: ['->', {
 						text: this.addbuttonText,
-						handler: function(){
+						handler: function() {
 							this.newItem();
 						},
 						bind: {
@@ -257,7 +266,8 @@ Ext.define('Ck.form.plugin.Subform', {
 		this.actionColumn = grid.down('actioncolumn');
 		if(!this.actionColumn) {
 			var actions = [];
-			if(this.editrow!==false || this.clicksToEdit==0){
+			if(this.editrow !== false || this.clicksToEdit == 0) {
+				// Add edit button in action column
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
 						if(!rec) return true;
@@ -279,7 +289,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				});
 			}
-			if(this.deleterow!==false){
+			if(this.deleterow !==false) {
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
 						if(!rec) return true;
@@ -336,13 +346,13 @@ Ext.define('Ck.form.plugin.Subform', {
 		if(this.clicksToEdit != 0) {
 			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), function(cmp, record, tr, rowIndex, e, eOpts) {
 				// Prevent load data when clic on action column ! handler of the action already pass...
-				if(!Ext.fly(e.target).hasCls('x-action-col-icon')){
+				if(!Ext.fly(e.target).hasCls('x-action-col-icon')) {
 					this.loadItem(cmp, record, tr, rowIndex);
 				}
 			}, this);
 		}
 
-		if(this.commitrow === true){
+		if(this.commitrow === true) {
 			grid.on('beforeedit', function (e, context) {
 				formController.getViewModel().set('rowdata', context.record.getData());
 			}, this);
@@ -376,7 +386,7 @@ Ext.define('Ck.form.plugin.Subform', {
 						vm.set('updating', false);
 
 						// Save main form too
-						if(this.autocommit){
+						if(this.autocommit) {
 							var controller = this._grid.lookupController();
 							controller.saveData();
 						}
@@ -420,7 +430,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		// saveData check form validity
 		formController.saveData({
 			success: function(res) {
-				if(this.addItemLast===true){
+				if(this.addItemLast===true) {
 					// Add new record at the end
 					this._grid.getStore().add(res);
 				}else{
@@ -429,7 +439,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 				this._grid.getView().refresh();
 
-				if(this.autocommit){
+				if(this.autocommit) {
 					var controller = this._grid.lookupController();
 					// When subform don't save data (global save), need to reload here to sync ID if necessary  
 					controller.saveData({
@@ -460,7 +470,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				if(rec) rec.set(res);
 				this._grid.getView().refresh();
 
-				if(this.autocommit){
+				if(this.autocommit) {
 					var controller = this._grid.lookupController();
 					controller.saveData();
 				}
@@ -487,13 +497,13 @@ Ext.define('Ck.form.plugin.Subform', {
 
 		// Delete record if params available
 		formController.deleteData({
-			success: function(){
+			success: function() {
 				store.remove(rec);
 				
 				// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
 				store.removed.push(rec);
 
-				if(this.autocommit){
+				if(this.autocommit) {
 					var controller = this._grid.lookupController();
 					controller.saveData();
 				}
@@ -520,7 +530,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		}
 
 		// Load subform data
-		if(data){
+		if(data) {
 			// update data fid for new item (used by dataUrl templating)
 			this.setDataFid(data);
 
