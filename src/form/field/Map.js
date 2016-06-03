@@ -100,7 +100,12 @@ Ext.define('Ck.form.field.Map', {
 		
 		return json
 	},
-
+	
+	getRawValue: function() {
+		if(!this.layer) return;
+		return this.layer.getSource().getFeatures();
+	},
+	
 	setValue: function (geojsonObject) {
 		this.geometry = geojsonObject;
 
@@ -134,6 +139,19 @@ Ext.define('Ck.form.field.Map', {
 		this.ckmap.setExtent(this.layer.getSource().getExtent());
 	},
 
+	reset: function() {
+		var me = this;
+		me.beforeReset();
+
+		// Clear map data
+		if(this.layer) this.layer.getSource().clear();
+		//
+
+		me.clearInvalid();
+		// delete here so we reset back to the original state
+		delete me.wasValid;
+	},
+	
 	beforeDestroy: function(){
 		// TODO : destroy map, layer ?
 		this.callParent();
@@ -141,6 +159,8 @@ Ext.define('Ck.form.field.Map', {
 	
 	getErrors: function(value) {
 		value = arguments.length ? (value == null ? '' : value) : this.processRawValue(this.getRawValue());
+		
+		if(Ext.isArray(value) && value.length==0) value = null;
 
 		var me = this,
 			errors = me.callParent([value]),

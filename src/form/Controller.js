@@ -55,6 +55,8 @@ Ext.define('Ck.form.Controller', {
 	afterDelete: Ext.emptyFn,
 	deleteFailed: Ext.emptyFn,
 	
+	beforeReset: Ext.emptyFn,
+	
 	onClick: Ext.emptyFn,
 	onChange: Ext.emptyFn,
 	onSelect: Ext.emptyFn,
@@ -1171,6 +1173,17 @@ Ext.define('Ck.form.Controller', {
 			config: config
 		}]);
 	},
+
+	/**
+	 * Get Field by Name or Reference
+	 */
+	getField: function(val, bRroot) {
+		var v = this.getView();
+		if(bRroot) v = this.rootForm.getView();
+		var field = v.down('[name=' + val + ']');
+		if(!field) field = v.down('[reference=' + val + ']');
+		return field;
+	},
 	
 	startEditing: function() {
 		this.getViewModel().set("editing", true);
@@ -2073,6 +2086,11 @@ Ext.define('Ck.form.Controller', {
 	resetData: function(bSoft) {
 		var v = this.getView();
 		if(!v) return;
+		
+		if(this.oController && this.oController.beforeReset(bSoft) === false) {
+			Ck.log("beforeReset cancel resetData.");
+			return false;
+		}
 		
 		// Reset main form
 		Ext.suspendLayouts();
