@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.select.Polygon', {
 	
 	itemId: 'selectpolygon',
 	text: '',
-	iconCls: 'fa fa-asterisk',
+	iconCls: 'ckfont ck-select-box',
 	tooltip: 'Select by polygon',
 	
 	continueMsg: 'Click on the map to start polygon selection',
