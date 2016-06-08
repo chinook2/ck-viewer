@@ -51,6 +51,27 @@ Ext.define('Ck.form.field.Map', {
 				});
 				this.ckmap.getOlMap().addLayer(this.layer);
 			},
+			addlayer: function(lyr){
+				if(!lyr.getSource()) return;
+				if(!lyr.getSource().getParams || !lyr.getSource().updateParams) return;
+				
+				// Try apply fid value to params
+				var lyrParams = lyr.getSource().getParams();
+				if(lyrParams){
+					var params = Ext.Object.toQueryString(lyrParams);
+					// need to preserve { } for template
+					params = params.replace('%7B','{').replace('%7D','}');
+					
+					var fid = this.lookupController().getView().getDataFid();
+					var tpl = new Ext.Template(params);
+					if(Ext.isString(fid)) fid = [fid];
+					params = tpl.apply(fid);
+					
+					lyrParams = Ext.Object.fromQueryString(params);
+					
+					lyr.getSource().updateParams(lyrParams);
+				}
+			},
 			scope: this
 		})
 		
