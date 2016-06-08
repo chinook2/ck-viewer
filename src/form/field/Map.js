@@ -99,6 +99,11 @@ Ext.define('Ck.form.field.Map', {
 		this.ckmap.resize();
 	},
 	
+	getOlMap: function(){
+		if(!this.ckmap) return;
+		return this.ckmap.getOlMap()
+	},
+	
 	getValue: function(){
 		if(!this.layer) return;
 
