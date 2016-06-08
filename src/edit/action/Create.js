@@ -90,6 +90,10 @@ Ext.define('Ck.edit.action.Create', {
 			this.interactions["drawInteraction"] = this.drawInteraction;
 		}
 
+		if(status && btn.single === true){
+			if(this.drawSource) this.drawSource.clear();
+		}
+		
 		this.drawInteraction.setActive(status);
 	},
 
