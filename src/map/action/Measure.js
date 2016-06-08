@@ -11,7 +11,7 @@ Ext.define('Ck.map.action.Measure', {
 	
 	itemId: 'measure',
 	text: '',
-	iconCls: 'fa fa-gear',
+	iconCls: 'ckfont ck-measures',
 	tooltip: '',
 	
 	toggleGroup: 'ckmapAction',
@@ -29,6 +29,11 @@ Ext.define('Ck.map.action.Measure', {
 	 * Allow snapping between measure
 	 */
 	snap: true,
+	
+	/**
+	 * Drawing color
+	 */
+	color: '#ff0000',
 	
 	/**
 	 * Currently drawn feature.
@@ -69,6 +74,11 @@ Ext.define('Ck.map.action.Measure', {
 	draw: null,
 	
 	/**
+	 * Button associate with this action
+	 */
+	btn: null,
+	
+	/**
 	 *
 	 */
 	ckLoaded: function(map) {		
@@ -84,13 +94,13 @@ Ext.define('Ck.map.action.Measure', {
 						color: 'rgba(255, 255, 255, 0.2)'
 					}),
 					stroke: new ol.style.Stroke({
-						color: '#ffcc33',
+						color: this.color,
 						width: 2
 					}),
 					image: new ol.style.Circle({
 						radius: 7,
 						fill: new ol.style.Fill({
-							color: '#ffcc33'
+							color: this.color
 						})
 					})
 				})
@@ -172,13 +182,17 @@ Ext.define('Ck.map.action.Measure', {
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
+		this.btn = btn;
 		if(!this.draw) return;
 		this.draw.setActive(pressed);
-		this.tip.setVisible(pressed);
+		if(this.tip) this.tip.setVisible(pressed);
 		if(pressed) {
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
+			// fix for touch device
+			this.olMap.on('singleclick', this.pointerMoveHandler, this);
 		} else {
 			this.olMap.un('pointermove', this.pointerMoveHandler, this);
+			this.olMap.un('singleclick', this.pointerMoveHandler, this);
 		}
 	},
 	
@@ -219,6 +233,8 @@ Ext.define('Ck.map.action.Measure', {
 	 * Creates a new help tooltip
 	 */
 	createHelpTooltip: function() {
+		if(!Ext.tip.QuickTipManager.isEnabled()) return;
+		
 		this.tip = Ext.create('Ext.tip.ToolTip', {
 			target: this.olMap.getViewport(),
 			trackMouse: true,
