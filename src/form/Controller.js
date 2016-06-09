@@ -1441,7 +1441,7 @@ Ext.define('Ck.form.Controller', {
 		var v = me.getView();
 
 		// Getters via config param in the view
-		var lyr = v.getLayer();
+		var lyr = v.layer || v.getLayer();
 		var bSilent = false;
 
 		// Call beforeLoad plugin. If it return false then cancel the loading
