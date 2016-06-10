@@ -42,8 +42,8 @@ Ext.define('Ck.edit.Action', {
 			// return this.layer;
 		// }
 
-		if(Ext.isString(this.layer)){
-			this.layer = this.getMap().getLayerById(this.layer);
+		if(Ext.isString(this.config.layer)){
+			this.layer = this.getMap().getLayerById(this.config.layer);
 			if(this.layer) {
 				return this.layer;
 			}
@@ -132,9 +132,13 @@ Ext.define('Ck.edit.Action', {
 			this.interactions[key].setActive(false)
 			if(Ext.isFunction(this.interactions[key].destroy)) {
 				this.interactions[key].destroy();
-				delete this[key];
 			}
+			delete this[key];
 		}
+		
+		this.interactions = [];
+		this.layer = null;
+		
 		this.callParent(arguments);
 	}
 });
