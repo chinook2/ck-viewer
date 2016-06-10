@@ -179,7 +179,9 @@ Ext.define('Ck.form.field.Map', {
 	},
 	
 	beforeDestroy: function(){
-		// TODO : destroy map, layer ?
+		// TODO : destroy layer ... ?
+		this.map.destroy();
+		
 		this.callParent();
 	},
 	

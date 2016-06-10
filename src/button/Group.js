@@ -80,6 +80,10 @@
 		this.callParent();
 	},
 	
+	beforeDestroy: function(){
+		this.toolbar.destroy();		
+		this.callParent();
+	},
 	
 	handler: function(btn) {
 		if (btn.pressed) {
