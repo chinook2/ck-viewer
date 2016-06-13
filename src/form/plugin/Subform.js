@@ -278,6 +278,7 @@ Ext.define('Ck.form.plugin.Subform', {
 						return false;
 					},
 					getClass: function(v, meta, rec) {
+						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
 						return 'fa fa-edit';
 					},
@@ -300,6 +301,7 @@ Ext.define('Ck.form.plugin.Subform', {
 						return false;
 					},
 					getClass: function(v, meta, rec) {
+						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
 						return 'fa fa-close';
 					},
