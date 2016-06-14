@@ -86,6 +86,16 @@
 		me.doc = htmlElement.contentDocument;
 		// Get window of the iFrame > access PDF JS functions 
 		me.win = htmlElement.contentWindow;
+
+		
+		// Print hack for Chrome with hidden iFrame with native PDF Viewer
+		if(Ext.isChrome) {
+			var print = me.win.print;
+			me.win.print = function print() {
+				if(document.printFrame) document.printFrame.print();
+			};	
+		}
+		
 		
 		// Activate by defaut Drag mode
 		me.win.HandTool.handTool.activate();
@@ -155,6 +165,7 @@
 			// Update current file using builtIn setter
 			this.setFile(file);
 			this.win.PDFView.open( this.getFullFile(file) );
+			this.embedPrinter( this.getFullFile(file) );
 		}
 		
 		this.opening = false;
@@ -222,5 +233,26 @@
 		}
 		
 		return file;
+	},
+	
+	embedPrinter: function(file) {
+		if(!Ext.isChrome) return;
+		
+		// Keep only one printFrame
+		var frm = Ext.getCmp('printFrame');
+		if(frm) frm.destroy();
+		
+		// Add 2nd iFrame that uses the default browser PDF viewer 
+		// Hack to print PDF with native PDF viewer for Chrome !
+		var pdfjsiFrame = new Ext.Component({
+			hidden: true,
+			id: 'printFrame',
+			autoEl: {
+				tag: 'iframe',
+				name: 'printFrame',
+				src: file
+			}
+		});
+		this.add(pdfjsiFrame);
 	}
 });
