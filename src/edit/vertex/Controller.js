@@ -123,6 +123,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		this.loadVertex();
 		
+		
 		this.gridEvent = this.grid.on({
 			destroyable: true,
 			select: this.updateMarker,
@@ -145,6 +146,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 				scope: this
 			}
 		});
+		
 	},
 	
 	/**
@@ -336,10 +338,11 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {Number}
 	 */
 	vertexDeleted: function(store, records, index) {
+		// TODO : review conflict with deleteRow from gridediting plugin.
 		// Select a new line
-		var newIdx = (index == this.store.getCount())? index - 1 : index;
-		this.grid.setSelection(this.store.getAt(newIdx));
-		this.grid.getView().focusRow(newIdx);		
+		// var newIdx = (index == this.store.getCount())? index - 1 : index;
+		// this.grid.setSelection(this.store.getAt(newIdx));
+		// this.grid.getView().focusRow(newIdx);		
 		
 		this.coords.splice(index, 1);
 		this.updateGeometry();
