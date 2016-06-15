@@ -20,7 +20,11 @@
  Ext.define("Ck.PdfViewer", {
 	extend: "Ext.panel.Panel",
 	alias: "widget.ckpdfviewer",
+	
 	opening: null,
+	
+	// Is print function enabled
+	isPrint: true,
 	
 	config: {
 		file: '',
@@ -86,16 +90,6 @@
 		me.doc = htmlElement.contentDocument;
 		// Get window of the iFrame > access PDF JS functions 
 		me.win = htmlElement.contentWindow;
-
-		
-		// Print hack for Chrome with hidden iFrame with native PDF Viewer
-		if(Ext.isChrome) {
-			var print = me.win.print;
-			me.win.print = function print() {
-				if(document.printFrame) document.printFrame.print();
-			};	
-		}
-		
 		
 		// Activate by defaut Drag mode
 		me.win.HandTool.handTool.activate();
@@ -103,6 +97,7 @@
 		// Check if we need to hide tools
 		var tools = me.getHiddenTools();
 		Ext.each(tools, function(tool, idx, a){
+			if(tool=='print') me.isPrint = false;
 			me.hideTool(tool);
 		});
 		
@@ -114,6 +109,14 @@
 				me.fireEvent('pagechange', page);
 			}
 		}, true);
+		
+		// Print hack for Chrome with hidden iFrame with native PDF Viewer
+		if(Ext.isChrome && me.isPrint) {
+			var print = me.win.print;
+			me.win.print = function print() {
+				if(document.printFrame) document.printFrame.print();
+			};	
+		}
 		
 		// pdfViewer iframe loaded
 		me.fireEvent('loaded');
@@ -237,6 +240,7 @@
 	
 	embedPrinter: function(file) {
 		if(!Ext.isChrome) return;
+		if(!this.isPrint) return;
 		
 		// Keep only one printFrame
 		var frm = Ext.getCmp('printFrame');
