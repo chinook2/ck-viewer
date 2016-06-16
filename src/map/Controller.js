@@ -117,6 +117,11 @@ Ext.define('Ck.map.Controller', {
 	geolocation: null,
 	
 	/**
+	 * @var {Ck.map.action.GpsLocation}
+	 */
+	gpslocation: null,
+	
+	/**
 	 * @var {ol.coordinate}
 	 * Offset to translate marker to another location
 	 */
@@ -304,20 +309,26 @@ Ext.define('Ck.map.Controller', {
 				geolocationOffset: Ck.getMap().geolocationOffset
 			});
 			this.geolocation.geolocationOffset = this.geolocationOffset;
-			this.geolocation.getRealPosition = this.geolocation.getPosition;
-			this.geolocation.getPosition = function() {
-				var p = this.getRealPosition();
-				if(Ext.isArray(p)) {
-					p[0] = p[0] + this.geolocationOffset[0];
-					p[1] = p[1] + this.geolocationOffset[1];
-				}
-				return p;
-			};
+			// this.geolocation.getRealPosition = this.geolocation.getPosition;
+			// this.geolocation.getPosition = function() {
+				// var p = this.getRealPosition();
+				// // if(Ext.isArray(p)) {
+					// // p[0] = p[0] + this.geolocationOffset[0];
+					// // p[1] = p[1] + this.geolocationOffset[1];
+				// // }
+				// return p;
+			// };
 			
 			this.geolocation.on("change", function(evt) {
 				var p = evt.target.getPosition();
 				this.fireEvent("geolocationchange", p);
 			}, this);
+			
+			this.geolocation.on("change", function(evt) {
+				var p = evt.target;
+				this.fireEvent("geolocationfullchange", p);
+			}, this);
+			
 			this.geolocation.on("error", function(error) {
 				Ck.error("GPS : "+ error.message);
 			});

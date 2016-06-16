@@ -64,8 +64,8 @@ Ext.define('Ck.map.action.Geolocation', {
 	toggleAction: function(btn, pressed) {
 		if(pressed) {
 			var geoloc = this.getMap().geolocation.getPosition();
-			if(Ext.isArray(geoloc)) {
-				this.setPosition();
+			if(Ext.isArray(geoloc)) {				
+				this.setPosition(geoloc);
 				this.getOlView().setCenter(geoloc);
 			}
 			
@@ -91,6 +91,9 @@ Ext.define('Ck.map.action.Geolocation', {
 	 */
 	setPosition: function(geoloc) {
 		if(Ext.isArray(geoloc)) {
+			geoloc[0] = geoloc[0] + this.getMap().geolocationOffset[0];
+			geoloc[1] = geoloc[1] + this.getMap().geolocationOffset[1];
+				
 			var mark = this.getGeolocationMarker();
 			this.marker.setVisible(true);
 			mark.setPosition(geoloc);
