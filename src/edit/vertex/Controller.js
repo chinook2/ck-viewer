@@ -180,7 +180,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		
 		// Add dummy row
 		var plg = this.grid.findPlugin('gridediting');
-		if(plg) plg.startEditing();
+		if(plg) plg.addNewRow();
 	},
 	
 	/**
@@ -192,7 +192,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.store.removeAll();
 		// Add dummy row
 		var plg = this.grid.findPlugin('gridediting');
-		if(plg) plg.startEditing();
+		if(plg) plg.addNewRow();
 		
 		this.getView().getDockedItems()[0].getComponent("vertex-live-edit").getMenu().getComponent("action-none").setValue(true);
 	},
