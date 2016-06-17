@@ -82,48 +82,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 			}
 		});
 		
-		var id = Ext.id();
-		if(view.config.layer) {
-			id = view.config.layer.getProperties().id
-		}
-		var vertexLayerId =  + "_vertex-marker";
-		this.vertexLayer = Ck.getMap().getLayerById(vertexLayerId);
-		
-		if(!this.vertexLayer) {
-			this.vertexLayer = Ck.create("ol.layer.Vector", {
-				id: vertexLayerId,
-				source: new ol.source.Vector(),
-				style: Ck.map.Style.redStroke,
-				zIndex: Ck.map.Style.zIndex.vertexOverlay
-			});
-			
-			this.vertexLayer.setMap(this.olMap);
-			// olMap.getLayers().setAt(olMap.getLayers().getLength() - 1, this.vertexLayer);
-		}
-		
-		// Auto load feature on init
-		if(view.config.feature) {
-			this.loadFeature(view.config.feature);
-		}
-	},
-	
-	/**
-	 * Start the vertex session edit for the passed feature
-	 * @param {ol.Feature}
-	 */
-	loadFeature: function(feature) {
-		this.fireEvent("sessionstart", feature);
-		this.geometryChanged = false;
-		
-		this.feature = feature;
-		this.geometry = feature.getGeometry();
-		
-		this.originalGeometry = this.geometry.clone();
-		this.ftCoords = this.geometry.getCoordinates();
-		
-		this.loadVertex();
-		
-		
+		// Init events
 		this.gridEvent = this.grid.on({
 			destroyable: true,
 			select: this.updateMarker,
@@ -145,8 +104,53 @@ Ext.define('Ck.edit.vertex.Controller', {
 				fn: this.updateVertex,
 				scope: this
 			}
-		});
+		});	
 		
+		// Add working vector layer
+		var id = Ext.id();
+		if(view.config.layer) id = view.config.layer.getProperties().id;
+		var vertexLayerId = id + "_vertex-marker";
+		this.vertexLayer = Ck.getMap().getLayerById(vertexLayerId);
+		
+		if(!this.vertexLayer) {
+			this.vertexLayer = Ck.create("ol.layer.Vector", {
+				id: vertexLayerId,
+				source: new ol.source.Vector(),
+				style: Ck.map.Style.redStroke,
+				zIndex: Ck.map.Style.zIndex.vertexOverlay
+			});
+			// Add layer on top (temporary layer) - not in map layers collection
+			this.vertexLayer.setMap(this.olMap);
+		}
+		
+		// Auto load feature on init
+		if(view.config.feature) {
+			this.loadFeature(view.config.feature);
+		}
+	},
+	
+	destroy: function() {
+		this.gridEvent.destroy();
+		this.storeEvent.destroy();
+
+		this.callParent();
+	},
+	
+	/**
+	 * Start the vertex session edit for the passed feature
+	 * @param {ol.Feature}
+	 */
+	loadFeature: function(feature) {
+		this.fireEvent("sessionstart", feature);
+		this.geometryChanged = false;
+		
+		this.feature = feature;
+		this.geometry = feature.getGeometry();
+		
+		this.originalGeometry = this.geometry.clone();
+		this.ftCoords = this.geometry.getCoordinates();
+		
+		this.loadVertex();
 	},
 	
 	/**
@@ -173,6 +177,10 @@ Ext.define('Ck.edit.vertex.Controller', {
 		}
 		
 		this.store.loadData(records);
+		
+		// Add dummy row
+		var plg = this.grid.findPlugin('gridediting');
+		if(plg) plg.startEditing();
 	},
 	
 	/**
@@ -180,8 +188,12 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	unloadGeometry: function() {
 		this.removeAllMarker();
-		this.gridEvent.destroy();
-		this.storeEvent.destroy();
+		// Clear Grid
+		this.store.removeAll();
+		// Add dummy row
+		var plg = this.grid.findPlugin('gridediting');
+		if(plg) plg.startEditing();
+		
 		this.getView().getDockedItems()[0].getComponent("vertex-live-edit").getMenu().getComponent("action-none").setValue(true);
 	},
 	
@@ -223,6 +235,9 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {Ext.data.Model}
 	 */
 	updateMarker: function(rm, record) {
+		// Ignore if select/click on the dummy row
+		if(record.get('dummy')) return;
+		
 		this.removeAllMarker();
 		
 		// Update the position field to simplify creation
@@ -370,11 +385,23 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	updateGeometry: function() {
 		this.geometryChanged = true;
-		this.coords.push(this.coords[0]);
-		if(this.coords.length>3) {
-			this.geometry.setCoordinates(this.ftCoords);
+		
+		// TODO: check geometry type (point/line/poly)
+		
+		// Add extra points when adding manually 1st then 2nd point of the polygon
+		var toRemove = -1;
+		if(this.coords.length>0){
+			this.coords.push(this.coords[0]);
+			
+			if(this.coords.length==2) {
+				toRemove--;
+				this.coords.push(this.coords[0]);
+			}
 		}
-		this.coords.splice(-1, 1);
+		
+		this.geometry.setCoordinates(this.ftCoords);
+		
+		this.coords.splice(toRemove);
 		this.fireEvent("geometrychange", this.feature);
 	},
 	
