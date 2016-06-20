@@ -1028,10 +1028,24 @@ Ext.define('Ck.form.Controller', {
 						queryMode: 'local'
 					});
 					Ext.Object.merge(c, {
-						store		: processStore(c),
-						listeners	: {
-							removed	: function(item, ownerCt, eOpts) {
+						store: processStore(c),
+						listeners: {
+							removed: function(item, ownerCt, eOpts) {
 								item.removeBindings()
+							},
+							render: function(cmb){
+								if(cmb.xtype == 'combobox' && Ck.params.hasOwnProperty('selenium')) {
+									var addMarkup = function(cmb){
+										cmb.setFieldLabel('<div style="color:green">' + cmb.getName() + '-Ready</div>' + cmb.getFieldLabel() );
+									}
+									if(cmb.getStore().isLoaded()){
+										addMarkup(cmb);
+									}else{
+										cmb.getStore().on('load', function(store){
+											addMarkup(cmb);
+										});
+									}
+								}
 							}
 						}
 					});
