@@ -358,6 +358,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		// var newIdx = (index == this.store.getCount())? index - 1 : index;
 		// this.grid.setSelection(this.store.getAt(newIdx));
 		// this.grid.getView().focusRow(newIdx);		
+		if(!this.coords) return;
 		
 		this.coords.splice(index, 1);
 		this.updateGeometry();
