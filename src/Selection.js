@@ -119,7 +119,12 @@ Ext.define('Ck.Selection', {
 		/**
 		 * Loading mask
 		 */
-		mask: null
+		mask: null,
+		
+		/**
+		*	Tolerance en px
+		**/
+		tolerance: 10
 	},
 	
 	/**
@@ -258,7 +263,7 @@ Ext.define('Ck.Selection', {
 		
 		var selFt = feature;
 		if(type=="Point"){
-			var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
+			var radius = Ck.getMap().getOlView().getResolution() * this.getTolerance(); // 10px buffer
 			var bbox = feature.getGeometry().getExtent();
 			var selFt = new ol.Feature({
 				geometry: new ol.geom.Polygon.fromExtent(ol.extent.buffer(bbox, radius))
@@ -332,7 +337,8 @@ Ext.define('Ck.Selection', {
 		var lyrFts, lyrFt;
 		res = [];
 		lyrFts = layer.getSource().getFeatures();
-		selFeature = geoJSON.writeFeatureObject(evntParams.feature);
+		// selFeature = geoJSON.writeFeatureObject(evntParams.feature);
+		selFeature = geoJSON.writeFeatureObject(selFt);
 		
 		for(var j = 0; j < lyrFts.length; j++) {
 			lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);

@@ -13,6 +13,11 @@ Ext.define('Ck.edit.action.Geometry', {
 	
 	interactionId: "geometryInteraction",
 
+	/**
+	*  Click tolerance to select features
+	*/
+	tolerance: 20,
+	
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		this.btn = btn;
@@ -34,7 +39,8 @@ Ext.define('Ck.edit.action.Geometry', {
 				drawStyle		: null,
 				overHighlight	: true,
 				highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
-				selectId		: "ckmapSelectEdit"
+				selectId		: "ckmapSelectEdit",
+				tolerance       : this.tolerance
 			});
 			this.interactions["geometryInteraction"] = this.geometryInteraction;
 		}
