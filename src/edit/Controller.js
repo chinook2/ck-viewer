@@ -321,12 +321,12 @@ Ext.define('Ck.edit.Controller', {
 		}
 		
 		// Hide "Add to GPS position" button if is not a point layer
-		if(Ck.isDesktop() || geometryType.search("Point") === -1) {
-			var gpsAdd = tbar.getComponent("edit-create-gps");
-			if(gpsAdd) {
-				gpsAdd.hide();
-			}
-		}
+		// if(Ck.isDesktop() || geometryType.search("Point") === -1) {
+			// var gpsAdd = tbar.getComponent("edit-create-gps");
+			// if(gpsAdd) {
+				// gpsAdd.hide();
+			// }
+		// }
 
 		// Geolocation button
 		this.on("geolocation", this.setPosition, this);

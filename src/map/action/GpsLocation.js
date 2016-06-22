@@ -66,7 +66,7 @@ Ext.define('Ck.map.action.GpsLocation', {
 	 * Zoom to user location
 	 */
 	toggleAction: function(btn, pressed) {
-		if(Ck.isMobileDevice()) {
+		if(Ck.isMobileDevice() && !Ext.isEmpty(GPSLocation)) {
 			if(pressed) {
 				this.createWin();
 				this.getMap().gpslocation = this;
@@ -101,7 +101,7 @@ Ext.define('Ck.map.action.GpsLocation', {
 				var coords = [coordinates.longitude, coordinates.latitude];
 				
 				var mapProj = thisref.getMap().getProjection();
-				var proj = new ol.proj.Projection({code:"EPSG:4326"}) 
+				var proj = new ol.proj.Projection({code:"EPSG:4326"});
 				
 				if(mapProj.getCode() != proj.getCode()) {
 					coords = ol.proj.transform(coords, proj, mapProj);				
@@ -180,5 +180,11 @@ Ext.define('Ck.map.action.GpsLocation', {
 			})
 		);
 		this.getMap().getOlMap().updateSize();
+	},
+	
+	getPosition: function(sucessFn, errorFn, opt) {
+		if(Ck.isMobileDevice() && !Ext.isEmpty(GPSLocation)) {
+			GPSLocation.getCurrentPosition(sucessFn, errorFn, opt);
+		}		
 	}
 });
