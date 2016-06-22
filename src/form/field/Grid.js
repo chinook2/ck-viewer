@@ -59,6 +59,23 @@ Ext.define('Ck.form.field.Grid', {
 			scope: this
 		});
 		
+		/*
+		// Helper to identify by CSS first cell for dummy row
+		this.grid.getColumns().forEach(function(col) {			
+			col.renderer = function(value, metaData, record, rowIndex, colIndex, store, view){
+				var cls = 'ck-';
+				if(record.get('dummy')){
+					cls += 'dummy-';
+				}
+				cls += 'r' + rowIndex;
+				cls += 'c' + colIndex;
+				cls += '-cell-inner';
+				metaData.innerCls = cls;
+				return value;
+			}
+		});
+		*/
+		
 		// Enable / Disable plugins when Start/Stop Editing
 		var formController = this.grid.lookupController();
 		formController.on({

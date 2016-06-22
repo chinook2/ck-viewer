@@ -89,10 +89,13 @@ Ext.define('Ck.form.plugin.Subform', {
 		}
 
 		// Update internal counter to check when all subforms are loaded.
-		// Add extra count to pass the delay:50 of initSubForm
+		// Add extra count to pass the delay:50 of initSubForm only when form is visible so grid will be rendered
 		var formController = grid.lookupController();
-		formController.rootForm.processingForm++;
-		Ck.log("Init subForm : "+ grid.subform.url);
+		if(formController.getView().isVisible()){
+			formController.rootForm.processingForm++;
+			formController.rootForm.processingData++;
+			// Ck.log("Init subForm : "+ grid.subform.url + " (stack " +formController.rootForm.processingForm+")");
+		}
 		
 		if(this.autocommit===true) this.commitrow=true;
 		
@@ -121,6 +124,10 @@ Ext.define('Ck.form.plugin.Subform', {
 		
 		// Remove extra count to pass the delay:50 of initSubForm
 		formController.rootForm.processingForm--;
+		formController.rootForm.processingData--;
+		// Ck.log("Init subForm 2 : "+ grid.subform.url + " (stack " +formController.rootForm.processingForm+")");
+		
+		var cssSuffix = grid.reference || formController.name;
 		
 		// Can't create subform instance here. Need to add in page first, to get viewModel hierarchy
 		this._subform = {
@@ -157,7 +164,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				},
 				items: ['->',{
 					text: 'Add',
-					cls: 'ck-form-add',
+					cls: 'ck-form-add ck-form-add-'+cssSuffix,
 					handler: this.addItem,
 					bind: {
 						hidden: '{updating}'
@@ -165,7 +172,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				},{
 					text: 'Update',
-					cls: 'ck-form-update',
+					cls: 'ck-form-update ck-form-update-'+cssSuffix,
 					handler: this.updateItem,
 					bind: {
 						hidden: '{!updating}'
@@ -173,7 +180,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				},{
 					text: 'Cancel',
-					cls: 'ck-form-cancel',
+					cls: 'ck-form-cancel ck-form-cancel-'+cssSuffix,
 					handler: this.resetSubForm,
 					scope: this
 				}]
@@ -241,6 +248,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					},
 					style: {border: 0},
 					items: ['->', {
+						cls: 'ck-form-new ck-form-new-'+cssSuffix,
 						text: this.addbuttonText,
 						handler: function() {
 							this.newItem();

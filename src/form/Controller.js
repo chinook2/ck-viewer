@@ -162,7 +162,7 @@ Ext.define('Ck.form.Controller', {
 		this.rootForm = this.getRootForm();
 		this.updateProcessing(true, 'Form');
 		this.rootForm.processingForm++;
-		Ck.log("Init form : "+ this.view.formName + " (stack " + (this.rootForm.processingForm) + ")");
+		// Ck.log("Init form : "+ this.view.formName + " (stack " + (this.rootForm.processingForm) + ")");
 		// Need to Init processing Data here to preserve stack
 		if(this.autoLoad){
 			this.updateProcessing(true, 'Data');
@@ -176,6 +176,10 @@ Ext.define('Ck.form.Controller', {
 		if(!this.initForm(inlineForm)){
 			this.rootForm.processingForm--;
 			if(this.rootForm.processingForm<0) this.rootForm.processingForm = 0;
+			if(this.autoLoad){
+				this.rootForm.processingData--;
+				if(this.rootForm.processingData<0) this.rootForm.processingData = 0;
+			}
 		}
 	},
 	
@@ -489,15 +493,15 @@ Ext.define('Ck.form.Controller', {
 			//
 			this.rootForm.processingForm--;
 			if(this.rootForm.processingForm<0) this.rootForm.processingForm = 0;
-			Ck.log("Loaded form : "+ this.name + " (stack "+ this.rootForm.processingForm+")");
+			// Ck.log("Loaded form : "+ this.view.formName +" - "+ this.name + " (stack "+ this.rootForm.processingForm+")");
 			
 			if(this.rootForm.processingForm==0){
-				Ck.log("!!!! All Forms LOADED !!!! for : " + this.rootForm.name);
+				// Ck.log("!!!! All Forms LOADED !!!! for : " + this.rootForm.name);
 				this.updateProcessing(false, 'Form');
 				this.rootForm.fireEvent('formloaded');
 			}
 			if(this.rootForm.processingForm==0 && this.rootForm.processingData==0){
-				Ck.log("!!!! ALL LOADED !!!! for : " + this.rootForm.name);
+				// Ck.log("!!!! ALL LOADED !!!! for : " + this.rootForm.name);
 				this.updateProcessing(false);
 				this.rootForm.fireEvent('allloaded');
 			}
@@ -529,7 +533,6 @@ Ext.define('Ck.form.Controller', {
 			}
 		}
 		
-		// Ck.log("Load form : "+ formUrl);
 		Cks.get({
 			url: formUrl,
 			scope: this,
@@ -573,7 +576,15 @@ Ext.define('Ck.form.Controller', {
 	 * Get the main form controller (the 1st)
 	 */ 
 	getRootForm: function(stopOnSubForm) {
-		var rootForm = this.getView().findParentBy(function(cmp) {
+		// First try to return the rootForm of current parentForm directly.
+		if(stopOnSubForm !== true){
+			if(this.parentForm && this.parentForm.rootForm) return this.parentForm.rootForm;
+		}
+		
+		var v = this.getView();
+		// Current form is subForm 'popup' need to get parentForm for hierarchy search...
+		if(v.parentForm) v = v.parentForm;
+		var rootForm = v.findParentBy(function(cmp) {
 			if(stopOnSubForm === true && cmp.isSubForm === true) return true; // Main subForm is a rootForm (subRootForm)
 			if(cmp.xtype != 'ckform') return false;
 			return (cmp.getController().parentForm === false);
@@ -631,6 +642,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	includeForm: function(formConfig, formName, callback) {
+		// Ck.log("Include form : " + formName);
 		var formUrl = this.getFullUrl(formName);
 		if(!formUrl) {
 			Ck.Notify.error("'formUrl' or 'formName' not set in includeForm.");
@@ -1576,7 +1588,7 @@ Ext.define('Ck.form.Controller', {
 		// Getters via config param in the view
 		var lyr = v.getLayer();
 		
-		Ck.log("Load Data for : "+this.name+" (stack "+ this.rootForm.processingData +")");
+		// Ck.log("Load Data for : "+this.name+" (stack "+ this.rootForm.processingData +")");
 
 		if(this.oController.beforeLoad(options) === false) {
 			Ck.log("beforeLoad cancel loadData.");
@@ -1642,16 +1654,13 @@ Ext.define('Ck.form.Controller', {
 
 
 		if(!url) {
-			Ck.log("Forms loadData 'fid' or 'url' not set in "+this.name);
+			Ck.log("Forms loadData 'url' not set in "+this.name);
 
 			this.loadRawData();
-			// If new form with empty data we need to startEditing too...
-			// if(v.getEditing()===true) this.startEditing();
-
 			return;
 		}
 
-
+		
 		// Load data from custom URL ou standard URL
 		url = this.getFullUrl(url);
 		Cks.get({
@@ -1715,15 +1724,15 @@ Ext.define('Ck.form.Controller', {
 		// Check if all forms & subForms are loaded
 		this.rootForm.processingData--;
 		if(this.rootForm.processingData<0) this.rootForm.processingData = 0;
-		Ck.log("Loaded Data for : " + this.name + " (stack " + this.rootForm.processingData + ")");
+		// Ck.log("Loaded Data for : " + this.name + " (stack " + this.rootForm.processingData + ")");
 		
 		if(this.rootForm.processingData==0){
-			Ck.log("!!!! All Data LOADED !!!! for : " + this.rootForm.name);
+			// Ck.log("!!!! All Data LOADED !!!! for : " + this.rootForm.name);
 			this.updateProcessing(false, 'Data');
 				this.rootForm.fireEvent('dataloaded');
 		}
 		if(this.rootForm.processingForm==0 && this.rootForm.processingData==0){
-			Ck.log("!!!! ALL LOADED !!!! for : " + this.rootForm.name);
+			// Ck.log("!!!! ALL LOADED !!!! for : " + this.rootForm.name);
 			this.updateProcessing(false);
 				this.rootForm.fireEvent('allloaded');
 		}
@@ -1786,7 +1795,7 @@ Ext.define('Ck.form.Controller', {
 			return true;
 		}
 		
-		Ck.log("Save data for : "+this.name);
+		// Ck.log("Save data for : "+this.name);
 		this.fireEvent('beforesave');
 
 		// Test if form is valid (all fields of the main form)
@@ -1808,7 +1817,7 @@ Ext.define('Ck.form.Controller', {
 
 		// SUBFORM : Save All forms recursively, waiting callback return to process
 		var subforms = this.getSubForms();
-		if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));		
+		// if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));		
 		
 		Ck.asyncForEach(subforms, function(subForm, cb) {			
 			// Save one sub-form...
@@ -1965,7 +1974,7 @@ Ext.define('Ck.form.Controller', {
 					// Allow to reload form after Save. Get back ID generated on save for example
 					if(options.reload===true) this.loadData();
 				}
-				Ck.log("Success to save for : "+this.name);
+				// Ck.log("Success to save for : "+this.name);
 				Ext.callback(options.success, options.scope, [data]);
 			},
 			failure: function(response, opts) {
@@ -1987,7 +1996,7 @@ Ext.define('Ck.form.Controller', {
 			});
 			this.saveMask.show();
 		}
-		Ck.log("Start save for : "+this.name);
+		// Ck.log("Start save for : "+this.name);
 		
 		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
