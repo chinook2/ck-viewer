@@ -647,7 +647,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.vertexLayer.setMap(null);
 		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
 		
-		if(this.controller.vertexContainer !== undefined) {
+		if(this.controller !== undefined && this.controller.vertexContainer !== undefined) {
 			this.controller.vertexContainer.setVisible(false);
 		}
 	},
