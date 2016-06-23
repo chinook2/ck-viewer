@@ -294,11 +294,12 @@ Ext.define('Ck.edit.Controller', {
 			}
 
 			var vertexConf = conf;
-			vertexConf.scrollable = false;
+			vertexConf.scrollable = true;
 			this.vertexPanel = Ext.create("widget.ckedit-vertex", vertexConf);
 			vertexContainer.add(this.vertexPanel);
 			this.mainWindow.manageVisibility();
-
+			this.vertexContainer = vertexContainer;
+			
 			// Add listeners
 			this.vertex = this.vertexPanel.getController();
 			Ext.apply(this.vertex, vertexConf);
@@ -500,6 +501,7 @@ Ext.define('Ck.edit.Controller', {
 		} else {
 			this.vertex.loadFeature(feature);
 			// JMA Hard fix - by defaut live edit
+			this.geolocationBtn.enable();
 			this.vertex.liveAction();
 			this.vertex.on("geometrychange", function(feature){
 				this.fireEvent("featuregeometry", feature);

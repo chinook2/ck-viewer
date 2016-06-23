@@ -97,6 +97,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 			this.vertexLayer.setMap(this.olMap);
 			// olMap.getLayers().setAt(olMap.getLayers().getLength() - 1, this.vertexLayer);
 		}
+		
+		this.on("geolocation", this.geolocate);
 	},
 	
 	/**
@@ -637,10 +639,35 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.fireEvent("cancel", this.feature);
 	},
 	
+	/**
+	 * Close edition
+	 */
 	close: function() {		
 		this.closeAll();
 		this.vertexLayer.setMap(null);
-		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);		
+		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+		
+		if(this.controller.vertexContainer !== undefined) {
+			this.controller.vertexContainer.setVisible(false);
+		}
+	},
+	
+	/**
+	 *	Replace one selected row coordinates with coordinates passed
+	 */
+	geolocate: function(coords) {
+		var selectedRows = this.grid.getSelection();
+		
+		if(selectedRows.length === 1) {
+			var record = selectedRows[0];
+			record.set("longitude", coords[0]);
+			record.set("latitude", coords[1]);
+			record.data.geometry = [record.data.longitude, record.data.latitude];
+		
+			this.coords[record.data.number - 1] = record.data.geometry;
+			this.updateMarker(null, record);
+			this.updateGeometry();
+		}		
 	}
 	
 });

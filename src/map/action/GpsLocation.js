@@ -1,11 +1,6 @@
 /**
- *
- *
- *
- *
- *
- *
- *
+ *	GPS Location utility action
+ *	Use corova-plugin-gpslocation
  */
 Ext.define('Ck.map.action.GpsLocation', {
 	extend: 'Ck.Action',
@@ -92,6 +87,9 @@ Ext.define('Ck.map.action.GpsLocation', {
 		}
 	},
 	
+	/**
+	 *	Fired every time the GPS position change with a Position object
+	 */
 	onChange: function(position) {
 		if(position) {
 			var thisref = Ck.getMap().gpslocation;
@@ -137,10 +135,16 @@ Ext.define('Ck.map.action.GpsLocation', {
 		}
 	},
 	
+	/**
+	 *	Error callback function
+	 */
 	onError: function(error) {
 		console.log(error);
 	},
 	
+	/**
+	 *	Create a docked window at the bottom of the map with GPS informations
+	 */
 	createWin: function() {
 		var view = this.getMap().getView();
 		
@@ -182,6 +186,9 @@ Ext.define('Ck.map.action.GpsLocation', {
 		this.getMap().getOlMap().updateSize();
 	},
 	
+	/**
+	 *	Retrieve GPS position and call success or error function passed as arguments
+	 */
 	getPosition: function(sucessFn, errorFn, opt) {
 		if(Ck.isMobileDevice() && !Ext.isEmpty(GPSLocation)) {
 			GPSLocation.getCurrentPosition(sucessFn, errorFn, opt);

@@ -31,6 +31,10 @@ Ext.define('Ck.edit.action.Geometry', {
 						var ft = layers[0].features;
 						if(ft.length == 1) {
 							this.controller.startGeometryEdition(ft[0]);
+							
+							if(this.controller.vertexContainer !== undefined) {
+								this.controller.vertexContainer.setVisible(true);
+							}
 						}
 					}
 				},
@@ -55,7 +59,11 @@ Ext.define('Ck.edit.action.Geometry', {
 			
 			if(this.controller.vertex !== undefined) {
 				this.controller.vertex.closeAll();
-			}			
+			}
+			
+			if(this.controller.vertexContainer !== undefined) {
+				this.controller.vertexContainer.setVisible(false);
+			}
 		}
 	},
 	
