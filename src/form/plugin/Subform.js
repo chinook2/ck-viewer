@@ -110,6 +110,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	 * Component calls destroy on all its plugins at destroy time.
 	 */
 	destroy: function() {
+		if(this._subformWindow) this._subformWindow.destroy();
 	},
 
 	/**
