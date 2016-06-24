@@ -9,6 +9,11 @@ Ext.define('Ck.edit.action.Attribute', {
 	iconCls: 'fa fa-align-justify',
 	tooltip: 'Edit attribute',
 
+	/**
+	*  Click tolerance to select features
+	*/
+	tolerance: 20,
+	
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		
@@ -31,7 +36,8 @@ Ext.define('Ck.edit.action.Attribute', {
 				drawStyle		: null,
 				overHighlight	: true,
 				highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
-				selectId		: "ckmapSelectEdit"
+				selectId		: "ckmapSelectEdit",
+				tolerance       : this.tolerance
 			});
 			this.interactions["attributeInteraction"] = this.attributeInteraction;
 		}

@@ -43,8 +43,34 @@ Ext.define('Ck.edit.action.Create', {
 			this.drawInteraction.finishDrawing = function() {
 				var sketchFeature = this.drawInteraction.abortDrawing_();
 				
-				var geometry = sketchFeature.getGeometry();
-		
+				if(!sketchFeature) {
+					var coords = this.drawInteraction.sketchCoords_;
+					if(coords && Ext.isArray(coords)) {
+						var type = this.controller.getGeometryTypeBehavior();
+						
+						if(type == "Polygon") {
+							sketchFeature = new ol.Feature(
+								new ol.geom.Polygon(
+									coords
+								)
+							);
+						} else if(type == "LineString")  {
+							sketchFeature = new ol.Feature(
+								new ol.geom.LineString(
+									coords
+								)
+							);
+						} else {
+							sketchFeature = new ol.Feature(
+								new ol.geom.Point(
+									coords
+								)
+							);
+						}
+					}				
+				}
+
+				var geometry = sketchFeature.getGeometry();	
 				var opt = {
 					layers		: this.controller.getSnappingOptions(),
 					layer		: this.getLayer(),

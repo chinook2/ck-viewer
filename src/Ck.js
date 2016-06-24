@@ -946,6 +946,19 @@ Ext.apply(Ck, {
 	},
 	
 	/**
+	 * Get action by itemId (eg: ck-map-mesure-id)
+	 * @param {String}
+	 * @return {Ck.Action}
+	 */
+	getActionByItemId: function(itemId) {
+		for(var i = 0; i < Ck.actions.length; i++) {
+			if(Ck.actions[i].itemId == itemId) {
+				return Ck.actions[i];
+			}
+		}
+	},
+	
+	/**
 	 * Get informations of the package (from Ext.manifest).
 	 *
 	 *  - creator

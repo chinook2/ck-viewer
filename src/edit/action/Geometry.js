@@ -13,6 +13,11 @@ Ext.define('Ck.edit.action.Geometry', {
 	
 	interactionId: "geometryInteraction",
 
+	/**
+	*  Click tolerance to select features
+	*/
+	tolerance: 20,
+	
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		this.btn = btn;
@@ -26,6 +31,10 @@ Ext.define('Ck.edit.action.Geometry', {
 						var ft = layers[0].features;
 						if(ft.length == 1) {
 							this.controller.startGeometryEdition(ft[0]);
+							
+							if(this.controller.vertexContainer !== undefined) {
+								this.controller.vertexContainer.setVisible(true);
+							}
 						}
 					}
 				},
@@ -34,7 +43,8 @@ Ext.define('Ck.edit.action.Geometry', {
 				drawStyle		: null,
 				overHighlight	: true,
 				highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
-				selectId		: "ckmapSelectEdit"
+				selectId		: "ckmapSelectEdit",
+				tolerance       : this.tolerance
 			});
 			this.interactions["geometryInteraction"] = this.geometryInteraction;
 		}
@@ -49,7 +59,11 @@ Ext.define('Ck.edit.action.Geometry', {
 			
 			if(this.controller.vertex !== undefined) {
 				this.controller.vertex.closeAll();
-			}			
+			}
+			
+			if(this.controller.vertexContainer !== undefined) {
+				this.controller.vertexContainer.setVisible(false);
+			}
 		}
 	},
 	

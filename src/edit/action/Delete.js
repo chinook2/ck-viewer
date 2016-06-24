@@ -16,6 +16,11 @@ Ext.define('Ck.edit.action.Delete', {
 	 * Ask confirmation to the user before remove
 	 */
 	deleteConfirmation: true,
+	
+	/**
+	*  Click tolerance to select features
+	*/
+	tolerance: 20,
 
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
@@ -33,7 +38,8 @@ Ext.define('Ck.edit.action.Delete', {
 				selectId		: "ckmapEditDelete",
 				overHighlight	: true,
 				highlightStyle	: Ck.map.Style.redStroke,
-				stackSelection	: true
+				stackSelection	: true,
+				tolerance       : this.tolerance
 			});
 			this.interactions["delInteraction"] = this.delInteraction;
 		}
