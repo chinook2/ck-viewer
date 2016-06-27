@@ -292,7 +292,7 @@ Ext.define('Ck.map.Controller', {
 					
 					this.overviewCollection.push(layer);
 				} else {
-					this.addLayer(layers[i], owc, Infinity);
+					this.addLayer(layers[i], owc);
 				}
 			}
 
