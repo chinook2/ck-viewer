@@ -36,7 +36,9 @@ Ext.define('Ck.format.OWSContextLayer', {
 			title		: data.properties.title,
 			visible		: data.properties.active,
 			minScale	: data.properties.minscale,
-			maxScale	: data.properties.maxscale
+			maxScale	: data.properties.maxscale,
+			minResolution	: data.properties.minResolution,
+			maxResolution	: data.properties.maxResolution
 		});
 		
 		this.initConfig(config);
