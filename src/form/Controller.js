@@ -795,7 +795,7 @@ Ext.define('Ck.form.Controller', {
 								// Apply template if available like dataUrl. Typically to insert object id in the URL
 								var v = me.getView();
 								var fid = v.getDataFid();
-								if(fid) {
+								if(!Ext.isEmpty(fid)) {
 									var tpl = new Ext.Template(storeUrl);
 									if(Ext.isString(fid)) fid = [fid];
 									storeUrl = tpl.apply(fid);
@@ -1305,7 +1305,7 @@ Ext.define('Ck.form.Controller', {
             // Boucle sur les records supprimés du gridpanel
             for(var r=0; r<drecs.length; r++){
                 var fid = drecs[r].get('fid');
-                if(fid) {
+                if(!Ext.isEmpty(fid)) {
                     recs.push({
                         fid: fid,
                         params: {}
@@ -1459,7 +1459,7 @@ Ext.define('Ck.form.Controller', {
 			}
 
 		// Load data from model (offline websql Database - model is linked to a websql proxy)
-		if(fid && model) {
+		if(!Ext.isEmpty(fid) && model) {
 			model.setId(fid);
 			model.load({
 				success: function(record, operation) {
@@ -1476,7 +1476,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load data by ID - build standard url
-		if(fid) {
+		if(!Ext.isEmpty(fid)) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL (or multiples URL) to load data
@@ -1702,7 +1702,7 @@ Ext.define('Ck.form.Controller', {
 		// Save in GeoJSON layer if loaded from DataObject
 		var dataObject = this.view.getDataObject();
 		
-		if(dataObject && lyr && fid) {
+		if(dataObject && lyr && !Ext.isEmpty(fid)) {
 			var map=Ck.getMap();
 			var layer = map.getLayerById(lyr);
 			
@@ -1718,6 +1718,7 @@ Ext.define('Ck.form.Controller', {
 							if(feature) {
 								var properties = Ext.JSON.decode(decodeURIComponent(values.data)).main.params;
 								feature.setProperties(properties);
+								this.fireEvent('aftersave', feature);
 								Ext.callback(options.success, options.scope, [values]);
 								return true
 							} else {
@@ -1731,7 +1732,7 @@ Ext.define('Ck.form.Controller', {
 		}
 		
 		// If a model is set we use it
-		if(fid && model) {
+		if(!Ext.isEmpty(fid) && model) {
 			model.set(values);
 			model.save({
 				success: function(record, operation) {
@@ -1759,7 +1760,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Load data by ID - build standard url
-		if(fid || lyr) {
+		if(!Ext.isEmpty(fid) || lyr) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL (or multiples URL) to load data
@@ -1769,7 +1770,7 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				var tpl = new Ext.Template(dataUrl);
-				if(!fid) fid = '';
+				if(Ext.isEmpty(fid)) fid = '';
 				if(Ext.isString(fid)) {
 					fid = {
 						fid: fid,
@@ -1864,7 +1865,7 @@ Ext.define('Ck.form.Controller', {
 			return false;
 		}
 
-		if(fid && model) {
+		if(!Ext.isEmpty(fid) && model) {
 			model.set(dt);
 			model.erase({
 				success: function(record, operation) {
@@ -1883,7 +1884,7 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		// Delete data by ID - build standard url
-		if(fid) {
+		if(!Ext.isEmpty(fid)) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
 				// Form provide un template URL to load data
