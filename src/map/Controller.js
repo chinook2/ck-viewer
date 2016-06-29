@@ -476,6 +476,7 @@ Ext.define('Ck.map.Controller', {
 				extent: extent,
 				style: olStyle,
 				visible: layer.getVisible(),
+				zIndex: layer.getZIndex(),
 				path: path,
 				minResolution: layer.getMinResolution(),
 				maxResolution: layer.getMaxResolution()
@@ -1214,6 +1215,7 @@ Ext.define('Ck.map.Controller', {
 			extent: extent,
 			style: olStyle,
 			visible: layer.getVisible(),
+			zIndex: layer.getZIndex(),
 			path: pathlayer,
 			minResolution: layer.getMinResolution(),
 			maxResolution: layer.getMaxResolution()
@@ -1256,7 +1258,8 @@ Ext.define('Ck.map.Controller', {
 										updated : "2015-07-22T00:00:00Z",
 										content : "",
 										publisher : "Chinook Server",
-										active : true,
+										active : folderLayer.getVisible(),
+										zIndex : folderLayer.getZIndex(),
 										offerings : [{
 											code: "http://www.opengis.net/spec/owc-shapefile/1.0/req/shapefile",
 											operations: [{
