@@ -25,16 +25,13 @@ Ext.define("Ck.edit.Vertex", {
 		bufferedRenderer: false,
 		_width: "auto",
 		_height: "auto",
-		
 		plugins: [{
 			ptype: 'gridediting'
 		},{
 			ptype: "rowediting",
 			clicksToEdit: 1
 		}],
-		
-		columns: [
-			{
+		columns: [{
 				text: "#",
 				dataIndex: "number",
 				width: 50,
@@ -51,14 +48,13 @@ Ext.define("Ck.edit.Vertex", {
 				editor: "numberfield",
 				decimalPrecision: 4,
 				width: 115
-			}
-		],
+			}],
 		store: {
 			storeId: "editVertexStore",
 			fields: ["number", "longitude", "latitude", "geometry"]
 		}
 	}],
-
+	
 	dockedItems: [{
 		xtype: 'toolbar',
 		dock: 'bottom',
@@ -123,5 +119,4 @@ Ext.define("Ck.edit.Vertex", {
 			}]
 		}]
 	}]
-	
 });

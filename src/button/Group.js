@@ -77,7 +77,7 @@
 			this.updatePosition();
 		}, this);
 
-		this.callParent();
+		this.callParent(arguments);
 	},
 	
 	beforeDestroy: function(){

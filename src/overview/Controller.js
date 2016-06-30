@@ -29,17 +29,12 @@ Ext.define('Ck.overview.Controller', {
 	 * @protected
 	 */
 	init: function() {
-		this.map = Ck.getMap();
+		this.callParent(arguments);
 		this.view = this.getView();
 		
 		this.config = this.getView().getConfig();
 		
-		this.ovLayers = Ck.getMap().getLayers(function(lyr) {
-			return (lyr.getExtension("overviewLayer") === true);
-		});
-		
-		
-		if(this.ovLayers.length == 0) {
+		if(this.getMap().overviewCollection.getLength() == 0) {
 			this.getView().on("beforerender", function() {
 				if(this.openner.close) {
 					this.openner.close();
@@ -70,20 +65,55 @@ Ext.define('Ck.overview.Controller', {
 			this.view.setWidth(this.config.ovWidth);
 			this.view.setHeight(this.config.ovHeight);
 			
-			this.getView().on("render", this.attachOvControl, this);
+			this.getView().on("render", this.initOverview, this);
 		}
+		
+		this.getMap().on("loaded", this.initOverview, this);
+		this.getMap().on("contextloading", this.removeOverview, this);
 	},
 	
-	attachOvControl: function() {
+   /**
+    * Initialize the control.OverviewMap. Calculate the extent, first from the owc
+	*/
+	initOverview: function() {
+		var extent = this.getMap().originOwc.getExtent();
+		
+		if(!Ext.isArray(extent)) {
+			// Wrong way to calculate. Depend of current view 
+			var extent = this.getOlView().calculateExtent(this.getOlMap().getSize());
+		}
+
+		var width = Math.abs(extent[2]) - Math.abs(extent[0]);
+		var height = Math.abs(extent[3]) - Math.abs(extent[1]);
+		
+		var size = this.getView().getSize();
+		size = [size.width, size.height];
+		
+		var res = [this.getOlView().getResolutionForExtent(extent, size)];
+		
+		for(var i = 1; i < this.config.nbRes; i++) {
+			res.push(res[0] / (Math.pow(2, i)));
+		}
+		
 		var opt = {
-			collapsed: false,
-			collapsible: false,
-			target: this.getView().getEl(),
-			layers: this.ovLayers
+			collapsed	: false,
+			collapsible	: false,
+			target		: this.getView().getEl(),
+			layers		: this.getMap().overviewCollection,
+			view		: new ol.View({
+				projection		: this.getOlView().getProjection(),
+				resolutions		: res,
+				maxResolution	: res[res.length - 1],
+				minResolution	: res[0]
+			})
 		};
 		
 		this.ovControl = new ol.control.OverviewMap(opt);
 		
-		this.map.getOlMap().addControl(this.ovControl);
+		this.getOlMap().addControl(this.ovControl);
+	},
+	
+	removeOverview: function() {
+		this.getOlMap().removeControl(this.ovControl);
 	}
 });

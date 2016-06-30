@@ -12,8 +12,10 @@ Ext.define('Ck.map.action.select.Circle', {
 		
 	continueMsg: 'Drag to draw a circle and select features',
 
-	/**
-	 * length or area
-	 */
-	type: 'circle'
+	config: {
+		/**
+		 * Type of selection
+		 */
+		type: 'Circle'
+	}
 });

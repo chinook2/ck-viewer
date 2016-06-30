@@ -17,7 +17,6 @@ Ext.define('Ck.form.Controller', {
 	
 	dataUrl: null,
 	dataModel: null,
-	// dataStore: null,
 
 	layoutConfig: {
 		labelSeparator: ' : '
@@ -106,6 +105,11 @@ Ext.define('Ck.form.Controller', {
 		}
 	},
 	
+	/**
+	 * @event aftersave
+	 * Fires when save was successful
+	 * @param {Object}
+	 */
 	init: function() {
 		var v = this.view;
 		this.isSubForm = v.getIsSubForm();
@@ -129,14 +133,14 @@ Ext.define('Ck.form.Controller', {
 		var inlineForm = v.getFormRaw();
 		
 		// Find parentForm
-		var parentForm = v.up('ckform');
+		var parentForm = v.up('ckform') || this.view.parentForm;
 		if(parentForm) {
 			// inherit editing from parent only if current form doesn't specify true or false
 			if(!Ext.isDefined(v.initialConfig.editing)){
 				this.editing = parentForm.getEditing();
 			}
 			
-			// inherit dataFid from main view form (used in store url template)
+			// Inherit dataFid from main view form (used in store url template)
 			vDataFid = v.getDataFid() || {};
 			pDataFid = parentForm.getDataFid() || {};
 			if(!Ext.isObject(vDataFid)) {
@@ -147,6 +151,17 @@ Ext.define('Ck.form.Controller', {
 			}
 			v.setDataFid(Ext.apply(vDataFid, pDataFid));
 
+			// Compatibility
+			if(parentForm.getController().compatibiltyMode===true){
+                for(var k in parentForm.getController().formConfig.subforms) {
+                    var sf = parentForm.getController().formConfig.subforms[k];
+                    if('/'+sf.name == this.view.getFormName() ){
+                        inlineForm = sf;
+						break;
+                    }
+                }
+			}
+			
 			// Try find parent form name (used for overriden controllers)
 			if(inlineForm && !inlineForm.name) {
 				inlineForm.name = parentForm.getController().name;
@@ -191,12 +206,19 @@ Ext.define('Ck.form.Controller', {
 	},
 	
 	destroy: function() {
+		this.clearLocalStorage();
 		if(this.ls) this.ls.release();
 		if(this.oController){
 			this.oController.onDestroy();
 			this.oController.destroy();
 		}
 		this.callParent();
+	},
+	
+	clearLocalStorage: function() {
+		if(this.ls && this.currentFormUrl) {
+			this.ls.removeItem(this.currentFormUrl);
+		}		
 	},
 
 	formLoad: function(btn) {
@@ -262,7 +284,12 @@ Ext.define('Ck.form.Controller', {
 				this.unRegisterSubForm(sf);
 			}
 			
-			if(this.oController.beforeClose() === false) {
+			var controller = this;
+			if(controller.type === undefined || controller.type != "ckform") {
+				controller = controller.oController
+			}
+			
+			if(controller.beforeClose() === false) {
 				Ck.log("beforeClose cancel formClose.");
 				return;
 			}
@@ -460,7 +487,7 @@ Ext.define('Ck.form.Controller', {
 
 				if(fcw.title) win.setTitle(fcw.title);
 				// Adjust form popup Size on PC (tablet is full screen)
-				if(Ext.os.is.desktop) {
+				if(Ck.isDesktop()) {
 					if(fcw.width) win.setWidth(fcw.width);
 					if(fcw.height) win.setHeight(fcw.height);
 				}
@@ -508,7 +535,14 @@ Ext.define('Ck.form.Controller', {
 			//
 			
 			// Auto-load data if params available
-			if(this.autoLoad) this.loadData();
+			if(this.autoLoad) {
+				// var data = this.view.getDataObject();
+				// if(Ext.isObject(data)) {
+					// this.loadData(data);
+				// } else {
+					this.loadData();
+				// }
+			}
 		}
 
 		return true;
@@ -516,13 +550,15 @@ Ext.define('Ck.form.Controller', {
 
 	/**
 	 * Get Form definition
-	 * @param
+	 * @param {String}
 	 */
 	getForm: function(formUrl) {
 		if(!formUrl) {
 			Ck.Notify.error("'formUrl' or 'formName' not set in getForm.");
 			return false;
 		}
+		
+		this.currentFormUrl = formUrl;
 
 		// Load Form from LocalStorage (cache form with includes - ajax cache can't save all in one)
 		if(this.ls) {
@@ -539,8 +575,16 @@ Ext.define('Ck.form.Controller', {
 			success: function(response) {
 				var me = this;
 				var formConfig = Ext.decode(response.responseText, true);
+				
+				if(formConfig.success) {
+					formConfig = formConfig.forms[0];
+				}
+				
 				if(!formConfig) {
-					Ck.Notify.error("Invalid JSON Form in : "+ formUrl);
+					Ck.Notify.error("Form not found at URL : "+ formUrl);
+					this.formClose({
+						force: true
+					});
 					return false;
 				}
 
@@ -733,14 +777,13 @@ Ext.define('Ck.form.Controller', {
 				msgTarget: 'side',
 				labelSeparator: me.layoutConfig.labelSeparator
 			});
-			if(c.xtype != "fileuploadfield" && c.xtype != "filefield") {
-				if(c.plugins !== false){
-					c.plugins.push({
-						ptype: 'formreadonly'
-					});
-				}
+			
+			if(c.plugins !== false) {
+				c.plugins.push({
+					ptype: 'formreadonly'
+				});
 			}
-						
+			
 			switch(c.xtype) {
 				case "tabpanel":
 					Ext.applyIf(c, {
@@ -749,10 +792,19 @@ Ext.define('Ck.form.Controller', {
 						deferredRender: false,
 						border: false,
 						defaults: {
+							xtype: 'form',
 							anchor: '100%',
+							scrollable: true,
 							labelSeparator: me.layoutConfig.labelSeparator
 						}
 					});
+					
+					// Change layout for panels if there is only one grid
+					Ext.each(c.items, function(it){
+						if((it.items && it.items.length==1) || (it.xtype && it.xtype.indexOf('grid')!=-1)) {
+							it.layout = 'fit'
+						}
+					}, this);
 					break;
 				case "radiogroup":
 					Ext.each(c.items, function(c) {
@@ -766,7 +818,8 @@ Ext.define('Ck.form.Controller', {
 					break;
 				case "datefield":
 					Ext.applyIf(c, {
-						format: "d/m/Y"
+						format: "d/m/Y",
+						submitFormat: "d/m/Y"
 					});
 
 					// Init-Actualise avec la date du jour (après le chargement)
@@ -785,7 +838,8 @@ Ext.define('Ck.form.Controller', {
 					break;
 				case "timefield":
 					Ext.applyIf(c, {
-						format: "H:i"
+						format: "H:i",
+						submitFormat: "H:i"
 					});
 
 					// Init-Actualise avec la date du jour (après le chargement)
@@ -798,29 +852,10 @@ Ext.define('Ck.form.Controller', {
 					break;
 				case "fileuploadfield":
 				case "filefield":
-					// If photo taking is allow
+					// If photo taking is allowed
 					if(c.uploadImage !== false) {
 						var panelId = Ext.id();
-						var pictureBtn = {
-							xtype: "button",
-							iconCls: "fa fa-camera",
-							width: 30,
-							style: {
-								"margin-top": "6px",
-								"margin-left": "5px"
-							},
-							handler: function() {
-								navigator.camera.getPicture(function(panelId, b64_image) {
-									var panel = Ext.getCmp(panelId);
-									panel.items.getAt(0).camera = Ck.b64toBlob(b64_image, "image/jpeg");
-									panel.items.getAt(0).setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
-								}.bind(this, panelId), function() {
-									alert('error');
-								},{
-									destinationType: navigator.camera.DestinationType.DATA_URL
-								})
-							}
-						}
+						
 						var removeBtn = {
 							xtype: "button",
 							iconCls: "fa fa-remove",
@@ -836,7 +871,7 @@ Ext.define('Ck.form.Controller', {
 							}
 						}
 						
-						// Delete camera picture when file is choosen from explorer
+						// Delete camera picture when file is chosen from explorer
 						c.listeners = {
 							change: function() {
 								this.camera = "";
@@ -845,7 +880,12 @@ Ext.define('Ck.form.Controller', {
 						c.columnWidth = 1;
 						
 						// Fix form.setValue
-						c.setValue = Ext.form.field.File.prototype.setRawValue;
+						c.setValue = function(value) {
+							this.setRawValue(value);
+							this.fireEvent("change", value);
+						}
+						
+						var useCamera = c.useCamera;
 						
 						c = {
 							xtype: "panel",
@@ -853,8 +893,36 @@ Ext.define('Ck.form.Controller', {
 							processItems: false,
 							width: "100%",
 							layout: "column",
-							items: [c, pictureBtn, removeBtn]
+							items: [c]
 						}
+						
+						if(useCamera === true && Ext.isObject(navigator.camera) && Ext.isFunction(navigator.camera.getPicture)) {
+								var pictureBtn = {
+									xtype: "button",
+									iconCls: "fa fa-camera",
+									width: 30,
+									style: {
+										"margin-top": "6px",
+										"margin-left": "5px"
+									},
+									handler: function() {
+										navigator.camera.getPicture(function(panelId, b64_image) {
+											var panel = Ext.getCmp(panelId);
+											var field = panel.items.getAt(0);
+											field.setValue("ckcam_" + (new Date()).getTime().toString() + ".jpg");
+											field.camera = Ck.b64toBlob(b64_image, "image/jpeg");
+											panel.items.replace(0, field);
+										}.bind(this, panelId), function() {
+											alert('error');
+										},{
+											destinationType: navigator.camera.DestinationType.DATA_URL
+										})
+									}
+								}
+								c.items.push(pictureBtn);
+							}
+							
+							c.items.push(removeBtn);
 					}
 					break;
 				case "combo":
@@ -912,6 +980,33 @@ Ext.define('Ck.form.Controller', {
 							}
 						}
 						
+						// Store can be difened inline. Need to build storeUrl...
+						if(me.compatibiltyMode && !store) {
+							var field = o.name || c.displayField || c.name;
+							field = field.split(".").pop();
+							
+							var baseparams = {
+								s: 'forms',
+								r: 'getStore',
+								// Précise une couche ou recup la couche associée au form
+								layer: c.layer || me.formConfig.layername || me.view.layer,
+								
+								// Précise un datasource + une table
+								datasource: o.datasource,
+								data: o.data,
+								
+								// TODO
+								// Filtres en fonction des parents
+								//params: encodeURIComponent(Ext.encode(c.parentValue)),
+								
+								// Le champ 'valeur' envoyé par le formulaire
+								valuefield: o.valueField || c.valueField,
+								field: field
+							};
+							storeUrl = Ck.getApi() + Ext.urlEncode(baseparams);
+							store = {};
+						}
+						
 						// Store Url - alternative config
 						if(Ext.isObject(store)) {
 							if(Ext.isString(store.url)) {
@@ -924,9 +1019,6 @@ Ext.define('Ck.form.Controller', {
 								storeUrl = store.proxy.url;
 								delete store.proxy.url;
 							}
-						} else {
-							// store can be string or undefined, init with empty object for merge
-							store = {};
 						}
 						
 						// Build default Fields (use for rowediting on grid)
@@ -993,7 +1085,10 @@ Ext.define('Ck.form.Controller', {
 								});
 							}
 						} else {
-							
+							if(!Ext.isDefined(store)) {
+								// Init with empty object for merge
+								store = {};
+							}
 							// Default in-memory Store
 							store = Ext.Object.merge(store, {
 								proxy: 'memory'
@@ -1014,31 +1109,95 @@ Ext.define('Ck.form.Controller', {
 					}
 					delete c.itemTpl;
 
-					// Init stores for grid editor & plugins
-					if(c.columns) {
-						var co = (Ext.isArray(c.columns))? c.columns : c.columns.items;
-						Ext.each(co, function(c, col, idx, cols) {
-							var editor = col.editor || ((c.columns.defaults)? c.columns.defaults.editor : null);
-							if(editor) {
-								if(editor.store) editor.store = processStore(editor);
-								// Date params
-								if(editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
-								if(editor.minValue == 'now') cols[idx].editor.minValue = new Date();
+					// Init stores for grid editor
+					if(Ext.isArray(c.columns)) {
+						Ext.each(c.columns, function(col, idx, cols) {
+							if(col.editor && col.editor.store) {
+								cols[idx].editor.store = processStore(col.editor)
 							}
-							
-							var plugins = col.plugins || ((c.columns.defaults)? c.columns.defaults.plugins : null);
-							if(plugins && Ext.isArray(plugins)) {
-								Ext.each(plugins, function(plugin, pidx, plugins) {
-									if(plugin.store) plugin.store = processStore(plugin);
-								});
+							// Compatibility
+							if(me.compatibiltyMode) {
+								if(col.name && !col.dataIndex){
+									// col.dataIndex = col.name.replace(/\./g, '_');
+									col.dataIndex = col.name;										
+								}										
+								if(col.editor && col.editor.xtype && (col.editor.xtype.substr(0,3) == 'ck_')) {
+									col.editor.xtype = col.editor.xtype.substr(3);
+									if(col.editor.xtype == 'datefield') {
+										col.xtype= 'datecolumn';
+										col.format='d/m/Y';
+										col.altFormats='Y-m-d';
+										col.submitFormat='d/m/Y';
+									}
+									
+									if(col.editor.xtype == 'combobox') {
+										col.editor.name = col.name;
+										col.editor.displayField = "value";
+										col.editor.store = processStore(col.editor);
+									}
+								}
+								if(col.header) {
+									col.text = col.header;
+									delete col.header;
+								}
+								if(col.renderer && col.renderer == 'image') {
+									col.renderer = function(value, meta, rec, rowIndex, colIndex, store){
+										var i, p, w = '';
+										if(value) {
+											i = "<img src='"+ value +"' alt='Image non disponible'/>";
+											if(col.rendererOption) {
+												p = col.rendererOption.path || '';
+												w = col.rendererOption.width || '';
+												h = col.rendererOption.height || '';
+												if(p) p += '/';
+												if(w) w = " width='"+w+"px'";
+												if(h) h = " height='"+h+"px'";
+												i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
+											}
+										}
+										return i;
+									};
+								}
 							}
-						}.bind(this, c));
+						});
 					}
-
-					Ext.applyIf(c, {
-						displayField: "value",
-						queryMode: 'local'
-					});
+					
+					// For autocomplete field
+					if(c.autocomplete) {
+						c.hideTrigger = true;
+						c.queryMode = "remote";
+						c.minChars = 2;
+						
+						// Overload doQuery method to insert "%"
+						c.doQuery = function(queryString, forceAll, rawQuery) {
+							var me = this,
+								// Decide if, and how we are going to query the store
+								queryPlan = me.beforeQuery({
+									query: "%" + (queryString || '') + "%",
+									rawQuery: rawQuery,
+									forceAll: forceAll,
+									combo: me,
+									cancel: false
+								});
+							// Allow veto.
+							if (queryPlan !== false && !queryPlan.cancel) {
+								// If they're using the same value as last time (and not being asked to query all), just show the dropdown
+								if (me.queryCaching && queryPlan.query === me.lastQuery) {
+									me.expand();
+								} else // Otherwise filter or load the store
+								{
+									me.lastQuery = queryPlan.query;
+									if (me.queryMode === 'local') {
+										me.doLocalQuery(queryPlan);
+									} else {
+										me.doRemoteQuery(queryPlan);
+									}
+								}
+							}
+							return true;
+						}
+					}
+					
 					Ext.Object.merge(c, {
 						store: processStore(c),
 						listeners: {
@@ -1061,6 +1220,105 @@ Ext.define('Ck.form.Controller', {
 							}
 						}
 					});
+					
+					if(me.compatibiltyMode) {
+						delete c.displayField;
+						Ext.applyIf(c, {
+							displayField: "value"
+						});
+					}
+					break;
+					
+				case "numberfield":
+					if(Ck.isMobileDevice() && c.gpsParam !== undefined) {
+						var panelId = Ext.id();
+						var gpsParam = "";
+						
+						switch(c.gpsParam) {
+							case "accuracy":
+								gpsParam = "accuracy";
+								break;
+							case "altitude":
+								gpsParam = "altitude";
+								break;
+							case "altitudeAccuracy":
+								gpsParam = "altitudeAccuracy";
+								break;
+							case "heading":
+								gpsParam = "heading";
+								break;
+							case "latitude":
+								gpsParam = "latitude";
+								break;
+							case "longitude":
+								gpsParam = "longitude";
+								break;
+							case "speed":
+								gpsParam = "speed";
+								break;							
+						}
+						
+						if(gpsParam !== "") {
+							var form = this;
+							var refreshBtn = {
+								xtype: "button",
+								iconCls: "fa fa-refresh",
+								width: 30,
+								style: {
+									"margin-top": "6px",
+									"margin-left": "5px"
+								},
+								handler: function() {
+									var btn = this;
+									btn.mask = new Ext.LoadMask({
+										msg: "Retrieving GPS informations...",
+										target: form.getView()
+									});
+									btn.mask.show();
+									
+									navigator.geolocation.getCurrentPosition(
+										function(position) {
+											var coordinates = position.coords;
+											var panel = Ext.getCmp(panelId);
+											panel.items.getAt(0).setValue(coordinates[gpsParam]);
+											btn.mask.hide();
+										}, function(err) {
+											btn.mask.hide();
+											Ext.Msg.show({
+												title: "Error " + err.code + " retrieving geolocation",
+												message: err.message,
+												buttons: Ext.Msg.OK,
+												icon: Ext.Msg.ERROR
+											});
+										}, {
+											enableHighAccuracy: true,
+											timeout: 5000,
+											maximumAge: 0
+										});
+								}
+							}
+							
+							c.columnWidth = 1;
+							
+							// Fix form.setValue
+							c.setValue = function(value) {
+								this.setRawValue(value);
+								this.fireEvent("change", value);
+							}
+															
+							c = {
+								xtype: "panel",
+								id: panelId,
+								processItems: false,
+								width: "100%",
+								layout: "column",
+								gpsButton: true,
+								items: [c]
+							}
+															
+							c.items.push(refreshBtn);
+						}							
+					}
 					break;
 			}
 			
@@ -1105,6 +1363,9 @@ Ext.define('Ck.form.Controller', {
 							pluginId: 'rowediting',
 							clicksToEdit: 1
 						}]);
+						
+						// To show rowediting bar & btns
+						c.minHeight = 250;
 					}
 				}
 			}
@@ -1131,7 +1392,11 @@ Ext.define('Ck.form.Controller', {
 			}
 			
 			if(c.items && c.processItems !== false) {
-				Ext.each(c.items, fn, this);
+				var cpt = 0;
+				Ext.each(c.items, function(item) {
+					c.items[cpt] = fn(item);
+					cpt++;
+				}, this);
 			}
 		
 			return c;
@@ -1266,27 +1531,88 @@ Ext.define('Ck.form.Controller', {
 	},
 	
 	/**
-	 * Collect all data from form. Recursively called for the subforms.
-	 * @param {Function}
+	 * Get values from grid. Function coming from Chinook 1
 	 */
-	/*
-	getValues: function(callback, values) {
-		if(Ext.isEmpty(values)) {
-			var values = {};
-		}
+    getGridValues: function() {
+        var res = {};
+        var grids = this.getView().query('gridpanel');
+
+        // Boucle sur les grid panel de la fiche
+        for(var g=0; g<grids.length; g++){
+            var recs = [];
+            var grid = grids[g];
+            var store = grid.getStore();
+            var mrecs = store.getModifiedRecords();            
+            var drecs = store.getRemovedRecords();
+
+            // Boucle sur les records modifiés du gridpanel
+            for(var r=0; r<mrecs.length; r++){
+                // 0 si nouvelle ligne sinon recup l'id de la ligne (il est dans les data mais pas affiché)
+                var params = mrecs[r].getData();
+				
+				// Empty field when plugin gridediting is active to add new record to the grid...
+				if(params.dummy===true) continue;
+				
+				var fid = params.fid;
+				// Clean params used to build sql query
+				if(Ext.String.startsWith(params.id, 'ext')) delete params.id;
+				delete params.fid;
+				
+                // Récup les données modifiés + l'id du record
+                recs.push({
+                    fid: fid,
+                    params: params
+                });
+            }
+            
+            // Boucle sur les records supprimés du gridpanel
+            for(var r=0; r<drecs.length; r++){
+                if(drecs[r].json) {
+                    recs.push({
+                        fid: drecs[r].json.fid,
+                        params: {}
+                    });
+                }
+            }
+            
+            res[grid.id] = recs;
+        }
+
+        return res;
+    },
+
+	/**
+	 * Collect all data from form. Recursively called for the subforms.
+	 * @param {Function} Function to call when all values have been collected
+	 * @param {Object} Extra parameter to pass to callback function
+	 * @param {Object} Object where all values go (cannot be null)
+	 */
+	getValues: function(callback, options, values) {
 		var v = this.getView();
 		var form = v.getForm();
 		var fid = v.getDataFid();
 		
+		// If all field has been processed
 		if(this.fieldsProcessed == this.fieldsToProcess) {
+			this.savedValues = values;
+			
 			if(this.compatibiltyMode) {
 				var lyr = v.getLayer();
+				if(Ext.isObject(fid)) {
+					fid = fid.fid;
+				}
 				var res = {
-					fid: fid.fid,
+					fid: fid,
 					params: values
 				};
+				
 				values = {};
 				values['main'] = res;
+
+				// data des gridpanel (il ne font pas partie du form...)
+				var grdValues = this.getGridValues();
+				Ext.apply(values, grdValues);
+				//
 			}
 
 			// Loop on subforms
@@ -1305,18 +1631,15 @@ Ext.define('Ck.form.Controller', {
 				var ctrl = sf.getController();
 				ctrl.getValues.apply(ctrl, arguments);
 			} else {
+				// All values of main form and subform have been collected then run the callback
 				if(this.compatibiltyMode) {
 					values = {
-						name: fid.layer,
+						name: lyr,
 						data: encodeURIComponent(Ext.encode(values))
 					}
 				}
-				// First argument will be delete (is the callback)
-				var fn = callback;
-				var args = Array.prototype.slice.apply(arguments);
-				args.splice(0, 1);
 				
-				fn.apply(this, args);
+				callback.apply(this, [options, values]);
 			}
 		} else {
 			field = this.fields[this.fieldsProcessed];
@@ -1337,7 +1660,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					
 					// Get value for file field
-					if(xtype == "filefield") {
+					if(xtype == "filefield" || xtype == "fileuploadfield") {
 						var fName = f.getValue().split("/").pop().split("\\").pop();
 						var inp = f.getEl().dom.getElementsByTagName("input");
 						if(inp[0].type == "file") {
@@ -1378,12 +1701,11 @@ Ext.define('Ck.form.Controller', {
 			this.getValues.apply(this, arguments);
 		}
 	},
-	*/
-
+	
 	/**
 	 * Prevent getting values from subform...
 	 */
-	getValues: function(resetDirty) {
+	simpleGetValues: function(resetDirty) {
 		var v = this.getView();
 		var form = v.getForm();
 
@@ -1420,13 +1742,12 @@ Ext.define('Ck.form.Controller', {
 		if(aValues.length==1 && Ext.isArray(aValues[0])){
 			values = aValues[0];
 		}
-		//
 		
 		if(this.compatibiltyMode) {
 			var fid = v.getDataFid();
 			var lyr = v.getLayer();
 			var res = {
-				fid: fid.fid,
+				fid: fid,
 				params: values
 			};
 			values = {};
@@ -1447,13 +1768,15 @@ Ext.define('Ck.form.Controller', {
 			
 			// We can manage multiple subform with the same name and merge values
 			if(Ext.isObject(values[name])){
-				values[name] = Ext.Object.merge(values[name], sf.getValues());
+				values[name] = Ext.Object.merge(values[name], sf.simpleGetValues());
 			} else {
 				// getValues can be an Array (merge transform to an Object...)
-				values[name] = sf.getValues();
+				values[name] = sf.simpleGetValues();
 			}
+			
+			if(!values[sf.name]) values[sf.name] = {};
+			values[sf.name] = Ext.Object.merge(values[sf.name], sf.getController().simpleGetValues());
 		}
-		//
 
 		if(this.compatibiltyMode) {
 			return {
@@ -1464,52 +1787,6 @@ Ext.define('Ck.form.Controller', {
 		return values;
 	},
 	
-	setValues: function(data) {
-		if(!data) return;
-		
-		var v = this.getView();
-		var form = v.getForm();
-
-		// If the entire form is Hidden ignore setValues
-		if(v.isVisible() === false) return;
-
-		if(Ext.isArray(data)){
-			// Find first gridfield to assign array !
-			var grid = v.down('gridfield');
-			if(grid) grid.setValue(data);
-		} else {
-			// Classic Ext setValues
-			form.setValues(data);
-		}
-		
-		// FIX Ext 
-		// Combo setValues with bind filters (who depends on previous field in form).
-		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
-		this.fields.forEach(function(field) {
-			var f = form.findField(field);
-			if(f && (f.xtype=='combobox')) {
-				var filters = f.getFilters();
-				if(filters.length>0) {
-					f.getStore().on('filterchange', function(){
-						f.setValue(data[f.name]);
-					}, this);
-				}
-			}
-			// Reset for isDirty status
-			if(f) f.resetOriginalValue();
-		}, this);
-		//
-		
-		// SUBFORM : load data
-		var subforms = this.getSubForms();
-		for (var s = 0; s < subforms.length; s++) {
-			var sf = subforms[s];
-			if(data[sf.view.name]) sf.setValues(data[sf.view.name]);
-		}
-		//
-		
-	},
-
 	/**
 	 * Prevent validate subform fields...
 	 */
@@ -1586,10 +1863,9 @@ Ext.define('Ck.form.Controller', {
 		var v = me.getView();
 
 		// Getters via config param in the view
-		var lyr = v.getLayer();
-		
-		// Ck.log("Load Data for : "+this.name+" (stack "+ this.rootForm.processingData +")");
+		var lyr = v.layer || v.getLayer();
 
+		// Call beforeLoad plugin. If it return false then cancel the loading
 		if(this.oController.beforeLoad(options) === false) {
 			Ck.log("beforeLoad cancel loadData.");
 			return;
@@ -1646,8 +1922,12 @@ Ext.define('Ck.form.Controller', {
 				url = tpl.apply(fid);
 			} else {
 				// Build default url
-				if(lyr && Ext.isString(fid)) {
-					url = 'resources/data/' + lyr + '/' + fid + '.json';
+				if(lyr && !Ext.isObject(fid)) {
+					if(this.compatibiltyMode) {
+						url = Ck.getApi() + "service=forms&request=getData&name=" + lyr + "&fid=" + fid;
+					} else {
+						url = 'resources/data/' + lyr + '/' + fid + '.json';
+					}
 				}
 			}
 		}
@@ -1741,23 +2021,79 @@ Ext.define('Ck.form.Controller', {
 		if(v.getEditing()===true) this.startEditing();
 	},
 	
+	setValues: function(data) {
+		if(!data) return;
+		
+		var v = this.getView();
+		var form = v.getForm();
+		
+		// If the entire form is Hidden ignore setValues
+		if(v.isVisible() === false) return;
+		
+		if(Ext.isArray(data)){
+			// Find first gridfield to assign array !
+			var grid = v.down('gridfield');
+			if(grid) grid.setValue(data);
+		} else {
+			// Classic Ext setValues
+			form.setValues(data);
+		}
+		
+		// FIX Ext 
+		// Combo setValues with bind filters (who depends on previous field in form).
+		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
+		this.fields.forEach(function(field) {
+			var f = form.findField(field);
+			if(f && (f.xtype=='combobox')) {
+				var filters = f.getFilters();
+				if(filters.length>0) {
+					f.getStore().on('filterchange', function(){
+						f.setValue(data[f.name]);
+					}, this);
+				}
+			}
+			// Launch manually "change" event
+			f.fireEvent("change");
+			
+			// Reset for isDirty status
+			if(f) f.resetOriginalValue();
+		}, this);
+		//
+		
+		// SUBFORM : load data
+		var subforms = this.getSubForms();
+		for (var s = 0; s < subforms.length; s++) {
+			var sf = subforms[s];
+			if(data[sf.view.name]) sf.setValues(data[sf.view.name]);
+		}
+		
+		// Compatibility / GRID : load data
+		var grids = v.query('gridpanel');
+		for (var g = 0; g < grids.length; g++) {
+			var grid = grids[g];
+			if(grid.id && data[grid.id]){
+				grid.getStore().loadData(data[grid.id]);
+			}
+		}
+	},
+
 	/**
 	 * Save data
-	 * @param {Object}
-	 * @param {Object}
+	 * @param {Object/Function} Parameters object or callback function
+	 * @param {Object} Values to send to the server
 	 * @return {Boolean}
 	 */
 	saveData: function(options, values) {
-		/*
-		if(Ext.isEmpty(values)) {
+		
+		if(Ext.isEmpty(values) && this.compatibiltyMode) {
 			this.files = [];
 			this.fieldsProcessed = 0;
 			this.fieldsToProcess = this.fields.length;
 			
-			this.getValues(this.saveData, {}, options);
+			this.getValues(this.saveData, options, {});
 			return;
 		}
-		*/
+		
 		options = options || {};
 
 		var me = this;
@@ -1806,7 +2142,9 @@ Ext.define('Ck.form.Controller', {
 
 		this.updateProcessing(true, 'Data');
 
-		var values = this.getValues(true);
+		if(!this.compatibiltyMode) {
+			var values = this.simpleGetValues(true);
+		}
 		
 		if(this.oController.beforeSave(values, options, fid, url, model) === false) {
 			Ck.log("beforeSave cancel saveData.");
@@ -1895,7 +2233,16 @@ Ext.define('Ck.form.Controller', {
 			options.method = 'POST';
 		}
 
-		var values = options.values || this.getValues(true);
+		var values = options.values;
+		
+		// If add/edit record in compatibiltyMode in a subform
+		// It's the main form who save the data...
+		// Just populate main grid here with data
+		if(this.compatibiltyMode && this.isSubForm) {
+			var val = Ext.decode(decodeURIComponent(values.data));
+			Ext.callback(options.success, options.scope, [val.main.params]);
+			return true;
+		}
 		
 		// If a model is set we use it
 		if(fid && model) {
@@ -1930,22 +2277,42 @@ Ext.define('Ck.form.Controller', {
 			});
 			return true;
 		}
+		
+		// Build default url
+		if(Ext.isEmpty(url)) {
+			if(this.compatibiltyMode) {
+				url = Ck.getApi() + "service=forms&request=edit&name={layer}&fid={fid}";
+			} else {
+				url = "resources/data/{layer}/{fid}.json";
+			}
+		}
 
 		// Load data by ID - build standard url
-		if(fid) {
+		if(fid || lyr) {
 			// TODO : Call un service REST for loading data...
 			if(url) {
-				// Form provide un template URL to load data
+				// Form provide un template URL (or multiples URL) to load data
 				var dataUrl = url;
 				if(Ext.isObject(dataUrl)) {
-					dataUrl = dataUrl.update;
-					if(options.create) dataUrl = dataUrl.create ||  dataUrl.update;
+					dataUrl = dataUrl.read;
 				}
+
 				var tpl = new Ext.Template(dataUrl);
-				if(Ext.isString(fid)) fid = [fid];
+				if(!fid) fid = '';
+				if(Ext.isString(fid)) {
+					fid = {
+						fid: fid,
+						layer: lyr
+					};
+				} else {
+					fid = Ext.applyIf(fid,{
+						fid: fid,
+						layer: lyr
+					});
+				}
 				url = tpl.apply(fid);
 			} else {
-				//Ck.log("fid defined but no dataUrl template in "+ this.name);
+				Ck.log("fid ("+ fid +") defined but no dataUrl template in "+ this.name);
 			}
 		}
 
@@ -1955,7 +2322,7 @@ Ext.define('Ck.form.Controller', {
 			return true;
 		}
 		
-		var opt  = {
+		var opt = {
 			method: options.method.toUpperCase(),
 			url: this.getFullUrl(url),
 			params: values,
@@ -1989,6 +2356,16 @@ Ext.define('Ck.form.Controller', {
 			}
 		};
 		
+		// Specific to Chinook 1 service
+		if(this.compatibiltyMode) {
+			Ext.apply(opt, {
+				encode: false,
+				headers: {
+					'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8'
+				}
+			});
+		}
+		
 		if(options.mask!==false){
 			this.saveMask = new Ext.LoadMask({
 				target: v,
@@ -1996,7 +2373,6 @@ Ext.define('Ck.form.Controller', {
 			});
 			this.saveMask.show();
 		}
-		// Ck.log("Start save for : "+this.name);
 		
 		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
@@ -2169,3 +2545,21 @@ Ext.define('Ck.form.Controller', {
 		return true;
 	}
 });
+
+Ext.util.Format.image = function(value, meta, rec, rowIndex, colIndex, store) {
+    var i, p, w = '';
+    var f = store.fields.get(this.dataIndex || this.name);
+	if(value) {
+		i = "<img src='"+ value +"' alt='Image non disponible'/>";
+		if(f && f.rendererOption) {
+			p = f.rendererOption.path || '';
+			w = f.rendererOption.width || '';
+			h = f.rendererOption.height || '';
+			if(p) p += '/';
+			if(w) w = " width='"+w+"px'";
+			if(h) h = " height='"+h+"px'";
+			i = "<img src='"+ p + value +"' "+ w +" "+ h +" alt='Image non disponible'/>";
+		}
+	}
+    return i;
+}

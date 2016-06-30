@@ -92,7 +92,7 @@ Ext.define('Ck.form.field.Grid', {
 	
 	beforeDestroy: function(){
 		this.grid.destroy();
-		this.callParent();
+		this.callParent(arguments);
 	},
 	
 	afterRender: function () {
@@ -242,7 +242,7 @@ Ext.define('Ck.form.field.Grid', {
 		}
 		
 		var me = this,
-			errors = me.callParent([value]),
+			errors = me.callParent(arguments),
 			validator = me.validator,
 			vtype = me.vtype,
 			vtypes = Ext.form.field.VTypes,

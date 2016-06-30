@@ -7,7 +7,8 @@ Ext.define('Ck.view.Model', {
 	alias: 'viewmodel.ckview',
 
 	data: {
-		name: Ext.manifest.name
+		name: Ext.manifest.name,
+		version: Ext.manifest.version
 	}
 
 	//TODO - add data, formulas and/or methods to support your view

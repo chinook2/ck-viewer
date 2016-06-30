@@ -10,12 +10,14 @@ if(Ext.manifest.paths) Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.
 Ext.define('Ck.view.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckview',
-
+	maxAttempt: 3,
+	attempt: 0,
+	
 	init: function() {
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
 		}
-
+				
 		this.initUi();				
 	},
 	
@@ -64,8 +66,8 @@ Ext.define('Ck.view.Controller', {
 				// this.initUi(uiConfig);
 				
 				Ck.error('Error when loading "'+uiName+'" interface !. Loading the default interface...');
-				
-				this.getUi('ck-default');
+				this.attempt++;
+				if(this.attempt <= this.maxAttempt) this.getUi('ck-default');
 			}
 		});
 	}

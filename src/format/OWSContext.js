@@ -56,7 +56,7 @@ Ext.define('Ck.format.OWSContext', {
 		
 		// Layers
 		for(var i = 0; i < data.features.length; i++) {
-			layers.push(new Ck.owcLayer({
+			layers.push(new Ck.owsLayer({
 				data: data.features[i],
 				owsContext: this
 			}));

@@ -15,6 +15,22 @@ Ext.define("Ck.Edit", {
 		"Ck.edit.action.*"
 	],
 	
+	config:{
+		layer: null,
+		openner: null,
+		
+		/**
+		 * Container for history, feature and vertex panel.
+		 * same to put in the main panel than tbar / window to create a window
+		 */
+		panelContainer: "same",
+		
+		/**
+		 * Include history panel or not
+		 */
+		useHistory: true
+	},
+	
 	editConfig: {
 		layerId: "ckedit-layer",
 		snapLayer: "",
@@ -27,7 +43,6 @@ Ext.define("Ck.Edit", {
 	},
 	
 	items: [{
-		id: "edit-historypanel",
 		tbar: [{
 			action: "ckEditCreate",
 			enableToggle: true,
@@ -40,6 +55,9 @@ Ext.define("Ck.Edit", {
 			action: "ckEditGeometry",
 			enableToggle: true,
 			toggleGroup: "ckmapAction"
+		},{
+			action: "ckEditGeolocation",
+			disabled: true
 		},{
 			action: "ckEditDelete",
 			enableToggle: true,

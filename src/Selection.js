@@ -161,6 +161,7 @@ Ext.define('Ck.Selection', {
 			type = "Circle";
 			geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
 		} else if(type.indexOf("box") != -1) {
+			maxPoints = 2;
 			type = "LineString";
 			geometryFunction = function(coordinates, geometry) {
 				if (!geometry) {
@@ -175,7 +176,7 @@ Ext.define('Ck.Selection', {
 			};
 		}
 		
-		// Initializ draw interaction		
+		// Initialize draw interaction		
 		var draw = new ol.interaction.Draw({
 			type				: type,
 			geometryFunction	: geometryFunction,
@@ -235,7 +236,12 @@ Ext.define('Ck.Selection', {
 	 */
 	processSelection: function(evntParams) {
 		this.getMask().show();
-		this.inAddition = event[this.getMergeKey()];
+		
+		// Fix if selection is fired from code and not from user interaction
+		if(event !== undefined) {
+			this.inAddition = event[this.getMergeKey()];
+		}
+		
 		var feature = evntParams.feature;
 		var draw = this.getDraw();
 		
@@ -250,21 +256,13 @@ Ext.define('Ck.Selection', {
 		var geoJSON  = new ol.format.GeoJSON();
 		var type = feature.getGeometry().getType();
 		
-		switch(type) {
-			case "Circle" :
-				var radius = feature.getGeometry().getRadius();
-				var pt = turf.point(feature.getGeometry().getCenter());
-				var geom = turf.buffer(pt, radius, "meters");
-				var selFt = geom.features[0];
-				break;
-			case "Point" :
-				var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
-				var pt = turf.point(feature.getGeometry().getCoordinates());
-				var geom = turf.buffer(pt, radius, "meters");
-				var selFt = geom.features[0];
-				break;
-			default :
-				var selFt = geoJSON.writeFeatureObject(feature);
+		var selFt = feature;
+		if(type=="Point"){
+			var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
+			var bbox = feature.getGeometry().getExtent();
+			var selFt = new ol.Feature({
+				geometry: new ol.geom.Polygon.fromExtent(ol.extent.buffer(bbox, radius))
+			});
 		}
 		
 		/* Developper : you can display buffered draw for Circle and Point
@@ -300,7 +298,7 @@ Ext.define('Ck.Selection', {
 		
 		if(Ext.isEmpty(layers)) {
 			layers = Ck.getMap().getLayers(function(lyr) {
-				return (lyr.getVisible() &&
+				return (lyr.getVisible() && Ck.getMap().layerInRange(lyr) && 
 					(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
 					lyr.getProperties("id") != "measureLayer"
 				);
@@ -308,18 +306,36 @@ Ext.define('Ck.Selection', {
 			layers = layers.getArray();
 		}
 		
-		var ft;
-		this.nbQueryDone = 0;
-		this.nbQuery = layers.length;
-		
-		for(var i = 0; i < layers.length; i++) {
-			if(layers[i] instanceof ol.layer.Vector) {
-				ft = this.queryWFSLayer(layers[i], selFt, evntParams);
-				this.onSelect(ft, layers[i]);
-			} else {
-				this.queryWMSLayer(layers[i], selFt, evntParams);
+		// Remove non queryable layers
+		for(var i=0; i<layers.length; i++) {
+			var layer = layers[i];
+			
+			if(layer.getExtension("queryable") !== true) {
+				var index = layers.indexOf(layer);
+
+				if (index > -1) {
+					layers.splice(index, 1);
+				}
 			}
 		}
+			
+		if(layers.length > 0) {		
+			var ft;
+			this.nbQueryDone = 0;
+			this.nbQuery = layers.length;
+		
+			for(var i = 0; i < layers.length; i++) {
+				if(layers[i] instanceof ol.layer.Vector) {
+					ft = this.queryWFSLayer(layers[i], selFt, evntParams);
+					this.onSelect(ft, layers[i]);
+				} else {
+					this.queryWMSLayer(layers[i], selFt, evntParams);
+				}
+			}
+		} else {
+			Ext.Msg.alert('Selection', 'No selectable layer displayed.');
+			this.getMask().hide();
+		}		
 	},
 	
 	/**
@@ -336,6 +352,10 @@ Ext.define('Ck.Selection', {
 		lyrFts = layer.getSource().getFeatures();
 		for(var j = 0; j < lyrFts.length; j++) {
 			lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+			
+			// JMA
+			// TODO : retest !
+			
 			if(turf.intersect(lyrFt, selFt)) {
 				if(lyrFts[j].getProperties().features) {
 					for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
@@ -413,11 +433,11 @@ Ext.define('Ck.Selection', {
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
-		var selGeom = new ol.geom.Polygon(selFt.geometry.coordinates);
-		var selBBox = selGeom.getExtent();
+		var selBBox = selFt.getGeometry().getExtent();
+
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
-			gmlFormat: Ck.create("ol.format.GML2"),
+			gmlFormat: Ck.create("ol.format.GML3"),
 			featureType: ope.getLayers().split(",")
 		});
 		var gf = f.writeGetFeature({
@@ -448,12 +468,12 @@ Ext.define('Ck.Selection', {
 				var lyr = ope.getLayers().split(",");
 				// Fix Chinook 1 context prefix in getFeature response
 				for(var i in lyr) {
-					lyr[i] = lyr[i].split(":")[0];
+					lyr[i] = lyr[i].split(":").pop();
 				}
 				
 				var format = Ck.create("ol.format.WFS", {
 					featureNS: "http://mapserver.gis.umn.edu/mapserver",
-					gmlFormat: Ck.create("ol.format.GML2"),
+					gmlFormat: Ck.create("ol.format.GML3"),
 					featureType: lyr
 				});
 				
@@ -530,7 +550,7 @@ Ext.define('Ck.Selection', {
 		
 		this.nbQueryDone++;
 		
-		if(this.nbQueryDone == this.nbQuery) {
+		if(this.nbQueryDone >= this.nbQuery) {
 			this.getMask().hide();
 			this.getCallback()(this.selection);
 		}
@@ -578,9 +598,12 @@ Ext.define('Ck.Selection', {
 			}
 		}
 		this.selection = [];
-		
+		// this.getDraw().source_.clear();
 		if(this.getHighlight()) {
-			this.getSelect().getFeatures().clear()
+			var isActive = this.getSelect().getActive();
+			this.getSelect().setActive(true);
+			this.getSelect().getFeatures().clear();
+			this.getSelect().setActive(isActive);
 		}
 	},
 	

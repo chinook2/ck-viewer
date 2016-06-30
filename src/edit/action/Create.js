@@ -9,6 +9,7 @@ Ext.define('Ck.edit.action.Create', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-create',
 	iconCls: 'fa fa-plus',
 	tooltip: 'Create features',
 	
@@ -18,146 +19,170 @@ Ext.define('Ck.edit.action.Create', {
 	 * True to snap vertex to nearest point
 	 */
 	snap: true,
+	
+	/**
+	 * True to add point at GPS geolocation
+	 */
+	gps: false,
 
 	/**
 	 * Activate the geometry creation interaction
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		this.callParent(arguments);
 
 		// Create the interaction if it doesn't already exist
-		if(!this.drawInteraction) {
-			this.drawSource = new ol.source.Vector();
+		if(!this.drawInteraction && !btn.gps) {
 			this.drawSource = this.getLayerSource();  // new ol.source.Vector();
+			if(Ext.isEmpty(this.drawSource)) {
+				this.drawSource = new ol.source.Vector();
+			}
 			this.drawInteraction = new ol.interaction.Draw({
-				type: this.getGeometryType(),
-				//snapGeometry: this.snapGeometry,
+				type: this.controller.getGeometryTypeBehavior(),
+				snapGeometry: this.snapGeometry,
 				source: this.drawSource
 			});
 			this.getMap().getOlMap().addInteraction(this.drawInteraction);
 			
-			/*
 			// Overload the end-drawing callback to use snapGeometry
 			this.drawInteraction.finishDrawing = function() {
 				var sketchFeature = this.drawInteraction.abortDrawing_();
-				sketchFeature = this.snapGeometry(sketchFeature);
-
-				goog.asserts.assert(!goog.isNull(sketchFeature));
-				var coordinates;
+				
 				var geometry = sketchFeature.getGeometry();
-				switch(this.drawInteraction.mode_) {
-					case ol.interaction.DrawMode.POINT:
-						goog.asserts.assertInstanceof(geometry, ol.geom.Point);
-						coordinates = geometry.getCoordinates();
-						break;
-					case ol.interaction.DrawMode.LINE_STRING :
-						goog.asserts.assertInstanceof(geometry, ol.geom.LineString);
-						coordinates = geometry.getCoordinates();
-						// Remove the redundant last point
-						coordinates.pop();
-						geometry.setCoordinates(coordinates);
-						break;
-					case ol.interaction.DrawMode.POLYGON :
-						goog.asserts.assertInstanceof(geometry, ol.geom.Polygon);
-						// When we finish drawing a polygon on the last point,
-						// the last coordinate is duplicated as for LineString
-						// we force the replacement by the first point
-						this.drawInteraction.sketchPolygonCoords_ = geometry.getCoordinates();
-						this.drawInteraction.sketchPolygonCoords_[0].pop();
-						this.drawInteraction.sketchPolygonCoords_[0].push(this.drawInteraction.sketchPolygonCoords_[0][0]);
-						geometry.setCoordinates(this.drawInteraction.sketchPolygonCoords_);
-						coordinates = geometry.getCoordinates();
-						break;
+		
+				var opt = {
+					layers		: this.controller.getSnappingOptions(),
+					layer		: this.getLayer(),
+					geometries	: [geometry],
+					callback	: this.endProcess,
+					scope		: this
 				}
-
-				// cast multi-part geometries
-				switch(this.drawInteraction.type_) {
-					case ol.geom.GeometryType.MULTI_POINT :
-						sketchFeature.setGeometry(new ol.geom.MultiPoint([coordinates]));
-						break;
-					case ol.geom.GeometryType.MULTI_LINE_STRING :
-						sketchFeature.setGeometry(new ol.geom.MultiLineString([coordinates]));
-						break;
-						sketchFeature.setGeometry(new ol.geom.MultiPolygon([coordinates]));
-					case ol.geom.GeometryType.MULTI_POLYGON :
+				if(opt.layers.length > 0) {
+					var geometry = Ck.Snap.snap(opt);
+				} else {
+					this.endProcess(geometry);
 				}
-
-				this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
-				this.controller.fireEvent("featurecreate", sketchFeature);
 			}.bind(this);
-			*/
 			
 			this.interactions["drawInteraction"] = this.drawInteraction;
 		}
-
+		
 		if(status && btn.single === true){
 			if(this.drawSource) this.drawSource.clear();
 			this.drawInteraction.on('drawstart', function(){
 				this.drawSource.clear();
 			}, this);
 		}
-		
-		this.drawInteraction.setActive(status);
+
+		if(btn.gps){
+			if(status) {
+				var geoloc = this.getMap().geolocation.getPosition();
+				// geoloc = [1424431, 2232227]; Testing
+				if(Ext.isArray(geoloc)) {
+					var geomType = this.controller.getGeometryTypeBehavior();
+					if(geomType=='Point') {
+						if(!this.drawSource) {
+							this.drawSource = new ol.source.Vector();
+						}
+						
+						// Create un new  feature
+						var geometry = new ol.geom.Point(geoloc)
+						var feature = new ol.Feature({
+							geometry: geometry,
+							status: "CREATED"
+						});
+						this.drawSource.addFeature(feature);
+						this.endProcess(geometry);
+						btn.toggle(false);
+						Ext.Msg.show({
+							title: "Creation",
+							message: "Point added at GPS position : [ " + geoloc[0] + ", "+ geoloc[1] + "]",
+							buttons: Ext.Msg.OK,
+							icon: Ext.Msg.INFO
+						});
+					}
+				} else {
+					Ext.Msg.show({
+						title: "Create features",
+						message: "GPS position not available",
+						buttons: Ext.Msg.OK,
+						icon: Ext.Msg.ERROR
+					});
+				}				
+			}			
+		} else {
+			this.drawInteraction.setActive(status);
+		}
 	},
 
+	doAction: function(btn) {
+		this.callParent(arguments);
+	},
+
+	// A voir si plus fonctionnel !
+	// Create object with GPS position
+	// doAction: function(btn) {
+		// if(btn.gps) this.toggleAction(btn, false);		
+	// },
+	
 	/**
 	 * Hang the polygon's points to those nearest according to the tolerance.
 	 * @params {ol.Feature}
 	 **/
-	snapGeometry: function(feature) {
-		var geometry = feature.getGeometry();
-		var extent = geometry.getExtent();
-
-		// Récupération des features dans un buffer d'extent du feature
-		var buffer = [
-			extent[0] - this.getTolerance(),
-			extent[1] - this.getTolerance(),
-			extent[2] + this.getTolerance(),
-			extent[3] + this.getTolerance()
-		];
-
-		var featuresInExtent = [];
-
-		var coordinates = geometry.getCoordinates();
-		var type = feature.getGeometry().getType();
-		if(type != "Point") {
-			var coordinates = coordinates[0];
-		}
-		var source = this.getLayerSource();
-
-		if(type != "Point" && this.snap) {
-			// Loop on vertex of the feature
-			for(var i=0; i<coordinates.length - 1; i++ ) {
-				var coordinate = coordinates[i];
-				var feat = source.getClosestFeatureToCoordinate(coordinate);
-				// If nearest feature was found
-				if(!Ext.isEmpty(feat)) {
-					var geom = feat.getGeometry();
-					var point = geom.getClosestPoint(coordinate).slice(0, 2); // Find the nearest point of the feature (force 2D)
-					var line = new ol.geom.LineString([coordinate, point]);
-					var length = line.getLength();
-
-					// Si on rentre dans la tolérance
-					if(length <= this.getTolerance()) {
-						coordinates[i] = point;
-					}
-				}
-			}
-		}
+	endProcess: function(geometry) {
 		
-		if(type.indexOf("multi") != -1) {
-			coordinates = [coordinates];
-		}
-
-		var d = new Date();
-		date = Ext.Date.format(d, 'Y-m-d');
-		var ced = 'A' + Ext.Date.format(d, 'YmdHis');
-
-		var f = new ol.Feature({
-			geometry: Ck.create("ol.geom." + type, coordinates),
+		var sketchFeature = new ol.Feature({
+			geometry: geometry,
 			status: "CREATED"
 		});
+		
+		goog.asserts.assert(!goog.isNull(sketchFeature));
+		var coordinates;
+		var geometry = sketchFeature.getGeometry();
+		
+		if(!this.gps) {
+			switch(this.drawInteraction.mode_) {
+				case ol.interaction.DrawMode.POINT:
+					goog.asserts.assertInstanceof(geometry, ol.geom.Point);
+					coordinates = geometry.getCoordinates();
+					break;
+				case ol.interaction.DrawMode.LINE_STRING :
+					goog.asserts.assertInstanceof(geometry, ol.geom.LineString);
+					coordinates = geometry.getCoordinates();
+					// Remove the redundant last point
+					coordinates.pop();
+					geometry.setCoordinates(coordinates);
+					break;
+				case ol.interaction.DrawMode.POLYGON :
+					goog.asserts.assertInstanceof(geometry, ol.geom.Polygon);
+					// When we finish drawing a polygon on the last point,
+					// the last coordinate is duplicated as for LineString
+					// we force the replacement by the first point
+					this.drawInteraction.sketchPolygonCoords_ = geometry.getCoordinates();
+					this.drawInteraction.sketchPolygonCoords_[0].pop();
+					this.drawInteraction.sketchPolygonCoords_[0].push(this.drawInteraction.sketchPolygonCoords_[0][0]);
+					geometry.setCoordinates(this.drawInteraction.sketchPolygonCoords_);
+					coordinates = geometry.getCoordinates();
+					break;
+			}
+		}
 
-		return f;
+		// Cast multi-part geometries
+		switch(this.controller.getGeometryTypeBehavior()) {
+			case ol.geom.GeometryType.MULTI_POINT :
+				sketchFeature.setGeometry(new ol.geom.MultiPoint([coordinates]));
+				break;
+			case ol.geom.GeometryType.MULTI_LINE_STRING :
+				sketchFeature.setGeometry(new ol.geom.MultiLineString([coordinates]));
+				break;
+				sketchFeature.setGeometry(new ol.geom.MultiPolygon([coordinates]));
+			case ol.geom.GeometryType.MULTI_POLYGON :
+		}
+
+		if(!this.gps) {
+			this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
+		}
+		
+		this.controller.fireEvent("featurecreate", sketchFeature);
 	}
 });

@@ -4,93 +4,175 @@
  * - Edit action add, delete, attribute...
  * - History grid to log modification (optionnal)
  * - Vertex grid to modify geometry accurately (optionnal)
+ *
+ * There are 2 value of type. The real type of the layer and the considered type for edition.
  */
 Ext.define('Ck.edit.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckedit',
-	
+
 	editPanelVisible: true,
 	
-	config: {		
+	/**
+	 * @var {ol.Feature}
+	 * Current edited feature
+	 */
+	currentFeature: null,
+	
+	/**
+	 * @var {Ext.button.Button}
+	 * Button for geolocation with ckEditGeolocation action
+	 */
+	geolocationBtn: null,
+
+	config: {
+		openner: null,
+
 		layer: null,
-		
+
 		/**
-		 * Indicate if the edited layer is a multi-feature layer (like MultiLineString)
+		 * Emulate single geometry. True to considerate geometry as simple geom
 		 */
-		multi: false,
-		
+		emulateSimple: true,
+
 		/**
 		 * If the edited layer is a WMS layer
 		 */
-		isWMS: false
+		isWMS: false,
+
+		/**
+		 * Indicate if the edited layer is a multi-feature layer for real(like MultiLineString)
+		 */
+		multi: false,
+
+		/**
+		 * Type of the layer. If it's a multi-geometry layer and emulateSimple is true then this value will be simple name geometry type
+		 */
+		geometryType: "",
+		
+		/**
+		 * True for looped geometry like polygon
+		 */
+		loopedType: false,
+
+		/**
+		 * Indicate if we have to display multi-geometry UI
+		 */
+		multiBehavior: false,
+
+		/**
+		 * Considerate geometry type. It can be different from geometryType only if emulateSimple is true
+		 */
+		geometryTypeBehavior: "",
+		
+		/**
+		 * The id of the snapping options panel
+		 */
+		snappingOptionsId: "edit-snapping-options"
 	},
-	
+
+	/**
+	 * @event geolocation
+	 * Fire when geolocation informations is send to this controller
+	 * @param {ol.Coordinate}
+	 */
+	 
 	/**
 	 * @event featurecreate
 	 * Fires when a feature was created
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featuregeometry
 	 * Fires when a feature geometry was modified
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featureattribute
 	 * Fires when a feature attribute was modified
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featureremove
 	 * Fires when a feature was removed
 	 * @param {ol.Feature}
 	 */
-	
+
 	/**
 	 * @event featurecrop
 	 * Fires when a feature was croped
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featureunion
 	 * Fires when a feature was gathered
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event sessionstart
 	 * Fires when feature or vertex session began
 	 */
-	 
+
 	/**
 	 * @event sessioncomplete
 	 * Fires when feature or vertex session is complete (not saved)
 	 */
-	 
+
 	/**
 	 * @event savesuccess
 	 * Fires when change saved successfully
 	 */
-	 
+
 	/**
 	 * @event savefailed
 	 * Fires when change saved successfully
 	 */
-	
+
 	/**
 	 * @protected
 	 */
 	init: function(view) {
-		this.callParent([view]);
+		this.callParent(arguments);
+		var geometryType, geometryTypeBehavior;
+
+		// Geometry type
+		var geometryType = this.getLayer().getExtension("geometryType");
 		
-		this.setLayer(view.initialConfig.layer);
-		//this.setOpenner(view.initialConfig.openner);
-		this.setMulti((view.initialConfig.layer.getExtension("geometryType").indexOf("Multi") != -1));
+		// Type compatibility
+		switch(geometryType) {
+			case "Line":
+				geometryType = "LineString";
+				break;
+		}
 		
+		// Looped geometry have specific vertex behavior
+		if(geometryType.indexOf("Polygon") != -1) {
+			this.setLoopedType(true);
+		}
+		
+		if(geometryType.indexOf("Multi") == -1) {
+			this.setEmulateSimple(false);
+			geometryTypeBehavior = geometryType;
+		} else if(this.getEmulateSimple()) {
+			geometryTypeBehavior = geometryType.substr(5);
+		} else {
+			geometryTypeBehavior = geometryType;
+		}
+
+		this.setGeometryType(geometryType);
+		this.setGeometryTypeBehavior(geometryTypeBehavior);
+
+		this.setMulti(geometryType.indexOf("Multi") != -1);
+		this.setMultiBehavior(geometryTypeBehavior.indexOf("Multi") != -1);
+		
+		// Reference to the main toolbar
+		var tbar = view.items.getAt(0).getDockedItems()[0];
+
 		this.control({
 			"ckedit button#cancel": {
 				click: function() {
@@ -130,13 +212,14 @@ Ext.define('Ck.edit.Controller', {
 							}
 						});
 					} else {
+						this.wfsSource.clear();
 						this.close();
 					}
 				},
 				scope: this
 			}
 		});
-		
+
 		// Check if the layer is a WMS or WFS
 		if(!(this.getLayer().getSource() instanceof ol.source.Vector)) {
 			source = this.getLayer().get("sources");
@@ -148,7 +231,7 @@ Ext.define('Ck.edit.Controller', {
 				return false;
 			}
 		}
-		
+
 		// Create a vector layer to host features of WMS layer
 		if(!this.wfsLayer) {
 			this.wfsLayer = Ck.create("ol.layer.Vector", {
@@ -159,115 +242,209 @@ Ext.define('Ck.edit.Controller', {
 			});
 			this.wfsFeatures = [];
 			this.wfsSource = this.wfsLayer.getSource();
-			this.wfsLayer.setMap(this.getOlMap());
+			this.getMap().addSpecialLayer(this.wfsLayer);
 		}
-		
+
 		var conf = view.editConfig;
 		conf.editController = this;
 		conf.layer = view.layer;
-		conf.multi = this.getMulti();
+		conf.multi = this.getMultiBehavior();
 		
-		// When user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
-		if(this.getMulti()) {
+		// Feature panel : when user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
+		if(conf.multi) {
 			var featureContainer = Ext.getCmp("edit-featurepanel");
-			featureContainer = (Ext.isEmpty(featureContainer))? view : featureContainer;
-		
+			if(Ext.isEmpty(featureContainer)) {
+				if(view.getPanelContainer() == "same") {
+					featureContainer = view;
+				} else {
+					featureContainer = this.getMainWindow();
+				}
+			}
+
 			this.featurePanel = Ext.create("widget.ckedit-feature", conf);
 			featureContainer.add(this.featurePanel);
-		
+			this.mainWindow.manageVisibility();
+
 			// Add listeners
 			this.feature = this.featurePanel.getController();
 			Ext.apply(this.feature, conf);
 			this.relayEvents(this.feature, ["sessionstart"], "feature");
 			this.feature.addListener("validate", this.saveFeatureChange, this);
 			this.feature.addListener("cancel", this.cancelFeatureChange, this);
-			
-			
-			
+
+
+
 			// Hide feature splitting button
-			var tbar = this.getView().items.getAt(0).getDockedItems()[0];
-			tbar.items.getAt(4).getMenu().items.getAt(0).setVisible(false);
+			var vertexLive = tbar.getComponent("vertex-live-edit");
+			if(vertexLive) {
+				vertexLive.getComponent("edit-crop").setVisible(false);
+			}
 		}
+
 		
-		// Display vertex panel for line and polygon
-		if(view.layer.getExtension("geometryType") != "Point") {
+		// Vertex panel : display vertex panel for line and polygon
+		if(this.getGeometryTypeBehavior() != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
-			vertexContainer = (Ext.isEmpty(vertexContainer))? view : vertexContainer;
-		
-			this.vertexPanel = Ext.create("widget.ckedit-vertex", conf);
+			if(Ext.isEmpty(vertexContainer)) {
+				if(view.getPanelContainer() == "same") {
+					vertexContainer = view;
+				} else {
+					vertexContainer = this.getMainWindow();
+				}
+			}
+
+			var vertexConf = conf;
+			vertexConf.scrollable = false;
+			this.vertexPanel = Ext.create("widget.ckedit-vertex", vertexConf);
 			vertexContainer.add(this.vertexPanel);
-		
+			this.mainWindow.manageVisibility();
+
 			// Add listeners
 			this.vertex = this.vertexPanel.getController();
-			Ext.apply(this.vertex, conf);
-			
-			var receiver = (this.getMulti())? this.feature : this;
+			Ext.apply(this.vertex, vertexConf);
+
+			var receiver = (this.getMultiBehavior())? this.feature : this;
 			this.relayEvents(this.vertex, ["sessionstart"], "vertex");
 			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
 			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
 		}
 		
+		
+		// History panel. Everytime used, but not necessarily visible
+		var historyContainer = Ext.getCmp("edit-historypanel");
+		if(Ext.isEmpty(historyContainer)) {
+			if(view.getPanelContainer() == "same") {
+				historyContainer = view;
+			} else {
+				historyContainer = this.getMainWindow();
+			}
+		}
+		
+		// Hide "Add to GPS position" button if is not a point layer
+		if(Ck.isDesktop() || geometryType.search("Point") === -1) {
+			var gpsAdd = tbar.getComponent("edit-create-gps");
+			if(gpsAdd) {
+				gpsAdd.hide();
+			}
+		}
+
+		// Geolocation button
+		this.on("geolocation", this.setPosition, this);
+		this.geolocationBtn = tbar.getComponent("edit-geolocation");
+		
 		this.historyView = Ext.create("widget.ckedit-history", conf);
+		this.historyView.setVisible(view.getUseHistory());
 		this.history = this.historyView.getController();
 		Ext.apply(this.history, conf);
 		this.history.createListeners(this);
-		
-		this.historyPanel = Ext.getCmp("edit-historypanel");
-		if(this.historyPanel) {
-			this.historyPanel.add(this.historyView);
-		}
+
+		historyContainer.add(this.historyView);
+		this.mainWindow.manageVisibility();
 		
 		this.on("featurecreate", this.onCreate, this);
+		
+		Ck.getMap().on("contextloading", function(ctx) {
+			this.close();		
+		}, this);
 	},
 	
+	/**
+	 * 
+	 */
+	getMainWindow: function() {
+		if(Ext.isEmpty(this.mainWindow)) {
+			this.mainWindow = Ck.create("Ext.window.Window", {
+				title: "Edition",
+				height: 400,
+				width: 400,
+				layout: "fit",
+				closable: false
+			});
+			
+			this.mainWindow.on("add", function(win, item) {
+				item.on("show", win.manageVisibility);
+				item.on("hide", win.manageVisibility);
+			});
+			
+			this.mainWindow.manageVisibility = function() {
+				var visible = false;
+				for(var i = 0; (i < this.items.getCount() && !visible); i++) {
+					visible = !this.items.getAt(i).hidden;
+				}
+				this.setVisible(visible);
+			}.bind(this.mainWindow);
+			
+			this.mainWindow.show();
+		}
+		
+		// JMA hard fix temp !
+		this.mainWindow.hide();
+		//
+		
+		return this.mainWindow;
+	},
+
 	/**
 	 * When user has create a geom.
 	 * Have to cast into multi-geom if necessary
 	 * @param {ol.Feature}
 	 */
 	onCreate: function(feature) {
-		feature.setStyle(Ck.map.Style.greenStroke);
+		feature.setStyle(Ck.map.Style.orangeStroke);
 		var source = this.getSource();
-		if(this.getMulti()) {
-			var type = "Multi" + feature.getGeometry().getType();
-			feature = Ck.create("ol.Feature", {
-				geometry: Ck.create("ol.geom." + type, [feature.getGeometry().getCoordinates()])
-			});
-		}
+		// if(this.getMultiBehavior()) {
+			// var type = "Multi" + feature.getGeometry().getType();
+			// feature = Ck.create("ol.Feature", {
+				// geometry: Ck.create("ol.geom." + type, [feature.getGeometry().getCoordinates()])
+			// });
+		// }
 		source.addFeature(feature);
 	},
-	
+
 	/**************************************************************************************/
 	/******************************** Click on edit button ********************************/
-	/**************************************************************************************/	
+	/**************************************************************************************/
 	/**
 	 * Start a geometry edition session.
 	 * If the layer is a multi-features layer, subfeatures panel is displayed, vertex panel otherwise.
-	 * Called by the action Ck.edit.action.Geometry.
+	 * Called by the action Ck.edit.action.Geometry only.
 	 * @param {ol.Feature}
 	 */
 	startGeometryEdition: function(feature) {
+		var geom = feature.getGeometry();
+		
+		// If it's a multi geom and we only edit geom as simple -> simplify geometry
+		if((geom.getType().indexOf("Multi") != -1) && this.getEmulateSimple()) {
+			feature.setGeometry(geom["get" + this.getGeometryTypeBehavior()](0));
+		}
+		
 		// Add the feature, if not already added, to the collection
 		if(this.getIsWMS()) {
 			var ft = this.wfsSource.getFeatureById(feature.getId());
-			
+
 			if(Ext.isEmpty(ft)) {
 				this.wfsSource.addFeature(feature);
 			} else {
 				feature.setGeometry(ft.getGeometry());
 			}
 		}
-		if(this.getMulti()) {
+		
+		if(this.getMultiBehavior()) {
 			this.startFeatureEdition(feature);
 		} else {
 			this.startVertexEdition(feature);
 		}
 	},
-	
+
 	/**
-	 * 
+	 *
 	 */
 	deleteFeature: function(feature) {
+		var ft = this.wfsSource.getFeatureById(feature.getId());
+		if(ft) {
+			this.wfsSource.removeFeature(ft);
+		}
+		
 		this.wfsSource.addFeature(feature);
 		feature.setStyle(Ck.map.Style.redStroke);
 		if(!this.getIsWMS()) {
@@ -276,10 +453,10 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.fireEvent("featureremove", feature);
 	},
-	
+
 	/**************************************************************************************/
 	/********************************** Geometry edition **********************************/
-	/**************************************************************************************/	
+	/**************************************************************************************/
 	/**
 	 * When the edited layer is a multi-feature layer.
 	 * Open sub-features selection panel
@@ -289,13 +466,15 @@ Ext.define('Ck.edit.Controller', {
 		this.feature.loadFeature(feature);
 		this.switchPanel(this.featurePanel);
 	},
-	
+
 	/**
 	 * Edit a simple geometry (polygon, line or point)
 	 * @param {ol.geom.SimpleGeometry}
 	 */
 	startVertexEdition: function(feature) {
-		if(this.getLayer().getExtension("geometryType") == "Point") {
+		this.currentFeature = feature;
+		if(this.getGeometryTypeBehavior() == "Point") {
+			this.geolocationBtn.enable();
 			if(this.moveInteraction) {
 				this.getOlMap().removeInteraction(this.moveInteraction);
 			}
@@ -304,40 +483,92 @@ Ext.define('Ck.edit.Controller', {
 			});
 			this.moveInteraction.on("translateend", this.pointTranslateEnd, this);
 			this.getOlMap().addInteraction(this.moveInteraction);
-			
+
 			// delete this.moveInteraction.previousCursor_;
 			this.moveInteraction.setActive(true);
 		} else {
 			this.vertex.loadFeature(feature);
+			// JMA Hard fix - by defaut live edit
+			this.vertex.liveAction();
+			this.vertex.on("geometrychange", function(feature){
+				this.fireEvent("featuregeometry", feature);
+			}, this);
+			//
+			
 			this.switchPanel(this.vertexPanel);
 		}
 	},
-	
-	pointTranslateEnd: function(a,b,c,d) {
-		this.fireEvent("featuregeometry", a.features.item(0));
+
+	/**
+	 * On feature translating
+	 * @param {ol.interaction.TranslateEvent}
+	 */
+	pointTranslateEnd: function(evt) {
+		// Do snapping
+		var feature = evt.features.item(0);
+		var geometry = feature.getGeometry();
+		
+		var opt = {
+			layers		: this.getSnappingOptions(),
+			layer		: this.getLayer(),
+			geometries	: [geometry],
+			callback	: function(feature, geometry) {
+				feature.setGeometry(geometry);
+				this.fireEvent("featuregeometry", feature);
+			}.bind(this, feature),
+			scope		: this
+		}
+		
+		if(opt.layers.length > 0) {
+			var geometry = Ck.Snap.snap(opt);
+		} else {
+			this.fireEvent("featuregeometry", feature);
+		}
+	},
+
+	/**
+	 * Set position from GPS location
+	 * @param {ol.Coordinate}
+	 */
+	setPosition: function(coord) {
+		if(coord && !Ext.isEmpty(this.currentFeature)) {
+			if(this.currentFeature.getGeometry().getType().indexOf("Point") == -1) {
+				this.vertex.fireEvent("geolocation", coord);
+			} else {
+				var geom = this.currentFeature.getGeometry();
+				if(this.currentFeature.getGeometry().getType().indexOf("Multi") == -1) {
+					geom.setCoordinates(coord);
+				} else {
+					geom.setCoordinates([coord]);
+				}
+				this.fireEvent("featuregeometry", this.currentFeature);
+			}
+		}
 	},
 	
 	/**************************************************************************************/
 	/********************************* Sub-feature events *********************************/
-	/**************************************************************************************/	
+	/**************************************************************************************/
 	/**
 	 * For feature panel validating
 	 * @param {ol.Feature}
 	 * @param {Boolean}
 	 */
 	saveFeatureChange: function(feature, changed) {
+		this.geolocationBtn.disable();
 		this.switchPanel(this.historyPanel);
 		if(changed) {
 			this.fireEvent("featuregeometry", feature);
 		}
 		this.fireEvent("sessioncomplete", feature);
 	},
-	
+
 	/**
 	 * When user cancel modification
 	 * @param {ol.Feature}
 	 */
 	cancelFeatureChange: function(feature) {
+		this.geolocationBtn.disable();
 		this.switchPanel(this.historyPanel);
 		this.fireEvent("sessioncomplete", feature);
 	},
@@ -357,7 +588,7 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.fireEvent("sessioncomplete", feature);
 	},
-	
+
 	/**
 	 * When the user cancel his changes
 	 * @param {ol.Feature}
@@ -366,10 +597,24 @@ Ext.define('Ck.edit.Controller', {
 		this.switchPanel(this.historyPanel);
 		this.fireEvent("sessioncomplete", feature);
 	},
-	
+
 	/**************************************************************************************/
 	/*************************************** Utils ****************************************/
 	/**************************************************************************************/
+	/**
+	 *
+	 */
+	getSnappingOptions: function() {
+		var config, cmp = Ext.getCmp("edit-snapping-options");
+		if(cmp) {
+			config = cmp.getController().getSettings();
+		} else {
+			config = [];
+		}
+		
+		return config
+	},
+	
 	/**
 	 * Return the source of the current layer
 	 * @return {ol.source}
@@ -381,7 +626,7 @@ Ext.define('Ck.edit.Controller', {
 			return this.getLayer().getSource();
 		}
 	},
-	
+
 	/**
 	 * Display the specified panel
 	 * @param {Ext.panel.Panel} The panel to display
@@ -397,13 +642,13 @@ Ext.define('Ck.edit.Controller', {
 			this.featurePanel.setVisible(this.featurePanel == panel);
 		}
 	},
-	
+
 	/**
 	 * Cancel all modifications.
 	 */
 	cancel: function() {
 		var data, ft;
-		
+
 		if(this.getIsWMS()) {
 			this.wfsSource.clear();
 		} else {
@@ -430,9 +675,9 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.history.store.removeAll();
 	},
-	
+
 	close: function() {
-		
+
 		if(this.vertex) {
 			this.vertex.close.bind(this.vertex)();
 		}
@@ -443,58 +688,70 @@ Ext.define('Ck.edit.Controller', {
 			this.feature.close.bind(this.feature)();
 		}
 		
+		if(this.mainWindow) {
+			this.mainWindow.close();
+		}
+		if(this.wfsLayer) {
+			this.getMap().removeSpecialLayer(this.wfsLayer);
+		}
+		
+		if(this.moveInteraction) {
+			this.getOlMap().removeInteraction(this.moveInteraction);
+		}
+		
 		var win = this.view.up('window');
 		if(win) {
 			win.close();
+		} else {
+			this.getOpenner().close();
 		}
 	},
-	
+
 	/**
 	 * Save the changes. If it concerne
 	 */
 	save: function() {
 		if(this.getIsWMS()) {
-			var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
-			var geometryName = this.getLayer().getExtension("geometryColumn");
-			var multiForReal = this.getLayer().getExtension("multiForReal");
+			var layer = this.getLayer();
 			
+			var ope = layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
+			var geometryName = layer.getExtension("geometryColumn");
+
 			var currSrs = this.getMap().getProjection().getCode();
 			var lyrSrs = ope.getSrs();
-			
-			var f = Ck.create("ol.format.WFS", {
-				featureNS: "http://mapserver.gis.umn.edu/mapserver",
-				gmlFormat: Ck.create("ol.format.GML2"),
-				featureType: ope.getLayers()
-			});
-			
+
 			// Loop on history store items
-			for(var i = 0; i < this.history.store.getCount(); i++) {				
+			var ft, inserts = [], updates = [], deletes = [];
+			for(var i = 0; i < this.history.store.getCount(); i++) {
 				data = this.history.store.getAt(i).data;
 				ft = data.feature
-				
+
 				if(currSrs != lyrSrs) {
 					ft.getGeometry().transform(currSrs, lyrSrs);
 				}
-				
+
 				if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
 					ft.set(geometryName, ft.getGeometry());
 					ft.unset("geometry");
-					ft.setGeometryName(geometryName);	
+					ft.setGeometryName(geometryName);
 				}
-				
+
 				// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
 				var geom = ft.getGeometry();
-				if(multiForReal === true && data.actionId != 3 && !Ext.isEmpty(geom) && geom.getType().indexOf("Multi") == -1) {
+				if(data.actionId != 3 && !Ext.isEmpty(geom) && (geom.getType() != this.getGeometryType())) {
 					var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
 					ft.setGeometry(mGeom);
 				}
-				
+
 				switch(data.actionId) {
 					case 0:
 						// Create
 						inserts.push(ft);
 						break;
 					case 1:
+						if(this.vertex !== undefined) {
+							this.vertex.closeAll();
+						}
 					case 2:
 					case 4:
 					case 5:
@@ -508,96 +765,39 @@ Ext.define('Ck.edit.Controller', {
 				}
 			}
 			
-			var lyr = ope.getLayers().split(":");
-			
-			transacOpt = {
-				featureNS		: "feature",
-				srsName			: currSrs,
-				featureType		: lyr[0],
-				gmlOptions: {
-					schemaLocation: "wfs"
-				}
-			};
-			
-			if(!Ext.isEmpty(lyr[1])) {
-				transacOpt.featurePrefix = lyr[1];
-			}
-			
-			var transac = f.writeTransaction(inserts, updates, deletes, transacOpt);
-			
-			// Temporary parent to get the whole innerHTML
-			var pTemp = document.createElement("div");
-			pTemp.appendChild(transac);
-			
-			// Do the getFeature query
-			Ck.Ajax.post({
-				scope: this,
-				url: ope.getUrl(),
-				rawData: pTemp.innerHTML,
-				success: function(response) {
+			Ck.Ajax.sendTransaction(layer, {
+				inserts: inserts,
+				updates: updates,
+				deletes: deletes
+			},{
+				fn: function() {
 					this.fireEvent("savesuccess");
-					var ins, upd, del;
-					ins = response.responseXML.getElementsByTagName("totalInserted")[0];
-					upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
-					del = response.responseXML.getElementsByTagName("totalDeleted")[0];
-					
-					if(ins || upd || del) {					
-						var msg = "Registration successfully : <br/>";
-						if(ins && ins.innerHTML != "0") {
-							msg += "Inserted : " + ins.innerHTML + "<br/>";
-						}
-						if(upd && upd.innerHTML != "0") {
-							msg += "Updated : " + upd.innerHTML + "<br/>";
-						}
-						if(del && del.innerHTML != "0") {
-							msg += "Deleted : " + del.innerHTML;
-						}
-						
-						Ext.Msg.show({
-							title: "Edition",
-							message: msg,
-							buttons: Ext.Msg.OK,
-							icon: Ext.Msg.INFO
-						});
-						this.reset();
-					}
+					this.reset();
 				},
-				failure: function(response) {
+				scope: this
+			},{
+				fn: function() {
 					this.fireEvent("savefailed");
-					var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
-					var msg = "Layer edition failed";
-					if(exception) {
-						var pre = document.createElement('pre');
-						var text = document.createTextNode(exception.innerHTML);
-						pre.appendChild(text);
-						msg += ". Error message : <br/>" + pre.innerHTML;
-					}
-					
-					Ext.Msg.show({
-						title: "Edition",
-						message: msg,
-						buttons: Ext.Msg.OK,
-						icon: Ext.Msg.ERROR
-					});
-				}
+				},
+				scope: this
 			});
 		}
 	},
-	
+
 	reset: function() {
 		if(this.history) {
 			this.history.reset.bind(this.history)();
 		}
-		
+
 		if(this.getIsWMS()) {
 			this.wfsSource.clear();
-			
+
 			// Redraw
 			src = this.getLayer().getSource();
 			var params = src.getParams();
 			params.t = new Date().getMilliseconds();
 			src.updateParams(params);
 		}
-		
+
 	}
 });

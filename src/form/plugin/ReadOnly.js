@@ -29,6 +29,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				if(cmp.suffix) this.suffix = cmp.suffix;
 				if(cmp.prefix) this.prefix = cmp.prefix;
 				if(cmp.fieldTpl) this.fieldTpl = cmp.fieldTpl;
+				if(!cmp.fieldTpl && cmp.tpl) this.fieldTpl = cmp.tpl;
 				if(cmp.target) this.target = cmp.target;
 				if(cmp.title) this.title = cmp.title;
 				if(cmp.formatter) this.formatter = cmp.formatter;
@@ -67,7 +68,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		this.callParent();
 	},
 
-	// private
+	/**
+	 * Replace input field with text field
+	 */
 	onRenderCmp : function(cmp){
 		// Ck.log("onRenderCmp for : " + cmp.name);
 		
@@ -89,6 +92,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	/**
 	 * Change the rendering of according the field is readonly or not
 	 * r variable indicates if the field is readOnly or not
+	 * Called by 3 events :
+	 * - when editing begins
+	 * - for each field modification
+	 * - when editing ends
 	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
@@ -133,29 +140,92 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 				var val = cmp.getValue();
 				// For combobox
-				if(cmp.displayField) val = cmp.getDisplayValue();
+				if(cmp.displayField) {
+					val = cmp.getDisplayValue() || cmp.getValue();
+				}
 				// For Datefields
-				if(cmp.submitFormat) val = cmp.getSubmitValue();
+				if(cmp.submitFormat) {
+					val = cmp.getSubmitValue();
+				}
 				
-				if(val==null) val = '';
-				
-				if(val != '') {
-					val = this.prefix + val + this.suffix;
-					if(this.template) {
-						val = this.template.apply({"value": val});
+				if(val !== null) {
+					if(!Ext.isEmpty(val)) {
+						val = this.prefix + val + this.suffix;
+						if(this.template) {
+							val = this.template.apply({"value": val});
+						}
+						
+						if(this.formatter && Ext.util.Format[this.formatter]) {
+							val = Ext.util.Format[this.formatter](val);
+						}
+						
+						var title = '';
+						if(this.title) {
+							title = "title='" + this.title + "'";
+						}
+						
+						// Include val in <a> element if it's a URL
+						var _http = /^http:/i;
+						if(_http.test(val)) {
+							val = "<a href='"+val+"' "+ title +" target='"+ this.target +"'>"+val+"</a>";
+						}
 					}
 					
-					if(this.formatter && Ext.util.Format[this.formatter]) {
-						val = Ext.util.Format[this.formatter](val);
+					this.textEl.update(val);
+					
+					// Fix: resize fileuploadfield's ownerCt (Panel) after image loaded
+					var img = this.textEl.down("img");
+					if(img !== undefined && img) {
+						img.on("load", function(e, target, opt) {
+							var cmp = this.getCmp();
+							if(cmp) {
+								cmp.ownerCt.setWidth(target.width);
+								cmp.ownerCt.setHeight(target.height);
+							}
+						}, this);										
+					}
+					
+					// Allow to open link on mobile device
+					if(val.indexOf("<a href") != -1 && Ck.isMobileDevice()) {
+						this.textEl.dom.onclick = function(evt) {
+							var url = evt.currentTarget.getElementsByTagName("a")[0].getAttribute("href");
+							if(url) {
+								var extension = url.split(".").pop();
+								if(Ext.isEmpty(Ck.EXTENSION_MIMETYPE["extension"])) {
+									navigator.app.loadUrl(url, {loadingDialog:"Wait, loading ressource", loadUrlTimeoutValue: 6000, openExternal: true});
+									return false;
+								}
+							}						
+						};
+					}
+				} else {
+					val = '';
+				}
+
+				// Hide file fields buttons when read only mode
+				if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
+					var items = cmp.ownerCt.items;
+					for(var i = 0; i < items.getCount(); i++) {
+						if(items.getAt(i) != cmp) {
+							items.getAt(i).setVisible(false);
+						}
 					}
 				}
-				var title = '';
-				if(this.title) title = "title='"+this.title+"'";
-
-				var _http = /^http:/i;
-				if(_http.test(val)) val = "<a href='"+val+"' "+ title +" target='"+ this.target +"'>"+val+"</a>";
-
-				this.textEl.update(val);
+				
+				// Hide numeric fields buttons when read only mode
+				if(cmp.getXTypes().indexOf("numberfield") != -1) {
+					var ownerCt = cmp.ownerCt;
+					if(ownerCt.gpsButton === true) {
+						var items = ownerCt.items;
+						for(var i = 0; i < items.getCount(); i++) {
+							if(items.getAt(i) != cmp) {
+								items.getAt(i).setVisible(false);
+							}
+						}
+					}
+					
+				}
+				
 				this.labelEl.show();
 
 			} else {
@@ -164,6 +234,32 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 				// Add a marker for required fields when editing
 				this.addRequiredMarker();
+				
+				// Show file fields buttons when not in read only mode
+				if(cmp.getXTypes().indexOf("filefield") != -1 || cmp.getXTypes().indexOf("fileuploadfield") != -1) {
+					// TODO : get the "52" from config
+					cmp.ownerCt.setHeight(52);
+					var items = cmp.ownerCt.items;
+					for(var i = 0; i < items.getCount(); i++) {
+						if(items.getAt(i) != cmp) {
+							items.getAt(i).setVisible(true);
+						}
+					}
+				}
+				
+				// Show numeric fields buttons when read only mode
+				if(cmp.getXTypes().indexOf("numberfield") != -1) {
+					var ownerCt = cmp.ownerCt;
+					if(ownerCt.gpsButton === true) {
+						var items = ownerCt.items;
+						for(var i = 0; i < items.getCount(); i++) {
+							if(items.getAt(i) != cmp) {
+								items.getAt(i).setVisible(true);
+							}
+						}
+					}
+					
+				}
 			}
 
 			if(cmp.inputEl) {

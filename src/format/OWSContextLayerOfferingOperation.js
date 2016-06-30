@@ -15,6 +15,8 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		layers		: null,
 		srs			: null,
 		crs			: null,
+		resolutions	: [],
+		extent		: [],
 		owsOffering	: {},
 		data		: {}
 	},
@@ -22,7 +24,7 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
-	 * @param {Ck.owcLayer}
+	 * @param {Ck.owsLayer}
 	 */
 	constructor: function(config) {
 		var params = {}, data = config.data;
@@ -44,10 +46,20 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 			version	: params.VERSION,
 			layers	: params.LAYERS,
 			srs		: params.SRS,
-			crs		: params.CRS
+			crs		: params.CRS,
+			resolutions	: data.resolutions,
+			extent		: data.extent
 		});
 		
 		this.initConfig(config);
+	},
+	
+	getSrs: function() {
+		if(this._srs) {
+			return this._srs;
+		} else {
+			return this.getOwsOffering().getSrs();
+		}
 	},
 	
 	/**

@@ -47,40 +47,44 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		};
 		
 		if(!Ext.isEmpty(this.win)) {
-			this.close();
-		}
-		
-		switch(this.target) {
-			case "window":
-				this.win = Ext.create('Ext.window.Window', Ext.apply({
-					title: "Edit layer " + layer.get('title'),
-					width: 410,
-					height: 300,
-					layout: 'fit',
-					collapsible: true,
-					closable: false,
-					items: [editOpt]
-				}), this.targetOpt);
+			Ext.Msg.show({
+				title: "Edition",
+				message: "Please complete the current editing session",
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.INFO
+			});
+		} else {
+			switch(this.target) {
+				case "window":
+					this.win = Ext.create('Ext.window.Window', Ext.apply({
+						title: "Edit layer " + layer.get('title'),
+						width: 410,
+						height: 300,
+						layout: 'fit',
+						collapsible: true,
+						closable: false,
+						items: [editOpt]
+					}), this.targetOpt);
 
-				this.win.show();
-				break;
-			case "docked":
-				var view = map.getView();
-				this.win = view.addDocked(Ext.apply({
-					dock : "top"
-				}, this.targetOpt, editOpt));
-				this.getMap().getOlMap().updateSize()
-				break;
-		}
-		
+					this.win.show();
+					break;
+				case "docked":
+					var view = map.getView();
+					this.win = view.addDocked(Ext.apply({
+						dock : "top"
+					}, this.targetOpt, editOpt));
+					this.getMap().getOlMap().updateSize()
+					break;
+			}
+ 		}
 	},
 	
 	/**
 	 * @param {ol.layer.Base}
 	 */
 	isEditable: function(layer) {
-		if(!Ext.isEmpty(layer)) {
-			if(layer.getExtension("editable")) {
+		if(!Ext.isEmpty(layer) && !(layer instanceof ol.layer.Group)) {
+			if((layer.getExtension("editable") || layer.ckLayer.getPermission("edit")) && layer.getExtension("geometryType")) {
 				return true;
 			}
 		}

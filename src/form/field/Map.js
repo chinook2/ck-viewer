@@ -191,7 +191,7 @@ Ext.define('Ck.form.field.Map', {
 		if(Ext.isArray(value) && value.length==0) value = null;
 
 		var me = this,
-			errors = me.callParent([value]),
+			errors = me.callParent(arguments),
 			validator = me.validator,
 			vtype = me.vtype,
 			vtypes = Ext.form.field.VTypes,

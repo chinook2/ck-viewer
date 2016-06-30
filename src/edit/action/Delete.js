@@ -8,6 +8,7 @@ Ext.define('Ck.edit.action.Delete', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-delete',
 	iconCls: 'fa fa-remove fa-lg fa-flip-horizontal ck-plugin',
 	tooltip: 'Delete feature',
 	
@@ -17,9 +18,7 @@ Ext.define('Ck.edit.action.Delete', {
 	deleteConfirmation: true,
 
 	toggleAction: function(btn, status) {
-		if(!this.used) {
-			this.callParent([btn]);
-		}
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 		
@@ -38,6 +37,9 @@ Ext.define('Ck.edit.action.Delete', {
 			});
 			this.interactions["delInteraction"] = this.delInteraction;
 		}
+		
+		// Hard fix for inexplicable issue (this.delInteraction.selection.length != 0)
+		this.delInteraction.resetSelection();
 
 		this.delInteraction.setActive(status);		
 	},

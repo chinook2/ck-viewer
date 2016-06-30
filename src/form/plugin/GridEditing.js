@@ -182,5 +182,31 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
 			store.removed.push(rec);		
 		}
+	},
+	
+	getFields: function(){
+		if(!this.grid.columns) return;
+		var fields = [];
+		var cols = this.grid.columns;
+
+		// Column Model
+		for(var col in cols){
+			if(cols[col] && cols[col].dataIndex) {
+				var colname = cols[col].text;
+				var colindex = cols[col].dataIndex;
+
+				fields.push({
+					name: colindex,
+					//defaultValue: colname,
+					type: cols[col].type || 'auto' //,
+					// rendererOption: cols[col].rendererOption || {},
+					// convert: function(v, n) {
+						// return n[v];
+					// }
+				});
+			}
+		}
+		
+		return fields;
 	}
 });

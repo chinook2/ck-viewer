@@ -12,8 +12,10 @@ Ext.define('Ck.map.action.select.Polygon', {
 	
 	continueMsg: 'Click on the map to start polygon selection',
 
-	/**
-	 * Type used in Selection
-	 */
-	type: 'Polygon'
+	config: {
+		/**
+		 * Type of selection
+		 */
+		type: 'Polygon'
+	}
 });

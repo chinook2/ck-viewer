@@ -1,22 +1,21 @@
 /**
  * This action is used to modify the geometry of a feature.
+ * Click on a feature on the map to edit it.
  * A geometryInteraction was created
  */
 Ext.define('Ck.edit.action.Geometry', {
 	extend: 'Ck.edit.Action',
 	alias: 'widget.ckEditGeometry',
 
+	itemId: 'edit-geometry',
 	iconCls: 'fa fa-edit',
 	tooltip: 'Edit geometry',
 	
 	interactionId: "geometryInteraction",
 
 	toggleAction: function(btn, status) {
-		if(!this.used) {
-			this.callParent([btn]);
-			this.firstUse();
-		}
-		
+		this.callParent(arguments);
+		this.btn = btn;
 		var source = this.getLayerSource();
 		
 		if(!this.geometryInteraction) {
@@ -43,11 +42,20 @@ Ext.define('Ck.edit.action.Geometry', {
 
 		this.geometryInteraction.setActive(status);
 		if(!status) {
+			this.controller.geolocationBtn.disable();
+			if(this.controller.moveInteraction) {
+				this.controller.moveInteraction.setActive(false);
+			}
 			this.geometryInteraction.resetSelection();
+			
+			if(this.controller.vertex !== undefined) {
+				this.controller.vertex.closeAll();
+			}			
 		}
 	},
 	
 	firstUse: function() {
+		this.callParent();
 		this.controller.addListener("featuresessionstart", function() {
 			this.reset();
 			this.disableInteraction();
@@ -56,10 +64,11 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.disableInteraction();
 		}, this);
 		this.controller.addListener("sessioncomplete", function() {
-			this.reset(); this.enableInteraction();
+			this.reset();
+			this.enableInteraction();
 		}, this);
 		this.controller.addListener("savesuccess", function() {
-			this.geometryInteraction.resetSelection();
+			this.reset();
 		}, this);
 	},
 	
@@ -76,5 +85,6 @@ Ext.define('Ck.edit.action.Geometry', {
 	 */
 	reset: function() {
 		this.geometryInteraction.resetSelection();
+		this.toggleAction(this.btn, true);
 	}
 });

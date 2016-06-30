@@ -44,7 +44,7 @@ Ext.define('Ck.Locale', {
     set: function (locale) {
         this.locale = locale;
         Ext.localeReady = true;
-
+		
         // update the Ck.View page
         // TODO : Manage multiples views
         var v = Ext.query('.ck-view')[0];

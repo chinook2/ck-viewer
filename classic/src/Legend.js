@@ -19,6 +19,7 @@ Ext.define("Ck.Legend", {
 	plugins: [
 		'legendchecker',
 		'legendslider',
+		'legendgraphic',
 		'legendlayeredit',
 		'legendlayerzoom',
 		'legendlayerremove'
@@ -26,7 +27,9 @@ Ext.define("Ck.Legend", {
 	
 	viewConfig: {
 		plugins: { 
-			ptype: 'treeviewdragdrop' 
+			ptype: 'treeviewdragdrop',
+			containerScroll: true,
+			allowParentInserts: true
 		}
 	},
 	

@@ -105,7 +105,7 @@ Ext.define('Ck.map.action.Measure', {
 					})
 				})
 			});
-			this.olMap.addLayer(this.measureLayer);
+			map.addSpecialLayer(this.measureLayer);
 		}
 		
 		var source = this.measureLayer.getSource();
@@ -176,6 +176,13 @@ Ext.define('Ck.map.action.Measure', {
 			
 			this.wgs84Sphere = new ol.Sphere(6378137);
 		}
+		
+		// Disable on context loading
+		map.on("contextloading", function() {
+			if(this.btn) {
+				this.btn.toggle(false);
+			}
+		}, this);
 	},
 	
 	/**

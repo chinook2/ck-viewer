@@ -7,7 +7,7 @@
 		"width": 320,
 		"bodyPadding": 10,
 		"bind":{
-			"title": "{name} Login"
+			"title": "{name}"
 		},
 		"defaults": {
 			"anchor": "100%",

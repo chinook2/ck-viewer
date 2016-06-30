@@ -8,6 +8,7 @@ Ext.define('Ck.edit.action.Crop', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-crop',
 	iconCls: 'fa fa-crop',
 	tooltip: 'Crop features',
 	
@@ -31,7 +32,7 @@ Ext.define('Ck.edit.action.Crop', {
 	 * Activate the geometry crop interaction. First, select the geom what want to crop.
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 

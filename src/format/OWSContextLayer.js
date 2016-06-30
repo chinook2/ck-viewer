@@ -2,19 +2,23 @@
  * 
  */
 Ext.define('Ck.format.OWSContextLayer', {
-	alternateClassName: ['Ck.owcLayer', 'Ck.OwcLayer'],
+	alternateClassName: ['Ck.owsLayer', 'Ck.OwsLayer'],
 	
 	/**
 	 * Config of OWSContextLayer
 	 */
 	config: {
-		id			: null,
-		name		: null,
-		title		: null,
-		visible		: true,
-		offerings	: [],
-		owsContext	: {},
-		data		: {}
+		id				: null,
+		name			: null,
+		title			: null,
+		visible			: true,
+		minScale		: 0,
+		maxScale		: Infinity,
+		minResolution	: 0,
+		maxResolution	: Infinity,
+		offerings		: [],
+		owsContext		: {},
+		data			: {}
 	},
 	
 	/**
@@ -27,10 +31,12 @@ Ext.define('Ck.format.OWSContextLayer', {
 		var data = config.data;
 		
 		Ext.apply(config, {
-			id		: data.id,
-			name	: data.properties.name,
-			title	: data.properties.title,
-			visible	: data.properties.active
+			id			: data.id,
+			name		: data.properties.name,
+			title		: data.properties.title,
+			visible		: data.properties.active,
+			minScale	: data.properties.minscale,
+			maxScale	: data.properties.maxscale
 		});
 		
 		this.initConfig(config);
@@ -46,6 +52,36 @@ Ext.define('Ck.format.OWSContextLayer', {
 		
 		if(offerings.length == 0) {
 			Ck.log("No offering for this layer ("+ this.getTitle() +").");
+		}
+	},
+	
+	setMinScale: function(value) {
+		if(!isNaN(value)) {
+			var units;
+			value = parseFloat(value);
+			this._minScale = value;
+			// Get the units
+			if(this.getOwsContext() && this.getOwsContext.getProjection) {
+				units = this.getOwsContext().getProjection().units_;
+			} else {
+				units = Ck.getMap().getOlView().getProjection().units_;
+			}
+			this._minResolution = Ck.getResolutionForScale(value, units);
+		}
+	},
+	
+	setMaxScale: function(value) {
+		if(!isNaN(value)) {
+			var units;
+			value = parseFloat(value);
+			this._maxScale = value;
+			// Get the units
+			if(this.getOwsContext() && this.getOwsContext.getProjection) {
+				units = this.getOwsContext().getProjection().units_;
+			} else {
+				units = Ck.getMap().getOlView().getProjection().units_;
+			}
+			this._maxResolution = Ck.getResolutionForScale(value, units);
 		}
 	},
 	
@@ -89,11 +125,29 @@ Ext.define('Ck.format.OWSContextLayer', {
 			return ext[key];
 		}
 	},
+	
+	/**
+	 * Get a permission
+	 * @param {String}
+	 * @return {Object /Boolean}
+	 */
+	getPermission: function(key) {
+		var perm = this.getExtension("permission");
+		if(Ext.isString(perm)) {
+			perm = Ext.decode(perm);
+		} else {
+			perm = {};
+		}
+		if(Ext.isString(key)) {
+			perm = (perm[key] == "allow");
+		}
+		return perm;
+	},
 		
 	/**
 	 * Get offering of desired type
 	 * @param {String/Number} Type (wms, wfs, osm...) or index of offering
-	 * @return {Ck.owcLayerOffering/undefined}
+	 * @return {Ck.owsLayerOffering/undefined}
 	 */
 	getOffering: function(val) {
 		var offering, offerings = this.getOfferings();

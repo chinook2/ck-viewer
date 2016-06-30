@@ -16,7 +16,8 @@ Ext.define("Ck.Overview", {
 		ovHeight: 200,
 		ovWidth: 200,
 		bodyPadding: 0,
-		replaceEverytime: false
+		replaceEverytime: false,
+		nbRes: 1
 	},
 
 	cls: 'ck-overview'

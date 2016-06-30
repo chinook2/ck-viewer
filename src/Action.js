@@ -93,6 +93,7 @@ Ext.define('Ck.Action', {
 	ckLoaded: Ext.emptyFn,
 
 	constructor: function(config) {
+		this.initConfig(config)
 		// If init action after app load (in new popup like edit) map is here, try to init it
 		this.setMap(Ck.getMap());
 		
@@ -130,7 +131,7 @@ Ext.define('Ck.Action', {
 			scope: this
 		});
 		Ck.actions.push(this);
-		this.callParent([config]);
+		this.callParent(arguments);
 	},
 	
 	render: Ext.emptyFn,

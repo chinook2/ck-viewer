@@ -135,6 +135,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			xtype: 'ckform',
 			itemId: 'subform',
 			isSubForm: true,
+			
 			// load from grid selection row
 			autoLoad: false,
 			editing: subForm.editing || formController.getView().getEditing(),
@@ -149,7 +150,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			scrollable: subForm.scrollable || 'y',
 
 			formName: '/' + subForm.url,
-			layer: grid.name,
+			layer: grid.name || subForm.url,
 			
 			parentForm: formController.getView(),
 			owner: this,
@@ -222,9 +223,6 @@ Ext.define('Ck.form.plugin.Subform', {
 		} else {
 			if(!subForm.window) {
 				subForm.window = {
-					//title: "Subform",
-					height: 500,
-					width: 600,
 					modal: true,
 					scrollable: 'y'
 				}
@@ -249,7 +247,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					},
 					style: {border: 0},
 					items: ['->', {
-						cls: 'ck-form-new ck-form-new-'+cssSuffix,
+						cls: 'ck-form-new ck-form-new-' + cssSuffix,
 						text: this.addbuttonText,
 						handler: function() {
 							this.newItem();
@@ -563,7 +561,7 @@ Ext.define('Ck.form.plugin.Subform', {
 
 		var data = rec.getData();
 		var fidName = grid.subform.fid || grid.fid || 'fid';
-		var fidValue = data[fidName];
+		var fidValue = data[fidName] || data.fid ;
 
 		var dataUrl = grid.subform.dataUrl || formController.dataUrl;
 

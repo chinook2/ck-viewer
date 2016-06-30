@@ -6,6 +6,9 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	
 	config: {
 		code		: null,
+		version		: null,
+		layers		: null,
+		srs			: null,
 		type		: null,
 		operations	: [],
 		owsContext	: {},
@@ -15,7 +18,7 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
-	 * @param {Ck.owcLayer}
+	 * @param {Ck.owsLayer}
 	 */
 	constructor: function(config) {
 		var data = config.data;
@@ -62,6 +65,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 				this.type = 'wms';
 			} else if (c.indexOf('wmts') != -1) {
 				this.type = 'wmts';
+			} else if (c.indexOf('xyz') != -1) {
+				this.type = 'xyz';
 			} else if (c.indexOf('wfs') != -1) {
 				this.type = 'wfs';
 				

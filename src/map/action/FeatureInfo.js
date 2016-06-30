@@ -11,6 +11,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	extend: 'Ck.Action',
 	alias: 'widget.ckmapFeatureInfo',
 	
+	requires: ["FeatureInfoResult"],
+	
 	toggleGroup: 'ckmapAction',
 	tooltip: "Get feature info",
 	iconCls: "fa fa-info-circle",
@@ -31,18 +33,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 * 
 	 */
 	fieldIgnored: ["geometry", "shape", "boundedBy"],
-	
-	constructor: function(config) {
-		Ext.define('FeatureInfoResult', {
-			extend: 'Ext.data.Model',
-			fields: [
-				{name: 'featureid', type: 'int'},
-				{name: 'field', type: 'string'},
-				{name: 'value', type: 'string'}
-			]
-		});
-		this.callParent([config]);
-	},
+
+	/**
+	 * Button associate with this action
+	 */
+	btn: null,
 	
 	/**
 	 * FeatureInfo on vector layer
@@ -58,12 +53,20 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			highlight	: false,
 			limit		: null
 		});
+		
+		// Disable on context loading
+		map.on("contextloading", function() {
+			if(this.btn) {
+				this.btn.toggle(false);
+			}
+		}, this);
 	},
 	
 	/**
 	 * 
 	 */
 	toggleAction: function(btn, pressed) {
+		this.btn = btn;
 		this.draw.setActive(pressed);
 	},
 	
@@ -155,6 +158,10 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				items: [this.panel],
 				closeAction: "hide"
 			});
+			
+			Ck.getMap().on("contextloading", function(ctx) {
+				this.win.close();	
+			}, this);
 		}
 	}
 });

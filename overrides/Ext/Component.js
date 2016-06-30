@@ -154,7 +154,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 
 			//<debug>
-			// Ext.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
+			//Ck.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
 			//</debug>
 			return str ? str : val;
 		};
@@ -318,7 +318,7 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 			}
 
 			//<debug>
-			// Ext.log("  *[" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + item[localeName] + ' -> ' + locale + ') :: '+ localeName );
+			// Ck.log("  *[" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + item[localeName] + ' -> ' + locale + ') :: '+ localeName );
 			//</debug>
 		});
 	},
