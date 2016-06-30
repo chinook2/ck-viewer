@@ -297,16 +297,28 @@ Ext.define('Ck.map.Style', {
 		var arrayValues = [];
 		var thisRef = this;
 		
+		var attributesConfig = {
+			type: undefined,
+			// fill: "#FFFFFF",
+			fill: "rgba(255, 255, 255, 0)",
+			// stroke: "#000000",
+			stroke: "rgba(0, 0, 0, 1)",
+			radius: 5,
+			width: 2
+		};		
+						
 		var fn = function(feature, resolution) {
 			var geom = feature.getGeometry();
 			
 			var styleConfig = {
 				type: geom.getType(),
-				fill: feature.get(config.properties.fillColor),
-				stroke: feature.get(config.properties.strokeColor),
+				fill: feature.get(config.properties.fill),
+				stroke: feature.get(config.properties.stroke),
 				radius: feature.get(config.properties.radius),
-				width: feature.get(config.properties.strokeWidth)
+				width: feature.get(config.properties.width)
 			}
+			
+			styleConfig = Ext.applyIf(styleConfig, attributesConfig);
 			
 			return thisRef.getStyleFromConfig(styleConfig);
 		};
@@ -314,6 +326,8 @@ Ext.define('Ck.map.Style', {
 		return {
 			styleFunction: fn,
 			method: "attributes",
+			defaultConfig: attributesConfig,
+			attributesConfig: config.properties,
 			classes: []
 		};
 	}

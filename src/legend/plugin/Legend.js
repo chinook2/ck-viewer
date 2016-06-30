@@ -71,7 +71,7 @@ Ext.define('Ck.legend.plugin.Legend', {
 		if(style instanceof Array) {
 			svg = this.createFromExistingStyle(style);
 		} else if(style instanceof Object) {
-			svg = this.createFromFunction(style);			
+			svg = this.createFromFunction(style, layer);			
 		}
 		
 		image = Ext.create('Ext.container.Container', {
@@ -87,7 +87,22 @@ Ext.define('Ck.legend.plugin.Legend', {
 		return image;
 	},
 	
-	createFromFunction: function(styles) {
+	createFromFunction: function(styles, layer) {
+		var svg = "";
+		switch(styles.method) {
+			case "classes": // Classes from attributes values
+				svg = this.createFromClasses(styles);
+				break;
+			case "attributes": // Style from attributes values
+				svg = this.createFromAttributes(styles, layer);
+			default:
+				break;
+		}
+		
+		return svg;
+	},
+	
+	createFromClasses: function(styles) {
 		var arrayValues = styles.classes;
 		var svgArr = [];		
 		
@@ -102,6 +117,42 @@ Ext.define('Ck.legend.plugin.Legend', {
 		}
 		
 		return svgArr.join("<br/>");
+	},
+	
+	createFromAttributes: function(styles, layer) {
+		var attributesConfig = styles.attributesConfig;
+		var source = layer.getSource();
+		var classes = [];
+		
+		source.forEachFeature(function(feature) {
+			var geom = feature.getGeometry();
+			
+			var fill = feature.get(attributesConfig.fill);
+			var stroke = feature.get(attributesConfig.stroke);
+			var radius = feature.get(attributesConfig.radius);
+			var width = feature.get(attributesConfig.width);
+			var unikKey = "fill" + fill + "stroke" + stroke + "radius" + radius + "width" + width;
+			var styleConfig = {
+				type: geom.getType(),
+				fill: fill,
+				stroke: stroke,
+				radius: radius,
+				width: width
+			}
+			
+			styleConfig = Ext.applyIf(styleConfig, attributesConfig);
+			
+			var style = Ck.map.Style.getStyleFromConfig(styleConfig);
+			
+			classes[unikKey] = {
+				style: style,
+				classe: {}
+			};
+		});		
+		
+		styles.classes = classes;
+		
+		return this.createFromClasses(styles);
 	},
 	
 	createFromExistingStyle: function(style) {
