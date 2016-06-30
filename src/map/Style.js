@@ -242,9 +242,11 @@ Ext.define('Ck.map.Style', {
 		var fn = {};
 		
 		switch(config.method) {
-			case "classes":
+			case "classes": // Classes from attributes values
 				fn = this.getClassesFunction(config);
-				break;				
+				break;
+			case "attributes": // Style from attributes values
+				fn = this.getAttributesFunction(config);
 			default:
 				break;
 		}
@@ -257,7 +259,6 @@ Ext.define('Ck.map.Style', {
 	*	Generate classe function from config for vector layers
 	*/
 	getClassesFunction: function(config) {
-		var thisref = this;
 		var arrayValues = [];
 		
 		for(var i=0; i<config.classes.length; i++) {
@@ -265,7 +266,7 @@ Ext.define('Ck.map.Style', {
 			classe.type = config.type;
 			
 			arrayValues[classe.value] = {
-				style: thisref.getStyleFromConfig(classe),
+				style: this.getStyleFromConfig(classe),
 				classe: classe
 			};
 		}
@@ -286,6 +287,34 @@ Ext.define('Ck.map.Style', {
 			styleFunction: fn,
 			method: "classes",
 			classes: arrayValues
+		};
+	},
+	
+	/**
+	*	Generate function from config to style vector layers from their attributes
+	*/
+	getAttributesFunction: function(config) {
+		var arrayValues = [];
+		var thisRef = this;
+		
+		var fn = function(feature, resolution) {
+			var geom = feature.getGeometry();
+			
+			var styleConfig = {
+				type: geom.getType(),
+				fill: feature.get(config.properties.fillColor),
+				stroke: feature.get(config.properties.strokeColor),
+				radius: feature.get(config.properties.radius),
+				width: feature.get(config.properties.strokeWidth)
+			}
+			
+			return thisRef.getStyleFromConfig(styleConfig);
+		};
+		
+		return {
+			styleFunction: fn,
+			method: "attributes",
+			classes: []
 		};
 	}
 });

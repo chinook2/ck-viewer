@@ -1271,7 +1271,8 @@ Ext.define('Ck.map.Controller', {
 										}],
 										extension : {
 											path: folderLayer.getExtension("path"),
-											editable: folderLayer.getExtension("editable")
+											editable: folderLayer.getExtension("editable"),
+											style: folderLayer.getExtension("style")
 										}
 									}
 								}
