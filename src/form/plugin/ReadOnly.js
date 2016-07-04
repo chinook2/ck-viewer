@@ -1,5 +1,5 @@
 ﻿/**
- * 
+ *
  */
 Ext.define('Ck.form.plugin.ReadOnly', {
 	extend: 'Ext.AbstractPlugin',
@@ -13,17 +13,17 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	fieldTpl: '',
 
 	formatter: '',
-	
+
 	target: '_blank',
 	title: '',
 
 	init: function(cmp) {
 		var xtypes = cmp.getXTypes();
-		
+
 		if(xtypes.indexOf('field') != -1) {
 			this.formController = cmp.lookupController();
 			this.formViewModel = cmp.lookupViewModel();
-			
+
 			// Apply only on subclass of component/box/field/{xtype}
 			if(xtypes.indexOf('/field/') != -1) {
 				if(cmp.suffix) this.suffix = cmp.suffix;
@@ -41,9 +41,23 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				// Update readOnly status on start/stop editing
 				this.formController.on('startEditing', this.setReadOnly, this);
 				this.formController.on('stopEditing', this.setReadOnly, this);
-				
+
 				// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
 				this.formController.on('afterreset', this.setReadOnly, this);
+
+				// Add field level start/stop Editing functions
+				// allow to change readOnly status for one field and refresh display.
+				var me = this;
+				cmp.startEditing = function() {
+					cmp.initialConfig.readOnly = false;
+					me.setReadOnly();
+				};
+				cmp.stopEditing = function() {
+					cmp.initialConfig.readOnly = true;
+					me.setReadOnly();
+				};
+				//
+
 			} else {
 				if(xtypes.indexOf('/fieldcontainer') != -1) {
 					// Init Text/Label for readOnly after cmp rendered
@@ -58,30 +72,34 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			var ctrl = this.cmp.lookupController();
 			if(ctrl) ctrl.clearListeners();
 		}
-		
+
 		if(this.textEl) this.textEl.destroy();
 		if(this.labelEl) this.labelEl.destroy();
 		delete this.textEl;
 		delete this.labelEl;
-		
+
 		this.callParent();
 	},
 
 	// private
 	onRenderCmp : function(cmp){
 		// Ck.log("onRenderCmp for : " + cmp.name);
-		
+
 		// Ajoute un span pour afficher le contenu en mode lecture (multiligne, lien, code html)
-		this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
-		this.labelEl = new Ext.Element(document.createElement('label')).addCls('x-form-item-label x-form-item-label-default');
-		this.textEl.appendTo(this.labelEl);
-		this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
-		
-		if(cmp.triggerWrap) this.labelEl.insertAfter(cmp.triggerWrap);
+		// Pour les textbox, combo (ignore les checkbox, radio...)
+		if(cmp.triggerWrap){
+			this.textEl = new Ext.Element(document.createElement('span')).addCls('ck-form-textfield-readonly');
+			this.labelEl = new Ext.Element(document.createElement('label')).addCls('x-form-item-label x-form-item-label-default');
+			this.textEl.appendTo(this.labelEl);
+			this.labelEl.setVisibilityMode(Ext.Element.DISPLAY);
+
+			this.labelEl.insertAfter(cmp.triggerWrap);
+		}
+
 
 		// Masque par défaut les input si form.readOnly est true
 		this.setReadOnly();
-		
+
 		// When update field need to update readonly label
 		cmp.on('change', this.setReadOnly, this);
 	},
@@ -92,30 +110,25 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
-		
+
 		// Field have to be rendered
 		if(!cmp.rendered) {
 			return;
 		}
-		
-		if(!this.labelEl || !this.labelEl.dom) {
-			// Ck.log("readOnly setReadOnly cancel for : " + cmp.name);
-			return;
-		}
-		
+
 		// Begin of calcul to check if it's readOnly or not
 		var r = !this.formViewModel.get("editing");
-		
+
 		// Force readOnly if specified in form
 		if(Ext.isBoolean(cmp.initialConfig.readOnly)) {
 			r = cmp.initialConfig.readOnly;
 		}
-		
+
 		// ReadOnly can be bind need to get value
 		if(cmp.bind && cmp.bind.readOnly){
 			r = cmp.bind.readOnly.getValue();
 		}
-		
+
 		if(cmp.formulaField) {
 			if(this.readOnly === true) {
 				cmp.disable(); // No value sent when submitting
@@ -123,8 +136,14 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			r = true;
 		}
 
+		if(Ext.isFunction(cmp.readOnly)) cmp.setReadOnly(r);
+		
 		// The field must have a trigger wrap (element which encapsulates the field) or to be a checkbox
 		if(cmp.triggerWrap) {
+			if(!this.labelEl || !this.labelEl.dom) {
+				return;
+			}
+
 			cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
 			if(r) {
 
@@ -136,15 +155,15 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				if(cmp.displayField) val = cmp.getDisplayValue();
 				// For Datefields
 				if(cmp.submitFormat) val = cmp.getSubmitValue();
-				
-				if(val==null) val = '';
-				
-				if(val != '') {
+
+				if(val === null) val = '';
+
+				if(val !== '') {
 					val = this.prefix + val + this.suffix;
 					if(this.template) {
 						val = this.template.apply({"value": val});
 					}
-					
+
 					if(this.formatter && Ext.util.Format[this.formatter]) {
 						val = Ext.util.Format[this.formatter](val);
 					}
@@ -188,14 +207,14 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			}
 		}
 	},
-	
+
 	/**
 	 * Add red asterix to mark field as mandatory
 	 * Special process for fieldcontainer
 	 */
 	addRequiredMarker: function() {
 		var cmp = this.getCmp();
-		
+
 		if(!cmp.hideLabel && cmp.allowBlank === false) {
 			cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
 		}
