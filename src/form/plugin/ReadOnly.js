@@ -136,7 +136,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			r = true;
 		}
 
-		if(Ext.isFunction(cmp.readOnly)) cmp.setReadOnly(r);
+		if(Ext.isFunction(cmp.setReadOnly)) cmp.setReadOnly(r);
 		
 		// The field must have a trigger wrap (element which encapsulates the field) or to be a checkbox
 		if(cmp.triggerWrap) {
