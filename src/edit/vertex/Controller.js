@@ -159,8 +159,6 @@ Ext.define('Ck.edit.vertex.Controller', {
 		} else {
 			this.coords = this.ftCoords;
 		}
-
-		this.coords.splice(this.coords.length - 1, 1);
 		
 		var records = [];
 		
