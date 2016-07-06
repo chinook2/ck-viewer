@@ -271,7 +271,7 @@
 	},{
 		"path": "libs/turf/turf.js"
 	},{
-		"path": "libs/turf/turf-snap.js"
+		"path": "libs/turf/turf.snap.js"
 	},{
 		// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
 		"path": "libs/jspdf/jspdf.min.js"
@@ -326,7 +326,7 @@
 		},{
 			"path": "libs/turf/turf.min.js"
 		},{
-			"path": "libs/turf/turf-snap.js"
+			"path": "libs/turf/turf.snap.js"
 		},{
 			// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
 			"path": "libs/jspdf/jspdf.min.js"
