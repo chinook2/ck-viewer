@@ -14,9 +14,15 @@ Ext.define('Ck.LiveSnap', {
 	interactions: null,
 	
 	/**
+	 *	Owner component
+	 */
+	interactions: null,
+	
+	/**
 	 *	Constructor
 	 */
-	constructor: function(snappingOptions) {
+	constructor: function(snappingOptions, owner) {
+		this.owner = owner;
 		this.map = Ck.getMap().getOlMap();
 		this.initInteractions(snappingOptions);
     },
@@ -57,12 +63,32 @@ Ext.define('Ck.LiveSnap', {
 		this.interactions.push(interaction);
 		this.map.addInteraction(interaction);
 		interaction.setActive(true);
+		
+		if(this.owner) {
+			if(this.owner.interactions === undefined) {
+				this.owner.interactions = [];
+			}
+			
+			this.owner.interactions.push(interaction);
+		}
 	},
 	
 	/**
 	 *	Remove an interaction from the map, this list and deactivates it
 	 */
 	removeInteraction: function(layer) {
+		
+		if(this.owner) {
+			for(var i=0; i<this.owner.interactions.length; i++) {
+				var interaction = this.owner.interactions[i];
+				
+				if(interaction.layer == layer) {
+					interaction.setActive(false);
+					this.map.removeInteraction(interaction);
+					this.owner.interactions.slice(i, 1);
+				}
+			}
+		}
 		
 		for(var i=0; i<this.interactions.length; i++) {
 			var interaction = this.interactions[i];

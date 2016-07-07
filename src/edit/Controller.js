@@ -296,6 +296,7 @@ Ext.define('Ck.edit.Controller', {
 			var vertexConf = conf;
 			vertexConf.scrollable = true;
 			this.vertexPanel = Ext.create("widget.ckedit-vertex", vertexConf);
+			this.vertexPanel.getController().controller = this;
 			vertexContainer.add(this.vertexPanel);
 			this.mainWindow.manageVisibility();
 			this.vertexContainer = vertexContainer;

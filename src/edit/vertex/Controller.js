@@ -18,6 +18,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	geometryChanged: false,
 	
+	allowLiveSnap: true,
+	
 	/**
 	 * @event sessionstart
 	 * Fires at begin of vertex session
@@ -440,6 +442,15 @@ Ext.define('Ck.edit.vertex.Controller', {
 				this.olMap.addInteraction(this.modifyInteraction);
 					
 				this.modifyInteraction.setActive(checked);
+				
+				// Livesnapping
+				if(this.allowLiveSnap) {
+					var snappingOptions = this.controller.getSnappingOptions();
+					this.livesnap = new Ck.LiveSnap(snappingOptions, this);
+					Ext.on("layerSnapActive", this.livesnap.manageLayerActive, this.livesnap);
+					Ext.on("layerSnapTolerance", this.livesnap.manageLayerTolerance, this.livesnap);
+				}
+			
 				break;
 		}
 	},

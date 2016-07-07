@@ -47,7 +47,7 @@ Ext.define('Ck.edit.action.Create', {
 			// Livesnapping
 			if(this.allowLiveSnap) {
 				var snappingOptions = this.controller.getSnappingOptions();
-				this.livesnap = new Ck.LiveSnap(snappingOptions);
+				this.livesnap = new Ck.LiveSnap(snappingOptions, this);
 				Ext.on("layerSnapActive", this.livesnap.manageLayerActive, this.livesnap);
 				Ext.on("layerSnapTolerance", this.livesnap.manageLayerTolerance, this.livesnap);
 			}
