@@ -23,6 +23,11 @@ Ext.define('Ck.edit.action.Create', {
 	 */
 	gps: false,
 
+	/** 
+	 * True to livesnap vertex to nearest point
+	 */
+	allowLiveSnap: false,
+	
 	/**
 	 * Activate the geometry creation interaction
 	 **/
@@ -38,6 +43,14 @@ Ext.define('Ck.edit.action.Create', {
 				source: this.drawSource
 			});
 			this.map.getOlMap().addInteraction(this.drawInteraction);
+			
+			// Livesnapping
+			if(this.allowLiveSnap) {
+				var snappingOptions = this.controller.getSnappingOptions();
+				this.livesnap = new Ck.LiveSnap(snappingOptions);
+				Ext.on("layerSnapActive", this.livesnap.manageLayerActive, this.livesnap);
+				Ext.on("layerSnapTolerance", this.livesnap.manageLayerTolerance, this.livesnap);
+			}
 			
 			// Overload the end-drawing callback to use snapGeometry
 			this.drawInteraction.finishDrawing = function() {

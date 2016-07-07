@@ -23,8 +23,24 @@ Ext.define("Ck.Snapping", {
 		flex		: 1
 	},{
 		dataIndex	: "active",
-		xtype		: "checkcolumn",
-		width		: 40
+		xtype		: "widgetcolumn",
+		width		: 40,
+		widget		: {
+			xtype	: "checkbox",
+			width	: 40,
+			listeners: {
+				change: function(nbField, value) {
+					if (nbField.getWidgetRecord) {
+						var rec = nbField.getWidgetRecord();
+						if (nbField.isValid() && rec) {
+							rec.set('active', value);
+							var cmp = Ext.getCmp("edit-snapping-options");
+							Ext.GlobalEvents.fireEvent("layerSnapActive", rec, value);
+						}
+					}
+				}
+			}
+		}
 	},{
 		text		: "Tolerance",
 		dataIndex	: "tolerance",
@@ -40,6 +56,8 @@ Ext.define("Ck.Snapping", {
 						var rec = nbField.getWidgetRecord();
 						if (nbField.isValid() && rec) {
 							rec.set('tolerance', value);
+							var cmp = Ext.getCmp("edit-snapping-options");
+							Ext.GlobalEvents.fireEvent("layerSnapTolerance", rec, value);
 						}
 					}
 				}

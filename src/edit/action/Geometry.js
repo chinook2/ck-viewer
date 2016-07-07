@@ -18,6 +18,11 @@ Ext.define('Ck.edit.action.Geometry', {
 	*/
 	tolerance: 20,
 	
+	/** 
+	 * True to livesnap vertex to nearest point
+	 */
+	allowLiveSnap: false,
+	
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		this.btn = btn;
@@ -47,6 +52,14 @@ Ext.define('Ck.edit.action.Geometry', {
 				tolerance       : this.tolerance
 			});
 			this.interactions["geometryInteraction"] = this.geometryInteraction;
+			
+			// Livesnapping
+			if(this.allowLiveSnap) {
+				var snappingOptions = this.controller.getSnappingOptions();
+				this.livesnap = new Ck.LiveSnap(snappingOptions);
+				Ext.on("layerSnapActive", this.livesnap.manageLayerActive, this.livesnap);
+				Ext.on("layerSnapTolerance", this.livesnap.manageLayerTolerance, this.livesnap);
+			}
 		}
 
 		this.geometryInteraction.setActive(status);
