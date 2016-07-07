@@ -2,9 +2,9 @@
  * @class Ck
  *
  * The Ck namespace (global object) encapsulates all classes, singletons, and
- * utility methods provided by Chinook's libraries 
+ * utility methods provided by Chinook's libraries
  *
- * ## Application start 
+ * ## Application start
  *
  * The main applications is initiated with Ext.application which is called once the DOM is ready.
  * Then call the main view {app}.view.main.Main which extend Ck.View the entry point of the 'ck-viewer' package.
@@ -14,11 +14,11 @@
  *     Ext.define('AppDemo.view.main.Main', {
  *         extend: 'Ck.View',
  *         xtype: 'app-main',
- *     	
+ *
  *     	requires: [
  *     		'AppDemo.view.main.MainController'
  *     	],
- *     	
+ *
  *     	controller: 'main'
  *     });
  *
@@ -34,7 +34,7 @@
  *         - nocache : allow to reload the app and context from server (ignore LocalStorage)
  *
  * ## Next...
- * 
+ *
  * For a Web GIS package the most important view is Ck.Map and Ck.Legend.
  *
  * The Ck.Controller is also very important as a basis of all other controllers of the package.
@@ -44,15 +44,15 @@
 String.prototype.stripExtension = function() {
 	return this.substr(0, this.lastIndexOf("."));
 }
- 
+
 var Ck = Ck || {};
 
 // @define Ck
 Ext.apply(Ck, {
-	
+
 	CM_PER_INCH: 2.45,
 	DOTS_PER_INCH: 96,
-	
+
 	INCHES_PER_UNIT: {
 		"50kilometers": 1968500,
 		"150kilometers": 5905500,
@@ -146,7 +146,7 @@ Ext.apply(Ck, {
 		"us-yd": 36,
 		"yd": 36
 	},
-	
+
 	/**
 	 * Known page size in millimeters
 	 */
@@ -161,7 +161,7 @@ Ext.apply(Ck, {
 		"a7": [74, 105],
 		"a8": [52, 74]
 	},
-		
+
 	/**
 	 * Kernels list corresponding to effects
 	 */
@@ -196,7 +196,7 @@ Ext.apply(Ck, {
 			0, 1, 0
 		]
 	},
-	
+
 	defaults: {
 		version: {
 			wfs	: "1.1.0",
@@ -206,7 +206,7 @@ Ext.apply(Ck, {
 		crs		: "EPSG:4326",
 		extent	: [-180,-90,180,90]
 	},
-	
+
 	/**
 	 * @property params
 	 * @type Object
@@ -214,7 +214,7 @@ Ext.apply(Ck, {
 	 * Global variable Ext.params of the current URL parameters
 	 */
 	params: {},
-	
+
 	/**
 	 * @property actions
 	 * @type Array
@@ -222,16 +222,16 @@ Ext.apply(Ck, {
 	 * Global array of avaible Ck.Action.
 	 */
 	actions: [],
-	
+
 	/**
 	 * Called on app start.
-	 * 
+	 *
 	 * Populate the Ck.params parameter.
 	 */
 	init: function() {
 		Ck.params = Ext.Object.fromQueryString(location.search);
 	},
-	
+
 	/**
 	 * Adds a listener to be notified when the map is ready (before context and layers are loaded).
 	 *
@@ -247,7 +247,7 @@ Ext.apply(Ck, {
 	onReady: function(fn, scope, options) {
 		Ext.on('ckmapReady', fn, scope, options);
 	},
-	
+
 	/**
 	 * Get all the maps avaible.
 	 * @return {Ck.map.Controller[]} An array of map controllers
@@ -260,7 +260,7 @@ Ext.apply(Ck, {
 		}
 		return maps;
 	},
-	
+
 	/**
 	 * Get the first map or a map by id.
 	 * @param {string} [idMap] id of the map
@@ -268,7 +268,7 @@ Ext.apply(Ck, {
 	 */
 	getMap: function(idMap) {
 		var map;
-		
+
 		if(!idMap) {
 			// Return the first map component by CSS Selector
 			map = Ck.getMaps().shift();
@@ -279,10 +279,10 @@ Ext.apply(Ck, {
 			if(!map) return false;
 			map = map.getController();
 		}
-		
+
 		return map;
 	},
-	
+
 	/**
 	 * Get action by widget name (eg: ckmapMeasure)
 	 * @param {String}
@@ -295,7 +295,7 @@ Ext.apply(Ck, {
 			}
 		}
 	},
-	
+
 	/**
 	 * Get informations of the package (from Ext.manifest).
 	 *
@@ -309,7 +309,7 @@ Ext.apply(Ck, {
 		if(!Ext.manifest.packages) return {};
 		return Ext.manifest.packages['ck-viewer'];
 	},
-	
+
 	/**
 	 * Get version of the package (from Ext.manifest).
 	 * Also avaible with Ext.versions
@@ -319,7 +319,7 @@ Ext.apply(Ck, {
 	getVersion: function() {
 		return this.getInfos().version;
 	},
-	
+
 	/**
 	 * Get execution environment (from Ext.manifest).
 	 *
@@ -332,7 +332,7 @@ Ext.apply(Ck, {
 	getEnvironment: function() {
 		return this.getInfos().environment;
 	},
-	
+
 	/**
 	 * Short alias of Ck.getEnvironment, get execution environment (from Ext.manifest).
 	 *
@@ -341,37 +341,39 @@ Ext.apply(Ck, {
 	 *  - development
 	 *
 	 * @return {String} The environment
-	 */	
+	 */
 	getEnv: function() {
 		return this.getEnvironment();
 	},
-	
+
 	/**
 	 * Get default resource path for a package
 	 * @param {String} The package name (ck-viewer by default)
 	 * @return {String}
 	 */
 	getPath: function(pkg) {
-		// Ext.manifest.paths doesn't in production and testing !
+		// Ext.manifest.paths doesn't exist in production and testing !
 		// Ext.manifest.profile can be empty in production mode.
-		
+
 		// TODO : testing mode not implemented
-		
-		//<debug>
+
 		// In Development
-		// mini hack to load static resource in dev and prod (this is ignored in prod) !
-		
-		var path = '';
-		if(Ext.manifest.paths && Ext.manifest.paths.Ck) {
-			var basePath = Ext.manifest.paths.Ck.replace('/src','');
-			if(!Ext.isEmpty(pkg)) {
-				basePath = basePath.replace("ck-viewer", pkg);
+		// Do not use spcecial debug comment
+		// Special case with ck-viewer build in dev mode.
+		if(this.getEnv()=='development') {
+			var path = '';
+			if(Ext.manifest.paths && Ext.manifest.paths.Ck) {
+				var basePath = Ext.manifest.paths.Ck;
+				basePath = basePath.replace('/Ck.js',''); // special hack
+				basePath = basePath.replace('/src','');
+				if(!Ext.isEmpty(pkg)) {
+					basePath = basePath.replace("ck-viewer", pkg);
+				}
+				path = basePath + '/resources';
 			}
-			path = basePath + '/resources';
+			return path;
 		}
-		return path;
-		//</debug>
-		
+
 		// In Production
 		pkg = (Ext.isEmpty(pkg))? "ck-viewer" : pkg;
 		if(window.cordova){
@@ -380,9 +382,9 @@ Ext.apply(Ck, {
 		} else {
 			// Standard web app need to add full url
 			var baseUrl = location.protocol +'//'+ location.host + location.pathname;
-			return baseUrl + Ext.manifest.profile + '/resources/' + pkg;
+			return baseUrl + (Ext.manifest.profile || '') + '/resources/' + pkg;
 		}
-		
+
 		// TODO : when used without CMD - include inline API...
 	},
 
@@ -405,14 +407,14 @@ Ext.apply(Ck, {
 	zoomToExtent: function(extent) {
 		this.getMap().getOlView().fit(extent, this.getMap().getOlMap().getSize());
 	},
-	
+
 	/**
 	 * @inheritdoc Ext#log
 	 */
 	log: function(opt) {
 		if(opt) Ext.log(opt);
 	},
-	
+
 	/**
 	 * Alias for Ck.log({level:'error', ...}). Log a message with error level.
 	 *
@@ -429,7 +431,7 @@ Ext.apply(Ck, {
 			msg: msg
 		});
 	},
-	
+
 	/**
 	 * Create an object from a config object
 	 * @param {String/Object}		Class name or config object. Config object must have "xtype" and "config" member
@@ -446,9 +448,9 @@ Ext.apply(Ck, {
 			Ck.error("Function signature not respected -> Ck.create({String/Object}, {Object})");
 			return false;
 		}
-		
+
 		var constructor = Ck.getClass(cls);
-		
+
 		if(typeof constructor == "function") {
 			var lib = Ck.getOwnerLibrary(cls);
 			switch(lib) {
@@ -462,15 +464,15 @@ Ext.apply(Ck, {
 			Ck.error("The class \"" + cls + "\" does not exists.");
 			return false;
 		}
-		
-		if(obj instanceof constructor) {				
+
+		if(obj instanceof constructor) {
 			return obj;
 		} else {
 			Ck.error("Instanciation of the " + cls + " object failed.");
 			return false;
 		}
 	},
-	
+
 	/**
 	 * Return the owner library of a class
 	 * @param {String}
@@ -480,7 +482,7 @@ Ext.apply(Ck, {
 		var namespaces = className.split(".");
 		return namespaces[0];
 	},
-	
+
 	/**
 	 * Return the constructor of a class from a string or undefined if class does not exists
 	 * @param {String} Name of the desired class
@@ -497,7 +499,7 @@ Ext.apply(Ck, {
 		}
 		return windowSpace;
 	},
-	
+
 	normalizeKernel: function(effectName) {
 		var kernel = Ck.kernelEffect[effectName];
 		if(!kernel) {
@@ -520,7 +522,7 @@ Ext.apply(Ck, {
 		}
 		return normal;
 	},
-	
+
 	/**
 	 * Apply a convolution kernel to canvas.	This works for any size kernel, but
 	 * performance starts degrading above 3 x 3.
@@ -567,16 +569,16 @@ Ext.apply(Ck, {
 		}
 		context.putImageData(output, 0, 0);
 	},
-	
+
 	/**
 	 * @param {float}
-	 * @return {Float} A normalized scale value, in 1 / X format. 
+	 * @return {Float} A normalized scale value, in 1 / X format.
 	 *         This means that if a value less than one ( already 1/x) is passed
-	 *         in, it just returns scale directly. Otherwise, it returns 
+	 *         in, it just returns scale directly. Otherwise, it returns
 	 *         1 / scale
 	 */
 	normalizeScale: function(scale) {
-		var normScale = (scale > 1.0) ? (1.0 / scale) 
+		var normScale = (scale > 1.0) ? (1.0 / scale)
 									  : scale;
 		return normScale;
 	},
@@ -584,8 +586,8 @@ Ext.apply(Ck, {
 	/**
 	 * @param {Float}
 	 * @param {ol.proj.ProjectionLike}
-	 * 
-	 * @return {Float} The corresponding resolution given passed-in scale and unit 
+	 *
+	 * @return {Float} The corresponding resolution given passed-in scale and unit
 	 *     parameters.  If the given scale is falsey, the returned resolution will
 	 *     be undefined.
 	 */
@@ -594,11 +596,11 @@ Ext.apply(Ck, {
 		var normScale = Ck.normalizeScale(scale);
 		return 1 / (normScale * ((proj.getMetersPerUnit() * 100) / Ck.CM_PER_INCH) * Ck.DOTS_PER_INCH);
 	},
-	
+
 	/**
 	 * @param {Float}
 	 * @param {ol.proj.ProjectionLike}
-	 * 
+	 *
 	 * @return {Float} The corresponding scale given passed-in resolution and unit parameters.
 	 */
 	getScaleFromResolution: function(resolution, proj) {
@@ -632,7 +634,7 @@ Ext.apply(Ck, {
 			callback();
 		}
 	},
-	
+
 	dataURItoBlob: function(dataURI) {
 		// convert base64/URLEncoded data component to raw binary data held in a string
 		var byteString;
@@ -652,7 +654,7 @@ Ext.apply(Ck, {
 
 		return new Blob([ia], {type:mimeString});
 	},
-	
+
 	b64toBlob: function(b64Data, contentType, sliceSize) {
 		contentType = contentType || '';
 		sliceSize = sliceSize || 512;
@@ -678,5 +680,3 @@ Ext.apply(Ck, {
 	}
 
 }).init();
-
-

@@ -1,34 +1,35 @@
 /**
- * 
+ *
  */
 Ext.define("Ck.View", {
 	extend: 'Ext.Container',
 	alias: "widget.ckview",
-	
+
 	requires: [
 		// require in production
         'Ext.plugin.Viewport',
         'Ext.window.*',
-        
+
 		'Ext.layout.*',
         'Ext.form.*',
         'Ext.tab.*',
         'Ext.grid.*',
+		'Ext.util.*',
 		
 		'Ck.*' // Load all Ck class...
 	],
-	plugins: 'viewport',
-	
+	//plugins: 'viewport',
+
 	controller: 'ckview',
-	
+
 	viewModel: {
 		type: 'ckview'
 	},
-	
+
 	layout: {
 		type: 'fit'
 	},
-	
+
 	config: {
 		name: 'ck-default',
 
@@ -37,6 +38,6 @@ Ext.define("Ck.View", {
 			ws: '{0}/ui/{1}'
 		}
 	},
-	
+
 	cls: 'ck-view'
 });

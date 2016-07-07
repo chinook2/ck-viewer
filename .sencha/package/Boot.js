@@ -11,7 +11,18 @@ var Ext = Ext || {};
 Ext.Boot = Ext.Boot || (function (emptyFn) {
 
     var doc = document,
-        _emptyArray = [],
+        apply = function (dest, src, defaults) {
+            if (defaults) {
+                apply(dest, defaults);
+            }
+
+            if (dest && src && typeof src == 'object') {
+                for (var key in src) {
+                    dest[key] = src[key];
+                }
+            }
+            return dest;
+        },
         _config = {
             /*
              * @cfg {Boolean} [disableCaching=true]
@@ -58,7 +69,7 @@ Ext.Boot = Ext.Boot || (function (emptyFn) {
         _environment = {
             browser: isBrowser,
             node: !isBrowser && (typeof require === 'function'),
-            phantom: (window && (window._phantom || window.callPhantom)) || /PhantomJS/.test(window.navigator.userAgent)
+            phantom: (typeof phantom !== 'undefined' && phantom.fs)
         },
         _tags = (Ext.platformTags = {}),
 
@@ -87,7 +98,6 @@ Ext.Boot = Ext.Boot || (function (emptyFn) {
         Boot = {
             loading: 0,
             loaded: 0,
-            apply: _apply,
             env: _environment,
             config: _config,
 
@@ -226,7 +236,7 @@ Ext.Boot = Ext.Boot || (function (emptyFn) {
                 isIE10 = uaTags['MSIE 10'];
                 isBlackberry = uaTags.Blackberry || uaTags.BB;
 
-                _apply(_tags, Boot.loadPlatformsParam(), {
+                apply(_tags, Boot.loadPlatformsParam(), {
                     phone: isPhone,
                     tablet: isTablet,
                     desktop: isDesktop,
@@ -270,43 +280,35 @@ Ext.Boot = Ext.Boot || (function (emptyFn) {
                 }
 
                 if (params.platformTags) {
-                    tmpArray = params.platformTags.split(",");
+                    tmpArray = params.platform.split(/\W/);
                     for (tmplen = tmpArray.length, i = 0; i < tmplen; i++) {
                         platform = tmpArray[i].split(":");
                         name = platform[0];
-                        enabled=true;
                         if (platform.length > 1) {
                             enabled = platform[1];
                             if (enabled === 'false' || enabled === '0') {
                                 enabled = false;
+                            } else {
+                                enabled = true;
                             }
                         }
                         platforms[name] = enabled;
                     }
                 }
-                return platforms;
+                return platform;
             },
 
-            filterPlatform: function (platform, excludes) {
-                platform = _emptyArray.concat(platform || _emptyArray);
-                excludes = _emptyArray.concat(excludes || _emptyArray);
+            filterPlatform: function (platform) {
+                platform = [].concat(platform);
+                var len, p, tag;
 
-                var plen = platform.length,
-                    elen = excludes.length,
-                    include = (!plen && elen), // default true if only excludes specified
-                    i, tag;
-
-                for (i = 0; i < plen && !include; i++) {
-                    tag = platform[i];
-                    include = !!_tags[tag];
+                for (len = platform.length, p = 0; p < len; p++) {
+                    tag = platform[p];
+                    if (_tags.hasOwnProperty(tag)) {
+                        return !!_tags[tag];
+                    }
                 }
-
-                for (i = 0; i < elen && include; i++) {
-                    tag = excludes[i];
-                    include = !_tags[tag];
-                }
-
-                return include;
+                return false;
             },
 
             init: function () {
@@ -452,16 +454,6 @@ Ext.Boot = Ext.Boot || (function (emptyFn) {
                     entry = Boot.create(url, key, cfg);
                 }
                 return entry;
-            },
-
-            registerContent: function (url, type, content) {
-                var cfg = {
-                    content: content,
-                    loaded: true,
-                    css: type === 'css'
-                };
-                
-                return Boot.getEntry(url, cfg);
             },
 
             processRequest: function(request, sync) {
@@ -995,22 +987,20 @@ Ext.Boot = Ext.Boot || (function (emptyFn) {
             cache = (cfg.cache !== undefined) ? cfg.cache : (loader && loader.cache),
             buster, busterParam;
 
-        if (Boot.config.disableCaching) {
-            if (cache === undefined) {
-                cache = !Boot.config.disableCaching;
-            }
-
-            if (cache === false) {
-                buster = +new Date();
-            } else if (cache !== true) {
-                buster = cache;
-            }
-
-            if (buster) {
-                busterParam = (loader && loader.cacheParam) || Boot.config.disableCachingParam;
-                buster = busterParam + "=" + buster;
-            }
+        if(cache === undefined) {
+            cache = !Boot.config.disableCaching;
         }
+
+        if(cache === false) {
+            buster = +new Date();
+        } else if(cache !== true) {
+            buster = cache;
+        }
+
+        if(buster) {
+            busterParam = (loader && loader.cacheParam) || Boot.config.disableCachingParam;
+            buster = busterParam + "=" + buster;
+        };
 
         _apply(cfg, {
             charset: charset,

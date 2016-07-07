@@ -14,7 +14,7 @@
 		"publisher" : "",
 		"creator" : "Chinook Server",
 		"rights" : "Chinook, licensed under a BSD License",
-		"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+		"bbox" : [3264472.6040033074, -136669.40657389513, 3916939.0774455722, 257745.65937761433],
 		"srs": "EPSG:3857",
 		"scales": [
 			{"res": 2.3886571339117578125, "scale": "1 / 8 530"},
@@ -53,10 +53,10 @@
 			"minscale" : 100,
 			"maxscale" : 10000000,
 			"latlongbbox": [-179, -89, 179, 89],
-			"overviewLayer": true,			
+			"overviewLayer": true,
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/osm",
-				"operations" : [{ 
+				"operations" : [{
 					"code" : "GetTile",
 					"method" : "GET",
 					"type" : "image/png",
@@ -66,28 +66,6 @@
 				}],
 				"extension" : []
 			}]
-		}
-	},{
-		"type": "Feature",
-		"id": "departement",
-		"properties": {
-			"title" : "Limites départementales",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "GEOFLA",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "https://raw.githubusercontent.com/chinook2/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": ""
-			}
 		}
 	}]
 }

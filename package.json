@@ -30,7 +30,7 @@
      *
      */
     "toolkit": "classic",
- 
+
      /**
       * The author of the package.
       *
@@ -95,15 +95,6 @@
     "local": true,
 
     /**
-     * The theme (package) this package will use (e.g., "ext-theme-neptune", etc.).
-     * This is only needed if the built package will be used by a non-Cmd application.
-     *
-     *     "theme": "ext-theme-classic",
-     *
-     */
-    "theme": "theme-triton",
-    
-    /**
      * Sass configuration properties.
      */
     "sass" : {
@@ -138,7 +129,7 @@
          *      | application     |
          *      +-----------------+
          */
-        "etc": "${package.dir}/sass/etc/all.scss,${package.dir}/${toolkit.name}/sass/etc/all.scss",
+        "etc": "${package.dir}/sass/etc/all.scss,${package.dir}/classic/sass/etc/all.scss",
 
         /**
          * Comma-separated list of folders containing Sass variable definitions
@@ -160,7 +151,7 @@
          * The "sass/var/all.scss" file is always included at the start of the var
          * block before any files associated with JavaScript classes.
          */
-        "var": "${package.dir}/sass/var,${package.dir}/${toolkit.name}/sass/var",
+        "var": "${package.dir}/sass/var,${package.dir}/classic/sass/var",
 
         /**
          * Comma-separated list of folders containing Sass rule files.
@@ -178,14 +169,14 @@
          *      | application     |
          *      +-----------------+
          */
-        "src": "${package.dir}/sass/src,${package.dir}/${toolkit.name}/sass/src"
+        "src": "${package.dir}/sass/src,${package.dir}/classic/sass/src"
     },
 
     /**
      * This is the comma-separated list of folders where classes reside. These
      * classes must be explicitly required to be included in the build.
      */
-    "classpath": "${package.dir}/src,${package.dir}/${toolkit.name}/src",
+    "classpath": "${package.dir}/src,${package.dir}/classic/src",
 
     /**
      * Comma-separated string with the paths of directories or files to search. Any classes
@@ -194,7 +185,7 @@
      * that override will in fact only be included in the build if the target class specified
      * in the "override" property is also included.
      */
-    "overrides": "${package.dir}/overrides,${package.dir}/${toolkit.name}/overrides",
+    "overrides": "${package.dir}/overrides,${package.dir}/classic/overrides",
 
     "example": {
         /**
@@ -224,7 +215,7 @@
      *
      */
     "framework": "ext",
-    
+
     /**
      * Packages can require other packages in the same way that applications can require
      * packages.
@@ -251,7 +242,7 @@
      *      }
      */
     "requires": [],
-    
+
     /**
      * List of all JavaScript assets in the right execution order.
      *
@@ -288,21 +279,21 @@
 	},{
 		"path": "libs/papaparse/papaparse.js"
 	}],
-    
+
     /**
      * List of all CSS assets in the right inclusion order.
      *
      * Each item is an object with the following format:
      * see app.json for complete description
-     */    
+     */
     "css": [
         {
             "path": "libs/ol3/ol.css"
         }
     ],
-	
+
 	/**
-	* override objects for setting build environment specific 
+	* override objects for setting build environment specific
 	* settings.
 	*/
 	"production": {
