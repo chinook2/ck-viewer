@@ -39,7 +39,7 @@ Ext.define('Ck.overview.Controller', {
 				if(this.openner.close) {
 					this.openner.close();
 				}
-				Ext.Msg.show({
+				Ck.Msg.show({
 					title: "Overview",
 					message: "No layer associate to overview",
 					buttons: Ext.Msg.OK,

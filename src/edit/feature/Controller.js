@@ -324,7 +324,7 @@ Ext.define('Ck.edit.feature.Controller', {
 				var idx = selections[0].getData().number;
 				this.store.removeAt(idx - 1);
 			} else {
-				Ext.Msg.show({
+				Ck.Msg.show({
 					title: "Edition",
 					message: "You must leave one feature at least",
 					buttons: Ext.Msg.OK,

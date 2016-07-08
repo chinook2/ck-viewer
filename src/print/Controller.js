@@ -292,7 +292,7 @@ Ext.define('Ck.print.Controller', {
 		switch(rendererType) {
 			case "canvas":
 				if(!Ext.supports.Canvas) {
-					Ext.Msg.show({
+					Ck.Msg.show({
 						title: "Print error",
 						message: "Your browser doesn't support canvas and print tool need it. Use a modern browser.",
 						icone: Ext.Msg.Error,
@@ -304,7 +304,7 @@ Ext.define('Ck.print.Controller', {
 				break;
 			case "webgl":
 			default:
-				Ext.Msg.show({
+				Ck.Msg.show({
 					message: "Chinook doesn't support printing from " + rendererType + " rendering map",
 					icon: Ext.Msg.ERROR,
 					buttons: Ext.Msg.OK

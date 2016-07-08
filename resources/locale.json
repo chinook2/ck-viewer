@@ -33,6 +33,18 @@
         "fr": "Fermer",
         "es": "Close ES"
     },{
+        "en": "Close panel",
+        "fr": "Fermer la fenêtre",
+        "es": ""
+    },{
+        "en": "Collapse panel",
+        "fr": "Réduire la fenêtre",
+        "es": ""
+    },{
+        "en": "Add vertex",
+        "fr": "Ajouter un vertex",
+        "es": ""
+    },{
         "en": "Save",
         "fr": "Enregistrer",
         "es": "Guardar"
@@ -189,8 +201,48 @@
         "fr": "Ajouter une couche",
         "es": " - "
     },{
+        "en": "Save layer",
+        "fr": "Sauvegarder une couche",
+        "es": " - "
+    },{
+        "en": "End creation",
+        "fr": "Finaliser",
+        "es": " - "
+    },{
         "en": "Create features",
         "fr": "Créer un objet",
+        "es": " - "
+    },{
+        "en": "You need to activate creation mode first before using this feature.",
+        "fr": "Activer le mode création avant d'utiliser cette fonctionnalité.",
+        "es": " - "
+    },{
+        "en": "The first and the last point must be outside of the polygon",
+        "fr": "Le premier et le dernier point doivent être en dehors du polygone",
+        "es": " - "
+    },{
+        "en": "The selected plygons must have at least 2 commons points",
+        "fr": "Les polygones sélectionnés doivent avoir au moins 2 points commun",
+        "es": " - "
+    },{
+        "en": "Close edit session without save any changes ?",
+        "fr": "Fermer la session d'édition sans sauvegarder les changements ?",
+        "es": " - "
+    },{
+        "en": "Please complete the current editing session",
+        "fr": "Terminer la session d'édition courante avant d'en ouvrir une autre",
+        "es": " - "
+    },{
+        "en": "Selection in progress...",
+        "fr": "Sélection en cours...",
+        "es": " - "
+    },{
+        "en": "Crop features",
+        "fr": "Diviser une entité",
+        "es": " - "
+    },{
+        "en": "Gather features",
+        "fr": "Unir deux entités",
         "es": " - "
     },{
         "en": "Create features at GPS position",
@@ -210,7 +262,7 @@
         "es": " - "
     },{
         "en": "Delete feature",
-        "fr": "Supprimer une couche",
+        "fr": "Supprimer une entité",
         "es": " - "
     },{
 		"en": "GPS position not available",

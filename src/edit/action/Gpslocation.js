@@ -48,7 +48,7 @@ Ext.define('Ck.edit.action.Gpslocation', {
 					thisRef.controller.fireEvent("geolocation", coords);
 				}, 
 				function(error) {
-					Ext.Msg.show({
+					Ck.Msg.show({
 						title: "GPS location",
 						message: "Error " + error.code + " : " + error.message + ".",
 						buttons: Ext.Msg.OK,
@@ -58,7 +58,7 @@ Ext.define('Ck.edit.action.Gpslocation', {
 				{ maximumAge: 0, timeout: 1000 } // Geolocation parameters
 			);
 		} else {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title: "GPS location",
 				message: "You must activate GPS location to use this feature.",
 				buttons: Ext.Msg.OK,

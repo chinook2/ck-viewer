@@ -67,7 +67,7 @@ Ext.define('Ck.edit.action.Delete', {
 		if(!Ext.isEmpty(feature)) {
 			
 			if(this.deleteConfirmation) {
-				Ext.Msg.show({
+				Ck.Msg.show({
 					title: "Edition",
 					message: "Are you sure to delete this feature ?",
 					buttons: Ext.Msg.YESNO,

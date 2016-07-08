@@ -259,7 +259,6 @@ Ext.define('Ext.overrides.Component', {
  }*/
 );
 
-
 Ext.define('Ext.overrides.panel.Panel', {
 	override: 'Ext.panel.Panel',
 	localeProperties: ['title', 'html']
@@ -350,6 +349,17 @@ Ext.define("Ext.overrides.form.field.Text", {
 
 
 Ext.define("Ext.overrides.window.Window", {override: "Ext.window.Window",localeProperties: ["title", "html"]});
+
+Ext.define('Ext.overrides.window.MessageBox', {
+	override: 'Ext.window.MessageBox',
+	localeProperties: ['title', 'html']
+});
+
+Ext.define('Ext.overrides.MessageBox', {
+	override: 'Ext.MessageBox',
+	localeProperties: ['title', 'html']
+});
+
 
 Ext.define("Ext.overrides.window.Toast", {
 	override: "Ext.window.Toast",

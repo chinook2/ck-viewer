@@ -276,7 +276,7 @@ Ext.define('Ck.Ajax', {
 					msg += "Deleted : " + del.innerHTML;
 				}
 
-				Ext.Msg.show({
+				Ck.Msg.show({
 					title: "Edition",
 					message: msg,
 					buttons: Ext.Msg.OK,
@@ -295,7 +295,7 @@ Ext.define('Ck.Ajax', {
 				msg += ". Error message : <br/>" + pre.innerHTML;
 			}
 
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title: "Edition",
 				message: msg,
 				buttons: Ext.Msg.OK,

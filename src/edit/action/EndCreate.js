@@ -25,7 +25,7 @@ Ext.define('Ck.edit.action.EndCreate', {
 			if(createAction && createAction.drawInteraction) {
 				createAction.drawInteraction.finishDrawing();
 			} else {
-				Ext.Msg.show({
+				Ck.Msg.show({
 					title: "Create features",
 					message: "You need to activate creation mode first before using this feature.",
 					buttons: Ext.Msg.OK,

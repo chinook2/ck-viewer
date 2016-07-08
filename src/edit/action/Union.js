@@ -90,7 +90,7 @@ Ext.define('Ck.edit.action.Union', {
 		try {
 			union = turf.union(poly1, poly2);
 		} catch(error) {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				icon: Ext.Msg.ERROR,
 				message: "Error " + error.name + " occured : " + error.message,
 				buttons: Ext.Msg.OK
@@ -100,7 +100,7 @@ Ext.define('Ck.edit.action.Union', {
 		}
 		
 		if(union && union.geometry.type != 'Polygon' && !this.multi) {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				icon: Ext.Msg.ERROR,
 				message: "The selected plygons must have at least 2 commons points",
 				buttons: Ext.Msg.OK

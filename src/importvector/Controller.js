@@ -114,7 +114,7 @@ Ext.define('Ck.importvector.Controller', {
 	startImport: function() {
 		var fileName = this.importParam.file;
 		if(Ext.isEmpty(fileName)) {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				message: "Choose a file",
 				icon: Ext.Msg.WARNING,
 				buttons: Ext.Msg.OK
@@ -153,7 +153,7 @@ Ext.define('Ck.importvector.Controller', {
 				if(!Ext.isEmpty(oShp)) {
 					this.processShapefile(oShp);
 				} else {
-					Ext.Msg.show({
+					Ck.Msg.show({
 						title: "Import",
 						message: "There is no ShapeFile in your archive",
 						buttons: Ext.Msg.OK,

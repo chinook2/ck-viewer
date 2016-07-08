@@ -121,7 +121,7 @@ Ext.define('Ck.edit.action.Create', {
 						this.drawSource.addFeature(feature);
 						this.endProcess(geometry);
 						btn.toggle(false);
-						Ext.Msg.show({
+						Ck.Msg.show({
 							title: "Creation",
 							message: "Point added at GPS position : [ " + geoloc[0] + ", "+ geoloc[1] + "]",
 							buttons: Ext.Msg.OK,
@@ -129,7 +129,7 @@ Ext.define('Ck.edit.action.Create', {
 						});
 					}
 				} else {
-					Ext.Msg.show({
+					Ck.Msg.show({
 						title: "Create features",
 						message: "GPS position not available",
 						buttons: Ext.Msg.OK,

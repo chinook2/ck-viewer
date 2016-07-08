@@ -47,7 +47,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		};
 		
 		if(!Ext.isEmpty(this.win)) {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title: "Edition",
 				message: "Please complete the current editing session",
 				buttons: Ext.Msg.OK,

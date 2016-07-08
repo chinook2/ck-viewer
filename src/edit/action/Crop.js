@@ -131,7 +131,7 @@ Ext.define('Ck.edit.action.Crop', {
 
 		// The first and the last point of the line must be outside of the polygon
 		if(turf.inside(turf.point(line.geometry.coordinates[0]), poly) || turf.inside(turf.point(line.geometry.coordinates[line.geometry.coordinates.length-1]), poly)) {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				icon: Ext.Msg.WARNING,
 				message: "The first and the last point must be outside of the polygon",
 				buttons: Ext.Msg.OK

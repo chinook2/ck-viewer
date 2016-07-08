@@ -328,7 +328,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		if(this.store.getCount() > 3) {
 			this.store.removeAt(index);
 		} else {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title: "Vertex",
 				message: "You must leave at least 3 vertices for a ploygon",
 				buttons: Ext.Msg.OK,

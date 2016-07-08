@@ -152,7 +152,7 @@ Ext.define('Ck.form.Controller', {
 				});
 			}
 			
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title: "Edition",
 				message: "Mise à jour effectuée",
 				buttons: Ext.Msg.OK,
@@ -203,7 +203,7 @@ Ext.define('Ck.form.Controller', {
 			this.fireEvent('beforeclose', btn);
 			closeMe();
 		} else {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title:'Close ?',
 				message: 'You are closing a form that has unsaved changes. Would you like to save your changes ?',
 				buttons: Ext.Msg.YESNOCANCEL,
@@ -1012,7 +1012,7 @@ Ext.define('Ck.form.Controller', {
 												btn.mask.hide();
 											}, function(err) {
 												btn.mask.hide();
-												Ext.Msg.show({
+												Ck.Msg.show({
 													title: "Error " + err.code + " retrieving geolocation",
 													message: err.message,
 													buttons: Ext.Msg.OK,

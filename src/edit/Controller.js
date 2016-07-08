@@ -177,7 +177,7 @@ Ext.define('Ck.edit.Controller', {
 			"ckedit button#cancel": {
 				click: function() {
 					if(this.history.store.getCount() != 0) {
-						Ext.Msg.show({
+						Ck.Msg.show({
 							title: "Edition",
 							message: "Are you sure to cancel all modifications ?",
 							buttons: Ext.Msg.YESNO,
@@ -198,7 +198,7 @@ Ext.define('Ck.edit.Controller', {
 			},"ckedit button#close": {
 				click: function() {
 					if(this.history.store.getCount() != 0) {
-						Ext.Msg.show({
+						Ck.Msg.show({
 							title: "Edition",
 							message: "Close edit session without save any changes ?",
 							buttons: Ext.Msg.YESNO,
