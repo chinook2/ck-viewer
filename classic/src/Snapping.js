@@ -50,6 +50,7 @@ Ext.define("Ck.Snapping", {
 			xtype		: "numberfield",
 			minValue	: 1,
 			maxValue	: 99,
+			height 		: 50,
 			listeners: {
 				change: function(nbField, value) {
 					if (nbField.getWidgetRecord) {
