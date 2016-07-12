@@ -333,26 +333,33 @@ Ext.define('Ck.Selection', {
 	 * @return {ol.Feature[]}
 	 */
 	queryWFSLayer: function(layer, selFt, evntParams) {
+		
 		var geoJSON  = new ol.format.GeoJSON();
-		var lyrFts, lyrFt;
+		var lyrFts, lyrFt, source, map, view, extent;
+		
+		map = Ck.getMap().getOlMap();
+		view = map.getView();
+		extent = view.calculateExtent(map.getSize());
 		res = [];
-		lyrFts = layer.getSource().getFeatures();
+		source = layer.getSource();
+		lyrFts = source.getFeaturesInExtent(extent);
 		// selFeature = geoJSON.writeFeatureObject(evntParams.feature);
 		selFeature = geoJSON.writeFeatureObject(selFt);
 		
 		for(var j = 0; j < lyrFts.length; j++) {
-			lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
+			var currFeature = lyrFts[j];
+			lyrFt = geoJSON.writeFeatureObject(currFeature);
 			
 			// JMA
 			// TODO : retest !
 			
 			if(turf.intersect(lyrFt, selFeature)) {
-				if(lyrFts[j].getProperties().features) {
-					for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
-						res.push(lyrFts[j].getProperties().features[k]);
+				if(currFeature.getProperties().features) {
+					for(k = 0; k < currFeature.getProperties().features.length; k++) {
+						res.push(currFeature.getProperties().features[k]);
 					}
 				} else {
-					res.push(lyrFts[j]);
+					res.push(currFeature);
 				}
 			}
 		}
