@@ -21,8 +21,8 @@ Ext.define('Ck.LiveSnap', {
 	/**
 	 *	Constructor
 	 */
-	constructor: function(snappingOptions, owner) {
-		this.owner = owner;
+	constructor: function(snappingOptions/*, owner*/) {
+		/*this.owner = owner;*/
 		this.map = Ck.getMap().getOlMap();
 		this.initInteractions(snappingOptions);
     },
@@ -64,13 +64,13 @@ Ext.define('Ck.LiveSnap', {
 		this.map.addInteraction(interaction);
 		interaction.setActive(true);
 		
-		if(this.owner) {
+		/*if(this.owner) {
 			if(this.owner.interactions === undefined) {
 				this.owner.interactions = [];
 			}
 			
 			this.owner.interactions.push(interaction);
-		}
+		}*/
 	},
 	
 	/**
@@ -78,7 +78,7 @@ Ext.define('Ck.LiveSnap', {
 	 */
 	removeInteraction: function(layer) {
 		
-		if(this.owner) {
+		/*if(this.owner) {
 			for(var i=0; i<this.owner.interactions.length; i++) {
 				var interaction = this.owner.interactions[i];
 				
@@ -88,7 +88,7 @@ Ext.define('Ck.LiveSnap', {
 					this.owner.interactions.slice(i, 1);
 				}
 			}
-		}
+		}*/
 		
 		for(var i=0; i<this.interactions.length; i++) {
 			var interaction = this.interactions[i];
@@ -140,5 +140,17 @@ Ext.define('Ck.LiveSnap', {
 		if(interaction) {
 			interaction.pixelTolerance_ = tolerance;
 		}		
+	},
+	
+	/**
+	 *	Reinit interactions by removing/adding it from the map
+	 */
+	reInitInteractions: function() {		
+		for(var i=0; i<this.interactions.length; i++) {
+			var interaction = this.interactions[i];			
+			this.map.removeInteraction(interaction);
+			this.map.addInteraction(interaction);
+			interaction.setActive(true);
+		}
 	}
 });

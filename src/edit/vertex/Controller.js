@@ -445,10 +445,16 @@ Ext.define('Ck.edit.vertex.Controller', {
 				
 				// Livesnapping
 				if(this.allowLiveSnap) {
-					var snappingOptions = this.controller.getSnappingOptions();
-					this.livesnap = new Ck.LiveSnap(snappingOptions, this);
-					Ext.on("layerSnapActive", this.livesnap.manageLayerActive, this.livesnap);
-					Ext.on("layerSnapTolerance", this.livesnap.manageLayerTolerance, this.livesnap);
+					var map = Ck.getMap();
+					
+					if(!map.livesnap) {
+						var snappingOptions = this.controller.getSnappingOptions();
+						map.livesnap = new Ck.LiveSnap(snappingOptions);
+						Ext.on("layerSnapActive", map.livesnap.manageLayerActive, map.livesnap);
+						Ext.on("layerSnapTolerance", map.livesnap.manageLayerTolerance, map.livesnap);
+					} else {
+						map.livesnap.reInitInteractions();
+					}					
 				}
 			
 				break;
