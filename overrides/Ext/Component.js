@@ -355,12 +355,6 @@ Ext.define('Ext.overrides.window.MessageBox', {
 	localeProperties: ['title', 'html']
 });
 
-Ext.define('Ext.overrides.MessageBox', {
-	override: 'Ext.MessageBox',
-	localeProperties: ['title', 'html']
-});
-
-
 Ext.define("Ext.overrides.window.Toast", {
 	override: "Ext.window.Toast",
 	localeProperties: ['html'],

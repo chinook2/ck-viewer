@@ -832,7 +832,13 @@ Ext.define('Ck.edit.Controller', {
 		var extension = layer.getExtension("fidColumn");
 		
 		if(!Ext.isEmpty(extension) && feature.getId() === undefined) {
-			feature.setId(feature.get(extension));
+			var value = feature.get(extension);
+			
+			if(Ext.isEmpty(value)) {
+				value = new Date().getTime();
+			}
+			
+			feature.setId(value);
 		}
 		
 		return feature.getId();
