@@ -1,6 +1,6 @@
 /**
  * Base class for measure actions.
- * 
+ *
  * See : Ck.map.action.measure.Length, Ck.map.action.measure.Area ...
  *
  * Code from : http://openlayers.org/en/master/examples/measure.html?q=measure
@@ -8,14 +8,14 @@
 Ext.define('Ck.map.action.Measure', {
 	extend: 'Ck.Action',
 	alias: 'widget.ckmapMeasure',
-	
+
 	itemId: 'measure',
 	text: '',
 	iconCls: 'ckfont ck-measures',
 	tooltip: '',
-	
+
 	toggleGroup: 'ckmapAction',
-	
+
 	/**
 	 * The type of the measure :
 	 *
@@ -24,17 +24,17 @@ Ext.define('Ck.map.action.Measure', {
 	 *  - ...
 	 */
 	type: 'length',
-	
+
 	/**
 	 * Allow snapping between measure
 	 */
 	snap: true,
-	
+
 	/**
 	 * Drawing color
 	 */
 	color: '#ff0000',
-	
+
 	/**
 	 * Currently drawn feature.
 	 * @type {ol.Feature}
@@ -60,30 +60,30 @@ Ext.define('Ck.map.action.Measure', {
 	 * Message to show when the user start measure.
 	 */
 	startMsg : 'Click to start measuring (shift and hold click for free measure)',
-	
+
 	/**
 	 * Message to show when the user is measuring.
 	 */
 	continueMsg: 'Click to continue measuring',
-	
+
 	/**
-	 * 
+	 *
 	 */
 	geodesic: true,
-	
+
 	draw: null,
-	
+
 	/**
 	 * Button associate with this action
 	 */
 	btn: null,
-	
+
 	/**
 	 *
 	 */
-	ckLoaded: function(map) {		
+	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
-		
+
 		this.measureLayer = map.getLayerById('measureLayer');
 		if(!this.measureLayer) {
 			this.measureLayer = new ol.layer.Vector({
@@ -107,10 +107,10 @@ Ext.define('Ck.map.action.Measure', {
 			});
 			this.olMap.addLayer(this.measureLayer);
 		}
-		
+
 		var source = this.measureLayer.getSource();
-		
-		
+
+
 		this.type = this.initialConfig.type || this.type;
 		if(this.type) {
 			var gtype = (this.type == 'area' ? 'Polygon' : 'LineString');
@@ -140,10 +140,10 @@ Ext.define('Ck.map.action.Measure', {
 			});
 			this.olMap.addInteraction(this.draw);
 			this.draw.setActive(false);
-			
+
 			this.createMeasureTooltip();
 			this.createHelpTooltip();
-			
+
 			this.draw.on('drawstart', function(evt) {
 				// set sketch
 				this.sketch = evt.feature;
@@ -152,34 +152,34 @@ Ext.define('Ck.map.action.Measure', {
 			this.draw.on('drawend', function(evt) {
 				this.measureTooltipElement.className = 'tooltip tooltip-static';
 				this.measureTooltip.setOffset([0, -7]);
-				
+
 				// associate the overlay to the feature and remove it when feature is removed
 				evt.feature.set('overlay', this.measureTooltip);
 				source.on('removefeature', function(evt) {
 					this.olMap.removeOverlay(evt.feature.get('overlay'));
 				}, this);
-				
+
 				// unset sketch
 				this.sketch = null;
-				
+
 				// unset tooltip so that a new one can be created
 				this.measureTooltipElement = null;
 				this.createMeasureTooltip();
 			}, this);
-			
+
 			this.snap = this.initialConfig.snap || this.snap;
 			if(this.snap) {
 				this.olMap.addInteraction(new ol.interaction.Snap({
 				  source: source
 				}));
 			}
-			
+
 			this.wgs84Sphere = new ol.Sphere(6378137);
 		}
 	},
-	
+
 	/**
-	 * 
+	 *
 	 */
 	toggleAction: function(btn, pressed) {
 		this.btn = btn;
@@ -195,14 +195,14 @@ Ext.define('Ck.map.action.Measure', {
 			this.olMap.un('singleclick', this.pointerMoveHandler, this);
 		}
 	},
-	
+
 	/**
-	 * 
+	 *
 	 */
 	clearAll: function() {
-		if(this.measureLayer) this.measureLayer.getSource().clear();	
+		if(this.measureLayer) this.measureLayer.getSource().clear();
 	},
-	
+
 	/**
 	 * Handle pointer move.
 	 * @param {ol.MapBrowserEvent} evt
@@ -211,7 +211,7 @@ Ext.define('Ck.map.action.Measure', {
 		if (evt.dragging) {
 			return;
 		}
-		
+
 		var tooltipCoord = evt.coordinate;
 
 		if (this.sketch) {
@@ -228,13 +228,13 @@ Ext.define('Ck.map.action.Measure', {
 			this.measureTooltip.setPosition(tooltipCoord);
 		}
 	},
-	
+
 	/**
 	 * Creates a new help tooltip
 	 */
 	createHelpTooltip: function() {
 		if(!Ext.tip.QuickTipManager.isEnabled()) return;
-		
+
 		this.tip = Ext.create('Ext.tip.ToolTip', {
 			target: this.olMap.getViewport(),
 			trackMouse: true,
@@ -245,11 +245,11 @@ Ext.define('Ck.map.action.Measure', {
 				Ext.defer(function(){
 					this.fireEvent('beforeshow', this);
 				}, 200, this);
-			}, 
+			},
 			listeners: {
 				beforeshow: function(tip) {
 					if(!this.draw.get('active')) return false;
-					
+
 					var helpMsg = this.startMsg;
 					if (this.sketch) helpMsg = this.continueMsg;
 					tip.setHtml(helpMsg);
@@ -298,7 +298,7 @@ Ext.define('Ck.map.action.Measure', {
 			length = Math.round(line.getLength() * 100) / 100;
 		}
 		var output;
-		if (length > 100) {
+		if (length > 1000) {
 			output = (Math.round(length / 1000 * 100) / 100) +
 					' ' + 'km';
 		} else {
@@ -325,7 +325,7 @@ Ext.define('Ck.map.action.Measure', {
 			area = polygon.getArea();
 		}
 		var output;
-		if (area > 10000) {
+		if (area > 100000) {
 			output = (Math.round(area / 1000000 * 100) / 100) +
 					' ' + 'km<sup>2</sup>';
 		} else {
@@ -335,4 +335,3 @@ Ext.define('Ck.map.action.Measure', {
 		return output;
 	}
 });
-

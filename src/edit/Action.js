@@ -8,7 +8,7 @@ Ext.define('Ck.edit.Action', {
 	layerStyle: null,
 	defaultGeometryType: "Polygon",
 	defaultTolerance: 10,
-	
+
 	used: false,
 	interactions: [],
 
@@ -20,7 +20,7 @@ Ext.define('Ck.edit.Action', {
 		// this.map = Ck.getMap();
 		// this.olMap = this.map.getOlMap();
 	},
-	
+
 	/**
 	 * Save the associated element
 	 * @param {Ext.Component}
@@ -28,7 +28,10 @@ Ext.define('Ck.edit.Action', {
 	toggleAction: function(el) {
 		this.associatedEl = el;
 		this.controller = el.lookupController();
-		if(this.used == false) {
+		// fix if edit btn config in subclass after 'constructor' call
+		if(!this.config.layer && el.layer) this.config.layer = el.layer;
+
+		if(this.used === false) {
 			this.controller.getView().on("hide", this.disableAllInteractions, this);
 		}
 		this.used = true;
@@ -48,12 +51,12 @@ Ext.define('Ck.edit.Action', {
 				return this.layer;
 			}
 		}
-		
+
 		if(this.controller.getLayer) this.layer = this.controller.getLayer();
 		if(this.layer) {
 			return this.layer;
 		}
-		
+
 		if(this.controller.getView().editConfig) var layerId = this.controller.getView().editConfig.layerId;
 		if(layerId) this.layer = this.getMap().getLayerById(layerId);
 
@@ -115,7 +118,7 @@ Ext.define('Ck.edit.Action', {
 	getTolerance: function() {
 		return this.config.tolerance || this.defaultTolerance;
 	},
-	
+
 	disableAllInteractions: function() {
 		for(var interaction in this.interactions) {
 			if(!Ext.isEmpty(this.interactions[interaction])) {
@@ -123,7 +126,7 @@ Ext.define('Ck.edit.Action', {
 			}
 		}
 	},
-	
+
 	/**
 	 * On destroy remove all interactions from the map
 	 */
@@ -135,10 +138,10 @@ Ext.define('Ck.edit.Action', {
 			}
 			delete this[key];
 		}
-		
+
 		this.interactions = [];
 		this.layer = null;
-		
+
 		this.callParent(arguments);
 	}
 });
