@@ -8,49 +8,50 @@
  *         "center": [260000, 5900000],
  *         "zoom": 6
  *     }
- * 
+ *
  * See also the Ck.map.Model and Ck.map.Controller to interact with the map and OpenLayers.
  */
 Ext.define("Ck.Map", {
 	extend: "Ext.panel.Panel",
 	alias: "widget.ckmap",
-	
+
 	requires: [
 		'Ck.map.*'
 	],
 
 	controller: "ckmap",
-	
+
 	viewModel: {
 		type: "ckmap"
 	},
 
 	plugins: [
-		'mapprogress'
+		'mapprogress',
+		'maptooltip'
 	],
-	
+
 	layout: {
 		type: 'fit'
 	},
-	
+
 	config: {
 		map: null,
-		
+
 		/**
 		 * The initial center of the map [x, y]
 		 */
 		center: [0, 0],
-		
+
 		/**
 		 * The initial zoom level of the map.
 		 */
 		zoom: 2,
-		
+
 		/**
 		 * The decimal precision of the coordinates when displaying the center or extent of the map.
 		 */
 		coordPrecision: 2,
-		
+
 		/**
 		 * The initial context to load.
 		 */
@@ -69,17 +70,17 @@ Ext.define("Ck.Map", {
 			 * Default control. + and - buttons to zoom in and zoom out.
 			 */
 			Zoom: {},
-			
+
 			/**
 			 * Control to display layers attributions.
 			 */
 			Attribution: {},
-			
+
 			/**
 			 * Display scale line. False to hide, true to show and object to show with specified parameters.
 			 */
 			ScaleLine: {},
-			
+
 			/**
 			 * Display zoom slider. False to hide, true to show and object to show with specified parameters.
 			 *
@@ -89,14 +90,14 @@ Ext.define("Ck.Map", {
 			 * - zoomslider-style3
 			 */
 			ZoomSlider: {},
-			
+
 			/**
 			 * Button to switch between full screen and window mode.
 			 */
 			FullScreen: {
 				className: "ck-full-screen"
 			},
-			
+
 			/**
 			 * Button to set the north at the top of the screen.
 			 */
@@ -105,7 +106,7 @@ Ext.define("Ck.Map", {
 				tipLabel: "Click + AltShift to rotate"
 			}
 		},
-		
+
 		/**
 		 * List of ol.interaction to add to the map.
 		 * Pinch interactions is for touch screen devices.
@@ -130,7 +131,7 @@ Ext.define("Ck.Map", {
 		'coordPrecision'
 	],
 	*/
-	
+
 	/**
 	 * @private
 	 * Base class name for the map. DO NOT EDIT !
@@ -138,7 +139,7 @@ Ext.define("Ck.Map", {
 	 * This class name is used to find a ckmap in the DOM.
 	 */
 	cls: 'ck-map',
-	
+
 	listeners: {
 		resize: 'resize' // The resize handle is necessary to set the map!
 	}
