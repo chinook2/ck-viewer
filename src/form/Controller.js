@@ -392,6 +392,9 @@ Ext.define('Ck.form.Controller', {
 			url: formUrl,
 			disableCaching: false,
 			scope: this,
+			params: {
+				mod: (Ck.isMobileDevice()) ? "mobile" : ""
+			},			
 			success: function(response) {
 				var me = this;
 				var formConfig = Ext.decode(response.responseText, true);
@@ -775,6 +778,12 @@ Ext.define('Ck.form.Controller', {
 							// need to build storeUrl...
 							if(me.compatibiltyMode && !store) {
 								if(o.xtype == 'combo' || o.xtype == 'combobox'){
+									
+									// Tbo: fix combo store loading
+									var fieldName = o.name || c.displayField || c.name;
+									var fieldTab = fieldName.split(".");
+									fieldName = fieldTab[fieldTab.length - 1];
+									
 									var baseparams = {
 										s: 'forms',
 										r: 'getStore',
@@ -791,7 +800,7 @@ Ext.define('Ck.form.Controller', {
 										
 										// Le champ 'valeur' envoyé par le formulaire
 										valuefield: o.valueField || c.valueField,
-										field: o.name || c.displayField || c.name
+										field: fieldName
 										// query : param automatique lors du autocomplete
 									};
 									storeUrl = Ck.getApi() + Ext.urlEncode(baseparams);
@@ -1506,6 +1515,10 @@ Ext.define('Ck.form.Controller', {
 				if(lyr && !Ext.isObject(fid)) {
 					if(this.compatibiltyMode) {
 						url = Ck.getApi() + "service=forms&request=getData&name=" + lyr + "&fid=" + fid;
+						
+						if(Ck.isMobileDevice()) {
+							url += "&mod=mobile";	
+						}
 					} else {
 						url = 'resources/data/' + lyr + '/' + fid + '.json';
 					}
