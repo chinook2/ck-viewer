@@ -6,127 +6,127 @@
  *
  * There are several possibilities to highlight selection but most of them are problematic :
  *  - change the feature style with getStyle and setStyle, but render ordering raise error
- *  - 
+ *  -
  *
  * For WFS callback parameter contain the reals features and not a clone
  */
 Ext.define('Ck.Selection', {
-	
+
 	config: {
 		/**
 		 * Chinook map
 		 * @var {Ck.map}
 		 */
 		map: null,
-		
+
 		/**
 		 * OpenLayers 3 map
 		 * @var {ol.map}
 		 */
 		olMap: null,
-		
+
 		/**
 		 * The layers to be queried or null to queried all layer
 		 */
 		layers: null,
-		
+
 		/**
 		 * Type of selection.
 		 * Can be one of : Point, LineString, Polygon, Circle, Square, Box
 		 */
 		type: null,
-		
+
 		/**
 		 * Number of feature needed. Limit per layer. If null no limit will be applied.
 		 * @var {Integer}
 		 */
 		limit: 1,
-		
+
 		/**
 		 * Witch key used to stack selection. Can be "ctrlKey", "shitftKey", "altKey"
 		 * @var {String} By default "shitftKey"
 		 */
 		mergeKey: "shiftKey",
-		
+
 		/**
 		 * The function will be called when feature selected
 		 * The function take one parameter : {Object[]}. One array of object with "features" and "layer" members.
 		 * The features are "real" features for WFS layer or temporaries features for WMS
 		 */
 		callback: Ext.emptyFn,
-		
+
 		/**
 		 * The scope of the callback method
 		 */
 		scope: null,
-		
+
 		/**
 		 * Draw style. Set to null to hide drawing.
 		 * @var {ol.style.Style/ol.style.Style[]/ol.style.StyleFunction}
 		 */
-		drawStyle: Ck.map.Style.orangeStroke,
-		
+		drawStyle: null,
+
 		/**
 		 * Draw interaction
 		 * @var {ol.interaction.Draw}
 		 */
 		draw: null,
-		
+
 		/**
 		 * True to hightlight feature from WMS.
 		 */
 		highlight: true,
-		
+
 		/**
 		 * True to replace vector feature with a selected feature.
 		 * Useful to change style of selected feature.
 		 */
 		overHighlight: false,
-		
+
 		/**
 		 * Selection style. Set to null to hide drawing. Only useful when highlight is true.
 		 * @var {ol.style.Style/ol.style.Style[]/ol.style.StyleFunction}
 		 */
-		highlightStyle: Ck.map.Style.orangeStroke,
-		
+		highlightStyle: null,
+
 		/**
 		 * ZIndex of the highlight selected feature
 		 */
-		highlightZIndex: Ck.map.Style.zIndex.editInteraction,
-		
+		highlightZIndex: null,
+
 		/**
 		 * Select interaction. Use to highlight features.
 		 * @var {ol.interaction.Select}
 		 */
 		select: null,
-		
+
 		/**
 		 * Select interaction ID. Useful to share the select interaction.
 		 * @var {String}
 		 */
 		selectId: "ckmapSelect",
-		
+
 		/**
 		 * Stack selection or not
 		 */
 		stackSelection: false,
-		
+
 		/**
 		 *
 		 */
 		maskMsg: "Selection in progress...",
-		
+
 		/**
 		 * Loading mask
 		 */
 		mask: null
 	},
-	
+
 	/**
 	 * For a selection, mark if the new selection must stack with the old selection.
 	 */
 	inAddition: false,
-	
+
 	/**
 	 * The current selection. Cleaned at the beginning of a selection if mergeKey doesn't be pressed.
 	 * @var {Object[]} Array of object with "features" and "layer" member
@@ -135,19 +135,22 @@ Ext.define('Ck.Selection', {
 
 	constructor: function(config) {
 		Ext.apply(config, {
-			olMap : config.map.getOlMap()
+			olMap : config.map.getOlMap(),
+			drawStyle: Ck.map.Style.orangeStroke,
+			highlightStyle: Ck.map.Style.orangeStroke,
+			highlightZIndex: Ck.map.Style.zIndex.editInteraction
 		});
-		
+
 		this.initConfig(config);
-		
+
 		if(config.scope) {
 			this.setCallback(config.callback.bind(config.scope));
 		}
-		
+
 		var geometryFunction, maxPoints;
 		var type = this.getType().toLowerCase();
 		var olMap = this.getOlMap();
-		
+
 		// Type compatibility and specifications
 		if(type.indexOf("point") != -1) {
 			type = "Point";
@@ -174,8 +177,8 @@ Ext.define('Ck.Selection', {
 				return geometry;
 			};
 		}
-		
-		// Initializ draw interaction		
+
+		// Initializ draw interaction
 		var draw = new ol.interaction.Draw({
 			type				: type,
 			geometryFunction	: geometryFunction,
@@ -184,17 +187,17 @@ Ext.define('Ck.Selection', {
 			condition			: function() {return true;}
 		});
 		this.setDraw(draw);
-		
-		
+
+
 		draw.on('drawstart', function(evt) {
 			this.sketch = evt.feature;
 		}, this);
-		
+
 		draw.on('drawend', this.processSelection, this);
-		
+
 		olMap.addInteraction(draw);
 		draw.setActive(false);
-		
+
 		// Share only one select interaction for all sub classes
 		var inte = olMap.getInteractions();
 		for(i=0; i<inte.getLength(); i++){
@@ -203,7 +206,7 @@ Ext.define('Ck.Selection', {
 				break;
 			}
 		}
-		
+
 		// Select interaction to host (and highlight) selected features
 		if(Ext.isEmpty(this.getSelect()) && this.getHighlight()) {
 			var select = new ol.interaction.Select({
@@ -213,7 +216,7 @@ Ext.define('Ck.Selection', {
 			olMap.addInteraction(select);
 			select.set('id', this.getSelectId());
 			select.setActive(false);
-			
+
 			select.on('select', function(e) {
 				Ck.log(e.target.getFeatures().getLength() +
 				  ' selected features (last operation selected ' + e.selected.length +
@@ -221,14 +224,14 @@ Ext.define('Ck.Selection', {
 			});
 			this.setSelect(select);
 		}
-		
+
 		// Create the mask
 		this.setMask(new Ext.LoadMask({
 			msg: this.getMaskMsg(),
 			target: this.getMap().getView()
 		}));
 	},
-	
+
 	/**
 	 * Query layers with current selection
 	 * @param {ol.interaction.DrawEvent}
@@ -238,18 +241,18 @@ Ext.define('Ck.Selection', {
 		this.inAddition = event[this.getMergeKey()];
 		var feature = evntParams.feature;
 		var draw = this.getDraw();
-		
+
 		if(!this.inAddition && !this.getStackSelection()) {
 			this.resetSelection();
 		}
-		
+
 		// Unset sketch
 		draw.sketch = null;
-		
+
 		// Parse les géométries en GeoJSON
 		var geoJSON  = new ol.format.GeoJSON();
 		var type = feature.getGeometry().getType();
-		
+
 		switch(type) {
 			case "Circle" :
 				var radius = feature.getGeometry().getRadius();
@@ -266,12 +269,12 @@ Ext.define('Ck.Selection', {
 			default :
 				var selFt = geoJSON.writeFeatureObject(feature);
 		}
-		
+
 		/* Developper : you can display buffered draw for Circle and Point
 			writer = new ol.format.WKT();
 			// writer.writeFeature(geoJSON.readFeature(selFt)); // getWKT
 			ft = geoJSON.readFeature(selFt);
-			
+
 			if(!window.lyr) {
 				window.lyr = new ol.layer.Vector({
 					id: "onTheFlyLayer",
@@ -294,10 +297,10 @@ Ext.define('Ck.Selection', {
 			}
 			window.lyr.getSource().addFeature(ft);
 		//*/
-		
+
 		var i = 0;
 		var layers = this.getLayers();
-		
+
 		if(Ext.isEmpty(layers)) {
 			layers = Ck.getMap().getLayers(function(lyr) {
 				return (lyr.getVisible() &&
@@ -307,11 +310,11 @@ Ext.define('Ck.Selection', {
 			});
 			layers = layers.getArray();
 		}
-		
+
 		var ft;
 		this.nbQueryDone = 0;
 		this.nbQuery = layers.length;
-		
+
 		for(var i = 0; i < layers.length; i++) {
 			if(layers[i] instanceof ol.layer.Vector) {
 				ft = this.queryWFSLayer(layers[i], selFt, evntParams);
@@ -321,12 +324,12 @@ Ext.define('Ck.Selection', {
 			}
 		}
 	},
-	
+
 	/**
 	 * Query a WFS layer.
 	 * @params {ol.layer.Base}
 	 * @params
-	 * @params 
+	 * @params
 	 * @return {ol.Feature[]}
 	 */
 	queryWFSLayer: function(layer, selFt, evntParams) {
@@ -346,15 +349,15 @@ Ext.define('Ck.Selection', {
 				}
 			}
 		}
-		
+
 		return res;
 	},
-	
+
 	/**
 	 * Query a WMS layer.
 	 * @params {ol.layer.Base}
 	 * @params
-	 * @params 
+	 * @params
 	 * @return {ol.Feature[]}
 	 */
 	queryWMSLayer: function(layer, selFt, evntParams) {
@@ -364,10 +367,10 @@ Ext.define('Ck.Selection', {
 			var extent = Ck.getMap().getOlView().calculateExtent(size).join(",");
 			var xy = evntParams.target.downPx_;
 			var projCode = this.getMap().getProjection().getCode();
-			
+
 			var source = layer.getSource();
 			url = source.getUrl();
-			
+
 			Ck.Ajax.get({
 				scope: this,
 				url: url,
@@ -409,7 +412,7 @@ Ext.define('Ck.Selection', {
 			this.queryWFSSource(layer, selFt, evntParams);
 		}
 	},
-	
+
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
@@ -428,17 +431,17 @@ Ext.define('Ck.Selection', {
 			maxFeatures		: this.getLimit(),
 			bbox			: selBBox
 		});
-		
+
 		// Temporary parent to get the whole innerHTML
 		var pTemp = document.createElement("div");
 		pTemp.appendChild(gf);
-		
+
 		// Pre make reader options for readFeatures method
 		var readOptions = {
 			dataProjection: ope.getSrs(),
 			featureProjection: this.getMap().getProjection().getCode()
 		};
-		
+
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
@@ -450,13 +453,13 @@ Ext.define('Ck.Selection', {
 				for(var i in lyr) {
 					lyr[i] = lyr[i].split(":")[0];
 				}
-				
+
 				var format = Ck.create("ol.format.WFS", {
 					featureNS: "http://mapserver.gis.umn.edu/mapserver",
 					gmlFormat: Ck.create("ol.format.GML2"),
 					featureType: lyr
 				});
-				
+
 				var features = format.readFeatures(response.responseXML, readOptions);
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
@@ -466,7 +469,7 @@ Ext.define('Ck.Selection', {
 			}
 		});
 	},
-	
+
 	/**
 	 * @params {ol.Feature[]}
 	 * @params {ol.layer.Base}
@@ -474,19 +477,19 @@ Ext.define('Ck.Selection', {
 	onSelect: function(features, layer) {
 		if(features && features.length !== 0 && layer) {
 			var res;
-			
+
 			// Force number of features limitation
 			if(this.getLimit() !== null) {
 				features = features.slice(0, this.getLimit());
 			}
-			
+
 			// Look whether a selection has been made on the same layer
 			for(var i = 0; ((i < this.selection.length) && Ext.isEmpty(res)); i++) {
 				if(this.selection[i].layer == layer) {
 					res = this.selection[i];
 				}
 			}
-			
+
 			if(Ext.isEmpty(res)) {
 				this.selection.push({
 					features: features,
@@ -503,18 +506,18 @@ Ext.define('Ck.Selection', {
 					}
 				}
 			}
-			
+
 			var wfsLayer = (layer instanceof ol.layer.Vector);
-			
+
 			// Highligth selected features and add them to select collection
 			if((!wfsLayer && this.getHighlight()) || (this.getOverHighlight() && wfsLayer)) {
-				
+
 				// The select interaction is used to highlight
 				var idx, select = this.getSelect();
 				select.setActive(true);
 				var selCollection = select.getFeatures();
 				var selArray = selCollection.getArray();
-				
+
 				// Loop on new selected features
 				for(var i = 0; i < features.length; i++) {
 					idx = selArray.indexOf(features[i]);
@@ -527,15 +530,15 @@ Ext.define('Ck.Selection', {
 				select.setActive(false);
 			}
 		}
-		
+
 		this.nbQueryDone++;
-		
+
 		if(this.nbQueryDone == this.nbQuery) {
 			this.getMask().hide();
 			this.getCallback()(this.selection);
 		}
 	},
-	
+
 	/**
 	 * Set the draw style. Set to null to hide drawing.
 	 * @var {ol.style.Style/ol.style.Style[]/ol.style.StyleFunction/null}
@@ -547,7 +550,7 @@ Ext.define('Ck.Selection', {
 			this._drawStyle = style;
 		}
 	},
-	
+
 	/**
 	 * Set the selection style. Set to null to hide drawing.
 	 * @var {ol.style.Style/ol.style.Style[]/ol.style.StyleFunction/null}
@@ -559,14 +562,14 @@ Ext.define('Ck.Selection', {
 			this._highlightStyle = style;
 		}
 	},
-	
-	/** 
+
+	/**
 	 * Activate or deactivate the draw interaction
 	 */
 	setActive: function(status) {
 		this.getDraw().setActive(status);
 	},
-	
+
 	/**
 	 * Reset the selection
 	 */
@@ -574,22 +577,22 @@ Ext.define('Ck.Selection', {
 		var style;
 		for(var obj in this.selection) {
 			for(var ft in this.selection[obj].features) {
-				
+
 			}
 		}
 		this.selection = [];
-		
+
 		if(this.getHighlight()) {
 			this.getSelect().getFeatures().clear()
 		}
 	},
-	
+
 	destroy: function() {
 		this.resetSelection();
 		var olMap = this.getOlMap();
 		var draw = this.getDraw();
 		var select = this.getSelect();
-		
+
 		olMap.removeInteraction(draw);
 		if(!Ext.isEmpty(select)) {
 			olMap.removeInteraction(select);
