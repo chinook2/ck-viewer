@@ -1,6 +1,11 @@
 /**
  *
  */
+ //<debug>
+ // Mini hack to load Ck.js main static class in dev mode
+ // Ext.manifest.paths doesn't in production and testing !!
+ if(Ext.manifest.paths) Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
+ //</debug>
 Ext.define("Ck.View", {
 	extend: 'Ext.Container',
 	alias: "widget.ckview",
@@ -15,7 +20,7 @@ Ext.define("Ck.View", {
         'Ext.tab.*',
         'Ext.grid.*',
 		'Ext.util.*',
-		
+
 		'Ck.*' // Load all Ck class...
 	],
 	//plugins: 'viewport',
