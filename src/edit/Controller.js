@@ -68,7 +68,12 @@ Ext.define('Ck.edit.Controller', {
 		/**
 		 * The id of the snapping options panel
 		 */
-		snappingOptionsId: "edit-snapping-options"
+		snappingOptionsId: "edit-snapping-options",
+		
+		/**
+		 * True to display vertex while editing LineString/Polygon layer
+		 */
+		displayVertex: false
 	},
 
 	/**
@@ -348,6 +353,10 @@ Ext.define('Ck.edit.Controller', {
 		Ck.getMap().on("contextloading", function(ctx) {
 			this.close();		
 		}, this);
+		
+		if(this.getDisplayVertex() && this.getLayer()) {
+			this.displayLayerVertex();
+		}
 	},
 	
 	/**
@@ -710,8 +719,63 @@ Ext.define('Ck.edit.Controller', {
 		}
 		
 		this.getOpenner().close();
+		
+		if(this.getDisplayVertex()) {
+			var map = this.getMap();
+			var layer = map.getLayerById(this.getLayer().get("id") + "_vertex");
+			
+			if(layer) {
+				map.removeSpecialLayer(layer);
+			}			
+		}
 	},
 
+	/**
+	 * Display a vertex layer
+	 */
+	displayLayerVertex: function() {
+		var layer = this.getLayer();
+		var source = layer.getSource();
+		var features = source.getFeatures();
+		
+		if(features.length > 0) {
+			var feature = features[0];
+			
+			if(feature.getGeometry().getType() == "point") {
+				return;
+			}
+		}
+		
+		var vertexLayer = new ol.layer.Vector({
+			id: layer.get("id") + "_vertex",
+			title: layer.get("title"),
+			source: source,
+			style: new ol.style.Style({
+				image: new ol.style.Circle({
+					radius: 5,
+					fill: new ol.style.Fill({
+						color: 'orange'
+					})
+				}),
+				geometry: function(feature) {
+					// return the coordinates of the first ring of the polygon
+					var geom = feature.getGeometry()
+					var coordinates = geom.getCoordinates();
+					
+					if(geom.getType() == "Polygon") {
+						coordinates = coordinates[0];
+					}
+
+					return new ol.geom.MultiPoint(coordinates);
+				}
+			}),
+			visible: true,
+			zIndex: layer.getZIndex() + 1
+		});
+				
+		this.getMap().addSpecialLayer(vertexLayer);
+	},
+	
 	/**
 	 * Save the changes.
 	 */
