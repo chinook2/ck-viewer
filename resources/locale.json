@@ -1,6 +1,14 @@
 {
 	"success": true,
 	"data": [{
+        "en": "Yes",
+        "fr": "Oui",
+        "es": "Sí"
+    },{
+        "en": "No",
+        "fr": "Non",
+        "es": "No"
+    },{
         "en": "Choose a language",
         "fr": "Selectionner une langue",
         "es": "Cambiar idioma"
@@ -43,6 +51,10 @@
     },{
         "en": "Add vertex",
         "fr": "Ajouter un vertex",
+        "es": ""
+    },{
+        "en": "Remove vertex",
+        "fr": "Supprimer un vertex",
         "es": ""
     },{
         "en": "Save",

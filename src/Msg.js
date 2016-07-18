@@ -8,6 +8,17 @@ Ext.define('Ck.Msg', {
 	show: function(config) {
 		var msgBox = Ext.create('Ext.window.MessageBox', {
 			closeAction: 'destroy'
-		}).show(config);
+		});
+		
+		if(Ck.Locale.get() == "fr") {
+			msgBox.buttonText = {
+				ok: 'OK',
+				yes: 'Oui',
+				no: 'Non',
+				cancel: 'Annuler'
+			};
+		}
+		
+		msgBox.show(config);
 	}
 });

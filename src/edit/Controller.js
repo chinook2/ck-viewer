@@ -358,7 +358,7 @@ Ext.define('Ck.edit.Controller', {
 			this.mainWindow = Ck.create("Ext.window.Window", {
 				title: "Edition",
 				height: 400,
-				width: 400,
+				width: 600,
 				layout: "fit",
 				closable: false
 			});

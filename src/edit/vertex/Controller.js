@@ -74,6 +74,17 @@ Ext.define('Ck.edit.vertex.Controller', {
 				},
 				scope: this
 			},
+			"ckedit-vertex button#remove-vertex": {
+				click: function() {
+					var posCmp = this.getView().getDockedItems()[0].getComponent("vertex-position");
+					// Position must be between 1 and store.length
+					if(posCmp.isValid()) {
+						var index = posCmp.getValue() - 1;
+						this.deleteVertex(index);
+					}
+				},
+				scope: this
+			},
 			"ckedit-vertex radio#action-move": {
 				change: this.liveAction,
 				scope: this
