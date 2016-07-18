@@ -285,6 +285,16 @@
 		"path": "libs/zip/zip.js"
 	},{
 		"path": "libs/shapefile-js/shp.js"
+	},{
+		"path": "libs/js2shapefile/JS2Shapefile.js"
+	},{
+		"path": "libs/js2shapefile/jDataView_write.js"
+	},{
+		"path": "libs/js2shapefile/FileSaveTools.js"
+	},{
+		"path": "libs/js2shapefile/lib/external/FileSaver.min.js"
+	},{
+		"path": "libs/js2shapefile/lib/external/jszip.js"
 	}],
     
     /**
