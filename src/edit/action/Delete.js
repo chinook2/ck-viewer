@@ -47,6 +47,22 @@ Ext.define('Ck.edit.action.Delete', {
 		// Hard fix for inexplicable issue (this.delInteraction.selection.length != 0)
 		this.delInteraction.resetSelection();
 
+		if(!status) {
+			var historyStore = this.controller.history.store;
+			for(var i = 0; i < historyStore.getCount(); i++) {
+				data = historyStore.getAt(i).data;
+				ft = data.feature
+				ft.setStyle(null);
+
+				switch(data.actionId) {
+					case 3:
+						// Remove
+						historyStore.removeAt(i)
+						break;
+				}
+			}
+		}		
+		
 		this.delInteraction.setActive(status);		
 	},
 	
