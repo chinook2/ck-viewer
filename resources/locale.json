@@ -261,6 +261,22 @@
         "fr": "Créer un objet à la position GPS",
         "es": " - "
     },{
+        "en": "Which polygon keeps attributes data ?",
+        "fr": "Quel polygone garde les attributs ?",
+        "es": " - "
+    },{
+        "en": "First polygon",
+        "fr": "Premier polygone",
+        "es": " - "
+    },{
+        "en": "Second polygon",
+        "fr": "Second polygone",
+        "es": " - "
+    },{
+        "en": "Validate",
+        "fr": "Valider",
+        "es": " - "
+    },{
         "en": "Edit attribute",
         "fr": "Editer les attributs",
         "es": " - "

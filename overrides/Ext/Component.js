@@ -346,7 +346,10 @@ Ext.define("Ext.overrides.form.field.Text", {
 	override: "Ext.form.field.Text",
 	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "regexText"]
 });
-
+Ext.define("Ext.overrides.form.field.Radio", {
+	override: "Ext.form.field.Radio",
+	localeProperties: ["fieldLabel", "boxLabel"]
+});
 
 Ext.define("Ext.overrides.window.Window", {override: "Ext.window.Window",localeProperties: ["title", "html"]});
 

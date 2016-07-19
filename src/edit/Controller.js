@@ -762,7 +762,9 @@ Ext.define('Ck.edit.Controller', {
 					var geom = feature.getGeometry()
 					var coordinates = geom.getCoordinates();
 					
-					if(geom.getType() == "Polygon") {
+					if(geom.getType() == "Point") {
+						return;
+					} else if(geom.getType() == "Polygon") {
 						coordinates = coordinates[0];
 					}
 
