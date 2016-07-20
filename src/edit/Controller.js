@@ -768,6 +768,10 @@ Ext.define('Ck.edit.Controller', {
 						coordinates = coordinates[0];
 					}
 
+					if(coordinates.length < 3) {
+						return;
+					}
+					
 					return new ol.geom.MultiPoint(coordinates);
 				}
 			}),

@@ -11,6 +11,9 @@ Ext.define('Ck.action.SnappingOptions', {
 	enableToggle: true,
 	toggleGroup: "snappingOptions",
 	
+	reloadLayer: false,
+	layer: null,
+	
 	/**
 	 * Update geolocationMarker's position via GPS if pressed == true.
 	 * Zoom to user location
@@ -31,6 +34,8 @@ Ext.define('Ck.action.SnappingOptions', {
 				constrain   : true,
 				items		: [{
 					xtype	: "cksnapping",
+					reloadLayer: this.reloadLayer,
+					layer: this.layer,
 					openner	: this
 				}]
 			});
