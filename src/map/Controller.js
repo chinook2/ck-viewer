@@ -364,7 +364,8 @@ Ext.define('Ck.map.Controller', {
 	createSource: function(offering, layer, owc) {
 		var mainOperation;
 		var olSourceAdditional = {
-			layer: layer
+			layer: layer,
+			offering: offering
 		};
 		var ckLayerSpec = this.getViewModel().getData().ckOlLayerConnection[offering.getType()];
 			
@@ -432,7 +433,6 @@ Ext.define('Ck.map.Controller', {
 					format.defaultDataProjection = ol.proj.get(mainOperation.getSrs());
 					
 					olSourceOptions = {
-						projection	: ol.proj.get(mainOperation.getSrs()),
 						url		: this.getMapUrl(mainOperation.getHref()),
 						format	: format
 					};

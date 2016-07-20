@@ -130,15 +130,19 @@ Ext.define('Ck.Ajax', {
 			}
 		};
 		
-		var fData = new FormData();
-		for(var key in options.params) {
-			fData.append(key, options.params[key]);
-		}
-		
-		var f;
-		for(var i in options.files) {
-			f = options.files[i];
-			fData.append(f.name, f.value, f.filename);
+		if(Ext.isObject(options.params)) {
+			var fData = new FormData();
+			for(var key in options.params) {
+				fData.append(key, options.params[key]);
+			}
+			
+			var f;
+			for(var i in options.files) {
+				f = options.files[i];
+				fData.append(f.name, f.value, f.filename);
+			}
+		} else {
+			var fData = options.params;
 		}
 
 		xhr.open(options.method, options.url, true);
