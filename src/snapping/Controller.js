@@ -14,7 +14,7 @@ Ext.define('Ck.snapping.Controller', {
 		config: null,
 		
 		reloadLayer: false,
-		layer: null,
+		layer: null
 	},
 	
 	/**
