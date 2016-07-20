@@ -8,14 +8,11 @@ Ext.define('Ck.Notify', {
 	align: 'tr',
 
 	info: function(msg) {
-		/*
 		Ext.toast({
 			html: msg,
 			align: this.align,
 			slideInDuration: 400
 		});
-		*/
-		Ck.log(msg);
 	},
 
 	error: function(msg) {

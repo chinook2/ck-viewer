@@ -170,7 +170,7 @@ Ext.define('Ck.Ajax', {
 		if(!res) return true;
 		
 		//<debug>
-		Ck.Notify.info('Request from Cache : '+ options.url);
+		Ck.log('Request from Cache : '+ options.url);
 		//</debug>
 		
 		var response = {
@@ -191,7 +191,7 @@ Ext.define('Ck.Ajax', {
 	
 	onRequestComplete: function(conn, response, options, eOpts) {
 		//<debug>
-		Ck.Notify.info('Request success : '+ options.url);
+		Ck.log('Request success : '+ options.url);
 		//</debug>
 		
 		if(!this.isCacheAvailable(options)) return true;

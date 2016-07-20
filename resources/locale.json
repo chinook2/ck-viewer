@@ -237,6 +237,10 @@
         "fr": "Les polygones sélectionnés doivent avoir au moins 2 points commun",
         "es": " - "
     },{
+        "en": "Result feature will receive the first selected feature's attributes.",
+        "fr": "L'entité créée héritera des attributs de la première sélection.",
+        "es": " - "
+    },{
         "en": "Close edit session without save any changes ?",
         "fr": "Fermer la session d'édition sans sauvegarder les changements ?",
         "es": " - "
