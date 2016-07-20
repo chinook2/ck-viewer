@@ -29937,8 +29937,9 @@ ol.layer.Layer.prototype.setMap = function(map) {
     this.mapPrecomposeKey_ = ol.events.listen(
         map, ol.render.EventType.PRECOMPOSE, function(evt) {
           var layerState = this.getLayerState();
+		  var zIndex = this.getZIndex();
           layerState.managed = false;
-          layerState.zIndex = Infinity;
+          layerState.zIndex = (goog.isDef(zIndex) && zIndex != 0) ? zIndex : Infinity;
           evt.frameState.layerStatesArray.push(layerState);
           evt.frameState.layerStates[goog.getUid(this)] = layerState;
         }, this);
@@ -76285,6 +76286,7 @@ goog.provide('ol.format.ogc.filter.And');
 goog.provide('ol.format.ogc.filter.Or');
 goog.provide('ol.format.ogc.filter.Not');
 goog.provide('ol.format.ogc.filter.Bbox');
+goog.provide('ol.format.ogc.filter.Intersects');
 goog.provide('ol.format.ogc.filter.Comparison');
 goog.provide('ol.format.ogc.filter.ComparisonBinary');
 goog.provide('ol.format.ogc.filter.EqualTo');
@@ -76349,6 +76351,21 @@ ol.format.ogc.filter.not = function(condition) {
  */
 ol.format.ogc.filter.bbox = function(geometryName, extent, opt_srsName) {
   return new ol.format.ogc.filter.Bbox(geometryName, extent, opt_srsName);
+};
+
+/**
+ * Create a `<Intersects>` operator to test whether a geometry-valued property
+ * intersects a fixed geometry
+ *
+ * @param {!string} geometryName Geometry name to use.
+ * @param {!ol.geom.Geometry} extent Extent.
+ * @param {string=} opt_srsName SRS name. No srsName attribute will be
+ *    set on geometries when this is not provided.
+ * @returns {!ol.format.ogc.filter.Intersects} `<Intersectsc>` operator.
+ * @api
+ */
+ol.format.ogc.filter.intersects = function(geometryName, geometry, opt_srsName) {
+  return new ol.format.ogc.filter.Intersects(geometryName, geometry, opt_srsName);
 };
 
 
@@ -76653,6 +76670,45 @@ ol.format.ogc.filter.Bbox = function(geometryName, extent, opt_srsName) {
   this.srsName = opt_srsName;
 };
 ol.inherits(ol.format.ogc.filter.Bbox, ol.format.ogc.filter.Filter);
+
+
+
+/**
+ * @classdesc
+ * Represents a `<Intersects>` operator to test whether a geometry-valued property
+ * intersects a fixed geometry
+ *
+ * @constructor
+ * @param {!string} geometryName Geometry name to use.
+ * @param {!ol.geom.Geometry} geometry Geometry.
+ * @param {string=} opt_srsName SRS name. No srsName attribute will be
+ *    set on geometries when this is not provided.
+ * @extends {ol.format.ogc.filter.Filter}
+ * @api
+ */
+ol.format.ogc.filter.Intersects = function(geometryName, geometry, opt_srsName) {
+
+  ol.format.ogc.filter.Filter.call(this, 'Intersects');
+
+  /**
+   * @public
+   * @type {!string}
+   */
+  this.geometryName = geometryName;
+
+  /**
+   * @public
+   * @type {ol.Extent}
+   */
+  this.geometry = geometry;
+
+  /**
+   * @public
+   * @type {string|undefined}
+   */
+  this.srsName = opt_srsName;
+};
+ol.inherits(ol.format.ogc.filter.Intersects, ol.format.ogc.filter.Filter);
 
 
 // Property comparison filters
@@ -78559,6 +78615,7 @@ goog.require('ol.format.GML3');
 goog.require('ol.format.GMLBase');
 goog.require('ol.format.ogc.filter');
 goog.require('ol.format.ogc.filter.Bbox');
+goog.require('ol.format.ogc.filter.Intersects');
 goog.require('ol.format.ogc.filter.ComparisonBinary');
 goog.require('ol.format.ogc.filter.LogicalBinary');
 goog.require('ol.format.ogc.filter.Not');
@@ -79141,6 +79198,25 @@ ol.format.WFS.writeBboxFilter_ = function(node, filter, objectStack) {
  * @param {Array.<*>} objectStack Node stack.
  * @private
  */
+ol.format.WFS.writeIntersectsFilter_ = function(node, filter, objectStack) {
+  goog.asserts.assertInstanceof(filter, ol.format.ogc.filter.Intersects,
+    'must be intersects filter');
+
+  var context = objectStack[objectStack.length - 1];
+  goog.asserts.assert(goog.isObject(context), 'context should be an Object');
+  context['srsName'] = filter.srsName;
+
+  ol.format.WFS.writeOgcPropertyName_(node, filter.geometryName);
+  ol.format.GML3.prototype.writeGeometryElement(node, filter.geometry, objectStack);
+};
+
+
+/**
+ * @param {Node} node Node.
+ * @param {ol.format.ogc.filter.Filter} filter Filter.
+ * @param {Array.<*>} objectStack Node stack.
+ * @private
+ */
 ol.format.WFS.writeLogicalFilter_ = function(node, filter, objectStack) {
   goog.asserts.assertInstanceof(filter, ol.format.ogc.filter.LogicalBinary,
     'must be logical filter');
@@ -79289,6 +79365,7 @@ ol.format.WFS.GETFEATURE_SERIALIZERS_ = {
     'Or': ol.xml.makeChildAppender(ol.format.WFS.writeLogicalFilter_),
     'Not': ol.xml.makeChildAppender(ol.format.WFS.writeNotFilter_),
     'BBOX': ol.xml.makeChildAppender(ol.format.WFS.writeBboxFilter_),
+    'Intersects': ol.xml.makeChildAppender(ol.format.WFS.writeIntersectsFilter_),
     'PropertyIsEqualTo': ol.xml.makeChildAppender(ol.format.WFS.writeComparisonFilter_),
     'PropertyIsNotEqualTo': ol.xml.makeChildAppender(ol.format.WFS.writeComparisonFilter_),
     'PropertyIsLessThan': ol.xml.makeChildAppender(ol.format.WFS.writeComparisonFilter_),
@@ -85945,7 +86022,8 @@ ol.interaction.Select = function(opt_options) {
     style: options.style ? options.style :
         ol.interaction.Select.getDefaultStyleFunction(),
     updateWhileAnimating: true,
-    updateWhileInteracting: true
+    updateWhileInteracting: true,
+	zIndex: goog.isDef(options.zIndex) ? options.zIndex : Infinity
   });
 
   /**
@@ -97904,6 +97982,11 @@ goog.exportSymbol(
 goog.exportSymbol(
     'ol.format.ogc.filter.bbox',
     ol.format.ogc.filter.bbox,
+    OPENLAYERS);
+
+goog.exportSymbol(
+    'ol.format.ogc.filter.intersects',
+    ol.format.ogc.filter.intersects,
     OPENLAYERS);
 
 goog.exportSymbol(
