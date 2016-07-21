@@ -324,7 +324,7 @@
     	},{
     		"path": "libs/proj4js/defs/EPSG4258.js"
     	},{
-    		"path": "libs/turf/turf.js"
+    		"path": "libs/turf/turf.min.js"
     	},{
     		"path": "libs/turf/turf-snap.js"
     	},{
