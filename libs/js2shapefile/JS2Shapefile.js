@@ -756,7 +756,7 @@ var Shapefile = (function(){
 				for (var attribute in graphic.attributes) {
 					if (graphic.attributes.hasOwnProperty(attribute)) {
 						var attvalue = graphic.attributes[attribute];
-						if (allAttributes.hasOwnProperty(attribute)) {
+						if (allAttributes.hasOwnProperty(attribute) && attvalue) {
 							// Call toString on all attributes to get the length in characters
 							if (allAttributes[attribute].length < attvalue.toString().length) {
 								allAttributes[attribute].length = attvalue.toString().length;

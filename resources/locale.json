@@ -61,6 +61,14 @@
         "fr": "Enregistrer",
         "es": "Guardar"
     },{
+        "en": "No graphics of type POLYGON have been added!",
+        "fr": "Aucune entité à enregistrer.",
+        "es": "-"
+    },{
+        "en": "Error generating shapefile",
+        "fr": "Erreur de génération du Shapefile",
+        "es": "-"
+    },{
         "en": "Cancel",
         "fr": "Annuler",
         "es": "Cancelar"

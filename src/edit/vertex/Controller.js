@@ -157,6 +157,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 				scope: this
 			}
 		});
+		
+		this.grid.scrollTo(0, 0);
 	},
 	
 	/**
