@@ -192,7 +192,46 @@ Ext.define('Ext.overrides.Component', {
 				setter.call(me, value);
 			}
 		}
-	}
+	},
+	
+	/**
+	 *	Fix issue 'scroller.setElement is not a function' see https://ftp.sencha.com/forum/showthread.php?304794-EXTJS-5.1.1-Lock-Grid-Error&p=1114002#post1114002
+	 */
+	onBoxReady: function(width, height) {
+        var me = this,
+            //scroller = me.scrollable;
+            scroller = me.getScrollable(); // changed line
+        //<debug>
+        if (me.scrollable !== me.getScrollable()) {
+            console.log('me.scrollable != me.getScrollable(): ', me.scrollable, me.getScrollable());            
+        }
+        //</debug>
+
+
+        if (me.resizable) {
+            me.initResizable(me.resizable);
+        }
+
+
+        // Draggability must be initialized after resizability
+        // Because if we have to be wrapped, the resizer wrapper must be dragged as a pseudo-Component
+        if (me.draggable) {
+            me.initDraggable();
+        }
+
+
+        if (scroller) {
+            if (me.touchScroll) {
+                scroller.setInnerElement(me.getScrollerEl());
+            }
+            scroller.setElement(me.getOverflowEl());
+        }
+
+
+        if (me.hasListeners.boxready) {
+            me.fireEvent('boxready', me, width, height);
+        }
+    }
 } /*,
  function(){
  var cProto = Ext.Component.prototype,
