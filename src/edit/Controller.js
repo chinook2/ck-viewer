@@ -19,6 +19,8 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	currentFeature: null,
 	
+	editAttributesAfterCreate: false,
+	
 	/**
 	 * @var {Ext.button.Button}
 	 * Button for geolocation with ckEditGeolocation action
@@ -855,6 +857,72 @@ Ext.define('Ck.edit.Controller', {
 		saveFunction.call(this, inserts, updates, deletes);
 	},
 	
+	editFeatureAttributes: function(feature) {
+		
+		var layer = this.getLayer();
+		if(!layer) {
+			Ck.log("enable to find layer : "+layer);
+			return false;
+		}
+		
+		// Get all properties and add layer name and fid. Used by dataUrl Template in form to load data
+		var dataFid =  feature.getProperties();
+		dataFid.fid = this.getFid(feature);
+		dataFid.layer = layer.get('id');
+		
+		// var source = layer.getSource();
+		var formName = layer.getExtension('form');
+		// Filter form fields for mobile (when using Forms serveur)
+		// if(formName) {
+		if(formName && Ck.isMobileDevice()) {
+			formName += '&mod=mobile';
+		}
+		
+		if(!formName){
+			var lyrName = layer.get('id');
+			var lyrName = lyrName.split(":");
+			lyrName = lyrName.pop();
+			formName = '/' + lyrName
+		}
+		
+		var dataObject = null;
+		var offerings = layer.ckLayer.getOfferings();
+		if(offerings) {
+			for(var i=0; i<offerings.length; i++) {
+				var offering = offerings[i];
+				if(offering.getType() == "geojson") {
+					dataObject = feature.getProperties();
+					break;
+				}
+			}			
+		}
+		
+		this.mapFormPanel =  Ext.create({
+			xtype		: 'ckform',
+			editing		: true,
+			formName	: formName,
+			layer		: layer.get("id"),
+			dataFid		: feature.getId(),
+			dataObject	: dataObject
+		});
+				
+		this.mapFormWindow = Ext.create('Ext.window.Window', {
+			layout: 'fit',
+			headerPosition: 'right',
+			
+			maximized: true,
+			closable: false,
+			
+			closeAction: 'hide',
+			listeners:{
+				scope: this
+			},
+			items: this.mapFormPanel 
+		});
+		
+		this.mapFormWindow.show();
+	},
+	
 	/**
 	*	Save the changes for a WMS layer
 	**/
@@ -867,6 +935,13 @@ Ext.define('Ck.edit.Controller', {
 			fn: function() {
 				this.fireEvent("savesuccess");
 				this.reset();
+				
+				if(this.editAttributesAfterCreate) {
+					// Open attribute edition after creation
+					for(var i=0; i<inserts.length; i++) {
+						this.editFeatureAttributes(inserts[i]);
+					}
+				}
 			},
 			scope: this
 		},{
