@@ -1433,7 +1433,7 @@ Ext.apply(Ck, {
 	/**
 	 * Returns a cloned feature with transformed coordinates
 	 */
-	transformFeature(feature, fromCode, toCode) {
+	transformFeature: function(feature, fromCode, toCode) {
 		var fromProj = new ol.proj.Projection({code: fromCode});
 		var toProj = new ol.proj.Projection({code: toCode});
 		var clonedFeature = feature.clone();
