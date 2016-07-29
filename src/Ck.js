@@ -1428,7 +1428,20 @@ Ext.apply(Ck, {
 	 */
 	isDesktop: function() {
 		return Ext.os.deviceType == "Desktop";
+	},
+	
+	/**
+	 * Returns a cloned feature with transformed coordinates
+	 */
+	transformFeature(feature, fromCode, toCode) {
+		var fromProj = new ol.proj.Projection({code: fromCode});
+		var toProj = new ol.proj.Projection({code: toCode});
+		var clonedFeature = feature.clone();
+		clonedFeature.getGeometry().transform(fromCode, toCode);
+		
+		return clonedFeature;
 	}
+	
 }).init();
 
 

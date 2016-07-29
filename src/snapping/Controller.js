@@ -72,7 +72,7 @@ Ext.define('Ck.snapping.Controller', {
 			item = {
 				layer		: layer,
 				title		: layer.get("title"),
-				tolerance	: Ck.Snap.getTolerance()
+				tolerance	: layer.ckLayer.tolerance || Ck.Snap.getTolerance()
 			};
 		}
 		

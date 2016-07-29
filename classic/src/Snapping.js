@@ -57,6 +57,8 @@ Ext.define("Ck.Snapping", {
 						var rec = nbField.getWidgetRecord();
 						if (nbField.isValid() && rec) {
 							rec.set('tolerance', value);
+							var layer = rec.get('layer');
+							layer.ckLayer.tolerance = value;
 							var cmp = Ext.getCmp("edit-snapping-options");
 							Ext.GlobalEvents.fireEvent("layerSnapTolerance", rec, value);
 						}
