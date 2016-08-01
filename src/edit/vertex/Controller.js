@@ -510,13 +510,16 @@ Ext.define('Ck.edit.vertex.Controller', {
 	focusVertexRow: function(event) {
 		var vertex = event.target.vertexFeature_.getGeometry();
 		var coord = vertex.getCoordinates();
- 		
+ 		var idx = 0;
+		
 		// If it's a click on a vertex or not (then create it)
 		if(event.target.snappedToVertex_) {
- 			idx = this.getIndexFromCoord(coord) - 1;
+ 			// idx = this.getIndexFromCoord(coord) - 1;
+ 			var prevPoint = event.target.dragSegments_[0][0].segment[0];
+ 			idx = this.getIndexFromCoord(prevPoint);
  		} else {			
 			var prevPoint = event.target.dragSegments_[0][0].segment[0];
- 			var idx = this.getIndexFromCoord(prevPoint);
+ 			idx = this.getIndexFromCoord(prevPoint);
  			
  			var data = {
 				number: idx + 1,
