@@ -6,6 +6,7 @@ Ext.define('Ck.format.OWSContext', {
 	
 	config: {
 		extent		: null,
+		maxExtent	: null,
 		projection	: null,
 		scales		: null,
 		resolutions	: null,
@@ -21,7 +22,7 @@ Ext.define('Ck.format.OWSContext', {
 	 * @params {Object}
 	 */
 	constructor: function(config) {
-		var scales, proj, extent, resolutions = [], data = config.data;
+		var scales, proj, extent, maxExtent, resolutions = [], data = config.data;
 		
 		// Scales
 		scales = data.properties.scales;
@@ -36,6 +37,13 @@ Ext.define('Ck.format.OWSContext', {
 			extent = data.properties.bbox;
 		}
 		
+		// maxExtent
+		if(!data.properties.maxExtent) {
+			maxExtent = extent;
+		} else {
+			maxExtent = data.properties.maxExtent;
+		}
+		
 		// Resolutions
 		if(!Ext.isEmpty(scales) && Ext.isArray(scales)) {
 			scales.forEach(function(o) {
@@ -46,6 +54,7 @@ Ext.define('Ck.format.OWSContext', {
 		Ext.apply(config, {
 			projection	: proj,
 			extent		: extent,
+			maxExtent	: maxExtent,
 			scales		: scales,
 			resolutions	: resolutions
 		});

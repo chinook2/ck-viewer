@@ -252,7 +252,7 @@ Ext.define('Ck.map.Controller', {
 			olMap.setView(new ol.View({
 				projection		: viewProj,
 				center			: v.getCenter(),
-				extent			: owc.getExtent(),
+				extent			: owc.getMaxExtent(),
 				zoom			: v.getZoom(),
 				minResolution	: viewScales[0].res,
 				maxResolution	: viewScales[viewScales.length-1].res
@@ -278,7 +278,7 @@ Ext.define('Ck.map.Controller', {
 			
 			// Load all layers. Reverse the loading for right order displaying
 			var layer, layers = owc.getLayers();
-			var olExtent = owc.getExtent();
+			var olExtent = owc.getMaxExtent();
 			for(var i = layers.length - 1; i >= 0; i--) {
 				if(layers[i].getExtension("overviewLayer") === true) {
 					layer = this.createLayer(layers[i], owc);
@@ -428,7 +428,7 @@ Ext.define('Ck.map.Controller', {
 				}.bind(undefined, cluster, olSource)
 			}
 
-			var extent = layer.getExtent() || owc.getExtent();
+			var extent = layer.getExtent() || owc.getMaxExtent();
 			if(mainOffering.getType() == "xyz") {
 				extent = olSource.tileGrid.getExtent() || extent;
 			}
@@ -531,7 +531,7 @@ Ext.define('Ck.map.Controller', {
 
 						// TODO : use extent, resolutions different from main view.
 						tileGrid: new ol.tilegrid.WMTS({
-							origin: ol.extent.getTopLeft(owc.getExtent()),
+							origin: ol.extent.getTopLeft(owc.getMaxExtent()),
 							resolutions: resolutions,
 							matrixIds: matrixIds
 						})
@@ -556,7 +556,7 @@ Ext.define('Ck.map.Controller', {
 					// get extent from params or view if not provided
 					var extent = mainOperation.getExtent();
 					if(!extent || extent.length == 0) {
-						extent = owc.getExtent();					
+						extent = owc.getMaxExtent();					
 					}
 					
 					olSourceOptions = {

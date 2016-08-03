@@ -34,6 +34,10 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		
 		if(aHref[1]) {
 			params = Ext.Object.fromQueryString(aHref[1]);
+			
+			if(aHref[1].indexOf("_OLSALT") !== -1) {
+				params = Ext.Object.fromQueryString(aHref[2]);
+			}		
 		}
 		
 		Ext.apply(config, {
