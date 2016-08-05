@@ -371,7 +371,11 @@ Ext.define('Ck.edit.Controller', {
 				height: 400,
 				width: 600,
 				layout: "fit",
-				closable: false
+				constrain: true,
+				closable: false,
+				// Counter drag issues on tablet
+				liveDrag: true,
+				animateShadow: false
 			});
 			
 			this.mainWindow.on("add", function(win, item) {
