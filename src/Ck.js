@@ -11,27 +11,27 @@
  *
  * For example:
  *
- *     Ext.define('AppDemo.view.main.Main', {
- *         extend: 'Ck.View',
- *         xtype: 'app-main',
+ *	 Ext.define('AppDemo.view.main.Main', {
+ *		 extend: 'Ck.View',
+ *		 xtype: 'app-main',
  *
- *     	requires: [
- *     		'AppDemo.view.main.MainController'
- *     	],
+ *	 	requires: [
+ *	 		'AppDemo.view.main.MainController'
+ *	 	],
  *
- *     	controller: 'main'
- *     });
+ *	 	controller: 'main'
+ *	 });
  *
  * ## URL Parameters
  *
  * The application can use URL Parameters to configure differents view.
  *
- *     - Ck.view.Controller
- *         - app : name of the layout to load
- *     - Ck.map.Controller
- *         - context : name of the context to load
- *     - Ck.Ajax
- *         - nocache : allow to reload the app and context from server (ignore LocalStorage)
+ *	 - Ck.view.Controller
+ *		 - app : name of the layout to load
+ *	 - Ck.map.Controller
+ *		 - context : name of the context to load
+ *	 - Ck.Ajax
+ *		 - nocache : allow to reload the app and context from server (ignore LocalStorage)
  *
  * ## Next...
  *
@@ -573,9 +573,9 @@ Ext.apply(Ck, {
 	/**
 	 * @param {float}
 	 * @return {Float} A normalized scale value, in 1 / X format.
-	 *         This means that if a value less than one ( already 1/x) is passed
-	 *         in, it just returns scale directly. Otherwise, it returns
-	 *         1 / scale
+	 *		 This means that if a value less than one ( already 1/x) is passed
+	 *		 in, it just returns scale directly. Otherwise, it returns
+	 *		 1 / scale
 	 */
 	normalizeScale: function(scale) {
 		var normScale = (scale > 1.0) ? (1.0 / scale)
@@ -588,8 +588,8 @@ Ext.apply(Ck, {
 	 * @param {ol.proj.ProjectionLike}
 	 *
 	 * @return {Float} The corresponding resolution given passed-in scale and unit
-	 *     parameters.  If the given scale is falsey, the returned resolution will
-	 *     be undefined.
+	 *	 parameters.  If the given scale is falsey, the returned resolution will
+	 *	 be undefined.
 	 */
 	getResolutionFromScale: function(scale, proj) {
 		var resolution;
@@ -612,8 +612,8 @@ Ext.apply(Ck, {
 	 * asynchronous sequential version of Array.prototype.forEach
 	 * @param array the array to iterate over
 	 * @param fn the function to apply to each item in the array, function
-	 *        has two argument, the first is the item value, the second a
-	 *        callback function
+	 *		has two argument, the first is the item value, the second a
+	 *		callback function
 	 * @param callback the function to call when the forEach has ended
 	 */
 	asyncForEach: function(array, fn, callback) {
@@ -677,6 +677,47 @@ Ext.apply(Ck, {
 
 		var blob = new Blob(byteArrays, {type: contentType});
 		return blob;
-	}
+	},
+	
+	fieldNameToLabel: function(name) {
+		var nameProper = '';
 
+		for (var i = 0; i < name.length; i++) {
+			var character = name.substr(i, 1);
+			if (character.toUpperCase() == character)
+				nameProper += ' ';
+
+			if (nameProper.length == 0)
+				nameProper += character.toUpperCase();
+			else
+				nameProper += character;
+		}
+		if (nameProper.indexOf('Code ') == 0)
+			nameProper = nameProper.substring(5);
+
+		if (nameProper.length == nameProper.indexOf(' Id') + 3)
+			nameProper = nameProper.substring(0, nameProper.length - 3);
+
+		var regex = / Flag$/
+		if (regex.test(nameProper))
+			nameProper = nameProper.replace(regex, '');
+
+		if (nameProper.indexOf(' Upd ') > -1)
+			nameProper = nameProper.replace(' Upd ', ' Update ');
+
+		return nameProper;
+
+	},
+
+	toCamelCase: function(name) {
+		return name.substring(0, 1).toUpperCase() + name.substring(1);
+	},
+
+	removeId: function(name) {
+		var regex = /\s?Id$/;
+		if (regex.test(name))
+			name = name.replace(regex, '');
+
+		return name;
+	}
 }).init();
