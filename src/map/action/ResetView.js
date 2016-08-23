@@ -2,7 +2,7 @@
  * Basic action to zoom in the map (zoom level + 1).
  *
  * Use on a {@link Ext.button.Button} in a {@link Ext.toolbar.Toolbar}.
- * 
+ *
  *		{
  *			xtype: "button",
  *			scale: "large",
@@ -15,13 +15,13 @@
 Ext.define('Ck.map.action.ResetView', {
 	extend: 'Ck.Action',
 	alias: "widget.ckmapResetview",
-	
+
 	itemId: 'resetview',
 	text: '',
 	// iconCls: 'fa fa-globe',
-	iconCls: 'fa fa-home',
+	iconCls: 'ckfont ck-home',
 	tooltip: 'Reset view',
-	
+
 	/**
 	 * Zoom to the initial extent
 	 */
