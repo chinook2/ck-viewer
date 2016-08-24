@@ -10,7 +10,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	 * Save the entire grid when add/edit/delete row. Used when subform have no dataUrl.
 	 */
 	autocommit: false,
-	
+
 	/**
 	 * Save when update row with rowediting plugin
 	 */
@@ -18,7 +18,7 @@ Ext.define('Ck.form.plugin.Subform', {
 
 	/**
 	 * Number of click needed to start editing by openning pop-up
-	 */	
+	 */
 	clicksToEdit: 1,
 
 	/**
@@ -35,7 +35,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	 * Enable single click to start live edition (without pop-up)
 	 */
 	editrow: true,
-	
+
 	/**
 	 * Object with "property" and "value" member to define row without edit button
 	 */
@@ -96,9 +96,9 @@ Ext.define('Ck.form.plugin.Subform', {
 			formController.rootForm.processingData++;
 			// Ck.log("Init subForm : "+ grid.subform.url + " (stack " +formController.rootForm.processingForm+")");
 		}
-		
+
 		if(this.autocommit===true) this.commitrow=true;
-		
+
 		// Init subform after grid rendering
 		grid.on('afterrender', function() {
 			this.initSubForm(grid);
@@ -122,14 +122,14 @@ Ext.define('Ck.form.plugin.Subform', {
 		var subForm = grid.subform;
 
 		var formController = grid.lookupController();
-		
+
 		// Remove extra count to pass the delay:50 of initSubForm
 		formController.rootForm.processingForm--;
 		formController.rootForm.processingData--;
 		// Ck.log("Init subForm 2 : "+ grid.subform.url + " (stack " +formController.rootForm.processingForm+")");
-		
+
 		var cssSuffix = grid.reference || formController.name;
-		
+
 		// Can't create subform instance here. Need to add in page first, to get viewModel hierarchy
 		this._subform = {
 			xtype: 'ckform',
@@ -150,7 +150,7 @@ Ext.define('Ck.form.plugin.Subform', {
 
 			formName: '/' + subForm.url,
 			layer: grid.name,
-			
+
 			parentForm: formController.getView(),
 			owner: this,
 
@@ -289,7 +289,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					getClass: function(v, meta, rec) {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
-						return 'fa fa-edit';
+						return 'ckEdit';
 					},
 					tooltip: 'Edit row',
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
@@ -312,7 +312,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					getClass: function(v, meta, rec) {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
-						return 'fa fa-close';
+						return 'ckClose';
 					},
 					tooltip: 'Delete row',
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
@@ -324,7 +324,7 @@ Ext.define('Ck.form.plugin.Subform', {
 			}
 
 			var conf = grid.getInitialConfig();
-			
+
 			// Add action column for editing by plugin GridEditing
 			var col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
 			col.push({
@@ -390,7 +390,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				// Init update mode
 				var vm = this._subform.getViewModel();
 				vm.set('updating', true);
-				
+
 				// Save subform data - allow to use form override if exist
 				formController.saveData({
 					success: function(res) {
@@ -452,12 +452,12 @@ Ext.define('Ck.form.plugin.Subform', {
 
 				if(this.autocommit) {
 					var controller = this._grid.lookupController();
-					// When subform don't save data (global save), need to reload here to sync ID if necessary  
+					// When subform don't save data (global save), need to reload here to sync ID if necessary
 					controller.saveData({
 						reload: true
 					});
 				}
-				
+
 				this.resetSubForm();
 			},
 			create: true,
@@ -485,7 +485,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					var controller = this._grid.lookupController();
 					controller.saveData();
 				}
-				
+
 				this.resetSubForm();
 			},
 			scope: this
@@ -510,7 +510,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		formController.deleteData({
 			success: function() {
 				store.remove(rec);
-				
+
 				// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
 				store.removed.push(rec);
 
