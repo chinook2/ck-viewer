@@ -14,7 +14,7 @@ Ext.define('Ck.form.Controller', {
 	storage: null,
 
 	formConfig: null,
-	
+
 	dataUrl: null,
 	dataModel: null,
 	// dataStore: null,
@@ -25,24 +25,24 @@ Ext.define('Ck.form.Controller', {
 
 	fields: [],
 	subforms: [],
-	
+
 	/**
 	 * Form JSON data definition
 	 */
 	form: null,
-	
+
 	// TODO in config param in form json...
 	compatibiltyMode: false,
 
 	// create read update delete
 	operation: '',
-	
+
 	// Override by named controller of the form Ck.form.controller.{name}
 	beforeShow: Ext.emptyFn,
 	afterShow: Ext.emptyFn,
 	beforeClose: Ext.emptyFn,
 	onDestroy: Ext.emptyFn,
-	
+
 	beforeLoad: Ext.emptyFn,
 	afterLoad: Ext.emptyFn,
 	loadFailed: Ext.emptyFn,
@@ -54,19 +54,19 @@ Ext.define('Ck.form.Controller', {
 	beforeDelete: Ext.emptyFn,
 	afterDelete: Ext.emptyFn,
 	deleteFailed: Ext.emptyFn,
-	
+
 	beforeReset: Ext.emptyFn,
-	
+
 	onClick: Ext.emptyFn,
 	onChange: Ext.emptyFn,
 	onSelect: Ext.emptyFn,
-	
+
 	// fieldsProcessed: 0,
 	// formsProcessed: 0,
-	
+
 	processingForm: 0,
 	processingData: 0,
-	
+
 	/**
 	 * Global intercept events to add custom action in controller
 	 */
@@ -81,7 +81,7 @@ Ext.define('Ck.form.Controller', {
 							return false;
 						}
 					}
-					
+
 					// Call global onClick function
 					return this.oController.onClick(cmp, e, eOpts);
 				},
@@ -105,7 +105,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		}
 	},
-	
+
 	init: function() {
 		var v = this.view;
 		this.isSubForm = v.getIsSubForm();
@@ -127,7 +127,7 @@ Ext.define('Ck.form.Controller', {
 
 		// Get form definition directly in the view (no Ajax request)
 		var inlineForm = v.getFormRaw();
-		
+
 		// Find parentForm
 		var parentForm = v.up('ckform');
 		if(parentForm) {
@@ -135,7 +135,7 @@ Ext.define('Ck.form.Controller', {
 			if(!Ext.isDefined(v.initialConfig.editing)){
 				this.editing = parentForm.getEditing();
 			}
-			
+
 			// inherit dataFid from main view form (used in store url template)
 			vDataFid = v.getDataFid() || {};
 			pDataFid = parentForm.getDataFid() || {};
@@ -151,13 +151,13 @@ Ext.define('Ck.form.Controller', {
 			if(inlineForm && !inlineForm.name) {
 				inlineForm.name = parentForm.getController().name;
 			}
-			
+
 			// Add reference of this form as subform for the parent...
 			parentForm.getController().registerSubForm(this);
-			
+
 			this.parentForm = parentForm.getController();
 		}
-		
+
 		// Keep reference of the main rootForm
 		this.rootForm = this.getRootForm();
 		this.updateProcessing(true, 'Form');
@@ -169,10 +169,10 @@ Ext.define('Ck.form.Controller', {
 			this.rootForm.processingData++;
 		}
 		//
-		
+
 		if(this.editing===true) this.startEditing();
 		if(this.editing===false) this.stopEditing(true);
-		
+
 		if(!this.initForm(inlineForm)){
 			this.rootForm.processingForm--;
 			if(this.rootForm.processingForm<0) this.rootForm.processingForm = 0;
@@ -182,14 +182,14 @@ Ext.define('Ck.form.Controller', {
 			}
 		}
 	},
-	
+
 	/**
 	 * Compatibility
 	 */
 	getDockedItems: function() {
 		return this.getView().getDockedItems();
 	},
-	
+
 	destroy: function() {
 		if(this.ls) this.ls.release();
 		if(this.oController){
@@ -207,7 +207,7 @@ Ext.define('Ck.form.Controller', {
 			this.initForm();
 			return;
 		}
-		
+
 		if(btn && btn.nextFormUrl) {
 			this.view.setFormUrl(btn.nextFormUrl);
 			this.isInit = false;
@@ -227,7 +227,7 @@ Ext.define('Ck.form.Controller', {
 
 			// Link to another form
 			this.formLoad(btn);
-			
+
 			// Close the form
 			if(btn && btn.andClose) {
 				this.formClose({
@@ -261,7 +261,7 @@ Ext.define('Ck.form.Controller', {
 				if(sf.isInit) sf.formClose({force:true});
 				this.unRegisterSubForm(sf);
 			}
-			
+
 			if(this.oController.beforeClose() === false) {
 				Ck.log("beforeClose cancel formClose.");
 				return;
@@ -285,7 +285,7 @@ Ext.define('Ck.form.Controller', {
 
 		// If nothing to save Force close action
 		if(this.isDirty()==false) forceClose = true;
-		
+
 		if(forceClose) {
 			this.fireEvent('beforeclose', btn);
 			closeMe();
@@ -335,7 +335,7 @@ Ext.define('Ck.form.Controller', {
 				if(!formUrl && formName) formUrl = this.getFullUrl(formName);
 
 				if(formName === false || formUrl === false) return false;
-				
+
 				this.getForm(formUrl);
 				return true;
 			}
@@ -352,7 +352,7 @@ Ext.define('Ck.form.Controller', {
 			this.dataUrl = null;
 			this.dataModel = null;
 			// this.dataStore = null;
-			
+
 			// Apply style and bodyStyle
 			if(form.style) {
 				this.getView().setStyle(form.style);
@@ -383,7 +383,7 @@ Ext.define('Ck.form.Controller', {
 
 			// Format form definition - apply custom options and process
 			var fcf = this.applyFormDefaults(form.form);
-			
+
 			// warp form in a fieldset
 			var fs = this.view.getFieldset();
 			if(fs===true) fs={};
@@ -396,10 +396,10 @@ Ext.define('Ck.form.Controller', {
 				}, fs)];
 			}
 			//
-			
+
 			// Suspend screen refresh during init
 			// Ext.suspendLayouts();
-			
+
 			// Clear all
 			this.view.removeAll(true);
 
@@ -409,7 +409,7 @@ Ext.define('Ck.form.Controller', {
 			Ext.each(docks, function(d) {
 				if(!this.defaultDock && (d.dock == 'bottom')) {
 					this.defaultDock = d.initialConfig;
-					
+
 					// Add reset button for subform
 					if(this.isSubForm) {
 						this.defaultDock.items.splice(0, 0, {
@@ -425,7 +425,7 @@ Ext.define('Ck.form.Controller', {
 					}
 					this.defaultDock.hidden = false;
 				}
-				
+
 				if( !d.isHeader) {
 					this.view.removeDocked(d);
 				}
@@ -442,7 +442,7 @@ Ext.define('Ck.form.Controller', {
 			// remove one level and add "all" in 'form' except dockedItems
 			// delete fcf.dockedItems;
 			// this.view.add(fcf);
-			
+
 			// Add form to the panel after toolbar (correct size)
 			this.view.add(fcf.items);
 
@@ -453,8 +453,8 @@ Ext.define('Ck.form.Controller', {
 				// Ext.apply(win, fcw);
 				// win.show();
 
-				// TODO : test win.setConfig(fcw) 
-				
+				// TODO : test win.setConfig(fcw)
+
 				// TODO : binding ou surcharge complète du config...
 				// if(fcw) win.setBind(fcw);
 
@@ -468,33 +468,33 @@ Ext.define('Ck.form.Controller', {
 
 			// Refresh screen once all done
 			// Ext.resumeLayouts(true);
-			
+
 			if(form.dataUrl) {
 				this.dataUrl = form.dataUrl;
 			}
-			
+
 			// Init Model from view or form
 			if(form.dataModel) {
 				this.dataModel = form.dataModel;
 			}
-			
+
 			// if(form.dataStore) {
 				// this.dataStore = Ext.getStore(form.dataStore);
 			// }
 
 			this.isInit = true;
 			this.operation = 'create';
-			
+
 			if(this.oController.afterShow(form) === false){
 				Ck.log("afterShow cancel initForm.");
 				return false;
 			}
-			
+
 			//
 			this.rootForm.processingForm--;
 			if(this.rootForm.processingForm<0) this.rootForm.processingForm = 0;
 			// Ck.log("Loaded form : "+ this.view.formName +" - "+ this.name + " (stack "+ this.rootForm.processingForm+")");
-			
+
 			if(this.rootForm.processingForm==0){
 				// Ck.log("!!!! All Forms LOADED !!!! for : " + this.rootForm.name);
 				this.updateProcessing(false, 'Form');
@@ -506,7 +506,7 @@ Ext.define('Ck.form.Controller', {
 				this.rootForm.fireEvent('allloaded');
 			}
 			//
-			
+
 			// Auto-load data if params available
 			if(this.autoLoad) this.loadData();
 		}
@@ -532,7 +532,7 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 		}
-		
+
 		Cks.get({
 			url: formUrl,
 			scope: this,
@@ -574,13 +574,13 @@ Ext.define('Ck.form.Controller', {
 
 	/**
 	 * Get the main form controller (the 1st)
-	 */ 
+	 */
 	getRootForm: function(stopOnSubForm) {
 		// First try to return the rootForm of current parentForm directly.
 		if(stopOnSubForm !== true){
 			if(this.parentForm && this.parentForm.rootForm) return this.parentForm.rootForm;
 		}
-		
+
 		var v = this.getView();
 		// Current form is subForm 'popup' need to get parentForm for hierarchy search...
 		if(v.parentForm) v = v.parentForm;
@@ -593,7 +593,7 @@ Ext.define('Ck.form.Controller', {
 		// By default return the current controller !
 		return this;
 	},
-	
+
 	/**
 	 * Get subForms by Name or formName
 	 */
@@ -607,19 +607,19 @@ Ext.define('Ck.form.Controller', {
 			return false;
 		}
 	},
-	
+
 	getSubForms: function() {
 		return this.subforms;
 	},
-	
+
 	registerSubForm: function(sform) {
 		this.subforms.push(sform);
 	},
-	
+
 	unRegisterSubForm: function(sform) {
 		Ext.Array.remove(this.subforms, sform);
 	},
-	
+
 	/**
 	 * List all included form in a form
 	 */
@@ -682,7 +682,7 @@ Ext.define('Ck.form.Controller', {
 			}
 		});
 	},
-	
+
 	/**
 	 * Auto config for the form (JSON simplify).
 	 * Create Ext components from JSON
@@ -695,7 +695,7 @@ Ext.define('Ck.form.Controller', {
 		var fn = function(c) {
 			if(!c) return;
 			if(Ext.isString(c)) return c;
-						
+
 			// Get Alls direct fields of the form with includes (exclude subform)
 			if(c.name) {
 				this.fields.push(c.name);
@@ -709,13 +709,13 @@ Ext.define('Ck.form.Controller', {
 			if(!c.name && c.xtype && !Ext.Array.contains(ignoreTypes, c.xtype)) {
 				Ck.log("Name undefined for xtype " + c.xtype);
 			}
-			
+
 			// Compatibility forms V1
 			if(c.xtype && c.xtype.substr(0,3) == 'ck_') {
 				c.xtype = c.xtype.substr(3);
 				this.compatibiltyMode = true;
 			}
-			
+
 			// Subforms : init default params and exit
 			if(c.xtype == "ckform") {
 				Ext.applyIf(c, {
@@ -726,7 +726,7 @@ Ext.define('Ck.form.Controller', {
 				});
 				return c;
 			}
-			
+
 			Ext.applyIf(c, {
 				plugins: [],
 				anchor: '100%',
@@ -740,7 +740,7 @@ Ext.define('Ck.form.Controller', {
 					});
 				}
 			}
-						
+
 			switch(c.xtype) {
 				case "tabpanel":
 					Ext.applyIf(c, {
@@ -835,7 +835,7 @@ Ext.define('Ck.form.Controller', {
 								panel.items.getAt(0).setValue("");
 							}
 						}
-						
+
 						// Delete camera picture when file is choosen from explorer
 						c.listeners = {
 							change: function() {
@@ -843,10 +843,10 @@ Ext.define('Ck.form.Controller', {
 							}
 						},
 						c.columnWidth = 1;
-						
+
 						// Fix form.setValue
 						c.setValue = Ext.form.field.File.prototype.setRawValue;
-						
+
 						c = {
 							xtype: "panel",
 							id: panelId,
@@ -890,7 +890,7 @@ Ext.define('Ck.form.Controller', {
 						// storeUrl : alias to define proxy type ajax with url.
 						var store = o.store;
 						var storeUrl = o.storeUrl;
-						
+
 						// Store conf is a string - get existing store or store Url
 						if(Ext.isString(store)) {
 							if(store.indexOf("/") == -1) {
@@ -911,7 +911,7 @@ Ext.define('Ck.form.Controller', {
 								storeUrl = store;
 							}
 						}
-						
+
 						// Store Url - alternative config
 						if(Ext.isObject(store)) {
 							if(Ext.isString(store.url)) {
@@ -928,13 +928,13 @@ Ext.define('Ck.form.Controller', {
 							// store can be string or undefined, init with empty object for merge
 							store = {};
 						}
-						
+
 						// Build default Fields (use for rowediting on grid)
 						var cols = o.columns;
 						if(!Ext.isArray(o.columns) && Ext.isObject(o.columns)) {
 							cols = o.columns.items;
 						}
-						
+
 						if(!Ext.isArray(store.fields) && Ext.isArray(cols)){
 							 // Init store fields from column definition
 							var fields = [];
@@ -956,7 +956,7 @@ Ext.define('Ck.form.Controller', {
 							}
 							store.fields = fields;
 						}
-						
+
 						if(storeUrl) {
 							// Apply template if available like dataUrl. Typically to insert object id in the URL
 							var v = me.getView();
@@ -965,8 +965,8 @@ Ext.define('Ck.form.Controller', {
 								var tpl = new Ext.Template(storeUrl);
 								if(Ext.isString(fid)) fid = [fid];
 								storeUrl = tpl.apply(fid);
-							}								
-							
+							}
+
 							if(me.compatibiltyMode) {
 								// Need default reader Array for Chinook V1 store
 								store = Ext.Object.mergeIf(store, {
@@ -993,11 +993,11 @@ Ext.define('Ck.form.Controller', {
 								});
 							}
 						} else {
-							
+
 							// Default in-memory Store
 							store = Ext.Object.merge(store, {
 								proxy: 'memory'
-							});								
+							});
 						}
 
 						return store;
@@ -1025,7 +1025,7 @@ Ext.define('Ck.form.Controller', {
 								if(editor.maxValue == 'now') cols[idx].editor.maxValue = new Date();
 								if(editor.minValue == 'now') cols[idx].editor.minValue = new Date();
 							}
-							
+
 							var plugins = col.plugins || ((c.columns.defaults)? c.columns.defaults.plugins : null);
 							if(plugins && Ext.isArray(plugins)) {
 								Ext.each(plugins, function(plugin, pidx, plugins) {
@@ -1063,7 +1063,7 @@ Ext.define('Ck.form.Controller', {
 					});
 					break;
 			}
-			
+
 			// GRID PLUGINS
 			if(c.xtype == "grid" || c.xtype == "gridpanel" || c.xtype == "gridfield") {
 				// Try to merge plugins config and default config
@@ -1109,7 +1109,7 @@ Ext.define('Ck.form.Controller', {
 				}
 			}
 			//
-			
+
 			if(c.layout == 'column') {
 				// TODO : simplifié l'ajout auto de xtype container mais pas tjrs...
 				Ext.applyIf(c, {
@@ -1125,18 +1125,18 @@ Ext.define('Ck.form.Controller', {
 				c.fieldLabel = c.name;
 			}
 
-			
+
 			if(!c.labelAlign) {
 				c.labelAlign = 'right';
 			}
-			
+
 			if(c.items && c.processItems !== false) {
 				Ext.each(c.items, fn, this);
 			}
-		
+
 			return c;
 		}.bind(this);
-		
+
 		// Process Items
 		for(var key in cfg.items) {
 			var cf = fn(cfg.items[key]);
@@ -1173,7 +1173,7 @@ Ext.define('Ck.form.Controller', {
 				Ext.each(c.plugins, fn, this);
 			}
 			//
-			
+
 			if(c.items && c.processItems !== false) {
 				Ext.each(c.items, fn, this);
 			}
@@ -1191,7 +1191,7 @@ Ext.define('Ck.form.Controller', {
 		}
 		return cfg;
 	},
-	
+
 	applyFieldDefaults: function(cfg, prop, ref, config){
 		return this.applyFieldsDefaults(cfg, [{
 			property: prop,
@@ -1210,15 +1210,15 @@ Ext.define('Ck.form.Controller', {
 		if(!field) field = v.down('[reference=' + val + ']');
 		return field;
 	},
-	
+
 	startEditing: function() {
 		this.getViewModel().set("editing", true);
 		this.getViewModel().set("isEditable", false);
 		this.getView().setEditing(true);
 		// this.editing = true;
-		
+
 		this.fireEvent('startEditing');
-		
+
 		// Process subforms
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
@@ -1237,12 +1237,12 @@ Ext.define('Ck.form.Controller', {
 		// this.editing = false;
 
 		if(bSilent!==false) this.fireEvent('stopEditing');
-		
+
 		// Process subforms
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
 			var sf = subforms[s];
-			
+
 			if(!Ext.isDefined(sf.view.initialConfig.editing)){
 				sf.stopEditing(bSilent);
 			}
@@ -1254,17 +1254,17 @@ Ext.define('Ck.form.Controller', {
 	*/
 	updateProcessing: function(status, type){
 		if(type){
-			this.rootForm.getViewModel().set("processing"+ type, status);	
+			this.rootForm.getViewModel().set("processing"+ type, status);
 		}
 
 		// Set global processing 'false' only if no type passed
 		if(type && !status) return;
-		
+
 		this.rootForm.getView().setProcessing(status);
 		this.rootForm.getViewModel().set("processing", status);
-		this.rootForm.getViewModel().notify();		
+		this.rootForm.getViewModel().notify();
 	},
-	
+
 	/**
 	 * Collect all data from form. Recursively called for the subforms.
 	 * @param {Function}
@@ -1277,7 +1277,7 @@ Ext.define('Ck.form.Controller', {
 		var v = this.getView();
 		var form = v.getForm();
 		var fid = v.getDataFid();
-		
+
 		if(this.fieldsProcessed == this.fieldsToProcess) {
 			if(this.compatibiltyMode) {
 				var lyr = v.getLayer();
@@ -1301,7 +1301,7 @@ Ext.define('Ck.form.Controller', {
 				// Add the callback
 				var args = Array.prototype.slice.apply(arguments);
 				args.unshift(this.getValues);
-				
+
 				var ctrl = sf.getController();
 				ctrl.getValues.apply(ctrl, arguments);
 			} else {
@@ -1315,7 +1315,7 @@ Ext.define('Ck.form.Controller', {
 				var fn = callback;
 				var args = Array.prototype.slice.apply(arguments);
 				args.splice(0, 1);
-				
+
 				fn.apply(this, args);
 			}
 		} else {
@@ -1335,7 +1335,7 @@ Ext.define('Ck.form.Controller', {
 					if(f.getGroupValue) {
 						values[field] = f.getGroupValue();
 					}
-					
+
 					// Get value for file field
 					if(xtype == "filefield") {
 						var fName = f.getValue().split("/").pop().split("\\").pop();
@@ -1345,7 +1345,7 @@ Ext.define('Ck.form.Controller', {
 						} else {
 							inp = inp[1];
 						}
-						
+
 						if(!Ext.isEmpty(f.camera)) {
 							values[field] = f.getValue();
 							this.files.push({
@@ -1402,12 +1402,14 @@ Ext.define('Ck.form.Controller', {
 				if(f.getGroupValue) {
 					val = f.getGroupValue();
 				}
-				
+
 				// TODO : add config option to trim or not
+				// TODO : add config option to force 'null' for empty string
 				if(Ext.isString(val)){
 					val = Ext.String.trim(val);
+					if(val==='') val = null;
 				}
-				
+
 				values[field] = val;
 			}
 			if(f && resetDirty){
@@ -1421,7 +1423,7 @@ Ext.define('Ck.form.Controller', {
 			values = aValues[0];
 		}
 		//
-		
+
 		if(this.compatibiltyMode) {
 			var fid = v.getDataFid();
 			var lyr = v.getLayer();
@@ -1444,7 +1446,7 @@ Ext.define('Ck.form.Controller', {
 			if(this.fields.indexOf(name)==-1) continue;
 			// subform return one field of the same name - value already get in this.fields.forEach...
 			if(sf.fields.length==1 && sf.fields[0]==name) continue;
-			
+
 			// We can manage multiple subform with the same name and merge values
 			if(Ext.isObject(values[name])){
 				values[name] = Ext.Object.merge(values[name], sf.getValues());
@@ -1463,10 +1465,10 @@ Ext.define('Ck.form.Controller', {
 		}
 		return values;
 	},
-	
+
 	setValues: function(data) {
 		if(!data) return;
-		
+
 		var v = this.getView();
 		var form = v.getForm();
 
@@ -1481,8 +1483,8 @@ Ext.define('Ck.form.Controller', {
 			// Classic Ext setValues
 			form.setValues(data);
 		}
-		
-		// FIX Ext 
+
+		// FIX Ext
 		// Combo setValues with bind filters (who depends on previous field in form).
 		// setValues try to init combo before filter apply (store can be empty) - setValues fail !
 		this.fields.forEach(function(field) {
@@ -1499,7 +1501,7 @@ Ext.define('Ck.form.Controller', {
 			if(f) f.resetOriginalValue();
 		}, this);
 		//
-		
+
 		// SUBFORM : load data
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
@@ -1507,7 +1509,7 @@ Ext.define('Ck.form.Controller', {
 			if(data[sf.view.name]) sf.setValues(data[sf.view.name]);
 		}
 		//
-		
+
 	},
 
 	/**
@@ -1520,7 +1522,7 @@ Ext.define('Ck.form.Controller', {
 
 		// If the entire form is Hidden ignore form validity
 		if(v.isVisible() === false) return true;
-		
+
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
 			if(f && f.isVisible() && !f.isValid()) {
@@ -1538,7 +1540,7 @@ Ext.define('Ck.form.Controller', {
 			if(!sf.isValid()) isValid = false;
 		}
 		//
-		
+
 		return isValid;
 	},
 
@@ -1552,7 +1554,7 @@ Ext.define('Ck.form.Controller', {
 
 		// If the entire form is Hidden ignore form validity
 		if(v.isVisible() === false) return true;
-		
+
 		this.fields.forEach(function(field) {
 			var f = form.findField(field);
 			if(f && f.isVisible() && f.isDirty()) {
@@ -1570,10 +1572,10 @@ Ext.define('Ck.form.Controller', {
 			if(sf.isDirty()) isDirty = true;
 		}
 		//
-		
+
 		return isDirty;
 	},
-	
+
 	/**
 	 * Load data for a specific feature
 	 * @param {Object}
@@ -1582,12 +1584,12 @@ Ext.define('Ck.form.Controller', {
 		options = options || {};
 		var me = this;
 		if(!me.isInit) return;
-		
+
 		var v = me.getView();
 
 		// Getters via config param in the view
 		var lyr = v.getLayer();
-		
+
 		// Ck.log("Load Data for : "+this.name+" (stack "+ this.rootForm.processingData +")");
 
 		if(this.oController.beforeLoad(options) === false) {
@@ -1660,13 +1662,13 @@ Ext.define('Ck.form.Controller', {
 			return;
 		}
 
-		
+
 		// Load data from custom URL ou standard URL
 		url = this.getFullUrl(url);
 		Cks.get({
 			headers: {
 				'Content-Type': 'application/json; charset=UTF-8'
-			},			
+			},
 			url: url,
 			scope: this,
 			success: function(response) {
@@ -1703,7 +1705,7 @@ Ext.define('Ck.form.Controller', {
 		var me = this;
 		var v = me.getView();
 		var lyr = v.getLayer();
-		
+
 		if(data){
 			this.operation = 'update';
 			if(this.oController.afterLoad(data) === false) {
@@ -1720,12 +1722,12 @@ Ext.define('Ck.form.Controller', {
 
 			this.fireEvent('afterload', data);
 		}
-		
+
 		// Check if all forms & subForms are loaded
 		this.rootForm.processingData--;
 		if(this.rootForm.processingData<0) this.rootForm.processingData = 0;
 		// Ck.log("Loaded Data for : " + this.name + " (stack " + this.rootForm.processingData + ")");
-		
+
 		if(this.rootForm.processingData==0){
 			// Ck.log("!!!! All Data LOADED !!!! for : " + this.rootForm.name);
 			this.updateProcessing(false, 'Data');
@@ -1737,10 +1739,10 @@ Ext.define('Ck.form.Controller', {
 				this.rootForm.fireEvent('allloaded');
 		}
 		//
-		
+
 		if(v.getEditing()===true) this.startEditing();
 	},
-	
+
 	/**
 	 * Save data
 	 * @param {Object}
@@ -1753,7 +1755,7 @@ Ext.define('Ck.form.Controller', {
 			this.files = [];
 			this.fieldsProcessed = 0;
 			this.fieldsToProcess = this.fields.length;
-			
+
 			this.getValues(this.saveData, {}, options);
 			return;
 		}
@@ -1762,13 +1764,13 @@ Ext.define('Ck.form.Controller', {
 
 		var me = this;
 		if(!me.isInit) return;
-		
+
 		var v = me.getView();
 		if(!v) {
 			Ck.log("Form View is not valid in saveData : "+ this.name);
 			return;
 		}
-		
+
 		var sid = v.getSid();
 		var lyr = v.getLayer();
 
@@ -1794,7 +1796,7 @@ Ext.define('Ck.form.Controller', {
 			Ext.callback(options.success, options.scope, []);
 			return true;
 		}
-		
+
 		// Ck.log("Save data for : "+this.name);
 		this.fireEvent('beforesave');
 
@@ -1807,7 +1809,7 @@ Ext.define('Ck.form.Controller', {
 		this.updateProcessing(true, 'Data');
 
 		var values = this.getValues(true);
-		
+
 		if(this.oController.beforeSave(values, options, fid, url, model) === false) {
 			Ck.log("beforeSave cancel saveData.");
 			this.updateProcessing(false, 'Data');
@@ -1817,9 +1819,9 @@ Ext.define('Ck.form.Controller', {
 
 		// SUBFORM : Save All forms recursively, waiting callback return to process
 		var subforms = this.getSubForms();
-		// if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));		
-		
-		Ck.asyncForEach(subforms, function(subForm, cb) {			
+		// if(subforms.length>0) Ck.log("Save subForms : " + Ext.Array.pluck(subforms, "name").join(", "));
+
+		Ck.asyncForEach(subforms, function(subForm, cb) {
 			// Save one sub-form...
 			// Try save only if subform has non name and isSubForm = false (isSubForm == true when subform liked with grid)
 			// If sub-form is visible
@@ -1841,7 +1843,7 @@ Ext.define('Ck.form.Controller', {
 				// No save needed but call cb to save next subform...
 				cb();
 			}
-			
+
 		}, function(newFormConfig) {
 			// All subForms saved, save current Form.
 			me.processSave({
@@ -1864,9 +1866,9 @@ Ext.define('Ck.form.Controller', {
 					scope: me
 				});
 		});
-		
+
 	},
-	
+
 	/**
 	 * Called ONLY by saveData. Do not use this function directly
 	 */
@@ -1875,7 +1877,7 @@ Ext.define('Ck.form.Controller', {
 
 		var me = this;
 		var v = me.getView();
-		
+
 		var sid = v.getSid();
 		var lyr = v.getLayer();
 
@@ -1896,16 +1898,16 @@ Ext.define('Ck.form.Controller', {
 		}
 
 		var values = options.values || this.getValues(true);
-		
+
 		// If a model is set we use it
 		if(fid && model) {
 			var oModel = Ext.create(model);
 			// Use set() to init fields modified to build create/update query
 			oModel.set(values);
-			
+
 			//fid[oModel.idProperty]
 			//oModel.setId(fid[oModel.idProperty]);
-			
+
 			// if phantom==false do Update otherwise do Insert
 			if(this.operation == 'update') oModel.phantom = false;
 
@@ -1916,7 +1918,7 @@ Ext.define('Ck.form.Controller', {
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
-					
+
 					Ext.callback(options.success, options.scope, [values]);
 				},
 				failure: function(record, operation) {
@@ -1954,7 +1956,7 @@ Ext.define('Ck.form.Controller', {
 			Ext.callback(options.success, options.scope, [values]);
 			return true;
 		}
-		
+
 		var opt  = {
 			method: options.method.toUpperCase(),
 			url: this.getFullUrl(url),
@@ -1970,7 +1972,7 @@ Ext.define('Ck.form.Controller', {
 						Ck.log("afterSave cancel saveData.");
 						return false;
 					}
-					
+
 					// Allow to reload form after Save. Get back ID generated on save for example
 					if(options.reload===true) this.loadData();
 				}
@@ -1988,7 +1990,7 @@ Ext.define('Ck.form.Controller', {
 				Ext.callback(options.failure, options.scope, [response]);
 			}
 		};
-		
+
 		if(options.mask!==false){
 			this.saveMask = new Ext.LoadMask({
 				target: v,
@@ -1997,15 +1999,15 @@ Ext.define('Ck.form.Controller', {
 			this.saveMask.show();
 		}
 		// Ck.log("Start save for : "+this.name);
-		
+
 		if(this.files && this.files.length>0){
 			// Save data from custom URL ou standard URL
 			Ck.Ajax.xhr(opt);
 		} else {
 			Cks[options.method.toLowerCase()](opt);
-		}		
+		}
 	},
-	
+
 	getOption: function(key) {
 		var opt = this.form.options || {};
 		if(Ext.isString(key)) {
@@ -2109,12 +2111,12 @@ Ext.define('Ck.form.Controller', {
 	resetData: function(bSoft) {
 		var v = this.getView();
 		if(!v) return;
-		
+
 		if(this.oController && this.oController.beforeReset(bSoft) === false) {
 			Ck.log("beforeReset cancel resetData.");
 			return false;
 		}
-		
+
 		// Reset main form
 		Ext.suspendLayouts();
 		var form = v.getForm();
@@ -2127,7 +2129,7 @@ Ext.define('Ck.form.Controller', {
 				if(fields[f].xtype=='hidden' || fields[f].xtype=='hiddenfield') continue;
 				if(!fields[f].isVisible()) continue;
 				if(fields[f].readOnly===true) continue;
-				
+
 				fields[f].originalValue = null;
 				fields[f].reset();
 			} else {
@@ -2137,9 +2139,9 @@ Ext.define('Ck.form.Controller', {
 				fields[f].reset();
 			}
 		}
-		Ext.resumeLayouts(true);	
+		Ext.resumeLayouts(true);
 		//
-		
+
 		// SUBFORM : reset data
 		var subforms = this.getSubForms();
 		for (var s = 0; s < subforms.length; s++) {
@@ -2147,14 +2149,14 @@ Ext.define('Ck.form.Controller', {
 			if(sf) sf.resetData(bSoft);
 		}
 		//
-		
+
 		// In soft reset don't alter viewModel - juste clean allowed fields.
 		if(bSoft===true) return true;
-		
+
 		if(this.getViewModel().get('updating')===true) {
 			this.getViewModel().set('updating', false);
 		}
-		
+
 		// Reset viewModel data (binding...)
 		this.getViewModel().setData({
 			layer: null,
@@ -2164,7 +2166,7 @@ Ext.define('Ck.form.Controller', {
 		this.getViewModel().notify();
 
 		this.operation = '';
-		
+
 		this.fireEvent('afterreset');
 		return true;
 	}
