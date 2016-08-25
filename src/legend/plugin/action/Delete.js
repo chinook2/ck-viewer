@@ -1,13 +1,13 @@
 /**
- * 
+ *
  */
 Ext.define('Ck.legend.plugin.action.Remove', {
 	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayerremove',
-	
-	iconCls: 'fa fa-remove fa-lg fa-flip-horizontal ck-plugin',
+
+	iconCls: 'ckClose ck-plugin',
 	tooltip: 'Remove layer from map',
-	
+
 	setAction: function() {
 		var action = {
 			tooltip: this.tooltip,
@@ -27,16 +27,16 @@ Ext.define('Ck.legend.plugin.action.Remove', {
 				} else {
 					return (lyr.get("removable"))? this.iconCls : this.disableClass;
 				}
-				
+
 			},
 			scope: this
 		}
-		
+
 		this.actionColumn.items.push(action);
 		this.actionColumn.width = this.actionColumn.items.length * 20;
 	},
-	
-	doAction: function(layer) {		
+
+	doAction: function(layer) {
 		var olMap = Ck.getMap().getOlMap();
 		olMap.removeLayer(layer);
 	}

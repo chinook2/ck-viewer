@@ -5,14 +5,14 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayeredit',
 
-	iconCls: 'fa fa-pencil fa-lg ck-plugin',
+	iconCls: 'ckEdit ck-plugin',
 	tooltip: 'Edit layer',
-	
+
 	/**
 	 * Where display the edit panel
 	 */
 	target: "window",
-	
+
 	/**
 	 * Options merged to the target instanciation options
 	 */
@@ -32,24 +32,24 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			},
 			scope: this
 		}
-		
+
 		this.actionColumn.items.push(action);
 		this.actionColumn.width = this.actionColumn.items.length * 20;
 	},
-	
-	doAction: function(layer) {		
+
+	doAction: function(layer) {
 		var map = this.getMap();
-		
+
 		var editOpt = {
 			xtype	: "ckedit",
 			layer	: layer,
 			openner	: this
 		};
-		
+
 		if(!Ext.isEmpty(this.win)) {
 			this.close();
 		}
-		
+
 		switch(this.target) {
 			case "window":
 				this.win = Ext.create('Ext.window.Window', Ext.apply({
@@ -72,9 +72,9 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 				this.getMap().getOlMap().updateSize()
 				break;
 		}
-		
+
 	},
-	
+
 	/**
 	 * @param {ol.layer.Base}
 	 */
@@ -86,7 +86,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		}
 		return false;
 	},
-	
+
 	close: function() {
 		switch(this.target) {
 			case "window":

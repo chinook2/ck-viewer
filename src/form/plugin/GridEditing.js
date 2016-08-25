@@ -8,24 +8,24 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	editrow: false,
 	deleterow: true,
 	dummyrow: true,
-	
+
 	init: function(grid) {
 		if(this.disabled) return;
-		
+
 		// Init subform after grid rendering
 		grid.on('afterrender', function() {
 			this.initEditing(grid);
 		}, this, {delay: 50});
 	},
-	
+
 	initEditing: function(grid) {
 		this.grid = grid;
-		
+
 		// Get parent ckform
 		var formController;
 		var ckform = grid.view.up('ckform');
 		if(ckform) formController = ckform.getController();
-		
+
 		// Get the Action Column
 		this.actionColumn = this.grid.down('actioncolumn');
 		if(!this.actionColumn) {
@@ -39,7 +39,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 					getClass: function(v, meta, rec) {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
-						return 'fa fa-edit';
+						return 'ckEdit';
 					},
 					tooltip: 'Edit row',
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
@@ -59,22 +59,28 @@ Ext.define('Ck.form.plugin.GridEditing', {
 					getClass: function(v, meta, rec) {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
-						return 'fa fa-close';
+						return 'ckClose';
 					},
 					tooltip: 'Delete row',
 					handler: this.deleteRow,
 					scope: this
 				});
 			}
-			
+
 			var conf = this.grid.getInitialConfig();
-			
+
 			// Default hide action column when editing = false or no action enable
 			var hide = (formController)? !formController.getView().getEditing() : false;
 			hide = (actions.length == 0)? true : hide;
-			
+
 			// Add action column for editing by plugin GridEditing
-			var col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
+			var col = [];
+			if (conf.columns) {
+				col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
+			} else {
+				col = Ext.Array.pluck(this.grid.columns, 'initialConfig');
+			}
+
 			col.push({
 				xtype		: 'actioncolumn',
 				hidden		: hide,
@@ -91,13 +97,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				}
 				return value;
 			}
-			
+
 			this.grid.reconfigure(col);
 			this.actionColumn = this.grid.down('actioncolumn');
 
 			// Add grid reference to the actionColumn
 			// this.actionColumn.ownerGrid = this.grid;
-			
+
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
 		}
 
@@ -110,8 +116,11 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			});
 			// If already editing (in subform...)
 			if(formController.view.getEditing()===true) this.startEditing();
+		} else {
+			var c = grid.getConfig();
+			if(c && c.editing === true) this.startEditing();
 		}
-		
+
 		grid.on({
 			validateedit: this.addNewRow,
 			edit: function(e, context){
@@ -147,15 +156,15 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		this.actionColumn.hide();
 		this.deleteNewRow();
 	},
-	
+
 	addNewRow: function(e, context){
 		var store = this.grid.getStore();
-		
+
 		// Call on validate new row. The new row is now validated.
 		if(context) {
 			delete context.record.data['dummy'];
 		}
-		
+
 		// We allready have un empty field for new record...
 		if(store.findRecord('dummy', true)) return;
 
@@ -166,21 +175,21 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			});
 		}
 	},
-	
+
 	deleteNewRow: function(){
 		// Remove empty field for new record...
 		var store = this.grid.getStore();
 		var rec = store.findRecord('dummy', true);
 		if(rec) store.remove(rec);
 	},
-	
+
 	deleteRow: function(grid, rowIndex) {
 		var store = grid.getStore();
 		var rec = store.getAt(rowIndex);
 		if(rec){
 			store.remove(rec);
 			// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
-			store.removed.push(rec);		
+			store.removed.push(rec);
 		}
 	}
 });
