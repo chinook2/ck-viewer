@@ -385,6 +385,9 @@ Ext.define('Ck.map.Controller', {
 						url: this.getMapUrl(mainOperation.getUrl()),
 						params: mainOperation.getParams()
 					};
+					if(!isNaN(offering.getData().ratio)) {
+						olSourceOptions.ratio = offering.getData().ratio;
+					}
 					break;
 					
 				case 'wmts':
