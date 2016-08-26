@@ -75,11 +75,20 @@ Ext.define('Ck.overview.Controller', {
 	},
 	
 	attachOvControl: function() {
+		var view;
+		if(true) {
+			view = new ol.View({
+				center: this.map.getView().getCenter(),
+				projection: this.map.originOwc.getProjection()
+			});
+		}
+		
 		var opt = {
 			collapsed: false,
 			collapsible: false,
 			target: this.getView().getEl(),
-			layers: this.ovLayers
+			layers: this.ovLayers,
+			view: view
 		};
 		
 		this.ovControl = new ol.control.OverviewMap(opt);
