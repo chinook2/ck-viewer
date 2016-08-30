@@ -741,7 +741,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {Boolean}	False to return the lower resolution
 	 * @param {Float}	More than 0 to return a non neighbor resolution
 	 */
-	getNearestResolution(res, upper, offset) {
+	getNearestResolution: function(res, upper, offset) {
 		var nrRes, idx = 0, mapRes = this.originOwc.getResolutions(true);
 		nrRes = mapRes[idx];
 		
