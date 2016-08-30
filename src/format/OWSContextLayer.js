@@ -12,6 +12,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 		name		: null,
 		title		: null,
 		visible		: true,
+		userLyr		: true,
 		offerings	: [],
 		owsContext	: {},
 		data		: {}
@@ -30,7 +31,8 @@ Ext.define('Ck.format.OWSContextLayer', {
 			id		: data.id,
 			name	: data.properties.name,
 			title	: data.properties.title,
-			visible	: data.properties.active
+			visible	: Ext.isBoolean(data.properties.active)? data.properties.active : true,
+			userLyr	: Ext.isBoolean(data.properties.userLyr)? data.properties.userLyr : true
 		});
 		
 		this.initConfig(config);
@@ -45,7 +47,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 		}
 		
 		if(offerings.length == 0) {
-			Ck.log("No offering for this layer ("+ this.getTitle() +").");
+			Ck.log("No offering for this layer (" + this.getTitle() + ").");
 		}
 	},
 	

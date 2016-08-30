@@ -99,6 +99,10 @@ Ext.define('Ck.legend.Controller', {
 	},
 	
 	addLayer: function(layer) {
+		if(!layer.ckLayer.getUserLyr()) {
+			return false;
+		}
+		
 		var root = this.getView().getRootNode();
 		var pNode = root;
 		

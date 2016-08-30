@@ -311,7 +311,13 @@ Ext.define('Ck.map.Controller', {
 					}
 					sources[off.getType()].push(this.createSource(off, layer, owc));
 				}
-					
+				
+				// Reference main source into sources properties
+				if(!Ext.isArray(sources[mainOffering.getType()])) {
+					sources[mainOffering.getType()] = [];
+				}
+				sources[mainOffering.getType()].push(olSource);
+				
 				// Layer creation	
 				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 					id: layer.getId(),
@@ -727,6 +733,39 @@ Ext.define('Ck.map.Controller', {
 			}
 		});
 		return res;
+	},
+	
+	/**
+	 * Return the available resolution nearest to the specified value
+	 * @param {Float}	The required resolution
+	 * @param {Boolean}	False to return the lower resolution
+	 * @param {Float}	More than 0 to return a non neighbor resolution
+	 */
+	getNearestResolution(res, upper, offset) {
+		var nrRes, idx = 0, mapRes = this.originOwc.getResolutions(true);
+		nrRes = mapRes[idx];
+		
+		while(Ext.isNumeric(mapRes[idx + 1]) && nrRes < res) {
+			nrRes = mapRes[++idx];
+		}
+		
+		// nrRes is the resolution next the specified resolution
+		if(upper) {
+			for(var i = 0; i < offset; i++) {
+				if(Ext.isNumeric(mapRes[idx + 1])) {
+					nrRes = mapRes[++idx];
+				}
+			}
+		} else {
+			offset++;
+			for(var i = 0; i < offset; i++) {
+				if(Ext.isNumeric(mapRes[idx - 1])) {
+					nrRes = mapRes[--idx];
+				}
+			}
+		}
+		
+		return nrRes;
 	},
 	
 	/**
