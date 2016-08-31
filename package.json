@@ -304,6 +304,8 @@
 			"path": "libs/papaparse/papaparse.min.js"
 		},{
 			"path": "libs/x2js/xml2json.min.js"
+		},{
+			"path": "libs/xmljs/xmllint.js"
 		}]
 	},
 	"development": {
@@ -346,6 +348,8 @@
     		"path": "libs/papaparse/papaparse.js"
     	},{
 			"path": "libs/x2js/xml2json.js"
+		},{
+			"path": "libs/xmljs/xmllint.js"
 		}]
     },
 	"testing": {"environment": "testing"}
