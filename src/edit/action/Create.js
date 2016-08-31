@@ -74,7 +74,7 @@ Ext.define('Ck.edit.action.Create', {
 						}
 						
 						// Create un new  feature
-						var geometry = new ol.geom.Point(geoloc)
+						var geometry = new ol.geom.Point(geoloc);
 						var feature = new ol.Feature({
 							geometry: geometry,
 							status: "CREATED"

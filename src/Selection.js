@@ -238,8 +238,8 @@ Ext.define('Ck.Selection', {
 		this.getMask().show();
 		
 		// Fix if selection is fired from code and not from user interaction
-		if(event !== undefined) {
-			this.inAddition = event[this.getMergeKey()];
+		if(evntParams !== undefined) {
+			this.inAddition = evntParams[this.getMergeKey()];
 		}
 		
 		var feature = evntParams.feature;
