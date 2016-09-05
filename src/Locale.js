@@ -58,20 +58,20 @@ Ext.define('Ck.Locale', {
         } else {
             v = Ext.getCmp(v.id);
         }
-        if(v) v.cascadeLocale(locale);
+        if(v && v.cascadeLocale) v.cascadeLocale(locale);
 
         // Update windows
         var aw = Ext.query('.x-window');
         aw.forEach(function(w){
             var win = Ext.getCmp(w.id);
-            if(win) win.cascadeLocale(locale);
+            if(win && win.cascadeLocale) win.cascadeLocale(locale);
         })
 
         // Update globals tips
         var at = Ext.query('.x-tip');
         at.forEach(function(t){
             var tip = Ext.getCmp(t.id);
-            if(tip) tip.cascadeLocale(locale);
+            if(tip && tip.cascadeLocale) tip.cascadeLocale(locale);
         })
     },
 
@@ -79,4 +79,3 @@ Ext.define('Ck.Locale', {
         return this.locale;
     }
 });
-

@@ -381,8 +381,13 @@ Ext.apply(Ck, {
 			return Ext.manifest.profile + '/resources/' + pkg;
 		} else {
 			// Standard web app need to add full url
-			var baseUrl = location.protocol +'//'+ location.host + location.pathname;
-			return baseUrl + (Ext.manifest.profile || '') + '/resources/' + pkg;
+			var locationPath = location.pathname;
+			if (locationPath.indexOf('.') != -1) {
+				locationPath = locationPath.split('/').slice(0,-1).join('/') + '/';
+			}
+			var baseUrl = location.protocol +'//'+ location.host + locationPath;
+			var resourcesUrl = Ck.getOption('inlineResources') || '/resources/' + pkg;
+			return baseUrl + (Ext.manifest.profile || '') + resourcesUrl;
 		}
 
 		// TODO : when used without CMD - include inline API...
@@ -678,7 +683,7 @@ Ext.apply(Ck, {
 		var blob = new Blob(byteArrays, {type: contentType});
 		return blob;
 	},
-	
+
 	fieldNameToLabel: function(name) {
 		var nameProper = '';
 

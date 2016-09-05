@@ -59,7 +59,7 @@ Ext.define('Ck.view.Controller', {
 
 				Ck.error('Error when loading "'+uiName+'" interface !. Loading the default interface...');
 
-				this.getUi('ck-default');
+				if(uiName != 'ck-default') this.getUi('ck-default');
 			}
 		});
 	}

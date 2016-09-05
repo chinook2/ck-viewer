@@ -106,7 +106,7 @@ Ext.define('Ck.Controller', {
 		// Static resource in application
 		else if(Ext.String.startsWith(name, '/')) {
 			var res = 'resources';
-			var packResources = Ck.getOption('resources');
+			var packResources = Ck.getOption('inlineResources') || Ck.getOption('resources');
 			if(packResources) res = Ck.getPath(packResources);
 			url = Ext.String.format(tpl.st, res, name);
 			// If start with http don't replace first http:// by http:/

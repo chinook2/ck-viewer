@@ -13,19 +13,19 @@ Ext.define('Ext.overrides.Component', {
 	 * @cfg {string/Array} [localeProperties=html] A string or array of strings
 	 * of properties on the component to be localized.
 	 */
-	localeProperties: 'html',
+	//localeProperties: 'html',
 
 
 	/**
 	 * @cfg {string} localeStore storeId of the store that holds strings
 	 * translated in multiple languages.
 	 */
-	localeStore: 'I18n',
+	//localeStore: 'I18n',
 
 	constructor: function(config) {
 		config = config || {};
-		if(config.action) {
-			var action = key = config.action;
+		if(config.ckAction) {
+			var action = key = config.ckAction;
 			// Allow to add same action twice or more with a different itemId
 			if(config.itemId) key += config.itemId;
 			// Special test for actions to change Locale (init simpliest)
@@ -35,14 +35,19 @@ Ext.define('Ext.overrides.Component', {
 			if( Ck.actions[key] ) {
 				config = Ck.actions[key];
 			} else {
-				config = Ext.create('widget.'+action, config);
-				Ck.actions[key] = config;
+				try {
+					config = Ext.create('widget.'+action, config);
+					Ck.actions[key] = config;
+				} catch (e) {
+					Ck.log("Enable to init action '"+ action +"'");
+				}
 			}
 		}
 
-		this.callParent([config]);
-	},
+		this.callParent(arguments);
+	}//,
 
+/*
 	initComponent: function() {
 		var me = this,
 			configurator = me.getConfigurator(),
@@ -74,12 +79,6 @@ Ext.define('Ext.overrides.Component', {
 
 		if(me.items) {
 			if(!Ext.isArray(me.items)){
-			/*	me.items.forEach(function (item) {
-					if (item.cascadeLocale) {
-						item.cascadeLocale(locale);
-					}
-				});
-			} else {*/
 				me.items.each(function (item) {
 					if (item.cascadeLocale) {
 						item.cascadeLocale(locale);
@@ -193,7 +192,9 @@ Ext.define('Ext.overrides.Component', {
 			}
 		}
 	}
-} /*,
+*/
+}
+/*,
  function(){
  var cProto = Ext.Component.prototype,
  localeStore = cProto.localeStore;
@@ -256,10 +257,11 @@ Ext.define('Ext.overrides.Component', {
  return this.locale || 'en';
  }
  });
- }*/
+ }
+ */
 );
 
-
+/*
 Ext.define('Ext.overrides.panel.Panel', {
 	override: 'Ext.panel.Panel',
 	localeProperties: ['title', 'html']
@@ -389,7 +391,7 @@ Ext.define("Ext.overrides.slider.Single",  {
 		//this.callParent(arguments);
 	}
 });
-
+*/
 
 /*
  Ext.define("Ext.overrides.toolbar.TextItem", {override: "Ext.toolbar.TextItem",localeProperties: ["text", "html"]});
