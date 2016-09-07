@@ -12,13 +12,13 @@ Ext.define('Ck.edit.Controller', {
 	alias: 'controller.ckedit',
 
 	editPanelVisible: true,
-	
+
 	/**
 	 * @var {ol.Feature}
 	 * Current edited feature
 	 */
 	currentFeature: null,
-	
+
 	/**
 	 * @var {Ext.button.Button}
 	 * Button for geolocation with ckEditGeolocation action
@@ -49,7 +49,7 @@ Ext.define('Ck.edit.Controller', {
 		 * Type of the layer. If it's a multi-geometry layer and emulateSimple is true then this value will be simple name geometry type
 		 */
 		geometryType: "",
-		
+
 		/**
 		 * True for looped geometry like polygon
 		 */
@@ -64,7 +64,7 @@ Ext.define('Ck.edit.Controller', {
 		 * Considerate geometry type. It can be different from geometryType only if emulateSimple is true
 		 */
 		geometryTypeBehavior: "",
-		
+
 		/**
 		 * The id of the snapping options panel
 		 */
@@ -76,7 +76,7 @@ Ext.define('Ck.edit.Controller', {
 	 * Fire when geolocation informations is send to this controller
 	 * @param {ol.Coordinate}
 	 */
-	 
+
 	/**
 	 * @event featurecreate
 	 * Fires when a feature was created
@@ -142,19 +142,19 @@ Ext.define('Ck.edit.Controller', {
 
 		// Geometry type
 		var geometryType = this.getLayer().getExtension("geometryType");
-		
+
 		// Type compatibility
 		switch(geometryType) {
 			case "Line":
 				geometryType = "LineString";
 				break;
 		}
-		
+
 		// Looped geometry have specific vertex behavior
 		if(geometryType.indexOf("Polygon") != -1) {
 			this.setLoopedType(true);
 		}
-		
+
 		if(geometryType.indexOf("Multi") == -1) {
 			this.setEmulateSimple(false);
 			geometryTypeBehavior = geometryType;
@@ -169,7 +169,7 @@ Ext.define('Ck.edit.Controller', {
 
 		this.setMulti(geometryType.indexOf("Multi") != -1);
 		this.setMultiBehavior(geometryTypeBehavior.indexOf("Multi") != -1);
-		
+
 		// Reference to the main toolbar
 		var tbar = view.items.getAt(0).getDockedItems()[0];
 
@@ -249,7 +249,7 @@ Ext.define('Ck.edit.Controller', {
 		conf.editController = this;
 		conf.layer = view.layer;
 		conf.multi = this.getMultiBehavior();
-		
+
 		// Feature panel : when user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
 		if(conf.multi) {
 			var featureContainer = Ext.getCmp("edit-featurepanel");
@@ -281,7 +281,7 @@ Ext.define('Ck.edit.Controller', {
 			}
 		}
 
-		
+
 		// Vertex panel : display vertex panel for line and polygon
 		if(this.getGeometryTypeBehavior() != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
@@ -308,8 +308,8 @@ Ext.define('Ck.edit.Controller', {
 			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
 			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
 		}
-		
-		
+
+
 		// History panel. Everytime used, but not necessarily visible
 		var historyContainer = Ext.getCmp("edit-historypanel");
 		if(Ext.isEmpty(historyContainer)) {
@@ -319,7 +319,7 @@ Ext.define('Ck.edit.Controller', {
 				historyContainer = this.getMainWindow();
 			}
 		}
-		
+
 		// Hide "Add to GPS position" button if is not a point layer
 		if(Ck.isDesktop() || geometryType.search("Point") === -1) {
 			var gpsAdd = tbar.getComponent("edit-create-gps");
@@ -331,7 +331,7 @@ Ext.define('Ck.edit.Controller', {
 		// Geolocation button
 		this.on("geolocation", this.setPosition, this);
 		this.geolocationBtn = tbar.getComponent("edit-geolocation");
-		
+
 		this.historyView = Ext.create("widget.ckedit-history", conf);
 		this.historyView.setVisible(view.getUseHistory());
 		this.history = this.historyView.getController();
@@ -340,16 +340,16 @@ Ext.define('Ck.edit.Controller', {
 
 		historyContainer.add(this.historyView);
 		this.mainWindow.manageVisibility();
-		
+
 		this.on("featurecreate", this.onCreate, this);
-		
+
 		Ck.getMap().on("contextloading", function(ctx) {
-			this.close();		
+			this.close();
 		}, this);
 	},
-	
+
 	/**
-	 * 
+	 *
 	 */
 	getMainWindow: function() {
 		if(Ext.isEmpty(this.mainWindow)) {
@@ -360,12 +360,12 @@ Ext.define('Ck.edit.Controller', {
 				layout: "fit",
 				closable: false
 			});
-			
+
 			this.mainWindow.on("add", function(win, item) {
 				item.on("show", win.manageVisibility);
 				item.on("hide", win.manageVisibility);
 			});
-			
+
 			this.mainWindow.manageVisibility = function() {
 				var visible = false;
 				for(var i = 0; (i < this.items.getCount() && !visible); i++) {
@@ -373,14 +373,14 @@ Ext.define('Ck.edit.Controller', {
 				}
 				this.setVisible(visible);
 			}.bind(this.mainWindow);
-			
+
 			this.mainWindow.show();
 		}
-		
+
 		// JMA hard fix temp !
 		this.mainWindow.hide();
 		//
-		
+
 		return this.mainWindow;
 	},
 
@@ -412,12 +412,12 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	startGeometryEdition: function(feature) {
 		var geom = feature.getGeometry();
-		
+
 		// If it's a multi geom and we only edit geom as simple -> simplify geometry
 		if((geom.getType().indexOf("Multi") != -1) && this.getEmulateSimple()) {
 			feature.setGeometry(geom["get" + this.getGeometryTypeBehavior()](0));
 		}
-		
+
 		// Add the feature, if not already added, to the collection
 		if(this.getIsWMS()) {
 			var ft = this.wfsSource.getFeatureById(feature.getId());
@@ -428,7 +428,7 @@ Ext.define('Ck.edit.Controller', {
 				feature.setGeometry(ft.getGeometry());
 			}
 		}
-		
+
 		if(this.getMultiBehavior()) {
 			this.startFeatureEdition(feature);
 		} else {
@@ -444,7 +444,7 @@ Ext.define('Ck.edit.Controller', {
 		if(ft) {
 			this.wfsSource.removeFeature(ft);
 		}
-		
+
 		this.wfsSource.addFeature(feature);
 		feature.setStyle(Ck.map.Style.redStroke);
 		if(!this.getIsWMS()) {
@@ -494,7 +494,7 @@ Ext.define('Ck.edit.Controller', {
 				this.fireEvent("featuregeometry", feature);
 			}, this);
 			//
-			
+
 			this.switchPanel(this.vertexPanel);
 		}
 	},
@@ -507,7 +507,7 @@ Ext.define('Ck.edit.Controller', {
 		// Do snapping
 		var feature = evt.features.item(0);
 		var geometry = feature.getGeometry();
-		
+
 		var opt = {
 			layers		: this.getSnappingOptions(),
 			layer		: this.getLayer(),
@@ -518,7 +518,7 @@ Ext.define('Ck.edit.Controller', {
 			}.bind(this, feature),
 			scope		: this
 		}
-		
+
 		if(opt.layers.length > 0) {
 			var geometry = Ck.Snap.snap(opt);
 		} else {
@@ -545,7 +545,7 @@ Ext.define('Ck.edit.Controller', {
 			}
 		}
 	},
-	
+
 	/**************************************************************************************/
 	/********************************* Sub-feature events *********************************/
 	/**************************************************************************************/
@@ -611,10 +611,10 @@ Ext.define('Ck.edit.Controller', {
 		} else {
 			config = [];
 		}
-		
+
 		return config
 	},
-	
+
 	/**
 	 * Return the source of the current layer
 	 * @return {ol.source}
@@ -687,18 +687,18 @@ Ext.define('Ck.edit.Controller', {
 		if(this.feature) {
 			this.feature.close.bind(this.feature)();
 		}
-		
+
 		if(this.mainWindow) {
 			this.mainWindow.close();
 		}
 		if(this.wfsLayer) {
 			this.getMap().removeSpecialLayer(this.wfsLayer);
 		}
-		
+
 		if(this.moveInteraction) {
 			this.getOlMap().removeInteraction(this.moveInteraction);
 		}
-		
+
 		this.getOpenner().close();
 	},
 
@@ -708,12 +708,12 @@ Ext.define('Ck.edit.Controller', {
 	save: function() {
 		if(this.getIsWMS()) {
 			var layer = this.getLayer();
-			
+
 			var ope = layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
 			var geometryName = layer.getExtension("geometryColumn");
 
 			var currSrs = this.getMap().getProjection().getCode();
-			var lyrSrs = ope.getSrs();
+			var lyrSrs = ope.getSrs() || currSrs;
 
 			// Loop on history store items
 			var ft, inserts = [], updates = [], deletes = [];
@@ -759,7 +759,7 @@ Ext.define('Ck.edit.Controller', {
 						break;
 				}
 			}
-			
+
 			Ck.Ajax.sendTransaction(layer, {
 				inserts: inserts,
 				updates: updates,

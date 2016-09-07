@@ -8,16 +8,16 @@ Ext.define('Ck.edit.action.Geometry', {
 	alias: 'widget.ckEditGeometry',
 
 	itemId: 'edit-geometry',
-	iconCls: 'fa fa-edit',
+	iconCls: 'ckfont ck-edit-geom',
 	tooltip: 'Edit geometry',
-	
+
 	interactionId: "geometryInteraction",
 
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		this.btn = btn;
 		var source = this.getLayerSource();
-		
+
 		if(!this.geometryInteraction) {
 			this.geometryInteraction = Ck.create("Ck.Selection", {
 				layers			: [this.getLayer()],
@@ -47,13 +47,13 @@ Ext.define('Ck.edit.action.Geometry', {
 				this.controller.moveInteraction.setActive(false);
 			}
 			this.geometryInteraction.resetSelection();
-			
+
 			if(this.controller.vertex !== undefined) {
 				this.controller.vertex.closeAll();
-			}			
+			}
 		}
 	},
-	
+
 	firstUse: function() {
 		this.callParent();
 		this.controller.addListener("featuresessionstart", function() {
@@ -71,15 +71,15 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.reset();
 		}, this);
 	},
-	
+
 	disableInteraction: function() {
 		this.geometryInteraction.setActive(false);
 	},
-	
+
 	enableInteraction: function() {
 		this.geometryInteraction.setActive(true);
 	},
-	
+
 	/**
 	 * Unhighlight feature
 	 */
