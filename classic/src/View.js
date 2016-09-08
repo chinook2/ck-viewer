@@ -21,7 +21,17 @@ Ext.define("Ck.View", {
         'Ext.grid.*',
 		'Ext.util.*',
 
-		'Ck.*' // Load all Ck class...
+        'Ck.Map',
+        'Ck.Legend',
+        'Ck.Toolbar',
+        'Ck.Form',
+        'Ck.Edit',
+        'Ck.Overview',
+        'Ck.Result',
+        'Ck.Print',
+        'Ck.Pdf',
+        'Ck.PdfViewer',
+        'Ck.view.*'
 	],
 	//plugins: 'viewport',
 

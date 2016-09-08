@@ -43,7 +43,7 @@
  */
 String.prototype.stripExtension = function() {
 	return this.substr(0, this.lastIndexOf("."));
-}
+};
 
 var Ck = Ck || {};
 

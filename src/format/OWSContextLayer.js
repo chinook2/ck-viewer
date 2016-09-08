@@ -1,9 +1,9 @@
 /**
- * 
+ *
  */
 Ext.define('Ck.format.OWSContextLayer', {
 	alternateClassName: ['Ck.owcLayer', 'Ck.OwcLayer'],
-	
+
 	/**
 	 * Config of OWSContextLayer
 	 */
@@ -17,7 +17,11 @@ Ext.define('Ck.format.OWSContextLayer', {
 		owsContext	: {},
 		data		: {}
 	},
-	
+
+	requires: [
+		'Ck.format.OWSContextLayerOffering'
+	],
+
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
@@ -26,7 +30,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 	constructor: function(config) {
 		// Feed the config
 		var data = config.data;
-		
+
 		Ext.apply(config, {
 			id		: data.id,
 			name	: data.properties.name,
@@ -34,23 +38,23 @@ Ext.define('Ck.format.OWSContextLayer', {
 			visible	: Ext.isBoolean(data.properties.active)? data.properties.active : true,
 			userLyr	: Ext.isBoolean(data.properties.userLyr)? data.properties.userLyr : true
 		});
-		
+
 		this.initConfig(config);
-		
+
 		var offerings = this.getOfferings();
-		
+
 		for(var i = 0; i < data.properties.offerings.length; i++) {
 			offerings.push(new Ck.owcOffering({
 				data: data.properties.offerings[i],
 				owsLayer: this
 			}));
 		}
-		
+
 		if(offerings.length == 0) {
 			Ck.log("No offering for this layer (" + this.getTitle() + ").");
 		}
 	},
-	
+
 	/**
 	 * Get layer extent reprojected if necessary
 	 * @param {ol.proj.ProjectionLike}
@@ -58,7 +62,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 	 */
 	getExtent: function(proj) {
 		var data = this.getData();
-		
+
 		if(data.properties.bbox) {
 			return data.properties.bbox;
 		} else if(data.properties.latlongbbox) {
@@ -74,10 +78,10 @@ Ext.define('Ck.format.OWSContextLayer', {
 				return data.properties.latlongbbox;
 			}
 		}
-		
+
 		return null;
 	},
-	
+
 	/**
 	 * Return one properties or all properties (in an object) if key param is not defined
 	 * @param {String/undefined}
@@ -91,7 +95,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 			return ext[key];
 		}
 	},
-		
+
 	/**
 	 * Get offering of desired type
 	 * @param {String/Number} Type (wms, wfs, osm...) or index of offering
@@ -99,8 +103,8 @@ Ext.define('Ck.format.OWSContextLayer', {
 	 */
 	getOffering: function(val) {
 		var offering, offerings = this.getOfferings();
-		
-		if(Ext.isString(val)) {		
+
+		if(Ext.isString(val)) {
 			for(var i = 0; (i < offerings.length && Ext.isEmpty(offering)); i++) {
 				if(offerings[i].getType() == val) {
 					offering = offerings[i];
@@ -109,7 +113,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 		} else {
 			offering = offerings[val];
 		}
-		
+
 		return offering;
 	}
 });

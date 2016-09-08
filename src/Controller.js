@@ -7,6 +7,10 @@
 Ext.define('Ck.Controller', {
 	extend: 'Ext.app.ViewController',
 
+	requires: [
+		'Ck.Ajax'
+	],
+	
 	listen: {
 		controller: {
 			'ckmap': {

@@ -8,6 +8,10 @@ Ext.define('Ck.Locale', {
     locale: null,
     defaultLocale: 'en',
 
+    requires: [
+		'Ck'
+	],
+    
     /**
      *
      * @param config
@@ -15,7 +19,7 @@ Ext.define('Ck.Locale', {
     constructor: function (config) {
         var locale = this.defaultLocale;
         if(Ext.manifest.locale) locale = Ext.manifest.locale;
-        if(Ck.params.locale) locale = Ck.params.locale;
+        // if(Ck.params.locale) locale = Ck.params.locale;
 
         var store = Ext.create('Ext.data.Store',{
             storeId: 'I18n',

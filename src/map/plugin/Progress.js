@@ -4,8 +4,8 @@
 Ext.define('Ck.map.plugin.Progress', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.mapprogress',
-	
-	
+
+
 	/**
 	 * Init the map component, init the viewModel
 	 * @protected
@@ -15,14 +15,14 @@ Ext.define('Ck.map.plugin.Progress', {
 		this.loaded = 0;
 		this.loading = 0;
 		this.el = this.createLoadElement();
-		
+
 		ckMap.getController().on("addLayer", this.addLoadListeners, this);
 	},
-	
+
 	destroy: function(){
 		this.el.remove();
 	},
-	
+
 	/**
 	 * Create the element that will be modified by update method
 	 */
@@ -32,27 +32,29 @@ Ext.define('Ck.map.plugin.Progress', {
 		document.body.appendChild(el);
 		return el;
 	},
-	
+
 	/**
 	 * Add listeners to each layer (except vector)
 	 * @param {ol.layer}
 	 */
 	addLoadListeners: function(layer) {
 		var olSource = layer.getSource();
+		if(!olSource) return;
+		
 		// Add loading event
 		if(typeof olSource.getImage == "function") {
 			olSource.on('imageloadstart', this.addLoading, this);
 			olSource.on('imageloadend', this.addLoaded, this);
 			olSource.on('imageloaderror', this.addLoaded, this);
 		}
-		
+
 		if(typeof olSource.getTile == "function") {
 			olSource.on('tileloadstart', this.addLoading, this);
 			olSource.on('tileloadend', this.addLoaded, this);
 			olSource.on('tileloaderror', this.addLoaded, this);
 		}
 	},
-	
+
 	/**
 	 * Increment the count of loading tiles
 	 */
@@ -64,7 +66,7 @@ Ext.define('Ck.map.plugin.Progress', {
 		++this.loading;
 		this.update();
 	},
-	
+
 	/**
 	 * Increment the count of loaded tiles
 	 */

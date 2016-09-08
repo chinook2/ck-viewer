@@ -1,12 +1,15 @@
 /**
- * 
+ *
  */
-// @require Ck
 Ext.define('Ck.Ajax', {
 	extend: 'Ext.data.Connection',
 	alternateClassName: 'Cks',
-	
+
 	singleton: true,
+
+	requires: [
+		'Ck'
+	],
 	
 	/**
 	 * @ignore
@@ -26,26 +29,26 @@ Ext.define('Ck.Ajax', {
 				scope: this
 			});
 		}
-		
+
 		// Ext.Ajax.setDefaultPostHeader('application/json; charset=UTF-8');
 		// if (Ck.getOption('defaultPostHeader')) {
 			// Ext.Ajax.setDefaultPostHeader(Ck.getOption('defaultPostHeader'));
 		// }
 	},
-	
+
 	get: function(options) {
 		options.method = 'GET';
-		
+
 		// Prod caching with unique build timestamp param (force reload for new build only)
 		if(Ck.getEnvironment() == 'production'){
 			if(Ext.manifest.loader && Ext.manifest.loader.cache){
 				options.url = Ext.urlAppend(options.url, Ext.Ajax.getDisableCachingParam() + '=' + Ext.manifest.loader.cache);
 			}
 		}
-		
+
 		this.request(options);
 	},
-	
+
 	/**
 	 * Perform a POST request
 	 * @param {Object}
@@ -58,49 +61,49 @@ Ext.define('Ck.Ajax', {
 				'Content-Type': 'application/json; charset=UTF-8'
 			}
 		});
-				
+
 		if(options.encode !== false) {
 			options.params = Ext.encode(options.params);
 			delete options.encode;
 		}
-		
+
 		this.request(options);
 	},
 
 	put: function(options) {
 		options.method = 'PUT';
-		
+
 		// TODO : chek if we have file to upload ...
 		// application/x-www-form-urlencoded;charset=UTF-8
 		options.headers = {
 			'Content-Type': 'application/json; charset=UTF-8'
 		};
-		
+
 		options.params = Ext.encode(options.params);
 		this.request(options);
 	},
 
 	del: function(options) {
 		options.method = 'DELETE';
-		
+
 		// TODO : chek if we have file to upload ...
 		// application/x-www-form-urlencoded;charset=UTF-8
 		options.headers = {
 			'Content-Type': 'application/json; charset=UTF-8'
 		};
-		
+
 		options.params = Ext.encode(options.params);
 		this.request(options);
 	},
-	
+
 	request: function(options) {
 		options.disableCaching = false;
 		//<debug>
 		// Dev Mode use standard disable cache system : each call is unique
 		options.disableCaching = true;
 		//</debug>
-		
-		Ext.Ajax.request(options);	
+
+		Ext.Ajax.request(options);
 	},
 
 	/**
@@ -117,7 +120,7 @@ Ext.define('Ck.Ajax', {
 			success	: Ext.emptyFn,
 			failure	: Ext.emptyFn
 		});
-		
+
 		var xhr = new XMLHttpRequest();
 
 		xhr.onreadystatechange = function() {
@@ -129,13 +132,13 @@ Ext.define('Ck.Ajax', {
 				}
 			}
 		};
-		
+
 		if(Ext.isObject(options.params)) {
 			var fData = new FormData();
 			for(var key in options.params) {
 				fData.append(key, options.params[key]);
 			}
-			
+
 			var f;
 			for(var i in options.files) {
 				f = options.files[i];
@@ -148,13 +151,13 @@ Ext.define('Ck.Ajax', {
 		xhr.open(options.method, options.url, true);
 		xhr.send(fData);
 	},
-	
+
 	isCacheAvailable: function(options) {
 		// Only cache GET request
 		if(options.method != 'GET') {
 			return false;
 		}
-		
+
 		// Disable Ajax cache for a specific call
 		if(options.nocache===true) {
 			return false;
@@ -164,44 +167,44 @@ Ext.define('Ck.Ajax', {
 		if(Ck.params.hasOwnProperty('nocache')) {
 			return false;
 		}
-		
+
 		// Disable Ajax cache (in testing and development). Allow 'forcecache' for testing and development.
 		if(Ck.getEnvironment() != 'production' && !Ck.params.hasOwnProperty('forcecache')) {
 			return false;
 		}
-		
+
 		return true;
 	},
-	
+
 	onBeforeRequest: function(conn, options, eOpts) {
 		if(!this.isCacheAvailable(options)) return true;
 		// TODO : test cache validity
-		
+
 		var res = this.ls.getItem(options.url);
 		if(res) {
 			//<debug>
 			Ck.Notify.info('Request from Cache : '+ options.url);
 			//</debug>
-			
+
 			var response = {
 				responseText: res
 			}
-			
+
 			Ext.callback(options.success, options.scope, [response, options]);
 			return false;
 		}
 	},
-	
+
 	onRequestComplete: function(conn, response, options, eOpts) {
 		//<debug>
 		Ck.Notify.info('Request success : '+ options.url);
 		//</debug>
-		
+
 		if(!this.isCacheAvailable(options)) return true;
-		
+
 		this.ls.setItem(options.url, response.responseText);
 	},
-	
+
 	onRequestException: function(conn, response, options, eOpts) {
 		Ck.Notify.error('Request failure : ' + options.url);
 

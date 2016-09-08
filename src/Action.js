@@ -41,6 +41,9 @@
  */
 Ext.define('Ck.Action', {
 	extend: 'Ext.Action',
+	requires: [
+		'Ck'
+	],
 
 	disabled: false,
 	hidden: false,
@@ -54,18 +57,18 @@ Ext.define('Ck.Action', {
 		 * @var {Ck.map.Controller}
 		 */
 		map: null,
-		
+
 		/**
 		 * @var {Ck.map.Controller}
 		 */
 		olMap: null,
-		
+
 		/**
 		 * @var {Ck.map.Controller}
 		 */
 		olView: null
 	},
-	
+
 	/**
 	 * @cfg {String/Object} tooltip
 	 * The tooltip for the button - can be a string to be used as innerHTML (html tags are accepted) or
@@ -80,7 +83,7 @@ Ext.define('Ck.Action', {
 	 */
 	toggleGroup: '',
 
-	
+
 
 	/**
 	 * @inheritdoc Ck.Controller
@@ -119,7 +122,7 @@ Ext.define('Ck.Action', {
 			tooltip: this.tooltip,
 			toggleGroup: this.toggleGroup,
 			toggleHandler: this.toggleAction,
-			
+
 			listeners: {
 				render: this.render,
 				destroy: this.destroy,
@@ -132,7 +135,7 @@ Ext.define('Ck.Action', {
 		Ck.actions.push(this);
 		this.callParent([config]);
 	},
-	
+
 	render: Ext.emptyFn,
 	destroy: Ext.emptyFn,
 	hide: Ext.emptyFn,
@@ -156,7 +159,7 @@ Ext.define('Ck.Action', {
      * @param {Boolean} toggleHandler.state The next state of the Button, true means pressed.
      */
 	toggleAction: Ext.emptyFn,
-	
+
     setTooltip : function(text){
         this.initialConfig.tooltip = text;
         //this.callEach('setTooltip', [text]);
@@ -167,9 +170,9 @@ Ext.define('Ck.Action', {
 				item.setTooltip(text);
 			}
 		});
-        Ext.resumeLayouts(true);		
+        Ext.resumeLayouts(true);
 	},
-	
+
 	/**
 	 * @param {Ck.map.Controller}
 	 */
@@ -180,7 +183,7 @@ Ext.define('Ck.Action', {
 			this.setOlView(map.getOlView());
 		}
 	},
-	
+
 	setVisible: function(show) {
 		this.executeFnOnItems(function(show, item) {
 			if(Ext.isFunction(item.setVisible)) {
@@ -188,7 +191,7 @@ Ext.define('Ck.Action', {
 			}
 		}.bind(this, show));
 	},
-	
+
 	executeFnOnItems: function(fn) {
 		this.items.forEach(fn);
 	}
