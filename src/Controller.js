@@ -86,6 +86,7 @@ Ext.define('Ck.Controller', {
 	 * - ck-name : static resource in ck-viewer package
 	 * - /name : static resource in application
 	 * - name : resource from service REST API
+	 * - ./package-name/... : resource in specific package
 	 *
 	 * @param {string} name of the resource
 	 * @return {string} the full Url
@@ -123,6 +124,11 @@ Ext.define('Ck.Controller', {
 			}
 		}
 
+		// Resource in specific package
+		else if(Ext.String.startsWith(name, '.')) {
+			url = window.location.origin + "/packages" + name.substr(1);
+		}
+		
 		// Resource from Web Service (API Call)
 		else {
 			url = Ext.String.format(tpl.ws, Ck.getApi(), name);
