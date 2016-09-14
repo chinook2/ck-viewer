@@ -118,7 +118,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			if(formController.view.getEditing()===true) this.startEditing();
 		} else {
 			var c = grid.getConfig();
-			if (c && c.editing === true) {
+			if ((grid.editing === true) || (c && c.editing === true)){
 				this.startEditing();
 			} else {
 				this.stopEditing();

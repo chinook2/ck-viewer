@@ -21,6 +21,8 @@ Ext.define("Ck.View", {
         'Ext.grid.*',
 		'Ext.util.*',
 
+        'Ck.Notify',
+
         'Ck.Map',
         'Ck.Legend',
         'Ck.Toolbar',
