@@ -118,7 +118,11 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			if(formController.view.getEditing()===true) this.startEditing();
 		} else {
 			var c = grid.getConfig();
-			if(c && c.editing === true) this.startEditing();
+			if ((grid.editing === true) || (c && c.editing === true)){
+				this.startEditing();
+			} else {
+				this.stopEditing();
+			}
 		}
 
 		grid.on({
@@ -189,7 +193,9 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		if(rec){
 			store.remove(rec);
 			// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
-			store.removed.push(rec);
+			if (store.removed) {
+				store.removed.push(rec);
+			}
 		}
 	}
 });
