@@ -13,6 +13,12 @@ Ext.define('Ck.map.Style', {
 	alternateClassName: 'Ck.Style',
 	singleton: true,
 	
+	defaultWidth	: 2,
+	blueColor		: "#3399CC",
+	redColor		: "#FF3333",
+	greenColor		: "#33cc33",
+	orangeColor		: "#FF953D",
+	
 	/**
 	 * Default fill color.
 	 */
@@ -62,11 +68,12 @@ Ext.define('Ck.map.Style', {
 	 */
 	radius: 10,
 	
-	style:null,
+	style: null,
 	
 	zIndex: {
 		editInteraction	: 500,
 		cloneLayer		: 520,
+		drawLayer		: 530,
 		featureOverlay	: 540,
 		vertexOverlay	: 560
 	},
@@ -150,48 +157,48 @@ Ext.define('Ck.map.Style', {
  * 	olStyle = Ck.map.Style.style;
  * 
  */
-Ck.map.Style.style = [
+Ck.Style.style = [
 	new ol.style.Style({
 		image: new ol.style.Circle({
-			fill: new ol.style.Fill(Ck.map.Style.fill),
-			stroke: new ol.style.Stroke(Ck.map.Style.stroke),
+			fill: new ol.style.Fill(Ck.Style.fill),
+			stroke: new ol.style.Stroke({color: Ck.Style.blueColor, width: Ck.Style.defaultWidth}),
 			radius: 15
 		}),
-		fill: new ol.style.Fill(Ck.map.Style.fill),
-		stroke: new ol.style.Stroke(Ck.map.Style.stroke)
+		fill: new ol.style.Fill(Ck.Style.fill),
+		stroke: new ol.style.Stroke({color: Ck.Style.blueColor, width: Ck.Style.defaultWidth})
 	})
 ];
 
-Ck.map.Style.redStroke = [
+Ck.Style.redStroke = [
 	new ol.style.Style({
 		image: new ol.style.RegularShape({
 			points: 4,
-			stroke: new ol.style.Stroke(Ck.map.Style.redStroke),
-			radius: Ck.map.Style.radius,
+			stroke: new ol.style.Stroke({color: Ck.Style.redColor, width: Ck.Style.defaultWidth}),
+			radius: Ck.Style.radius,
 			angle: 0.785398
 		}),
-		stroke: new ol.style.Stroke(Ck.map.Style.redStroke)
+		stroke: new ol.style.Stroke({color: Ck.Style.redColor, width: Ck.Style.defaultWidth})
 	})
 ];
 
-Ck.map.Style.greenStroke = [
+Ck.Style.greenStroke = [
 	new ol.style.Style({
 		image: new ol.style.Circle({
-			stroke: new ol.style.Stroke(Ck.map.Style.greenStroke),
-			radius: Ck.map.Style.minorRadius
+			stroke: new ol.style.Stroke({color: Ck.Style.greenColor, width: Ck.Style.defaultWidth}),
+			radius: Ck.Style.minorRadius
 		}),
-		stroke: new ol.style.Stroke(Ck.map.Style.greenStroke)
+		stroke: new ol.style.Stroke({color: Ck.Style.greenColor, width: Ck.Style.defaultWidth})
 	})
 ];
 
-Ck.map.Style.orangeStroke = [
+Ck.Style.orangeStroke = [
 	new ol.style.Style({
 		image: new ol.style.Circle({
-			stroke: new ol.style.Stroke(Ck.map.Style.selectStroke),
-			radius: Ck.map.Style.minorRadius
+			stroke: new ol.style.Stroke({color: Ck.Style.orangeColor, width: Ck.Style.defaultWidth}),
+			radius: Ck.Style.minorRadius
 		}),
-		stroke: new ol.style.Stroke(Ck.map.Style.selectStroke)
+		stroke: new ol.style.Stroke({color: Ck.Style.orangeColor, width: Ck.Style.defaultWidth})
 	})
 ];
 
-Ck.map.Style.invisibleStyle = [];
+Ck.Style.invisibleStyle = [];

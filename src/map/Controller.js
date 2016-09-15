@@ -98,6 +98,8 @@ Ext.define('Ck.map.Controller', {
 	 */
 	legend: null,
 	
+	draw: {},
+	
 	/**
 	 * @var {ol.Geolocation}
 	 */
