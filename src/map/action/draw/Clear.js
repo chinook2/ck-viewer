@@ -1,9 +1,10 @@
 /**
  */
-Ext.define('Ck.map.action.draw.Clean', {
+Ext.define('Ck.map.action.draw.Clear', {
 	extend: 'Ck.Action',
-	alias: 'widget.ckmapDrawClean',
-	itemId: 'drawClean',
+	alias: 'widget.ckmapDrawClear',
+	itemId: 'drawClear',
+	iconCls: 'ckfont ck-eraser',
 	
 	drawId: "default",
 	requires: [
