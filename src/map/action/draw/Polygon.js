@@ -5,7 +5,7 @@ Ext.define('Ck.map.action.draw.Polygon', {
 	alias: 'widget.ckmapDrawPolygon',
 	
 	itemId: 'drawPolygon',
-	iconCls: 'fa fa-asterisk',
+	iconCls: 'ckfont ck-draw-polygon',
 	
 	type: "Polygon"
 });
