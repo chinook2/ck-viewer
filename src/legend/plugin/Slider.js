@@ -50,9 +50,11 @@ Ext.define('Ck.legend.plugin.Slider', {
 		}
 	},
 	
-	// the Ext doc is wrong for the list params !!
+	/**
+	 * The Ext doc is wrong for the list params !!
+	 * After drag&drop the slider reference is wrong, need to rebuild
+	 */
 	onItemremove: function(root, record) {
-		// After drag&drop the slider reference is wrong, need to rebuild
 		record.set('slider', false);
 	}
 	

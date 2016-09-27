@@ -138,8 +138,10 @@ Ext.define('Ck.legend.Controller', {
 		pNode.appendChild(node);		
 	},
 	
-	// Allow change layer visibility for groups / sub layers. Bind tree store property to ol Layers
-	// If we use onCheckChange event update only when click on layer chekbox and not for groups.
+	/**
+	 * Allow change layer visibility for groups / sub layers. Bind tree store property to ol Layers
+	 * If we use onCheckChange event update only when click on layer chekbox and not for groups.
+	 */
 	onUpdate: function(store, rec, operation, modifiedFieldNames, details, eOpts) {
 		var layer = rec.get('layer');
 		if(!layer) return;

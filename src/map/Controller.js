@@ -737,6 +737,10 @@ Ext.define('Ck.map.Controller', {
 		return res;
 	},
 	
+	getScale: function() {
+		return Ck.getScaleFromResolution(Ck.getMap().getOlView().getResolution(), Ck.getMap().getOlView().getProjection());
+	},
+	
 	/**
 	 * Return the available resolution nearest to the specified value
 	 * @param {Float}	The required resolution
