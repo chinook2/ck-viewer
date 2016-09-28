@@ -27,10 +27,16 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		if(graphic) {			
 			graphic.setVisible(graphic.hidden);
 		} else {
+			var td = item.firstChild.insertRow().insertCell();
+			td.colSpan = 2;
+			
 			graphic = Ck.create("Ext.Img", {
 				src: this.generateSrc(layer),
 				urlParam: layer.ckLayer.getData().properties.legend,
-				renderTo: item
+				style: {
+					marginLeft: "2%"
+				},
+				renderTo: td
 			});
 			
 			Ck.getMap().getOlView().on("change:resolution", this.updateSrc.bind(this, record));
