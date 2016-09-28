@@ -202,3 +202,4 @@ Ck.Style.orangeStroke = [
 ];
 
 Ck.Style.invisibleStyle = [];
+Ck.Style.drawStyle = Ck.Style.greenStroke;

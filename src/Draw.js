@@ -70,7 +70,7 @@ Ext.define('Ck.Draw', {
 			id: this.layerId,
 			source: source,
 			zIndex: Ck.map.Style.zIndex.drawLayer,
-			style: Ck.Style.greenStroke
+			style: Ck.Style.drawStyle
 		});
 		
 		layer.setMap(this.getOlMap());

@@ -46,11 +46,16 @@ Ext.define('Ck.map.action.draw.Action', {
 		this.draw.activeDraw(this.type, pressed);
 	},
 	
-	createInteraction: function() {
-		this.interaction = new ol.interaction.Draw({
+	/**
+	 * Create the draw interaction
+	 * @param {Object} Options to pass to the interaction instantiation
+	 */
+	createInteraction: function(opt) {
+		opt = (Ext.isObject(opt))? opt : {};
+		this.interaction = new ol.interaction.Draw(Ext.applyIf(opt, {
 			source: this.draw.getSource(),
 			type: this.type
-		});
+		}));
 		this.draw.getOlMap().addInteraction(this.interaction);
 	},
 	
