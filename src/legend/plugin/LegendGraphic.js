@@ -19,7 +19,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	
 	onItemmousedown: function(tree, record, item, index, e) {
 		var layer = record.get('layer');
-		if(!layer || !layer.ckLayer || e.target.tagName != "SPAN") {
+		if(!layer || !layer.ckLayer || layer.ckLayer.getData().properties.legend === false || e.target.tagName != "SPAN") {
 			return false;
 		}
 		
