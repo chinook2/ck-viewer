@@ -5,6 +5,10 @@
 Ext.define('Ck.legend.plugin.LegendGraphic', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendgraphic',
+	
+	requires: [
+		'Ext.Img'
+	],
 
 	tipPrefix: 'Opacity',
 
