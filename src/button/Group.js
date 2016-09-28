@@ -11,31 +11,42 @@
 	alternateClassName: 'Ck.GroupButton',
 
 	enableToggle: true,
-	
+
+    /**
+     * CLose the sub toolbar when click on button.
+     * @type {Boolean}
+     */
 	autoClose: false,
-	
+
+    /**
+     * Toggle off all the actions when close the toolbar.
+     * Do not use with autoClose true.
+     * @type {Boolean}
+     */
+    toggleOnClose: false,
+
 	/**
 	 * Anchor point of the toolbar.
 	 */
 	anchor: 'r-l',
-	
+
 	offsets: [0,0],
-	
+
 	items: [],
-	
+
 	cls: 'ck-group-button',
-	
+
 	/**
 	 * @type Ext.toolbar.Toolbar
 	 * Associate toolbar
 	 */
 	toolbar: null,
-	
+
 	/**
 	 * Extra class for the sub toolbar
 	 */
 	toolbarCls: 'ck-toolbar ck-toolbar-group',
-		
+
 	onRender: function() {
 		// The container of the group button
 		var mainToolbar = this.ownerCt;
@@ -48,7 +59,7 @@
 			this.anchor = 'tl-bl';
 			this.offsets = [-8,0];
 		}
-		
+
 		var w = this.getWidth();
 		this.toolbar = Ext.create('Ext.toolbar.Toolbar', {
 			items: this.items,
@@ -59,19 +70,20 @@
 			vertical: vertical,
 			defaults: this.defaults || mainToolbar.defaults
 		});
-		
+
 		if(this.autoClose === true) {
 			this.toolbar.items.each(function(cmp, idx, len) {
 				cmp.on('click', function() {
-					this.collapse();				
-				}, this);			
+					this.collapse();
+				}, this);
 			}, this);
 		}
-		
+
+
 		// fix hide when multiple group button
 		this.toolbar.getEl().setVisibilityMode(Ext.Element.VISIBILITY);
 		//
-		
+
 		// Fix anchor of sub-toolbar when mainToolbar is right align and overlay=true
 		mainToolbar.on('positionUpdated', function() {
 			this.updatePosition();
@@ -79,20 +91,20 @@
 
 		this.callParent();
 	},
-	
+
 	beforeDestroy: function(){
-		this.toolbar.destroy();		
+		this.toolbar.destroy();
 		this.callParent();
 	},
-	
+
 	handler: function(btn) {
 		if (btn.pressed) {
 			this.expand();
 		} else {
 			this.collapse();
-		}
+    	}
 	},
-	
+
 	expand: function(){
 		this.toolbar.show();
 
@@ -103,12 +115,17 @@
 			if(btn) btn.updatePosition();
 		}
 	},
-	
+
 	collapse: function(){
 		this.toolbar.hide();
-	},
-	
+        if (this.toggleOnClose === true) {
+            this.toolbar.items.each(function(cmp, idx, len) {
+				if(cmp.toggle) cmp.toggle(false);
+			}, this);
+        }
+    },
+
 	updatePosition: function() {
 		this.toolbar.getEl().anchorTo(this.getEl(), this.anchor, this.offsets);
-	}	
+	}
 });
