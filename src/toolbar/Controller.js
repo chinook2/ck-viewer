@@ -11,6 +11,23 @@ Ext.define('Ck.toolbar.Controller', {
 		var v = this.getView();
 		v.offset = 10;
 
+		// Move toolbar inside ol viewport
+		// When drawing on map can move over the toolbar
+		var domEl = this.getOlMap().getViewport();
+		Ext.get(domEl.id).appendChild(v.getEl());
+		//
+
+		// Note: with Ext 5.x afterlayout seem to be ignored !
+
+		// Fix add left margin for zoomslider + btn
+		if(v.overlay === true && v.dock == 'top') {
+			// workaround of post layout process
+			//v.on('afterlayout', function() {
+			v.el.setLeft(30);
+			//	v.fireEvent("positionUpdated", v);
+			//}, this);
+		}
+
 		// Fix right align of toolbar when overlay=true
 		if(v.overlay === true && v.dock == 'right') {
 			// workaround of post layout process
