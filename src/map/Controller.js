@@ -497,8 +497,10 @@ Ext.define('Ck.map.Controller', {
 		} else {
 			switch(offering.getType()) {
 				case 'osm':
+					mainOperation = offering.getOperation("GetTile");
 					olSourceOptions = {
-						layer: 'osm'
+						layer: 'osm',
+						url: mainOperation.getHref()
 					};
 					break;
 

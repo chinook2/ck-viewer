@@ -52,7 +52,7 @@
 			"active" : true,
 			"minscale" : 100,
 			"maxscale" : 10000000,
-			"latlongbbox": [-179, -89, 179, 89],
+			"_latlongbbox": [-179, -89, 179, 89],
 			"overviewLayer": true,			
 			"offerings" : [{
 				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/osm",
@@ -60,7 +60,7 @@
 					"code" : "GetTile",
 					"method" : "GET",
 					"type" : "image/png",
-					"href" : "https://otile{1-4}-s.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.jpg",
+					"href" : "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png",
 					"request":{},
 					"result":{}
 				}],
