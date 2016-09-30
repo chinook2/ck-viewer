@@ -234,6 +234,7 @@ Ext.apply(Ck, {
 
 	/**
 	 * Adds a listener to be notified when the map is ready (before context and layers are loaded).
+	 * If the map is already ready call the callback.
 	 *
 	 * @param {Function} fn The method to call.
 	 * @param {Object} [scope] The scope (`this` reference) in which the handler function
@@ -245,7 +246,31 @@ Ext.apply(Ck, {
 	 * 1000 or greater and -1000 or lesser are reserved for internal framework use only.
 	 */
 	onReady: function(fn, scope, options) {
-		Ext.on('ckmapReady', fn, scope, options);
+		var m = this.getMap();
+		if (m && m.ready === true) {
+			fn.apply(scope, [m]);
+		} else {
+			Ext.on('ckmapReady', fn, scope, options);
+		}
+	},
+
+	/**
+	 * Adds a listener to be notified when the map is loaded (when context and layers are loaded).
+	 * If the map is already loaded call the callback.
+	 *
+	 * [onLoaded description]
+	 * @param  {Function} fn      [description]
+	 * @param  {[type]}   scope   [description]
+	 * @param  {[type]}   options [description]
+	 * @return {[type]}           [description]
+	 */
+	onLoaded: function (fn, scope, options) {
+		var m = this.getMap();
+		if (m && m.loaded === true) {
+			fn.apply(scope, [m]);
+		} else {
+			Ext.on('ckmapLoaded', fn, scope, options);
+		}
 	},
 
 	/**
