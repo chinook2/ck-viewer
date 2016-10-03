@@ -11,21 +11,11 @@ Ext.define('Ck.Controller', {
 		'Ck.Ajax'
 	],
 
-	listen: {
-		controller: {
-			'ckmap': {
-				// Called when map is ready
-				ready: 'onMapReady',
-				// Called when layers are added from context
-				loaded: 'onMapLoaded'
-			}
-		}
-	},
-
 	config: {
 		map		: null,
 		olMap	: null,
-		olView	: null
+		olView	: null,
+		ckView: null,
 	},
 
 	/**
@@ -54,24 +44,24 @@ Ext.define('Ck.Controller', {
 		if(Ext.isObject(map)) {
 			this.setMap(map);
 		}
-	},
 
-	/**
-	 * Called by 'ready' event of ckmap controller
-	 * @protected
-	 */
-	onMapReady: function(mapController) {
-		this.setMap(mapController);
-		this.ckReady(mapController);
-	},
-
-	/**
-	 * Called by 'loaded' event of ckmap controller
-	 * @protected
-	 */
-	onMapLoaded: function(mapController) {
-		this.setMap(mapController);
-		this.ckLoaded(mapController);
+		// Listen to map events registred in the same ckview
+		var ckview = view.up('ckview');
+		if (ckview) {
+			ckview = ckview.getController();
+			this.setCkView(ckview);
+			ckview.on({
+				mapready: function (mapController) {
+					this.setMap(mapController);
+					this.ckReady(mapController);
+				},
+				maploaded: function (mapController) {
+					this.setMap(mapController);
+					this.ckLoaded(mapController);
+				},
+				scope: this
+			});
+		}
 	},
 
 	setMap: function(ckMap) {

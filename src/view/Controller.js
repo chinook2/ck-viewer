@@ -5,6 +5,8 @@ Ext.define('Ck.view.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckview',
 
+	ckMap: null,
+
 	init: function() {
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
@@ -62,6 +64,16 @@ Ext.define('Ck.view.Controller', {
 				if(uiName != 'ck-default') this.getUi('ck-default');
 			}
 		});
-	}
+	},
 
+	getCkMap: function () {
+		return this.ckMap;
+	},
+
+	setCkMap: function (ckmap) {
+		if(ckmap) {
+			this.relayEvents(ckmap, ['ready', 'loaded'], 'map');
+			this.ckMap = ckmap;
+		}
+	}
 });

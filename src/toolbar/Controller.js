@@ -74,17 +74,13 @@ Ext.define('Ck.toolbar.Controller', {
 		var v = this.getView();
 		var size = v.getSize();
 
-		// Move the ol zoom control if Toolbar is above OL controls
-		var zoom = Ext.query('.ol-zoom').shift();
-
-		if(zoom) {
-			if(v.dock == 'top') {
-				Ext.get(zoom).setTop(size.height + 2);
-			}
-
-			if(v.dock == 'left') {
-				Ext.get(zoom).setLeft(size.width + 0);
-			}
+		// Fix add left margin for zoomslider + btn
+		if(v.overlay === true && v.dock == 'top') {
+			// workaround of post layout process
+			//v.on('afterlayout', function() {
+			v.el.setLeft(30);
+			//	v.fireEvent("positionUpdated", v);
+			//}, this);
 		}
 	}
 });

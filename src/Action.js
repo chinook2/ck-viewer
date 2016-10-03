@@ -66,7 +66,9 @@ Ext.define('Ck.Action', {
 		/**
 		 * @var {Ck.map.Controller}
 		 */
-		olView: null
+		olView: null,
+
+		ckView: null
 	},
 
 	/**
@@ -98,9 +100,10 @@ Ext.define('Ck.Action', {
 	constructor: function(config) {
 		// If init action after app load (in new popup like edit) map is here, try to init it
 		this.setMap(Ck.getMap());
-		
+
 		// Use global event to call function when map is ready.
 		// ckmap isn't avaible when first pass here...
+		/*
 		Ext.on('ckmapReady', function(map) {
 			this.setMap(map);
 			this.ckReady(map, config);
@@ -110,8 +113,9 @@ Ext.define('Ck.Action', {
 			this.setMap(map);
 			this.ckLoaded(map, config);
 		}, this);
+		*/
 
-		config = Ext.applyIf(config || {}, {
+		nconfig = Ext.applyIf(config || {}, {
 			disabled: this.disabled,
 			hidden: this.hidden,
 			itemId: this.itemId,
@@ -124,7 +128,10 @@ Ext.define('Ck.Action', {
 			toggleHandler: this.toggleAction,
 
 			listeners: {
-				render: this.render,
+				render: function (btn, opts) {
+					this.onRender(btn, config, opts);
+					this.render(btn, opts);
+				} ,
 				destroy: this.destroy,
 				hide: this.hide,
 				scope: this
@@ -133,7 +140,29 @@ Ext.define('Ck.Action', {
 			scope: this
 		});
 		Ck.actions.push(this);
-		this.callParent([config]);
+		this.callParent([nconfig]);
+	},
+
+	onRender: function (btn, config) {
+		// Listen to map events registred in the same ckview
+		var ckview = btn.up('ckview');
+		if (ckview) {
+			ckview = ckview.getController();
+			this.setCkView(ckview);
+			ckview.on({
+				mapready: function (mapController) {
+					this.setMap(mapController);
+					this.ckReady(mapController, config);
+				},
+				maploaded: function (mapController) {
+					this.setMap(mapController);
+					this.ckLoaded(mapController, config);
+				},
+				scope: this
+			});
+		} else {
+			Ck.log('Action "'+ btn.ckAction +'" as no ckview !');
+		}
 	},
 
 	render: Ext.emptyFn,
