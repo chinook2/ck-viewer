@@ -139,6 +139,21 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			},
 			scope: this
 		});
+
+		grid.getStore().on({
+			add: function (store, records) {
+				// Adding dummy row. return
+				if(records.length===1 && records[0].get('dummy')===true) return;
+
+				var rec = store.findRecord('dummy', true);
+				if (rec) {
+					// Move dummy row to the end
+					this.deleteNewRow();
+					this.addNewRow();
+				}
+			},
+			scope: this
+		})
 	},
 
 	/**
