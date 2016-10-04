@@ -1,15 +1,15 @@
 /**
- * 
+ *
  */
 Ext.define('Ck.legend.plugin.Action', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.action',
-	
+
 	disableClass: "ck-disablePlugin",
-		
+
 	init: function(cmp) {
 		this.tree =  cmp;
-		
+
 		// Get the Action Column
 		this.actionColumn = cmp.down('actioncolumn');
 		if(!this.actionColumn) {
@@ -24,7 +24,7 @@ Ext.define('Ck.legend.plugin.Action', {
 		if(this.actionColumn.items && (this.actionColumn.items.length == 1) && (this.actionColumn.items[0].xtype == 'actioncolumn')) {
 			this.actionColumn.items = [];
 		}
-		
+
 		// Show/Hide Actions icons
 		var tview = this.tree.getView();
 		if(!tview.hasListener('highlightitem') ) {
@@ -46,7 +46,7 @@ Ext.define('Ck.legend.plugin.Action', {
 						rowEl.down('.x-action-col-cell').hide();
 					})
 				},
-				
+
 				// Show actions when mouse enter item
 				highlightitem: function(view, node, eOpts) {
 					var rowEl = Ext.get(node);
@@ -60,10 +60,10 @@ Ext.define('Ck.legend.plugin.Action', {
 				scope: this
 			});
 		}
-		
+
 		this.setAction();
 	},
-	
+
 	setAction: function(action) {
 		if(!action) {
 			action = {
@@ -80,26 +80,26 @@ Ext.define('Ck.legend.plugin.Action', {
 					return this.iconCls;
 				},
 				scope: this
-			}
+			};
 		}
-		
+
 		this.actionColumn.items.push(action);
 		this.actionColumn.width = this.actionColumn.items.length * 20;
 		this.actionColumn.fireEvent('add', action);
 	},
-	
+
 	// tree, rowIndex, colIndex, row, event, record
 	handlerAction: function(tree, r, c, row, event, rec) {
 		var layer = rec.get('layer');
 		if(!layer) return;
-		
+
 		this.doAction(layer);
 	},
-	
+
 	doAction: Ext.emptyFn,
-	
+
 	getMap: function() {
 		return this.tree.getController().getMap();
 	}
-	
+
 });

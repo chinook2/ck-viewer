@@ -5,12 +5,13 @@
 Ext.define('Ck.legend.plugin.LegendGraphic', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendgraphic',
-	
+
 	requires: [
 		'Ext.Img'
 	],
 
 	tipPrefix: 'Opacity',
+	cklegend: null,
 
 	init: function(cmp) {
 		cmp.on({
@@ -19,66 +20,75 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 			itemremove: this.onItemremove,
 			scope: this
 		});
+
+		this.cklegend = cmp.getController();
 	},
-	
+
 	onItemmousedown: function(tree, record, item, index, e) {
 		var layer = record.get('layer');
 		if(!layer || !layer.ckLayer || layer.ckLayer.getData().properties.legend === false || e.target.tagName != "SPAN") {
 			return false;
 		}
-		
+
 		var graphic = record.get('graphic');
-		if(graphic) {			
+		if(graphic) {
 			graphic.setVisible(graphic.hidden);
 		} else {
 			var td = item.firstChild.insertRow().insertCell();
 			td.colSpan = 2;
-			
-			graphic = Ck.create("Ext.Img", {
-				src: this.generateSrc(layer),
-				urlParam: layer.ckLayer.getData().properties.legend,
-				style: {
-					marginLeft: "2%"
-				},
-				renderTo: td
-			});
-			
-			Ck.getMap().getOlView().on("change:resolution", this.updateSrc.bind(this, record));
+			var imgSrc = this.generateSrc(layer);
+			if (imgSrc) {
+				graphic = Ck.create("Ext.Img", {
+					src: imgSrc,
+					urlParam: layer.ckLayer.getData().properties.legend,
+					style: {
+						marginLeft: "2%"
+					},
+					renderTo: td
+				});
+
+				this.cklegend.getOlView().on("change:resolution", this.updateSrc.bind(this, record));
+			}
 		}
-		
+
 		record.set('graphic', graphic);
 	},
-	
+
 	/**
 	 *
 	 */
 	updateSrc: function(rcd, evt) {
 		var img = rcd.get("graphic");
-		img.setSrc(this.generateSrc(rcd.get("layer")));
+		var imgSrc = this.generateSrc(rcd.get("layer"));
+		if (imgSrc) {
+			img.setSrc(imgSrc);
+		}
 	},
-	
+
 	/**
 	 * Generate the image source
 	 * @return {String}
 	 */
 	generateSrc: function(lyr) {
 		var src = lyr.getSource();
+		if (!src.getUrl) return false;
+
 		var url = src.getUrl() + "?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=" + src.getParams().LAYERS + "&TRANSPARENT=true";
-		
+
 		var lgd = lyr.ckLayer.getData().properties.legend;
 		if(lgd) {
 			url += lgd;
 		}
-		
-		var url = new Ext.Template(url);
-		url = url.applyTemplate({
+
+		var turl = new Ext.Template(url);
+		url = turl.applyTemplate({
 			scale: parseInt(Ck.getMap().getScale())
 		});
-		
+
 		return url;
-		
+
 	},
-	
+
 	/**
 	 * The Ext doc is wrong for the list params !!
 	 */
@@ -86,5 +96,5 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		// After drag&drop the legend reference is wrong, need to rebuild
 		record.set('graphic', false);
 	}
-	
+
 });
