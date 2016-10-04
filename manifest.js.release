@@ -13,7 +13,7 @@ if (!Ext.manifest.ckClient) {
 		/**
 		 * Param for template Url in context
 		 */
-		"mapApi": "http://mem-ouganda:8090/geoserver",
+		"mapApi": "gis",
 
         /**
          * Use LocalStorage to cache all Ajax request.

@@ -15,7 +15,7 @@ Ext.define('Ck.Controller', {
 		map		: null,
 		olMap	: null,
 		olView	: null,
-		ckView: null,
+		ckView  : null
 	},
 
 	/**

@@ -145,7 +145,8 @@ Ext.define('Ck.Action', {
 
 	onRender: function (btn, config) {
 		// Listen to map events registred in the same ckview
-		var ckview = btn.up('ckview');
+		// for group btn specify btn.ckview to get back associated view
+		var ckview = btn.up('ckview') || btn.ckview;
 		if (ckview) {
 			ckview = ckview.getController();
 			this.setCkView(ckview);

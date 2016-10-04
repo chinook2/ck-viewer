@@ -61,28 +61,44 @@
 		}
 
 		var w = this.getWidth();
-		this.toolbar = Ext.create('Ext.toolbar.Toolbar', {
-			items: this.items,
-			hidden: true,
-			renderTo: mainToolbar.ownerCt.getEl(), // The map, the container of the mainToolbar (in general)
-			cls: this.toolbarCls,
-			width: (((w + 10) * this.items.length)) +'px',
-			vertical: vertical,
-			defaults: this.defaults || mainToolbar.defaults
-		});
+        var ckview = this.up('ckview');
+        if (ckview) {
+            ckview.getController().on({
+                mapready: function (ckmap) {
+                    var domEl = ckmap.getOlMap().getViewport();
+            		this.toolbar = Ext.create('Ext.toolbar.Toolbar', {
+                        xtype: 'toolbar',
+            			items: this.items,
+            			hidden: true,
+            			renderTo: mainToolbar.ownerCt.getEl(), // The map, the container of the mainToolbar (in general)
+            			cls: this.toolbarCls,
+            			width: (((w + 10) * this.items.length)) +'px',
+            			vertical: vertical,
+            			defaults: Ext.apply(this.defaults || mainToolbar.defaults || {}, {
+                            ckview: ckview
+                        })
+            		});
 
-		if(this.autoClose === true) {
-			this.toolbar.items.each(function(cmp, idx, len) {
-				cmp.on('click', function() {
-					this.collapse();
-				}, this);
-			}, this);
-		}
+                    // Move toolbar inside ol viewport
+            		// When drawing on map can move over the toolbar
+            		Ext.get(domEl.id).appendChild(this.toolbar.getEl());
+            		//
 
+            		if(this.autoClose === true) {
+            			this.toolbar.items.each(function(cmp, idx, len) {
+            				cmp.on('click', function() {
+            					this.collapse();
+            				}, this);
+            			}, this);
+            		}
 
-		// fix hide when multiple group button
-		this.toolbar.getEl().setVisibilityMode(Ext.Element.VISIBILITY);
-		//
+            		// fix hide when multiple group button
+            		this.toolbar.getEl().setVisibilityMode(Ext.Element.VISIBILITY);
+            		//
+            	},
+                scope: this
+            });
+        }
 
 		// Fix anchor of sub-toolbar when mainToolbar is right align and overlay=true
 		mainToolbar.on('positionUpdated', function() {
