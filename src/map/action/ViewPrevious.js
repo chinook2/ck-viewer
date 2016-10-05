@@ -22,8 +22,12 @@ Ext.define('Ck.map.action.ViewPrevious', {
 	tooltip: 'Previous view',
 	disabled: true,
 
+	_next: null,
+
 	// Use ViewNext code to manage history
-	// ckLoaded: function(map, config) {}
+	ckLoaded: function(map, config) {
+		this._next = this.getCkView().getView().down('[ckAction=ckmapViewNext]');
+	},
 
 	/**
 	* Show previous view on click.
@@ -37,7 +41,7 @@ Ext.define('Ck.map.action.ViewPrevious', {
 			map.historyIgnore = true;
 
 			// update button status
-			Ck.actions.ckmapViewNext.setDisabled(false);
+			if(this._next) this._next.setDisabled(false);
 			if(map.historyIdx === 0) this.setDisabled(true);
 		}
 	}

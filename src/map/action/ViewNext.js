@@ -22,6 +22,8 @@ Ext.define('Ck.map.action.ViewNext', {
 	tooltip: 'Next view',
 	disabled: true,
 
+	_previous: null,
+
 	ckLoaded: function(map, config) {
 		var olMap = map.getOlMap();
 		if(!map.history) {
@@ -29,6 +31,9 @@ Ext.define('Ck.map.action.ViewNext', {
 			map.historyIdx = 0;
 			map.historyIgnore = false;
 		}
+
+		// Get previous action of current CkView (ok when multiple CkView)
+		this._previous = this.getCkView().getView().down('[ckAction=ckmapViewPrevious]');
 
 		olMap.on("moveend", function(mapEvt) {
 			// Limit history size
@@ -42,7 +47,9 @@ Ext.define('Ck.map.action.ViewNext', {
 
 				// update button status
 				this.setDisabled(true);
-				if(map.historyIdx > 0) Ck.actions.ckmapViewPrevious.setDisabled(false);
+				if(map.historyIdx > 0) {
+					if(this._previous) this._previous.setDisabled(false);
+				}
 			}
 			map.historyIgnore = false;
 		}, this);
@@ -59,7 +66,7 @@ Ext.define('Ck.map.action.ViewNext', {
 			map.historyIgnore = true;
 
 			// update button status
-			Ck.actions.ckmapViewPrevious.setDisabled(false);
+			if(this._previous) this._previous.setDisabled(false);
 			if(map.historyIdx === map.history.length-1) this.setDisabled(true);
 		}
 	}
