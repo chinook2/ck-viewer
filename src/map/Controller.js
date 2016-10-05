@@ -762,7 +762,7 @@ Ext.define('Ck.map.Controller', {
 	},
 
 	getScale: function() {
-		return Ck.getScaleFromResolution(Ck.getMap().getOlView().getResolution(), Ck.getMap().getOlView().getProjection());
+		return Ck.getScaleFromResolution(this.getOlView().getResolution(), this.getProjection());
 	},
 
 	/**
