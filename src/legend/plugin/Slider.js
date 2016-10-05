@@ -15,28 +15,35 @@ Ext.define('Ck.legend.plugin.Slider', {
 			scope: this
 		});
 	},
-	
+
 	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
 		if(!layer || e.target.tagName != "SPAN") {
 			return false;
 		}
-		
+
 		var opacity = layer.getOpacity();
-		
+
 		var slider = record.get('slider');
 		if(slider) {
 			slider.setVisible(slider.hidden);
 		} else {
+			var td = item.firstChild.insertRow().insertCell();
+			td.colSpan = 2;
+
 			slider = Ext.create('Ext.slider.Single', {
-				width: 200,
+				width: "96%",
 				value: (opacity * 100),
 				increment: 1,
 				minValue: 0,
 				maxValue: 100,
-				renderTo: item,
+				renderTo: td,
 				useTips: true,
 				tipPrefix: this.tipPrefix,
+				style: {
+					marginRight: "2%",
+					marginLeft: "2%"
+				},
 				tipText: function(thumb) {
 					return Ext.String.format(slider.tipPrefix + ' {0} %', thumb.value);
 				},
@@ -49,11 +56,11 @@ Ext.define('Ck.legend.plugin.Slider', {
 			record.set('slider', slider);
 		}
 	},
-	
+
 	// the Ext doc is wrong for the list params !!
 	onItemremove: function(root, record) {
 		// After drag&drop the slider reference is wrong, need to rebuild
 		record.set('slider', false);
 	}
-	
+
 });
