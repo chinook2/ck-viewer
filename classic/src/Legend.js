@@ -47,6 +47,7 @@ Ext.define("Ck.Legend", {
 		dataIndex: 'text',
 		flex: 1
 	},{
-		xtype: 'actioncolumn'
+		xtype: 'actioncolumn',
+		width: 0
 	}]
 });
