@@ -53,7 +53,7 @@ Ext.define('Ext.overrides.Component', {
 			},
 			destroy: function () {
 				if(key) delete Ck.actions[key];
-			},
+			}
 		});
 	}//,
 
