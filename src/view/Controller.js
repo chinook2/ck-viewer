@@ -73,6 +73,7 @@ Ext.define('Ck.view.Controller', {
 	setCkMap: function (ckmap) {
 		if(ckmap) {
 			this.relayEvents(ckmap, ['ready', 'loaded'], 'map');
+			this.getView().relayEvents(ckmap, ['ready', 'loaded'], 'map');
 			this.ckMap = ckmap;
 		}
 	}
