@@ -1,13 +1,14 @@
 /**
- * 
+ *
  */
 Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 	alternateClassName: ['Ck.owcOperation', 'Ck.OwcOperation'],
-	
+
 	config: {
 		code		: null,
 		method		: null,
 		type		: null,
+		format      : null,
 		href		: null,
 		params		: null,
 		url			: null,
@@ -18,7 +19,7 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		owsOffering	: {},
 		data		: {}
 	},
-	
+
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
@@ -26,18 +27,19 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 	 */
 	constructor: function(config) {
 		var params = {}, data = config.data;
-		
+
 		var href = Ext.htmlDecode(data.href);
 		var aHref = href.split("?");
-		
+
 		if(aHref[1]) {
 			params = Ext.Object.fromQueryString(aHref[1]);
 		}
-		
+
 		Ext.apply(config, {
 			code	: data.code,
 			method	: data.method,
 			type	: data.type,
+			format  : data.type,
 			href	: href,
 			params	: params,
 			url		: aHref[0],
@@ -46,10 +48,10 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 			srs		: params.SRS,
 			crs		: params.CRS
 		});
-		
+
 		this.initConfig(config);
 	},
-	
+
 	/**
 	 * Get the format.
 	 * @return {String} Can be : xml, json, text
@@ -66,12 +68,12 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 			t = 'png';
 		} else if (type.indexOf('image') != -1) {
 			t = 'image';
-		} 
-		
+		}
+
 		// this.type = t;
 		this._type = t;
 	},
-	
+
 	/**
 	 * Get the layer projection
 	 * @return {ol.proj.Projection}
@@ -87,7 +89,7 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 		}
 		return ol.proj.get(projection);
 	},
-	
+
 	/**
 	 * Return the operation version or default version
 	 * @return {String}
