@@ -130,7 +130,7 @@ Ext.define('Ck.map.Controller', {
 		}
 
 		// Create interactions
-		var olInteractions = []
+		var olInteractions = [];
 		var interaction, interactions = v.getInteractions();
 		for(var interactionName in interactions) {
 			interaction = Ck.create("ol.interaction." + interactionName, interactions[interactionName]);
@@ -389,6 +389,10 @@ Ext.define('Ck.map.Controller', {
 				case 'wmts':
 					mainOperation = offering.getOperation("GetTile");
 					params = mainOperation.getParams();
+
+					// get grid origin from layer extent or context extent
+					var origin = ol.extent.getTopLeft(layer.getExtent() || owc.getExtent());
+
 					// get resolution from main view. need inverse order
 					var resolutions = owc.getResolutions(false);
 
@@ -402,12 +406,12 @@ Ext.define('Ck.map.Controller', {
 						url: this.getMapUrl(mainOperation.getUrl()),
 						layer: params.LAYER,
 						matrixSet: params.TILEMATRIXSET,
-						format: params.FORMAT || 'image/png',
+						format: params.FORMAT || mainOperation.getFormat() || 'image/png',
 						style: params.STYLE || 'default',
 
 						// TODO : use extent, resolutions different from main view.
 						tileGrid: new ol.tilegrid.WMTS({
-							origin: ol.extent.getTopLeft(owc.getExtent()),
+							origin: origin,
 							resolutions: resolutions,
 							matrixIds: matrixIds
 						})
