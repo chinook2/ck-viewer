@@ -29,6 +29,7 @@ Ext.define("Ck.View", {
         'Ck.Form',
         'Ck.Edit',
         'Ck.Overview',
+        'Ck.Selection',
         'Ck.Result',
         'Ck.Print',
         'Ck.Pdf',
