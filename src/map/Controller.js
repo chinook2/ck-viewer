@@ -418,7 +418,7 @@ Ext.define('Ck.map.Controller', {
 					params = mainOperation.getParams();
 
 					// get grid origin from layer extent or context extent
-					var origin = ol.extent.getTopLeft(layer.getExtent() || owc.getExtent());
+					var origin = layer.getExtension('topLeftCorner') || ol.extent.getTopLeft(layer.getExtent() || owc.getExtent());
 
 					// get resolution from main view. need inverse order
 					var resolutions = owc.getResolutions(false);
