@@ -117,7 +117,7 @@ Ext.define('Ck.Action', {
 				render: function (btn, opts) {
 					this.onRender(btn, config, opts);
 					this.render(btn, opts);
-				} ,
+				},
 				destroy: this.destroy,
 				hide: this.hide,
 				scope: this
@@ -125,7 +125,7 @@ Ext.define('Ck.Action', {
 
 			scope: this
 		});
-		Ck.actions.push(this);
+
 		this.callParent([nconfig]);
 	},
 

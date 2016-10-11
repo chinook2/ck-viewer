@@ -25,7 +25,8 @@ Ext.define('Ext.overrides.Component', {
 	constructor: function(config) {
 		config = config || {};
 		if(config.ckAction) {
-			var action = key = config.ckAction;
+			var key = config.ckAction;
+			var action = key;
 			// Allow to add same action twice or more with a different itemId
 			if(config.itemId) key += config.itemId;
 			// Special test for actions to change Locale (init simpliest)
@@ -37,7 +38,6 @@ Ext.define('Ext.overrides.Component', {
 			} else {
 				try {
 					config = Ext.create('widget.'+action, config);
-					Ck.actions[key] = config;
 				} catch (e) {
 					Ck.log("Enable to init action '"+ action +"'");
 				}
@@ -45,6 +45,16 @@ Ext.define('Ext.overrides.Component', {
 		}
 
 		this.callParent(arguments);
+
+		// Register actions on render & Unregister on destroy
+		this.on({
+			render: function () {
+				if(key) Ck.actions[key] = config;
+			},
+			destroy: function () {
+				if(key) delete Ck.actions[key];
+			}
+		});
 	}//,
 
 /*

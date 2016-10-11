@@ -109,7 +109,7 @@
 	},
 
 	beforeDestroy: function(){
-		this.toolbar.destroy();
+		if(this.toolbar) this.toolbar.destroy();
 		this.callParent();
 	},
 

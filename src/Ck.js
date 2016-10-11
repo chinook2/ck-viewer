@@ -319,11 +319,7 @@ Ext.apply(Ck, {
 	 * @return {Ck.Action}
 	 */
 	getAction: function(widget) {
-		for(var i = 0; i < Ck.actions.length; i++) {
-			if(Ck.actions[i].config.action == widget) {
-				return Ck.actions[i];
-			}
-		}
+		return Ck.actions[widget];
 	},
 
 	/**

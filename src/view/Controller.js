@@ -73,7 +73,26 @@ Ext.define('Ck.view.Controller', {
 	setCkMap: function (ckmap) {
 		if(ckmap) {
 			this.relayEvents(ckmap, ['ready', 'loaded'], 'map');
+			this.getView().relayEvents(ckmap, ['ready', 'loaded'], 'map');
 			this.ckMap = ckmap;
+		}
+	},
+
+	onMapReady: function(fn, scope, options) {
+		var m = this.getCkMap();
+		if (m && m.ready === true) {
+			fn.apply(scope, [m]);
+		} else {
+			this.on('mapready', fn, scope, options);
+		}
+	},
+
+	onMapLoaded: function (fn, scope, options) {
+		var m = this.getCkMap();
+		if (m && m.loaded === true) {
+			fn.apply(scope, [m]);
+		} else {
+			this.on('maploaded', fn, scope, options);
 		}
 	}
 });

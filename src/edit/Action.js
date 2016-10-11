@@ -59,7 +59,7 @@ Ext.define('Ck.edit.Action', {
 
 		if(this.controller.getView().editConfig) var layerId = this.controller.getView().editConfig.layerId;
 		if(layerId) this.layer = this.getMap().getLayerById(layerId);
-
+		/*
 		if(!this.layer) {
 			this.layer = new ol.layer.Vector({
 				id: "editLayer",
@@ -69,6 +69,7 @@ Ext.define('Ck.edit.Action', {
 				})
 			});
 		}
+		*/
 
 		return this.layer;
 	},
@@ -80,7 +81,9 @@ Ext.define('Ck.edit.Action', {
 	 **/
 	getLayerSource: function(layer) {
 		if(Ext.isEmpty(layer)) {
-			return this.getLayer().getSource();
+			var lyr = this.getLayer()
+			if(lyr) return lyr.getSource();
+			return null;
 		} else {
 			return layer.getSource();
 		}
@@ -101,13 +104,16 @@ Ext.define('Ck.edit.Action', {
 	 **/
 	getGeometryType: function() {
 		var layer = this.getLayer();
-		var type = this.layer.getExtension("geometryType");
-		if(Ext.isEmpty(type)) {
-			var ft = this.layer.getSource().getFeatures()[0];
-			if(!Ext.isEmpty(ft)) {
-				type = ft.getGeometry().getType();
+		if (layer) {
+			var type = layer.getExtension("geometryType");
+			if(Ext.isEmpty(type)) {
+				var ft = this.layer.getSource().getFeatures()[0];
+				if(!Ext.isEmpty(ft)) {
+					type = ft.getGeometry().getType();
+				}
 			}
 		}
+
 		return type || this.defaultGeometryType;
 	},
 
