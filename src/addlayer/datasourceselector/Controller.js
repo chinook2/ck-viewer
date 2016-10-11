@@ -9,15 +9,6 @@ Ext.define('Ck.addlayer.datasourceselector.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer.datasourceselector',
 	
-	config: {
-	},
-	
-	/**
-	 * @protected
-	 */
-	init: function(view) {
-		this.callParent([view]);
-	},
 	
 	onKeyPress: function(cbx, evt) {
 		if(evt.getKey() == evt.ENTER) {
@@ -41,7 +32,5 @@ Ext.define('Ck.addlayer.datasourceselector.Controller', {
 				Ext.Msg.alert("Add Layer", "This is not a valid URL : " + url);
 			}
 		}
-	},
-	
-	onServerSelect: Ext.emptyFn
+	}
 });

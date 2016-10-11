@@ -9,29 +9,28 @@ Ext.define("Ck.addlayer.Wfs", {
 	extend: "Ext.panel.Panel",
 	alias: "widget.ckaddlayer-wfs",
 	
+	itemId: "addlayer-wfs",
 	controller: "ckaddlayer.wfs",
 	
 	title: "WFS",
 	cls: "ck-addlayer-wfs",
-	itemId: "addlayer-wfs",
-	height: "auto",
+	height: "100%",
 	
-	layout: {
-		type: "fit"
-	},
+	layout: "vbox",
 	
 	sources: [],
 	
 	items: [{
 		xtype: 'ckaddlayer-datasourceselector',
-		itemId: 'ckaddlayer-wfs-datasourceselector',
+		flex: 0,
+		width: "100%",
 		listeners:{
 			select: "dataSourceChange"
 		}
 	},{
 		xtype: 'ckaddlayer-datasourcecapabilities',
-		itemId: 'ckaddlayer-wfs-datasourcecapabilities',
-		service: "WFS",
-		autoScroll: true
+		flex: 1,
+		width: "100%",
+		service: "WFS"
 	}]
 });

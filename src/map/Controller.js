@@ -258,99 +258,12 @@ Ext.define('Ck.map.Controller', {
 		// Set the bbox from context only if no zoom / center or extent
 		if(!cfg.zoom && !cfg.center && !cfg.extent) this.setExtent(owc.getExtent());
 
+		// Loop on layers to create its
 		owc.getLayers().forEach(function(layer) {
-			var params, opt_options;
-
-			var olLayer, olLayerType, olSourceOptions, olSource,
-				olSourceAdditional = {},
-				olStyle = false;
-			var mainOffering = layer.getOffering(0);
-
-			var olSource = this.createSource(mainOffering, layer, owc);
-
-			switch(mainOffering.getType()) {
-				case "wfs":
-				case 'geojson':
-					olStyle = Ck.map.Style.style;
-					break;
-			}
-
-
-			if(!Ext.isEmpty(olSource)) {
-				var cluster = layer.getExtension("cluster");
-				if(cluster) {
-					var styleCache = {};
-					var nbFeatures = false;
-					olStyle = function(opt, source, feature, resolution) {
-						var size = feature.get('features').length;
-						var style = styleCache[size];
-						if (!style) {
-							var minSize = opt.minSize || 10;
-							var maxSize = opt.maxSize || opt.distance || 60;
-							if(!nbFeatures) nbFeatures = source.getFeatures().length;
-							var ptRadius = minSize + ((size * maxSize) / nbFeatures);
-							style = [new ol.style.Style({
-								image: new ol.style.Circle({
-									radius: ptRadius,
-									stroke: new ol.style.Stroke({
-										color: '#fff'
-									}),
-									fill: new ol.style.Fill({
-										color:	'rgba(51,153,204,0.75)'
-									})
-								}),
-								text: new ol.style.Text({
-									text: size.toString(),
-									scale: ptRadius * .1,
-									fill: new ol.style.Fill({
-										color: '#fff'
-									})
-								})
-							})];
-							styleCache[size] = style;
-						}
-						return style;
-					}.bind(undefined, cluster, olSource)
-				}
-
-				var extent = layer.getExtent(viewProj) || owc.getExtent();
-
-				var ckLayerSpec = vm.getData().ckOlLayerConnection[mainOffering.getType()];
-
-				// Create others source
-				var sources = {};
-				var off, offs = layer.getOfferings();
-				for(var i = 1; i < offs.length; i++) {
-					off = offs[i];
-					if(!Ext.isArray(sources[off.getType()])) {
-						sources[off.getType()] = [];
-					}
-					sources[off.getType()].push(this.createSource(off, layer, owc));
-				}
-
-				// Reference main source into sources properties
-				if(!Ext.isArray(sources[mainOffering.getType()])) {
-					sources[mainOffering.getType()] = [];
-				}
-				sources[mainOffering.getType()].push(olSource);
-
-				// Layer creation
-				olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
-					id: layer.getId(),
-					title: layer.getTitle(),
-					source: olSource,
-					sources: sources,
-					extent: extent,
-					style: olStyle,
-					visible: layer.getVisible(),
-					path: layer.getExtension('path') || "",
-					extension: layer.getExtension()
-				});
-
-				if(olLayer) {
-					olLayer.ckLayer = layer;
-					this.getOlMap().addLayer(olLayer);
-				}
+			olLayer = this.createLayer(layer, owc);
+			if(olLayer) {
+				olLayer.ckLayer = layer;
+				this.getOlMap().addLayer(olLayer);
 			}
 		}, this);
 
@@ -375,6 +288,107 @@ Ext.define('Ck.map.Controller', {
 		Ck.log('fireEvent ckmapLoaded');
 		this.fireEvent('loaded', this);
 		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
+	},
+	
+	/**
+	 * Create a layer
+	 * @param {Ck.owcLayer}
+	 * @param {Ck.owc}
+	 * @return {ol.layer}
+	 */
+	createLayer: function(layer, owc) {
+		var params, opt_options;
+		var vm = this.getViewModel();
+		var viewProj = owc.getProjection();
+
+		var olLayer, olLayerType, olSourceOptions, olSource,
+			olSourceAdditional = {},
+			olStyle = false;
+		var mainOffering = layer.getOffering(0);
+
+		var olSource = this.createSource(mainOffering, layer, owc);
+
+		switch(mainOffering.getType()) {
+			case "wfs":
+			case 'geojson':
+				olStyle = Ck.map.Style.style;
+				break;
+		}
+
+
+		if(!Ext.isEmpty(olSource)) {
+			var cluster = layer.getExtension("cluster");
+			if(cluster) {
+				var styleCache = {};
+				var nbFeatures = false;
+				olStyle = function(opt, source, feature, resolution) {
+					var size = feature.get('features').length;
+					var style = styleCache[size];
+					if (!style) {
+						var minSize = opt.minSize || 10;
+						var maxSize = opt.maxSize || opt.distance || 60;
+						if(!nbFeatures) nbFeatures = source.getFeatures().length;
+						var ptRadius = minSize + ((size * maxSize) / nbFeatures);
+						style = [new ol.style.Style({
+							image: new ol.style.Circle({
+								radius: ptRadius,
+								stroke: new ol.style.Stroke({
+									color: '#fff'
+								}),
+								fill: new ol.style.Fill({
+									color:	'rgba(51,153,204,0.75)'
+								})
+							}),
+							text: new ol.style.Text({
+								text: size.toString(),
+								scale: ptRadius * .1,
+								fill: new ol.style.Fill({
+									color: '#fff'
+								})
+							})
+						})];
+						styleCache[size] = style;
+					}
+					return style;
+				}.bind(undefined, cluster, olSource)
+			}
+
+			var extent = layer.getExtent(viewProj) || owc.getExtent();
+
+			var ckLayerSpec = vm.getData().ckOlLayerConnection[mainOffering.getType()];
+
+			// Create others source
+			var sources = {};
+			var off, offs = layer.getOfferings();
+			for(var i = 1; i < offs.length; i++) {
+				off = offs[i];
+				if(!Ext.isArray(sources[off.getType()])) {
+					sources[off.getType()] = [];
+				}
+				sources[off.getType()].push(this.createSource(off, layer, owc));
+			}
+
+			// Reference main source into sources properties
+			if(!Ext.isArray(sources[mainOffering.getType()])) {
+				sources[mainOffering.getType()] = [];
+			}
+			sources[mainOffering.getType()].push(olSource);
+
+			// Layer creation
+			olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
+				id: layer.getId(),
+				title: layer.getTitle(),
+				source: olSource,
+				sources: sources,
+				extent: extent,
+				style: olStyle,
+				visible: layer.getVisible(),
+				path: layer.getExtension('path') || "",
+				extension: layer.getExtension()
+			});
+
+			return olLayer;
+		}
 	},
 
 	/**

@@ -206,6 +206,11 @@ Ext.apply(Ck, {
 		crs		: "EPSG:4326",
 		extent	: [-180,-90,180,90]
 	},
+	
+	codeOperation: {
+		wfs		: "http://www.opengis.net/spec/owc-wfs/1.0/req/wfs",
+		wms		: "http://www.opengis.net/spec/owc-geojson/1.0/req/wms"
+	},
 
 	/**
 	 * @property params
@@ -749,5 +754,92 @@ Ext.apply(Ck, {
 			name = name.replace(regex, '');
 
 		return name;
+	},
+	
+	/**
+	 * Reduce a BBox if it doesn't contained by other BBox
+	 * Comparison is done in WGS84 projection
+	 *
+	 * @param {ol.Extent}		BBox to be limited
+	 * @param {ol.Extent}		BBox who limit
+	 * @param {ol.proj.ProjectionLike}	Projection of first BBox
+	 * @param {ol.proj.ProjectionLike}	Projection of second BBox
+	 * @param {ol.proj.ProjectionLike}	Output projection (equal to second BBox projection by default)
+	 *
+	 * @return {OpenLayers.Bounds} BBox retrécie
+	 */
+	limitBBox: function(BBox, limitBBox, srsBBox, srsLimitBBox, srsOut) {
+		
+		// On transforme les projections qui sont en string en objets
+		srsBBox = ol.proj.get(srsBBox);
+		srsLimitBBox = ol.proj.get(srsLimitBBox);
+		
+		if(srsOut == undefined) {
+			srsOut = srsLimitBBox;
+		} else {
+			srsOut = ol.proj.get(srsOut);	
+		}
+
+		// On convertie les BBox en 4326
+		refSRS = ol.proj.get("EPSG:4326");
+		if(srsBBox.getCode() != "EPSG:4326") {
+			BBox = ol.geom.Polygon.fromExtent(BBox);
+			BBox.transform(srsBBox, refSRS);
+			BBox = BBox.getExtent();
+		}
+		
+		if(srsLimitBBox.getCode() != "EPSG:4326") {
+			limitBBox = ol.geom.Polygon.fromExtent(limitBBox);
+			limitBBox.transform(srsLimitBBox, refSRS);
+			limitBBox = limitBBox.getExtent();
+		}
+		
+		// On limite
+		leftCoord	= (BBox[0] < limitBBox[0])?		limitBBox[0]		: BBox[0];
+		bottomCoord	= (BBox[1] < limitBBox[1])?	limitBBox[1]	: BBox[1];
+		rightCoord	= (BBox[2] > limitBBox[2])?	limitBBox[2]		: BBox[2];
+		topCoord	= (BBox[3] > limitBBox[3])?		limitBBox[3]		: BBox[3];
+		
+		boundsOut = [leftCoord, bottomCoord, rightCoord, topCoord];
+		
+		if(!ol.proj.equivalent(srsOut, refSRS)) {
+			boundsOut = ol.geom.Polygon.fromExtent(boundsOut);
+			boundsOut.transform(refSRS, srsOut);
+			boundsOut = boundsOut.getExtent();
+		}
+		
+		return boundsOut;
 	}
 }).init();
+
+
+/**
+ * Override Ajax callback to fix Chrome and responseXML null member.
+ * Caused by Content-Type equal to "vnd.ogc.wms_xml" instead of "xml"
+ *
+ * > Header edit Connection-Type "vnd.ogc.wms_xml" "xml"
+ *
+ * > SetEnvIfNoCase Connection "keep-alivea" HAVE_TOTO
+ * > Header set Test "application/xml" env=HAVE_TOTO
+ */
+Ext.data.proxy.Ajax.prototype.createRequestCallback = function(request, operation) {
+	var me = this;
+	return function(options, success, response) {
+		if (request === me.lastRequest) {
+			me.lastRequest = null;
+		}
+		try {
+			var oParser = new DOMParser();
+			response.responseXML = oParser.parseFromString(response.responseText , "text/xml");
+		} catch(e) {
+			Ext.Msg.show({
+				title: "Request error",
+				msg: "Unable to create DomDocument from XML string",
+				buttons: Ext.Msg.OK,
+				icon: Ext.MessageBox.ERROR
+			});
+		} finally {
+			me.processResponse(success, operation, request, response);
+		}
+	};
+}

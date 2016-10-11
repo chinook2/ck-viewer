@@ -9,24 +9,20 @@ Ext.define("Ck.addlayer.DataSourceSelector", {
 	extend: "Ext.form.field.ComboBox",
 	alias: "widget.ckaddlayer-datasourceselector",
 	
+	itemId: "addlayer-datasourceselector",
 	controller: "ckaddlayer.datasourceselector",
 	
 	cls: "ck-addlayer-datasourceselector",
-	itemId: "addlayer-datasourceselector",
-	height: "auto",
-	
-	queryMode: 'local',
-	
+	emptyText: 'Choose a server or type an URL...',
 	
 	hideLabel: true,
+	editable: true,
+	
 	enableKeyEvents: true,
 	triggerAction: 'all',
-	editable: true,
-
+	queryMode: 'local',
 	displayField: 'title',
 	valueField: 'name',
-
-	emptyText: 'Choose a server or type an URL...',
 
 	/**
 	 * @param {String} Options à passer au service getCapabilities
@@ -36,11 +32,10 @@ Ext.define("Ck.addlayer.DataSourceSelector", {
 	service: 'WMS',
 	
 	store: {
-		fields: ["name", "title", "url", "type"]
+		fields: ["name", "title", "url", "service"]
 	},
 	
 	listeners: {
-		keypress: "onKeyPress",
-		select: "onServerSelect"
+		keypress: "onKeyPress"
 	}
 });

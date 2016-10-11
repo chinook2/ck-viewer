@@ -20,6 +20,9 @@ Ext.define('Ck.legend.Controller', {
 		ckMap.legend = this;
 	},
 
+	/**
+	 * When map is loaded, add layers to legend
+	 */
 	ckLoaded: function() {
 		var v = this.getView();
 
@@ -45,6 +48,10 @@ Ext.define('Ck.legend.Controller', {
 		this.fireEvent('ready', this);
 	},
 
+	/**
+	 * When a layer is added
+	 * @deprecated
+	 */
 	onMapAddLayer: function(layer) {
 		// this.addLayer(layer);
 	},
@@ -98,6 +105,10 @@ Ext.define('Ck.legend.Controller', {
         return layers.reverse();
 	},
 
+	/**
+	 * Add layer to legend
+	 * @param {ol.layer
+	 */
 	addLayer: function(layer) {
 		if(!layer.ckLayer || !layer.ckLayer.getUserLyr()) {
 			return false;

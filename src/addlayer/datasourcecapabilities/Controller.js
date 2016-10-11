@@ -9,6 +9,10 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer.datasourcecapabilities',
 	
+	requires: [
+		'Ck.CapabilitiesLoader'
+	],
+	
 	config: {
 		groupName: 'Mes données',
 		groupByDatasource: false,
@@ -25,7 +29,7 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 		/**
 		 * Paramètres additionels ajoutés à la fin de la requête getCapabilities
 		 */
-		loaderParams: false,
+		loaderParams: "",
 		
 		/**
 		 * Configuration du dataSource utilisé par défaut
@@ -33,7 +37,7 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 		datasource: {
 			url: 'index.php',
 			title: 'Base de données Postgis',
-			type: 'POSTGIS'
+			service: 'POSTGIS'
 		},
 		
 		/**
@@ -50,77 +54,39 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 		/**
 		 * Indique pour les WFS si c'est la passe en WMS (true) ou la passe en WFS (false)
 		 */
-		firstPass: true,
+		firstPass: false,
 		
 		/**
 		 * Indique s'il faut regarder s'il y a un serveur WMS associé au serveur WFS
 		 */
-		testWMS: false,
+		tryWMS: true,
 		
 		/**
 		 * Version en cours de test (contient une valeur du tableau this.versions
 		 */
 		version: '1.1.0',
 		
-		versions: ["1.1.0", "1.3.0"]
+		/**
+		 * Versions available to test
+		 */
+		versions: ["1.1.0", "1.3.0"],
+		
+		/**
+		 * Version index to try
+		 */
+		idxVersion: -1
 	},
 	
 	/**
 	 * @protected
 	 */
 	init: function(view) {
-		// http://mem-ouganda:8090/geoserver/wfs/?service=wfs&request=getCapabilities
-		this.store = Ext.create("Ext.data.TreeStore", {
-			proxy: Ext.create("Ext.data.proxy.Ajax", {
-				reader: Ext.create("Ext.data.reader.Xml", {
-					transform: this.readRecords
-				})
-			})
+		view.getStore().addListener({
+			beforeLoad: this.beforeLoad,
+			load: this.afterLoad,
+			scope: this
 		});
-		
-		this.store.on("load", this.test, this);
-		
-		// recordCreator
-		
-		/* Initialisation du TreeLoader
-		this.loader = new Ext.ux.XmlGetCapabilitiesTreeLoader({
-			baseAttrs: {
-				iconCls: 'x-tree-node-no-icon',
-				singleClickExpand: true
-			},
-			listeners: {
-				"beforeload": this.beforeLoad,
-				"load": this.afterLoad,
-				"loadexception": this.loaderException,
-				scope: this
-			},
-			clearOnLoad: true,
-			skipUser: false
-		});
-		this.root = new Ext.tree.TreeNode();*/
-		// this.store.load();
 		this.callParent([view]);
-	},
-	
-	test: function(a,b,c) {
-		var toto = 1;
-		toto += 1;
-	},
-	
-	readRecords: function(data) {
-		return data;
-	},
-	
-	/**
-	 * @method initMask
-	 * Initilise le masque de chargement s'il n'y en a pas déjà un
-	 */
-	initMask: function() {
-		if(!this.loadMask)
-			this.loadMask = new Ext.LoadMask({
-				target: this.getView().el,
-				message: this.getLoadingMsg()
-			});
 	},
 	
 	/**
@@ -128,7 +94,7 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 	 * Méthode appelée au début du chargement des couches. Affiche le masque
 	 */
 	beforeLoad: function() {
-		this.loadMask.show();
+		this.getView().mask("Loading...");
 	},
 	
 	/**
@@ -138,6 +104,8 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 	 * @param {Ext.ux.XmlGetCapabilitiesTreeLoader}
 	 */
 	afterLoad: function(TL) {
+		this.getView().unmask();
+		this.getView().getRootNode().expand();
 		if(TL.success) {
 			this.loadMask.hide();
 			
@@ -152,10 +120,19 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 		}
 	},
 	
+	/**
+	 * Start capabilities data loading. Called by DataSourceSelector select event.
+	 * @params {Object} Datasource parameters
+	 */
 	loadDataSource: function(src) {
-		this.idxVersion = -1;
-		this.firstPass = true;
-		this.datasource = src;
+		this.setIdxVersion(-1);
+		this.setFirstPass(true);
+		this.setDatasource(src);
+		
+		if(this.nodePath === null || this.nodeName === null) {
+			this.nodePath = this.getCapabilitiesConfig[src.service].nodePath;
+			this.nodeName = this.getCapabilitiesConfig[src.service].nodeName;
+		}
 		
 		this.reload();
 	},
@@ -165,53 +142,57 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 	 * Charge la liste des couches d'un serveur
 	 */
 	reload: function() {
-		this.idxVersion++;
+		var dsrc = this.getDatasource();
+		var service = dsrc.service;
 		
-		this.version = this.getVersions()[this.idxVersion];
+		// Set request version
+		if(dsrc.version) {
+			this.setVersion(dsrc.version);
+		} else {
+			this.setIdxVersion(this.getIdxVersion() + 1);
+			this.setVersion(this.getVersions()[this.getIdxVersion()]);
+		}
 		
-		var service = this.datasource.type;
-		
-		switch(this.datasource.type) {
-			// Datasource temporaire saisie par l'utilisateur
+		switch(service) {
+			// Temporary datasource service by user
 			case "WFS":
-				// On essai de requêter le serveur WFS en WMS (question performance)
-				if(this.firstPass && this.testWMS) {
+				// Try to request WFS server as WMS (performance question)
+				if(this.getFirstPass() && this.getTryWMS()) {
 					service = "WMS";
 				}
+				break;
 			case "WMS":
-				var url = this.datasource.url;
-				url += '?SERVICE=' + service + '&REQUEST=GetCapabilities&VERSION=' + this.version + '&' + this.loaderParams;
-			break;
+				break;
 			default:
 				if(this.context != null) {
-					// Data internes
-					url = "index.php?s=wms&r=getcapabilities&params=Data,DataSource,ConnectionType,Type&context=" + this.context + '&' + this.loaderParams;
+					// Internal data
+					url = "index.php?s=wms&r=getcapabilities&params=Data,DataSource,ConnectionType,Type&context=" + this.context + '&' + this.getLoaderParams();
 				} else {
-					// Datasource via datasource.xml
-					url = "index.php?s=datasource&r=getdata&datasource="+this.datasource.name;
+					// Datasource from datasource.xml
+					url = "index.php?s=datasource&r=getdata&datasource=" + dsrc.name;
 				}
 		}
 		
-		// loadexception 
-		// this.loader.service = service;
-		// this.loader.dataUrl = url;
-		// this.loader.load(this.root);
-		this.store.getProxy().setUrl(url);
-		this.store.load();
-		// this.root.expand();
+		var url = dsrc.url + "?SERVICE=" + service + "&REQUEST=GetCapabilities&VERSION=" + this.getVersion() + '&' + this.getLoaderParams();
+		var store = this.getView().getStore(); 
+		
+		store.getProxy().setService(service);
+		store.getProxy().setUrl(url);
+		store.load({
+			node: this.getView().getRootNode()
+		});
 	},
 	
 	/**
-	 * @method loaderException
-	 * Appelé lors d'une exception de chargement
+	 * Called when the load fails
 	 *
 	 * @param {Mixed} Soit un entier : 1 pour abscence de réponse, 2 pour une requête WMS qui 
 	 */
 	loaderException: function(param) {
 		if(this.idxVersion + 1 < this.versions.length) {
 			this.reload();
-		} else if(this.datasource.type == "WFS") {
-			this.datasource.type = "WMS";
+		} else if(this.datasource.service == "WFS") {
+			this.datasource.service = "WMS";
 			this.idxVersion = -1;
 			this.reload();
 		} else {
@@ -221,20 +202,6 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 				buttons: Ext.Msg.OK,
 				icon: Ext.MessageBox.ERROR
 			});
-		}
-	},
-	
-	onClick: function(node, evt){
-		var layer = this.addLayer(node);
-		if(layer) {
-			this.redrawLegendPanel(layer);
-			// Pour le WFS on lance la requête getFeatures pour les autres on fait un simple redraw
-			if(layer.connectiontype == "WFS") {
-				layer.strategies[0].activate();
-			} else {
-				layer.redraw(true);
-			}
-			this.fireEvent("layeradded", layer, node);
 		}
 	}
 });

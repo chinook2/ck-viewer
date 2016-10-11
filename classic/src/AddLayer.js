@@ -11,15 +11,31 @@ Ext.define("Ck.AddLayer", {
 	
 	controller: "ckaddlayer",
 	
+	layout: {
+		type: "fit"
+	},
+	
 	config: {
 		bodyPadding: 10,
-		defaultType: "combo",
 		defaults: {
 			width: "100%"
 		}
 	},
 	
+	activeTab: 1,
+	
 	items: [{
-		xtype: "ckaddlayer-wfs"
+		xtype: "ckaddlayer-wfs",
+		hidden: true,
+		scope: this,
+		listeners: {
+			itemclick: "addLayer"
+		}
+	},{
+		xtype: "ckaddlayer-wms",
+		scope: this,
+		listeners: {
+			itemclick: "addLayer"
+		}
 	}]
 });

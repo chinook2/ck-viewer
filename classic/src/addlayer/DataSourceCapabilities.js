@@ -12,14 +12,20 @@ Ext.define("Ck.addlayer.DataSourceCapabilities", {
 	controller: "ckaddlayer.datasourcecapabilities",
 	
 	itemId: "addlayer-datasourcecapabilities",
-	height: "auto",
 	
-	layout: {
-		type: "fit"
+	manageHeight: false,
+	syncRowHeight: false,
+	rootVisible: false,
+	
+	root: {
+		title: "Layers"
 	},
-	
-	listeners: {
-		click: "onClick",
-		render: "initMask"
+	store: {
+		xtype: "store.tree",
+		autoLoad: false,
+		clearOnLoad: true,
+		proxy: {
+			type: "capabilitiesloader"
+		}
 	}
 });

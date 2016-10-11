@@ -23,6 +23,7 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'Add Layer',
 				width: 400,
+				height: 250,
 				layout: 'fit',
 				closeAction: 'hide',
 				items: {
