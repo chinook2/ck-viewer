@@ -74,13 +74,24 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 		/**
 		 * Version index to try
 		 */
-		idxVersion: -1
+		idxVersion: -1,
+		
+		/**
+		 * True to sort capabilities
+		 */
+		sort: false
 	},
 	
 	/**
 	 * @protected
 	 */
 	init: function(view) {
+		if(this.getSort()) {
+			view.on("load", function(view) {
+				view.sort("text", "ASC");
+			});
+		}
+		
 		view.getStore().addListener({
 			beforeLoad: this.beforeLoad,
 			load: this.afterLoad,
@@ -98,26 +109,22 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 	},
 	
 	/**
-	 * @method afterLoad
-	 * Méthode appelée à la fin du chargement des couches. Cache le masque
-	 * On vérifie le succès car l'évènement "load" est appelé même avec "loaderexception" !!
-	 * @param {Ext.ux.XmlGetCapabilitiesTreeLoader}
+	 * After capabilities load
 	 */
 	afterLoad: function(TL) {
 		this.getView().unmask();
 		this.getView().getRootNode().expand();
-		if(TL.success) {
-			this.loadMask.hide();
-			
-			if(!Ext.isEmpty(TL.version)) {
-				this.version = TL.version;
-			}
-			
-			if(Array.isArray(TL.projList) && TL.projList.length!=0)
-				this.projList = TL.projList;
-			else
-				this.projList = false;
+		
+		// Get projection list
+		var cl = this.getView().getStore().getProxy();
+		if(Array.isArray(cl.projList) && cl.projList.length > 0) {
+			this.setProjList(cl.projList);
+		} else {
+			this.setProjList(false);
 		}
+		
+		// Sort layer
+		this.getView().getStore().sort
 	},
 	
 	/**

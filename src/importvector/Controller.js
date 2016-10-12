@@ -11,6 +11,12 @@ Ext.define('Ck.importvector.Controller', {
 	importParam: {},
 	
 	/**
+	 * @property {ol.layer.Vector}
+	 * Current layer imported
+	 */
+	importLayer: null,
+	
+	/**
 	 * Objet containing parsed files
 	 */
 	files: {},
@@ -30,75 +36,29 @@ Ext.define('Ck.importvector.Controller', {
 	 * Init the map component, init the viewModel.
 	 * @protected
 	 */
-	init: function() {
-		var v = this.getView();
-		var vm = this.getViewModel();
-		this.ckMap = Ck.getMap();
-		this.olMap = this.ckMap.getOlMap();
-		this.olView = this.ckMap.getOlView();
-		
-		Ext.apply(this.importParam, vm.getData().importParam);
-		
-		this.control({
-			"ckimportvector button#import": {
-				click: this.startImport,
-				scope: this
-			},
-			"ckimportvector button#cancel": {
-				click: this.cancel
-			},
-			"ckimportvector textfield#file": {
-				change: this.paramChange
-			},
-			"ckimportvector combo#format": {
-				change: this.paramChange
-			},
-			"ckimportvector combo#projection": {
-				change: this.paramChange
-			}
-		});
-		
-		this.loadDefaultParam();		
+	init: function(view) {
+		this.callParent([view]);
+		Ext.apply(this.importParam, this.getViewModel().getData().importParam);
+		this.loadDefaultParam();
 	},
 	
 	/**
-	 * Create a layer to host imported features
-	 * @param {String} Title of the created layer
-	 */
-	createLayer: function(title) {
-		var vm = this.getViewModel();
-		title = Ext.String.capitalize(title.toLowerCase()) || "Imported layer n°" + this.nbImport++;
-		
-		this.importLayer = new ol.layer.Vector({
-			title: title,
-			removable: true,
-			source: new ol.source.Vector(),
-			style: new ol.style.Style({
-				fill: new ol.style.Fill(Ext.apply({
-					color: 'rgba(255, 255, 255, 0.2)'
-				}, vm.getData().layerParam.fill)),
-				stroke: new ol.style.Stroke(Ext.apply({
-					color: '#ffcc33',
-					width: 1
-				}, vm.getData().layerParam.stroke))
-			})
-		});
-		this.olMap.addLayer(this.importLayer);
-		this.layers.push(this.importLayer);
-		this.ckMap.getLegend().addLayer(this.importLayer);
-	},
-	
-	/**
-	 * Set default value for each field
+	 * Init cbx with default parameters. Hide cbx if only 1 choice
 	 */
 	loadDefaultParam: function() {
-		var importParam = this.importParam;
+		var formatCbx = this.getView().getComponent("format");
+		if(this.getViewModel().getStore("format").count() < 2) {
+			formatCbx.hide();
+		} else {
+			formatCbx.setValue(this.importParam.format);
+		}
 		
-		var formatCbx = this.getView().items.get("format");
-		formatCbx.setValue(importParam.format);
-		
-		var projCbx = this.getView().items.get("projection");
-		projCbx.setValue(importParam.projection);
+		var projCbx = this.getView().getComponent("projection");
+		if(this.getViewModel().getStore("projection").count() < 2) {
+			projCbx.hide();
+		} else {
+			projCbx.setValue(this.importParam.projection);
+		}
 	},
 	
 	/**
@@ -106,6 +66,7 @@ Ext.define('Ck.importvector.Controller', {
 	 */
 	paramChange: function(item, newValue, oldValue) {
 		this.importParam[item.name] = newValue;
+		this.importParam[item.name + "Label"] = item.getRawValue();
 	},
 	
 	/**
@@ -129,6 +90,7 @@ Ext.define('Ck.importvector.Controller', {
 			fileName: file,
 			onProgress: this.showProgress,
 			onFilesLoaded: this.processFiles,
+			onGetEntry: function() { alert('toto') },
 			scope: {
 				onProgress: this,
 				onFilesLoaded: this
@@ -146,33 +108,25 @@ Ext.define('Ck.importvector.Controller', {
 	 * When all files are loaded, do the right action.
 	 */
 	processFiles: function() {
-		switch(this.importParam.format) {
-			case "shp":
-				var oShp = this.ckZip.getFilesByExtension("shp")[0];
-				this.createLayer(Ext.String.stripExtension(oShp.filename));
-				if(!Ext.isEmpty(oShp)) {
-					this.processShapefile(oShp);
-				} else {
-					Ext.Msg.show({
-						title: "Import",
-						message: "There is no ShapeFile in your archive",
-						buttons: Ext.Msg.OK,
-						icon: Ext.Msg.ERROR
-					});
-				}
-				break;
-			case "csv":
-				var oShp = this.ckZip.getFilesByExtension("csv")[0];
-				if(!Ext.isEmpty(oShp)) {
-					
-				}
-				break;
-			case "gpx":
-				var oShp = this.ckZip.getFilesByExtension("gpx")[0];
-				if(!Ext.isEmpty(oShp)) {
-					
-				}
-				break;
+		var file = this.ckZip.getFilesByExtension(this.importParam.format)[0];
+		
+		if(Ext.isEmpty(file)) {
+			Ext.Msg.show({
+				title: "Import",
+				message: "There is no " + this.importParam.formatLabel + " in your archive",
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.ERROR
+			});
+		} else {
+			switch(this.importParam.format) {
+				case "shp":
+					this.processShapefile(file);
+					break;
+				case "csv":
+					break;
+				case "gpx":
+					break;
+			}
 		}
 		
 	},
@@ -183,13 +137,8 @@ Ext.define('Ck.importvector.Controller', {
 	 * @param {Object}
 	 */
 	processShapefile: function(oShp) {
-		var oDbf, features, feature, geom, ftLists, mapProj, featureProj;
-		/**
-		 * Block to create WGS84 features directly
-			var oPrj = this.ckZip.getFilesByExtension("prj")[0];
-			var wktPrj = String.fromCharCode.apply(null, new Uint8Array(oPrj.data));
-			features = shp.parseShp(oShp.data, wktPrj);
-		 */
+		var oDbf, features, feature, geom, wgsGeom, ftLists, mapProj, featureProj;
+		var refProj = ol.proj.get("EPSG:4326");
 		
 		features = shp.parseShp(oShp.data);
 		
@@ -201,22 +150,61 @@ Ext.define('Ck.importvector.Controller', {
 		
 		feature, geom;
 		olFeatures = [];
-		mapProj = this.olView.getProjection();
+		mapProj = this.getOlView().getProjection();
 		featureProj = ol.proj.get("EPSG:" + this.importParam.projection);
+		
+		// Get map extent as WGS 84 for comparison
+		mapExtent = Ck.reprojectExtent(this.getMap().originOwc.getExtent(), mapProj);
 		
 		for(var i = 0; i < features.length; i++) {
 			geom = new ol.geom[features[i].geometry.type](features[i].geometry.coordinates);
-			geom.transform(featureProj, mapProj);
-			feature = new ol.Feature(
-				Ext.apply({
-					geometry: geom
-				}, features[i].properties)
-			);
-			olFeatures.push(feature);
+			wgsGeom = geom.clone().transform(featureProj, refProj);
+			
+			if(wgsGeom.intersectsExtent(mapExtent)) {
+				geom.transform(featureProj, mapProj);
+				feature = new ol.Feature(
+					Ext.apply({
+						geometry: geom
+					}, features[i].properties)
+				);
+				olFeatures.push(feature);
+			}
 		}
 		
-		this.importLayer.getSource().clear();
-		this.importLayer.getSource().addFeatures(olFeatures);
+		if(olFeatures.length < 1) {
+			Ext.Msg.show({
+				message: "There are no feature within the extent of the project</br>Check the projection, it may be wrong",
+				icon: Ext.Msg.ERROR,
+				buttons: Ext.Msg.OK
+			});
+		} else {
+			this.createLayer(oShp.filename.stripExtension());
+			this.importLayer.getSource().clear();
+			this.importLayer.getSource().addFeatures(olFeatures);
+		}
+	},
+	
+	/**
+	 * Create a layer to host imported features
+	 * @param {String} Title of the created layer
+	 */
+	createLayer: function(name) {
+		var vm = this.getViewModel();
+		name = Ext.String.capitalize(name.toLowerCase()) || "Imported layer n°" + this.nbImport++;
+		
+		this.importLayer = new ol.layer.Vector({
+			title: name,
+			removable: true,
+			source: new ol.source.Vector(),
+			style: Ck.Style.importStyle
+		});
+		this.importLayer.ckLayer = {
+			getUserLyr: function() {return true}
+		};
+		
+		this.getOlMap().addLayer(this.importLayer);
+		this.layers.push(this.importLayer);
+		this.getMap().getLegend().addLayer(this.importLayer);
 	},
 	
 	/**

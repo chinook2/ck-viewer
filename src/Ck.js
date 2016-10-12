@@ -753,6 +753,30 @@ Ext.apply(Ck, {
 	},
 	
 	/**
+	 * Reproject an extent
+	 * @param {ol.Extent}
+	 * @param {ol.proj.ProjectionLike}
+	 * @param {ol.proj.ProjectionLike} Use WGS 84 if not set
+	 * @return {ol.Extent}
+	 */
+	reprojectExtent: function(extent, from, to) {
+		from = ol.proj.get(from);
+		if(Ext.isEmpty(to)) {
+			to = ol.proj.get("EPSG:4326");
+		} else {
+			to = ol.proj.get(to);
+		}
+		
+		if(ol.proj.equivalent(to, from)) {
+			return extent;
+		} else {
+			extent = ol.geom.Polygon.fromExtent(extent);
+			extent.transform(from, to);
+			return extent.getExtent();
+		}
+	},
+	
+	/**
 	 * Reduce a BBox if it doesn't contained by other BBox
 	 * Comparison is done in WGS84 projection
 	 *
@@ -778,17 +802,8 @@ Ext.apply(Ck, {
 
 		// On convertie les BBox en 4326
 		refSRS = ol.proj.get("EPSG:4326");
-		if(srsBBox.getCode() != "EPSG:4326") {
-			BBox = ol.geom.Polygon.fromExtent(BBox);
-			BBox.transform(srsBBox, refSRS);
-			BBox = BBox.getExtent();
-		}
-		
-		if(srsLimitBBox.getCode() != "EPSG:4326") {
-			limitBBox = ol.geom.Polygon.fromExtent(limitBBox);
-			limitBBox.transform(srsLimitBBox, refSRS);
-			limitBBox = limitBBox.getExtent();
-		}
+		BBox = this.reprojectExtent(BBox, srsBBox);
+		limitBBox = this.reprojectExtent(limitBBox, srsLimitBBox);
 		
 		// On limite
 		leftCoord	= (BBox[0] < limitBBox[0])?		limitBBox[0]		: BBox[0];

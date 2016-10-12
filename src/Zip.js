@@ -62,7 +62,8 @@ Ext.define('Ck.Zip', {
 	constructor: function(config) {
 		Ext.apply(this, config);
 		this.requestFileSystem = window.webkitRequestFileSystem || window.mozRequestFileSystem || window.requestFileSystem;
-		zip.workerScriptsPath = "packages/local/ck-viewer/libs/zip/WebContent/";
+		zip.workerScriptsPath = "packages/ck-viewer/libs/zip/";
+		// zip.useWebWorkers = false;
 	},
 
 	onerror: function(message) {

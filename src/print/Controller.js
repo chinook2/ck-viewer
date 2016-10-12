@@ -29,11 +29,8 @@ Ext.define('Ck.print.Controller', {
 	 * @protected
 	 */
 	init: function() {
-		var v = this.getView();
+		this.callParent(arguments);
 		var vm = this.getViewModel();
-		this.ckMap = Ck.getMap();
-		this.olMap = this.ckMap.getOlMap();
-		this.olView = this.ckMap.getOlView();
 		
 		Ext.apply(this.printParam, vm.getData().printParam);
 		
@@ -53,7 +50,7 @@ Ext.define('Ck.print.Controller', {
 				}, vm.getData().previewParam.stroke))
 			})
 		});
-		this.olMap.addLayer(this.previewLayer);
+		this.getOlMap.addLayer(this.previewLayer);
 		window.previewLayer = this.previewLayer;
 		
 		this.control({
@@ -99,7 +96,7 @@ Ext.define('Ck.print.Controller', {
 		this.moveInteraction = new ol.interaction.Translate({
 			features: []
 		});
-		this.olMap.addInteraction(this.moveInteraction);
+		this.getOlMap.addInteraction(this.moveInteraction);
 		this.layoutChange(null, this.printParam.printLayout);
 	},
 	
@@ -132,13 +129,13 @@ Ext.define('Ck.print.Controller', {
 	 * Load resolutions list from OwcContext
 	 */
 	loadResolutions: function() {
-		var data = this.ckMap.originOwc.getScales();
+		var data = this.getMap().originOwc.getScales();
 		var combo = this.getView().items.get("resolution");
 		combo.setStore(new Ext.data.Store({
 			fields: ["scale", "res"],
 			data: data
 		}));
-		this.printParam.resolution = this.olView.getResolution();
+		this.printParam.resolution = this.getOlView.getResolution();
 	},
 	
 	valueChange: function(item, newValue, oldValue) {
@@ -236,7 +233,7 @@ Ext.define('Ck.print.Controller', {
 		var mapSize = [mapDiv.offsetWidth, mapDiv.offsetHeight];
 		
 		// Calculate mapExtent
-		// var scale = Ck.getScaleFromResolution(this.printParam.resolution, this.olView.getProjection());
+		// var scale = Ck.getScaleFromResolution(this.printParam.resolution, this.getOlView.getProjection());
 		this.mapExtent = [
 			(mapSize[0] * this.printParam.resolution),
 			(mapSize[1] * this.printParam.resolution)
@@ -254,7 +251,7 @@ Ext.define('Ck.print.Controller', {
 	 */
 	updatePreview: function() {
 		var vm = this.getViewModel();
-		var olView = this.ckMap.getOlView();
+		var olView = this.getMap().getOlView();
 		
 		this.renderLayout();
 		document.body.removeChild(this.layoutDiv);
@@ -288,7 +285,7 @@ Ext.define('Ck.print.Controller', {
 	 * Check how the document will be print
 	 */
 	beforePrint: function(btn) {
-		var rendererType = this.olMap.getRenderer().getType();
+		var rendererType = this.getOlMap.getRenderer().getType();
 		switch(rendererType) {
 			case "canvas":
 				if(!Ext.supports.Canvas) {
@@ -320,10 +317,10 @@ Ext.define('Ck.print.Controller', {
 	 */
 	preparePrint: function() {
 		// Save current view param
-		this.oldRes = this.olView.getResolution();
-		this.oldCenter = this.olView.getCenter();
+		this.oldRes = this.getOlView.getResolution();
+		this.oldCenter = this.getOlView.getCenter();
 		
-		this.olMap.once('postcompose', function(event) {
+		this.getOlMap.once('postcompose', function(event) {
 			// First print to display fake map on the screen during the real print
 			var mapCanvas = event.context.canvas;
 			var mapCtx = mapCanvas.getContext("2d");
@@ -334,7 +331,7 @@ Ext.define('Ck.print.Controller', {
 			this.fakeMap = document.createElement("img");
 			this.fakeMap.src = uri;
 			
-			var target = this.ckMap.getView().getEl().dom;
+			var target = this.getMap().getView().getEl().dom;
 			target.firstChild.appendChild(this.fakeMap);
 			
 			// Move map to invisible div to print with right resolution
@@ -347,7 +344,7 @@ Ext.define('Ck.print.Controller', {
 			// */
 			
 			document.body.appendChild(printDiv);
-			this.olMap.setTarget(printDiv);
+			this.getOlMap.setTarget(printDiv);
 			
 			this.printDiv = printDiv;
 			
@@ -358,8 +355,8 @@ Ext.define('Ck.print.Controller', {
 			var extent = this.feature.getGeometry().getExtent();
 			Ck.zoomToExtent(extent);
 			
-			// this.ckMap.once doesn't exists :-(
-			this.layersEndLoad = this.ckMap.on({
+			// this.getMap().once doesn't exists :-(
+			this.layersEndLoad = this.getMap().on({
 				destroyable: true,
 				"layersloaded": function() {
 					// Unset layersloaded event
@@ -371,7 +368,7 @@ Ext.define('Ck.print.Controller', {
 			
 			Ck.getMap().redraw();			
 		}, this);
-		this.olMap.renderSync();
+		this.getOlMap.renderSync();
 	},
 	
 	/**
@@ -379,7 +376,7 @@ Ext.define('Ck.print.Controller', {
 	 * Launch an html2canvas to create a canvas of HTML layout
 	 */
 	print: function() {
-		this.olMap.once('postcompose', function(event) {
+		this.getOlMap.once('postcompose', function(event) {
 			this.integratePrintValue();
 			
 			uri = event.context.canvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
@@ -396,7 +393,7 @@ Ext.define('Ck.print.Controller', {
 				onrendered: this.finishPrinting
 			});
 		}, this);
-		this.olMap.renderSync();
+		this.getOlMap.renderSync();
 	},
 	
 	/**

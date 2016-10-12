@@ -9,6 +9,21 @@ Ext.define('Ck.addlayer.datasourceselector.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer.datasourceselector',
 	
+	/**
+	 * @protected
+	 */
+	init: function(view) {
+		var sources = view.getRefOwner().sources;
+		view.getStore().loadData(sources);
+		if(sources.length < 2 && !view.editable) {
+			view.hide();
+			view.getRefOwner().on("afterrender", function() {
+				view.select(view.getStore().getAt(0));
+				view.fireEvent("select", view, view.getStore().getAt(0));
+			});
+		}
+		this.callParent([view]);
+	},
 	
 	onKeyPress: function(cbx, evt) {
 		if(evt.getKey() == evt.ENTER) {

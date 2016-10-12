@@ -12,11 +12,9 @@ Ext.define('Ck.importvector.Model', {
 			projection: "4326"
 		},
 		layerParam: {
-			fill: {},
-			stroke: {
-				color: "#ff8d00",
-				width: 5
-			}
+			fill: null,
+			stroke: null,
+			image: null
 		}
 	},
 		

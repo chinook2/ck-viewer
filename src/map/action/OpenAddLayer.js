@@ -22,10 +22,14 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 		if(!this.win) {
 			this.win = Ext.create('Ext.window.Window', {
 				title: 'Add Layer',
-				width: 400,
 				height: 250,
+				width: 400,
+				minHeight: 250,
+				minWidth: 300,
 				layout: 'fit',
 				closeAction: 'hide',
+				collapsible: true,
+				maximizable: true,
 				items: {
 					xtype: 'ckaddlayer',
 					openner: this

@@ -6,6 +6,8 @@ Ext.define("Ck.ImportVector", {
 	extend: "Ext.form.Panel",
 	alias: "widget.ckimportvector",
 	
+	title: "File",
+	
 	requires: [
 		"Ck.importvector.*"
 	],
@@ -33,13 +35,19 @@ Ext.define("Ck.ImportVector", {
 		editable: false,
 		bind: {
 			"store": "{format}"
+		},
+		listeners: {
+			change: "paramChange"
 		}
 	},{
 		xtype: "filefield",
 		itemId: "file",
 		fieldLabel: "File",
 		name: "file",
-		editable: false
+		editable: false,
+		listeners: {
+			change: "paramChange"
+		}
 	},{
 		xtype: "combo",
 		itemId: "projection",
@@ -50,15 +58,20 @@ Ext.define("Ck.ImportVector", {
 		editable: false,
 		bind: {
 			"store": "{projection}"
+		},
+		listeners: {
+			change: "paramChange"
 		}
 	}],
 	
-	buttons: [{
+	bbar: [{
 		text: "Import",
-		itemId: "import"
+		itemId: "import",
+		handler: "startImport"
 	},{
 		text: "Cancel",
-		itemId: "cancel"
+		itemId: "cancel",
+		handler: "cancel"
 	}],
 
 	cls: "ck-import"

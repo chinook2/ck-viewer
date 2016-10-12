@@ -4,72 +4,43 @@
  *  - ol.style.defaultStyleFunction
  *  - ol.style.createDefaultEditingStyles
  *  - Ck.map.Style.style			: Default OL blue style
- *  - Ck.map.Style.redStroke		: Red stroke without fill
- *  - Ck.map.Style.greenStroke		: Green stroke without fill
- *  - Ck.map.Style.orangeStroke		: Pretty similar to Style.style but with an orange stroke
+ *  - Ck.map.Style.red				: Red stroke without fill
+ *  - Ck.map.Style.green			: Green stroke without fill
+ *  - Ck.map.Style.orange			: Pretty similar to Style.style but with an orange stroke
  *  - Ck.map.Style.invisibleStyle	: Invisible style
  */
 Ext.define('Ck.map.Style', {
 	alternateClassName: 'Ck.Style',
 	singleton: true,
 	
-	defaultWidth	: 2,
-	blueColor		: "#3399CC",
-	redColor		: "#FF3333",
-	greenColor		: "#33cc33",
-	orangeColor		: "#FF953D",
+	/**
+	 * Default width. Typically for stroke
+	 */
+	defaultWidth: 2,
 	
 	/**
-	 * Default fill color.
+	 * Default colors
 	 */
-	fill: {
-		color: 'rgba(255,255,255,0.4)'
+	color: {
+		gray	: "rgba(255, 255, 255, 0.4)",
+		blue	: "#3399CC",
+		red		: "#FF3333",
+		green	: "#33cc33",
+		orange	: "#FF953D"
 	},
 	
 	/**
-	 * Default stroke color and width.
+	 * Default radius
 	 */
-	stroke: {
-		color: '#3399CC',
-		width: 2
+	radius: {
+		small	: 3,
+		medium	: 5,
+		big		: 10
 	},
 	
 	/**
-	 * Default red stroke
+	 * Default Z-Index
 	 */
-	redStroke: {
-		color: "#FF3333",
-		width: 2
-	},
-	
-	/**
-	 * Default green stroke
-	 */
-	greenStroke: {
-		color: "#33cc33",
-		width: 2
-	},
-	
-	/**
-	 * Default select stroke color and width
-	 */
-	selectStroke: {
-		color: "#FF953D",
-		width: 2
-	},
-	
-	/**
-	 * Default minor radius.
-	 */
-	minorRadius: 6,
-	
-	/**
-	 * Default radius.
-	 */
-	radius: 10,
-	
-	style: null,
-	
 	zIndex: {
 		editInteraction	: 500,
 		cloneLayer		: 520,
@@ -151,55 +122,64 @@ Ext.define('Ck.map.Style', {
 	}
 });
 
+
 /**
- * Get default ol.style {Array} using Ck.map.Style.fill, Ck.map.Style.stroke and Ck.map.Style.radius properties.
- *
- * 	olStyle = Ck.map.Style.style;
- * 
+ * Gray
  */
-Ck.Style.style = [
-	new ol.style.Style({
-		image: new ol.style.Circle({
-			fill: new ol.style.Fill(Ck.Style.fill),
-			stroke: new ol.style.Stroke({color: Ck.Style.blueColor, width: Ck.Style.defaultWidth}),
-			radius: 15
-		}),
-		fill: new ol.style.Fill(Ck.Style.fill),
-		stroke: new ol.style.Stroke({color: Ck.Style.blueColor, width: Ck.Style.defaultWidth})
-	})
-];
+Ck.Style.grayFill = new ol.style.Style({fill: new ol.style.Fill({color: Ck.Style.color.gray})});
 
-Ck.Style.redStroke = [
-	new ol.style.Style({
-		image: new ol.style.RegularShape({
-			points: 4,
-			stroke: new ol.style.Stroke({color: Ck.Style.redColor, width: Ck.Style.defaultWidth}),
-			radius: Ck.Style.radius,
-			angle: 0.785398
-		}),
-		stroke: new ol.style.Stroke({color: Ck.Style.redColor, width: Ck.Style.defaultWidth})
+/**
+ * Red
+ */
+Ck.Style.redStroke = new ol.style.Style({stroke: new ol.style.Stroke({color: Ck.Style.color.red, width: Ck.Style.defaultWidth})});
+Ck.Style.redShape = new ol.style.Style({
+	image: new ol.style.RegularShape({
+		points: 4,
+		stroke: new ol.style.Stroke({color: Ck.Style.color.red, width: Ck.Style.defaultWidth}),
+		radius: Ck.Style.radius.big,
+		angle: 0.785398
 	})
-];
+});
 
-Ck.Style.greenStroke = [
-	new ol.style.Style({
-		image: new ol.style.Circle({
-			stroke: new ol.style.Stroke({color: Ck.Style.greenColor, width: Ck.Style.defaultWidth}),
-			radius: Ck.Style.minorRadius
-		}),
-		stroke: new ol.style.Stroke({color: Ck.Style.greenColor, width: Ck.Style.defaultWidth})
+/**
+ * Green
+ */
+Ck.Style.greenStroke = new ol.style.Style({stroke: new ol.style.Stroke({color: Ck.Style.color.green, width: Ck.Style.defaultWidth})});
+Ck.Style.greenCircle = new ol.style.Style({
+	image: new ol.style.Circle({
+		stroke: new ol.style.Stroke({color: Ck.Style.color.green, width: Ck.Style.defaultWidth}),
+		radius: Ck.Style.radius.medium
 	})
-];
+});
 
-Ck.Style.orangeStroke = [
-	new ol.style.Style({
-		image: new ol.style.Circle({
-			stroke: new ol.style.Stroke({color: Ck.Style.orangeColor, width: Ck.Style.defaultWidth}),
-			radius: Ck.Style.minorRadius
-		}),
-		stroke: new ol.style.Stroke({color: Ck.Style.orangeColor, width: Ck.Style.defaultWidth})
+/**
+ * Orange
+ */
+Ck.Style.orangeStroke = new ol.style.Style({stroke: new ol.style.Stroke({color: Ck.Style.color.orange, width: Ck.Style.defaultWidth})});
+Ck.Style.orangeCircle = new ol.style.Style({
+	image: new ol.style.Circle({
+		stroke: new ol.style.Stroke({color: Ck.Style.color.orange, width: Ck.Style.defaultWidth}),
+		radius: Ck.Style.radius.medium
 	})
-];
+});
 
+/**
+ * Blue
+ */
+Ck.Style.blueStroke = new ol.style.Style({stroke: new ol.style.Stroke({color: Ck.Style.color.blue, width: Ck.Style.defaultWidth})});
+Ck.Style.blueCircle = new ol.style.Style({
+	image: new ol.style.Circle({
+		stroke: new ol.style.Stroke({color: Ck.Style.color.blue, width: Ck.Style.defaultWidth}),
+		radius: Ck.Style.radius.medium
+	})
+});
+
+
+/**
+ * Here is defined the directly used styles
+ */
 Ck.Style.invisibleStyle = [];
-Ck.Style.drawStyle = Ck.Style.greenStroke;
+Ck.Style.deleteStyle = [Ck.Style.redStroke, Ck.Style.redShape];
+Ck.Style.vertexStyle = [Ck.Style.redStroke, Ck.Style.redShape];
+Ck.Style.drawStyle = [Ck.Style.greenStroke, Ck.Style.greenCircle, Ck.Style.grayFill];
+Ck.Style.importStyle = [Ck.Style.blueStroke, Ck.Style.blueCircle];

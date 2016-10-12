@@ -29,7 +29,8 @@ Ext.define('Ck.overview.Controller', {
 	 * @protected
 	 */
 	init: function() {
-		this.map = Ck.getMap();
+		this.callParent(arguments);
+		this.getMap() = Ck.getMap();
 		this.view = this.getView();
 		
 		this.config = this.getView().getConfig();
@@ -78,8 +79,8 @@ Ext.define('Ck.overview.Controller', {
 		var view;
 		if(true) {
 			view = new ol.View({
-				center: this.map.getView().getCenter(),
-				projection: this.map.originOwc.getProjection()
+				center: this.getMap().getView().getCenter(),
+				projection: this.getMap().originOwc.getProjection()
 			});
 		}
 		
@@ -93,6 +94,6 @@ Ext.define('Ck.overview.Controller', {
 		
 		this.ovControl = new ol.control.OverviewMap(opt);
 		
-		this.map.getOlMap().addControl(this.ovControl);
+		this.getOlMap().addControl(this.ovControl);
 	}
 });

@@ -37,5 +37,12 @@ Ext.define("Ck.AddLayer", {
 		listeners: {
 			itemclick: "addLayer"
 		}
+	},{
+		xtype: "ckimportvector",
+		bbar: ["->", {
+			text: "Import",
+			itemId: "import",
+			handler: "startImport"
+		}]
 	}]
 });

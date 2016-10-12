@@ -11,7 +11,7 @@ Ext.define('Ck.addlayer.wfs.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
-		this.olMap = Ck.getMap().getOlMap();
+		this.callParent(arguments);
 		this.selector = view.getComponent("addlayer-datasourceselector");
 		this.capabilities = view.getComponent("addlayer-datasourcecapabilities");
 		
@@ -22,8 +22,6 @@ Ext.define('Ck.addlayer.wfs.Controller', {
 		this.selector.on("select", this.onServerSelect, this);
 		
 		this.getView().relayEvents(this.capabilities, ["itemclick"]);
-		
-		this.callParent([view]);
 	},
 	
 	dataSourceChange: function(ob, recs, idx) {

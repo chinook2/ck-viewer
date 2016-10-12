@@ -33,7 +33,7 @@ Ext.define('Ck.edit.action.Delete', {
 				drawStyle		: null,
 				selectId		: "ckmapEditDelete",
 				overHighlight	: true,
-				highlightStyle	: Ck.map.Style.redStroke,
+				highlightStyle	: Ck.map.Style.deleteStyle,
 				stackSelection	: true
 			});
 			this.interactions["delInteraction"] = this.delInteraction;

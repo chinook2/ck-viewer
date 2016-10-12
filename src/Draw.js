@@ -56,8 +56,8 @@ Ext.define('Ck.Draw', {
 	constructor: function(config) {
 		Ext.apply(config, {
 			olMap : config.map.getOlMap(),
-			drawStyle: Ck.map.Style.orangeStroke,
-			highlightStyle: Ck.map.Style.orangeStroke,
+			drawStyle: Ck.map.Style.orange,
+			highlightStyle: Ck.map.Style.orange,
 			highlightZIndex: Ck.map.Style.zIndex.editInteraction
 		});
 
