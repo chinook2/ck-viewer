@@ -22,11 +22,12 @@ Ext.define('Ck.map.Style', {
 	 * Default colors
 	 */
 	color: {
-		gray	: "rgba(255, 255, 255, 0.4)",
-		blue	: "#3399CC",
-		red		: "#FF3333",
-		green	: "#33cc33",
-		orange	: "#FF953D"
+		lightGray	: "rgba(255, 255, 255, 0.2)",
+		gray		: "rgba(255, 255, 255, 0.4)",
+		blue		: "#3399CC",
+		red			: "#FF3333",
+		green		: "#33cc33",
+		orange		: "#FF953D"
 	},
 	
 	/**
@@ -127,6 +128,7 @@ Ext.define('Ck.map.Style', {
  * Gray
  */
 Ck.Style.grayFill = new ol.style.Style({fill: new ol.style.Fill({color: Ck.Style.color.gray})});
+Ck.Style.lightGrayFill = new ol.style.Style({fill: new ol.style.Fill({color: Ck.Style.color.lightGray})});
 
 /**
  * Red
@@ -138,6 +140,12 @@ Ck.Style.redShape = new ol.style.Style({
 		stroke: new ol.style.Stroke({color: Ck.Style.color.red, width: Ck.Style.defaultWidth}),
 		radius: Ck.Style.radius.big,
 		angle: 0.785398
+	})
+});
+Ck.Style.redCircle = new ol.style.Style({
+	image: new ol.style.Circle({
+		fill: new ol.style.Fill({color: Ck.Style.color.red}),
+		radius: Ck.Style.radius.medium,
 	})
 });
 
@@ -179,6 +187,7 @@ Ck.Style.blueCircle = new ol.style.Style({
  * Here is defined the directly used styles
  */
 Ck.Style.invisibleStyle = [];
+Ck.Style.measureStyle = [Ck.Style.lightGrayFill, Ck.Style.redStroke, Ck.Style.redCircle];
 Ck.Style.deleteStyle = [Ck.Style.redStroke, Ck.Style.redShape];
 Ck.Style.vertexStyle = [Ck.Style.redStroke, Ck.Style.redShape];
 Ck.Style.drawStyle = [Ck.Style.greenStroke, Ck.Style.greenCircle, Ck.Style.grayFill];

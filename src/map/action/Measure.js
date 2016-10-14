@@ -21,6 +21,7 @@ Ext.define('Ck.map.action.Measure', {
 	 *
 	 *  - length
 	 *  - area
+	 *  - radius
 	 *  - ...
 	 */
 	type: 'length',
@@ -29,11 +30,6 @@ Ext.define('Ck.map.action.Measure', {
 	 * Allow snapping between measure
 	 */
 	snap: true,
-
-	/**
-	 * Drawing color
-	 */
-	color: '#ff0000',
 
 	/**
 	 * Currently drawn feature.
@@ -77,6 +73,15 @@ Ext.define('Ck.map.action.Measure', {
 	 * Button associate with this action
 	 */
 	btn: null,
+	
+	/**
+	 * Measure type -> vector type association
+	 */
+	typeAssoc: {
+		area: "Polygon",
+		length: "LineString",
+		radius: "Circle"
+	},
 
 	/**
 	 *
@@ -89,21 +94,7 @@ Ext.define('Ck.map.action.Measure', {
 			this.measureLayer = new ol.layer.Vector({
 				id: 'measureLayer',
 				source:  new ol.source.Vector(),
-				style: new ol.style.Style({
-					fill: new ol.style.Fill({
-						color: 'rgba(255, 255, 255, 0.2)'
-					}),
-					stroke: new ol.style.Stroke({
-						color: this.color,
-						width: 2
-					}),
-					image: new ol.style.Circle({
-						radius: 7,
-						fill: new ol.style.Fill({
-							color: this.color
-						})
-					})
-				})
+				style: Ck.Style.measureStyle
 			});
 			this.olMap.addLayer(this.measureLayer);
 		}
@@ -113,7 +104,7 @@ Ext.define('Ck.map.action.Measure', {
 
 		this.type = this.initialConfig.type || this.type;
 		if(this.type) {
-			var gtype = (this.type == 'area' ? 'Polygon' : 'LineString');
+			var gtype = this.typeAssoc[this.type];
 
 			this.draw = new ol.interaction.Draw({
 				source: source,
@@ -223,6 +214,9 @@ Ext.define('Ck.map.action.Measure', {
 			} else if (geom instanceof ol.geom.LineString) {
 				output = this.formatLength(geom);
 				tooltipCoord = geom.getLastCoordinate();
+			}else if (geom instanceof ol.geom.Circle) {
+				output = this.formatArea(geom);
+				tooltipCoord = geom.getCenter();
 			}
 			this.measureTooltipElement.innerHTML = output;
 			this.measureTooltip.setPosition(tooltipCoord);
@@ -319,8 +313,12 @@ Ext.define('Ck.map.action.Measure', {
 		if (this.geodesic) {
 			var sourceProj = this.olMap.getView().getProjection();
 			var geom = polygon.clone().transform(sourceProj, 'EPSG:4326');
-			var coordinates = geom.getLinearRing(0).getCoordinates();
-			area = Math.abs(this.wgs84Sphere.geodesicArea(coordinates));
+			if(geom instanceof ol.geom.Circle) {
+				area = (Math.PI * Math.pow(geom.getRadius(), 2) * 10000000000);
+			} else {
+				var coordinates = geom.getLinearRing(0).getCoordinates();
+				area = Math.abs(this.wgs84Sphere.geodesicArea(coordinates));
+			}
 		} else {
 			area = polygon.getArea();
 		}
