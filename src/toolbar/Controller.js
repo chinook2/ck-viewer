@@ -7,6 +7,24 @@ Ext.define('Ck.toolbar.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.cktoolbar',
 
+	init: function () {
+		this.callParent(arguments);
+
+		// OL Override
+		// Check if not click on a button.
+		// floating toolbar is in viewport to prevent problems with drawing tools
+		// when pass hover? So need to check now if click on button or map !
+		var olHandleMapBrowserEvent = ol.Map.prototype.handleMapBrowserEvent;
+		ol.Map.prototype.handleMapBrowserEvent = function (mapBrowserEvent) {
+			var t = mapBrowserEvent.originalEvent.target;
+			if (t && t.className.indexOf('x-btn') != -1) return false;
+
+			return olHandleMapBrowserEvent.call(this, mapBrowserEvent);
+		};
+		//
+		//
+	},
+
 	ckReady: function() {
 		var v = this.getView();
 		v.offset = 10;
