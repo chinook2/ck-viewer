@@ -1,7 +1,7 @@
 /**
  * The map controller allow to interact with the map. You can use the Ck.map.Model binding to control the map from a view
  * or you can use directly the map controller functions from another controller or a Ck.Action.
- * 
+ *
  * ### ckmap is the controller
  *
  * The events like ckmapReady, the Ck.Controller#getMap (and by inheritance getMap() of all the ck controllers) return a Ck.map.Controller.
@@ -11,35 +11,34 @@
  *		var map = Ck.getMap();
  *		map.setZoom( map.getZoom() + 1 );
  *
- * Example in Ck.legend.Controller : 
+ * Example in Ck.legend.Controller :
  *
  *     var layers = this.getMap().getLayers()
  *
  * ### Events relay
- * 
+ *
  * The map controller relay also ol.Map events like addLayer.
  *
  */
 Ext.define('Ck.overview.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckoverview',
-	
+
 	/**
 	 * Init the map component, init the viewModel.
 	 * @protected
 	 */
 	init: function() {
 		this.callParent(arguments);
-		this.getMap() = Ck.getMap();
 		this.view = this.getView();
 		
 		this.config = this.getView().getConfig();
-		
-		this.ovLayers = Ck.getMap().getLayers(function(lyr) {
+
+		this.ovLayers = this.getMap().getLayers(function(lyr) {
 			return (lyr.getExtension("overviewLayer") === true);
 		});
-		
-		
+
+
 		if(this.ovLayers.length == 0) {
 			this.getView().on("beforerender", function() {
 				if(this.openner.close) {
@@ -54,12 +53,12 @@ Ext.define('Ck.overview.Controller', {
 				return false;
 			})
 		} else {
-		
+
 			// Stylesheet creation for overview
 			this.style = document.createElement("style");
 			this.style.appendChild(document.createTextNode(""));
 			document.head.appendChild(this.style);
-			
+
 			this.style.innerHTML = ".ck-overview .ol-overviewmap-map, .ck-overview .ol-overviewmap{ \
 				width: " + this.config.ovWidth + "px; \
 				height: " + this.config.ovHeight + "px; \
@@ -67,14 +66,14 @@ Ext.define('Ck.overview.Controller', {
 				margin: 0px; \
 				padding: 0px; \
 			}";
-			
+
 			this.view.setWidth(this.config.ovWidth);
 			this.view.setHeight(this.config.ovHeight);
-			
+
 			this.getView().on("render", this.attachOvControl, this);
 		}
 	},
-	
+
 	attachOvControl: function() {
 		var view;
 		if(true) {
@@ -83,7 +82,7 @@ Ext.define('Ck.overview.Controller', {
 				projection: this.getMap().originOwc.getProjection()
 			});
 		}
-		
+
 		var opt = {
 			collapsed: false,
 			collapsible: false,
@@ -91,9 +90,9 @@ Ext.define('Ck.overview.Controller', {
 			layers: this.ovLayers,
 			view: view
 		};
-		
+
 		this.ovControl = new ol.control.OverviewMap(opt);
-		
+
 		this.getOlMap().addControl(this.ovControl);
 	}
 });
