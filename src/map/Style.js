@@ -145,7 +145,7 @@ Ck.Style.redShape = new ol.style.Style({
 Ck.Style.redCircle = new ol.style.Style({
 	image: new ol.style.Circle({
 		fill: new ol.style.Fill({color: Ck.Style.color.red}),
-		radius: Ck.Style.radius.medium,
+		radius: Ck.Style.radius.medium
 	})
 });
 

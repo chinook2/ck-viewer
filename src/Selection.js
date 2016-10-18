@@ -14,6 +14,16 @@ Ext.define('Ck.Selection', {
 
 	config: {
 		/**
+		 * True to draw geometry use for getFeature
+		 */
+		debug: false,
+		
+		/**
+		 * Method called before process selection
+		 */
+		beforeProcess: Ext.emptyFn,
+		
+		/**
 		 * Chinook map
 		 * @var {Ck.map}
 		 */
@@ -27,6 +37,7 @@ Ext.define('Ck.Selection', {
 
 		/**
 		 * The layers to be queried or null to queried all layer
+		 * @var {ol.Layer[]/String[]}
 		 */
 		layers: null,
 
@@ -41,6 +52,11 @@ Ext.define('Ck.Selection', {
 		 * @var {Integer}
 		 */
 		limit: 1,
+		
+		/**
+		 * Buffer, in pixel, for point selection
+		 */
+		buffer: 10,
 
 		/**
 		 * Witch key used to stack selection. Can be "ctrlKey", "shitftKey", "altKey"
@@ -237,6 +253,9 @@ Ext.define('Ck.Selection', {
 	 * @param {ol.interaction.DrawEvent}
 	 */
 	processSelection: function(evntParams) {
+		if(this.getBeforeProcess().bind(this.getScope())() === false) {
+			return false;
+		}
 		this.getMask().show();
 		this.inAddition = event[this.getMergeKey()];
 		var feature = evntParams.feature;
@@ -252,29 +271,38 @@ Ext.define('Ck.Selection', {
 		// Parse les géométries en GeoJSON
 		var geoJSON  = new ol.format.GeoJSON();
 		var type = feature.getGeometry().getType();
-
+		var refPrj = ol.proj.get("EPSG:4326");
+		var mapPrj = this.getMap().getOlView().getProjection();
+		
 		switch(type) {
 			case "Circle" :
 				var radius = feature.getGeometry().getRadius();
+				feature.getGeometry().transform(mapPrj, refPrj);
 				var pt = turf.point(feature.getGeometry().getCenter());
+				
 				var geom = turf.buffer(pt, radius, "meters");
 				var selFt = geom.features[0];
+				selFt.getGeometry().transform(refPrj, mapPrj);
 				break;
 			case "Point" :
-				var radius = Ck.getMap().getOlView().getResolution() * 10; // 10px buffer
+				var radius = Ck.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
+				feature.getGeometry().transform(mapPrj, refPrj);
 				var pt = turf.point(feature.getGeometry().getCoordinates());
 				var geom = turf.buffer(pt, radius, "meters");
-				var selFt = geom.features[0];
+				selFt = new ol.Feature({
+					geometry: new ol.geom.Polygon(geom.geometry.coordinates)
+				});
+				selFt.getGeometry().transform(refPrj, mapPrj)
+				
+				// var selFt = geom.features[0];
 				break;
 			default :
 				var selFt = geoJSON.writeFeatureObject(feature);
 		}
 
-		/* Developper : you can display buffered draw for Circle and Point
-			writer = new ol.format.WKT();
-			// writer.writeFeature(geoJSON.readFeature(selFt)); // getWKT
-			ft = geoJSON.readFeature(selFt);
-
+		// Draw the feature used for getFeature query if debug is true. Use this to clean map : window.lyr.getSource().clear()
+		if(this.getDebug()) {
+			var ft = selFt.clone();
 			if(!window.lyr) {
 				window.lyr = new ol.layer.Vector({
 					id: "onTheFlyLayer",
@@ -296,12 +324,12 @@ Ext.define('Ck.Selection', {
 				Ck.getMap().getOlMap().addLayer(window.lyr);
 			}
 			window.lyr.getSource().addFeature(ft);
-		//*/
+		}
 
 		var i = 0;
-		var layers = this.getLayers();
+		var lyr, layers = this.getLayers();
 
-		if(Ext.isEmpty(layers)) {
+		if(Ext.isEmpty(layers) || !Ext.isArray(layers)) {
 			layers = Ck.getMap().getLayers(function(lyr) {
 				return (lyr.getVisible() &&
 					(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
@@ -309,6 +337,18 @@ Ext.define('Ck.Selection', {
 				);
 			});
 			layers = layers.getArray();
+		} else {
+			for(var i = 0; i < layers.length; i++) {
+				if(Ext.isString(layers[i])) {
+					lyr = this.getMap().getLayerById(layers[i]);
+					if(lyr) {
+						layers[i] = lyr;
+					} else {
+						Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
+						layers.splice(i--, 1);
+					}
+				}
+			}
 		}
 
 		var ft;
@@ -416,8 +456,7 @@ Ext.define('Ck.Selection', {
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
-		var selGeom = new ol.geom.Polygon(selFt.geometry.coordinates);
-		var selBBox = selGeom.getExtent();
+		var selBBox = selFt.getGeometry().getExtent();
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
 			gmlFormat: Ck.create("ol.format.GML2"),
@@ -445,22 +484,45 @@ Ext.define('Ck.Selection', {
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
-			url: ope.getUrl(),
+			url: this.getMap().getMapUrl(ope.getUrl()),
 			rawData: pTemp.innerHTML,
 			success: function(layer, ope, readOptions, response) {
+				var ly, ns = {
+					"http://mapserver.gis.umn.edu/mapserver": []
+				};
 				var lyr = ope.getLayers().split(",");
 				// Fix Chinook 1 context prefix in getFeature response
-				for(var i in lyr) {
-					lyr[i] = lyr[i].split(":")[0];
+				if(false && chinook1) {
+					for(var i in lyr) {
+						lyr[i] = lyr[i].split(":")[0];
+					}
+				} else {
+					for(var i in lyr) {
+						ly = lyr[i].split(":");
+						if(ly.length > 1) {
+							if(!Ext.isArray(ns[ly[0]])) {
+								ns[ly[0]] = [];
+							}
+							ns[ly[0]].push(ly[ly.length - 1]);
+						} else {
+							ns["http://mapserver.gis.umn.edu/mapserver"].push(ly[ly.length - 1]);
+						}
+					}
 				}
 
-				var format = Ck.create("ol.format.WFS", {
-					featureNS: "http://mapserver.gis.umn.edu/mapserver",
-					gmlFormat: Ck.create("ol.format.GML2"),
-					featureType: lyr
-				});
+				var format, features = [];
+				for(n in ns) {
+					if(ns[n].length > 0) {
+						format = Ck.create("ol.format.WFS", {
+							featureNS: n,
+							gmlFormat: Ck.create("ol.format.GML2"),
+							featureType: ns[n]
+						});
 
-				var features = format.readFeatures(response.responseXML, readOptions);
+						features = Ext.Array.merge(features, format.readFeatures(response.responseXML, readOptions));
+					}
+				}
+				
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
 			failure: function() {

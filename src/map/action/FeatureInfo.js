@@ -13,24 +13,43 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	
 	toggleGroup: 'ckmapAction',
 	tooltip: "Get feature info",
-	iconCls: "fa fa-info-circle",
+	iconCls: "ckfont ck-info2",
 	
 	itemId: 'featureinfo',
 	
-	/**
-	 * Buffer around point click (in pixel)
-	 */
-	buffer: 5,
+	timerId: null,
 	
-	/**
-	 * Query visible layer only
-	 */
-	onlyVisible: true,
-	
-	/**
-	 * 
-	 */
-	fieldIgnored: ["geometry", "shape", "boundedBy"],
+	config: {
+		/**
+		 * False to keep heavy UI
+		 */
+		light: true,
+		
+		/**
+		 * Buffer around point click (in pixel)
+		 */
+		buffer: 5,
+		
+		/**
+		 * Query visible layer only
+		 */
+		onlyVisible: true,
+		
+		/**
+		 * 
+		 */
+		fieldIgnored: ["geom", "geometry", "shape", "boundedBy"],
+		
+		/**
+		 * List of queryed layers
+		 */
+		layers: null,
+		
+		/**
+		 * Capitalize first letter of field name
+		 */
+		capitalize: true
+	},
 	
 	constructor: function(config) {
 		Ext.define('FeatureInfoResult', {
@@ -41,7 +60,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				{name: 'value', type: 'string'}
 			]
 		});
-		this.callParent([config]);
+		
+		this.callParent(arguments);
 	},
 	
 	/**
@@ -51,13 +71,22 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		this.olMap = map.getOlMap();
 		
 		this.draw = new Ck.Selection({
-			type		: "Point",
-			map			: map,
-			callback	: this.displayInfo,
-			scope		: this,
-			highlight	: false,
-			limit		: null
+			type			: "Point",
+			map				: map,
+			callback		: this.displayInfo,
+			scope			: this,
+			highlight		: false,
+			layers			: this.getLayers(),
+			buffer			: this.getBuffer(),
+			beforeProcess	: this.beforeSelection
 		});
+	},
+	
+	beforeSelection: function() {
+		if(!Ext.isEmpty(this.timerId)) {
+			clearTimeout(this.timerId);
+			delete this.timerId;
+		}
 	},
 	
 	/**
@@ -65,6 +94,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	toggleAction: function(btn, pressed) {
 		this.draw.setActive(pressed);
+		this.createContainer();
 	},
 	
 	/**
@@ -73,17 +103,41 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	displayInfo: function(res) {
 		this.res = res;
+		this.win.removeAll();
 		if(this.res.length != 0) {
-			this.createContainer();
-			this.panel.removeAll();
-			
-			this.res.forEach(function(lyr) {
-				this.panel.add(this.createTab(lyr));
-			}, this);
+			if(this.res.length < 2 && this.getLight()) {
+				this.win.add(this.createTab(this.res[0]));
+			} else {
+				var tab = [];
+				this.res.forEach(function(lyr) {
+					tab.push(this.createTab(lyr));
+				}, this);
+				this.panel = Ck.create("Ext.tab.Panel", {
+					layout: "fit",
+					header: false,
+					defaults: {
+						width: "100%"
+					},
+					items: tab
+				});
+				this.win.add(this.panel);
+			}
 			
 			this.win.show();
+			this.win.expand(1000);
 		} else {
-			// alert("Result empty!");
+			Ck.log("Empty result");
+			// this.win.setLayout("center"); 
+			this.win.add({
+				xtype: "panel",
+				layout: "center",
+				items: [{
+					xtype: "label",
+					text: "Empty result",
+					cls: "ck-big-text"
+				}]
+			});
+			this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);
 		}
 	},
 	
@@ -93,13 +147,16 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 * @return {Ext.grid.Panel}
 	 */
 	createTab: function(lyr) {
-		var data = [];
+		var field, data = [];
+		var col = lyr.layer.getExtension("columns") || {};
+		
 		for(var i = 0; i < lyr.features.length; i++) {
 			for(var f in lyr.features[i].values_) {
-				if(this.fieldIgnored.indexOf(f) == -1) {
+				if(this.getFieldIgnored().indexOf(f) == -1) {
+					field = (Ext.isObject(col[f]))? col[f].alias : f;
 					data.push({
 						featureid: i + 1,
-						field: f,
+						field: (this.getCapitalize())? Ext.String.capitalize(field) : field,
 						value: (Ext.isEmpty(lyr.features[i].values_[f]))? "" : lyr.features[i].values_[f].toString()
 					});
 				}
@@ -112,18 +169,23 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			data: data
 		});
 		
-		var grid = Ext.create('Ext.grid.Panel', {
-			title: lyr.layer.get("title"),
+		var title = lyr.layer.get("title");
+		
+		if(lyr.features.length < 2 && this.getLight()) {
+			var tpl = lyr.layer.ckLayer.getExtension("titleTpl");
+			if(Ext.isString(tpl)) {
+				tpl = new Ext.Template(tpl);
+				title = tpl.apply(lyr.features[0].getProperties());
+			}
+		}
+		
+		var opt = {
+			title: title,
 			store: store,
 			layout: "fit",
 			scrollable: true,
-			features: [{
-				ftype: "groupingsummary",
-				groupHeaderTpl: "Feature {featureid}",
-				enableGroupingMenu: false,
-				showSummaryRow: false,
-				startCollapsed: true
-			}],
+			hideHeaders: this.getLight(),
+			header: (this.getLight())? { padding: 0 } : true,
 			columns: [{
 				text: 'Attribut',
 				dataIndex: 'field',
@@ -137,24 +199,42 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				menuDisabled: true,
 				hideable: false
 			}]
-		});
+		};
+		
+		if(lyr.features.length > 1 && this.getLight()) {
+			opt.features = [{
+				ftype: "groupingsummary",
+				groupHeaderTpl: "Feature {featureid}",
+				enableGroupingMenu: false,
+				showSummaryRow: false,
+				startCollapsed: true
+			}]
+		}
+		
+		var grid = Ext.create('Ext.grid.Panel', opt);
 		
 		return grid;
 	},
 	
 	createContainer: function() {
 		if(Ext.isEmpty(this.win)) {
-			this.panel = Ck.create("Ext.tab.Panel", {
-				layout: "fit"
-			});
-			
-			this.win = Ck.create("Ext.Window", {
-				width: 400,
+			var opt = {
 				height: 400,
-				layout: "fit",
-				items: [this.panel],
-				closeAction: "hide"
-			});
+				width: 400,
+				minHeight: 250,
+				minWidth: 300,
+				layout: 'fit',
+				y: 0,
+				header: (this.getLight())? { padding: 0 } : true,
+				closeAction: 'hide',
+				collapsible: true,
+				maximizable: !this.getLight(),
+				items: []
+			};
+			
+			opt.x = Ext.getBody().getSize().width - opt.width;
+			
+			this.win = Ck.create("Ext.Window", opt);
 		}
 	}
 });
