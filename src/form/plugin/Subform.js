@@ -8,26 +8,26 @@ Ext.define('Ck.form.plugin.Subform', {
 	clicksToEdit: 1,
 
 	editrow: true,
-	
+
 	deleterow: true,
 	disableDeleteRow: null,
-	
+
 	addItemLast: true,
-	
+
 	_subformWindow: null,
 	_subform: null,
 	_grid: null,
-	
+
 	init: function(grid) {
 		if(!grid.subform) return;
-		
+
 		// Accept param as String or Object
 		if(Ext.isString(grid.subform)){
 			grid.subform = {
 				url : grid.subform
 			};
 		}
-		
+
 		// Init subform after grid rendering
 		grid.on('afterrender', function() {
 			this.initSubForm(grid);
@@ -40,12 +40,12 @@ Ext.define('Ck.form.plugin.Subform', {
 	 */
 	destroy: function() {
 	},
-	
-	
+
+
 	initSubForm: function(grid) {
 		this._grid = grid;
 		var subForm = grid.subform;
-		
+
 		var formController = grid.lookupController();
 
 		// Can't create subform instance here. Need to add in page first, to get viewModel hierarchy
@@ -54,26 +54,26 @@ Ext.define('Ck.form.plugin.Subform', {
 			itemId: 'subform',
 			isSubForm: true,
 			parentForm: formController.getView(),
-			
+
 			// load from grid selection row
 			autoLoad: false,
 			editing: subForm.editing || formController.getView().getEditing(),
 			urlTemplate: subForm.urlTemplate || formController.getView().getUrlTemplate(),
 			// inherit dataFid from main form (used in store url template)
 			dataFid:  formController.getView().getDataFid(),
-			
+
 			// TODO use param from json
 			//layout: 'fit',
 			layout: subForm.layout || '',
 			scrollable: subForm.scrollable || 'y',
-			
+
 			formName: '/' + subForm.url,
-			
+
 			// TODO verify
 			// for compatibility mode only
 			layer: subForm.url,
 			//
-			
+
 			// Default toolbar
 			dockedItems: [{
 				xtype: 'toolbar',
@@ -98,8 +98,8 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				}]
 			}]
-		};		
-		
+		};
+
 		// add subform in a panel
 		if(subForm.renderTo) {
 				var ct = Ext.getCmp(subForm.renderTo);
@@ -110,7 +110,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 				ct.removeAll(true);
 				this._subform = ct.add(this._subform);
-			
+
 		//  dock subform on right of the grid
 		} else if(subForm.docked){
 			// Adding toolbar for subform on grid
@@ -121,16 +121,16 @@ Ext.define('Ck.form.plugin.Subform', {
 			} else {
 				docked = subForm.docked;
 			}
-			
+
 			grid.addDocked({
 				dock: docked.dock,
 				width: docked.width || 500,
 				items: [this._subform]
 			});
-			
+
 			// Get subform
 			this._subform = grid.down('ckform');
-			
+
 		// (default) add subform in popup
 		} else {
 			if(!subForm.window) {
@@ -146,7 +146,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				closeAction: 'hide',
 				items: this._subform
 			}, subForm.window));
-			
+
 			// Add toolbar for adding new item in grid (open window...)
 			grid.addDocked({
 				xtype: 'toolbar',
@@ -164,40 +164,19 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				}]
 			});
-			
+
 			// Get subform
 			this._subform = this._subformWindow.down('ckform');
 		}
-		
+
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
-		
+
  		// Get the Action Column
-		this.actionColumn = grid.down('actioncolumn');
+		var conf = grid.getInitialConfig();
+		this.actionColumn = grid.down('[reference=actionColumn1]');
 		if(!this.actionColumn) {
 			var actions = [];
-			if(this.editrow!==false || this.clicksToEdit==0){
-				actions.push({
-					isDisabled: function(v, r, c, i, rec) {
-						if(!rec) return true;
-						if(rec.get('dummy')) return true;
-						if(this.disableEditRow) {
-							if(rec.get(this.disableEditRow.property) === this.disableEditRow.value) return true
-						}
-						return false;
-					},
-					getClass: function(v, meta, rec) {
-						if(rec && rec.get('dummy')) return false;
-						return 'fa fa-edit';
-					},
-					tooltip: 'Edit row',
-					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
-						// e.stopPropagation();
-						this.loadItem(view, rec, row, rowIndex);
-					},
-					scope: this
-				});
-			}
 			if(this.deleterow!==false){
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
@@ -220,25 +199,68 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				});
 			}
-			
-			var conf = grid.getInitialConfig();
+
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
+				reference: 'actionColumn1',
+				menuDisabled: true,
+				width: 25,
 				//hidden: !formController.getView().getEditing(),
 				items: actions
 			});
 
 			grid.reconfigure(conf.columns);
-			this.actionColumn = grid.down('actioncolumn');
+			this.actionColumn = grid.down('[reference=actionColumn1]');
 
 			// Add grid reference to the actionColumn
 			// this.actionColumn.ownerGrid = this.grid;
-			
-			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
-		}	   
-		
-		
+
+			//this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
+		}
+		// Get the Action Column
+		this.actionColumn2 = grid.down('[reference=actionColumn2]');
+		if(!this.actionColumn2) {
+			var actions2 = [];
+			if(this.editrow!==false || this.clicksToEdit==0){
+				actions2.push({
+					isDisabled: function(v, r, c, i, rec) {
+						if(!rec) return true;
+						if(rec.get('dummy')) return true;
+						if(this.disableEditRow) {
+							if(rec.get(this.disableEditRow.property) === this.disableEditRow.value) return true
+						}
+						return false;
+					},
+					getClass: function(v, meta, rec) {
+						if(rec && rec.get('dummy')) return false;
+						return 'fa fa-edit';
+					},
+					tooltip: 'Edit row',
+					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
+						// e.stopPropagation();
+						this.loadItem(view, rec, row, rowIndex);
+					},
+					scope: this
+				});
+			}
+
+			// Add action column for editing by plugin GridEditing
+			conf.columns.unshift({
+				xtype: 'actioncolumn',
+				reference: 'actionColumn2',
+				menuDisabled: true,
+				width: 25,
+				//hidden: !formController.getView().getEditing(),
+				items: actions2
+			});
+
+			grid.reconfigure(conf.columns);
+			this.actionColumn2 = grid.down('[reference=actionColumn2]');
+
+			//this.actionColumn2.width = 6 + (this.actionColumn2.items.length * 20);
+		}
+
 		// On start editing
 		formController.on({
 			startEditing: this.startEditing,
@@ -248,26 +270,27 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Init editing state
 		if(this._subform.editing === true) {
 			this.startEditing();
-		} 
+		}
 		if(this._subform.editing === false) {
-			this.stopEditing();	
+			this.stopEditing();
 		}
 		//
-		
+
 		if(this.clicksToEdit != 0) {
 			grid.on('row' + (this.clicksToEdit === 1 ? 'click' : 'dblclick'), function(cmp, record, tr, rowIndex, e, eOpts) {
 				// Prevent load data when clic on action column ! handler of the action already pass...
 				if(!Ext.fly(e.target).hasCls('x-action-col-icon')){
 					this.loadItem(cmp, record, tr, rowIndex);
 				}
-			}, this);			
+			}, this);
 		}
 	},
-	
+
 	startEditing: function() {
 		// add & show action column
 		this.actionColumn.show();
-		
+		this.actionColumn2.show();
+
 		// Enable rowediting plugin
 		var sfplugin = this._grid.findPlugin('rowediting');
 		if(sfplugin) sfplugin.enable();
@@ -276,37 +299,38 @@ Ext.define('Ck.form.plugin.Subform', {
 	stopEditing: function() {
 		// hide action column
 		this.actionColumn.hide();
-		
+		this.actionColumn2.hide();
+
 		// Disable rowediting plugin
 		var sfplugin = this._grid.findPlugin('rowediting');
 		if(sfplugin) sfplugin.disable();
-		
-		// Force 
-		this.clicksToEdit = 1;				
+
+		// Force
+		this.clicksToEdit = 1;
 	},
-	
+
 	newItem: function() {
 		if(!this._subform) return;
-		
+
 		// Force reset
 		this.resetSubForm();
-		
+
 		// TEMP - compatibility only ?
 		// reset data fid for new item (used by dataUrl templating)
 		this._subform.setDataFid(null);
 		//
-		
+
 		if(this._subformWindow) {
 			this._subform.getController().startEditing();;
 			this._subformWindow.show();
 		}
 	},
 
-	addItem: function() {				
+	addItem: function() {
 		// Get subform controller
 		var formController = this._subform.getController();
 
-		// Save to server if params available, otherwise 
+		// Save to server if params available, otherwise
 		// saveData check form validity
 		formController.saveData(null, {
 			success: function(res) {
@@ -314,36 +338,36 @@ Ext.define('Ck.form.plugin.Subform', {
 					// Add new record at the end
 					this._grid.getStore().add(res);
 				}else{
-					// Insert new record	at the beginning	
+					// Insert new record	at the beginning
 					this._grid.getStore().insert(0, res);
 				}
 				this._grid.getView().refresh();
-				
+
 				this.resetSubForm();
 			},
 			create: true,
 			scope: this
 		});
 	},
-	
+
 	updateItem: function() {
 		// Get subform controller
 		var formController = this._subform.getController();
-		
+
 		// Save if params available
 		formController.saveData(null, {
 			success: function(res) {
 				// End update mode
 				var vm = this._subform.getViewModel();
 				vm.set('updating', false);
-				
+
 				// Update selected record
 				var rec = this._grid.getStore().getAt(this._subform.rowIndex);
 				if(rec) rec.set(res);
 				this._grid.getView().refresh();
-				
+
 				delete this._subform.rowIndex;
-				
+
 				this.resetSubForm();
 			},
 			scope: this
@@ -351,39 +375,39 @@ Ext.define('Ck.form.plugin.Subform', {
 	},
 
 	deleteItem: function(grid, rowIndex) {
-		
+
  		// End update mode
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
-		
+
 		var formController = this._subform.getController();
 		var store = grid.getStore();
 		var rec = store.getAt(rowIndex);
-		
+
 		// update data fid for current item (used by dataUrl templating)
 		var dataFid = Ext.apply(this._subform.getDataFid(), rec.getData());
 		this._subform.setDataFid(dataFid);
 		//
-		
+
 		// Delete record if params available
 		formController.deleteData({
 			success: function(){
 				store.remove(rec);
 				// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
 				store.removed.push(rec);
-				
-				this.resetSubForm();				
+
+				this.resetSubForm();
 			},
 			fid: dataFid,
 			scope: this
 		});
 	},
-	
+
 	loadItem: function(view, rec, tr, rowIndex) {
 		if(!this._subform) return;
 		var formController = this._subform.getController();
 		var grid = this._grid;
-		
+
 		if(this._subformWindow) {
 			// If grid is in editing mode > subform is editing too
 			if(grid.lookupViewModel().get('editing')===true){
@@ -391,21 +415,21 @@ Ext.define('Ck.form.plugin.Subform', {
 			} else {
 				formController.stopEditing();
 			}
-			
+
 			this._subformWindow.show();
 		}
-		
-		
+
+
 		// Init update mode
 		var vm = this._subform.getViewModel();
 		vm.set('updating', true);
-		
+
 		var data = rec.getData();
-		var fidName = grid.subform.fid || grid.fid || 'fid';	
+		var fidName = grid.subform.fid || grid.fid || 'fid';
 		var fidValue = data[fidName] || data.fid ;
-		
+
 		var dataUrl = grid.subform.dataUrl || formController.dataUrl;
-		
+
 		// update data fid for current loading item (used by dataUrl templating)
 		var vDataFid = this._subform.getDataFid();
 		var dataFid = {};
@@ -418,20 +442,20 @@ Ext.define('Ck.form.plugin.Subform', {
 		}
 		this._subform.setDataFid(dataFid);
 		//
-		
+
 		// By default load subform with data from the grid
 		var options = {
 			raw: data
 		};
-		
+
 		// If find un Feature Id, try load with it
 		if(fidValue) {
 			options = {
 				fid: fidValue
 			};
 		}
-		
-		// If find a Data URL, try load with it instead 
+
+		// If find a Data URL, try load with it instead
 		if(dataUrl) {
 			if(Ext.isObject(dataUrl)) {
 				dataUrl = dataUrl.read;
@@ -443,20 +467,20 @@ Ext.define('Ck.form.plugin.Subform', {
 				url: dataUrl
 			};
 		}
-		
+
 		if(Ext.isDefined(rowIndex)) this._subform.rowIndex = rowIndex;
-		
+
 		// Finally load subform data with fid, url or data
 		formController.loadFeature(options);
 	},
-	
+
 	resetSubForm: function() {
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
-		
+
 		this._subform.getController().resetData();
 		this._grid.focus();
-		
+
 		if(this._subformWindow) {
 			this._subformWindow.hide();
 		}

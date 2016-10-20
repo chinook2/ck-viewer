@@ -328,10 +328,12 @@ Ext.define('Ck.form.Controller', {
 
 					if(fcw.title) win.setTitle(fcw.title);
 				// Adjust form popup Size on PC (tablet is full screen)
+
 				if(Ck.isDesktop()) {
 					if(fcw.width) win.setWidth(fcw.width);
 					if(fcw.height) win.setHeight(fcw.height);
 				}
+
 			}
 
 			if(form.dataUrl) {
@@ -1321,6 +1323,12 @@ Ext.define('Ck.form.Controller', {
 				if(Ext.String.startsWith(params.id, 'ext')) delete params.id;
 				delete params.fid;
 
+				// get back uploaded file infos to send data to server
+				if (params.__files && params.__files.length > 0) {
+					this.files = this.files.concat(params.__files);
+				}
+				delete params.__files;
+
                 // Récup les données modifiés + l'id du record
                 recs.push({
                     fid: fid,
@@ -1725,6 +1733,10 @@ Ext.define('Ck.form.Controller', {
 		// Just populate main grid here with data
 		if(this.compatibiltyMode && this.isSubForm) {
 			var val = Ext.decode(decodeURIComponent(values.data));
+			// Preserve file upload in subform...
+			if (this.files && this.files.length>0) {
+				val.main.params.__files = this.files
+			}
 			Ext.callback(options.success, options.scope, [val.main.params]);
 			return true;
 		}
