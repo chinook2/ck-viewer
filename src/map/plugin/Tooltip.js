@@ -81,8 +81,11 @@ Ext.define('Ck.map.plugin.Tooltip', {
 		*/
 		this.tip.hide();
 
-        var feature = this.olMap.forEachFeatureAtPixel(pixel, function(feature) {
-    		return feature;
+        var feature = this.olMap.forEachFeatureAtPixel(pixel, function(feature, layer) {
+			// return the first feature with a tooltip config
+			if (feature.get('tooltipTpl') || feature.get('tooltip')) {
+				return feature;
+			}
         });
 
 		if (!feature) return;
