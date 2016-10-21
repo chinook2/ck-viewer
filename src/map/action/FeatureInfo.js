@@ -4,72 +4,79 @@
  * The ol.interaction.FeatureInfo is not used because ol does not support exotic featureinfoion (circle, polygon...).
  * However an ol.interaction.FeatureInfo is created to manage featureinfoed features properly.
  * So featureinfoions are made manually.
- * 
+ *
  * See : Ck.map.action.featureinfo.Point, Ck.map.action.featureinfo.Square ...
  */
 Ext.define('Ck.map.action.FeatureInfo', {
 	extend: 'Ck.Action',
 	alias: 'widget.ckmapFeatureInfo',
-	
+
 	toggleGroup: 'ckmapAction',
 	tooltip: "Get feature info",
 	iconCls: "ckfont ck-info2",
-	
+
 	itemId: 'featureinfo',
-	
+
 	timerId: null,
-	
+
 	config: {
 		/**
 		 * False to keep heavy UI
 		 */
 		light: true,
-		
+
 		/**
 		 * Buffer around point click (in pixel)
 		 */
 		buffer: 5,
-		
+
 		/**
 		 * Query visible layer only
 		 */
 		onlyVisible: true,
-		
+
 		/**
-		 * 
+		 *
 		 */
 		fieldIgnored: ["geom", "geometry", "shape", "boundedBy"],
-		
+
 		/**
 		 * List of queryed layers
 		 */
 		layers: null,
-		
+
 		/**
 		 * Capitalize first letter of field name
 		 */
 		capitalize: true
 	},
-	
+
 	constructor: function(config) {
-		Ext.define('FeatureInfoResult', {
-			extend: 'Ext.data.Model',
-			fields: [
-				{name: 'featureid', type: 'int'},
-				{name: 'field', type: 'string'},
-				{name: 'value', type: 'string'}
-			]
-		});
+		var s = Ext.data.schema.Schema.get();
+		if (!s.hasEntity('FeatureInfoResult')) {
+			Ext.define('FeatureInfoResult', {
+				extend: 'Ext.data.Model',
+				fields: [
+					{name: 'featureid', type: 'int'},
+					{name: 'field', type: 'string'},
+					{name: 'value', type: 'string'}
+				]
+			});
+		}
 		
 		this.callParent(arguments);
 	},
-	
+
+	destroy: function () {
+
+	},
+
 	/**
 	 * FeatureInfo on vector layer
 	 */
 	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
-		
+
 		this.draw = new Ck.Selection({
 			type			: "Point",
 			map				: map,
@@ -81,22 +88,22 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			beforeProcess	: this.beforeSelection
 		});
 	},
-	
+
 	beforeSelection: function() {
 		if(!Ext.isEmpty(this.timerId)) {
 			clearTimeout(this.timerId);
 			delete this.timerId;
 		}
 	},
-	
+
 	/**
-	 * 
+	 *
 	 */
 	toggleAction: function(btn, pressed) {
 		this.draw.setActive(pressed);
 		this.createContainer();
 	},
-	
+
 	/**
 	 * Display features informations.
 	 * @params {ol.Feature[][]}
@@ -122,12 +129,12 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				});
 				this.win.add(this.panel);
 			}
-			
+
 			this.win.show();
 			this.win.expand(1000);
 		} else {
 			Ck.log("Empty result");
-			// this.win.setLayout("center"); 
+			// this.win.setLayout("center");
 			this.win.add({
 				xtype: "panel",
 				layout: "center",
@@ -140,7 +147,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);
 		}
 	},
-	
+
 	/**
 	 * Create panel with grid from one layer
 	 * @param {Object} Result with members "features" and "layer"
@@ -149,7 +156,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	createTab: function(lyr) {
 		var field, data = [];
 		var col = lyr.layer.getExtension("columns") || {};
-		
+
 		for(var i = 0; i < lyr.features.length; i++) {
 			for(var f in lyr.features[i].values_) {
 				if(this.getFieldIgnored().indexOf(f) == -1) {
@@ -162,15 +169,15 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}
 			}
 		}
-		
+
 		var store = Ck.create("Ext.data.Store", {
 			model: "FeatureInfoResult",
 			groupField: "featureid",
 			data: data
 		});
-		
+
 		var title = lyr.layer.get("title");
-		
+
 		if(lyr.features.length < 2 && this.getLight()) {
 			var tpl = lyr.layer.ckLayer.getExtension("titleTpl");
 			if(Ext.isString(tpl)) {
@@ -178,7 +185,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				title = tpl.apply(lyr.features[0].getProperties());
 			}
 		}
-		
+
 		var opt = {
 			title: title,
 			store: store,
@@ -200,7 +207,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				hideable: false
 			}]
 		};
-		
+
 		if(lyr.features.length > 1 && this.getLight()) {
 			opt.features = [{
 				ftype: "groupingsummary",
@@ -210,12 +217,12 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				startCollapsed: true
 			}]
 		}
-		
+
 		var grid = Ext.create('Ext.grid.Panel', opt);
-		
+
 		return grid;
 	},
-	
+
 	createContainer: function() {
 		if(Ext.isEmpty(this.win)) {
 			var opt = {
@@ -231,9 +238,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				maximizable: !this.getLight(),
 				items: []
 			};
-			
+
 			opt.x = Ext.getBody().getSize().width - opt.width;
-			
+
 			this.win = Ck.create("Ext.Window", opt);
 		}
 	}
