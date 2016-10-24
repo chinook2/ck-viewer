@@ -235,14 +235,18 @@ Ext.define('Ck.map.Controller', {
 		});
 
 		vm.setStores(vmStores);
+		
+		var res = [];
+		for(var i = viewScales.length - 1; i >= 0; i--) {
+			res.push(viewScales[i].res);
+		}
 
 		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
 		olMap.setView(new ol.View({
 			projection: viewProj,
 			center: v.getCenter(),
 			zoom: v.getZoom(),
-			minResolution: viewScales[0].res,
-			maxResolution: viewScales[viewScales.length-1].res
+			resolutions: res
 		}));
 		this.bindMap(olMap);
 
@@ -786,12 +790,9 @@ Ext.define('Ck.map.Controller', {
 	 * @param {Float}	More than 0 to return a non neighbor resolution
 	 */
 	getNearestResolution: function(res, upper, offset) {
-		var nrRes, idx = 0, mapRes = this.originOwc.getResolutions(true);
-		nrRes = mapRes[idx];
-
-		while(Ext.isNumeric(mapRes[idx + 1]) && nrRes < res) {
-			nrRes = mapRes[++idx];
-		}
+		var idx = 0, mapRes = this.originOwc.getResolutions(true);
+		
+		nrRes = Math.closest(res, mapRes);
 
 		// nrRes is the resolution next the specified resolution
 		if(upper) {

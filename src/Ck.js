@@ -45,6 +45,19 @@ String.prototype.stripExtension = function() {
 	return this.substr(0, this.lastIndexOf("."));
 };
 
+Math.closest = function(num, arr) {
+	var curr = arr[0];
+	var diff = Math.abs (num - curr);
+	for(var val = 0; val < arr.length; val++) {
+		var newdiff = Math.abs (num - arr[val]);
+		if(newdiff < diff) {
+			diff = newdiff;
+			curr = arr[val];
+		}
+	}
+	return curr;
+};
+
 var Ck = Ck || {};
 
 // @define Ck
@@ -264,10 +277,10 @@ Ext.apply(Ck, {
 	 * If the map is already loaded call the callback.
 	 *
 	 * [onLoaded description]
-	 * @param  {Function} fn      [description]
+	 * @param  {Function} fn	  [description]
 	 * @param  {[type]}   scope   [description]
 	 * @param  {[type]}   options [description]
-	 * @return {[type]}           [description]
+	 * @return {[type]}		   [description]
 	 */
 	onLoaded: function (fn, scope, options) {
 		var m = this.getMap();
