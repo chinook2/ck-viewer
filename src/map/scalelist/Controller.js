@@ -19,18 +19,17 @@ Ext.define('Ck.map.ScaleList.Controller', {
 		// Re-render 
 		if(view.isFloating()) {
 			var flCfg = view.floatConfig;
-			var el = flCfg.alignTo;
-			el = document.getElementsByClassName(el);
-			el = el[el.length - 1];
-			if(el) {
+			flCfg.alignTo = document.getElementsByClassName(flCfg.alignTo);
+			flCfg.alignTo = flCfg.alignTo[flCfg.alignTo.length - 1];
+			if(flCfg.alignTo) {
 				view.show();
-				var off = flCfg.alignOff;
-				if(!Ext.isArray(off)) {
-					off = [-(view.getWidth() + 10), 0];
+				if(!Ext.isArray(flCfg.alignOff)) {
+					flCfg.alignOff = [-(view.getWidth() + 10), 0];
 				}
-				view.onAlignToScroll = Ext.emptyFn; // Hard fix (when scroll list)
-				view.alignTo(el, flCfg.alignPos, off);
 				
+				view.onAlignToScroll = Ext.emptyFn; // Hard fix (when scroll list)
+				this.alignTo();
+				this.getOlMap().on("change:size", this.alignTo, this);
 			} else {
 				Ck.log({
 					msg: "Element of \"" + flCfg.alignTo + "\" doesn't exist. Scale list rendering impossible",
@@ -46,6 +45,15 @@ Ext.define('Ck.map.ScaleList.Controller', {
 		
 		this.getOlView().on("change:resolution", this.mapResolutionChange, this);
 		view.on("select", this.resolutionChange, this);
+	},
+	
+	/**
+	 * Align to a element using view.floatConfig
+	 */
+	alignTo: function() {
+		var view = this.getView();
+		var flCfg = view.floatConfig;
+		view.alignTo(flCfg.alignTo, flCfg.alignPos, flCfg.alignOff);
 	},
 	
 	mapResolutionChange: function(evt) {
