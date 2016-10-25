@@ -24,9 +24,12 @@ Ext.define("Ck.map.ScaleList", {
 	displayField: 'scale',
 	valueField: 'res',
 	
-	floatConfig: {
-		alignTo: "ol-scale-line",
-		alignPos: "tl",
-		alignOff: null
+	config: {
+		floatConfig: {
+			alignTo: "ol-scale-line",
+			alignPos: "tl",
+			alignOff: null,
+			alignEl: null
+		}
 	}
 });
