@@ -4,23 +4,23 @@
 Ext.define('Ck.map.action.OpenAddLayer', {
 	extend: 'Ck.Action',
 	alias: "widget.ckOpenAddLayer",
-	
+
 	requires: [
 		'Ck.AddLayer'
 	],
-	
+
 	itemId: 'openaddlayer',
 	text: '',
-	
+
 	iconCls: 'fa fa-download',
 	tooltip: 'Open add layer panel',
-	
+
 	/**
 	 * Create and display a windows with import form
 	 */
 	doAction: function(btn) {
 		if(!this.win) {
-			this.win = Ext.create('Ext.window.Window', {
+			this.win = Ext.create(this.classWindow, {
 				title: 'Add Layer',
 				height: 250,
 				width: 400,
@@ -36,10 +36,10 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 				}
 			});
 		}
-		
+
 		this.win.show();
 	},
-	
+
 	close: function() {
 		this.win.hide();
 	}
