@@ -5,7 +5,7 @@
 Ext.define("Ck.Toolbar", {
 	extend: "Ext.toolbar.Toolbar",
 	alias: "widget.cktoolbar",
-
+	
 	requires: [
 		'Ck.toolbar.*',
 		'Ck.button.Group'
@@ -22,6 +22,10 @@ Ext.define("Ck.Toolbar", {
 
 		// If docked toolbar : default over map.
 		overlay: true
+	},
+	
+	style: {
+		overflow: "visible"
 	},
 
 	cls: 'ck-toolbar'
