@@ -2,7 +2,7 @@
  * Basic action to zoom in the map (zoom level + 1).
  *
  * Use on a {@link Ext.button.Button} in a {@link Ext.toolbar.Toolbar}.
- * 
+ *
  *		{
  *			xtype: "button",
  *			scale: "large",
@@ -15,35 +15,36 @@
 Ext.define('Ck.map.action.OpenOverview', {
 	extend: 'Ck.Action',
 	alias: "widget.ckOpenOverview",
-	
+
 	toggleGroup: 'ckOverview',
-	
+
 	requires: [
 		'Ck.Overview'
 	],
-	
+
 	itemId: 'openoverview',
 	text: '',
-	
+
 	iconCls: 'fa fa-eye',
 	tooltip: 'Display overview',
-	
+
 	firstView: true,
-	
+
 	/**
 	 * Create and display a windows with print form
 	 */
 	toggleAction: function(btn, pressed) {
 		this.button = btn;
-		
+
 		this.ov = Ext.create({
 			xtype: "ckoverview",
 			openner: this
-		})
-		
+		});
+
 		if(!this.win) {
-			this.win = Ext.create('Ext.window.Window', {
+			this.win = Ext.create(this.classWindow, {
 				resizable: false,
+				modal: false,
 				layout: 'fit',
 				closeAction: 'hide',
 				items: this.ov,
@@ -60,7 +61,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 				}
 			});
 		}
-		
+
 		if(pressed) {
 			this.win.show();
 			if(this.firstView || this.ov.config.replaceEverytime) {
@@ -69,9 +70,9 @@ Ext.define('Ck.map.action.OpenOverview', {
 			}
 		} else {
 			this.win.hide();
-		}		
+		}
 	},
-	
+
 	close: function() {
 		this.win.hide();
 		this.button.setPressed(false);

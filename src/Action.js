@@ -44,6 +44,8 @@ Ext.define('Ck.Action', {
 	requires: [
 		'Ck'
 	],
+	
+	classWindow: 'Ext.window.Window',
 
 	disabled: false,
 	hidden: false,
@@ -126,7 +128,7 @@ Ext.define('Ck.Action', {
 
 			scope: this
 		});
-		
+
 		this.callParent([nconfig]);
 	},
 
