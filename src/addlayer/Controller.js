@@ -126,7 +126,7 @@ Ext.define('Ck.addlayer.Controller', {
 				});
 			}
 			
-			lyr = new Ck.owcLayer(lyr);
+			lyr = new Ck.owsLayer(lyr);
 			ckMap.originOwc.setLayers([lyr]);
 			
 			// Use ckMap controller to create layer

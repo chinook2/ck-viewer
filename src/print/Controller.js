@@ -126,7 +126,7 @@ Ext.define('Ck.print.Controller', {
 	},
 	
 	/**
-	 * Load resolutions list from OwcContext
+	 * Load resolutions list from OwsContext
 	 */
 	loadResolutions: function() {
 		var data = this.getMap().originOwc.getScales();

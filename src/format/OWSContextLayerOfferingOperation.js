@@ -2,7 +2,7 @@
  *
  */
 Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
-	alternateClassName: ['Ck.owcOperation', 'Ck.OwcOperation'],
+	alternateClassName: ['Ck.owsOperation', 'Ck.OwsOperation'],
 
 	config: {
 		code		: null,
@@ -23,7 +23,7 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
-	 * @param {Ck.owcLayer}
+	 * @param {Ck.owsLayer}
 	 */
 	constructor: function(config) {
 		var params = {}, data = config.data;

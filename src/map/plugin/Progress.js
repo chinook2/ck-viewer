@@ -38,20 +38,22 @@ Ext.define('Ck.map.plugin.Progress', {
 	 * @param {ol.layer}
 	 */
 	addLoadListeners: function(layer) {
-		var olSource = layer.getSource();
-		if(!olSource) return;
-		
-		// Add loading event
-		if(typeof olSource.getImage == "function") {
-			olSource.on('imageloadstart', this.addLoading, this);
-			olSource.on('imageloadend', this.addLoaded, this);
-			olSource.on('imageloaderror', this.addLoaded, this);
-		}
+		if(!(layer instanceof ol.layer.Group)) {
+			var olSource = layer.getSource();
+			if(!olSource) return;
+			
+			// Add loading event
+			if(typeof olSource.getImage == "function") {
+				olSource.on('imageloadstart', this.addLoading, this);
+				olSource.on('imageloadend', this.addLoaded, this);
+				olSource.on('imageloaderror', this.addLoaded, this);
+			}
 
-		if(typeof olSource.getTile == "function") {
-			olSource.on('tileloadstart', this.addLoading, this);
-			olSource.on('tileloadend', this.addLoaded, this);
-			olSource.on('tileloaderror', this.addLoaded, this);
+			if(typeof olSource.getTile == "function") {
+				olSource.on('tileloadstart', this.addLoading, this);
+				olSource.on('tileloadend', this.addLoaded, this);
+				olSource.on('tileloaderror', this.addLoaded, this);
+			}
 		}
 	},
 

@@ -10,50 +10,51 @@ Ext.define('Ck.legend.plugin.Slider', {
 
 	init: function(cmp) {
 		cmp.on({
-			itemmousedown: this.onItemmousedown,
+			itemclick: this.onItemclick,
 			itemremove: this.onItemremove,
 			scope: this
 		});
 	},
 	
-	onItemmousedown: function(tree, record, item, index, e, eOpts ) {
+	onItemclick: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(!layer || e.target.tagName != "SPAN") {
-			return false;
-		}
-		
-		var opacity = layer.getOpacity();
-		
-		var slider = record.get('slider');
-		if(slider) {
-			slider.setVisible(slider.hidden);
-		} else {
-			var td = item.firstChild.insertRow().insertCell();
-			td.colSpan = 2;
+		if(layer && record.isLeaf() && e.target.tagName == "SPAN" && !Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
+			var opacity = layer.getOpacity();
 			
-			slider = Ext.create('Ext.slider.Single', {
-				width: "96%",
-				value: (opacity * 100),
-				increment: 1,
-				minValue: 0,
-				maxValue: 100,
-				renderTo: td,
-				useTips: true,
-				tipPrefix: this.tipPrefix,
-				style: {
-					marginRight: "2%",
-					marginLeft: "2%"
-				},
-				tipText: function(thumb) {
-					return Ext.String.format(slider.tipPrefix + ' {0} %', thumb.value);
-				},
-				listeners: {
-					change: function(s, v) {
-						layer.setOpacity(v/100);
+			var slider = record.get('slider');
+			if(slider && record.isLeaf() && slider.getEl().dom && slider.getEl().dom && Ext.get(slider.getEl().dom.id)) {
+				slider.setVisible(slider.hidden);
+			} else {
+				var td = item.firstChild.insertRow().insertCell();
+				td.colSpan = 2;
+			
+				slider = Ext.create('Ext.slider.Single', {
+					width: '96%',
+					value: (opacity * 100),
+					increment: 1,
+					minValue: 0,
+					maxValue: 100,
+					renderTo: td,
+					useTips: true,
+					tipPrefix: this.tipPrefix,
+					saveDelay: 300,
+					checkChangeEvents: ["change"],
+					style: {
+						marginRight: "2%",
+						marginLeft: "2%"
+					},
+					tipText: function(thumb) {
+						return Ext.String.format(slider.tipPrefix + ' {0} %', thumb.value);
+					},
+					listeners: {
+						change: function(s, v) {
+							// Ck.log(v.toString());
+							layer.setOpacity(v/100);
+						}
 					}
-				}
-			});
-			record.set('slider', slider);
+				});
+				record.set('slider', slider);
+			}
 		}
 	},
 	

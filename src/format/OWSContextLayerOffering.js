@@ -2,7 +2,7 @@
  *
  */
 Ext.define('Ck.format.OWSContextLayerOffering', {
-	alternateClassName: ['Ck.owcOffering', 'Ck.OwcOffering'],
+	alternateClassName: ['Ck.owsOffering', 'Ck.OwsOffering'],
 
 	config: {
 		code		: null,
@@ -19,7 +19,7 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	/**
 	 * Create a offering from an object
 	 * @param {Object}
-	 * @param {Ck.owcLayer}
+	 * @param {Ck.owsLayer}
 	 */
 	constructor: function(config) {
 		var data = config.data;
@@ -36,7 +36,7 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 		var operations = this.getOperations();
 
 		for(var i = 0; i < data.operations.length; i++) {
-			operations.push(new Ck.owcOperation({
+			operations.push(new Ck.owsOperation({
 				data: data.operations[i],
 				owsOffering: this
 			}));
@@ -85,7 +85,7 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	/**
 	 * Get operation of desired code
 	 * @param {String/Number} code (getMap, getFeature...) or index of operation
-	 * @return {Ck.owcOperation/undefined}
+	 * @return {Ck.owsOperation/undefined}
 	 */
 	getOperation: function(val) {
 		var operation, operations = this.getOperations();

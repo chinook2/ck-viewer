@@ -9,14 +9,19 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	requires: [
 		'Ext.Img'
 	],
-
-	tipPrefix: 'Opacity',
+	
+	/**
+	 * @var {Ck.legend.Controller}
+	 */
 	cklegend: null,
 
+	/**
+	 * Register event on tree
+	 * @param {Ext.tree.Panel}
+	 */
 	init: function(cmp) {
 		cmp.on({
-			// itemmousedown: function(a,b,c,d,e) { setTimeout(this.onItemmousedown.bind(this, a, b, c, d, e), 0) },
-			itemmousedown: this.onItemmousedown,
+			itemclick: this.onItemclick,
 			itemremove: this.onItemremove,
 			scope: this
 		});
@@ -24,49 +29,67 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		this.cklegend = cmp.getController();
 	},
 
-	onItemmousedown: function(tree, record, item, index, e) {
+	/**
+	 * When clicking on a layer display graphic
+	 * @param {Ext.view.View}
+	 * @param {Ext.data.Model}
+	 * @param {HTMLElemeent}
+	 * @param {Number}
+	 * @param {Ext.event.Event}
+	 */
+	onItemclick: function(tree, record, item, index, e) {
 		var layer = record.get('layer');
-		if(!layer || !layer.ckLayer || layer.ckLayer.getData().properties.legend === false || e.target.tagName != "SPAN") {
-			return false;
-		}
+		
+		if(e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
+			!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
+			var graphic = record.get('graphic');
+			
+			if(graphic && graphic.getEl() && graphic.getEl().dom && Ext.get(graphic.getEl().dom.id)) {
+				graphic.setVisible(graphic.hidden);
+			} else {
+				var td = item.firstChild.insertRow().insertCell();
+				td.colSpan = 2;
+				
+				var imgSrc = this.generateSrc(layer);
+				if (imgSrc) {
+					graphic = Ck.create("Ext.Img", {
+						src: imgSrc,
+						urlParam: layer.ckLayer.getData().properties.legend,
+						style: {
+							marginLeft: "2%"
+						},
+						renderTo: td
+					});
 
-		var graphic = record.get('graphic');
-		if(graphic) {
-			graphic.setVisible(graphic.hidden);
-		} else {
-			var td = item.firstChild.insertRow().insertCell();
-			td.colSpan = 2;
-			var imgSrc = this.generateSrc(layer);
-			if (imgSrc) {
-				graphic = Ck.create("Ext.Img", {
-					src: imgSrc,
-					urlParam: layer.ckLayer.getData().properties.legend,
-					style: {
-						marginLeft: "2%"
-					},
-					renderTo: td
-				});
-
-				this.cklegend.getOlView().on("change:resolution", this.updateSrc.bind(this, record));
+					this.cklegend.getOlView().on("change:resolution", this.updateSrc.bind(this, record));
+					
+					graphic.getEl().dom.addEventListener("error", this.interceptError.bind(this));
+					// window[window.i++] = graphic;
+					record.set('graphic', graphic);
+				}
+			}
+			
+			if(graphic) {
+				window.g = graphic;
 			}
 		}
-
-		record.set('graphic', graphic);
 	},
 
 	/**
-	 *
+	 * On resolution change, update image because legend can be differente
+	 * 
 	 */
 	updateSrc: function(rcd, evt) {
 		var img = rcd.get("graphic");
 		var imgSrc = this.generateSrc(rcd.get("layer"));
-		if (imgSrc) {
+		if (img && imgSrc) {
 			img.setSrc(imgSrc);
 		}
 	},
 
 	/**
 	 * Generate the image source
+	 * @param {ol.layer.Base}
 	 * @return {String}
 	 */
 	generateSrc: function(lyr) {
@@ -91,10 +114,16 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 
 	/**
 	 * The Ext doc is wrong for the list params !!
+	 * After drag&drop the legend reference is wrong, need to rebuild
 	 */
 	onItemremove: function(root, record) {
-		// After drag&drop the legend reference is wrong, need to rebuild
 		record.set('graphic', false);
+	},
+	
+	/**
+	 * @param {HTMLElemeent}
+	 */
+	interceptError: function(el) {
+		this.setVisible(false)
 	}
-
 });

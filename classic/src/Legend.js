@@ -25,10 +25,12 @@ Ext.define("Ck.Legend", {
 		'legendlayerremove'
 	],
 
-	// disable drag&drop need refactoring !
-	__viewConfig: {
-		plugins: {
-			ptype: 'treeviewdragdrop'
+	viewConfig: {
+		plugins: { 
+			ptype: 'treeviewdragdrop',
+			containerScroll: true,
+			allowContainerDrops: true,
+			allowParentInserts: true
 		}
 	},
 
