@@ -288,34 +288,54 @@ Ext.define('Ck.map.Controller', {
 		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
 	},
 	
-	addSpecialLayer: function(layer) {
-		this.specialGroup.getLayers().insertAt(0, layer);
+	/**
+	 * Add layer to special group to render it as overlay
+	 * Index param is optionnal. If no provided the layer will render at top
+	 * @param {ol.layer.Base}
+	 * @param {Number} Index to insert
+	 */
+	addSpecialLayer: function(layer, index) {
+		if(!(typeof index == "number") || index == 0) {
+			index = this.specialGroup.getLayers().getLength();
+		} else if(index == Infinity) {
+			index = 0;
+		}
+		this.specialGroup.getLayers().insertAt(index, layer);
+	},
+	
+	/**
+	 * Add layer to map
+	 * @param {ol.layer.Base}
+	 * @param {Number} See addLayer method description
+	 */
+	addNormalLayer: function(layer, index) {
+		var lyrGroup = this.getOlMap().getLayerGroup();
+			
+		if(!(typeof index == "number") || index == 0) {
+			index = lyrGroup.getLayers().getLength() - 1; // -1 to render behind the special group
+		} else if(index == Infinity) {
+			index = 0;
+		}
+		
+		lyrGroup.getLayers().insertAt(index, layer);
 	},
 	
 	/**
 	 * Create ol.Source and ol.Layer and add it to the ol.Map
+	 * Index param is optionnal. If no provided the layer will render at top
+	 * 
 	 * @param {Ck.format.OWSContextLayer}
 	 * @param {Ck.format.OWSContext}
-	 * @param {Number} Index to insert in the legend. Infinity to insert at last
+	 * @param {Number} Index to insert
 	 */
 	addLayer: function(layer, owc, index) {
 		if(Ext.isEmpty(owc)) {
-			owc = this.currentOwsContext;
+			owc = this.originOwc;
 		}
-		if(!(typeof index == "number")) {
-			index = 0;
-		}
-		
 		var olLayer = this.createLayer(layer, owc);
-		
 		if(olLayer) {
-			if(index == 0) {
-				index = lyrGroup.getLayers().getLength();
-			} else if(index == Infinity) {
-				index = 0;
-			}
 			olLayer.ckLayer = layer;
-			lyrGroup.getLayers().insertAt(index, olLayer);
+			this.addNormalLayer(olLayer, index);
 		}
 	},
 	
@@ -624,6 +644,19 @@ Ext.define('Ck.map.Controller', {
 		return olSource;
 	},
 
+	/**
+	 * Add ckLayer object with required function
+	 * @param {Object}
+	 */
+	shamCkLayer: function(lyr) {
+		lyr.ckLayer = {
+			getUserLyr			: function() { return true },
+			getMaxResolution	: function() { return Infinity },
+			getMinResolution	: function() { return 0	},
+			getData				: function() { return { properties: {} } }
+		};
+	},
+	
 	getMapUrl: function(url) {
 		if(!Ext.manifest.ckClient) return url;
 

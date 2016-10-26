@@ -49,7 +49,7 @@ Ext.define('Ck.form.field.Map', {
 					source: new ol.source.Vector(),
 					style: Ck.map.Style.style
 				});
-				this.ckmap.getOlMap().addLayer(this.layer);
+				this.ckmap.addSpecialLayer(this.layer);
 			},
 			addlayer: function(lyr){
 				if(!lyr.getSource()) return;

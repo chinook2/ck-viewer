@@ -117,7 +117,7 @@ Ext.define('Ck.edit.feature.Controller', {
 				zIndex: Ck.map.Style.zIndex.cloneLayer
 			});
 			this.source = this.cloneLayer.getSource();
-			this.olMap.addLayer(this.cloneLayer);
+			this.getMap().addSpecialLayer(this.cloneLayer);
 		}
 
 		this.on("featurecrop", function() {

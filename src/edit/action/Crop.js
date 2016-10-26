@@ -95,7 +95,7 @@ Ext.define('Ck.edit.action.Crop', {
 				displayInLayerSwitcher: false
 			});
 
-			this.olMap.addLayer(this.editCropLayer);
+			this.getMap().addSpecialLayer(this.editCropLayer);
 		}
 		this.editCropLayer.getSource().on("addfeature", this.editCropFeature, this);
 

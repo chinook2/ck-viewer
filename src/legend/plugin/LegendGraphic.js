@@ -31,6 +31,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 
 	/**
 	 * When clicking on a layer display graphic
+	 * Not available for local layer (check URL)
 	 * @param {Ext.view.View}
 	 * @param {Ext.data.Model}
 	 * @param {HTMLElemeent}
@@ -40,7 +41,9 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	onItemclick: function(tree, record, item, index, e) {
 		var layer = record.get('layer');
 		
-		if(e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
+		var src = layer.getSource();
+		
+		if(Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
 			!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 			var graphic = record.get('graphic');
 			

@@ -5,6 +5,10 @@ Ext.define('Ck.importvector.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckimportvector',
 	
+	requires: [
+		'Ck.Zip'
+	],
+	
 	/**
 	 * List of parameters to configure the import
 	 */
@@ -15,6 +19,11 @@ Ext.define('Ck.importvector.Controller', {
 	 * Current layer imported
 	 */
 	importLayer: null,
+	
+	/**
+	 * @property {ol.layer.Group}
+	 */
+	targetGrp: null,
 	
 	/**
 	 * Objet containing parsed files
@@ -39,6 +48,7 @@ Ext.define('Ck.importvector.Controller', {
 	init: function(view) {
 		this.callParent([view]);
 		Ext.apply(this.importParam, this.getViewModel().getData().importParam);
+		this.targetGrp = this.getOlMap().getLayerGroup();
 		this.loadDefaultParam();
 	},
 	
@@ -196,15 +206,13 @@ Ext.define('Ck.importvector.Controller', {
 			title: name,
 			removable: true,
 			source: new ol.source.Vector(),
-			style: Ck.Style.importStyle
+			style: Ck.Style.importStyle,
+			group: this.targetGrp
 		});
-		this.importLayer.ckLayer = {
-			getUserLyr: function() {return true}
-		};
+		this.getMap().shamCkLayer(this.importLayer);
 		
-		this.getOlMap().addLayer(this.importLayer);
+		this.getMap().addNormalLayer(this.importLayer);
 		this.layers.push(this.importLayer);
-		this.getMap().getLegend().addLayer(this.importLayer);
 	},
 	
 	/**

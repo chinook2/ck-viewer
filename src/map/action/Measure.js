@@ -96,7 +96,7 @@ Ext.define('Ck.map.action.Measure', {
 				source:  new ol.source.Vector(),
 				style: Ck.Style.measureStyle
 			});
-			this.olMap.addLayer(this.measureLayer);
+			map.addSpecialLayer(this.measureLayer);
 		}
 
 		var source = this.measureLayer.getSource();

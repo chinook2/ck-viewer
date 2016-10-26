@@ -50,8 +50,7 @@ Ext.define('Ck.print.Controller', {
 				}, vm.getData().previewParam.stroke))
 			})
 		});
-		this.getOlMap.addLayer(this.previewLayer);
-		window.previewLayer = this.previewLayer;
+		this.getMap().addSpecialLayer(this.previewLayer);
 		
 		this.control({
 			"ckprint button#print": {

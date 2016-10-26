@@ -130,13 +130,7 @@ Ext.define('Ck.addlayer.Controller', {
 			ckMap.originOwc.setLayers([lyr]);
 			
 			// Use ckMap controller to create layer
-			var olLayer = ckMap.createLayer(ckMap.originOwc.getLayers()[0], ckMap.originOwc);
-			
-			if(olLayer) {
-				olLayer.ckLayer = lyr;
-				ckMap.getOlMap().addLayer(olLayer);
-				ckMap.getLegend().addLayer(olLayer);
-			}
+			ckMap.addLayer(ckMap.originOwc.getLayers()[0]);
 			
 			// Set the layers back
 			ckMap.originOwc.setLayers(originLayers);
