@@ -43,7 +43,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		
 		var src = layer.getSource();
 		
-		if(Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
+		if(src.getUrl && Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
 			!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 			var graphic = record.get('graphic');
 			
