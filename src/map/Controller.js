@@ -649,12 +649,15 @@ Ext.define('Ck.map.Controller', {
 	 * @param {Object}
 	 */
 	shamCkLayer: function(lyr) {
-		lyr.ckLayer = {
-			getUserLyr			: function() { return true },
-			getMaxResolution	: function() { return Infinity },
-			getMinResolution	: function() { return 0	},
-			getData				: function() { return { properties: {} } }
-		};
+		Ext.apply(lyr, {
+			ckLayer : {
+				getUserLyr			: function() { return true },
+				getMaxResolution	: function() { return Infinity },
+				getMinResolution	: function() { return 0	},
+				getData				: function() { return { properties: {} } }
+			},
+			getExtension : function() { return null }
+		})
 	},
 	
 	getMapUrl: function(url) {
