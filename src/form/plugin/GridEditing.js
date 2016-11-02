@@ -46,6 +46,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 						var plg = grid.getPlugin('rowediting');
 						// colIndex = actioncolumn index... use column index 0 to start Edit
 						if(plg) plg.startEdit(rec, 0);
+						grid.fireEvent('actionColumnClick', 'editrow', rec);
 					},
 					scope: this
 				});
@@ -62,7 +63,10 @@ Ext.define('Ck.form.plugin.GridEditing', {
 						return 'ckClose';
 					},
 					tooltip: 'Delete row',
-					handler: this.deleteRow,
+					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
+						this.deleteRow(view, rowIndex);
+						grid.fireEvent('actionColumnClick', 'deleterow', rec);
+					},
 					scope: this
 				});
 			}
@@ -212,5 +216,6 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				store.removed.push(rec);
 			}
 		}
+
 	}
 });
