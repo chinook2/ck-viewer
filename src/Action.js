@@ -44,7 +44,7 @@ Ext.define('Ck.Action', {
 	requires: [
 		'Ck'
 	],
-	
+
 	classWindow: 'Ext.window.Window',
 
 	disabled: false,
@@ -135,21 +135,20 @@ Ext.define('Ck.Action', {
 	onRender: function (btn, config) {
 		// Listen to map events registred in the same ckview
 		// for group btn specify btn.ckview to get back associated view
-		var ckview = btn.up('ckview') || btn.ckview;
+		// try to find ckview property in a window popup
+		var ckview = btn.up('ckview') || (btn.up('window') && btn.up('window').ckview) || btn.ckview;
 		if (ckview) {
 			ckview = ckview.getController();
 			this.setCkView(ckview);
-			ckview.on({
-				mapready: function (mapController) {
-					this.setMap(mapController);
-					this.ckReady(mapController, config);
-				},
-				maploaded: function (mapController) {
-					this.setMap(mapController);
-					this.ckLoaded(mapController, config);
-				},
-				scope: this
-			});
+			ckview.onMapReady(function (mapController) {
+				this.setMap(mapController);
+				this.ckReady(mapController, config);
+			}, this);
+
+			ckview.onMapLoaded(function (mapController) {
+				this.setMap(mapController);
+				this.ckLoaded(mapController, config);
+			}, this);
 		} else {
 			Ck.log('Action "'+ btn.ckAction +'" as no ckview !');
 		}
@@ -201,6 +200,9 @@ Ext.define('Ck.Action', {
 			this.setOlMap(map.getOlMap());
 			this.setOlView(map.getOlView());
 		}
+	},
+	getMap: function () {
+		return this._map;
 	},
 
 	setVisible: function(show) {
