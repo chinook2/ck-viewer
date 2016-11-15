@@ -285,7 +285,7 @@ Ext.define('Ck.Selection', {
 				selFt.getGeometry().transform(refPrj, mapPrj);
 				break;
 			case "Point" :
-				var radius = Ck.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
+				var radius = this.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
 				feature.getGeometry().transform(mapPrj, refPrj);
 				var pt = turf.point(feature.getGeometry().getCoordinates());
 				var geom = turf.buffer(pt, radius, "meters");
@@ -303,8 +303,8 @@ Ext.define('Ck.Selection', {
 		// Draw the feature used for getFeature query if debug is true. Use this to clean map : window.lyr.getSource().clear()
 		if(this.getDebug()) {
 			var ft = selFt.clone();
-			if(!window.lyr) {
-				window.lyr = new ol.layer.Vector({
+			if(!this.debugLayer) {
+				this.debugLayer = new ol.layer.Vector({
 					id: "onTheFlyLayer",
 					title: "onTheFlyLayer",
 					source: new ol.source.Vector({
@@ -321,16 +321,16 @@ Ext.define('Ck.Selection', {
 						})
 					})
 				});
-				Ck.getMap().getOlMap().addLayer(window.lyr);
+				this.getMap().getOlMap().addLayer(this.debugLayer);
 			}
-			window.lyr.getSource().addFeature(ft);
+			this.debugLayer.getSource().addFeature(ft);
 		}
 
 		var i = 0;
 		var lyr, layers = this.getLayers();
 
 		if(Ext.isEmpty(layers) || !Ext.isArray(layers)) {
-			layers = Ck.getMap().getLayers(function(lyr) {
+			layers = this.getMap().getLayers(function(lyr) {
 				return (lyr.getVisible() &&
 					(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
 					lyr.getProperties("id") != "measureLayer"
@@ -345,7 +345,7 @@ Ext.define('Ck.Selection', {
 						layers[i] = lyr;
 					} else {
 						Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
-						layers.splice(i--, 1);
+						layers.splice(i - 1, 1);
 					}
 				}
 			}
@@ -374,12 +374,24 @@ Ext.define('Ck.Selection', {
 	 */
 	queryWFSLayer: function(layer, selFt, evntParams) {
 		var geoJSON  = new ol.format.GeoJSON();
-		var lyrFts, lyrFt;
-		res = [];
-		lyrFts = layer.getSource().getFeatures();
-		for(var j = 0; j < lyrFts.length; j++) {
-			lyrFt = geoJSON.writeFeatureObject(lyrFts[j]);
-			if(turf.intersect(lyrFt, selFt)) {
+		
+		if(selFt instanceof ol.Feature) {
+			selFt = geoJSON.writeFeatureObject(selFt);
+		}
+		
+		var res = [];
+		var lyrFts = layer.getSource().getFeatures();
+		
+		// Force feature loading from WFS server
+		if(lyrFts.length == 0) {
+			layer.getSource().loader_();
+			lyrFts = layer.getSource().getFeatures();
+		}
+		
+		var tfFts = geoJSON.writeFeaturesObject(lyrFts).features;
+		
+		for(var j = 0; j < tfFts.length; j++) {
+			if(turf.intersect(tfFts[j], selFt)) {
 				if(lyrFts[j].getProperties().features) {
 					for(k = 0; k < lyrFts[j].getProperties().features.length; k++) {
 						res.push(lyrFts[j].getProperties().features[k]);
@@ -403,8 +415,8 @@ Ext.define('Ck.Selection', {
 	queryWMSLayer: function(layer, selFt, evntParams) {
 		var sources = layer.get("sources");
 		if(Ext.isEmpty(sources.wfs)) {
-			var size = Ck.getMap().getOlMap().getSize();
-			var extent = Ck.getMap().getOlView().calculateExtent(size).join(",");
+			var size = this.getMap().getOlMap().getSize();
+			var extent = this.getMap().getOlView().calculateExtent(size).join(",");
 			var xy = evntParams.target.downPx_;
 			var projCode = this.getMap().getProjection().getCode();
 
@@ -440,7 +452,11 @@ Ext.define('Ck.Selection', {
 						dataProjection: projCode,
 						featureProjection: projCode
 					};
-					var features = parser.readFeatures(response.responseXML, parseOptions);
+					if(response.responseXML) {
+						var features = parser.readFeatures(response.responseXML, parseOptions);
+					} else {
+						var features = parser.readFeatures(response.responseText, parseOptions);
+					}
 					this.onSelect(features, layer);
 				}.bind(this, layer),
 				failure: function() {
@@ -456,19 +472,24 @@ Ext.define('Ck.Selection', {
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
-		var selBBox = selFt.getGeometry().getExtent();
+		
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
 			gmlFormat: Ck.create("ol.format.GML2"),
 			featureType: ope.getLayers().split(",")
 		});
+		
 		var gf = f.writeGetFeature({
 			srsName			: this.getMap().getProjection().getCode(),
 			featureTypes	: ope.getLayers().split(","),
 			geometryName	: layer.getExtension("geometryColumn"),
 			count			: this.getLimit(),
 			maxFeatures		: this.getLimit(),
-			bbox			: selBBox
+			filter			: new ol.format.filter.Intersects(
+				layer.getExtension("geometryColumn"),
+				selFt.getGeometry(),
+				this.getMap().getProjection().getCode()
+			)
 		});
 
 		// Temporary parent to get the whole innerHTML

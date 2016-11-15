@@ -61,6 +61,7 @@ Ext.define('Ck.edit.feature.Controller', {
 	 * @protected
 	 */
 	init: function(view) {
+		this.callParent(arguments);
 		this.olMap = Ck.getMap().getOlMap();
 		this.layer = view.layer;
 		this.editController = view.editController;

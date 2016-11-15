@@ -65,7 +65,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 		if(pressed) {
 			this.win.show();
 			if(this.firstView || this.ov.config.replaceEverytime) {
-				this.win.alignTo(Ck.getMap().getOlMap().getViewport(), "tl", [50, 10]);
+				this.win.alignTo(this.getMap().getOlMap().getViewport(), "tl", [50, 10]);
 				this.firstView = false;
 			}
 		} else {

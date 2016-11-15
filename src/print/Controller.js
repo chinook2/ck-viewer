@@ -365,7 +365,7 @@ Ext.define('Ck.print.Controller', {
 				scope: this
 			});
 			
-			Ck.getMap().redraw();			
+			this.getMap().redraw();			
 		}, this);
 		this.getOlMap.renderSync();
 	},

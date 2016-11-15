@@ -10,6 +10,10 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		'Ext.Img'
 	],
 	
+	config: {
+		map: null
+	},
+	
 	/**
 	 * @var {Ck.legend.Controller}
 	 */
@@ -27,6 +31,9 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		});
 
 		this.cklegend = cmp.getController();
+		this.cklegend.on("ready", function() {
+			this.setMap(this.cklegend.getMap());
+		}, this);
 	},
 
 	/**
@@ -108,7 +115,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 
 		var turl = new Ext.Template(url);
 		url = turl.applyTemplate({
-			scale: parseInt(Ck.getMap().getScale())
+			scale: parseInt(this.getMap().getScale())
 		});
 
 		return url;

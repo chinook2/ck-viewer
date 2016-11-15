@@ -46,11 +46,12 @@ Ext.define('Ck.legend.Controller', {
 	},
 	
 	/**
+	 * 
 	 * @param {ol.layer.Base}
 	 * @param {Number}
 	 */
 	onMapAddLayer: function(layer, idx) {
-		if(!Ext.isEmpty(layer.get("group"))) {
+		if(!Ext.isEmpty(layer.get("group")) && (layer instanceof ol.layer.Group || layer.ckLayer.getUserLyr())) {
 			var node = {
 				leaf: !(layer instanceof ol.layer.Group),
 				text: layer.get('title'),

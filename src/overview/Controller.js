@@ -35,7 +35,7 @@ Ext.define('Ck.overview.Controller', {
 		this.config = this.getView().getConfig();
 
 		this.ovLayers = this.getMap().getLayers(function(lyr) {
-			return (lyr.getExtension("overviewLayer") === true);
+			return (lyr.getExtension && lyr.getExtension("overviewLayer") === true);
 		});
 
 
