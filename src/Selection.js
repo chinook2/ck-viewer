@@ -17,12 +17,12 @@ Ext.define('Ck.Selection', {
 		 * True to draw geometry use for getFeature
 		 */
 		debug: false,
-		
+
 		/**
 		 * Method called before process selection
 		 */
 		beforeProcess: Ext.emptyFn,
-		
+
 		/**
 		 * Chinook map
 		 * @var {Ck.map}
@@ -52,7 +52,7 @@ Ext.define('Ck.Selection', {
 		 * @var {Integer}
 		 */
 		limit: 1,
-		
+
 		/**
 		 * Buffer, in pixel, for point selection
 		 */
@@ -273,13 +273,13 @@ Ext.define('Ck.Selection', {
 		var type = feature.getGeometry().getType();
 		var refPrj = ol.proj.get("EPSG:4326");
 		var mapPrj = this.getMap().getOlView().getProjection();
-		
+
 		switch(type) {
 			case "Circle" :
 				var radius = feature.getGeometry().getRadius();
 				feature.getGeometry().transform(mapPrj, refPrj);
 				var pt = turf.point(feature.getGeometry().getCenter());
-				
+
 				var geom = turf.buffer(pt, radius, "meters");
 				var selFt = geom.features[0];
 				selFt.getGeometry().transform(refPrj, mapPrj);
@@ -293,7 +293,7 @@ Ext.define('Ck.Selection', {
 					geometry: new ol.geom.Polygon(geom.geometry.coordinates)
 				});
 				selFt.getGeometry().transform(refPrj, mapPrj)
-				
+
 				// var selFt = geom.features[0];
 				break;
 			default :
@@ -345,7 +345,7 @@ Ext.define('Ck.Selection', {
 						layers[i] = lyr;
 					} else {
 						Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
-						layers.splice(i - 1, 1);
+						layers.splice(i--, 1);
 					}
 				}
 			}
@@ -374,22 +374,22 @@ Ext.define('Ck.Selection', {
 	 */
 	queryWFSLayer: function(layer, selFt, evntParams) {
 		var geoJSON  = new ol.format.GeoJSON();
-		
+
 		if(selFt instanceof ol.Feature) {
 			selFt = geoJSON.writeFeatureObject(selFt);
 		}
-		
+
 		var res = [];
 		var lyrFts = layer.getSource().getFeatures();
-		
+
 		// Force feature loading from WFS server
 		if(lyrFts.length == 0) {
 			layer.getSource().loader_();
 			lyrFts = layer.getSource().getFeatures();
 		}
-		
+
 		var tfFts = geoJSON.writeFeaturesObject(lyrFts).features;
-		
+
 		for(var j = 0; j < tfFts.length; j++) {
 			if(turf.intersect(tfFts[j], selFt)) {
 				if(lyrFts[j].getProperties().features) {
@@ -472,13 +472,13 @@ Ext.define('Ck.Selection', {
 	queryWFSSource: function(layer, selFt, evntParams) {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
-		
+
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
 			gmlFormat: Ck.create("ol.format.GML2"),
 			featureType: ope.getLayers().split(",")
 		});
-		
+
 		var gf = f.writeGetFeature({
 			srsName			: this.getMap().getProjection().getCode(),
 			featureTypes	: ope.getLayers().split(","),
@@ -543,7 +543,7 @@ Ext.define('Ck.Selection', {
 						features = Ext.Array.merge(features, format.readFeatures(response.responseXML, readOptions));
 					}
 				}
-				
+
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
 			failure: function() {
