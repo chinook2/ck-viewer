@@ -258,6 +258,9 @@ Ext.define('Ck.Selection', {
 		}
 		this.getMask().show();
 		this.inAddition = event[this.getMergeKey()];
+		// Get access to event in override
+		this.drawEvent = evntParams;
+
 		var feature = evntParams.feature;
 		var draw = this.getDraw();
 

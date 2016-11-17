@@ -15,6 +15,13 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 	iconCls: 'fa fa-download',
 	tooltip: 'Open add layer panel',
 
+	config: {
+		winWidth: 400,
+		winHeight: 250,
+		winCollapsible: true,
+		winMaximizable: true
+	},
+
 	/**
 	 * Create and display a windows with import form
 	 */
@@ -22,14 +29,14 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 		if(!this.win) {
 			this.win = Ext.create(this.classWindow, {
 				title: 'Add Layer',
-				height: 250,
-				width: 400,
+				height: this.getWinHeight(),
+				width: this.getWinWidth(),
 				minHeight: 250,
 				minWidth: 300,
 				layout: 'fit',
 				closeAction: 'hide',
-				collapsible: true,
-				maximizable: true,
+				collapsible: this.getWinCollapsible(),
+				maximizable: this.getWinMaximizable(),
 				items: {
 					xtype: 'ckaddlayer',
 					openner: this
