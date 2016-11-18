@@ -4,15 +4,15 @@
 Ext.define('Ck.map.action.Form', {
 	extend: 'Ck.Action',
 	alias: "widget.ckmapForm",
-	
+
 	itemId: 'form',
 	text: '',
 	iconCls: 'fa fa-file-text',
-	tooltip: 'Open Form',	
-	
+	tooltip: 'Open Form',
+
 	mapFormSelect: null,
 	mapFormPanel: null,
-	
+
 	doAction: function(btn, status) {
 		var map = this.getMap();
 		var layer = btn.layer;
@@ -28,16 +28,16 @@ Ext.define('Ck.map.action.Form', {
 			return false;
 		}
 		var source = lyr.getSource();
-		
+
 		// Initialise le formulaire (dans une popup plein écran)
-		if(!this.mapFormPanel) {			
+		if(!this.mapFormPanel) {
 			this.mapFormPanel =  Ext.create({
 				xtype: 'ckform',
 				formName: '/' + layer,
 				layer: layer
 			});
-			
-			this.mapFormWindow = Ext.create('Ext.window.Window', {
+
+			this.mapFormWindow = Ext.create(this.classWindow, {
 				height: 300,
 				width: 600,
 				layout: 'fit',
@@ -49,13 +49,13 @@ Ext.define('Ck.map.action.Form', {
 					close: this.clearSelection,
 					scope: this
 				},
-				items: this.mapFormPanel 
+				items: this.mapFormPanel
 			});
 		}
-		
+
 		if(!this.mapFormSelect) {
 			this.mapFormSelect = this.initInteraction(lyr);
-			
+
 			// Après sélection d'un objet charge les infos dans le formulaire puis l'affiche
 			this.mapFormSelect.getFeatures().on('add', function (ce) {
 				var f = ce.element;
@@ -84,21 +84,21 @@ Ext.define('Ck.map.action.Form', {
 				var tab = this.mapFormPanel.down('tabpanel');
 				if(tab) tab.setActiveTab(0);
 				//
-				
+
 				this.mapFormWindow.show();
 			}, this);
 
 			// this.mapFormSelect.on('change:active', this.clearSelection, this);
 		}
-		
+
 		// Active / Désactive l'interaction.
 		this.mapFormSelect.setActive(status);
 	},
-	
+
 	clearSelection: function() {
 		this.mapFormSelect.getFeatures().clear();
 	},
-	
+
 	initInteraction: function(layer) {
 		var it = new ol.interaction.Select({
 			layers: [layer],

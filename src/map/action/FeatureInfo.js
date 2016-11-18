@@ -48,7 +48,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		/**
 		 * Capitalize first letter of field name
 		 */
-		capitalize: true
+		capitalize: true,
+
+		winWidth: 400,
+		winHeight: 400,
+		winCollapsible: true
 	},
 
 	constructor: function(config) {
@@ -63,7 +67,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				]
 			});
 		}
-		
+
 		this.callParent(arguments);
 	},
 
@@ -144,7 +148,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 					cls: "ck-big-text"
 				}]
 			});
-			this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);
+			if (this.getWinCollapsible() === true) {
+				this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);	
+			}
 		}
 	},
 
@@ -226,22 +232,22 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	createContainer: function() {
 		if(Ext.isEmpty(this.win)) {
 			var opt = {
-				height: 400,
-				width: 400,
+				height: this.getWinHeight(),
+				width: this.getWinWidth(),
 				minHeight: 250,
 				minWidth: 300,
 				layout: 'fit',
 				y: 0,
 				header: (this.getLight())? { padding: 0 } : true,
 				closeAction: 'hide',
-				collapsible: true,
+				collapsible: this.getWinCollapsible(),
 				maximizable: !this.getLight(),
 				items: []
 			};
 
 			opt.x = Ext.getBody().getSize().width - opt.width;
 
-			this.win = Ck.create("Ext.Window", opt);
+			this.win = Ck.create(this.classWindow, opt);
 		}
 	}
 });
