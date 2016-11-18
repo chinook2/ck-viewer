@@ -142,6 +142,6 @@
     },
 
 	updatePosition: function() {
-		this.toolbar.getEl().anchorTo(this.getEl(), this.anchor, this.offsets);
+		if(this.toolbar) this.toolbar.getEl().anchorTo(this.getEl(), this.anchor, this.offsets);
 	}
 });
