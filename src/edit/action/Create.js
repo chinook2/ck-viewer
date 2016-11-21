@@ -35,6 +35,10 @@ Ext.define('Ck.edit.action.Create', {
 			});
 			this.getMap().getOlMap().addInteraction(this.drawInteraction);
 
+			//https://github.com/openlayers/ol3/issues/3610
+			this.drawInteraction.on('drawend', this.onFinishSelection, this);
+			//
+			
 			/*
 			// Overload the end-drawing callback to use snapGeometry
 			this.drawInteraction.finishDrawing = function() {
@@ -158,5 +162,30 @@ Ext.define('Ck.edit.action.Create', {
 		});
 
 		return f;
+	},
+
+	//https://github.com/openlayers/ol3/issues/3610
+	//Setup drawend event handle function
+	onFinishSelection: function (evt) {
+		var me = this;
+		//Call to double click zoom control function to deactivate zoom event
+		me.controlDoubleClickZoom(false);
+
+		//Delay execution of activation of double click zoom function
+		setTimeout(function(){
+			me.controlDoubleClickZoom(true);
+		}, 251);
+	},
+
+	//Control active state of double click zoom interaction
+	controlDoubleClickZoom:function (active){
+	    //Find double click interaction
+	    var interactions = this.getMap().getOlMap().getInteractions();
+	    for (var i = 0; i < interactions.getLength(); i++) {
+	        var interaction = interactions.item(i);
+	        if (interaction instanceof ol.interaction.DoubleClickZoom) {
+	            interaction.setActive(active);
+	        }
+	    }
 	}
 });
