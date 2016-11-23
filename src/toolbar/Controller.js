@@ -52,7 +52,7 @@ Ext.define('Ck.toolbar.Controller', {
 			// workaround of post layout process
 			v.on('afterlayout', function() {
 				v.el.setLeft(null);
-				v.el.setRight(0);
+				v.el.setRight(6);
 
 
 				var height = (v.items.length * 50) + 10;

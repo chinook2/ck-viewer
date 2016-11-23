@@ -222,7 +222,7 @@ Ext.define('Ck.map.Controller', {
 		});
 
 		vm.setStores(vmStores);
-		
+
 		var res = [];
 		for(var i = viewScales.length - 1; i >= 0; i--) {
 			res.push(viewScales[i].res);
@@ -248,9 +248,9 @@ Ext.define('Ck.map.Controller', {
 
 		// Set the bbox from context only if no zoom / center or extent
 		if(!cfg.zoom && !cfg.center && !cfg.extent) this.setExtent(owc.getExtent());
-		
+
 		this.relayMapEvents(olMap.getLayerGroup());
-		
+
 		// Add a layer group to host special layer (draw, measure...)
 		this.specialGroup = Ck.create("ol.layer.Group", {
 			title: "CkOverlayGroup",
@@ -258,7 +258,7 @@ Ext.define('Ck.map.Controller', {
 			zIndex: 1
 		});
 		olMap.addLayer(this.specialGroup);
-		
+
 		// Load all layers. Reverse the loading for right order displaying
 		var layers = owc.getLayers();
 		for(var i = layers.length - 1; i >= 0; i--) {
@@ -287,7 +287,7 @@ Ext.define('Ck.map.Controller', {
 		this.fireEvent('loaded', this);
 		Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
 	},
-	
+
 	/**
 	 * Add layer to special group to render it as overlay
 	 * Index param is optionnal. If no provided the layer will render at top
@@ -302,7 +302,7 @@ Ext.define('Ck.map.Controller', {
 		}
 		this.specialGroup.getLayers().insertAt(index, layer);
 	},
-	
+
 	/**
 	 * Add layer to map
 	 * @param {ol.layer.Base}
@@ -310,20 +310,20 @@ Ext.define('Ck.map.Controller', {
 	 */
 	addNormalLayer: function(layer, index) {
 		var lyrGroup = this.getOlMap().getLayerGroup();
-			
+
 		if(!(typeof index == "number") || index == 0) {
 			index = lyrGroup.getLayers().getLength() - 1; // -1 to render behind the special group
 		} else if(index == Infinity) {
 			index = 0;
 		}
-		
+
 		lyrGroup.getLayers().insertAt(index, layer);
 	},
-	
+
 	/**
 	 * Create ol.Source and ol.Layer and add it to the ol.Map
 	 * Index param is optionnal. If no provided the layer will render at top
-	 * 
+	 *
 	 * @param {Ck.format.OWSContextLayer}
 	 * @param {Ck.format.OWSContext}
 	 * @param {Number} Index to insert
@@ -338,7 +338,7 @@ Ext.define('Ck.map.Controller', {
 			this.addNormalLayer(olLayer, index);
 		}
 	},
-	
+
 	/**
 	 * Get the layer group corresponding to the path
 	 * 3 cases :
@@ -358,14 +358,14 @@ Ext.define('Ck.map.Controller', {
 			var layers, parentGroup;
 			var paths = path.split("/");
 			var groupName = paths.pop();
-			
+
 			// Create parent group recursively
 			if(paths.length > 0) {
 				parentGroup = this.getLayerGroup(paths.join("/"), autoCreate);
 			} else {
 				parentGroup = this.getLayerGroup("", autoCreate);
 			}
-			
+
 			if(!Ext.isEmpty(parentGroup)) {
 				// Now find the group
 				var layers = parentGroup.getLayers().getArray();
@@ -374,7 +374,7 @@ Ext.define('Ck.map.Controller', {
 						lyrGroup = layers[i];
 					}
 				}
-				
+
 				// Layer group doesn't exist. Create it
 				if(Ext.isEmpty(lyrGroup) && autoCreate !== false) {
 					var lyrGroup = Ck.create("ol.layer.Group", {
@@ -387,7 +387,7 @@ Ext.define('Ck.map.Controller', {
 				}
 			}
 		}
-		
+
 		return lyrGroup;
 	},
 
@@ -404,8 +404,8 @@ Ext.define('Ck.map.Controller', {
 			var layer = colEvent.element;
 			var col = colEvent.target;
 			var idx = col.getArray().indexOf(layer);
-			
-			
+
+
 			// Alias to get extension property directly
 			layer.getExtension = function(key) {
 				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
@@ -420,7 +420,7 @@ Ext.define('Ck.map.Controller', {
 			this.fireEvent('removelayer', layer);
 		}, this);
 	},
-	
+
 	/**
 	 * Create a layer
 	 * @param {Ck.owsLayer}
@@ -504,7 +504,7 @@ Ext.define('Ck.map.Controller', {
 				sources[mainOffering.getType()] = [];
 			}
 			sources[mainOffering.getType()].push(olSource);
-			
+
 			var path = layer.getExtension('path') || "";
 			lyrGroup = this.getLayerGroup(path);
 
@@ -659,7 +659,7 @@ Ext.define('Ck.map.Controller', {
 			getExtension : function() { return null }
 		})
 	},
-	
+
 	getMapUrl: function(url) {
 		if(!Ext.manifest.ckClient) return url;
 
@@ -957,9 +957,10 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getNearestResolution: function(res, upper, offset) {
 		var idx = 0, mapRes = this.originOwc.getResolutions(true);
-		
-		nrRes = Math.closest(res, mapRes);
 
+		nrRes = Math.closest(res, mapRes);
+		idx = mapRes.indexOf(nrRes);
+		
 		// nrRes is the resolution next the specified resolution
 		if(upper) {
 			for(var i = 0; i < offset; i++) {
@@ -1056,7 +1057,7 @@ Ext.define('Ck.map.Controller', {
 			this.applyFunction(applyEffect);
 		}
 	},
-	
+
 	/**
 	 * @param {ol.layer.Base}
 	 */
