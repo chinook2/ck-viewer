@@ -41,7 +41,7 @@ Ext.define('Ck.map.plugin.Progress', {
 		if(!(layer instanceof ol.layer.Group)) {
 			var olSource = layer.getSource();
 			if(!olSource) return;
-			
+
 			// Add loading event
 			if(typeof olSource.getImage == "function") {
 				olSource.on('imageloadstart', this.addLoading, this);
@@ -90,7 +90,8 @@ Ext.define('Ck.map.plugin.Progress', {
 			this.loading = 0;
 			this.loaded = 0;
 			setTimeout(this.hide.bind(this), 500);
-			this.map.getController().fireEvent("layersloaded");
+			var c = this.map.getController();
+			if(c) c.fireEvent("layersloaded");
 		}
 	},
 
