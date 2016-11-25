@@ -48,7 +48,7 @@ Ext.define('Ck.legend.Controller', {
 	/**
 	 * 
 	 * @param {ol.layer.Base}
-	 * @param {Number}
+	 * @param {Number} Index of the layer in the layer group
 	 */
 	onMapAddLayer: function(layer, idx) {
 		if(!Ext.isEmpty(layer.get("group")) && (layer instanceof ol.layer.Group || layer.ckLayer.getUserLyr())) {
@@ -61,7 +61,9 @@ Ext.define('Ck.legend.Controller', {
 				allowDrop: (layer instanceof ol.layer.Group)
 			};
 			
-			node = layer.get("group").get("node").insertChild(idx, node);
+			var grpNode = layer.get("group").get("node");
+			
+			node = grpNode.insertChild(grpNode.childNodes.length - idx, node);
 			layer.set("node", node);
 			
 			this.setLegendLayerStyle(layer, node);
