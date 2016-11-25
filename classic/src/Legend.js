@@ -26,7 +26,7 @@ Ext.define("Ck.Legend", {
 	],
 
 	viewConfig: {
-		plugins: { 
+		plugins: {
 			ptype: 'treeviewdragdrop',
 			containerScroll: true,
 			allowContainerDrops: true,
@@ -41,6 +41,7 @@ Ext.define("Ck.Legend", {
 	useArrows: true,
 	rootVisible: false,
 	hideHeaders: true,
+	reserveScrollbar: true,
 
 	cls: 'ck-legend',
 
