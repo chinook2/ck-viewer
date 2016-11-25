@@ -15,21 +15,21 @@ Ext.define('Ck.legend.plugin.Slider', {
 			scope: this
 		});
 	},
-	
+
 	onItemclick: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
 		if(layer && record.isLeaf() && e.target.tagName == "SPAN" && !Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 			var opacity = layer.getOpacity();
-			
+
 			var slider = record.get('slider');
 			if(slider && record.isLeaf() && slider.getEl().dom && slider.getEl().dom && Ext.get(slider.getEl().dom.id)) {
 				slider.setVisible(slider.hidden);
 			} else {
 				var td = item.firstChild.insertRow().insertCell();
 				td.colSpan = 2;
-			
+
 				slider = Ext.create('Ext.slider.Single', {
-					width: '96%',
+					width: '90%', // ok with vertical scrollbar in panel
 					value: (opacity * 100),
 					increment: 1,
 					minValue: 0,
@@ -57,7 +57,7 @@ Ext.define('Ck.legend.plugin.Slider', {
 			}
 		}
 	},
-	
+
 	/**
 	 * The Ext doc is wrong for the list params !!
 	 * After drag&drop the slider reference is wrong, need to rebuild
@@ -65,5 +65,5 @@ Ext.define('Ck.legend.plugin.Slider', {
 	onItemremove: function(root, record) {
 		record.set('slider', false);
 	}
-	
+
 });
