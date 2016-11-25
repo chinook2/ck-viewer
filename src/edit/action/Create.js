@@ -33,12 +33,46 @@ Ext.define('Ck.edit.action.Create', {
 				//snapGeometry: this.snapGeometry,
 				source: this.drawSource
 			});
+
+			// Set special style when point is snapped
+			this.drawInteraction.styleSnapped_ = [
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						radius: 12,
+						stroke: new ol.style.Stroke({
+							color: 'red',
+							width: 1
+						})
+					})
+				}),
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						fill: new ol.style.Fill({
+							color: 'white'
+						}),
+						radius: 6,
+						stroke: new ol.style.Stroke({
+							color: 'red',
+							width: 1
+						})
+					})
+				}),
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						fill: new ol.style.Fill({
+							color: 'red'
+						}),
+						radius: 2
+					})
+				})
+			];
 			this.getMap().getOlMap().addInteraction(this.drawInteraction);
 
 			//https://github.com/openlayers/ol3/issues/3610
 			this.drawInteraction.on('drawend', this.onFinishSelection, this);
 			//
-			
+
+
 			/*
 			// Overload the end-drawing callback to use snapGeometry
 			this.drawInteraction.finishDrawing = function() {
