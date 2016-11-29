@@ -1,5 +1,5 @@
 ﻿/**
- * 
+ * Checkbox to manage layer visiblity
  */
 Ext.define('Ck.legend.plugin.Checker', {
 	extend: 'Ext.AbstractPlugin',
@@ -18,6 +18,11 @@ Ext.define('Ck.legend.plugin.Checker', {
 		}, this);
 	},
 	
+	/**
+	 * Method called when checkbox status change
+	 * @params {Ext.data.NodeStore}
+	 * @params {Boolean}
+	 */
 	onCheckChange: function(node, isChecked){
 		node.set('cls', null);
 
@@ -30,7 +35,9 @@ Ext.define('Ck.legend.plugin.Checker', {
 		this.updateParentCheckedStatus(node);
 	},
 	
-	/* private */
+	/**
+	 * @params {Ext.data.NodeStore}
+	 */
 	setChildrenCheckedStatus: function (current) {
 		if (current.parentNode) {
 			var parent = current.parentNode;
@@ -44,6 +51,10 @@ Ext.define('Ck.legend.plugin.Checker', {
 		}
 	},
 	
+	/**
+	 * Update parent checkbox status. Called recursively
+	 * @params {Ext.data.NodeStore}
+	 */
 	updateParentCheckedStatus: function (current) {
 		if (current.parentNode) {
 			var parent = current.parentNode;
@@ -56,15 +67,14 @@ Ext.define('Ck.legend.plugin.Checker', {
 			// Children have same value if all of them are checked or none is checked.
 			var sameValue = (checkedCount == parent.childNodes.length) || (checkedCount == 0);
 			if(parent.get('checked') !== null){
-				if (sameValue) {
+				if(sameValue) {
 					var checkedValue = (checkedCount == parent.childNodes.length);
 					parent.set('checked', checkedValue);
 					
 					parent.set('cls', '');
 				} else {
 					// Not all of the children are checked, so partiel check the parent 'tri-state'.
-					parent.set('checked', false);
-										
+					parent.set('checked', true);
 					parent.set('cls', 'x-tree-checkbox-tristate');
 				}
 			}

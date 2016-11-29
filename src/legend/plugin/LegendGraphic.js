@@ -48,39 +48,40 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	onItemclick: function(tree, record, item, index, e) {
 		var layer = record.get('layer');
 		
-		var src = layer.getSource();
-		
-		if(src.getUrl && Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
-			!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
-			var graphic = record.get('graphic');
-			
-			if(graphic && graphic.getEl() && graphic.getEl().dom && Ext.get(graphic.getEl().dom.id)) {
-				graphic.setVisible(graphic.hidden);
-			} else {
-				var td = item.firstChild.insertRow().insertCell();
-				td.colSpan = 2;
+		if(!(layer instanceof ol.layer.Group)) {
+			var src = layer.getSource();
+			if(src.getUrl && Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
+				!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
+				var graphic = record.get('graphic');
 				
-				var imgSrc = this.generateSrc(layer);
-				if (imgSrc) {
-					graphic = Ck.create("Ext.Img", {
-						src: imgSrc,
-						urlParam: layer.ckLayer.getData().properties.legend,
-						style: {
-							marginLeft: "2%"
-						},
-						renderTo: td
-					});
-
-					this.cklegend.getOlView().on("change:resolution", this.updateSrc.bind(this, record));
+				if(graphic && graphic.getEl() && graphic.getEl().dom && Ext.get(graphic.getEl().dom.id)) {
+					graphic.setVisible(graphic.hidden);
+				} else {
+					var td = item.firstChild.insertRow().insertCell();
+					td.colSpan = 2;
 					
-					graphic.getEl().dom.addEventListener("error", this.interceptError.bind(this));
-					// window[window.i++] = graphic;
-					record.set('graphic', graphic);
+					var imgSrc = this.generateSrc(layer);
+					if (imgSrc) {
+						graphic = Ck.create("Ext.Img", {
+							src: imgSrc,
+							urlParam: layer.ckLayer.getData().properties.legend,
+							style: {
+								marginLeft: "2%"
+							},
+							renderTo: td
+						});
+
+						this.cklegend.getOlView().on("change:resolution", this.updateSrc.bind(this, record));
+						
+						graphic.getEl().dom.addEventListener("error", this.interceptError.bind(this));
+						// window[window.i++] = graphic;
+						record.set('graphic', graphic);
+					}
 				}
-			}
-			
-			if(graphic) {
-				window.g = graphic;
+				
+				if(graphic) {
+					window.g = graphic;
+				}
 			}
 		}
 	},
@@ -92,7 +93,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	updateSrc: function(rcd, evt) {
 		var img = rcd.get("graphic");
 		var imgSrc = this.generateSrc(rcd.get("layer"));
-		if (img && imgSrc) {
+		if (img && img.getEl().dom && imgSrc) {
 			img.setSrc(imgSrc);
 		}
 	},
