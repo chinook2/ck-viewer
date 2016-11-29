@@ -150,6 +150,7 @@ Ext.define('Ck.Selection', {
 	selection: [],
 
 	constructor: function(config) {
+		var me = this;
 		Ext.apply(config, {
 			olMap : config.map.getOlMap(),
 			drawStyle: Ck.map.Style.orange,
@@ -200,7 +201,10 @@ Ext.define('Ck.Selection', {
 			geometryFunction	: geometryFunction,
 			maxPoints			: maxPoints,
 			style				: this.getDrawStyle(),
-			condition			: function() {return true;}
+			condition			: function(e) {
+				me.inAddition = e.originalEvent[me.getMergeKey()];
+				return true;
+			}
 		});
 		this.setDraw(draw);
 
@@ -257,7 +261,7 @@ Ext.define('Ck.Selection', {
 			return false;
 		}
 		this.getMask().show();
-		this.inAddition = event[this.getMergeKey()];
+
 		// Get access to event in override
 		this.drawEvent = evntParams;
 
