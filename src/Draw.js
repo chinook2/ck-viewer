@@ -4,18 +4,19 @@
 Ext.define('Ck.Draw', {
 	statics: {
 		getInstance: function(config) {
-			var draw = Ck.getMap().draw[config.id];
+			var ckmap = config.map || Ck.getMap();
+			var draw = ckmap.draw[config.id];
 			if(!draw) {
 				draw = new this(config);
+				ckmap.draw[config.id] = draw;
 			}
-			Ck.getMap().draw[config.id] = draw;
 			return draw;
 		}
 	},
-	
+
 	config: {
 		id: null,
-		
+
 		/**
 		 * Chinook map
 		 * @var {Ck.map}
@@ -29,7 +30,7 @@ Ext.define('Ck.Draw', {
 		olMap: null,
 
 		layerId: "drawing-layer",
-		
+
 		/**
 		 * The layer store drawings
 		 */
@@ -39,7 +40,7 @@ Ext.define('Ck.Draw', {
 		 *
 		 */
 		source: null,
-		
+
 		/**
 		 * Draw style. Set to null to hide drawing.
 		 * @var {ol.style.Style/ol.style.Style[]/ol.style.StyleFunction}
@@ -72,18 +73,16 @@ Ext.define('Ck.Draw', {
 			zIndex: Ck.map.Style.zIndex.drawLayer,
 			style: Ck.Style.drawStyle
 		});
-		
+
 		layer.setMap(this.getOlMap());
-		
+
 		this.setLayer(layer);
 		this.setSource(source);
 	},
-	
+
 	activeDraw: function(type, enable) {
 		// var interaction = this.getInteractions()[type];
-		
+
 		// alert('active');
 	}
 });
-
-
