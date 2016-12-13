@@ -1,6 +1,7 @@
 ﻿/**
- * LegendGraphic to set layer opacity. It's displayed at the layer click.
- * The opacity range begins from 0 to 100 pourcent.
+ * LegendGraphic query the server to retrieve an legend img.
+ * Only done if "legend" property is set (with TRUE or with string)
+ * "legend" property can be extra params or entire URL
  */
 Ext.define('Ck.legend.plugin.LegendGraphic', {
 	extend: 'Ext.AbstractPlugin',
@@ -50,7 +51,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 		
 		if(!(layer instanceof ol.layer.Group)) {
 			var src = layer.getSource();
-			if(src.getUrl && Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend !== false &&
+			if(src.getUrl && Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend &&
 				!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 				var graphic = record.get('graphic');
 				
@@ -64,7 +65,6 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 					if (imgSrc) {
 						graphic = Ck.create("Ext.Img", {
 							src: imgSrc,
-							urlParam: layer.ckLayer.getData().properties.legend,
 							style: {
 								marginLeft: "2%"
 							},
@@ -99,28 +99,37 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	},
 
 	/**
-	 * Generate the image source
+	 * Generate the image source, "legend" property is use here.
 	 * @param {ol.layer.Base}
 	 * @return {String}
 	 */
 	generateSrc: function(lyr) {
 		var src = lyr.getSource();
 		if (!src.getUrl) return false;
-
-		var url = src.getUrl() + "?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=" + src.getParams().LAYERS + "&TRANSPARENT=true";
-
-		var lgd = lyr.ckLayer.getData().properties.legend;
-		if(lgd) {
-			url += lgd;
+		
+		var url = lyr.ckLayer.getData().properties.legend;
+		
+		if(Ext.isString(url)) {
+			// URL variables
+			var urlVar = {
+				scale: parseInt(this.getMap().getScale())
+			};
+			if(Ext.manifest.ckClient) {
+				Ext.applyIf(urlVar, Ext.manifest.ckClient);
+			};
+			
+			// Apply variables
+			var urlTpl = new Ext.Template(url);
+			url = urlTpl.applyTemplate(urlVar);
+		} else {
+			url = "";
+		}
+		
+		if(url.indexOf("http") !== 0) {
+			url = src.getUrl() + "?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=" + src.getParams().LAYERS + "&TRANSPARENT=true" + url;
 		}
 
-		var turl = new Ext.Template(url);
-		url = turl.applyTemplate({
-			scale: parseInt(this.getMap().getScale())
-		});
-
 		return url;
-
 	},
 
 	/**
