@@ -7,15 +7,15 @@ Ext.define('Ck.legend.Controller', {
 
 	ckReady: function(ckMap) {
 		ckMap.legend = this;
-		
+
 		// Link main layer group to root node
 		var mainGrp = ckMap.getOlMap().getLayerGroup();
 		var rootNode = this.getView().getRootNode();
-		
+
 		ckMap.on("addlayer", this.onMapAddLayer, this);
 		ckMap.on("removelayer", this.onMapRemoveLayer, this);
 		// ckMap.on("ready", this.linkToMap, this);
-		
+
 		mainGrp.set("node", rootNode);
 		rootNode.set("layer", mainGrp);
 	},
@@ -28,30 +28,30 @@ Ext.define('Ck.legend.Controller', {
 
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
-		
+
 		// Expand on item click
 		v.on('itemclick', function(view, rec, item, index, e, eOpts) {
 			if(!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 				view.toggle(rec);
 			}
 		});
-		
+
 		// Event on ol view resolution change
 		var olv = this.getMap().getOlView();
 		olv.on('change:resolution',	this.setLegendLayersStyle, this);
-		
+
 		v.getRootNode().on('expand' , this.setLegendLayersStyle, this);
-		
+
 		this.fireEvent('ready', this);
 	},
-	
+
 	/**
-	 * 
+	 *
 	 * @param {ol.layer.Base}
 	 * @param {Number} Index of the layer in the layer group
 	 */
 	onMapAddLayer: function(layer, idx) {
-		if(!Ext.isEmpty(layer.get("group")) && (layer instanceof ol.layer.Group || layer.ckLayer.getUserLyr())) {
+		if(!Ext.isEmpty(layer.get("title")) && !Ext.isEmpty(layer.get("group")) && (layer instanceof ol.layer.Group || layer.ckLayer.getUserLyr())) {
 			var node = {
 				leaf: !(layer instanceof ol.layer.Group),
 				text: layer.get('title'),
@@ -60,19 +60,19 @@ Ext.define('Ck.legend.Controller', {
 				layer: layer,
 				allowDrop: (layer instanceof ol.layer.Group)
 			};
-			
+
 			var grpNode = layer.get("group").get("node");
-			
+
 			node = grpNode.insertChild(grpNode.childNodes.length - idx, node);
 			layer.set("node", node);
-			
+
 			this.setLegendLayerStyle(layer, node);
-			
+
 			// Append and remove node events (to manage order for example)
 			node.on("move", this.onLayerMove, this);
 		}
 	},
-	
+
 	/**
 	 * On node move (layer or group), move the layer into the map layer collection
 	 * @param {Ext.data.NodeInterface}
@@ -84,20 +84,20 @@ Ext.define('Ck.legend.Controller', {
 		var lyr = node.get("layer"),
 		oldCol = oldGrp.get("layer").getLayers(),
 		newCol = newGrp.get("layer").getLayers();
-		
+
 		// Set new group to layer and invert index to respect layer display order
 		lyr.set("group", newGrp.get("layer"));
 		idx = (newGrp.childNodes.length - idx) - 1;
-		
+
 		// Exception for root folder
 		if(oldGrp.get("layer") == this.getOlMap().getLayerGroup()) {
 			idx++;
 		}
-		
+
 		// Inhibit remove and add layer map event (in Ck.map.Controller with Ck.functionInStackTrace)
 		oldCol.remove(lyr);
 		newCol.insertAt(idx, lyr);
-		
+
 		// Return false to avoid move event recusion. Action already does by OpenLayers group managment
 		return false;
 	},
@@ -162,39 +162,39 @@ Ext.define('Ck.legend.Controller', {
 			layer.set('visible', rec.get('checked'));
 		}
 	},
-	
+
 	/**
-	 * Set legend layers labels style for all layer 
+	 * Set legend layers labels style for all layer
 	 */
 	setLegendLayersStyle: function(){
 			var layers = this.getMap().getLayers();
 			var layer;
 			var node;
 			var nodeDom;
-			for(var i = 0; i < layers.array_.length; i++) {				
+			for(var i = 0; i < layers.array_.length; i++) {
 				layer = layers.array_[i];
 				node = layer.get("node");
 				if(node){
 					nodeDom = this.getNodeDomElement(node);
-					if(!(layer instanceof ol.layer.Group) && !this.getMap().layerInRange(layer) && (nodeDom)){					
+					if(!(layer instanceof ol.layer.Group) && !this.getMap().layerInRange(layer) && (nodeDom)){
 						nodeDom.style.color = '#dbdbdb';
 					}else if(!(layer instanceof ol.layer.Group) && this.getMap().layerInRange(layer) && (nodeDom)) {
 						nodeDom.style.color = '#404040';
-					}	
-				}				
+					}
+				}
 			}
 	},
-	
+
 	/**
 	 * Set legend layer label style for the selected layer
 	 */
 	setLegendLayerStyle: function(layer, node){
-		var nodeDom = this.getNodeDomElement(node);;	
-		if(!(layer instanceof ol.layer.Group) && !this.getMap().layerInRange(layer) && (nodeDom)){				 
+		var nodeDom = this.getNodeDomElement(node);;
+		if(!(layer instanceof ol.layer.Group) && !this.getMap().layerInRange(layer) && (nodeDom)){
 			nodeDom.style.color = '#dbdbdb';
 		}
 	},
-	
+
 	/**
 	 * Get the generated Dom node of the legend layer from the Layer's node object
 	 */
@@ -204,9 +204,9 @@ Ext.define('Ck.legend.Controller', {
 		var recordId;
 		var treeDom = node.getOwnerTree().getEl().dom;
 		var tablesDom = treeDom.getElementsByTagName("table");
-		for (var i = 0; i < tablesDom.length; i++) { 
-			recordId = tablesDom[i].getAttribute("data-recordid"); 
-			if ( recordId == id) { 
+		for (var i = 0; i < tablesDom.length; i++) {
+			recordId = tablesDom[i].getAttribute("data-recordid");
+			if ( recordId == id) {
 				nodeDom = tablesDom[i];
 			}
 		}
