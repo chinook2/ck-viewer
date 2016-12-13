@@ -68,19 +68,18 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 							style: {
 								marginLeft: "2%"
 							},
-							renderTo: td
+							renderTo: td,
+							listeners: {el: {
+								scope: this,
+								load: this.loadSuccess,
+								error: this.loadFailed
+							}}
 						});
 
+						this.graphic = graphic;
 						this.cklegend.getOlView().on("change:resolution", this.updateSrc.bind(this, record));
-						
-						graphic.getEl().dom.addEventListener("error", this.interceptError.bind(this));
-						// window[window.i++] = graphic;
 						record.set('graphic', graphic);
 					}
-				}
-				
-				if(graphic) {
-					window.g = graphic;
 				}
 			}
 		}
@@ -131,7 +130,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 
 		return url;
 	},
-
+	
 	/**
 	 * The Ext doc is wrong for the list params !!
 	 * After drag&drop the legend reference is wrong, need to rebuild
@@ -141,9 +140,16 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	},
 	
 	/**
-	 * @param {HTMLElemeent}
+	 * Hide img on fail
 	 */
-	interceptError: function(el) {
-		this.setVisible(false)
+	loadFailed: function() {
+		this.graphic.setVisible(false);
+	},
+	
+	/**
+	 * Display img on fail
+	 */
+	loadSuccess: function() {
+		this.graphic.setVisible(true);
 	}
 });
