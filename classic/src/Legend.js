@@ -38,6 +38,7 @@ Ext.define("Ck.Legend", {
 		map: null
 	},
 
+	scrollable: true,
 	useArrows: true,
 	rootVisible: false,
 	hideHeaders: true,
