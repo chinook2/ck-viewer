@@ -137,7 +137,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		}
 
 		if(Ext.isFunction(cmp.setReadOnly)) cmp.setReadOnly(r);
-		
+
 		// The field must have a trigger wrap (element which encapsulates the field) or to be a checkbox
 		if(cmp.triggerWrap) {
 			if(!this.labelEl || !this.labelEl.dom) {
@@ -212,11 +212,15 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	 * Add red asterix to mark field as mandatory
 	 * Special process for fieldcontainer
 	 */
-	addRequiredMarker: function() {
-		var cmp = this.getCmp();
+	 addRequiredMarker: function() {
+ 		var cmp = this.getCmp();
 
-		if(!cmp.hideLabel && cmp.allowBlank === false) {
-			cmp.setFieldLabel(cmp.initialConfig.fieldLabel + ' <span class="ck-form-required">*</span>');
-		}
-	}
+ 		if(!cmp.hideLabel) {
+ 			var s = '';
+ 			if (cmp.allowBlank === false) {
+ 				s = ' <span class="ck-form-required">*</span>';
+ 			}
+ 			cmp.setFieldLabel(cmp.initialConfig.fieldLabel + s);
+ 		}
+ 	}
 });
