@@ -44,7 +44,8 @@ Ext.define('Ck.format.OWSContextLayerOfferingOperation', {
 			params	: params,
 			url		: aHref[0],
 			version	: params.VERSION,
-			layers	: params.LAYERS || params.TYPENAME,
+			// LAYERS = WMS, LAYER = WMTS, TYPENAME = WFS
+			layers	: params.LAYERS || params.LAYER || params.TYPENAME,
 			srs		: params.SRS,
 			crs		: params.CRS
 		});
