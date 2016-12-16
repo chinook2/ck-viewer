@@ -56,7 +56,9 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 				var graphic = record.get('graphic');
 				
 				if(graphic && graphic.getEl() && graphic.getEl().dom && Ext.get(graphic.getEl().dom.id)) {
-					graphic.setVisible(graphic.hidden);
+					if(graphic.success) {
+						graphic.setVisible(graphic.hidden);
+					}
 				} else {
 					var td = item.firstChild.insertRow().insertCell();
 					td.colSpan = 2;
@@ -143,6 +145,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	 * Hide img on fail
 	 */
 	loadFailed: function() {
+		this.graphic.success = false;
 		this.graphic.setVisible(false);
 	},
 	
@@ -150,6 +153,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	 * Display img on fail
 	 */
 	loadSuccess: function() {
+		this.graphic.success = true;
 		this.graphic.setVisible(true);
 	}
 });
