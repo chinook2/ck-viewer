@@ -2,7 +2,7 @@
  * Basic action to zoom in the map (zoom level + 1).
  *
  * Use on a {@link Ext.button.Button} in a {@link Ext.toolbar.Toolbar}.
- * 
+ *
  *		{
  *			xtype: "button",
  *			scale: "large",
@@ -15,14 +15,14 @@
 Ext.define('Ck.map.action.DisplaySettings', {
 	extend: 'Ck.Action',
 	alias: "widget.ckmapDisplaySettings",
-	
+
 	tooltip: 'Open display settings window',
-	
+
 	/**
 	 * Create and display a windows with print form
 	 */
 	doAction: function() {
-		this.map = Ck.getMap();
+		this.map = this.getMap();
 		
 		if(!this.win) {
 			this.createSettingsPanel();
@@ -44,10 +44,10 @@ Ext.define('Ck.map.action.DisplaySettings', {
 				}
 			});
 		}
-		
+
 		this.win.show();
 	},
-	
+
 	createSettingsPanel: function() {
 		var effectStore = new Ck.create("Ext.data.Store", {
 			fields: ["id", "label"],
@@ -61,14 +61,14 @@ Ext.define('Ck.map.action.DisplaySettings', {
 				{"id": "edge", "label": "Edge detect"}
 			]
 		});
-		
+
 		var layers = this.map.getLayersStore();
 		layers.unshift({"id": "All", "data": 0})
 		var layerStore = new Ck.create("Ext.data.Store", {
 			fields: ["id", "data"],
 			data: layers
 		});
-		
+
 		this.layerCombo = Ck.create("Ext.form.ComboBox", {
 			fieldLabel: "Layer",
 			xtype: "combo",
@@ -78,7 +78,7 @@ Ext.define('Ck.map.action.DisplaySettings', {
 			valueField: "data",
 			value: 0
 		});
-		
+
 		this.settingsFieldSet = Ck.create("Ext.form.FieldSet", {
 			title: "Settings",
 			hidden: (this.map.getOlMap().getRenderer().getType() != "webgl"),
@@ -107,7 +107,7 @@ Ext.define('Ck.map.action.DisplaySettings', {
 				fct: "setSaturation"
 			}]
 		});
-		
+
 		this.effectsFieldSet = Ck.create("Ext.form.FieldSet", {
 			title: "Effects",
 			defaults: {
@@ -124,7 +124,7 @@ Ext.define('Ck.map.action.DisplaySettings', {
 				listeners: {change: this.effectChange, scope: this}
 			}]
 		});
-		
+
 		this.panel = new Ext.FormPanel({
 			defaultType: "slider",
 			defaults: {
@@ -133,23 +133,23 @@ Ext.define('Ck.map.action.DisplaySettings', {
 			items: [this.layerCombo, this.settingsFieldSet, this.effectsFieldSet]
 		});
 	},
-	
+
 	valueChange: function(slider, newValue) {
 		var settingsFct = slider.fct;
 		var fct = function(layer) {
 			if(layer[settingsFct]) {
 				layer[settingsFct](newValue);
 			}
-		}			
+		}
 		this.map.applyFunction(fct);
 	},
-	
+
 	effectChange: function(combo, newValue) {
 		var lyr = this.layerCombo.getValue();
 		this.map.applyEffect(newValue, (lyr == 0)? undefined : lyr);
 		this.map.getOlMap().render();
 	},
-	
+
 	close: function() {
 		this.win.hide();
 		this.button.setPressed(false);
