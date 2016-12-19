@@ -167,22 +167,25 @@ Ext.define('Ck.legend.Controller', {
 	 * Set legend layers labels style for all layer
 	 */
 	setLegendLayersStyle: function(){
-			var layers = this.getMap().getLayers();
-			var layer;
-			var node;
-			var nodeDom;
-			for(var i = 0; i < layers.array_.length; i++) {
-				layer = layers.array_[i];
-				node = layer.get("node");
-				if(node){
-					nodeDom = this.getNodeDomElement(node);
-					if(!(layer instanceof ol.layer.Group) && !this.getMap().layerInRange(layer) && (nodeDom)){
-						nodeDom.style.color = '#dbdbdb';
-					}else if(!(layer instanceof ol.layer.Group) && this.getMap().layerInRange(layer) && (nodeDom)) {
-						nodeDom.style.color = '#404040';
-					}
-				}
+		var node, layer, layers = this.getMap().getLayers();
+		for(var i = 0; i < layers.array_.length; i++) {
+			layer = layers.array_[i];
+			node = layer.get("node");
+			if(node && !(layer instanceof ol.layer.Group)) {
+				this.setNodeStatus(node, this.getMap().layerInRange(layer));
 			}
+		}
+	},
+	
+	setNodeStatus: function(node, active) {
+		var domNode = this.getNodeDomElement(node);
+		if(domNode) {
+			domNode.style.color = (active)? '#404040' : '#dbdbdb';
+			var inp = domNode.getElementsByTagName("input");
+			for(var i = 0; i < inp.length; i++) {
+				inp[i].disabled = !active;
+			}
+		}
 	},
 
 	/**

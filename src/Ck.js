@@ -637,8 +637,7 @@ Ext.apply(Ck, {
 	 */
 	getResolutionFromScale: function(scale, proj) {
 		var resolution;
-		var normScale = Ck.normalizeScale(scale);
-		return 1 / (normScale * ((proj.getMetersPerUnit() * 100) / Ck.CM_PER_INCH) * Ck.DOTS_PER_INCH);
+		return ((Ck.CM_PER_INCH / 100) / Ck.DOTS_PER_INCH) * scale * proj.getMetersPerUnit();
 	},
 
 	/**

@@ -514,6 +514,10 @@ Ext.define('Ck.map.Controller', {
 			
 			var path = layer.getExtension('path') || "";
 			lyrGroup = this.getLayerGroup(path);
+			
+			// Resolution limits
+			var maxRes = layer.getMaxResolution();
+			var minRes = layer.getMinResolution();
 
 			// Layer creation
 			olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
@@ -523,6 +527,8 @@ Ext.define('Ck.map.Controller', {
 				sources: sources,
 				group: lyrGroup,
 				extent: extent,
+				maxResolution: (maxRes == Infinity)? Infinity : this.getNearestResolution(maxRes),
+				minResolution: (maxRes == 0)? 0 : this.getNearestResolution(minRes),
 				style: olStyle,
 				visible: layer.getVisible(),
 				path: path,
@@ -968,7 +974,7 @@ Ext.define('Ck.map.Controller', {
 		nrRes = Math.closest(res, mapRes);
 		idx = mapRes.indexOf(nrRes);
 		
-		// nrRes is the resolution next the specified resolution
+		// Usefull only if offset > 0
 		if(upper) {
 			for(var i = 0; i < offset; i++) {
 				if(Ext.isNumeric(mapRes[idx + 1])) {

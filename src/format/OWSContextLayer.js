@@ -66,13 +66,13 @@ Ext.define('Ck.format.OWSContextLayer', {
 			var units;
 			value = parseFloat(value);
 			this._minScale = value;
-			// Get the units
+			
 			if(this.getOwsContext() && this.getOwsContext.getProjection) {
-				units = this.getOwsContext().getProjection().units_;
+				proj = this.getOwsContext().getProjection();
 			} else {
-				units = Ck.getMap().getOlView().getProjection().units_;
+				proj = Ck.getMap().getOlView().getProjection();
 			}
-			this._minResolution = Ck.getResolutionForScale(value, units);
+			this._minResolution = Ck.getResolutionFromScale(value, proj);
 		}
 	},
 	
@@ -83,11 +83,11 @@ Ext.define('Ck.format.OWSContextLayer', {
 			this._maxScale = value;
 			// Get the units
 			if(this.getOwsContext() && this.getOwsContext.getProjection) {
-				units = this.getOwsContext().getProjection().units_;
+				proj = this.getOwsContext().getProjection();
 			} else {
-				units = Ck.getMap().getOlView().getProjection().units_;
+				proj = Ck.getMap().getOlView().getProjection();
 			}
-			this._maxResolution = Ck.getResolutionForScale(value, units);
+			this._maxResolution = Ck.getResolutionFromScale(value, proj);
 		}
 	},
 	
