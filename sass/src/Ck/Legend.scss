@@ -16,3 +16,15 @@
 .x-tree-checkbox-tristate input{
 	opacity: 0.5
 }
+
+/* To disable legend entry */
+.ck-disabled-layer{
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Disable Slider, LegendGraphic and more */
+.ck-disabled-layer ~ tr, .ck-disabled-layer ~ tr *{
+	visibility: hidden;
+	height: 0px;
+}

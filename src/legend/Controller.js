@@ -4,7 +4,25 @@
 Ext.define('Ck.legend.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.cklegend',
-
+	
+	/**
+	 * Class list possible for node main <tr> with associate
+	 * function returned boolean to indicated if node have to be added.
+	 */
+	nodeClasses: {
+		"ck-disabled-layer" : function(record, index, rowParams, store) {
+			var lyr = record.get("layer");
+			if(lyr instanceof ol.layer.Group || this.getMap().layerInRange(lyr)) {
+				return false;
+			} else {
+				return true;
+			}
+		}
+	},
+	
+	/**
+	 * Add listeners on add and remove layer
+	 */
 	ckReady: function(ckMap) {
 		ckMap.legend = this;
 
@@ -12,12 +30,12 @@ Ext.define('Ck.legend.Controller', {
 		var mainGrp = ckMap.getOlMap().getLayerGroup();
 		var rootNode = this.getView().getRootNode();
 
-		ckMap.on("addlayer", this.onMapAddLayer, this);
-		ckMap.on("removelayer", this.onMapRemoveLayer, this);
-		// ckMap.on("ready", this.linkToMap, this);
-
 		mainGrp.set("node", rootNode);
 		rootNode.set("layer", mainGrp);
+		
+		// Add event listeners
+		ckMap.on("addlayer", this.layerAdd, this);
+		ckMap.on("removelayer", this.layerRemove, this);
 	},
 
 	/**
@@ -25,7 +43,7 @@ Ext.define('Ck.legend.Controller', {
 	 */
 	ckLoaded: function() {
 		var v = this.getView();
-
+		
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
 
@@ -35,14 +53,29 @@ Ext.define('Ck.legend.Controller', {
 				view.toggle(rec);
 			}
 		});
+		
+		// Manage row style
+		v.getView().getRowClass = this.getNodeClasses.bind(this);
 
 		// Event on ol view resolution change
-		var olv = this.getMap().getOlView();
-		olv.on('change:resolution',	this.setLegendLayersStyle, this);
-
-		v.getRootNode().on('expand' , this.setLegendLayersStyle, this);
+		this.getMap().getOlView().on('change:resolution',	this.setLegendLayersStyle, this);
 
 		this.fireEvent('ready', this);
+	},
+	
+	/**
+	 * Call all functions to generate class list for node
+	 * @return {String} Class list
+	 */
+	getNodeClasses: function(record, index, rowParams, store) {
+		var cls, classes = "";
+		for(var cls in this.nodeClasses) {
+			if(this.nodeClasses[cls].apply(this, arguments)) {
+				classes += " " + cls;
+			}
+		}
+		
+		return classes.substring(1);
 	},
 
 	/**
@@ -50,7 +83,7 @@ Ext.define('Ck.legend.Controller', {
 	 * @param {ol.layer.Base}
 	 * @param {Number} Index of the layer in the layer group
 	 */
-	onMapAddLayer: function(layer, idx) {
+	layerAdd: function(layer, idx) {
 		if(!Ext.isEmpty(layer.get("title")) && !Ext.isEmpty(layer.get("group")) && (layer instanceof ol.layer.Group || layer.ckLayer.getUserLyr())) {
 			var node = {
 				leaf: !(layer instanceof ol.layer.Group),
@@ -66,10 +99,8 @@ Ext.define('Ck.legend.Controller', {
 			node = grpNode.insertChild(grpNode.childNodes.length - idx, node);
 			layer.set("node", node);
 
-			this.setLegendLayerStyle(layer, node);
-
 			// Append and remove node events (to manage order for example)
-			node.on("move", this.onLayerMove, this);
+			node.on("move", this.layerMove, this);
 		}
 	},
 
@@ -80,7 +111,7 @@ Ext.define('Ck.legend.Controller', {
 	 * @param {Ext.data.NodeInterface}
 	 * @param {Number}
 	 */
-	onLayerMove: function(node, oldGrp, newGrp, idx) {
+	layerMove: function(node, oldGrp, newGrp, idx) {
 		var lyr = node.get("layer"),
 		oldCol = oldGrp.get("layer").getLayers(),
 		newCol = newGrp.get("layer").getLayers();
@@ -97,8 +128,8 @@ Ext.define('Ck.legend.Controller', {
 		// Inhibit remove and add layer map event (in Ck.map.Controller with Ck.functionInStackTrace)
 		oldCol.remove(lyr);
 		newCol.insertAt(idx, lyr);
-
-		// Return false to avoid move event recusion. Action already does by OpenLayers group managment
+		
+		// Return false to avoid move event recusion. Action already done by OpenLayers group managment
 		return false;
 	},
 
@@ -106,48 +137,11 @@ Ext.define('Ck.legend.Controller', {
 	 * Called when a layer is removed from the map
 	 * @param {ol.layer}
 	 */
-	onMapRemoveLayer: function(layer) {
-		var node = this.getNodeByLayer(layer);
+	layerRemove: function(layer) {
+		var node = layer.get("node");
 		if(node) {
 			node.remove();
 		}
-	},
-
-	/**
-	 * Find the node of the tree view corresponding to the specified layer
-	 * @param {ol.layer}
-	 * @return {Ext.data.NodeStore}
-	 */
-	getNodeByLayer: function(layer) {
-		var searchNode = function(node, layer) {
-			var resultNode;
-			var data = node.getData();
-			if(data.layer && data.layer == layer) {
-					return node;
-			} else if(node.childNodes && node.childNodes.length > 0) {
-				for(var i = 0; i < node.childNodes.length; i++) {
-					resultNode = searchNode(node.childNodes[i], layer);
-					if(resultNode) {
-						return resultNode;
-					}
-				}
-			}
-		};
-		var root = this.getView().getRootNode();
-		var node = searchNode(root, layer);
-		return node;
-	},
-
-	getLayers: function() {
-        var layers = [];
-		var root = this.getView().getRootNode();
-
-        root.cascadeBy(function(rec){
-            if (rec.get('layer')) {
-                layers.push(rec.get('layer'));
-            }
-        });
-        return layers;
 	},
 
 	/**
@@ -167,9 +161,9 @@ Ext.define('Ck.legend.Controller', {
 	 * Set legend layers labels style for all layer
 	 */
 	setLegendLayersStyle: function(){
-		var node, layer, layers = this.getMap().getLayers();
-		for(var i = 0; i < layers.array_.length; i++) {
-			layer = layers.array_[i];
+		var node, layer, layers = this.getMap().getLayers().getArray();
+		for(var i = 0; i < layers.length; i++) {
+			layer = layers[i];
 			node = layer.get("node");
 			if(node && !(layer instanceof ol.layer.Group)) {
 				this.setNodeStatus(node, this.getMap().layerInRange(layer));
@@ -177,42 +171,38 @@ Ext.define('Ck.legend.Controller', {
 		}
 	},
 	
+	/**
+	 * Enable or disable node. Use getNodeClasses method
+	 * @params {Ext.data.NodeInterface} Must be a leaf
+	 * @params {Boolean}
+	 */
 	setNodeStatus: function(node, active) {
 		var domNode = this.getNodeDomElement(node);
 		if(domNode) {
-			domNode.style.color = (active)? '#404040' : '#dbdbdb';
-			var inp = domNode.getElementsByTagName("input");
-			for(var i = 0; i < inp.length; i++) {
-				inp[i].disabled = !active;
+			var tr = domNode.getElementsByClassName("x-grid-tree-node-leaf")[0];
+			for(var cls in this.nodeClasses) {
+				if(this.nodeClasses[cls].apply(this, arguments)) {
+					tr.classList.add(cls);
+				} else {
+					tr.classList.remove(cls);
+				}
 			}
-		}
-	},
-
-	/**
-	 * Set legend layer label style for the selected layer
-	 */
-	setLegendLayerStyle: function(layer, node){
-		var nodeDom = this.getNodeDomElement(node);;
-		if(!(layer instanceof ol.layer.Group) && !this.getMap().layerInRange(layer) && (nodeDom)){
-			nodeDom.style.color = '#dbdbdb';
 		}
 	},
 
 	/**
 	 * Get the generated Dom node of the legend layer from the Layer's node object
+	 * @return {DOMElement|undefined}
 	 */
 	getNodeDomElement: function(node){
-		var nodeDom;
-		var id = node.internalId;
-		var recordId;
-		var treeDom = node.getOwnerTree().getEl().dom;
-		var tablesDom = treeDom.getElementsByTagName("table");
-		for (var i = 0; i < tablesDom.length; i++) {
+		var nodeDom, recordId, id = node.internalId;
+		var tablesDom = node.getOwnerTree().getEl().dom.getElementsByTagName("table");
+		
+		for(var i = 0; i < tablesDom.length; i++) {
 			recordId = tablesDom[i].getAttribute("data-recordid");
-			if ( recordId == id) {
-				nodeDom = tablesDom[i];
+			if(recordId == id) {
+				return tablesDom[i];
 			}
 		}
-		return nodeDom;
 	}
 });

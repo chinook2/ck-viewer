@@ -405,7 +405,7 @@ Ext.define('Ck.map.Controller', {
 	relayMapEvents: function(olGroup) {
 		// Relay olMap events
 		olGroup.getLayers().on('add', function(colEvent) {
-			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.onLayerMove, 6)) {
+			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
 				return;
 			}
 			var layer = colEvent.element;
@@ -420,7 +420,7 @@ Ext.define('Ck.map.Controller', {
 			this.fireEvent('addlayer', layer, idx);
 		}, this);
 		olGroup.getLayers().on('remove', function(colEvent) {
-			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.onLayerMove, 6)) {
+			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
 				return;
 			}
 			var layer = colEvent.element;

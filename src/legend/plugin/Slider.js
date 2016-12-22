@@ -25,7 +25,9 @@ Ext.define('Ck.legend.plugin.Slider', {
 			if(slider && record.isLeaf() && slider.getEl().dom && slider.getEl().dom && Ext.get(slider.getEl().dom.id)) {
 				slider.setVisible(slider.hidden);
 			} else {
-				var td = item.firstChild.insertRow().insertCell();
+				var tr = item.firstChild.insertRow();
+				tr.classList.add("ck-layer-slider");
+				var td = tr.insertCell();
 				td.colSpan = 2;
 
 				slider = Ext.create('Ext.slider.Single', {

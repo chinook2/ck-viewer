@@ -60,7 +60,9 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 						graphic.setVisible(graphic.hidden);
 					}
 				} else {
-					var td = item.firstChild.insertRow().insertCell();
+					var tr = item.firstChild.insertRow();
+					tr.classList.add("ck-layer-legendgraphic");
+					var td = tr.insertCell();
 					td.colSpan = 2;
 					
 					var imgSrc = this.generateSrc(layer);
