@@ -220,7 +220,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
  			if (cmp.allowBlank === false) {
  				s = ' <span class="ck-form-required">*</span>';
  			}
- 			cmp.setFieldLabel(cmp.initialConfig.fieldLabel + s);
+			// Test for fieldcontainer
+			if (cmp.initialConfig && cmp.initialConfig.fieldLabel) {
+ 				cmp.setFieldLabel(cmp.initialConfig.fieldLabel + s);
+			}
  		}
  	}
 });
