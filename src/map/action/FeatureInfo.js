@@ -149,7 +149,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}]
 			});
 			if (this.getWinCollapsible() === true) {
-				this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);	
+				this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);
 			}
 		}
 	},
@@ -185,7 +185,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		var title = lyr.layer.get("title");
 
 		if(lyr.features.length < 2 && this.getLight()) {
-			var tpl = lyr.layer.ckLayer.getExtension("titleTpl");
+			var tpl = lyr.layer.getExtension("titleTpl");
 			if(Ext.isString(tpl)) {
 				tpl = new Ext.Template(tpl);
 				title = tpl.apply(lyr.features[0].getProperties());
