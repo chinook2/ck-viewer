@@ -5,7 +5,7 @@
  * - History grid to log modification (optionnal)
  * - Vertex grid to modify geometry accurately (optionnal)
  */
-Ext.define('Ck.map.ScaleList.Controller', {
+Ext.define('Ck.map.scalelist.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckmap.scalelist',
 
