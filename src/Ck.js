@@ -219,7 +219,7 @@ Ext.apply(Ck, {
 		crs		: "EPSG:4326",
 		extent	: [-180,-90,180,90]
 	},
-	
+
 	codeOperation: {
 		wfs		: "http://www.opengis.net/spec/owc-wfs/1.0/req/wfs",
 		wms		: "http://www.opengis.net/spec/owc-geojson/1.0/req/wms"
@@ -332,7 +332,19 @@ Ext.apply(Ck, {
 	 * @return {Ck.Action}
 	 */
 	getAction: function(widget) {
-		return Ck.actions[widget];
+		var a = Ck.actions[widget];
+		if(a) return a;
+
+		// index can include itemId to make it unique
+		// try to find only with ckAction name
+		for(var an in Ck.actions) {
+			a = Ck.actions[an];
+			if (a.ckAction === widget) {
+				return a;
+			}
+		}
+
+		return false;
 	},
 
 	/**
@@ -763,7 +775,7 @@ Ext.apply(Ck, {
 
 		return name;
 	},
-	
+
 	/**
 	 * Reproject an extent
 	 * @param {ol.Extent}
@@ -778,7 +790,7 @@ Ext.apply(Ck, {
 		} else {
 			to = ol.proj.get(to);
 		}
-		
+
 		if(ol.proj.equivalent(to, from)) {
 			return extent;
 		} else {
@@ -787,7 +799,7 @@ Ext.apply(Ck, {
 			return extent.getExtent();
 		}
 	},
-	
+
 	/**
 	 * Reduce a BBox if it doesn't contained by other BBox
 	 * Comparison is done in WGS84 projection
@@ -801,39 +813,39 @@ Ext.apply(Ck, {
 	 * @return {OpenLayers.Bounds} BBox retrécie
 	 */
 	limitBBox: function(BBox, limitBBox, srsBBox, srsLimitBBox, srsOut) {
-		
+
 		// On transforme les projections qui sont en string en objets
 		srsBBox = ol.proj.get(srsBBox);
 		srsLimitBBox = ol.proj.get(srsLimitBBox);
-		
+
 		if(srsOut == undefined) {
 			srsOut = srsLimitBBox;
 		} else {
-			srsOut = ol.proj.get(srsOut);	
+			srsOut = ol.proj.get(srsOut);
 		}
 
 		// On convertie les BBox en 4326
 		refSRS = ol.proj.get("EPSG:4326");
 		BBox = this.reprojectExtent(BBox, srsBBox);
 		limitBBox = this.reprojectExtent(limitBBox, srsLimitBBox);
-		
+
 		// On limite
 		leftCoord	= (BBox[0] < limitBBox[0])?		limitBBox[0]		: BBox[0];
 		bottomCoord	= (BBox[1] < limitBBox[1])?	limitBBox[1]	: BBox[1];
 		rightCoord	= (BBox[2] > limitBBox[2])?	limitBBox[2]		: BBox[2];
 		topCoord	= (BBox[3] > limitBBox[3])?		limitBBox[3]		: BBox[3];
-		
+
 		boundsOut = [leftCoord, bottomCoord, rightCoord, topCoord];
-		
+
 		if(!ol.proj.equivalent(srsOut, refSRS)) {
 			boundsOut = ol.geom.Polygon.fromExtent(boundsOut);
 			boundsOut.transform(refSRS, srsOut);
 			boundsOut = boundsOut.getExtent();
 		}
-		
+
 		return boundsOut;
 	},
-	
+
 	/**
 	 * Check if a function is present in the stack trace
 	 * @param {Function}
