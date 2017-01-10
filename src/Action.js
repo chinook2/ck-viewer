@@ -110,11 +110,25 @@ Ext.define('Ck.Action', {
 			itemId: this.itemId,
 			text: this.text,
 			iconCls: this.iconCls,
-			handler: this.doAction,
+			handler: function () {
+				try {
+					this.doAction.apply(this, arguments);
+				} catch (e) {
+					Ck.log(e.message);
+					Ck.Notify.error("Chinook Action Error :: " + e.message);
+				}
+			},
 
 			tooltip: this.tooltip,
 			toggleGroup: this.toggleGroup,
-			toggleHandler: this.toggleAction,
+			toggleHandler: function () {
+				try {
+					this.toggleAction.apply(this, arguments);
+				} catch (e) {
+					Ck.log(e.message);
+					Ck.Notify.error("Chinook Action Error :: " + e.message);
+				}
+			},
 
 			listeners: {
 				render: function (btn, opts) {
