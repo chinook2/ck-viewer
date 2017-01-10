@@ -31,15 +31,20 @@ Ext.define('Ck.overview.Controller', {
 	init: function() {
 		this.callParent(arguments);
 		this.view = this.getView();
-		
+
 		this.config = this.getView().getConfig();
 
-		this.ovLayers = this.getMap().getLayers(function(lyr) {
-			return (lyr.getExtension && lyr.getExtension("overviewLayer") === true);
-		});
+		var ovLayer = this.getMap().overviewLayer;
+		if (ovLayer) {
+			//ovLayer
+			this.ovLayers = [ovLayer];
+		} else {
+			this.ovLayers = this.getMap().getLayers(function(lyr) {
+				return (lyr.getExtension && lyr.getExtension("overviewLayer") === true);
+			});
+		}
 
-
-		if(this.ovLayers.length == 0) {
+		if(this.ovLayers.length === 0) {
 			this.getView().on("beforerender", function() {
 				if(this.openner.close) {
 					this.openner.close();
@@ -51,7 +56,7 @@ Ext.define('Ck.overview.Controller', {
 					icon: Ext.Msg.WARNING
 				});
 				return false;
-			})
+			});
 		} else {
 
 			// Stylesheet creation for overview
@@ -75,13 +80,10 @@ Ext.define('Ck.overview.Controller', {
 	},
 
 	attachOvControl: function() {
-		var view;
-		if(true) {
-			view = new ol.View({
-				center: this.getMap().getView().getCenter(),
-				projection: this.getMap().originOwc.getProjection()
-			});
-		}
+		var view = new ol.View({
+			//center: this.getMap().getView().getCenter(),
+			projection: this.getMap().originOwc.getProjection()
+		});
 
 		var opt = {
 			collapsed: false,

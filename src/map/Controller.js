@@ -342,7 +342,13 @@ Ext.define('Ck.map.Controller', {
 		var olLayer = this.createLayer(layer, owc);
 		if(olLayer) {
 			olLayer.ckLayer = layer;
-			this.addNormalLayer(olLayer, index);
+
+			// Test if special 'overview' layer...
+			if (layer.getId() === "overview") {
+				this.overviewLayer = olLayer;
+			} else {
+				this.addNormalLayer(olLayer, index);
+			}
 		}
 	},
 
