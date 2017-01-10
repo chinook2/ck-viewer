@@ -499,10 +499,6 @@ Ext.define('Ck.Selection', {
 			)
 		});
 
-		// Temporary parent to get the whole innerHTML
-		var pTemp = document.createElement("div");
-		pTemp.appendChild(gf);
-
 		// Pre make reader options for readFeatures method
 		var readOptions = {
 			dataProjection: ope.getSrs(),
@@ -513,7 +509,7 @@ Ext.define('Ck.Selection', {
 		Ck.Ajax.post({
 			scope: this,
 			url: this.getMap().getMapUrl(ope.getUrl()),
-			rawData: pTemp.innerHTML,
+			rawData: new XMLSerializer().serializeToString(gf),
 			success: function(layer, ope, readOptions, response) {
 				var ly, ns = {
 					"http://mapserver.gis.umn.edu/mapserver": []
