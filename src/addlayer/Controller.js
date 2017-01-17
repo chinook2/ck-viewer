@@ -8,7 +8,7 @@
 Ext.define('Ck.addlayer.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer',
-	
+
 	/**
 	 * Add a layer from node
 	 *
@@ -23,10 +23,10 @@ Ext.define('Ck.addlayer.Controller', {
 			var olView = ckMap.getOlView();
 			var wfsAvailable = false;
 			var capabilities = tree.getBubbleParent().getController();
-			
+
 			var datasource = capabilities.getDatasource();
 			var data = node.data.data;
-			
+
 			var url = datasource.url;
 			var name = data.Name || data.name || node.text;
 			var title = data.Title || data.title;
@@ -42,14 +42,14 @@ Ext.define('Ck.addlayer.Controller', {
 			var bbox = (Ext.isArray(bbox))? bbox[0] : bbox;
 			var maxres = data.maxResolution || data.maxresolution;
 			var minres = data.minResolution || data.minresolution;
-			
+
 			var mapproj = ckMap.getOlView().getProjection();
-			
+
 			maxextent = bbox.bbox.split(",");
-			
+
 			// BBox may be limited
 			maxextent = Ck.limitBBox(maxextent, ckMap.getExtent(), bbox.srs, mapproj);
-			
+
 			// Gestion des groupes pour bien placer la couche
 			if(data.Group) {
 				var group = data.Group.join("/");
@@ -57,7 +57,7 @@ Ext.define('Ck.addlayer.Controller', {
 				var group = this.groupName;
 				if(this.groupByDatasource) group += "/" + datasource.title;
 			}
-			
+
 			if(this.groupExists) {
 				var gp;
 				var aGp = {};
@@ -76,7 +76,7 @@ Ext.define('Ck.addlayer.Controller', {
 					group = aG.join("/");
 				}
 			}
-			
+
 			createOperation = function(type) {
 				var operation;
 				switch(type) {
@@ -98,10 +98,10 @@ Ext.define('Ck.addlayer.Controller', {
 				}
 				return operation;
 			};
-			
+
 			// We use originOwc to create layer. Need to save old layers array
 			var originLayers = ckMap.originOwc.getLayers();
-			
+
 			// Layer is queryable through WMS (mandatory)
 			var lyr = {data: {
 					id: name,
@@ -112,11 +112,14 @@ Ext.define('Ck.addlayer.Controller', {
 							code: Ck.codeOperation["wms"],
 							version: capabilities.getVersion(),
 							operations: [createOperation("WMS")]
-						}]
+						}],
+						extension: {
+							removable: true
+						}
 					}
 				}
 			};
-			
+
 			// If layer can be queried through WFS service
 			if(wfsAvailable || true) {
 				lyr.data.properties.offerings.push({
@@ -125,17 +128,17 @@ Ext.define('Ck.addlayer.Controller', {
 					operations: [createOperation("WFS")]
 				});
 			}
-			
+
 			lyr = new Ck.owsLayer(lyr);
 			ckMap.originOwc.setLayers([lyr]);
-			
+
 			// Use ckMap controller to create layer
 			ckMap.addLayer(ckMap.originOwc.getLayers()[0]);
-			
+
 			// Set the layers back
 			ckMap.originOwc.setLayers(originLayers);
 		}
-		
+
 		return layer;
 	}
 });

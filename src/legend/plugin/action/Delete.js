@@ -17,7 +17,7 @@ Ext.define('Ck.legend.plugin.action.Remove', {
 				if(Ext.isEmpty(lyr)) {
 					return true
 				} else {
-					return !lyr.get("removable");
+					return !lyr.getExtension("removable");
 				}
 			},
 			getClass: function(v, meta, rec) {
@@ -25,7 +25,7 @@ Ext.define('Ck.legend.plugin.action.Remove', {
 				if(Ext.isEmpty(lyr)) {
 					return "";
 				} else {
-					return (lyr.get("removable"))? this.iconCls : this.disableClass;
+					return (lyr.getExtension("removable"))? this.iconCls : this.disableClass;
 				}
 
 			},
