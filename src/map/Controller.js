@@ -280,14 +280,18 @@ Ext.define('Ck.map.Controller', {
 			var layer, layers = owc.getLayers();
 			var olExtent = owc.getMaxExtent();
 			for(var i = layers.length - 1; i >= 0; i--) {
-				if(layers[i].getExtension("overviewLayer") === true) {
-					layer = this.createLayer(layers[i], owc);
+				var currLayer = layers[i];
+				
+				if(currLayer.getExtension("overviewLayer") === true) {
+					layer = this.createLayer(currLayer, owc);
 					layer.setVisible(true);
 					layer.setExtent(olExtent);
 					
 					this.overviewCollection.push(layer);
+				} else if(currLayer.getExtension("isFolder") === true) {
+					this.addFolder(currLayer, owc);
 				} else {
-					this.addLayer(layers[i], owc);
+					this.addLayer(currLayer, owc);
 				}
 			}
 
@@ -461,6 +465,7 @@ Ext.define('Ck.map.Controller', {
 				extent: extent,
 				style: olStyle,
 				visible: layer.getVisible(),
+				zIndex: layer.getZIndex(),
 				path: path,
 				minResolution: layer.getMinResolution(),
 				maxResolution: layer.getMaxResolution()
@@ -618,7 +623,7 @@ Ext.define('Ck.map.Controller', {
 												code: "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
 												operations: [{
 													code: "GetMap",
-													href: manifestPath + "GEOJSON/" + fileName + "?SRS=EPSG:32618",
+													href: manifestPath + Ext.manifest.fileConf.geojsonDirectory + fileName + "?SRS=" + Ck.getMap().getProjection().getCode(),
 													method: "GET",
 													type: "application/json"
 												}]
@@ -1196,6 +1201,7 @@ Ext.define('Ck.map.Controller', {
 			extent: extent,
 			style: olStyle,
 			visible: layer.getVisible(),
+			zIndex: layer.getZIndex(),
 			path: pathlayer,
 			minResolution: layer.getMinResolution(),
 			maxResolution: layer.getMaxResolution()
@@ -1206,5 +1212,64 @@ Ext.define('Ck.map.Controller', {
 				lyrGroup.getLayers().insertAt(lyrGroup.getLayers().getLength(), olLayer);
 			}
 		}
+	},
+	
+	/**
+	*	Function addFolder
+	*	Add layers from a folder source
+	**/
+	addFolder: function(folderLayer, owc) {
+		var offering = folderLayer.getOfferings()[0];
+		var thisRef = this;
+		var mainOperation = offering.getOperation("GetMap");
+		var shapefileDirectory = mainOperation.getUrl().toString();
+		
+		var fileReader = new Ck.utils.file.Reader({
+			path: shapefileDirectory,
+			listeners: {
+				directoryListed: function(res) {
+					if(res.data.entries && res.data.entries.length > 0) {
+						var entries = res.data.entries;
+						
+						for(var i=0; i<entries.length; i++) {
+							var entry = entries[i];
+							var layerName = entry.name.split(".")[0];
+							
+							var layerConfig = {
+								data: {
+									type: "Feature",
+									id: layerName,
+									properties: {
+										title : layerName,
+										updated : "2015-07-22T00:00:00Z",
+										content : "",
+										publisher : "Chinook Server",
+										active : folderLayer.getVisible(),
+										zIndex : folderLayer.getZIndex(),
+										offerings : [{
+											code: "http://www.opengis.net/spec/owc-shapefile/1.0/req/shapefile",
+											operations: [{
+												code: "GetMap",
+												href: shapefileDirectory + "/" + layerName + "?SRS=EPSG:32618",
+												method: "GET",
+												type: "application/json"
+											}]
+										}],
+										extension : {
+											path: folderLayer.getExtension("path"),
+											editable: folderLayer.getExtension("editable")
+										}
+									}
+								}
+							};
+							
+							var layer = new Ck.format.OWSContextLayer(layerConfig);																	
+							thisRef.addLayer(layer, owc);
+						}
+					}
+				}
+			}
+		});
+		fileReader.readDir("shp");
 	}
 });

@@ -107,5 +107,52 @@ Ext.define("Ck.utils.file.Reader", {
 				}
 			);
 		}, thisref.fail);
+	},
+	
+	/**
+	*	Function readDir
+	*	Permet de récupérer le contenu d'un dossier
+	**/
+	readDir: function(extensionFilter) {
+		var thisref = this;
+        if(!window.LocalFileSystem) return;
+        
+		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(fileSystem) {
+			fileSystem.root.getDirectory(
+				thisref.path,
+				{ create: false },
+				function(directoryEntry) {
+					var reader = directoryEntry.createReader();			
+					reader.readEntries(function(entries) {
+						
+						if(!Ext.isEmpty(extensionFilter)) {
+							var arrEntries = [];
+							
+							for (var i=0; i<entries.length; i++) {
+								var entry = entries[i];
+								
+								var strLength = entry.name.length;
+								var extension = "." + extensionFilter;
+								var extensionLength = extension.length;
+								
+								if (entry.name.toUpperCase().indexOf(extension.toUpperCase()) == (strLength - extensionLength)) {
+									arrEntries.push(entry);
+								}
+							}
+							
+							entries = arrEntries;
+						}
+
+						thisref.fireEvent("directoryListed",{
+							data: {
+								path: thisref.path,
+								entries: entries
+							}				
+						});
+					}, thisref.fail);	
+				},
+				thisref.fail
+			);					
+		}, thisref.fail);			
 	}
 });
