@@ -533,6 +533,7 @@ Ext.define('Ck.map.Controller', {
 				sources: sources,
 				group: lyrGroup,
 				extent: extent,
+				opacity: layer.getExtension('opacity') || 1,
 				maxResolution: (maxRes == Infinity)? Infinity : this.getNearestResolution(maxRes),
 				minResolution: (maxRes == 0)? 0 : this.getNearestResolution(minRes),
 				style: olStyle,
