@@ -132,6 +132,11 @@ Ext.define('Ck.map.Style', {
 	},
 	
 	/**
+	*	Backup of every layer styled loaded in the map
+	*/
+	layerStyles: [],
+	
+	/**
 	 *
 	 */
 	styleFunction: function(feature, resolution) {
@@ -141,6 +146,147 @@ Ext.define('Ck.map.Style', {
 		} else {
 			return Ck.map.Style.defaultStyles[feature.getGeometry().getType()];
 		}
+	},
+	
+	/**
+	*	Generate style from config for vector layers
+	*/
+	getStyleFromConfig: function(config, layerId) {
+		if(!Ext.isEmpty(config)) {
+			var style = null;
+			
+			if(!Ext.isEmpty(config.method)) {
+				return this.getFunctionFromConfig(layerId, config);
+			}
+			
+			switch(config.type) {
+				case "Polygon":
+				case "MultiPolygon":
+					var fillColor = config.fill;
+					var strokeColor = config.stroke;
+					var strokeWidth = config.width;
+					
+					style = [new ol.style.Style({
+						fill: new ol.style.Fill({
+							color: fillColor
+						}),
+						stroke: new ol.style.Stroke({
+							color: strokeColor,
+							width: strokeWidth
+						})
+					})];
+					break;
+				
+				case "LineString":
+				case "MultiLineString":
+					var strokeColor = config.stroke;
+					var strokeWidth = config.width;
+					
+					style = [new ol.style.Style({						
+						stroke: new ol.style.Stroke({
+							color: strokeColor,
+							width: strokeWidth
+						})
+					})];
+					break;
+					
+				case "Point":
+				case "MultiPoint":
+					var fillColor = config.fill;
+					var radius = config.radius;
+					var strokeColor = config.stroke;
+					var strokeWidth = config.width;
+					
+					style = [new ol.style.Style({
+						image: new ol.style.Circle({
+							fill: new ol.style.Fill({
+								color: fillColor
+							}),
+							radius: radius,
+							stroke: new ol.style.Stroke({
+								color: strokeColor,
+								width: strokeWidth
+							})
+						})
+					})];
+					break;
+					
+				default:
+					style = Ck.map.Style.style;
+					config.type = "Polygon";
+					break;
+			}
+			
+			style.geometryType = config.type;
+			
+			if(config.label) {
+				style.label = config.label;
+			}
+			
+		} else {
+			style = Ck.map.Style.style;
+			style.geometryType = "Polygon";
+		}
+		
+		if(!Ext.isEmpty(layerId)) {
+			this.layerStyles[layerId] = style;
+		}
+		
+		return style;
+	},
+	
+	/**
+	*	Generate function from config for vector layers
+	*/
+	getFunctionFromConfig: function(layerId, config) {
+		var fn = {};
+		
+		switch(config.method) {
+			case "classes":
+				fn = this.getClassesFunction(config);
+				break;				
+			default:
+				break;
+		}
+		
+		this.layerStyles[layerId] = fn;
+		return fn.styleFunction;
+	},
+	
+	/**
+	*	Generate classe function from config for vector layers
+	*/
+	getClassesFunction: function(config) {
+		var thisref = this;
+		var arrayValues = [];
+		
+		for(var i=0; i<config.classes.length; i++) {
+			var classe = config.classes[i];
+			classe.type = config.type;
+			
+			arrayValues[classe.value] = {
+				style: thisref.getStyleFromConfig(classe),
+				classe: classe
+			};
+		}
+		
+		var fn = function(feature, resolution) {
+			var style = null;
+			var value = feature.get(config.property);			
+			var item = arrayValues[value];
+			
+			if(!Ext.isEmpty(item)) {
+				style = item.style;
+			}
+			
+			return style;
+		};
+		
+		return {
+			styleFunction: fn,
+			method: "classes",
+			classes: arrayValues
+		};
 	}
 });
 

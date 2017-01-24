@@ -139,6 +139,8 @@ Ext.define("Ck.Map", {
 	 */
 	cls: 'ck-map',
 	
+	styleHtmlContent: true,
+	
 	listeners: {
 		resize: 'resize' // The resize handle is necessary to set the map!
 	}
