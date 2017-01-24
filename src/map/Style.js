@@ -151,88 +151,112 @@ Ext.define('Ck.map.Style', {
 	/**
 	*	Generate style from config for vector layers
 	*/
-	getStyleFromConfig: function(config, layerId) {
-		if(!Ext.isEmpty(config)) {
+	getStyleFromConfig: function(config, layerId, ignoreThisStyles) {
+		var styles = [];
+		var thisLayerStyles = [];
+		
+		if(ignoreThisStyles === undefined) {
+			var ignoreThisStyles = true;
+		}		
+		
+		if(!Ext.isEmpty(config)) {		
 			var style = null;
 			
 			if(!Ext.isEmpty(config.method)) {
-				return this.getFunctionFromConfig(layerId, config);
-			}
-			
-			switch(config.type) {
-				case "Polygon":
-				case "MultiPolygon":
-					var fillColor = config.fill;
-					var strokeColor = config.stroke;
-					var strokeWidth = config.width;
-					
-					style = [new ol.style.Style({
-						fill: new ol.style.Fill({
-							color: fillColor
-						}),
-						stroke: new ol.style.Stroke({
-							color: strokeColor,
-							width: strokeWidth
-						})
-					})];
-					break;
-				
-				case "LineString":
-				case "MultiLineString":
-					var strokeColor = config.stroke;
-					var strokeWidth = config.width;
-					
-					style = [new ol.style.Style({						
-						stroke: new ol.style.Stroke({
-							color: strokeColor,
-							width: strokeWidth
-						})
-					})];
-					break;
-					
-				case "Point":
-				case "MultiPoint":
-					var fillColor = config.fill;
-					var radius = config.radius;
-					var strokeColor = config.stroke;
-					var strokeWidth = config.width;
-					
-					style = [new ol.style.Style({
-						image: new ol.style.Circle({
+				// return this.getFunctionFromConfig(layerId, config);
+				style = this.getFunctionFromConfig(layerId, config);
+				styles = style;
+				ignoreThisStyles = true;
+			} else {
+				switch(config.type) {
+					case "Polygon":
+					case "MultiPolygon":
+						var fillColor = config.fill;
+						var strokeColor = config.stroke;
+						var strokeWidth = config.width;
+						
+						style = new ol.style.Style({
 							fill: new ol.style.Fill({
 								color: fillColor
 							}),
-							radius: radius,
 							stroke: new ol.style.Stroke({
 								color: strokeColor,
 								width: strokeWidth
 							})
-						})
-					})];
-					break;
+						});
+						
+						break;
 					
-				default:
-					style = Ck.map.Style.style;
-					config.type = "Polygon";
-					break;
+					case "LineString":
+					case "MultiLineString":
+						var strokeColor = config.stroke;
+						var strokeWidth = config.width;
+						
+						style = new ol.style.Style({						
+							stroke: new ol.style.Stroke({
+								color: strokeColor,
+								width: strokeWidth
+							})
+						});
+						
+						break;
+						
+					case "Point":
+					case "MultiPoint":
+						var fillColor = config.fill;
+						var radius = config.radius;
+						var strokeColor = config.stroke;
+						var strokeWidth = config.width;
+						
+						style = new ol.style.Style({
+							image: new ol.style.Circle({
+								fill: new ol.style.Fill({
+									color: fillColor
+								}),
+								radius: radius,
+								stroke: new ol.style.Stroke({
+									color: strokeColor,
+									width: strokeWidth
+								})
+							})
+						});
+				
+						break;						
+						
+					default:
+						style = Ck.map.Style.style;
+						config.type = "Polygon";
+						break;
+				}			
+						
+				thisLayerStyles.push(style);
+				
+				if(config.labelStyle) {
+					styles = this.getLabelStyleFunction(style, config.labelStyle);
+				} else {
+					styles.push(style);
+				}
+
+				styles.geometryType = config.type;
+				thisLayerStyles.geometryType = config.type;
+		
+				if(config.label) {
+					styles.label = config.label;
+					thisLayerStyles.label = config.label;
+				}
 			}
-			
-			style.geometryType = config.type;
-			
-			if(config.label) {
-				style.label = config.label;
-			}
-			
 		} else {
-			style = Ck.map.Style.style;
+			var style = Ck.map.Style.style;
 			style.geometryType = "Polygon";
+			styles = style;
+			thisLayerStyles = style;
 		}
 		
-		if(!Ext.isEmpty(layerId)) {
-			this.layerStyles[layerId] = style;
+		if(!Ext.isEmpty(layerId) && ignoreThisStyles === false) {
+			this.layerStyles[layerId] = thisLayerStyles;
 		}
 		
-		return style;
+		return styles;
 	},
 	
 	/**
@@ -242,9 +266,11 @@ Ext.define('Ck.map.Style', {
 		var fn = {};
 		
 		switch(config.method) {
-			case "classes":
+			case "classes": // Classes from attributes values
 				fn = this.getClassesFunction(config);
-				break;				
+				break;
+			case "attributes": // Style from attributes values
+				fn = this.getAttributesFunction(config);
 			default:
 				break;
 		}
@@ -257,7 +283,6 @@ Ext.define('Ck.map.Style', {
 	*	Generate classe function from config for vector layers
 	*/
 	getClassesFunction: function(config) {
-		var thisref = this;
 		var arrayValues = [];
 		
 		for(var i=0; i<config.classes.length; i++) {
@@ -265,7 +290,7 @@ Ext.define('Ck.map.Style', {
 			classe.type = config.type;
 			
 			arrayValues[classe.value] = {
-				style: thisref.getStyleFromConfig(classe),
+				style: this.getStyleFromConfig(classe),
 				classe: classe
 			};
 		}
@@ -287,6 +312,88 @@ Ext.define('Ck.map.Style', {
 			method: "classes",
 			classes: arrayValues
 		};
+	},
+	
+	/**
+	*	Generate function from config to style vector layers from their attributes
+	*/
+	getAttributesFunction: function(config) {
+		var arrayValues = [];
+		var thisRef = this;
+		
+		var attributesConfig = {
+			type: undefined,
+			// fill: "#FFFFFF",
+			fill: "rgba(255, 255, 255, 0)",
+			// stroke: "#000000",
+			stroke: "rgba(0, 0, 0, 1)",
+			radius: 5,
+			width: 2
+		};		
+						
+		var fn = function(feature, resolution) {
+			var geom = feature.getGeometry();
+			
+			var styleConfig = {
+				type: geom.getType(),
+				fill: feature.get(config.properties.fill),
+				stroke: feature.get(config.properties.stroke),
+				radius: feature.get(config.properties.radius),
+				width: feature.get(config.properties.width)
+			}
+			
+			styleConfig = Ext.applyIf(styleConfig, attributesConfig);
+			
+			return thisRef.getStyleFromConfig(styleConfig);
+		};
+		
+		return {
+			styleFunction: fn,
+			method: "attributes",
+			defaultConfig: attributesConfig,
+			attributesConfig: config.properties,
+			classes: []
+		};
+	},
+
+	/**
+	*	Generate function from config to style vector layers with normal style + label style
+	*/
+	getLabelStyleFunction: function(style, labelStyleConfig) {
+		var fillColor = labelStyleConfig.fill || "#000";
+		var color = labelStyleConfig.color || "rgba(0, 0, 0, 1)";
+		var strokeColor = labelStyleConfig.stroke || "#fff";
+		var strokeWidth = labelStyleConfig.width || 2;
+		var property = labelStyleConfig.property;
+		var font = labelStyleConfig.font || "12px helvetica,sans-serif";	
+		var minResolution = labelStyleConfig.resolution || Infinity;
+		
+		var fn = function(feature, resolution) {
+			var styles = [style];
+			
+			if(resolution <= minResolution) {
+				var labelStyle = new ol.style.Style({
+					text: new ol.style.Text({
+						font: font,
+						color: color,
+						text: feature.get(property),
+						fill: new ol.style.Fill({
+							color: fillColor
+						}),
+						stroke: new ol.style.Stroke({
+							color: strokeColor,
+							width: strokeWidth
+						})
+					})
+				});
+				
+				styles.push(labelStyle);
+			}
+			
+			return styles;
+		};
+		
+		return fn;
 	}
 });
 

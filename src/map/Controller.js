@@ -392,7 +392,7 @@ Ext.define('Ck.map.Controller', {
 			case 'geojson':
 				var style = layer.getExtension("style");
 				var layerId = layer.getId();
-				olStyle = Ck.map.Style.getStyleFromConfig(style, layerId);
+				olStyle = Ck.map.Style.getStyleFromConfig(style, layerId, false);
 				break;
 		}
 
@@ -1177,7 +1177,7 @@ Ext.define('Ck.map.Controller', {
 		var extent = layer.getExtent() || owc.getExtent();
 		var style = layer.getExtension("style");
 		var layerId = layer.getId();
-		olStyle = Ck.map.Style.getStyleFromConfig(style, layerId);
+		olStyle = Ck.map.Style.getStyleFromConfig(style, layerId, false);
 		var pathlayer = layer.getExtension('path') || "";
 		lyrGroup = this.getLayerGroup(pathlayer);
 		
@@ -1257,7 +1257,8 @@ Ext.define('Ck.map.Controller', {
 										}],
 										extension : {
 											path: folderLayer.getExtension("path"),
-											editable: folderLayer.getExtension("editable")
+											editable: folderLayer.getExtension("editable"),
+											style: folderLayer.getExtension("style")
 										}
 									}
 								}
