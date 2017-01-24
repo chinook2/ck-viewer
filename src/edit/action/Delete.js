@@ -20,8 +20,6 @@ Ext.define('Ck.edit.action.Delete', {
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		
-		var source = this.getLayerSource();
-		
 		if(!this.delInteraction) {
 			this.delInteraction = Ck.create("Ck.Selection", {
 				layers			: [this.getLayer()],

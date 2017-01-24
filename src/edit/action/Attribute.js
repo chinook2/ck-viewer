@@ -52,7 +52,7 @@ Ext.define('Ck.edit.action.Attribute', {
 		
 		// Get all properties and add layer name and fid. Used by dataUrl Template in form to load data
 		var dataFid =  feature.getProperties();
-		dataFid.fid = feature.getId();
+		dataFid.fid = this.controller.getFid(feature);
 		dataFid.layer = layer.get('id');
 		
 		// var source = layer.getSource();
@@ -70,14 +70,25 @@ Ext.define('Ck.edit.action.Attribute', {
 			formName = '/' + lyrName
 		}
 		
-		
+		var dataObject = null;
+		var offerings = layer.ckLayer.getOfferings();
+		if(offerings) {
+			for(var i=0; i<offerings.length; i++) {
+				var offering = offerings[i];
+				if(offering.getType() == "geojson") {
+					dataObject = feature.getProperties();
+					break;
+				}
+			}			
+		}
 		
 		this.mapFormPanel =  Ext.create({
 			xtype		: 'ckform',
 			editing		: true,
 			formName	: formName,
 			layer		: layer.get("id"),
-			dataFid		: feature.getId()
+			dataFid		: feature.getId(),
+			dataObject	: dataObject
 			// ,dataObject: feature.getProperties()
 		});
 		
