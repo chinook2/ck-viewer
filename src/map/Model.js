@@ -97,6 +97,10 @@ Ext.define('Ck.map.Model', {
 			"geojson": {
 				"source": "Vector",
 				"layerType": "Vector"
+			},
+			"shapefile": {
+				"source": "Vector",
+				"layerType": "Vector"
 			}
 		},
 		

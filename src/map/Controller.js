@@ -594,29 +594,92 @@ Ext.define('Ck.map.Controller', {
 						format	: format
 					};
 					break;
-
-				case 'geojson':
+				case 'shapefile':
+					
+					var thisRef = this;
+					var manifestPath = Ext.manifest.fileConf.appDirectory;
 					mainOperation = offering.getOperation("GetMap");
+					var shapefileDirectory = mainOperation.getUrl().toString();
+					var urlSplit = mainOperation.getUrl().split("/");
+					urlSplit = urlSplit.reverse();
+					urlSplit = urlSplit.slice(0, 1);
+					urlSplit = urlSplit.toString().split(".");
+					urlSplit = urlSplit.slice(0, 1);
+					var shapeName = urlSplit.toString();
+					var fileName = shapeName + ".geojson";
+					
+					var fE = new Ck.utils.file.Reader({
+						path: Ext.manifest.fileConf.geojsonDirectory + fileName,
+						listeners: {
+									fileExistsChecked: function(evt) {
+										// New offering param for geojson layer display
+										var config = {
+											data: {
+												code: "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+												operations: [{
+													code: "GetMap",
+													href: manifestPath + "GEOJSON/" + fileName + "?SRS=EPSG:32618",
+													method: "GET",
+													type: "application/json"
+												}]
+											},
+											owsLayer: layer
+										};
+										var geojsonOffering = new Ck.format.OWSContextLayerOffering(config);
+										layer.setOfferings([geojsonOffering]);
+																				
+										if(evt.data.exists){
+											var olSource = thisRef.createSource(geojsonOffering, layer, owc);
+											thisRef.attachLayer(ckLayerSpec, olSource, geojsonOffering, layer, owc);
+											
+											
+										}else{											
+											var shapePath = manifestPath + shapefileDirectory;
+											shp(shapePath).then(function(geojson){
+												// convert geojson to defined projection												
+												var geojsonFeat = new ol.format.GeoJSON();
+												var olFeat = geojsonFeat.readFeatures(geojson, {
+												  dataProjection: "EPSG:4326",
+												  featureProjection: "EPSG:32618"												  
+												});												
+												var geojsonProj = geojsonFeat.writeFeaturesObject(olFeat, {});												
+												geojsonProj.crs = {"type": "name", "properties":{"name": "EPSG:32618" }};
+												thisRef.saveJsonFile(ckLayerSpec, fileName, JSON.stringify(geojsonProj), geojsonOffering, layer, owc);
+											});
+										};		
+									}
+								}
+					});
+					fE.fileExists();				
+					olSourceOptions = false;
+					
+					break;
+					
+				case 'geojson':
+					Operation = offering.getOperation("GetMap");
 					olSourceOptions = {
-						url: mainOperation.getUrl(),
+						url: Operation.getUrl(),
 						format: new ol.format.GeoJSON()
 					};
 					break;
+				
 			}
+			
+			if(olSourceOptions){
+				var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
 
-			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
-
-			// For vector layer only, if we want a clustered representation
-			var cluster = layer.getExtension('cluster');
-			if(cluster) {
-				// TODO : check if scope is ok with N layers
-				var olSrcVector = olSource;
-				var dist = cluster.distance || 60;
-				olSource = new ol.source.Cluster({
-					distance: dist,
-					source: olSrcVector
-				});
-			}
+				// For vector layer only, if we want a clustered representation
+				var cluster = layer.getExtension('cluster');
+				if(cluster) {
+					// TODO : check if scope is ok with N layers
+					var olSrcVector = olSource;
+					var dist = cluster.distance || 60;
+					olSource = new ol.source.Cluster({
+						distance: dist,
+						source: olSrcVector
+					});
+				}
+			}			
 		}
 		Ext.apply(olSource, olSourceAdditional);
 		return olSource;
@@ -1057,5 +1120,91 @@ Ext.define('Ck.map.Controller', {
 			inRange = (layer.ckLayer.getMaxResolution() > res && layer.ckLayer.getMinResolution() < res);
 		}
 		return inRange;
+	},
+	
+	/**
+	*	Function saveFeatures
+	*	Save geoJson object in geojson file
+	**/
+	saveJsonFile: function(ckLayerSpec, fileName, geojson, geoOffering, layer, owc) {
+        if(!fileName) return;
+		var thisRef = this;
+		var manifestPath = Ext.manifest.fileConf.appDirectory;
+		var fileWriter = new Ck.utils.file.Writer({
+			path: Ext.manifest.fileConf.geojsonDirectory + fileName,
+			listeners: {
+				dataWritten: function(evt) {
+					if(evt.target.error !== undefined && evt.target.error) {
+						Ck.error('Error while recording. ', evt.target.error);
+					} else {
+						//Ck.error('File saved succesfully.');
+						// New offering param for geojson layer display
+						var config = {
+							data: {
+								code: "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+								operations: [{
+									code: "GetMap",
+									href: manifestPath + "GEOJSON/" + fileName + "?SRS=EPSG:32618",
+									method: "GET",
+									type: "application/json"
+								}]
+							},
+							owsLayer: layer
+						};
+						var geojsonOffering = new Ck.format.OWSContextLayerOffering(config);
+						layer.setOfferings([geojsonOffering]);
+						// then load the geojson layer
+						var olSource = thisRef.createSource(geoOffering, layer, owc);
+						thisRef.attachLayer(ckLayerSpec, olSource, geojsonOffering, layer, owc);						
+					}					
+				}
+			}
+		});	
+		fileWriter.writeData(geojson, Ck.utils.file.Writer.MODE.ERASE);
+	},
+	
+	/**
+	*	Function attachLayer
+	*	Attach layer on the fly
+	**/
+	attachLayer: function(ckLayerSpec, olSource, geojsonOffering, layer, owc) {
+        //Layer creation
+		var extent = layer.getExtent() || owc.getExtent();
+		var style = layer.getExtension("style");
+		var layerId = layer.getId();
+		olStyle = Ck.map.Style.getStyleFromConfig(style, layerId);
+		var pathlayer = layer.getExtension('path') || "";
+		lyrGroup = this.getLayerGroup(pathlayer);
+		
+		// Test sur integration de sources
+		var sources = {};
+		var off, offs = geojsonOffering;
+		for(var i = 1; i < offs.length; i++) {
+			off = offs[i];
+			if(!Ext.isArray(sources[off.getType()])) {
+				sources[off.getType()] = [];
+			}
+			sources[off.getType()].push(this.createSource(off, layer, owc));
+		}
+		
+		olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
+			id: layer.getId(),
+			title: layer.getTitle(),
+			source: olSource,
+			sources: sources,
+			group: lyrGroup,
+			extent: extent,
+			style: olStyle,
+			visible: layer.getVisible(),
+			path: pathlayer,
+			minResolution: layer.getMinResolution(),
+			maxResolution: layer.getMaxResolution()
+		});
+		if(!Ext.isEmpty(olLayer)) {
+			if(olLayer) {
+				olLayer.ckLayer = layer;
+				lyrGroup.getLayers().insertAt(lyrGroup.getLayers().getLength(), olLayer);
+			}
+		}
 	}
 });

@@ -72,7 +72,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 				
 			} else if (c.indexOf('geojson') != -1) {
 				this.type = 'geojson';
-			
+			} else if (c.indexOf('shapefile') != -1) {
+				this.type = 'shapefile';
 			// WCS, WPS, CSW, GML, KML, GeoTIFF, GMLJP2, GMLCOV
 			} else {
 				Ck.log("Offering code '" + c + "' not available.");

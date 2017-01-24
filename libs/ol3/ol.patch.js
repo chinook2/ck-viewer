@@ -96,3 +96,68 @@ ol.layer.Vector.prototype.setMap = function(map) {
     this.changed();
   }
 };
+
+/**
+ * @param {string|ol.FeatureUrlFunction} url Feature URL service.
+ * @param {ol.format.Feature} format Feature format.
+ * @param {function(this:ol.VectorTile, Array.<ol.Feature>, ol.proj.Projection)|function(this:ol.source.Vector, Array.<ol.Feature>)} success
+ *     Function called with the loaded features and optionally with the data
+ *     projection. Called with the vector tile or source as `this`.
+ * @param {function(this:ol.VectorTile)|function(this:ol.source.Vector)} failure
+ *     Function called when loading failed. Called with the vector tile or
+ *     source as `this`.
+ * @return {ol.FeatureLoader} The feature loader.
+ */
+ol.featureloader.loadFeaturesXhr = function(url, format, success, failure) {
+  return (
+      /**
+       * @param {ol.Extent} extent Extent.
+       * @param {number} resolution Resolution.
+       * @param {ol.proj.Projection} projection Projection.
+       * @this {ol.source.Vector|ol.VectorTile}
+       */
+      function(extent, resolution, projection) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET',
+            goog.isFunction(url) ? url(extent, resolution, projection) : url,
+            true);
+        if (format.getType() == ol.format.FormatType.ARRAY_BUFFER) {
+          xhr.responseType = 'arraybuffer';
+        }
+        /**
+         * @param {Event} event Event.
+         * @private
+         */
+        xhr.onload = function(event) {
+		  // Add xhr.statut == 0 to load the geojson from local file (ajax versus filesystem)
+          if ((xhr.status >= 200 && xhr.status < 300) || xhr.status == 0) {
+            var type = format.getType();
+            /** @type {Document|Node|Object|string|undefined} */
+            var source;
+            if (type == ol.format.FormatType.JSON ||
+                type == ol.format.FormatType.TEXT) {
+              source = xhr.responseText;
+            } else if (type == ol.format.FormatType.XML) {
+              source = xhr.responseXML;
+              if (!source) {
+                source = ol.xml.parse(xhr.responseText);
+              }
+            } else if (type == ol.format.FormatType.ARRAY_BUFFER) {
+              source = /** @type {ArrayBuffer} */ (xhr.response);
+            } else {
+              goog.asserts.fail('unexpected format type');
+            }
+            if (source) {
+              success.call(this, format.readFeatures(source,
+                  {featureProjection: projection}),
+                  format.readProjection(source));
+            } else {
+              goog.asserts.fail('undefined or null source');
+            }
+          } else {
+            failure.call(this);
+          }
+        }.bind(this);
+        xhr.send();
+      });
+};
