@@ -23,6 +23,11 @@ Ext.define('Ck.edit.action.Create', {
 	 */
 	gps: false,
 
+	/** 
+	 * True to livesnap vertex to nearest point
+	 */
+	allowLiveSnap: false,
+	
 	/**
 	 * Activate the geometry creation interaction
 	 **/
@@ -39,12 +44,53 @@ Ext.define('Ck.edit.action.Create', {
 			});
 			this.map.getOlMap().addInteraction(this.drawInteraction);
 			
+			// Livesnapping
+			if(this.allowLiveSnap) {
+				var map = Ck.getMap();
+				
+				if(!map.livesnap) {
+					var snappingOptions = this.controller.getSnappingOptions();
+					map.livesnap = new Ck.LiveSnap(snappingOptions);
+					Ext.on("layerSnapActive", map.livesnap.manageLayerActive, map.livesnap);
+					Ext.on("layerSnapTolerance", map.livesnap.manageLayerTolerance, map.livesnap);
+				} else {
+					map.livesnap.reInitInteractions();
+				}					
+			}
+			
 			// Overload the end-drawing callback to use snapGeometry
 			this.drawInteraction.finishDrawing = function() {
 				var sketchFeature = this.drawInteraction.abortDrawing_();
 				
-				var geometry = sketchFeature.getGeometry();
-		
+				if(!sketchFeature) {
+					var coords = this.drawInteraction.sketchCoords_;
+					if(coords && Ext.isArray(coords)) {
+						var type = this.controller.getGeometryTypeBehavior();
+						
+						if(type == "Polygon") {
+							sketchFeature = new ol.Feature(
+								new ol.geom.Polygon(
+									coords
+								)
+							);
+						} else if(type == "LineString")  {
+							sketchFeature = new ol.Feature(
+								new ol.geom.LineString(
+									coords
+								)
+							);
+						} else {
+							sketchFeature = new ol.Feature(
+								new ol.geom.Point(
+									coords
+								)
+							);
+						}
+					}				
+				}
+
+				var geometry = sketchFeature.getGeometry();	
+
 				var opt = {
 					layers		: this.controller.getSnappingOptions(),
 					layer		: this.getLayer(),
@@ -74,7 +120,7 @@ Ext.define('Ck.edit.action.Create', {
 						}
 						
 						// Create un new  feature
-						var geometry = new ol.geom.Point(geoloc);
+						var geometry = new ol.geom.Point(geoloc)
 						var feature = new ol.Feature({
 							geometry: geometry,
 							status: "CREATED"
@@ -82,7 +128,7 @@ Ext.define('Ck.edit.action.Create', {
 						this.drawSource.addFeature(feature);
 						this.endProcess(geometry);
 						btn.toggle(false);
-						Ext.Msg.show({
+						Ck.Msg.show({
 							title: "Creation",
 							message: "Point added at GPS position : [ " + geoloc[0] + ", "+ geoloc[1] + "]",
 							buttons: Ext.Msg.OK,
@@ -90,7 +136,7 @@ Ext.define('Ck.edit.action.Create', {
 						});
 					}
 				} else {
-					Ext.Msg.show({
+					Ck.Msg.show({
 						title: "Create features",
 						message: "GPS position not available",
 						buttons: Ext.Msg.OK,

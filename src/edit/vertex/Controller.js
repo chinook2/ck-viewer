@@ -18,6 +18,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	geometryChanged: false,
 	
+	allowLiveSnap: true,
+	
 	/**
 	 * @event sessionstart
 	 * Fires at begin of vertex session
@@ -72,6 +74,17 @@ Ext.define('Ck.edit.vertex.Controller', {
 				},
 				scope: this
 			},
+			"ckedit-vertex button#remove-vertex": {
+				click: function() {
+					var posCmp = this.getView().getDockedItems()[0].getComponent("vertex-position");
+					// Position must be between 1 and store.length
+					if(posCmp.isValid()) {
+						var index = posCmp.getValue() - 1;
+						this.deleteVertex(index);
+					}
+				},
+				scope: this
+			},
 			"ckedit-vertex radio#action-move": {
 				change: this.liveAction,
 				scope: this
@@ -97,6 +110,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 			this.vertexLayer.setMap(this.olMap);
 			// olMap.getLayers().setAt(olMap.getLayers().getLength() - 1, this.vertexLayer);
 		}
+		
+		this.on("geolocation", this.geolocate);
 	},
 	
 	/**
@@ -142,6 +157,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 				scope: this
 			}
 		});
+		this.grid.scrollTo(0, 0);
 	},
 	
 	/**
@@ -158,7 +174,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 			this.coords = this.ftCoords;
 		}
 
-		this.coords.splice(this.coords.length - 1, 1);
+
 		
 		var records = [];
 		
@@ -326,7 +342,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 		if(this.store.getCount() > 3) {
 			this.store.removeAt(index);
 		} else {
-			Ext.Msg.show({
+			Ck.Msg.show({
 				title: "Vertex",
 				message: "You must leave at least 3 vertices for a ploygon",
 				buttons: Ext.Msg.OK,
@@ -440,6 +456,21 @@ Ext.define('Ck.edit.vertex.Controller', {
 				this.olMap.addInteraction(this.modifyInteraction);
 					
 				this.modifyInteraction.setActive(checked);
+				
+				// Livesnapping
+				if(this.allowLiveSnap) {
+					var map = Ck.getMap();
+					
+					if(!map.livesnap) {
+						var snappingOptions = this.controller.getSnappingOptions();
+						map.livesnap = new Ck.LiveSnap(snappingOptions);
+						Ext.on("layerSnapActive", map.livesnap.manageLayerActive, map.livesnap);
+						Ext.on("layerSnapTolerance", map.livesnap.manageLayerTolerance, map.livesnap);
+					} else {
+						map.livesnap.reInitInteractions();
+					}					
+				}
+			
 				break;
 		}
 	},
@@ -480,13 +511,16 @@ Ext.define('Ck.edit.vertex.Controller', {
 	focusVertexRow: function(event) {
 		var vertex = event.target.vertexFeature_.getGeometry();
 		var coord = vertex.getCoordinates();
- 		
+ 		var idx = 0;
+		
 		// If it's a click on a vertex or not (then create it)
 		if(event.target.snappedToVertex_) {
- 			idx = this.getIndexFromCoord(coord) - 1;
+ 			// idx = this.getIndexFromCoord(coord) - 1;
+ 			var prevPoint = event.target.dragSegments_[0][0].segment[0];
+ 			idx = this.getIndexFromCoord(prevPoint);
  		} else {			
 			var prevPoint = event.target.dragSegments_[0][0].segment[0];
- 			var idx = this.getIndexFromCoord(prevPoint);
+ 			idx = this.getIndexFromCoord(prevPoint);
  			
  			var data = {
 				number: idx + 1,
@@ -637,10 +671,36 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.fireEvent("cancel", this.feature);
 	},
 	
+	/**
+	 * Close edition
+	 */
 	close: function() {		
 		this.closeAll();
 		this.vertexLayer.setMap(null);
-		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);		
+
+		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+		
+		if(this.controller !== undefined && this.controller.vertexContainer !== undefined) {
+			this.controller.vertexContainer.setVisible(false);
+		}
+	},
+	
+	/**
+	 *	Replace one selected row coordinates with coordinates passed
+	 */
+	geolocate: function(coords) {
+		var selectedRows = this.grid.getSelection();
+		
+		if(selectedRows.length === 1) {
+			var record = selectedRows[0];
+			record.set("longitude", coords[0]);
+			record.set("latitude", coords[1]);
+			record.data.geometry = [record.data.longitude, record.data.latitude];
+		
+			this.coords[record.data.number - 1] = record.data.geometry;
+			this.updateMarker(null, record);
+			this.updateGeometry();
+		}		
 	}
 	
 });

@@ -128,7 +128,13 @@ Ext.define('Ck.edit.Action', {
 	 */
 	destroy: function() {
 		for(var key in this.interactions) {
-			this.interactions[key].setActive(false)
+			
+			if(Ext.isFunction(this.interactions[key].getFeatures)) {
+				this.interactions[key].getFeatures().clear()
+			}
+			
+			this.interactions[key].setActive(false);
+			
 			if(Ext.isFunction(this.interactions[key].destroy)) {
 				this.interactions[key].destroy();
 			}

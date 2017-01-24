@@ -16,9 +16,16 @@ Ext.define('Ck.edit.action.Delete', {
 	 * Ask confirmation to the user before remove
 	 */
 	deleteConfirmation: true,
+	
+	/**
+	*  Click tolerance to select features
+	*/
+	tolerance: 20,
 
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
+		
+		var source = this.getLayerSource();
 		
 		if(!this.delInteraction) {
 			this.delInteraction = Ck.create("Ck.Selection", {
@@ -31,7 +38,8 @@ Ext.define('Ck.edit.action.Delete', {
 				selectId		: "ckmapEditDelete",
 				overHighlight	: true,
 				highlightStyle	: Ck.map.Style.redStroke,
-				stackSelection	: true
+				stackSelection	: true,
+				tolerance       : this.tolerance
 			});
 			this.interactions["delInteraction"] = this.delInteraction;
 		}
@@ -39,6 +47,22 @@ Ext.define('Ck.edit.action.Delete', {
 		// Hard fix for inexplicable issue (this.delInteraction.selection.length != 0)
 		this.delInteraction.resetSelection();
 
+		if(!status) {
+			var historyStore = this.controller.history.store;
+			for(var i = 0; i < historyStore.getCount(); i++) {
+				data = historyStore.getAt(i).data;
+				ft = data.feature
+				ft.setStyle(null);
+
+				switch(data.actionId) {
+					case 3:
+						// Remove
+						historyStore.removeAt(i)
+						break;
+				}
+			}
+		}		
+		
 		this.delInteraction.setActive(status);		
 	},
 	
@@ -59,7 +83,7 @@ Ext.define('Ck.edit.action.Delete', {
 		if(!Ext.isEmpty(feature)) {
 			
 			if(this.deleteConfirmation) {
-				Ext.Msg.show({
+				Ck.Msg.show({
 					title: "Edition",
 					message: "Are you sure to delete this feature ?",
 					buttons: Ext.Msg.YESNO,

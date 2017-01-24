@@ -297,7 +297,13 @@ Ext.define('Ck.map.Style', {
 		
 		var fn = function(feature, resolution) {
 			var style = null;
-			var value = feature.get(config.property);			
+
+			var value = feature.get(config.property);
+			
+			if(Ext.isEmpty(value)) {
+				value = "";
+			}
+			
 			var item = arrayValues[value];
 			
 			if(!Ext.isEmpty(item)) {

@@ -271,7 +271,7 @@
 	},{
 		"path": "libs/turf/turf.js"
 	},{
-		"path": "libs/turf/turf-snap.js"
+		"path": "libs/turf/turf.snap.js"
 	},{
 		// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
 		"path": "libs/jspdf/jspdf.min.js"
@@ -285,6 +285,16 @@
 		"path": "libs/zip/zip.js"
 	},{
 		"path": "libs/shapefile-js/shp.js"
+	},{
+		"path": "libs/js2shapefile/JS2Shapefile.js"
+	},{
+		"path": "libs/js2shapefile/jDataView_write.js"
+	},{
+		"path": "libs/js2shapefile/FileSaveTools.js"
+	},{
+		"path": "libs/js2shapefile/lib/external/FileSaver.min.js"
+	},{
+		"path": "libs/js2shapefile/lib/external/jszip.js"
 	}],
     
     /**

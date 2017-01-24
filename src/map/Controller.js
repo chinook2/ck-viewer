@@ -121,6 +121,26 @@ Ext.define('Ck.map.Controller', {
 	 * Offset to translate marker to another location
 	 */
 	geolocationOffset: [0, 0],
+	
+	/**
+	 * @var {Ext.data.Store}
+	 * Stores views (center + zoom) visited by the user
+	 */
+	viewStore: null,
+	
+	/**
+	 * @property {integer}
+	 * Max views to store
+	 */
+	viewMaxLength: 10,
+	
+	/**
+	 * @property {boolean}
+	 * Ignore view storing
+	 */
+	ignoreViewRegister: false,
+	
+	currViewIdx: 0,
 
 	currentOwsContext: null,
 
@@ -172,6 +192,28 @@ Ext.define('Ck.map.Controller', {
 
 		this.bindMap(olMap);
 
+		if(Ck.getAction("ckmapPreviousview") && Ck.getAction("ckmapNextview")) {
+			Ext.define('StoredView', {
+				extend: 'Ext.data.Model',
+				fields: [
+					{name: 'center'},
+					{name: 'zoom',  type: 'integer'}
+				]
+			});
+
+			this.viewStore =  Ext.create('Ext.data.Store', {
+				model: 'StoredView',
+				data : []
+			});
+			
+			this.getOlMap().on("moveend", function(mapEvt) {
+				this.registerView();
+			}, this);
+			
+			Ck.getAction("ckmapPreviousview").controller = this;
+			Ck.getAction("ckmapNextview").controller = this;
+		}
+		
 		this.on("layersloading", this.layersLoading, this);
 		this.on("layersloaded", this.layersLoaded, this);
 		this.layersAreLoading = false;
@@ -191,6 +233,26 @@ Ext.define('Ck.map.Controller', {
 		}, this);
 	},
 
+	registerView: function() {
+		if(this.ignoreViewRegister === false) {
+			var view = this.getOlView();
+			
+			if(this.currViewIdx < this.viewStore.getCount() - 1) {
+				for(var i=this.viewStore.getCount() - 1; i>=this.currViewIdx; i--) {
+					this.viewStore.removeAt(i);
+				}
+			}
+			
+			this.viewStore.add({
+				zoom: view.getZoom(),
+				center: view.getCenter()
+			});
+			
+			this.currViewIdx = this.viewStore.getCount() - 1;
+		} 
+		this.ignoreViewRegister = false;
+	},
+	
 	layersLoading: function() {
 		this.layersAreLoading = true;
 	},

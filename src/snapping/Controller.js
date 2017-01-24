@@ -11,9 +11,12 @@ Ext.define('Ck.snapping.Controller', {
 		/**
 		 * Config used by snapping tool
 		 */
-		config: null
+		config: null,
+		
+		reloadLayer: false,
+		layer: null
 	},
-
+	
 	/**
 	 * @protected
 	 */
@@ -42,6 +45,11 @@ Ext.define('Ck.snapping.Controller', {
 		
  		for(var i = 0; i < lyrs.length; i++) {
 			item = this.createItem(lyrs[i]);
+			
+			if(this.getReloadLayer() && lyrs[i] == this.getLayer()) {
+				item.active = true;
+			}
+			
 			if(item != null) {
 				data.push(item);
 			}
@@ -64,7 +72,7 @@ Ext.define('Ck.snapping.Controller', {
 			item = {
 				layer		: layer,
 				title		: layer.get("title"),
-				tolerance	: Ck.Snap.getTolerance()
+				tolerance	: layer.ckLayer.tolerance || Ck.Snap.getTolerance()
 			};
 		}
 		
