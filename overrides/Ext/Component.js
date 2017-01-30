@@ -33,15 +33,20 @@ Ext.define('Ext.overrides.Component', {
 			if(config.toLocale) {
 				config.itemId = key += '-' + config.toLocale;
 			}
-			if( Ck.actions[key] ) {
-				config = Ck.actions[key];
-			} else {
+
+			// if( Ck.actions[key] ) {
+				// console.log("Action exist "+key);
+			// }
+
+			// if( Ck.actions[key] ) {
+				// config = Ck.actions[key];
+			// } else {
 				try {
 					config = Ext.create('widget.'+action, config);
 				} catch (e) {
 					Ck.log("Enable to init action '"+ action +"'");
 				}
-			}
+			// }
 		}
 
 		this.callParent(arguments);
