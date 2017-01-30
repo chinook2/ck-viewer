@@ -37,6 +37,7 @@ Ext.define('Ck.Controller', {
 	init: function(view) {
 		var map = this.getMap();
 
+		// Init default ckmap
 		if(!Ext.isObject(map)) {
 			map = Ck.getMap();
 		}
@@ -46,21 +47,20 @@ Ext.define('Ck.Controller', {
 		}
 
 		// Listen to map events registred in the same ckview
-		var ckview = view.up('ckview');
+		var ckview = view.up('ckview') || (view.up('window') && view.up('window').ckview) || view.ckview;
 		if (ckview) {
 			ckview = ckview.getController();
 			this.setCkView(ckview);
-			ckview.on({
-				mapready: function (mapController) {
-					this.setMap(mapController);
-					this.ckReady(mapController);
-				},
-				maploaded: function (mapController) {
-					this.setMap(mapController);
-					this.ckLoaded(mapController);
-				},
-				scope: this
-			});
+
+			ckview.onMapReady(function (mapController) {
+				this.setMap(mapController);
+				this.ckReady(mapController);
+			}, this);
+
+			ckview.onMapLoaded(function (mapController) {
+				this.setMap(mapController);
+				this.ckLoaded(mapController);
+			}, this);
 		}
 	},
 

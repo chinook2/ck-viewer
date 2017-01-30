@@ -36,12 +36,13 @@ Ext.define('Ck.map.action.OpenOverview', {
 	toggleAction: function(btn, pressed) {
 		this.button = btn;
 
-		this.ov = Ext.create({
-			xtype: "ckoverview",
-			openner: this
-		});
-
 		if(!this.win) {
+			this.ov = Ext.create({
+				xtype: "ckoverview",
+				ckview: this.getCkView().getView(),
+				openner: this
+			});
+
 			this.win = Ext.create(this.classWindow, {
 				resizable: false,
 				modal: false,
@@ -54,8 +55,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 				},
 				listeners: {
 					close: function() {
-						this.button.setPressed(false);
-						this.toggleAction(this.button, false);
+						this.close();
 					},
 					scope: this
 				}
@@ -65,12 +65,33 @@ Ext.define('Ck.map.action.OpenOverview', {
 		if(pressed) {
 			this.win.show();
 			if(this.firstView || this.ov.config.replaceEverytime) {
-				this.win.alignTo(this.getMap().getOlMap().getViewport(), "tl", [50, 10]);
+				this.win.alignTo(this.getMap().getOlMap().getViewport(), "tl", [50, 40]);
 				this.firstView = false;
 			}
 		} else {
 			this.win.hide();
 		}
+
+		// Auto close overview popup when CkView or CkMap is hidden or destroy
+		this.getCkView().getView().on({
+			hide: function () {
+				this.close();
+			},
+			destroy: function () {
+				this.close();
+			},
+			scope: this
+		});
+
+		this.getMap().getView().on({
+			hide: function () {
+				this.close();
+			},
+			destroy: function () {
+				this.close();
+			},
+			scope: this
+		});
 	},
 
 	close: function() {

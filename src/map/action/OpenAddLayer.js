@@ -39,6 +39,7 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 				maximizable: this.getWinMaximizable(),
 				items: {
 					xtype: 'ckaddlayer',
+					ckview: this.getCkView().getView(),
 					openner: this
 				}
 			});

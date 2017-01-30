@@ -39,6 +39,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 				closeAction: 'hide',
 				items: {
 					xtype: 'ckprint',
+					ckview: this.getCkView().getView(),
 					openner: this
 				}
 			});
