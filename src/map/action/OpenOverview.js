@@ -34,12 +34,13 @@ Ext.define('Ck.map.action.OpenOverview', {
 	 * Create and display a windows with print form
 	 */
 	toggleAction: function(btn, pressed) {
-		this.button = btn;
+		this.button = btn || {};
 
 		if(!this.win) {
 			this.ov = Ext.create({
 				xtype: "ckoverview",
 				ckview: this.getCkView().getView(),
+				resolutions: this.button.resolutions,
 				openner: this
 			});
 

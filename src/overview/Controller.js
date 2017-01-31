@@ -28,9 +28,10 @@ Ext.define('Ck.overview.Controller', {
 	 * Init the map component, init the viewModel.
 	 * @protected
 	 */
-	init: function() {
+	init: function(options) {
 		this.callParent(arguments);
 		this.view = this.getView();
+		this.options = options || {};
 
 		this.config = this.getView().getConfig();
 
@@ -81,8 +82,8 @@ Ext.define('Ck.overview.Controller', {
 
 	attachOvControl: function() {
 		var view = new ol.View({
-			//center: this.getMap().getView().getCenter(),
-			projection: this.getMap().originOwc.getProjection()
+			projection: this.getMap().originOwc.getProjection(),
+			resolutions: this.options.resolutions
 		});
 
 		var opt = {
