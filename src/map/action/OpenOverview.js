@@ -79,7 +79,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 				this.close();
 			},
 			destroy: function () {
-				this.close();
+				this.close(true);
 			},
 			scope: this
 		});
@@ -89,14 +89,14 @@ Ext.define('Ck.map.action.OpenOverview', {
 				this.close();
 			},
 			destroy: function () {
-				this.close();
+				this.close(true);
 			},
 			scope: this
 		});
 	},
 
-	close: function() {
+	close: function(isDestroying) {
 		this.win.hide();
-		this.button.setPressed(false);
+		if(isDestroying!==true) this.button.setPressed(false);
 	}
 });
