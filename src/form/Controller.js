@@ -1758,8 +1758,9 @@ Ext.define('Ck.form.Controller', {
 							var feature = source.getFeatureById(fid);
 							
 							if(feature) {
-								var properties = Ext.JSON.decode(decodeURIComponent(values.data)).main.params;
+								var properties = (values.data !== undefined) ? Ext.JSON.decode(decodeURIComponent(values.data)).main.params : values;
 								feature.setProperties(properties)
+								this.fireEvent('aftersave', feature);
 								Ext.callback(options.success, options.scope, [values]);
 								return true
 							} else {

@@ -161,3 +161,48 @@ ol.featureloader.loadFeaturesXhr = function(url, format, success, failure) {
         xhr.send();
       });
 };
+
+/**
+ * @classdesc
+ * Layer source for the MapQuest tile server.
+ *
+ * @constructor
+ * @extends {ol.source.XYZ}
+ * @param {olx.source.MapQuestOptions=} opt_options MapQuest options.
+ * @api stable
+ */
+ol.source.MapQuest = function(opt_options) {
+
+  var options = opt_options || {};
+  goog.asserts.assert(options.layer in ol.source.MapQuestConfig,
+      'known layer configured');
+
+  var layerConfig = ol.source.MapQuestConfig[options.layer];
+
+  /**
+   * Layer. Possible values are `osm`, `sat`, and `hyb`.
+   * @type {string}
+   * @private
+   */
+  this.layer_ = options.layer;
+
+  // var url = options.url !== undefined ? options.url :
+      // 'https://otile{1-4}-s.mqcdn.com/tiles/1.0.0/' +
+      // this.layer_ + '/{z}/{x}/{y}.jpg';
+  var url = options.url !== undefined ? options.url :
+      "https://{a-c}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+	  
+  goog.base(this, {
+    attributions: layerConfig.attributions,
+    crossOrigin: 'anonymous',
+    logo: 'https://developer.mapquest.com/content/osm/mq_logo.png',
+    maxZoom: layerConfig.maxZoom,
+    reprojectionErrorThreshold: options.reprojectionErrorThreshold,
+    opaque: layerConfig.opaque,
+    tileLoadFunction: options.tileLoadFunction,
+    url: url
+  });
+
+};
+
+goog.inherits(ol.source.MapQuest, ol.source.XYZ);

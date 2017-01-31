@@ -1180,11 +1180,26 @@ Ext.define('Ck.map.Controller', {
 	/**
 	 * @param {ol.layer.Base}
 	 */
-	layerInRange: function(layer) {
+	/*layerInRange: function(layer) {
 		var inRange = false;
 		if(layer.ckLayer) {
 			var res = this.getOlView().getResolution();
 			inRange = (layer.ckLayer.getMaxResolution() > res && layer.ckLayer.getMinResolution() < res);
+		}
+		return inRange;
+	},*/
+	
+	/**
+	 * @param {ol.layer.Base}
+	 */
+	layerInRange: function(layer) {
+		var inRange = true;
+		if(layer.ckLayer) {
+			var res = this.getOlView().getResolution();
+
+			var maxRes = layer.ckLayer.getMaxResolution();
+			var minRes = layer.ckLayer.getMinResolution();
+			inRange = ((maxRes === undefined || maxRes > res) && (minRes === undefined || minRes < res));
 		}
 		return inRange;
 	},

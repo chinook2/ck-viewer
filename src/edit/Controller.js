@@ -162,7 +162,26 @@ Ext.define('Ck.edit.Controller', {
 				geometryType = "LineString";
 				break;
 		}
-
+		
+		var disableUnionCrop = geometryType != "Polygon";
+		var unionAction = Ck.getActionByItemId("edit-union");
+		var cropAction = Ck.getActionByItemId("edit-crop");
+		
+		if(cropAction) {
+			view.items.getAt(0).getDockedItems()[0].items.each(function(btn) {
+				if(btn.action == unionAction.action || btn.action == cropAction.action) {
+					btn.setDisabled(disableUnionCrop);
+				}
+			});
+		}		
+		
+		if(unionAction) {
+			unionAction.setDisabled(disableUnionCrop);
+		}
+		
+		if(cropAction) {
+			cropAction.setDisabled(disableUnionCrop);
+		}
 		
 		// Looped geometry have specific vertex behavior
 		if(geometryType.indexOf("Polygon") != -1) {
@@ -306,6 +325,14 @@ Ext.define('Ck.edit.Controller', {
 			if(Ext.isEmpty(vertexContainer)) {
 				if(view.getPanelContainer() == "same") {
 					vertexContainer = view;
+					this.mainWindow = vertexContainer;
+					this.mainWindow.manageVisibility = function() {
+						var visible = false;
+						for(var i = 0; (i < this.items.getCount() && !visible); i++) {
+							visible = !this.items.getAt(i).hidden;
+						}
+						this.setVisible(visible);
+					}.bind(this.mainWindow);
 				} else {
 					vertexContainer = this.getMainWindow();
 				}
@@ -356,7 +383,7 @@ Ext.define('Ck.edit.Controller', {
 		this.on("geolocation", this.setPosition, this);
 		this.geolocationBtn = tbar.getComponent("edit-geolocation");
 
-		
+		// History
 		this.historyView = Ext.create("widget.ckedit-history", conf);
 		this.historyView.setVisible(view.getUseHistory());
 		this.history = this.historyView.getController();
@@ -364,6 +391,22 @@ Ext.define('Ck.edit.Controller', {
 		this.history.createListeners(this);
 
 		historyContainer.add(this.historyView);
+		
+		// Snapping
+		var cmpSnapping = Ext.getCmp("edit-snapping-options");
+		if(cmpSnapping) {
+			cmpSnapping.controller.setReloadLayer(true);
+			cmpSnapping.controller.setLayer(this.getLayer());
+			cmpSnapping.controller.loadPanel();
+		}
+		
+		var snappingAction = Ck.getAction("ckSnappingOptions");
+		if(snappingAction) {
+			snappingAction.reloadLayer = true;
+			snappingAction.layer = this.getLayer();
+			snappingAction.doAction();
+		}
+		
 		this.mainWindow.manageVisibility();
 
 		
@@ -711,6 +754,8 @@ Ext.define('Ck.edit.Controller', {
 	 * Cancel all modifications.
 	 */
 	cancel: function() {
+		// this.history.reset();
+		// this.wfsSource.clear();
 		var data, ft;
 
 		if(this.getIsWMS()) {
@@ -814,10 +859,18 @@ Ext.define('Ck.edit.Controller', {
 						return;
 					} else if(geom.getType() == "Polygon") {
 						coordinates = coordinates[0];
-					}
-
-					if(coordinates.length < 3) {
-						return;
+						
+						if(coordinates.length < 3) {
+							return;
+						}
+					} else if(geom.getType() == "MultiPolygon") {
+						var arr = [];
+						
+						for(var i=0; i<coordinates.length; i++) {
+							arr = arr.concat(coordinates[i][0]);
+						}
+						
+						coordinates = arr;
 					}
 					
 					return new ol.geom.MultiPoint(coordinates);
@@ -837,7 +890,63 @@ Ext.define('Ck.edit.Controller', {
 	save: function() {
 		if(this.getIsWMS()) {
 			this.saveFeatures(this.saveWMS);
+		} else {
+			this.saveFeatures(this.saveGeoJSON);
 		}
+	},
+	
+	/**
+	*	Save the changes for a GeoJSON layer
+	**/
+	saveGeoJSON: function(inserts, updates, deletes) {	
+		var layer = this.getLayer();
+		var source = layer.getSource();
+		var map = this.getMap();
+		var layerSrs = layer.ckLayer.getOffering("geojson").getSrs();
+		var mapSrs = map.getProjection().getCode();
+		var needReproject = layerSrs !== undefined && mapSrs != layerSrs;
+			
+		if(inserts.length > 0) {
+			if(needReproject) {
+				for(var i=0; i<inserts.length; i++) {
+					var feature = inserts[i];
+					feature.getGeometry().transform(layerSrs, mapSrs);
+				}
+			}
+			
+			source.addFeatures(inserts);
+			
+			if(this.editAttributesAfterCreate) {
+				// Open attribute edition after creation
+				for(var i=0; i<inserts.length; i++) {
+					this.editFeatureAttributes(inserts[i]);
+				}
+			}			
+		}
+		
+		if(updates.length > 0) {
+			for(var i=0; i<updates.length; i++) {
+				var feat = updates[i];
+				
+				if(needReproject) {
+					feat.getGeometry().transform(layerSrs, mapSrs);
+				}
+				
+				var featToUpdate = source.getFeatureById(this.getFid(feat));
+				featToUpdate.setGeometry(feat.getGeometry());
+			}
+		}
+		
+		if(deletes.length > 0) {
+			for(var i=0; i<deletes.length; i++) {
+				var feat = deletes[i];
+				var featToDelete = source.getFeatureById(this.getFid(feat));
+				source.removeFeature(featToDelete);
+			}		
+		}
+		
+		this.fireEvent("savesuccess");
+		this.reset();
 	},
 	
 	saveFeatures: function(saveFunction) {
@@ -1004,11 +1113,10 @@ Ext.define('Ck.edit.Controller', {
 	reset: function() {
 		if(this.history) {
 			this.history.reset.bind(this.history)();
-		}
-
-		if(this.getIsWMS()) {
+		}	
+		
+		if(this.getIsWMS()) {			
 			this.wfsSource.clear();
-
 			// Redraw
 			src = this.getLayer().getSource();
 			var params = src.getParams();
