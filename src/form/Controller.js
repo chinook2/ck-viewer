@@ -1753,20 +1753,21 @@ Ext.define('Ck.form.Controller', {
 				if(offerings) {
 					for(var i=0; i<offerings.length; i++) {
 						var offering = offerings[i];
-						if(offering.getType() == "geojson") {
+						if(offering.getType() == "geojson" || offering.getType() == "shapefile") {
 							var source = layer.getSource();
-							var feature = source.getFeatureById(fid);
+							var feature = map.getVectorFeatureBy(source, layer.getExtension("fidColumn"), fid) || source.getFeatureById(fid);
 							
 							if(feature) {
 								var properties = (values.data !== undefined) ? Ext.JSON.decode(decodeURIComponent(values.data)).main.params : values;
 								feature.setProperties(properties)
-								this.fireEvent('aftersave', feature);
+								this.fireEvent('aftersave', this.savedValues);
 								Ext.callback(options.success, options.scope, [values]);
 								return true
 							} else {
 								Ck.Notify.error("Feature " + fid + " not found.");
 								return false;
 							}
+							break;
 						}
 					}			
 				}				

@@ -310,7 +310,7 @@ Ext.define('Ck.Selection', {
 		for(var i=0; i<layers.length; i++) {
 			var layer = layers[i];
 			
-			if(layer.getExtension("queryable") !== true) {
+			if(!Ext.isFunction(layer.getExtension) || layer.getExtension("queryable") !== true) {
 				var index = layers.indexOf(layer);
 
 				if (index > -1) {

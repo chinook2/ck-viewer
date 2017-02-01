@@ -38,16 +38,34 @@ Ext.define('Ck.result.feature.Controller', {
 			formName = '/' + lyrName
 		}
 		
+		var fid = this.currentRecord.data.objectid || this.currentRecord.data.ogc_fid || this.currentRecord.data.ogc_fid || this.currentRecord.data.gid || this.currentRecord.data.id;
+		if(Ext.isFunction(layer.getExtension) && layer.getExtension("fidColumn")) {
+			var fidColumn = layer.getExtension("fidColumn");
+			
+			if(fidColumn) {
+				fid = this.currentRecord.data[fidColumn];
+			}
+		}
 		
+		var dataObject = null;
+		var offerings = layer.ckLayer.getOfferings();
+		if(offerings) {
+			for(var i=0; i<offerings.length; i++) {
+				var offering = offerings[i];
+				if(offering.getType() == "geojson" || offering.getType() == "shapefile") {
+					dataObject = this.currentRecord.data;
+					break;
+				}
+			}			
+		}
 		
 		this.mapFormPanel =  Ext.create({
 			xtype: 'ckform',
 			editing: false,
 			formName: formName,
 			layer: layer.get("id"),
-			// TODO: better use layer extension to get fid column
-			dataFid: this.currentRecord.data.objectid || this.currentRecord.data.ogc_fid || this.currentRecord.data.ogc_fid || this.currentRecord.data.gid || this.currentRecord.data.id
-			// ,dataObject: feature.getProperties() 
+			dataFid: fid,
+			dataObject: dataObject
 		});
 		
 		this.mapFormPanel.getController().on("aftersave", this.editingComplete, this);

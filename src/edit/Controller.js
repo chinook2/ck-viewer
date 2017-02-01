@@ -1047,7 +1047,7 @@ Ext.define('Ck.edit.Controller', {
 		if(offerings) {
 			for(var i=0; i<offerings.length; i++) {
 				var offering = offerings[i];
-				if(offering.getType() == "geojson") {
+				if(offering.getType() == "geojson" || offering.getType() == "shapefile") {
 					dataObject = feature.getProperties();
 					break;
 				}

@@ -296,8 +296,6 @@ Ext.define('Ck.map.Controller', {
 		var continueEvent = this.fireEvent("contextloading", owc);
 		
 		if(continueEvent) {	
-			proj4.defs("EPSG:3943", "+proj=lcc +lat_1=42.25 +lat_2=43.75 +lat_0=43 +lon_0=3 +x_0=1700000 +y_0=2200000 +ellps=GRS80 +towgs84=0,0,0,0,0,0,0 +units=m +no_defs");
-
 			var viewProj = owc.getProjection();
 			var viewScales = owc.getScales();
 
@@ -674,7 +672,7 @@ Ext.define('Ck.map.Controller', {
 					urlSplit = urlSplit.slice(0, 1);
 					var shapeName = urlSplit.toString();
 					var fileName = shapeName + ".geojson";
-					
+
 					var fE = new Ck.utils.file.Reader({
 						path: Ext.manifest.fileConf.geojsonDirectory + fileName,
 						listeners: {
@@ -683,9 +681,11 @@ Ext.define('Ck.map.Controller', {
 										var config = {
 											data: {
 												code: "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+												srs: offering.getSrs(),
+												shape: true,
 												operations: [{
 													code: "GetMap",
-													href: manifestPath + Ext.manifest.fileConf.geojsonDirectory + fileName + "?SRS=" + Ck.getMap().getProjection().getCode(),
+													href: manifestPath + Ext.manifest.fileConf.geojsonDirectory + fileName + "?SRS=" + offering.getSrs(),
 													method: "GET",
 													type: "application/json"
 												}]
@@ -695,22 +695,27 @@ Ext.define('Ck.map.Controller', {
 										var geojsonOffering = new Ck.format.OWSContextLayerOffering(config);
 										layer.setOfferings([geojsonOffering]);
 																				
-										if(evt.data.exists){
+										if(evt.data.exists) {
 											var olSource = thisRef.createSource(geojsonOffering, layer, owc);
-											thisRef.attachLayer(ckLayerSpec, olSource, geojsonOffering, layer, owc);
+											thisRef.attachLayer(ckLayerSpec, olSource, geojsonOffering, layer, owc);											
 											
-											
-										}else{											
+										} else {											
 											var shapePath = manifestPath + shapefileDirectory;
 											shp(shapePath).then(function(geojson){
 												// convert geojson to defined projection												
 												var geojsonFeat = new ol.format.GeoJSON();
+
 												var olFeat = geojsonFeat.readFeatures(geojson, {
-												  dataProjection: "EPSG:4326",
-												  featureProjection: "EPSG:32618"												  
-												});												
-												var geojsonProj = geojsonFeat.writeFeaturesObject(olFeat, {});												
-												geojsonProj.crs = {"type": "name", "properties":{"name": "EPSG:32618" }};
+												  dataProjection: "EPSG:4326", // !!! shapefile2js transforms to WGS84 no matter what
+												  featureProjection: offering.getSrs()											  
+												});
+												
+												var geojsonProj = geojsonFeat.writeFeaturesObject(olFeat, {
+													dataProjection: offering.getSrs(),
+													featureProjection: offering.getSrs()
+												});
+												
+												geojsonProj.crs = {"type": "name", "properties":{"name": offering.getSrs() }};
 												thisRef.saveJsonFile(ckLayerSpec, fileName, JSON.stringify(geojsonProj), geojsonOffering, layer, owc);
 											});
 										};		
@@ -1224,9 +1229,11 @@ Ext.define('Ck.map.Controller', {
 						var config = {
 							data: {
 								code: "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
+								srs: geoOffering.getSrs(),
+								shape: geoOffering.getIsFromShape(),
 								operations: [{
 									code: "GetMap",
-									href: manifestPath + "GEOJSON/" + fileName + "?SRS=EPSG:32618",
+									href: manifestPath + "GEOJSON/" + fileName + "?SRS=" + geoOffering.getSrs(),
 									method: "GET",
 									type: "application/json"
 								}]
@@ -1327,7 +1334,7 @@ Ext.define('Ck.map.Controller', {
 											code: "http://www.opengis.net/spec/owc-shapefile/1.0/req/shapefile",
 											operations: [{
 												code: "GetMap",
-												href: shapefileDirectory + "/" + layerName + "?SRS=EPSG:32618",
+												href: shapefileDirectory + "/" + layerName + "?SRS=" + offering.getSrs(),
 												method: "GET",
 												type: "application/json"
 											}]
@@ -1349,5 +1356,24 @@ Ext.define('Ck.map.Controller', {
 			}
 		});
 		fileReader.readDir("shp");
+	},
+	
+	/**
+	*	Function getVectorFeatureBy
+	*	Return the first feature with a specific value of a field
+	**/
+	getVectorFeatureBy: function(layerSource, field, value) {
+		var featToReturn = null;
+		
+		layerSource.forEachFeature(function(feature) {
+			if(feature.get(field) == value) {
+				featToReturn = feature;
+				return feature;
+			} else {
+				return false;
+			}
+		}, this);
+		
+		return featToReturn;
 	}
 });

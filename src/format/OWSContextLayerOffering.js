@@ -12,7 +12,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 		type		: null,
 		operations	: [],
 		owsContext	: {},
-		data		: {}
+		data		: {},
+		isFromShape : false
 	},
 	
 	/**
@@ -27,7 +28,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 			code	: data.code,
 			version	: data.version,
 			layers	: data.layers,
-			srs		: data.srs
+			srs		: data.srs,
+			isFromShape : (data.shape === true) ? true : false
 		});
 		
 		this.initConfig(config);

@@ -261,7 +261,7 @@
     "js": [{
 		"path": "libs/ol3/ol-debug.js"
 	},{
-		"path": "libs/ol3/ol.patch.js"
+		"path": "libs/ol3/ol-patch.js"
 	},{
 		"path": "libs/proj4js/proj4-src.js"
 	},{
@@ -271,7 +271,7 @@
 	},{
 		"path": "libs/turf/turf.js"
 	},{
-		"path": "libs/turf/turf.snap.js"
+		"path": "libs/turf/turf-snap.js"
 	},{
 		// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
 		"path": "libs/jspdf/jspdf.min.js"
@@ -292,7 +292,7 @@
 	},{
 		"path": "libs/js2shapefile/FileSaveTools.js"
 	},{
-		"path": "libs/js2shapefile/lib/external/FileSaver.min.js"
+		"path": "libs/js2shapefile/lib/external/FileSaver-min.js"
 	},{
 		"path": "libs/js2shapefile/lib/external/jszip.js"
 	}],
