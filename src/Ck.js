@@ -63,7 +63,7 @@ var Ck = Ck || {};
 // @define Ck
 Ext.apply(Ck, {
 
-	CM_PER_INCH: 2.45,
+	CM_PER_INCH: 2.54,
 	DOTS_PER_INCH: 96,
 
 	INCHES_PER_UNIT: {
