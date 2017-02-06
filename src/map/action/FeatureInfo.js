@@ -36,6 +36,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		onlyVisible: true,
 
 		/**
+		 * Hide fields without Alias
+		 */
+		onlyFieldWithAlias: false,
+
+		/**
 		 *
 		 */
 		fieldIgnored: ["geom", "geometry", "shape", "boundedBy"],
@@ -160,13 +165,20 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 * @return {Ext.grid.Panel}
 	 */
 	createTab: function(lyr) {
-		var field, data = [];
+		var field, alias, data = [];
 		var col = lyr.layer.getExtension("columns") || {};
 
 		for(var i = 0; i < lyr.features.length; i++) {
 			for(var f in lyr.features[i].values_) {
 				if(this.getFieldIgnored().indexOf(f) == -1) {
-					field = (Ext.isObject(col[f]))? col[f].alias : f;
+					alias = (Ext.isObject(col[f])) ? col[f].alias : false;
+					field = alias || f;
+
+					// Ignore fields without Alias when onlyFieldWithAlias is true
+					if (!alias && this.getOnlyFieldWithAlias()) {
+						continue;
+					}
+
 					data.push({
 						featureid: i + 1,
 						field: (this.getCapitalize())? Ext.String.capitalize(field) : field,
