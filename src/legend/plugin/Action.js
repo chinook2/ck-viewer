@@ -7,6 +7,9 @@ Ext.define('Ck.legend.plugin.Action', {
 	
 	disableClass: "ck-disablePlugin",
 		
+	row: null,
+	column: null,
+	
 	init: function(cmp) {
 		this.tree =  cmp;
 		
@@ -95,6 +98,9 @@ Ext.define('Ck.legend.plugin.Action', {
 	handlerAction: function(tree, r, c, row, event, rec) {
 		var layer = rec.get('layer');
 		if(!layer) return;
+		
+		this.row = r;
+		this.column = c;
 		
 		this.doAction(layer);
 	},

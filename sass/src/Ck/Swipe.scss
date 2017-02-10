@@ -1,0 +1,77 @@
+/**
+ * @class Ck.Swipe
+ */
+ 
+ /* SLIDER */
+.swipePanel-slider .x-panel-body {
+    border-radius: 20px;
+	background-color: #5795cb;
+	padding: 0 20px;
+}
+
+.swipePanel-slider .ck-swipe .x-slider-inner {
+	height: 40px;
+}
+
+.swipePanel-slider .ck-swipe .x-slider-thumb {
+	width: 40px;
+    height: 40px;
+	font-size: 40px !important;
+	display: inline-block;
+    font: normal normal normal 14px/1 FontAwesome;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transform: translate(0, 0);
+	background: none;
+    border: none;
+}
+
+.swipePanel-slider .ck-swipe .x-slider-thumb::before {
+	content: "\f111";
+	color: wheat;
+}
+
+.swipePanel-slider .swipeCloseBtn {
+	font-size: 40px;
+    padding: 0;
+	margin-left: 30px;
+	background: none;
+    border: none;
+}
+
+.swipePanel-slider .swipeCloseBtn::before {
+	color: darkred;
+}
+
+/* SPLIT */
+#swipePanel-ghost .x-panel-body, .swipePanel-split .x-panel-body {
+	padding: 0;
+	cursor: e-resize;
+}
+
+.swipePanel-split .x-panel-body {
+	background: none;
+}
+
+#swipePanel-ghost .x-panel-body {
+	background-color: #5795cb !important;
+    width: 6px !important;
+    left: 20px !important;
+}
+
+.swipePanel-split .swipePanel-split-arrow-left,
+.swipePanel-split .swipePanel-split-arrow-right {
+	background-color: #5795cb !important;
+	font-size: 16px;
+	box-shadow: none !important;
+	padding: 7px 5px;
+}
+
+.swipePanel-split-panel-center .x-panel-body {
+	background: #5795cb;
+}
+
+.ck-action-swipe.active::before {
+	color: darkred;
+}
