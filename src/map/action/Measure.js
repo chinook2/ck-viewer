@@ -37,20 +37,17 @@ Ext.define('Ck.map.action.Measure', {
 	 */
 	sketch: null,
 
-
 	/**
 	 * The measure tooltip element.
 	 * @type {Element}
 	 */
 	measureTooltipElement: null,
 
-
 	/**
 	 * Overlay to show the measurement.
 	 * @type {ol.Overlay}
 	 */
 	measureTooltip: null,
-
 
 	/**
 	 * Message to show when the user start measure.
@@ -63,6 +60,62 @@ Ext.define('Ck.map.action.Measure', {
 	continueMsg: 'Click to continue measuring',
 
 	/**
+	 * Set measure mode. metric, imperial or both...
+	 * @type {String|Array}
+	 */
+	 mode: 'metric',
+	 //mode: ['metric', 'imperial'],
+
+	/**
+	 * Define units and conversion for different mode
+	 * @type {Object}
+	 */
+	units: {
+		defaults: {
+			decimal: 2
+		},
+		metric: {
+			length: [{
+				unit: 'm',
+				max: 1000
+			},{
+				ratio: 1000,
+				unit: 'km'
+			}],
+			area: [{
+				unit: 'm<sup>2</sup>',
+				max: 1000
+			},{
+				ratio: 10000,
+				unit: 'ha',
+				decimal: 4,
+				max: 100
+			},{
+				ratio: 1000000,
+				unit: 'km<sup>2</sup>'
+			}]
+		},
+		imperial: {
+			length: [{
+				ratio: 0.3048,
+				unit: 'ft',
+				max: 5280
+			},{
+				ratio: 1609.344,
+				unit: 'mi'
+			}],
+			area: [{
+				ratio: 4046.8564224,
+				unit: 'ac',
+				max: 640
+			},{
+				ratio: 2589988.1,
+				unit: 'mi<sup>2</sup>'
+			}]
+		}
+	},
+
+	/**
 	 *
 	 */
 	geodesic: true,
@@ -73,7 +126,7 @@ Ext.define('Ck.map.action.Measure', {
 	 * Button associate with this action
 	 */
 	btn: null,
-	
+
 	/**
 	 * Measure type -> vector type association
 	 */
@@ -278,6 +331,7 @@ Ext.define('Ck.map.action.Measure', {
 	 * @return {string}
 	 */
 	formatLength: function(line) {
+		// raw length in meters
 		var length;
 		if (this.geodesic) {
 			var coordinates = line.getCoordinates();
@@ -289,17 +343,44 @@ Ext.define('Ck.map.action.Measure', {
 				length += this.wgs84Sphere.haversineDistance(c1, c2);
 			}
 		} else {
-			length = Math.round(line.getLength() * 100) / 100;
+			length = line.getLength();
 		}
-		var output;
-		if (length > 1000) {
-			output = (Math.round(length / 1000 * 100) / 100) +
-					' ' + 'km';
-		} else {
-			output = (Math.round(length * 100) / 100) +
-					' ' + 'm';
+
+		var output = [], decimal, uLength;
+
+		var mode = this.mode;
+		if(Ext.isString(mode) && !this.units[mode]) {
+			Ck.log("Enable to get mode '"+ mode +"' for units, use default 'metric' mode.");
+			mode = 'metric';
 		}
-		return output;
+
+		for (var uMode in this.units) {
+			if (uMode==='defaults') continue;
+			if (Ext.isString(mode) && uMode !== mode) continue;
+
+			var units = this.units[uMode]['length'];
+			for (var i = 0; i < units.length; i++) {
+				var u = units[i];
+
+				decimal = u.decimal || this.units.defaults.decimal;
+				uLength = length;
+
+				// Conversion from meters to Unit
+				if (u.ratio) {
+					uLength = uLength / u.ratio
+				}
+				// Test if need to pass next Unit
+				if (u.max && uLength > u.max) {
+					continue;
+				}
+
+				// Format result
+				output.push( uLength.toFixed(decimal) + ' ' + u.unit );
+				break;
+			}
+		}
+
+		return output.join('<br>');
 	},
 
 
@@ -309,6 +390,7 @@ Ext.define('Ck.map.action.Measure', {
 	 * @return {string}
 	 */
 	formatArea: function(polygon) {
+		// raw area in square meters
 		var area;
 		if (this.geodesic) {
 			var sourceProj = this.olMap.getView().getProjection();
@@ -322,14 +404,41 @@ Ext.define('Ck.map.action.Measure', {
 		} else {
 			area = polygon.getArea();
 		}
-		var output;
-		if (area > 100000) {
-			output = (Math.round(area / 1000000 * 100) / 100) +
-					' ' + 'km<sup>2</sup>';
-		} else {
-			output = (Math.round(area * 100) / 100) +
-					' ' + 'm<sup>2</sup>';
+
+		var output = [], decimal, uArea;
+
+		var mode = this.mode;
+		if(Ext.isString(mode) && !this.units[mode]) {
+			Ck.log("Enable to get mode '"+ mode +"' for units, use default 'metric' mode.");
+			mode = 'metric';
 		}
-		return output;
+
+		for (var uMode in this.units) {
+			if (uMode==='defaults') continue;
+			if (Ext.isString(mode) && uMode !== mode) continue;
+
+			var units = this.units[uMode]['area'];
+			for (var i = 0; i < units.length; i++) {
+				var u = units[i];
+
+				decimal = u.decimal || this.units.defaults.decimal;
+				uArea = area;
+
+				// Conversion from square meters to Unit
+				if (u.ratio) {
+					uArea = uArea / u.ratio
+				}
+				// Test if need to pass next Unit
+				if (u.max && uArea > u.max) {
+					continue;
+				}
+
+				// Format result
+				output.push( uArea.toFixed(decimal) + ' ' + u.unit );
+				break;
+			}
+		}
+
+		return output.join('<br>');
 	}
 });

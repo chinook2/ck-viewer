@@ -154,7 +154,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				this.addNewRow();
 			},
 			scope: this
-		})
+		});
 	},
 
 	/**
