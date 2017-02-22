@@ -37,7 +37,7 @@ Ext.define('Ck.legend.plugin.action.Remove', {
 	},
 
 	doAction: function(layer) {
-		var olMap = Ck.getMap().getOlMap();
+		var olMap = this.getMap().getOlMap();
 		olMap.removeLayer(layer);
 	}
 
