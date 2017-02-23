@@ -444,9 +444,9 @@ Ext.apply(Ck, {
 		// TODO : when used without CMD - include inline API...
 	},
 
-	getOption: function (opt) {
-		if(!Ext.manifest.ckClient) return false;
-		return Ext.manifest.ckClient[opt];
+	getOption: function (opt, defaultValue) {
+		if(!Ext.manifest.ckClient) return defaultValue || false;
+		return Ext.manifest.ckClient[opt] || defaultValue;
 	},
 
 	/**

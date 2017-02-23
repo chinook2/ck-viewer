@@ -120,7 +120,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	displayInfo: function(res) {
 		this.res = res;
 		this.win.removeAll();
-		if(this.res.length != 0) {
+		if(this.res.length !== 0) {
 			if(this.res.length < 2 && this.getLight()) {
 				this.win.add(this.createTab(this.res[0]));
 			} else {
@@ -128,6 +128,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				this.res.forEach(function(lyr) {
 					tab.push(this.createTab(lyr));
 				}, this);
+				
 				this.panel = Ck.create("Ext.tab.Panel", {
 					layout: "fit",
 					header: false,
@@ -154,7 +155,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}]
 			});
 			if (this.getWinCollapsible() === true) {
-				this.timerId = setTimeout(function() { this.collapse(Ext.Component.DIRECTION_TOP, 1000) }.bind(this.win), 1000);
+				this.timerId = setTimeout(function() {
+					this.collapse(Ext.Component.DIRECTION_TOP, 1000);
+				}.bind(this.win), 1000);
 			}
 		}
 	},
@@ -233,7 +236,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				enableGroupingMenu: false,
 				showSummaryRow: false,
 				startCollapsed: true
-			}]
+			}];
 		}
 
 		var grid = Ext.create('Ext.grid.Panel', opt);
