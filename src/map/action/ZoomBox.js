@@ -4,13 +4,13 @@
  * Let user to zoom on a zone by drawing a box.
  *
  */
-Ext.define('DesinlisiPortals.view.action.ZoomBox', {
+Ext.define('Ck.map.action.ZoomBox', {
     extend: 'Ck.Action',
     alias: "widget.ckmapZoomBox",
 
     text: '',
     iconCls: 'ckfont ck-zoom-box',
-    tooltip: 'Zoom Box',
+    tooltip: 'Zoom by rectangle',
     toggleGroup: 'ckmapAction',
 
     /**
