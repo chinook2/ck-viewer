@@ -208,18 +208,48 @@ Ext.define('Ck.map.Style', {
 						var strokeColor = config.stroke;
 						var strokeWidth = config.width;
 						
-						style = new ol.style.Style({
-							image: new ol.style.Circle({
-								fill: new ol.style.Fill({
-									color: fillColor
-								}),
-								radius: radius,
-								stroke: new ol.style.Stroke({
-									color: strokeColor,
-									width: strokeWidth
-								})
-							})
-						});
+						switch(config.shape) {
+							case "regular":
+								var shapeConf = {
+									fill: new ol.style.Fill({
+										color: fillColor
+									}),
+									radius: radius,
+									stroke: new ol.style.Stroke({
+										color: strokeColor,
+										width: strokeWidth
+									})
+								};
+								
+								if(config.radius1) shapeConf.radius1 = config.radius1;
+								if(config.radius2) shapeConf.radius2 = config.radius2;
+								if(config.points) shapeConf.points = config.points;
+								if(config.angle) shapeConf.angle = config.angle;
+								if(config.rotation) shapeConf.rotation = config.rotation;
+								
+								style = new ol.style.Style({
+									image: new ol.style.RegularShape(shapeConf)
+								});
+								
+								break;
+								
+							case "circle":
+							default:							
+								style = new ol.style.Style({
+									image: new ol.style.Circle({
+										fill: new ol.style.Fill({
+											color: fillColor
+										}),
+										radius: radius,
+										stroke: new ol.style.Stroke({
+											color: strokeColor,
+											width: strokeWidth
+										})
+									})
+								});
+								
+								break;
+						}
 				
 						break;						
 						

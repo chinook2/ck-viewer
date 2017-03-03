@@ -166,6 +166,12 @@ Ext.define('Ck.legend.plugin.Legend', {
 	
 	getPointThumb: function(style) {
 		var style = style.getImage();
+		var canvas = style.getImage();
+		var img = canvas.toDataURL("image/png");
+		return '<img width="15px" src="'+img+'"/>';
+		return style.getImage();
+		
+		/* OLD WAY
 		var fillColor = style.getFill().getColor();
 		var stroke = style.getStroke();
 		var strokeWidth = stroke.getWidth();
@@ -177,6 +183,6 @@ Ext.define('Ck.legend.plugin.Legend', {
 		strSvg += "	<circle cx=\"15\" cy=\"7.5\" r=\"" + radius + "\" stroke=\"" + strokeColor + "\" stroke-width=\"" + strokeWidth + "\" fill=\"" + fillColor + "\" />";
 		strSvg += "</svg>";
 		
-		return strSvg;
+		return strSvg;*/
 	}
 });
