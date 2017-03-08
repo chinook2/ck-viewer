@@ -697,7 +697,7 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getContext: function(contextName) {
 		Cks.get({
-			url: this.getFullUrl(contextName),
+			url: this.getFullUrl( this.getMapUrl(contextName) ),
 			scope: this,
 			success: function(response){
 				var owc = Ext.decode(response.responseText);
