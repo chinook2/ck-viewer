@@ -49,15 +49,17 @@ Ext.define('Ck.map.action.Measure', {
 	 */
 	measureTooltip: null,
 
-	/**
-	 * Message to show when the user start measure.
-	 */
-	startMsg : 'Click to start measuring (shift and hold click for free measure)',
+	helpMessages: {
+		/**
+		 * Message to show when the user start measure.
+		 */
+		startMsg : 'Click to start measuring (shift and hold click for free measure)',
 
-	/**
-	 * Message to show when the user is measuring.
-	 */
-	continueMsg: 'Click to continue measuring',
+		/**
+		 * Message to show when the user is measuring.
+		 */
+		continueMsg: 'Click to continue measuring'
+	},
 
 	/**
 	 * Set measure mode. metric, imperial or both...
@@ -186,11 +188,11 @@ Ext.define('Ck.map.action.Measure', {
 			this.draw.setActive(false);
 
 			this.createMeasureTooltip();
-			this.createHelpTooltip();
 
 			this.draw.on('drawstart', function(evt) {
 				// set sketch
 				this.sketch = evt.feature;
+				this.setHelpMsg(this.helpMessages.continueMsg);
 			}, this);
 
 			this.draw.on('drawend', function(evt) {
@@ -205,6 +207,7 @@ Ext.define('Ck.map.action.Measure', {
 
 				// unset sketch
 				this.sketch = null;
+				this.setHelpMsg(this.helpMessages.startMsg);
 
 				// unset tooltip so that a new one can be created
 				this.measureTooltipElement = null;
@@ -234,9 +237,11 @@ Ext.define('Ck.map.action.Measure', {
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
 			// fix for touch device
 			this.olMap.on('singleclick', this.pointerMoveHandler, this);
+			this.setHelpMsg(this.helpMessages.startMsg);
 		} else {
 			this.olMap.un('pointermove', this.pointerMoveHandler, this);
 			this.olMap.un('singleclick', this.pointerMoveHandler, this);
+			this.setHelpMsg(null);
 		}
 	},
 
@@ -275,37 +280,6 @@ Ext.define('Ck.map.action.Measure', {
 			this.measureTooltip.setPosition(tooltipCoord);
 		}
 	},
-
-	/**
-	 * Creates a new help tooltip
-	 */
-	createHelpTooltip: function() {
-		if(!Ext.tip.QuickTipManager.isEnabled()) return;
-
-		this.tip = Ext.create('Ext.tip.ToolTip', {
-			target: this.olMap.getViewport(),
-			trackMouse: true,
-			dismissDelay: 0,
-			renderTo: Ext.getBody(),
-			onDocMouseDown: function() {
-				// prevent hide tooltip on click
-				Ext.defer(function(){
-					this.fireEvent('beforeshow', this);
-				}, 200, this);
-			},
-			listeners: {
-				beforeshow: function(tip) {
-					if(!this.draw.get('active')) return false;
-
-					var helpMsg = this.startMsg;
-					if (this.sketch) helpMsg = this.continueMsg;
-					tip.setHtml(helpMsg);
-				},
-				scope: this
-			}
-		});
-	},
-
 
 	/**
 	 * Creates a new measure tooltip

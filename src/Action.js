@@ -70,7 +70,10 @@ Ext.define('Ck.Action', {
 		 */
 		olView: null,
 
-		ckView: null
+		ckView: null,
+
+		helpMsg: null,
+		helpMsgAnchor: 'top'
 	},
 
 	/**
@@ -230,5 +233,47 @@ Ext.define('Ck.Action', {
 
 	executeFnOnItems: function(fn) {
 		this.items.forEach(fn);
+	},
+
+	/**
+	 * Creates a new help tooltip
+	 */
+	createHelpTooltip: function() {
+		if(!Ext.tip.QuickTipManager.isEnabled()) return;
+		if(this.helpTip) return;
+
+		this.helpTip = Ext.create('Ext.tip.ToolTip', {
+			target: this.getMap().getOlMap().getViewport(),
+			trackMouse: true,
+			dismissDelay: 0,
+			anchor: this.getHelpMsgAnchor(),
+			renderTo: Ext.getBody(),
+			onDocMouseDown: function() {
+				// prevent hide tooltip on click
+				Ext.defer(function(){
+					this.fireEvent('beforeshow', this);
+				}, 200, this);
+			},
+			listeners: {
+				beforeshow: function(tip) {
+					//if(!this.draw.get('active')) return false;
+
+					var helpMsg = this.getHelpMsg();
+					if(!helpMsg) return false;
+					tip.setHtml(helpMsg);
+				},
+				scope: this
+			}
+		});
+	},
+
+	updateHelpMsg: function (newMsg, oldMsg) {
+		if(this.helpMessages && !this.helpTip) this.createHelpTooltip();
+
+		if (newMsg && newMsg != '') {
+			this.helpTip.setHtml(newMsg);
+		} else {
+			this.helpTip.hide();
+		}
 	}
 });
