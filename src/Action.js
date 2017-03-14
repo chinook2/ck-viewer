@@ -256,8 +256,6 @@ Ext.define('Ck.Action', {
 			},
 			listeners: {
 				beforeshow: function(tip) {
-					//if(!this.draw.get('active')) return false;
-
 					var helpMsg = this.getHelpMsg();
 					if(!helpMsg) return false;
 					tip.setHtml(helpMsg);
@@ -270,7 +268,7 @@ Ext.define('Ck.Action', {
 	updateHelpMsg: function (newMsg, oldMsg) {
 		if(this.helpMessages && !this.helpTip) this.createHelpTooltip();
 
-		if (newMsg && newMsg != '') {
+		if (newMsg && newMsg !== '') {
 			this.helpTip.setHtml(newMsg);
 		} else {
 			this.helpTip.hide();
