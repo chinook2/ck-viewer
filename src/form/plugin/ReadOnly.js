@@ -45,6 +45,11 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 				// When reset field (sometimes field is mark readOnly by contexte, need to update status - on Window)
 				this.formController.on('afterreset', this.setReadOnly, this);
 
+				// Try to resolve bug #1468
+				if(cmp.displayField){
+					cmp.getStore().on('load', this.setReadOnly, this);	
+				}
+
 				// Add field level start/stop Editing functions
 				// allow to change readOnly status for one field and refresh display.
 				var me = this;
