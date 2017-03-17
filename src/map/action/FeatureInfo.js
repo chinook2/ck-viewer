@@ -57,7 +57,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 
 		winWidth: 400,
 		winHeight: 400,
-		winCollapsible: true
+		winCollapsible: true,
+		winEmptyResult: true
 	},
 
 	constructor: function(config) {
@@ -120,46 +121,64 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	displayInfo: function(res) {
 		this.res = res;
 		this.win.removeAll();
+		var dInfo = false;
+
 		if(this.res.length !== 0) {
 			if(this.res.length < 2 && this.getLight()) {
-				this.win.add(this.createTab(this.res[0]));
+				var t = this.createTab(this.res[0]);
+				if (t) {
+					this.win.add(t);
+					dInfo = true;
+				}
 			} else {
 				var tab = [];
 				this.res.forEach(function(lyr) {
-					tab.push(this.createTab(lyr));
+					var t = this.createTab(lyr);
+					if (t) {
+						tab.push(t);
+						dInfo = true;
+					}
 				}, this);
-				
-				this.panel = Ck.create("Ext.tab.Panel", {
-					layout: "fit",
-					header: false,
-					defaults: {
-						width: "100%"
-					},
-					items: tab
-				});
-				this.win.add(this.panel);
+
+				if (dInfo) {
+					this.panel = Ck.create("Ext.tab.Panel", {
+						layout: "fit",
+						header: false,
+						defaults: {
+							width: "100%"
+						},
+						items: tab
+					});
+					this.win.add(this.panel);
+				}
+			}
+		}
+
+		if (!dInfo) {
+			if (this.getWinEmptyResult() === false) {
+				Ck.log("Empty result");
+				return;
 			}
 
-			this.win.show();
-			this.win.expand(1000);
-		} else {
-			Ck.log("Empty result");
-			// this.win.setLayout("center");
 			this.win.add({
 				xtype: "panel",
 				layout: "center",
 				items: [{
 					xtype: "label",
-					text: "Empty result",
+					text: "No results.",
 					cls: "ck-big-text"
 				}]
 			});
-			if (this.getWinCollapsible() === true) {
-				this.timerId = setTimeout(function() {
-					this.collapse(Ext.Component.DIRECTION_TOP, 1000);
-				}.bind(this.win), 1000);
-			}
 		}
+		
+		if (this.getWinCollapsible() === true) {
+			this.timerId = setTimeout(function() {
+				this.collapse(Ext.Component.DIRECTION_TOP, 1000);
+			}.bind(this.win), 1000);
+		}
+
+		this.win.show();
+		this.win.expand(1000);
 	},
 
 	/**
@@ -189,6 +208,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 					});
 				}
 			}
+		}
+
+		// No data > ignore tab
+		if (data.length === 0) {
+			return false;
 		}
 
 		var store = Ck.create("Ext.data.Store", {
