@@ -349,7 +349,8 @@ Ext.apply(Ck, {
 			if (a.ckAction === widget) {
 				if (map) {
 					// If map instance return the action associated to the map
-					if (a.getMap().getId() === map.getId()) {
+					var aMap = a.getMap();
+					if (aMap && aMap.getId() === map.getId()) {
 						return a;
 					}
 				} else {
