@@ -326,21 +326,35 @@ Ext.apply(Ck, {
 		return map;
 	},
 
+
 	/**
-	 * Get action by widget name (eg: ckmapMeasure)
-	 * @param {String}
-	 * @return {Ck.Action}
+	 * Get action by widget name (eg: ckmapMeasure).
+	 * @param  {String} widget name of the action
+	 * @param  {Ck.Map} map    optional. map instance for the action
+	 * @return {Ck.Action}        [description]
 	 */
-	getAction: function(widget) {
-		var a = Ck.actions[widget];
-		if(a) return a;
+	getAction: function(widget, map) {
+		var a;
+
+		// Try to find direct by index when map is not defined
+		if(!map) {
+			a = Ck.actions[widget];
+			if(a) return a;
+		}
 
 		// index can include itemId to make it unique
 		// try to find only with ckAction name
 		for(var an in Ck.actions) {
 			a = Ck.actions[an];
 			if (a.ckAction === widget) {
-				return a;
+				if (map) {
+					// If map instance return the action associated to the map
+					if (a.getMap().getId() === map.getId()) {
+						return a;
+					}
+				} else {
+					return a;
+				}
 			}
 		}
 

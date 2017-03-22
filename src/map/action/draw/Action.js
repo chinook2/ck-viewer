@@ -30,7 +30,7 @@ Ext.define('Ck.map.action.draw.Action', {
 	destroy: function () {
 		// TODO: review draw instance managment !
 		var ckmap = this.getMap();
-		delete ckmap.draw[this.draw.getId()];
+		if(ckmap) delete ckmap.draw[this.draw.getId()];
 
 		this.draw = null;
 		this.interaction = null;
@@ -48,6 +48,14 @@ Ext.define('Ck.map.action.draw.Action', {
 		} else {
 			this.interaction.setActive(false);
 		}
+
+		if(pressed && btn.single === true){
+			if(this.draw.getSource()) this.draw.getSource().clear();
+			this.interaction.on('drawstart', function(){
+				this.draw.getSource().clear();
+			}, this);
+		}
+
 		this.draw.activeDraw(this.type, pressed);
 	},
 
@@ -59,7 +67,8 @@ Ext.define('Ck.map.action.draw.Action', {
 		opt = (Ext.isObject(opt))? opt : {};
 		this.interaction = new ol.interaction.Draw(Ext.applyIf(opt, {
 			source: this.draw.getSource(),
-			type: this.type
+			type: this.type,
+			style: Ck.Style.drawStyle
 		}));
 		this.draw.getOlMap().addInteraction(this.interaction);
 	},
@@ -69,5 +78,9 @@ Ext.define('Ck.map.action.draw.Action', {
 			map: map,
 			id: this.drawId
 		});
+	},
+
+	getFeatures: function () {
+		return this.draw.getSource().getFeatures();
 	}
 });
