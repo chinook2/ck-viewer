@@ -140,7 +140,6 @@ Ext.define('Ck.Action', {
 					this.render(btn, opts);
 				},
 				destroy: this.destroy,
-				hide: this.hide,
 				scope: this
 			},
 
@@ -174,7 +173,6 @@ Ext.define('Ck.Action', {
 
 	render: Ext.emptyFn,
 	destroy: Ext.emptyFn,
-	hide: Ext.emptyFn,
 
     /**
      * A function called when the button is clicked (can be used instead of click event).
