@@ -554,7 +554,7 @@ Ext.define('Ck.map.Controller', {
 	 * @return {ol.Source}
 	 */
 	createSource: function(offering, layer, owc) {
-		var mainOperation;
+		var mainOperation, params;
 		var olSourceAdditional = {
 			layer: layer,
 			offering: offering
@@ -573,9 +573,13 @@ Ext.define('Ck.map.Controller', {
 
 				case 'wms':
 					mainOperation = offering.getOperation("GetMap");
+					params = mainOperation.getParams();
+					params.FORMAT = mainOperation.getFormat() || 'image/png';
+
 					olSourceOptions = {
 						url: this.getMapUrl(mainOperation.getUrl()),
-						params: mainOperation.getParams()
+						params: params,
+						projection: mainOperation.getSrs()
 					};
 					if(!isNaN(offering.getData().ratio)) {
 						olSourceOptions.ratio = offering.getData().ratio;
