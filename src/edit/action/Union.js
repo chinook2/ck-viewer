@@ -92,7 +92,8 @@ Ext.define('Ck.edit.action.Union', {
 		} catch(error) {
 			Ck.Msg.show({
 				icon: Ext.Msg.ERROR,
-				message: "Error " + error.name + " occured : " + error.message,
+				title: error.name,
+				message: error.message,
 				buttons: Ext.Msg.OK
 			});
 			this.unionInteraction.getFeatures().clear();

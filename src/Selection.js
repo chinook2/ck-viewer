@@ -352,16 +352,20 @@ Ext.define('Ck.Selection', {
 			
 			// JMA
 			// TODO : retest !
-			
-			if(turf.intersect(lyrFt, selFeature)) {
-				if(currFeature.getProperties().features) {
-					for(k = 0; k < currFeature.getProperties().features.length; k++) {
-						res.push(currFeature.getProperties().features[k]);
+			try {
+				if(turf.intersect(lyrFt, selFeature)) {
+					if(currFeature.getProperties().features) {
+						for(k = 0; k < currFeature.getProperties().features.length; k++) {
+							res.push(currFeature.getProperties().features[k]);
+						}
+					} else {
+						res.push(currFeature);
 					}
-				} else {
-					res.push(currFeature);
 				}
-			}
+			} catch(error) {
+				var id = currFeature.get("id") || currFeature.getId();
+				console.log("Feature" + id + " error " + error.name + " : " + error.message);
+			}			
 		}
 		
 		return res;

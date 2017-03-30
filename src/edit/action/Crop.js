@@ -130,65 +130,80 @@ Ext.define('Ck.edit.action.Crop', {
 		var poly = geojson.writeFeatureObject(this.cropFeature);
 
 		// The first and the last point of the line must be outside of the polygon
-		if(turf.inside(turf.point(line.geometry.coordinates[0]), poly) || turf.inside(turf.point(line.geometry.coordinates[line.geometry.coordinates.length-1]), poly)) {
-			Ck.Msg.show({
-				icon: Ext.Msg.WARNING,
-				message: "The first and the last point must be outside of the polygon",
-				buttons: Ext.Msg.OK
-			});
+		try {
+			if(turf.inside(turf.point(line.geometry.coordinates[0]), poly) || turf.inside(turf.point(line.geometry.coordinates[line.geometry.coordinates.length-1]), poly)) {
+				Ck.Msg.show({
+					icon: Ext.Msg.WARNING,
+					message: "The first and the last point must be outside of the polygon",
+					buttons: Ext.Msg.OK
+				});
+				// Remove the cropping line
+				this.editCropLayer.getSource().clear();
+				return;
+			}
+			
 			// Remove the cropping line
 			this.editCropLayer.getSource().clear();
-			return;
-		}
 
-		// Remove the cropping line
-		this.editCropLayer.getSource().clear();
+			var _axe = turf.buffer(line, 0.0001, 'meters').features[0];		// turf-buffer issue #23
+			var _body = turf.erase(poly, _axe);
+			var pieces = [];
 
-		var _axe = turf.buffer(line, 0.0001, 'meters').features[0];		// turf-buffer issue #23
-		var _body = turf.erase(poly, _axe);
-		var pieces = [];
+			if (_body.geometry.type == 'Polygon' ){
+				pieces.push(turf.polygon(_body.geometry.coordinates));
+			}else{
+				_body.geometry.coordinates.forEach(function(a){
+					pieces.push(turf.polygon(a));
+				});
+			}
 
-		if (_body.geometry.type == 'Polygon' ){
-			pieces.push(turf.polygon(_body.geometry.coordinates));
-		}else{
-			_body.geometry.coordinates.forEach(function(a){
-				pieces.push(turf.polygon(a));
+			// There is a problem, go out
+			if(pieces.length==1){
+				return;
+			}
+
+			// Remove the original polygon
+			var properties = this.cropFeature.getProperties();
+			delete properties.geometry;
+
+			var fid = this.controller.getFid(this.cropFeature);
+			var ft = this.controller.wfsSource.getFeatureById(fid);
+
+			if(!Ext.isEmpty(ft)) {
+				source.removeFeature(ft);
+			}
+			
+			this.cropInteraction.getFeatures().clear();
+
+			// Add the 2 pieces, result of the crop
+			var d = new Date();
+			date = Ext.Date.format(d, 'Y-m-d');
+
+			var features = [];
+
+			// First pass to simplify the geometries
+			pieces.forEach(function(p, idx, pcs){
+				pcs[idx] = turf.simplify(p, 0.001, true);
 			});
+
+			// Second pass to node the geometries
+			pieces.forEach(function(p, idx, pcs){
+				pcs[idx] = turf.snap(p, pieces, 0.001);
+			});
+		} catch(error) {
+			Ck.Msg.show({
+				icon: Ext.Msg.ERROR,
+				title: error.name,
+				message: error.message,
+				buttons: Ext.Msg.OK
+			});
+			
+			if(!Ext.isEmpty(ft)) {
+				source.removeFeature(ft);
+			}
+			
+			return false;
 		}
-
-		// There is a problem, go out
-		if(pieces.length==1){
-			return;
-		}
-
-		// Remove the original polygon
-		var properties = this.cropFeature.getProperties();
-		delete properties.geometry;
-
-		var fid = this.controller.getFid(this.cropFeature);
-		var ft = this.controller.wfsSource.getFeatureById(fid);
-
-		if(!Ext.isEmpty(ft)) {
-			source.removeFeature(ft);
-		}	
-		
-		this.cropInteraction.getFeatures().clear();
-
-		// Add the 2 pieces, result of the crop
-		var d = new Date();
-		date = Ext.Date.format(d, 'Y-m-d');
-
-		var features = [];
-
-		// First pass to simplify the geometries
-		pieces.forEach(function(p, idx, pcs){
-			pcs[idx] = turf.simplify(p, 0.001, true);
-		});
-
-		// Second pass to node the geometries
-		pieces.forEach(function(p, idx, pcs){
-			pcs[idx] = turf.snap(p, pieces, 0.001);
-		});
 
 		pieces.forEach(function(p, i){
 			var f = geojson.readFeature(p);

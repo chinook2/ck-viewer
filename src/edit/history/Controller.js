@@ -68,11 +68,18 @@ Ext.define('Ck.edit.history.Controller', {
 	 */
 	onFeatureGeometry: function(feature) {
 		var rcd = this.getRecord(feature);
-		if(Ext.isEmpty(rcd)) {
-			this.store.add(this.createRecord(feature, 1));
+		
+		if(this.checkTopology(feature)) {
+			if(Ext.isEmpty(rcd)) {
+				this.store.add(this.createRecord(feature, 1));
+			} else {
+				
+			}
 		} else {
-			
-		}
+			if(!Ext.isEmpty(rcd)) {
+				this.store.remove(rcd);
+			}
+		}	
 	},
 	
 	/**
@@ -148,5 +155,28 @@ Ext.define('Ck.edit.history.Controller', {
 	
 	reset: function() {
 		this.store.removeAll();
+	},
+	
+	/**
+	*	Check the feature topology
+	**/
+	checkTopology: function(feature) {
+		// Check self-intersection errors
+		var geoJSON  = new ol.format.GeoJSON();
+		var geojsonFeature = geoJSON.writeFeatureObject(feature);		
+		var kinks = turf.kinks(geojsonFeature);
+
+		if(kinks.intersections.features.length > 0) {
+			Ck.Msg.show({
+				icon: Ext.Msg.ERROR,
+				title: "Topology error",
+				message: "The feature geometry is self-intersected.",
+				buttons: Ext.Msg.OK
+			});
+			
+			return false;
+		}
+		
+		return true;
 	}
 });

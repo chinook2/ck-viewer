@@ -264,7 +264,7 @@ Ext.define('Ck.edit.Controller', {
 				if(view.getPanelContainer() == "same") {
 					featureContainer = view;
 				} else {
-					featureContainer = this.getMainWindow();
+					featureContainer = this.getMainWindow(this.getView().featureWin);
 				}
 			}
 
@@ -296,7 +296,7 @@ Ext.define('Ck.edit.Controller', {
 				if(view.getPanelContainer() == "same") {
 					vertexContainer = view;
 				} else {
-					vertexContainer = this.getMainWindow();
+					vertexContainer = this.getMainWindow(this.getView().vertexWin);
 				}
 			}
 
@@ -325,7 +325,7 @@ Ext.define('Ck.edit.Controller', {
 			if(view.getPanelContainer() == "same") {
 				historyContainer = view;
 			} else {
-				historyContainer = this.getMainWindow();
+				historyContainer = this.getMainWindow(this.getView().historyWin);
 			}
 		}
 		
@@ -358,15 +358,19 @@ Ext.define('Ck.edit.Controller', {
 		
 		if(this.getDisplayVertex() && this.getLayer()) {
 			this.displayLayerVertex();
-		}
+		}	
 	},
 	
 	/**
 	 * 
 	 */
-	getMainWindow: function() {
+	getMainWindow: function(conf) {
 		if(Ext.isEmpty(this.mainWindow)) {
-			this.mainWindow = Ck.create("Ext.window.Window", {
+			if(conf === undefined) {
+				conf = {};
+			}
+			
+			var winConf = Ext.apply({
 				title: "Edition",
 				height: 400,
 				width: 600,
@@ -376,7 +380,9 @@ Ext.define('Ck.edit.Controller', {
 				// Counter drag issues on tablet
 				liveDrag: true,
 				animateShadow: false
-			});
+			}, conf);
+			
+			this.mainWindow = Ck.create("Ext.window.Window", winConf);
 			
 			this.mainWindow.on("add", function(win, item) {
 				item.on("show", win.manageVisibility);

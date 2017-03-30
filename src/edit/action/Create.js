@@ -170,6 +170,23 @@ Ext.define('Ck.edit.action.Create', {
 		});
 		
 		goog.asserts.assert(!goog.isNull(sketchFeature));
+		
+		// Check self-intersection errors
+		var geoJSON  = new ol.format.GeoJSON();
+		var geojsonFeature = geoJSON.writeFeatureObject(sketchFeature);		
+		var kinks = turf.kinks(geojsonFeature);
+
+		if(kinks.intersections.features.length > 0) {
+			Ck.Msg.show({
+				icon: Ext.Msg.ERROR,
+				title: "Topology error",
+				message: "The created geometry is self-intersected.",
+				buttons: Ext.Msg.OK
+			});
+			
+			return false;
+		}
+		
 		var coordinates;
 		var geometry = sketchFeature.getGeometry();
 		
