@@ -15,10 +15,10 @@ Ext.define('Ck.action.SnappingOptions', {
 	layer: null,
 	
 	/**
-	 * Update geolocationMarker's position via GPS if pressed == true.
-	 * Zoom to user location
+	 * Show the snappingOptions window
 	 */
-	doAction: function(btn, evt) {
+	toggleAction: function(btn, status) {
+		this.callParent(arguments);
 		this.btn = btn;
 		
 		if(Ext.isEmpty(this.win) || this.win.isDestroyed) {
@@ -37,11 +37,24 @@ Ext.define('Ck.action.SnappingOptions', {
 					reloadLayer: this.reloadLayer,
 					layer: this.layer,
 					openner	: this
-				}]
+				}],
+				listeners: {
+					hide: function(win, opt) {
+						this.btn.toggle(false);
+					},
+					close: function(win, opt) {
+						this.btn.toggle(false);
+					},
+					scope: this
+				}
 			});
 		}
 
-		this.win.show();
+		if(status) {
+			this.win.show();
+		} else {
+			this.win.hide();
+		}		
 	},
 	
 	close: function() {

@@ -351,7 +351,7 @@ Ext.define('Ck.map.Controller', {
 				} else if(currLayer.getExtension("isFolder") === true) {
 					this.addFolder(currLayer, owc);
 				} else {
-					this.addLayer(currLayer, owc);
+					this.addLayer(currLayer, owc, Infinity);
 				}
 			}
 
@@ -515,6 +515,9 @@ Ext.define('Ck.map.Controller', {
 			var path = layer.getExtension('path') || "";
 			lyrGroup = this.getLayerGroup(path);
 			
+			var opacity = layer.getExtension("opacity");
+			opacity = (!isNaN(parseFloat(opacity)) && isFinite(opacity)) ? opacity : 1;
+			
 			// Layer creation
 			olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
 				id: layer.getId(),
@@ -528,7 +531,8 @@ Ext.define('Ck.map.Controller', {
 				zIndex: layer.getZIndex(),
 				path: path,
 				minResolution: layer.getMinResolution(),
-				maxResolution: layer.getMaxResolution()
+				maxResolution: layer.getMaxResolution(),
+				opacity: opacity
 			});
 		}
 		return olLayer;

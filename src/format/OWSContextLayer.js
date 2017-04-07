@@ -12,7 +12,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 		name			: null,
 		title			: null,
 		visible			: true,
-		zIndex			: 2,
+		zIndex			: null,
 		minScale		: 0,
 		maxScale		: Infinity,
 		minResolution	: 0,

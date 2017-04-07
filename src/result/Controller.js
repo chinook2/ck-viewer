@@ -5,7 +5,7 @@ Ext.define('Ck.result.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckresult',
 	
-	excludedColumns: ["boundedBy", "the_geom", "msGeometry"],
+	excludedColumns: ["boundedBy", "the_geom", "msGeometry", "ckFeature"],
 	
 	config: {
 		openner: null
@@ -102,10 +102,13 @@ Ext.define('Ck.result.Controller', {
 			if(Ext.isEmpty(firstId)) {
 				firstId = res[i].layer.get("id") + "-" + now;
 			}
+			
 			result.push({
 				leaf	: true,
 				id		: res[i].layer.get("id") + "-" + now,
 				text	: res[i].layer.get("title") + " (" + res[i].features.length.toString() + ")",
+				layer	: res[i].layer.get("title"),
+				selected: res[i].features.length.toString(),
 				data	: res[i]
 			});
 		};
@@ -200,7 +203,11 @@ Ext.define('Ck.result.Controller', {
 		});
 		
 		this.featureStore.ckLayer = record.data.data.layer;
-		this.featurePaging.setStore(this.featureStore);
+		
+		if(this.featurePaging) {
+			this.featurePaging.setStore(this.featureStore);
+		}
+		
 		this.featureGrid.reconfigure(this.featureStore, columns);
 	},
 	

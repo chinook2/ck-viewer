@@ -45,6 +45,17 @@ String.prototype.stripExtension = function() {
 	return this.substr(0, this.lastIndexOf("."));
 }
  
+String.prototype.stripAccent = (function() {
+    var non_asciis = {'a':'[àáâãäå]', 'ae':'æ', 'c':'ç', 'e':'[èéêë]', 'i':'[ìíîï]', 'n':'ñ', 'o':'[òóôõö]', 'oe':'œ','u':'[ùúûuü]','y':'[ýÿ]','A':'[ÀÁÂÃÄÅ]', 'AE':'Æ', 'C':'Ç', 'E':'[ÈÉÊË]', 'I':'[ÌÍÎÏ]', 'N':'Ñ', 'O':'[ÒÓÔÕÖ]', 'OE':'Œ', 'U':'[ÙÚÛUÜ]', 'Y':'[ÝŸ]'};
+    return function () {
+        var r = this;
+        for (i in non_asciis) {
+            r = r.replace(new RegExp(non_asciis[i], 'g'), i);
+        }
+        return r;
+    }
+})();
+
 var Ck = Ck || {};
 
 // @define Ck

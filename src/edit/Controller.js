@@ -393,19 +393,19 @@ Ext.define('Ck.edit.Controller', {
 		historyContainer.add(this.historyView);
 		
 		// Snapping
-		var cmpSnapping = Ext.getCmp("edit-snapping-options");
-		if(cmpSnapping) {
-			cmpSnapping.controller.setReloadLayer(true);
-			cmpSnapping.controller.setLayer(this.getLayer());
-			cmpSnapping.controller.loadPanel();
-		}
+		// var cmpSnapping = Ext.getCmp("edit-snapping-options");
+		// if(cmpSnapping) {
+			// cmpSnapping.controller.setReloadLayer(true);
+			// cmpSnapping.controller.setLayer(this.getLayer());
+			// cmpSnapping.controller.loadPanel();
+		// }
 		
-		var snappingAction = Ck.getAction("ckSnappingOptions");
-		if(snappingAction) {
-			snappingAction.reloadLayer = true;
-			snappingAction.layer = this.getLayer();
-			snappingAction.doAction();
-		}
+		// var snappingAction = Ck.getAction("ckSnappingOptions");
+		// if(snappingAction) {
+			// snappingAction.reloadLayer = true;
+			// snappingAction.layer = this.getLayer();
+			// snappingAction.doAction();
+		// }
 		
 		this.mainWindow.manageVisibility();
 
@@ -1084,7 +1084,9 @@ Ext.define('Ck.edit.Controller', {
 	/**
 	*	Save the changes for a WMS layer
 	**/
-	saveWMS: function(inserts, updates, deletes) {	
+	saveWMS: function(inserts, updates, deletes) {
+		var layer = this.getLayer();
+		
 		Ck.Ajax.sendTransaction(layer, {
 			inserts: inserts,
 			updates: updates,

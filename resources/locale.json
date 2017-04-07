@@ -308,5 +308,21 @@
 		"en": "GPS position not available",
         "fr": "Position GPS indisponible",
         "es": " - "
+	},{
+		"en": "Registration successfully",
+        "fr": "Sauvegardé avec succès",
+        "es": " - "
+	},{
+		"en": "Inserted",
+        "fr": "Ajouté",
+        "es": " - "
+	},{
+		"en": "Updated",
+        "fr": "Mis à jour",
+        "es": " - "
+	},{
+		"en": "Deleted",
+        "fr": "Supprimé",
+        "es": " - "
 	}]
 }

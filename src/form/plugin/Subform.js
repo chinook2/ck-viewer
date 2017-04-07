@@ -298,8 +298,13 @@ Ext.define('Ck.form.plugin.Subform', {
 
 	stopEditing: function() {
 		// hide action column
-		this.actionColumn.hide();
-		this.actionColumn2.hide();
+		if(this.actionColumn.getRefOwner() !== undefined) {
+			this.actionColumn.hide();
+		}
+		
+		if(this.actionColumn2.getRefOwner() !== undefined) {
+			this.actionColumn2.hide();
+		}		
 
 		// Disable rowediting plugin
 		var sfplugin = this._grid.findPlugin('rowediting');
@@ -321,7 +326,7 @@ Ext.define('Ck.form.plugin.Subform', {
 		//
 
 		if(this._subformWindow) {
-			this._subform.getController().startEditing();;
+			this._subform.getController().startEditing();
 			this._subformWindow.show();
 		}
 	},

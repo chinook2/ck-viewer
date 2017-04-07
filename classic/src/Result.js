@@ -20,7 +20,9 @@ Ext.define("Ck.Result", {
 		 */
 		widgetColumns: [{
 			type: "sheet"
-		}]
+		}],
+		
+		layerTreeToColumns: false
 	},
 	
 	layout: {
@@ -32,7 +34,7 @@ Ext.define("Ck.Result", {
 	items: [{
 		itemId: "layer_tree",
 		xtype: "treepanel",
-		width: 200,
+		width: 205,
 		resizable: true,
 		rootVisible: false,
 		store: {
@@ -58,6 +60,22 @@ Ext.define("Ck.Result", {
 	buttons: [{
 		text: "Close",
 		itemId: "close"
-	}]
+	}],
 	
+	initComponent: function() {
+		var me = this;
+
+		if(this.getConfig("layerTreeToColumns")) {
+			var layerTree = this.items[0];
+			
+			layerTree.columns = [{
+				text: 'Couches',
+				dataIndex: 'layer'
+			},{
+				text: 'Sélectionnés',
+				dataIndex: 'selected'
+			}];
+		}
+		me.callParent(arguments);
+	}
 });

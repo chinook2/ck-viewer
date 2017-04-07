@@ -23,6 +23,11 @@ Ext.define('Ck.edit.action.Geometry', {
 	 */
 	allowLiveSnap: false,
 	
+	/**
+	 * True to show the vertex panel
+	 */
+	showVertexContainer: false,
+	
 	toggleAction: function(btn, status) {
 		this.callParent(arguments);
 		this.btn = btn;
@@ -37,7 +42,7 @@ Ext.define('Ck.edit.action.Geometry', {
 						if(ft.length == 1) {
 							this.controller.startGeometryEdition(ft[0]);
 							
-							if(this.controller.vertexContainer !== undefined) {
+							if(this.controller.vertexContainer !== undefined && this.showVertexContainer) {
 								this.controller.vertexContainer.setVisible(true);
 							}
 						}
@@ -52,6 +57,14 @@ Ext.define('Ck.edit.action.Geometry', {
 				tolerance       : this.tolerance
 			});
 			this.interactions["geometryInteraction"] = this.geometryInteraction;
+			
+			this.controller.on("savesuccess", function(evt) {
+				this.geometryInteraction.resetSelection();
+			}, this);
+			
+			this.controller.on("savefailed", function(evt) {
+				this.geometryInteraction.resetSelection();
+			}, this);
 		}
 
 		this.geometryInteraction.setActive(status);

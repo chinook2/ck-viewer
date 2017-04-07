@@ -43,6 +43,8 @@ Ext.define('Ck.form.Controller', {
 
 	fieldsProcessed: 0,
 	formsProcessed: 0,
+	
+	commitSubform: false,
 
 	/**
 	 * @event aftersave
@@ -355,6 +357,8 @@ Ext.define('Ck.form.Controller', {
 				return;
 			}
 
+			this.getView().fireEvent('afterShow', form);
+			
 			// Auto-load data if params available
 			if(this.autoLoad) {
 				var data = this.view.getDataObject();
@@ -786,7 +790,7 @@ Ext.define('Ck.form.Controller', {
 									var fieldName = o.field || o.displayField || o.name;
 									var fieldTab = fieldName.split(".");
 									fieldName = fieldTab[fieldTab.length - 1];
-
+									
 									var baseparams = {
 										s: 'forms',
 										r: 'getStore',
@@ -896,6 +900,10 @@ Ext.define('Ck.form.Controller', {
 											col.editor.field = col.name;
 											col.editor.displayField = "value";
 											col.editor.store = processStore(col.editor);
+											
+											if(col.editor.editable === undefined || !col.editor.editable) {
+												col.editor.editable = false;
+											}
 										}
 									}
 									if(col.header) {
@@ -961,6 +969,21 @@ Ext.define('Ck.form.Controller', {
 							}
 						}
 
+						if(c.xtype == 'combo' || c.xtype == 'combobox') {
+							if(c.editable === undefined || !c.editable) {
+								c.editable = false;
+								
+								// hack, issue with form readonly/editable
+								if(c.listeners === undefined) {
+									c.listeners = {};
+								}								
+																
+								c.listeners.focus = function(cbx, opt) {
+									cbx.setEditable(false);
+								}
+							}
+						}
+						
 						Ext.Object.merge(c, {
 							store		: processStore(c),
 							listeners	: {
@@ -984,6 +1007,7 @@ Ext.define('Ck.form.Controller', {
 								});
 							}
 						}
+						
 						break;
 					case "numberfield":
 						if(Ck.isMobileDevice() && c.gpsParam !== undefined) {
@@ -1105,7 +1129,21 @@ Ext.define('Ck.form.Controller', {
 						return plugins;
 					};
 
-					if(c.subform) {
+					var rowEditing = false;
+					
+					if(c.subformTemplate && c.subform) {
+						c.plugins = applyDefault(c.plugins, [{
+							ptype: 'gridsubformtemplate'
+						},{
+							ptype: 'gridediting'
+						}, {
+							ptype: 'rowediting',
+							pluginId: 'rowediting',
+							clicksToEdit: 2
+						}]);
+						
+						rowEditing = true;
+					} else if(c.subform) {
 						c.plugins = applyDefault(c.plugins, [{
 							ptype: 'gridsubform'
 						}]);
@@ -1118,6 +1156,10 @@ Ext.define('Ck.form.Controller', {
 							clicksToEdit: 1
 						}]);
 
+						rowEditing = true;
+					}
+					
+					if(rowEditing) {
 						// To show rowediting bar & btns
 						c.minHeight = 250;
 					}
@@ -1737,8 +1779,19 @@ Ext.define('Ck.form.Controller', {
 			if (this.files && this.files.length>0) {
 				val.main.params.__files = this.files
 			}
-			Ext.callback(options.success, options.scope, [val.main.params]);
-			return true;
+			
+			if(val === undefined) {
+				val = { main: { params: {} } };
+			}
+			
+			if(!this.commitSubform) {
+				Ext.callback(options.success, options.scope, [val.main.params]);
+				return true;
+			}
+			
+			var subformValues = this.getView().getValues();
+			values = Ext.apply(values, subformValues);
+			this.commitSubform = false;
 		}
 		
 		// Save in GeoJSON layer if loaded from DataObject
