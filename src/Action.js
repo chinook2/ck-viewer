@@ -56,6 +56,11 @@ Ext.define('Ck.Action', {
 
 	config: {
 		/**
+		 * Component associated with this action
+		 */
+		ownerCt: null,
+		
+		/**
 		 * @var {Ck.map.Controller}
 		 */
 		map: null,
@@ -153,6 +158,7 @@ Ext.define('Ck.Action', {
 		// Listen to map events registred in the same ckview
 		// for group btn specify btn.ckview to get back associated view
 		// try to find ckview property in a window popup
+		this.setOwnerCt(btn);
 		var ckview = btn.up('ckview') || (btn.up('window') && btn.up('window').ckview) || btn.ckview;
 		if (ckview) {
 			ckview = ckview.getController();
