@@ -59,7 +59,7 @@ Ext.define('Ck.Action', {
 		 * Component associated with this action
 		 */
 		ownerCt: null,
-		
+
 		/**
 		 * @var {Ck.map.Controller}
 		 */
@@ -120,7 +120,12 @@ Ext.define('Ck.Action', {
 			iconCls: this.iconCls,
 			handler: function () {
 				try {
-					this.doAction.apply(this, arguments);
+					// When use action.execute always call 'handler' method
+					if (this.toggleGroup) {
+						this.toggleAction.apply(this, arguments);
+					} else {
+						this.doAction.apply(this, arguments);
+					}
 				} catch (e) {
 					Ck.log(e.message);
 					Ck.Notify.error("Chinook Action Error :: " + e.message);
@@ -166,12 +171,12 @@ Ext.define('Ck.Action', {
 			ckview.onMapReady(function (mapController) {
 				this.setMap(mapController);
 				this.ckReady(mapController, config);
-			}, this);
+			}, this, {priority: 100});
 
 			ckview.onMapLoaded(function (mapController) {
 				this.setMap(mapController);
 				this.ckLoaded(mapController, config);
-			}, this);
+			}, this, {priority: 100});
 		} else {
 			Ck.log('Action "'+ btn.ckAction +'" as no ckview !');
 		}
