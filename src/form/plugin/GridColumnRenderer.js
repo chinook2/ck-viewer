@@ -117,7 +117,7 @@ Ext.define('Ck.form.plugin.GridColumnRenderer', {
 			this.dataStore.filter(this.filters);
 		}
 		
-		var frec = this.dataStore.findRecord(this.valueField, val);
+		var frec = this.dataStore.findRecord(this.valueField, val, undefined, undefined, undefined, true);
 		if(frec) val = frec.get(this.displayField);
 		
 		this.dataStore.clearFilter();		
