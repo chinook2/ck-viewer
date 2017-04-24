@@ -97,6 +97,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			buffer			: this.getBuffer(),
 			beforeProcess	: this.beforeSelection
 		});
+		if (this.btn && this.btn.pressed) {
+			this.draw.setActive(true);
+		}
 	},
 
 	beforeSelection: function() {
@@ -110,7 +113,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 *
 	 */
 	toggleAction: function(btn, pressed) {
-		this.draw.setActive(pressed);
+		this.btn = btn;
+		if(this.draw) this.draw.setActive(pressed);
 		this.createContainer();
 	},
 
@@ -170,7 +174,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}]
 			});
 		}
-		
+
 		if (this.getWinCollapsible() === true) {
 			this.timerId = setTimeout(function() {
 				this.collapse(Ext.Component.DIRECTION_TOP, 1000);
