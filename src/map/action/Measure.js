@@ -234,6 +234,10 @@ Ext.define('Ck.map.action.Measure', {
 		this.draw.setActive(pressed);
 		if(this.tip) this.tip.setVisible(pressed);
 		if(pressed) {
+			if (!this.measureTooltipElement) {
+				this.createMeasureTooltip();
+			}
+
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
 			// fix for touch device
 			this.olMap.on('singleclick', this.pointerMoveHandler, this);
@@ -242,6 +246,13 @@ Ext.define('Ck.map.action.Measure', {
 			this.olMap.un('pointermove', this.pointerMoveHandler, this);
 			this.olMap.un('singleclick', this.pointerMoveHandler, this);
 			this.setHelpMsg(null);
+
+			// Force clear tooltip if toggle off measure tool when drawing
+			if (this.measureTooltip) {
+				this.olMap.removeOverlay(this.measureTooltip);
+			}
+			this.measureTooltipElement = null;
+			this.sketch = null;
 		}
 	},
 
@@ -273,8 +284,8 @@ Ext.define('Ck.map.action.Measure', {
 				output = this.formatLength(geom);
 				tooltipCoord = geom.getLastCoordinate();
 			}else if (geom instanceof ol.geom.Circle) {
-				output = this.formatArea(geom);
-				tooltipCoord = geom.getCenter();
+				output = this.formatLength(geom);
+				//tooltipCoord = geom.getLastCoordinate();
 			}
 			this.measureTooltipElement.innerHTML = output;
 			this.measureTooltip.setPosition(tooltipCoord);
@@ -304,11 +315,16 @@ Ext.define('Ck.map.action.Measure', {
 	 * @param {ol.geom.LineString} line
 	 * @return {string}
 	 */
-	formatLength: function(line) {
+	formatLength: function(geom) {
 		// raw length in meters
-		var length;
+		var length, coordinates;
 		if (this.geodesic) {
-			var coordinates = line.getCoordinates();
+			if(geom instanceof ol.geom.Circle) {
+				coordinates = [geom.getCenter(), geom.getLastCoordinate()];
+			} else {
+				coordinates = geom.getCoordinates();
+			}
+
 			length = 0;
 			var sourceProj = this.olMap.getView().getProjection();
 			for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
@@ -317,7 +333,11 @@ Ext.define('Ck.map.action.Measure', {
 				length += this.wgs84Sphere.haversineDistance(c1, c2);
 			}
 		} else {
-			length = line.getLength();
+			if(geom instanceof ol.geom.Circle) {
+				length = geom.getRadius();
+			} else {
+				length = geom.getLength();
+			}
 		}
 
 		var output = [], decimal, uLength;

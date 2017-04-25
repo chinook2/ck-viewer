@@ -122,7 +122,10 @@ Ext.define('Ck.Action', {
 				try {
 					// When use action.execute always call 'handler' method
 					if (this.toggleGroup) {
-						this.toggleAction.apply(this, arguments);
+						var btn = this.getOwnerCt();
+						if (btn) {
+							this.toggleAction.apply(this, [btn, btn.pressed]);
+						}
 					} else {
 						this.doAction.apply(this, arguments);
 					}
