@@ -25,7 +25,7 @@ Ext.define('Ck.action.SnappingOptions', {
 
 			this.win = Ck.create("Ext.window.Window", {
 				title		: "Snapping options",
-				height		: 350,
+				height		: 400,
 				width		: 500,
 				layout		: "fit",
 				maximizable	: false,
@@ -44,6 +44,12 @@ Ext.define('Ck.action.SnappingOptions', {
 					},
 					close: function(win, opt) {
 						this.btn.toggle(false);
+					},
+					show: function(win, opt) {
+						var grid = Ext.getCmp("edit-snapping-options");
+						if(grid) {
+							grid.getView().refresh();
+						}
 					},
 					scope: this
 				}

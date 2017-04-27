@@ -56,6 +56,7 @@ Ext.define('Ck.snapping.Controller', {
 		}
 		
 		this.getView().getStore().loadData(data);
+		this.getView().getView().refresh();
 	},
 	
 	/**
@@ -88,6 +89,7 @@ Ext.define('Ck.snapping.Controller', {
 		item = this.createItem(layer);
 		if(item != null) {
 			store.add(item);
+			this.getView().getView().refresh();
 		}
 	},
 	

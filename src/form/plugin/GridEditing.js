@@ -19,6 +19,23 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			store.setFields(this.getFields());
 		}
 		
+		grid.addDocked({
+			xtype: 'toolbar',
+			dock: 'top',
+			bind: {
+				hidden: '{!editing}'
+			},
+			style: {border: 0},
+			items: ['->', {
+				text: 'Add',
+				handler: this.handleNewRow,
+				bind: {
+					hidden: '{updating}'
+				},
+				scope: this
+			}]
+		});
+			
 		// Get the Action Column
 		this.actionColumn = this.grid.down('actioncolumn');
 		if(!this.actionColumn) {
@@ -97,11 +114,30 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	destroy: function() {
 	},
 
-
+	handleNewRow: function() {
+		this.startEditing();
+		
+		var store = this.grid.getStore();
+		var view = this.grid.getView();		
+		var row = view.getRow(store.getAt(store.getCount() - 1));
+		
+		// Focus the 1st non-actioncolumn cell of the new row
+		for(var i=0; i<row.cells.length; i++) {
+			if(row.cells[i].className.indexOf("actioncolumn") == -1) {
+				view.editingPlugin.startEdit(store.getAt(store.getCount() - 1), i);
+				break;
+			}
+		}
+	},
+	
 	startEditing: function() {
 		// add & show action column
 		this.actionColumn.show();
 		this.addNewRow();
+		
+		// Enable rowediting plugin
+		var sfplugin = this.grid.findPlugin('rowediting');
+		if(sfplugin) sfplugin.enable();
 	},
 
 	stopEditing: function() {
@@ -114,7 +150,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		var store = this.grid.getStore();
 		
 		// Call on validate new row. The new row is now validated.
-		if(context) {
+		if(context && context.record) {
 			delete context.record.data['dummy'];
 		}
 		

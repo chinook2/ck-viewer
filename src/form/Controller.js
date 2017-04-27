@@ -389,6 +389,7 @@ Ext.define('Ck.form.Controller', {
 		if(this.ls) {
 			var form = this.ls.getItem(formUrl);
 			if(form && Ck.getEnvironment() == 'production') {
+				console.log("Loading form from local storage.");
 				this.initForm( Ext.decode(form) );
 				return;
 			}
@@ -1139,7 +1140,7 @@ Ext.define('Ck.form.Controller', {
 						}, {
 							ptype: 'rowediting',
 							pluginId: 'rowediting',
-							clicksToEdit: 2
+							clicksToEdit: 1
 						}]);
 						
 						rowEditing = true;

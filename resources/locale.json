@@ -324,5 +324,9 @@
 		"en": "Deleted",
         "fr": "Supprimé",
         "es": " - "
+	},{
+		"en": "Please complete the current editing session",
+        "fr": "Terminer la session d'édition courante",
+        "es": " - "
 	}]
 }

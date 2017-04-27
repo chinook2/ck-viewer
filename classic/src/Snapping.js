@@ -20,6 +20,7 @@ Ext.define("Ck.Snapping", {
 	columns: [{
 		text		: "Layer",
 		dataIndex	: "title",
+		height 		: 50,
 		flex		: 1
 	},{
 		dataIndex	: "active",
@@ -28,6 +29,7 @@ Ext.define("Ck.Snapping", {
 		widget		: {
 			xtype	: "checkbox",
 			width	: 40,
+			height 	: 50,
 			listeners: {
 				change: function(nbField, value) {
 					if (nbField.getWidgetRecord) {
@@ -81,6 +83,13 @@ Ext.define("Ck.Snapping", {
 	buttons: [{
 		text: "Close",
 		itemId: "close"
-	}]
+	}],
+	
+	/* To fix a scroll issue on mobile devices */
+	viewConfig: {
+		getRowClass: function(record, index, rowParams, store)  {
+			return "edit-snapping-options-row";
+		}
+	}
 	
 });
