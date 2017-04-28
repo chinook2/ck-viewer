@@ -124,7 +124,9 @@ Ext.define('Ck.Action', {
 					if (this.toggleGroup) {
 						var btn = this.getOwnerCt();
 						if (btn) {
-							this.toggleAction.apply(this, [btn, btn.pressed]);
+							// remove > side effect + double call...
+							// on toggle can re activate action when trying to deactivate
+							//this.toggleAction.apply(this, [btn, btn.pressed]);
 						}
 					} else {
 						this.doAction.apply(this, arguments);
