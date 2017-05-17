@@ -232,7 +232,7 @@ Ext.define('Ck.map.Style', {
 				thisLayerStyles.push(style);
 				
 				if(config.labelStyle) {
-					styles = this.getLabelStyleFunction(style, config.labelStyle);
+					styles = this.getLabelStyleFunction(style, config.labelStyle, layerId);
 				} else {
 					styles.push(style);
 				}
@@ -364,7 +364,7 @@ Ext.define('Ck.map.Style', {
 	/**
 	*	Generate function from config to style vector layers with normal style + label style
 	*/
-	getLabelStyleFunction: function(style, labelStyleConfig) {
+	getLabelStyleFunction: function(style, labelStyleConfig, layerId) {
 		var fillColor = labelStyleConfig.fill || "#000";
 		var color = labelStyleConfig.color || "rgba(0, 0, 0, 1)";
 		var strokeColor = labelStyleConfig.stroke || "#fff";
@@ -372,26 +372,71 @@ Ext.define('Ck.map.Style', {
 		var property = labelStyleConfig.property;
 		var font = labelStyleConfig.font || "12px helvetica,sans-serif";	
 		var minResolution = labelStyleConfig.resolution || Infinity;
+		//var thisLayerId = layerId;
 		
 		var fn = function(feature, resolution) {
-			var styles = [style];
-			
+			var styles = [style];			
+			var template = labelStyleConfig.template;
 			if(resolution <= minResolution) {
-				var labelStyle = new ol.style.Style({
-					text: new ol.style.Text({
-						font: font,
-						color: color,
-						text: feature.get(property),
-						fill: new ol.style.Fill({
-							color: fillColor
-						}),
-						stroke: new ol.style.Stroke({
-							color: strokeColor,
-							width: strokeWidth
+				if(property){
+					
+					var labelStyle = new ol.style.Style({
+						text: new ol.style.Text({
+							font: font,
+							color: color,
+							text: feature.get(property),
+							fill: new ol.style.Fill({
+								color: fillColor
+							}),
+							stroke: new ol.style.Stroke({
+								color: strokeColor,
+								width: strokeWidth
+							})
 						})
-					})
-				});
-				
+					});
+				} else if (template){					
+						
+					var coordinates = [];
+					var newProjection = new ol.proj.Projection({code: "EPSG:4326"});
+					
+					var currentLayer = Ck.getMap().getLayerById(layerId);		
+					var currentProjection = new ol.proj.Projection({code: currentLayer.ckLayer.getOfferings()[0].getOperations()[0].getSrs()});
+					
+					var clonedGeometry = feature.getGeometry().clone();
+					clonedGeometry.transform(currentProjection, newProjection);
+					
+					var polyArea = 0;	
+					
+					var sphere = new ol.Sphere(6378137);
+					
+					
+					
+					console.log(feature.getProperties());
+					for(var feat in feature.getProperties()){
+						template = template.replace("{"+ feat +"}", feature.get(feat));
+					
+					}					
+					
+					coordinates = clonedGeometry.getCoordinates()[0];
+					polyArea = sphere.geodesicArea(coordinates)/1000000;
+					template = template.replace("{geom_area}", polyArea.toFixed(2));
+					
+					var labelStyle = new ol.style.Style({
+						text: new ol.style.Text({
+							font: font,
+							color: color,
+							text: template,
+							fill: new ol.style.Fill({
+								color: fillColor
+							}),
+							stroke: new ol.style.Stroke({
+								color: strokeColor,
+								width: strokeWidth
+							})
+						})
+					});
+
+				}
 				styles.push(labelStyle);
 			}
 			
