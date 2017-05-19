@@ -8,89 +8,89 @@
 Ext.define('Ck.edit.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckedit',
-	
+
 	editPanelVisible: true,
-	
-	config: {		
+
+	config: {
 		layer: null,
-		
+
 		/**
 		 * Indicate if the edited layer is a multi-feature layer (like MultiLineString)
 		 */
 		multi: false,
-		
+
 		/**
 		 * If the edited layer is a WMS layer
 		 */
 		isWMS: false
 	},
-	
+
 	/**
 	 * @event featurecreate
 	 * Fires when a feature was created
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featuregeometry
 	 * Fires when a feature geometry was modified
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featureattribute
 	 * Fires when a feature attribute was modified
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featureremove
 	 * Fires when a feature was removed
 	 * @param {ol.Feature}
 	 */
-	
+
 	/**
 	 * @event featurecrop
 	 * Fires when a feature was croped
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event featureunion
 	 * Fires when a feature was gathered
 	 * @param {ol.Feature}
 	 */
-	 
+
 	/**
 	 * @event sessionstart
 	 * Fires when feature or vertex session began
 	 */
-	 
+
 	/**
 	 * @event sessioncomplete
 	 * Fires when feature or vertex session is complete (not saved)
 	 */
-	 
+
 	/**
 	 * @event savesuccess
 	 * Fires when change saved successfully
 	 */
-	 
+
 	/**
 	 * @event savefailed
 	 * Fires when change saved successfully
 	 */
-	
+
 	/**
 	 * @protected
 	 */
 	init: function(view) {
 		this.callParent([view]);
-		
+
 		this.setLayer(view.initialConfig.layer);
 		//this.setOpenner(view.initialConfig.openner);
 		this.setMulti((view.initialConfig.layer.getExtension("geometryType").indexOf("Multi") != -1));
-		
+
 		this.control({
 			"ckedit button#cancel": {
 				click: function() {
@@ -136,7 +136,7 @@ Ext.define('Ck.edit.Controller', {
 				scope: this
 			}
 		});
-		
+
 		// Check if the layer is a WMS or WFS
 		if(!(this.getLayer().getSource() instanceof ol.source.Vector)) {
 			source = this.getLayer().get("sources");
@@ -148,7 +148,7 @@ Ext.define('Ck.edit.Controller', {
 				return false;
 			}
 		}
-		
+
 		// Create a vector layer to host features of WMS layer
 		if(!this.wfsLayer) {
 			this.wfsLayer = Ck.create("ol.layer.Vector", {
@@ -161,65 +161,65 @@ Ext.define('Ck.edit.Controller', {
 			this.wfsSource = this.wfsLayer.getSource();
 			this.wfsLayer.setMap(this.getOlMap());
 		}
-		
+
 		var conf = view.editConfig;
 		conf.editController = this;
 		conf.layer = view.layer;
 		conf.multi = this.getMulti();
-		
+
 		// When user edit a multi-feature layer we have to prepare sub-feature and hide advance operation menu
 		if(this.getMulti()) {
 			var featureContainer = Ext.getCmp("edit-featurepanel");
 			featureContainer = (Ext.isEmpty(featureContainer))? view : featureContainer;
-		
+
 			this.featurePanel = Ext.create("widget.ckedit-feature", conf);
 			featureContainer.add(this.featurePanel);
-		
+
 			// Add listeners
 			this.feature = this.featurePanel.getController();
 			Ext.apply(this.feature, conf);
 			this.relayEvents(this.feature, ["sessionstart"], "feature");
 			this.feature.addListener("validate", this.saveFeatureChange, this);
 			this.feature.addListener("cancel", this.cancelFeatureChange, this);
-			
-			
-			
+
+
+
 			// Hide feature splitting button
 			var tbar = this.getView().items.getAt(0).getDockedItems()[0];
 			tbar.items.getAt(4).getMenu().items.getAt(0).setVisible(false);
 		}
-		
+
 		// Display vertex panel for line and polygon
 		if(view.layer.getExtension("geometryType") != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
 			vertexContainer = (Ext.isEmpty(vertexContainer))? view : vertexContainer;
-		
+
 			this.vertexPanel = Ext.create("widget.ckedit-vertex", conf);
 			vertexContainer.add(this.vertexPanel);
-		
+
 			// Add listeners
 			this.vertex = this.vertexPanel.getController();
 			Ext.apply(this.vertex, conf);
-			
+
 			var receiver = (this.getMulti())? this.feature : this;
 			this.relayEvents(this.vertex, ["sessionstart"], "vertex");
 			this.vertex.addListener("validate", receiver.saveVertexChange, receiver);
 			this.vertex.addListener("cancel", receiver.cancelVertexChange, receiver);
 		}
-		
+
 		this.historyView = Ext.create("widget.ckedit-history", conf);
 		this.history = this.historyView.getController();
 		Ext.apply(this.history, conf);
 		this.history.createListeners(this);
-		
+
 		this.historyPanel = Ext.getCmp("edit-historypanel");
 		if(this.historyPanel) {
 			this.historyPanel.add(this.historyView);
 		}
-		
+
 		this.on("featurecreate", this.onCreate, this);
 	},
-	
+
 	/**
 	 * When user has create a geom.
 	 * Have to cast into multi-geom if necessary
@@ -236,10 +236,10 @@ Ext.define('Ck.edit.Controller', {
 		}
 		source.addFeature(feature);
 	},
-	
+
 	/**************************************************************************************/
 	/******************************** Click on edit button ********************************/
-	/**************************************************************************************/	
+	/**************************************************************************************/
 	/**
 	 * Start a geometry edition session.
 	 * If the layer is a multi-features layer, subfeatures panel is displayed, vertex panel otherwise.
@@ -250,7 +250,7 @@ Ext.define('Ck.edit.Controller', {
 		// Add the feature, if not already added, to the collection
 		if(this.getIsWMS()) {
 			var ft = this.wfsSource.getFeatureById(feature.getId());
-			
+
 			if(Ext.isEmpty(ft)) {
 				this.wfsSource.addFeature(feature);
 			} else {
@@ -263,9 +263,9 @@ Ext.define('Ck.edit.Controller', {
 			this.startVertexEdition(feature);
 		}
 	},
-	
+
 	/**
-	 * 
+	 *
 	 */
 	deleteFeature: function(feature) {
 		this.wfsSource.addFeature(feature);
@@ -276,10 +276,10 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.fireEvent("featureremove", feature);
 	},
-	
+
 	/**************************************************************************************/
 	/********************************** Geometry edition **********************************/
-	/**************************************************************************************/	
+	/**************************************************************************************/
 	/**
 	 * When the edited layer is a multi-feature layer.
 	 * Open sub-features selection panel
@@ -289,7 +289,7 @@ Ext.define('Ck.edit.Controller', {
 		this.feature.loadFeature(feature);
 		this.switchPanel(this.featurePanel);
 	},
-	
+
 	/**
 	 * Edit a simple geometry (polygon, line or point)
 	 * @param {ol.geom.SimpleGeometry}
@@ -304,7 +304,7 @@ Ext.define('Ck.edit.Controller', {
 			});
 			this.moveInteraction.on("translateend", this.pointTranslateEnd, this);
 			this.getOlMap().addInteraction(this.moveInteraction);
-			
+
 			// delete this.moveInteraction.previousCursor_;
 			this.moveInteraction.setActive(true);
 		} else {
@@ -312,14 +312,14 @@ Ext.define('Ck.edit.Controller', {
 			this.switchPanel(this.vertexPanel);
 		}
 	},
-	
+
 	pointTranslateEnd: function(a,b,c,d) {
 		this.fireEvent("featuregeometry", a.features.item(0));
 	},
-	
+
 	/**************************************************************************************/
 	/********************************* Sub-feature events *********************************/
-	/**************************************************************************************/	
+	/**************************************************************************************/
 	/**
 	 * For feature panel validating
 	 * @param {ol.Feature}
@@ -332,7 +332,7 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.fireEvent("sessioncomplete", feature);
 	},
-	
+
 	/**
 	 * When user cancel modification
 	 * @param {ol.Feature}
@@ -357,7 +357,7 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.fireEvent("sessioncomplete", feature);
 	},
-	
+
 	/**
 	 * When the user cancel his changes
 	 * @param {ol.Feature}
@@ -366,7 +366,7 @@ Ext.define('Ck.edit.Controller', {
 		this.switchPanel(this.historyPanel);
 		this.fireEvent("sessioncomplete", feature);
 	},
-	
+
 	/**************************************************************************************/
 	/*************************************** Utils ****************************************/
 	/**************************************************************************************/
@@ -381,7 +381,7 @@ Ext.define('Ck.edit.Controller', {
 			return this.getLayer().getSource();
 		}
 	},
-	
+
 	/**
 	 * Display the specified panel
 	 * @param {Ext.panel.Panel} The panel to display
@@ -397,13 +397,13 @@ Ext.define('Ck.edit.Controller', {
 			this.featurePanel.setVisible(this.featurePanel == panel);
 		}
 	},
-	
+
 	/**
 	 * Cancel all modifications.
 	 */
 	cancel: function() {
 		var data, ft;
-		
+
 		if(this.getIsWMS()) {
 			this.wfsSource.clear();
 		} else {
@@ -430,9 +430,9 @@ Ext.define('Ck.edit.Controller', {
 		}
 		this.history.store.removeAll();
 	},
-	
+
 	close: function() {
-		
+
 		if(this.vertex) {
 			this.vertex.close.bind(this.vertex)();
 		}
@@ -442,13 +442,13 @@ Ext.define('Ck.edit.Controller', {
 		if(this.feature) {
 			this.feature.close.bind(this.feature)();
 		}
-		
+
 		var win = this.view.up('window');
 		if(win) {
 			win.close();
 		}
 	},
-	
+
 	/**
 	 * Save the changes. If it concerne
 	 */
@@ -457,38 +457,38 @@ Ext.define('Ck.edit.Controller', {
 			var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
 			var geometryName = this.getLayer().getExtension("geometryColumn");
 			var multiForReal = this.getLayer().getExtension("multiForReal");
-			
+
 			var currSrs = this.getMap().getProjection().getCode();
 			var lyrSrs = ope.getSrs();
-			
+
 			var f = Ck.create("ol.format.WFS", {
 				featureNS: "http://mapserver.gis.umn.edu/mapserver",
-				gmlFormat: Ck.create("ol.format.GML2"),
+				//gmlFormat: Ck.create("ol.format.GML2"),
 				featureType: ope.getLayers()
 			});
-			
+
 			// Loop on history store items
-			for(var i = 0; i < this.history.store.getCount(); i++) {				
+			for(var i = 0; i < this.history.store.getCount(); i++) {
 				data = this.history.store.getAt(i).data;
 				ft = data.feature
-				
+
 				if(currSrs != lyrSrs) {
 					ft.getGeometry().transform(currSrs, lyrSrs);
 				}
-				
+
 				if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
 					ft.set(geometryName, ft.getGeometry());
 					ft.unset("geometry");
-					ft.setGeometryName(geometryName);	
+					ft.setGeometryName(geometryName);
 				}
-				
+
 				// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
 				var geom = ft.getGeometry();
 				if(multiForReal === true && data.actionId != 3 && !Ext.isEmpty(geom) && geom.getType().indexOf("Multi") == -1) {
 					var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
 					ft.setGeometry(mGeom);
 				}
-				
+
 				switch(data.actionId) {
 					case 0:
 						// Create
@@ -507,9 +507,9 @@ Ext.define('Ck.edit.Controller', {
 						break;
 				}
 			}
-			
+
 			var lyr = ope.getLayers().split(":");
-			
+
 			transacOpt = {
 				featureNS		: "feature",
 				srsName			: currSrs,
@@ -518,17 +518,17 @@ Ext.define('Ck.edit.Controller', {
 					schemaLocation: "wfs"
 				}
 			};
-			
+
 			if(!Ext.isEmpty(lyr[1])) {
 				transacOpt.featurePrefix = lyr[1];
 			}
-			
+
 			var transac = f.writeTransaction(inserts, updates, deletes, transacOpt);
-			
+
 			// Temporary parent to get the whole innerHTML
 			var pTemp = document.createElement("div");
 			pTemp.appendChild(transac);
-			
+
 			// Do the getFeature query
 			Ck.Ajax.post({
 				scope: this,
@@ -540,8 +540,8 @@ Ext.define('Ck.edit.Controller', {
 					ins = response.responseXML.getElementsByTagName("totalInserted")[0];
 					upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
 					del = response.responseXML.getElementsByTagName("totalDeleted")[0];
-					
-					if(ins || upd || del) {					
+
+					if(ins || upd || del) {
 						var msg = "Registration successfully : <br/>";
 						if(ins && ins.innerHTML != "0") {
 							msg += "Inserted : " + ins.innerHTML + "<br/>";
@@ -552,7 +552,7 @@ Ext.define('Ck.edit.Controller', {
 						if(del && del.innerHTML != "0") {
 							msg += "Deleted : " + del.innerHTML;
 						}
-						
+
 						Ext.Msg.show({
 							title: "Edition",
 							message: msg,
@@ -572,7 +572,7 @@ Ext.define('Ck.edit.Controller', {
 						pre.appendChild(text);
 						msg += ". Error message : <br/>" + pre.innerHTML;
 					}
-					
+
 					Ext.Msg.show({
 						title: "Edition",
 						message: msg,
@@ -583,21 +583,21 @@ Ext.define('Ck.edit.Controller', {
 			});
 		}
 	},
-	
+
 	reset: function() {
 		if(this.history) {
 			this.history.reset.bind(this.history)();
 		}
-		
+
 		if(this.getIsWMS()) {
 			this.wfsSource.clear();
-			
+
 			// Redraw
 			src = this.getLayer().getSource();
 			var params = src.getParams();
 			params.t = new Date().getMilliseconds();
 			src.updateParams(params);
 		}
-		
+
 	}
 });

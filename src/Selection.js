@@ -482,7 +482,6 @@ Ext.define('Ck.Selection', {
 
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
-			gmlFormat: Ck.create("ol.format.GML2"),
 			featureType: ope.getLayers().split(",")
 		});
 
@@ -539,7 +538,6 @@ Ext.define('Ck.Selection', {
 					if(ns[n].length > 0) {
 						format = Ck.create("ol.format.WFS", {
 							featureNS: n,
-							gmlFormat: Ck.create("ol.format.GML2"),
 							featureType: ns[n]
 						});
 
