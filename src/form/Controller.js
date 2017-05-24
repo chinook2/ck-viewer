@@ -1411,6 +1411,10 @@ Ext.define('Ck.form.Controller', {
 				}
 
 				values[field] = val;
+				// Hack: prevent return values as simple array if only one grid
+			   if (f.asArray === false) {
+				values[field + '_dummy'] = '';
+			   }
 			}
 			if(f && resetDirty){
 				f.resetOriginalValue();
