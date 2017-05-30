@@ -480,11 +480,14 @@ Ext.define('Ck.Selection', {
 		var off = layer.ckLayer.getOffering("wfs");
 		var ope = off.getOperation("GetFeature");
 
+		/*
 		var f = Ck.create("ol.format.WFS", {
 			featureNS: "http://mapserver.gis.umn.edu/mapserver",
 			featureType: ope.getLayers().split(",")
 		});
+		*/
 
+		var f = new ol.format.WFS();	
 		var gf = f.writeGetFeature({
 			srsName			: this.getMap().getProjection().getCode(),
 			featureTypes	: ope.getLayers().split(","),
@@ -510,6 +513,7 @@ Ext.define('Ck.Selection', {
 			url: this.getMap().getMapUrl(ope.getUrl()),
 			rawData: new XMLSerializer().serializeToString(gf),
 			success: function(layer, ope, readOptions, response) {
+				/*
 				var ly, ns = {
 					"http://mapserver.gis.umn.edu/mapserver": []
 				};
@@ -544,6 +548,9 @@ Ext.define('Ck.Selection', {
 						features = Ext.Array.merge(features, format.readFeatures(response.responseXML, readOptions));
 					}
 				}
+				*/
+				var format = new ol.format.WFS();
+				var features = format.readFeatures(response.responseXML, readOptions);
 
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
