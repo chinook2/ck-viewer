@@ -1,4 +1,4 @@
-﻿/**
+/**
  *
  */
 Ext.define('Ck.form.plugin.ReadOnly', {
@@ -47,7 +47,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 
 				// Try to resolve bug #1468
 				if(cmp.displayField){
-					cmp.getStore().on('load', this.setReadOnly, this);	
+					cmp.getStore().on('load', this.setReadOnly, this);
 				}
 
 				// Add field level start/stop Editing functions
@@ -73,8 +73,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	},
 
 	destroy: function () {
-		if(this.cmp){
-			var ctrl = this.cmp.lookupController();
+		var cmp = this.getCmp();
+		if(cmp){
+			var ctrl = cmp.lookupController();
 			if(ctrl) ctrl.clearListeners();
 		}
 
@@ -115,7 +116,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
-
+		if (!cmp){
+			return;
+		}
 		// Field have to be rendered
 		if(!cmp.rendered) {
 			return;
