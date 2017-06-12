@@ -451,7 +451,8 @@ Ext.define('Ck.Selection', {
 					height: size[1],
 					info_format: "application/vnd.ogc.gml",
 					geometriefeature: "bounds",
-					mod: "sheet"
+					mod: "sheet",
+					env: source.getParams().ENV
 				},
 				success: function(layer, response) {
 					var parser = new ol.format.WMSGetFeatureInfo();
@@ -487,7 +488,17 @@ Ext.define('Ck.Selection', {
 		});
 		*/
 
-		var f = new ol.format.WFS();	
+		// Pass WMS ENV variables to WFS Query !
+		var env = '';
+		var wmsSrc = layer.get("sources").wms;
+		if(Ext.isArray(wmsSrc)) {
+			wmsSrc = wmsSrc[0];
+			var p = wmsSrc.getParams() || {};
+			env = '?ENV=' + p.ENV;
+		}
+		//
+
+		var f = new ol.format.WFS();
 		var gf = f.writeGetFeature({
 			srsName			: this.getMap().getProjection().getCode(),
 			featureTypes	: ope.getLayers().split(","),
@@ -510,7 +521,7 @@ Ext.define('Ck.Selection', {
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
-			url: this.getMap().getMapUrl(ope.getUrl()),
+			url: this.getMap().getMapUrl(ope.getUrl()) + env,
 			rawData: new XMLSerializer().serializeToString(gf),
 			success: function(layer, ope, readOptions, response) {
 				/*
