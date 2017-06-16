@@ -21,14 +21,15 @@ Ext.define('Ck.map.action.Goto', {
 	 */
 	doAction: function(btn) {
 		if(!this.win) {
-			this.win = Ext.create("Ext.Window", {
+			this.win = Ext.create(this.classWindow, {
 				title: 'Coordinates',
 				autoHeight: true,
-				width: 300,
+				modal: false,
+				width: 350,
 				layout: 'fit',
 				closeAction: 'hide',
-				collapsible: true,
-				resizable: true,
+				//collapsible: true,
+				//resizable: true,
 				items: {
 					xtype: 'ckgoto',
 					ckview: this.getCkView().getView(),
