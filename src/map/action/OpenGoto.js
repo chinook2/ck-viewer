@@ -12,8 +12,7 @@ Ext.define('Ck.map.action.Goto', {
 	itemId: 'opengoto',
 	text: '',
 
-	// iconCls: 'fa fa-search',
-	iconCls: 'fa fa-crosshairs',
+	iconCls: 'ckfont ck-crosshairs',
 	tooltip: 'Open go to coordinates panel',
 
 	/**
