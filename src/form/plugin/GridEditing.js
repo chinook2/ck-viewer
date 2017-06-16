@@ -9,6 +9,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	deleterow: true,
 	dummyrow: true,
 
+	_hasdummy: false,
+
 	init: function(grid) {
 		if(this.disabled) return;
 
@@ -153,6 +155,12 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				this.deleteNewRow();
 				this.addNewRow();
 			},
+			clear: function (store) {
+				// When remove all records, add dummy row if was here
+				if (this._hasdummy === true) {
+					this.addNewRow();
+				}
+			},
 			scope: this
 		});
 	},
@@ -193,6 +201,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			store.add({
 				dummy: true
 			});
+			this._hasdummy = true;
 		}
 	},
 
@@ -200,7 +209,10 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		// Remove empty field for new record...
 		var store = this.grid.getStore();
 		var rec = store.findRecord('dummy', true);
-		if(rec) store.remove(rec);
+		if(rec) {
+			store.remove(rec);
+			this._hasdummy = false;
+		}
 	},
 
 	deleteRow: function(grid, rowIndex) {
