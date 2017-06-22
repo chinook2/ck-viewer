@@ -13,7 +13,13 @@ Ext.define('Ck.map.action.Goto', {
 	text: '',
 
 	iconCls: 'ckfont ck-crosshairs',
-	tooltip: 'Open go to coordinates panel',
+	tooltip: 'Open Go to Coordinates',
+	config: {
+		winWidth: 400,
+		winHeight: 200,
+		winTitle: 'Go to Coordinates',
+		winCollapsible: true
+	},
 
 	/**
 	 * Create and display a windows with import form
@@ -21,13 +27,14 @@ Ext.define('Ck.map.action.Goto', {
 	doAction: function(btn) {
 		if(!this.win) {
 			this.win = Ext.create(this.classWindow, {
-				title: 'Coordinates',
+				title: this.getWinTitle(),
+				width: this.getWinWidth(),
+				height: this.getWinHeight(),
 				autoHeight: true,
 				modal: false,
-				width: 350,
 				layout: 'fit',
 				closeAction: 'hide',
-				//collapsible: true,
+				collapsible: this.getWinCollapsible(),
 				//resizable: true,
 				items: {
 					xtype: 'ckgoto',
