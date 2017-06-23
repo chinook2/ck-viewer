@@ -132,8 +132,8 @@ Ext.define('Ck.Action', {
 						this.doAction.apply(this, arguments);
 					}
 				} catch (e) {
-					Ck.log(e.message);
 					Ck.Notify.error("Chinook Action Error :: " + e.message);
+					Ck.log(e.stack);
 				}
 			},
 
@@ -143,9 +143,8 @@ Ext.define('Ck.Action', {
 				try {
 					this.toggleAction.apply(this, arguments);
 				} catch (e) {
-					Ck.log(e.message);
-					Ck.log(e.stack);
 					Ck.Notify.error("Chinook Action Error :: " + e.message);
+					Ck.log(e.stack);
 				}
 			},
 
