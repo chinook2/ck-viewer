@@ -18,7 +18,8 @@ Ext.define('Ck.map.action.Goto', {
 		winWidth: 400,
 		winHeight: 200,
 		winTitle: 'Go to Coordinates',
-		winCollapsible: true
+		winCollapsible: true,
+		clearCoordinates: false
 	},
 
 	/**
@@ -39,12 +40,18 @@ Ext.define('Ck.map.action.Goto', {
 				items: {
 					xtype: 'ckgoto',
 					ckview: this.getCkView().getView(),
+					clearCoordinates: this.getClearCoordinates(),
 					openner: this
 				}
 			});
 		}
-
+		
 		this.win.show();
+
+		if (this.getClearCoordinates()===true) {
+			this.win.down('ckgoto').getController().clearCoordinates();
+		}
+
 	},
 
 	close: function() {

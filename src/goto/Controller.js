@@ -46,7 +46,7 @@ Ext.define('Ck.goto.Controller', {
 		if (!this.mapProj) {
 			this.mapProj = this.getOlView().getProjection();
 		}
-		
+
 		this.layer = Ck.create("ol.layer.Vector", {
 			id: this.getConfig("layerName"),
 			source: new ol.source.Vector({
@@ -72,7 +72,18 @@ Ext.define('Ck.goto.Controller', {
 		// this.dms.goto = this;
 		// this.dm.goto = this;
 
-		this.loadCenter();
+		// Init projection with map projection
+		var projCode = this.mapProj.getCode();
+		if(view.getComponent("projection").getStore().find("code", projCode) != -1) {
+			view.getComponent("projection").setValue(projCode);
+		} else {
+			Ck.error("The map projection does not exists in the combobox store")
+		}
+
+		if (view.clearCoordinates === false) {
+			this.loadCenter();
+		}
+
 	},
 
 	projChange: function(cbx, value) {
@@ -88,10 +99,11 @@ Ext.define('Ck.goto.Controller', {
 			fcUnits.getComponent("units-dec").setValue(true);
 		}
 
+		var geom = this.getGeometry();
 		if(oldProj) {
 			// Reproject coordinates
 			this.loadCoordinates({
-				point: this.getGeometry(),
+				point: geom,
 				proj: oldProj
 			})
 		}
@@ -107,13 +119,6 @@ Ext.define('Ck.goto.Controller', {
 
 	loadCenter: function() {
 		var geom = new ol.geom.Point(this.getOlView().getCenter());
-		var projCode = this.mapProj.getCode();
-
-		if(this.view.getComponent("projection").getStore().find("code", projCode) != -1) {
-			this.view.getComponent("projection").setValue(projCode);
-		} else {
-			Ck.error("The map projection does not exists in the combobox store")
-		}
 
 		this.loadCoordinates({
 			point: geom,
@@ -127,31 +132,46 @@ Ext.define('Ck.goto.Controller', {
 	 * @params {Object} Object with point and proj members
 	 */
 	loadCoordinates: function(data) {
-		if(this.proj) {
-			var fcUnit = ["dec"];
-			/* Disable for now
-			if(this.proj.getUnits() == "degrees") {
-				fcUnit.push("dms", "dm")
-			} */
+		if(!this.proj) return;
+		var fcUnit = ["dec"];
+		/* Disable for now
+		if(this.proj.getUnits() == "degrees") {
+			fcUnit.push("dms", "dm")
+		} */
 
-			// Transform
-			var pt = data.point;
+		// Transform
+		var pt = data.point;
+		var c = null;
+
+		if (pt) {
 			if(!ol.proj.equivalent(data.proj, this.proj)) {
 				pt.transform(data.proj, this.proj);
 			}
 
 			// Truncate values to number of desired decimal
 			var prec = (this.proj.getUnits() == "degrees")? this.getConfig("degPrecision") : this.getConfig("mPrecision");
-			var c = pt.getCoordinates();
+			c = pt.getCoordinates();
 
-			c[0] = Math.round(c[0] * Math.pow(10, prec)) / Math.pow(10, prec);
-			c[1] = Math.round(c[1] * Math.pow(10, prec)) / Math.pow(10, prec);
-
-			fcUnit.forEach(function(id) {
-				this[id].setCoordinates(c);
-				this[id].setProjection(this.proj);
-			}.bind(this));
+			c[0] = parseFloat(c[0]).toFixed(prec);
+			c[1] = parseFloat(c[1]).toFixed(prec);
 		}
+
+		fcUnit.forEach(function(id) {
+			this[id].setCoordinates(c);
+			this[id].setProjection(this.proj);
+		}.bind(this));
+	},
+
+	clearCoordinates: function () {
+		var fcUnit = ["dec"];
+		/* Disable for now
+		if(this.proj.getUnits() == "degrees") {
+			fcUnit.push("dms", "dm")
+		} */
+
+		fcUnit.forEach(function(id) {
+			this[id].setCoordinates(null);
+		}.bind(this));
 	},
 
 	/**
@@ -160,25 +180,32 @@ Ext.define('Ck.goto.Controller', {
 	 */
 	getGeometry: function() {
 		var c = this[this.unit].getCoordinates();
+		if (c === null) {
+			return false;
+		}
 		return new ol.geom.Point(c);
 	},
 
 	goTo: function() {
 		var geom = this.getGeometry();
+		if(this.proj && geom) {
+			// Transform coordinate to map proj
+			if(!ol.proj.equivalent(this.proj, this.mapProj)) {
+				geom.transform(this.proj, this.mapProj);
+			}
 
-		// Transform coordinate to map proj
-		if(!ol.proj.equivalent(this.proj, this.mapProj)) {
-			geom.transform(this.proj, this.mapProj);
+			var ft = new ol.Feature({
+				geometry: geom
+			});
+			this.getMap().setCenter(geom.getCoordinates());
+			this.layer.getSource().addFeature(ft);
 		}
-
-		var ft = new ol.Feature({
-			geometry: geom
-		});
-		this.getMap().setCenter(geom.getCoordinates());
-		this.layer.getSource().addFeature(ft);
 	},
 
 	clearMarker: function() {
 		this.layer.getSource().clear();
+		if (this.getView().clearCoordinates === true) {
+			this.clearCoordinates();
+		}
 	}
 });

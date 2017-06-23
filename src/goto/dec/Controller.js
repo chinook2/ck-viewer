@@ -8,7 +8,7 @@
 Ext.define('Ck.goto.dec.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckgoto.dec',
-	
+
 	setProjection: function(proj) {
 		if(proj.getUnits() == "m") {
 			this.view.getComponent("xPanel").getComponent("xUnit").setHtml("&nbsp;m");
@@ -18,18 +18,24 @@ Ext.define('Ck.goto.dec.Controller', {
 			this.view.getComponent("yPanel").getComponent("yUnit").setHtml("&nbsp;°");
 		}
 	},
-	
+
 	setCoordinates: function(c) {
+		if (c === null) {
+			c = ['',''];
+		}
 		this.view.getComponent("xPanel").getComponent("x").setValue(c[0]);
 		this.view.getComponent("yPanel").getComponent("y").setValue(c[1]);
 	},
-	
+
 	getCoordinates: function() {
 		var c = [];
-		
-		c[0] = parseFloat(this.view.getComponent("xPanel").getComponent("x").getValue());
-		c[1] = parseFloat(this.view.getComponent("yPanel").getComponent("y").getValue());
-		
-		return c;
+
+		var x = this.view.getComponent("xPanel").getComponent("x").getValue();
+		var y = this.view.getComponent("yPanel").getComponent("y").getValue();
+
+		if (x === '' && y === '') {
+			return null;
+		}
+		return [parseFloat(x), parseFloat(y)];
 	}
 });

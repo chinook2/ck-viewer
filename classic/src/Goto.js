@@ -4,13 +4,14 @@
 Ext.define("Ck.Goto", {
 	extend: "Ext.form.Panel",
 	alias: "widget.ckgoto",
-	
+
 	requires: [
 		"Ck.goto.*",
 		"Ck.store.Projection"
 	],
-	
+
 	controller: "ckgoto",
+	clearCoordinates: false,
 	
 	config: {
 		bodyPadding: 10,
@@ -18,11 +19,11 @@ Ext.define("Ck.Goto", {
 			width: "100%"
 		}
 	},
-	
+
 	listeners: {
 		afterrender: "render"
 	},
-	
+
 	items: [{
 		xtype: "combobox",
 		itemId: "projection",
@@ -80,4 +81,4 @@ Ext.define("Ck.Goto", {
 		text: "Go to position",
 		handler: "goTo"
 	}]
-}); 
+});
