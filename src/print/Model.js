@@ -9,11 +9,11 @@ Ext.define('Ck.print.Model', {
 	data: {
 		printParam: {
 			resolution: 1,
-			printLayout: "default-layout",
+			layout: "default-layout",
 			outputFormat: "pdf",
 			dpi: 96,
 			format: "a4",
-			orientation: 'p'
+			orientation: {orientation: 'p'}
 		},
 		previewParam: {
 			fill: {},
@@ -23,11 +23,18 @@ Ext.define('Ck.print.Model', {
 			}
 		}
 	},
+
 	
 	/**
 	 * @ignore
 	 */
 	stores: {
+		layouts: {
+			fields: ["id", "label", "package"],
+			data: [
+				{id: "default-layout", label: "Default"}
+			]
+		},
 		outputformats: {
 			fields: ["id", "label"],
 			data: [

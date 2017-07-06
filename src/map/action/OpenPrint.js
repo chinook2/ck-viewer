@@ -22,27 +22,41 @@ Ext.define('Ck.map.action.OpenPrint', {
 
 	itemId: 'openprint',
 	text: '',
-
+	
 	iconCls: 'fa fa-print',
 	tooltip: 'Open print panel',
+	
+	/**
+	 * Object to override window instanciation parameters
+	 */
+	winOpt: {},
+	
+	/**
+	 * Object to override print instanciation parameters
+	 */
+	printOpt: {},
 
 	/**
 	 * Create and display a windows with print form
 	 */
 	doAction: function(btn) {
 		if(!this.win) {
-			this.win = Ext.create(this.classWindow, {
+			this.printOpt = Ext.applyIf(this.printOpt, {
+				xtype: 'ckprint',
+				ckview: this.getCkView().getView(),
+				openner: this
+			});
+			
+			this.winOpt = Ext.applyIf(this.winOpt, {
 				title: 'Print',
-				// height: 400,
 				width: 400,
 				layout: 'fit',
+				modal: false,
 				closeAction: 'hide',
-				items: {
-					xtype: 'ckprint',
-					ckview: this.getCkView().getView(),
-					openner: this
-				}
+				items: [this.printOpt]
 			});
+			
+			this.win = Ext.create(this.classWindow, this.winOpt);
 		}
 
 		this.win.show();

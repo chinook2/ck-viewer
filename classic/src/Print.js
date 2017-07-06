@@ -41,8 +41,12 @@ Ext.define("Ck.Print", {
 		itemId: "printLayout",
 		fieldLabel: "Layout",
 		name: "printLayout",
+		displayField: "label",
+		valueField: "id",
 		editable: false,
-		store: ["default-layout"]
+		bind: {
+			"store": "{printLayouts}"
+		}
 	},{
 		xtype: "combo",
 		itemId: "outputFormat",
@@ -91,10 +95,10 @@ Ext.define("Ck.Print", {
 	
 	buttons: [{
 		text: "Print",
-		itemId: "print"
+		handler: "beforePrint"
 	},{
 		text: "Cancel",
-		itemId: "cancel"
+		handler: "cancel"
 	}],
 
 	cls: "ck-print"
