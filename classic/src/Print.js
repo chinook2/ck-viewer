@@ -5,17 +5,17 @@
 Ext.define("Ck.Print", {
 	extend: "Ext.form.Panel",
 	alias: "widget.ckprint",
-	
+
 	requires: [
 		"Ck.print.*"
 	],
 
 	controller: "ckprint",
-	
+
 	viewModel: {
 		type: "ckprint"
 	},
-	
+
 	config: {
 		bodyPadding: 10,
 		defaultType: "textfield",
@@ -23,7 +23,7 @@ Ext.define("Ck.Print", {
 			width: "100%"
 		}
 	},
-	
+
 	items: [{
 		fieldLabel: "Title",
 		itemId: "title",
@@ -92,7 +92,7 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Lanscape", name: "orientation", inputValue: "l"}
 		]
 	}],
-	
+
 	buttons: [{
 		text: "Print",
 		handler: "beforePrint"
@@ -101,5 +101,5 @@ Ext.define("Ck.Print", {
 		handler: "cancel"
 	}],
 
-	cls: "ck-print"
+	cls: "ckprint"
 });

@@ -24,13 +24,13 @@ Ext.define('Ck.print.Model', {
 		}
 	},
 
-	
+
 	/**
 	 * @ignore
 	 */
 	stores: {
 		layouts: {
-			fields: ["id", "label", "package"],
+			fields: ["id", "label", "packageName"],
 			data: [
 				{id: "default-layout", label: "Default"}
 			]

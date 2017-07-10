@@ -22,15 +22,15 @@ Ext.define('Ck.map.action.OpenPrint', {
 
 	itemId: 'openprint',
 	text: '',
-	
-	iconCls: 'fa fa-print',
+
+	iconCls: 'ckfont ck-print',
 	tooltip: 'Open print panel',
-	
+
 	/**
 	 * Object to override window instanciation parameters
 	 */
 	winOpt: {},
-	
+
 	/**
 	 * Object to override print instanciation parameters
 	 */
@@ -46,7 +46,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 				ckview: this.getCkView().getView(),
 				openner: this
 			});
-			
+
 			this.winOpt = Ext.applyIf(this.winOpt, {
 				title: 'Print',
 				width: 400,
@@ -55,7 +55,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 				closeAction: 'hide',
 				items: [this.printOpt]
 			});
-			
+
 			this.win = Ext.create(this.classWindow, this.winOpt);
 		}
 
