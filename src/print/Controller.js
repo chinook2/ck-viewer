@@ -176,31 +176,26 @@ Ext.define('Ck.print.Controller', {
 	/**
 	 * Render the HTML layout just to calculate some variables. Remove it after
 	 *		- pageSize : printed page in CENTIMETERS (with margins) -> use to create pageCanvas
-	 *		- bodySize : printed page in PIXEL (without margins) -> use to create bodyCanvas
-	 *		- mapExtent : extent of the map in METERS -> use to draw preview
+	 *		- mapSize : size of the map in METERS -> use to draw preview
 	 *		- canvasSize : canvas size to print in PIXEL -> use for making div
 	 */
 	renderLayout: function() {
 		if (this.printLayout==='') return;
 
 		var parser = new DOMParser();
-		htmlLayout = parser.parseFromString(this.printLayout, "text/html");
-		var pageDiv = htmlLayout.getElementById("ckPrint-page");
-		if (!pageDiv) return;
+		var htmlLayout = parser.parseFromString(this.printLayout, "text/html");
+		this.pageDiv = htmlLayout.getElementById("ckPrint-page");
+		if (!this.pageDiv) return;
 
 		if(this.layoutDiv) {
-			this.layoutDiv.parentNode.removeChild(this.layoutDiv);
+			Ext.get(this.layoutDiv).remove();
 		}
-
-		var layoutDiv = document.createElement("div");
-		layoutDiv.style.position = "absolute";
-		layoutDiv.style.zIndex = 500;
-		layoutDiv.style.left = "100%"; // Comment to display layout
 
 		// Size of final print page in cm
 		this.pageSize = Ck.pageSize[this.get("printParam.format")];
 		if (!this.pageSize) return;
 		this.pageSize = this.pageSize.slice(0); // Clone
+		// transform to cm
 		this.pageSize[0] /= 10;
 		this.pageSize[1] /= 10;
 
@@ -210,30 +205,32 @@ Ext.define('Ck.print.Controller', {
 		}
 
 		// Apply DPI to get number of dot (pixel) needed
-		pageDiv.style.width = Math.floor((this.pageSize[0] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
-		pageDiv.style.height = Math.floor((this.pageSize[1] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
+		this.pageDiv.style.width = Math.floor((this.pageSize[0] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
+		this.pageDiv.style.height = Math.floor((this.pageSize[1] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
 
-		//
-		document.body.appendChild(layoutDiv);
-		layoutDiv.appendChild(pageDiv);
+		// Insert pageDiv in layout div
+		var dh = Ext.DomHelper;
+		this.layoutDiv = dh.append(document.body, {
+			tag: 'div',
+			id: 'ckprint-layoutdiv',
+			style: {
+				position: 'absolute',
+				left: "100%", // Comment to display layout
+				zIndex: 500
+			}
+		});
+		this.layoutDiv.appendChild(this.pageDiv);
 
-		this.pageDiv = pageDiv;
-		this.layoutDiv = layoutDiv;
+		// Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
+		var mapDiv = Ext.get("ckPrint-map");
+		this.mapDiv = mapDiv.dom;
+		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 
-		// Now calculate some variable from rendered page div
-		var mapDiv = Ext.get("ckPrint-map").dom;
-		var mapSize = [mapDiv.offsetWidth, mapDiv.offsetHeight];
+		// Calculate mapSize
 		var res = this.get("printParam.resolution");
-
-		// Calculate mapExtent
-		this.mapExtent = [
-			(mapSize[0] * res),
-			(mapSize[1] * res)
-		];
-
-		this.canvasSize = [
-			this.mapExtent[0] / res,
-			this.mapExtent[1] / res
+		this.mapSize = [
+			(this.canvasSize[0] * res),
+			(this.canvasSize[1] * res)
 		];
 	},
 
@@ -241,27 +238,20 @@ Ext.define('Ck.print.Controller', {
 	 * Update the preview feature from layout, format and orientation
 	 */
 	updatePreview: function() {
-		var vm = this.getViewModel();
-		var olView = this.getMap().getOlView();
-
 		this.renderLayout();
-		if(!this.mapExtent) return;
+		if(!this.mapSize) return;
 
-		var center = olView.getCenter();
+		var center = this.getMap().getOlView().getCenter();
 		if(this.feature) {
-			center = this.feature.getGeometry().getExtent();
-			center = [
-				(center[2] + center[0]) / 2,
-				(center[3] + center[1]) / 2
-			];
+			center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 			this.previewLayer.getSource().clear();
 		}
 
 		var coordinate = [
-			center[0] - (this.mapExtent[0] / 2),
-			center[1] - (this.mapExtent[1] / 2),
-			center[0] + (this.mapExtent[0] / 2),
-			center[1] + (this.mapExtent[1] / 2)
+			center[0] - (this.mapSize[0] / 2),
+			center[1] - (this.mapSize[1] / 2),
+			center[0] + (this.mapSize[0] / 2),
+			center[1] + (this.mapSize[1] / 2)
 		];
 
 		this.feature = new ol.Feature({
@@ -309,48 +299,48 @@ Ext.define('Ck.print.Controller', {
 		// Save current view param
 		this.oldRes = this.getOlView().getResolution();
 		this.oldCenter = this.getOlView().getCenter();
+		this.mapTarget = Ext.get(this.getOlMap().getTarget()).dom;
+		if(!this.canvasSize) return;
 
 		this.getOlMap().once('postcompose', function(event) {
-			// First print to display fake map on the screen during the real print
+			// First display fake map on the screen during the real print
 			var mapCanvas = event.context.canvas;
 			var mapCtx = mapCanvas.getContext("2d");
+			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 
-			uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+			var dh = Ext.DomHelper;
 
-			// Create the img element
-			this.fakeMap = document.createElement("img");
-			this.fakeMap.src = uri;
-
-			var target = this.getMap().getView().getEl().dom;
-			target.firstChild.appendChild(this.fakeMap);
+			// Create the img element and add over map
+			this.fakeMap = dh.append(this.mapTarget, {
+				tag: 'img',
+				src: uri
+			});
 
 			// Move map to invisible div to print with right resolution
-			var printDiv = document.createElement("div");
-			this.printDiv = printDiv;
-			document.body.appendChild(printDiv);
-			printDiv.style.position = "absolute";
-			printDiv.style.top = (screen.height) + "px";
-			printDiv.style.width = (this.canvasSize[0]).toString() + "px";
-			printDiv.style.height = (this.canvasSize[1]).toString() + "px";
-
-			this.getOlMap().setTarget(printDiv);
+			this.printDiv = dh.append(document.body, {
+				tag: 'div',
+				id: 'ckprint-div',
+				style: {
+					position: 'absolute',
+					top: (screen.height) + "px", // Comment to display div
+					width: (this.canvasSize[0]).toString() + "px",
+					height: (this.canvasSize[1]).toString() + "px"
+				}
+			});
+			this.getOlMap().setTarget(this.printDiv);
 
 			// Hide preview vector
 			this.previewLayer.setVisible(false);
 
 			// Zoom on the desired extent
-			var extent = this.feature.getGeometry().getExtent();
-			Ck.zoomToExtent(extent);
+			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
+			var res = this.get("printParam.resolution");
+			this.getMap().setCenter(center);
+			this.getMap().setResolution(res);
 
-			// this.getMap().once doesn't exists :-(
-			this.layersEndLoad = this.getMap().on({
-				destroyable: true,
-				"layersloaded": function() {
-					// Unset layersloaded event
-					this.layersEndLoad.destroy();
-					this.print();
-				},
-				scope: this
+			// Call print when all layers are drawed
+			this.getMap().on('layersloaded', this.print, this, {
+				single: true
 			});
 
 			this.getMap().redraw();
@@ -365,20 +355,22 @@ Ext.define('Ck.print.Controller', {
 	print: function() {
 		this.getOlMap().once('postcompose', function(event) {
 			this.integratePrintValue();
+			// refresh mapDiv after integratePrintValue
+			this.mapDiv = Ext.get("ckPrint-map").dom;
 
-			uri = event.context.canvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-			this.mapImg = document.createElement("img");
-
-			this.mapImg.src = uri;
-			var target = Ext.get("ckPrint-map").dom;
-			target.appendChild(this.mapImg);
-
-			html2canvas(this.pageDiv, {
-				printControl: this,
-				logging: true,
-				allowTaint: true,
-				onrendered: this.finishPrinting
+			var uri = event.context.canvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+			var dh = Ext.DomHelper;
+			this.mapImg = dh.append(this.mapDiv, {
+				tag: 'img',
+				src: uri
 			});
+
+			// Convert layout page to canvas
+			html2canvas(this.pageDiv, {
+				allowTaint: true
+			}).then(function(canvas) {
+			    this.finishPrinting(canvas);
+			}.bind(this));
 		}, this);
 		this.getOlMap().renderSync();
 	},
@@ -388,14 +380,14 @@ Ext.define('Ck.print.Controller', {
 	 * @param {DOMElement} The canvas of the layout
 	 */
 	finishPrinting: function(canvas) {
-		switch(this.printControl.get("printParam.outputFormat")) {
+		switch(this.get("printParam.outputFormat")) {
 			case "jpg":
 			case "png":
-				uri = canvas.toDataURL('image/' + this.printControl.get("printParam.outputFormat")).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+				var uri = canvas.toDataURL('image/' + this.get("printParam.outputFormat")).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 				// Pop the download prompt
 				var downloadLink = document.createElement("a");
 				downloadLink.href = uri;
-				downloadLink.download = "map." + this.printControl.get("printParam.outputFormat");
+				downloadLink.download = "map." + this.get("printParam.outputFormat");
 				document.body.appendChild(downloadLink);
 				downloadLink.click();
 				document.body.removeChild(downloadLink);
@@ -403,8 +395,8 @@ Ext.define('Ck.print.Controller', {
 
 			case "pdf":
 				var pdf = new jsPDF({
-					orientation: this.printControl.get("printParam.orientation").orientation,
-					format: this.printControl.get("printParam.format"),
+					orientation: this.get("printParam.orientation").orientation,
+					format: this.get("printParam.format"),
 					unit: "cm"
 				});
 				var imgURL = canvas.toDataURL("image/jpg");
@@ -413,24 +405,24 @@ Ext.define('Ck.print.Controller', {
 					format: 'jpeg',
 					x: 0,
 					y: 0,
-					w: this.printControl.pageSize[0],
-					h: this.printControl.pageSize[1]
+					w: this.pageSize[0],
+					h: this.pageSize[1]
 				});
 				pdf.save("map.pdf");
 		}
 
 		// Replace the map at the right place and remove temp div
-		this.printControl.getOlMap().setTarget(this.printControl.getMap().getView().getEl().dom.firstChild);
-		this.printControl.printDiv.parentNode.removeChild(this.printControl.printDiv);
-		Ext.get("ckPrint-map").dom.removeChild(this.printControl.mapImg);
+		this.printDiv.parentNode.removeChild(this.printDiv);
+		this.mapDiv.removeChild(this.mapImg);
 
 		// Reset center, resolution and preview
-		this.printControl.previewLayer.setVisible(true);
-		this.printControl.getOlView().setCenter(this.printControl.oldCenter);
-		this.printControl.getOlView().setResolution(this.printControl.oldRes);
+		this.previewLayer.setVisible(true);
+		this.getOlMap().setTarget(this.mapTarget);
+		this.getMap().setCenter(this.oldCenter);
+		this.getMap().setResolution(this.oldRes);
 
 		// Delete fake image
-		this.printControl.getMap().getView().getEl().dom.firstChild.removeChild(this.printControl.fakeMap);
+		this.mapTarget.removeChild(this.fakeMap);
 	},
 
 	/**
