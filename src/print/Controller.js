@@ -92,10 +92,14 @@ Ext.define('Ck.print.Controller', {
 		// Use ol.interaction.Translate
 		// Add DragFeature interaction to move preview
 		this.moveInteraction = new ol.interaction.Translate({
-			features: []
+			features: new ol.Collection([])
 		});
 		this.getOlMap().addInteraction(this.moveInteraction);
 		this.layoutChange(null, this.get("printParam.layout"));
+	},
+
+	destroy: function () {
+
 	},
 
 	/**
@@ -109,19 +113,28 @@ Ext.define('Ck.print.Controller', {
 			fields: ["scale", "res"],
 			data: data
 		});
-
-		this.getViewModel().set("printParam.resolution", store.findRecord("res", this.getOlView().getResolution()));
 		combo.setStore(store);
+
+		this.initResolution();
+	},
+
+	initResolution: function () {
+		this.set("printParam.resolution", this.getOlView().getResolution());
 	},
 
 	/**
 	 * Update param for dpi, format and orientation then call this.updatePreview method
 	 */
-	paramChange: function(item, newValue, oldValue) {
-		if(!Ext.isEmpty(newValue)) {
-			this.set("printParam." + item.name, newValue);
-			this.updatePreview();
-		}
+	paramChange: function(item, rec) {
+		if(Ext.isEmpty(rec)) return;
+		var val = item.getValue();
+		// if(item.getChecked) {
+		// 	var i = item = item.getChecked()[0];
+		// 	if(i && i.getSubmitValue) val = i.getSubmitValue();
+		// }
+
+		this.set("printParam." + item.name, val);
+		this.updatePreview();
 	},
 
 	/**
@@ -185,13 +198,16 @@ Ext.define('Ck.print.Controller', {
 		layoutDiv.style.left = "100%"; // Comment to display layout
 
 		// Size of final print page in cm
-		this.pageSize = Ck.pageSize[this.get("printParam.format")].slice(0);
+		this.pageSize = Ck.pageSize[this.get("printParam.format")];
+		if (!this.pageSize) return;
+		this.pageSize = this.pageSize.slice(0); // Clone
 		this.pageSize[0] /= 10;
 		this.pageSize[1] /= 10;
 
 		// Reverse size according to orientation
-		if(this.get("printParam.orientation").orientation == "l")
+		if(this.get("printParam.orientation").orientation == "l") {
 			this.pageSize.reverse();
+		}
 
 		// Apply DPI to get number of dot (pixel) needed
 		pageDiv.style.width = Math.floor((this.pageSize[0] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
@@ -207,16 +223,17 @@ Ext.define('Ck.print.Controller', {
 		// Now calculate some variable from rendered page div
 		var mapDiv = Ext.get("ckPrint-map").dom;
 		var mapSize = [mapDiv.offsetWidth, mapDiv.offsetHeight];
+		var res = this.get("printParam.resolution");
 
 		// Calculate mapExtent
 		this.mapExtent = [
-			(mapSize[0] * this.get("printParam.resolution").get("res")),
-			(mapSize[1] * this.get("printParam.resolution").get("res"))
+			(mapSize[0] * res),
+			(mapSize[1] * res)
 		];
 
 		this.canvasSize = [
-			this.mapExtent[0] / this.get("printParam.resolution").get("res"),
-			this.mapExtent[1] / this.get("printParam.resolution").get("res")
+			this.mapExtent[0] / res,
+			this.mapExtent[1] / res
 		];
 	},
 
@@ -229,7 +246,7 @@ Ext.define('Ck.print.Controller', {
 
 		this.renderLayout();
 		if(!this.mapExtent) return;
-		
+
 		var center = olView.getCenter();
 		if(this.feature) {
 			center = this.feature.getGeometry().getExtent();
@@ -386,7 +403,7 @@ Ext.define('Ck.print.Controller', {
 
 			case "pdf":
 				var pdf = new jsPDF({
-					orientation: this.printControl.get("printParam.orientation"),
+					orientation: this.printControl.get("printParam.orientation").orientation,
 					format: this.printControl.get("printParam.format"),
 					unit: "cm"
 				});
@@ -409,8 +426,8 @@ Ext.define('Ck.print.Controller', {
 
 		// Reset center, resolution and preview
 		this.printControl.previewLayer.setVisible(true);
-		this.printControl.olView.setCenter(this.printControl.oldCenter);
-		this.printControl.olView.setResolution(this.printControl.oldRes);
+		this.printControl.getOlView().setCenter(this.printControl.oldCenter);
+		this.printControl.getOlView().setResolution(this.printControl.oldRes);
 
 		// Delete fake image
 		this.printControl.getMap().getView().getEl().dom.firstChild.removeChild(this.printControl.fakeMap);
@@ -444,7 +461,14 @@ Ext.define('Ck.print.Controller', {
 		return this.getViewModel().set(id, value);
 	},
 
+	clearPreview: function () {
+		this.previewLayer.getSource().clear();
+		this.feature = null;
+	},
+
 	cancel: function() {
-		this.getView().openner.close();
+		this.clearPreview();
+		var win = this.getView().up('window');
+		if(win) win.close();
 	}
 });

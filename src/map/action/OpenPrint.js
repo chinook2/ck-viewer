@@ -41,11 +41,10 @@ Ext.define('Ck.map.action.OpenPrint', {
 	 */
 	doAction: function(btn) {
 		if(!this.win) {
-			this.printOpt = Ext.applyIf(this.printOpt, {
+			this.print = Ext.create(Ext.applyIf(this.printOpt, {
 				xtype: 'ckprint',
-				ckview: this.getCkView().getView(),
-				openner: this
-			});
+				ckview: this.getCkView().getView()
+			}));
 
 			this.winOpt = Ext.applyIf(this.winOpt, {
 				title: 'Print',
@@ -53,16 +52,25 @@ Ext.define('Ck.map.action.OpenPrint', {
 				layout: 'fit',
 				modal: false,
 				closeAction: 'hide',
-				items: [this.printOpt]
+				items: [this.print],
+				listeners: {
+					close: function() {
+						this.print.getController().clearPreview();
+					},
+					scope: this
+				}
 			});
 
 			this.win = Ext.create(this.classWindow, this.winOpt);
 		}
 
 		this.win.show();
+
+		this.print.getController().initResolution();
+		this.print.getController().updatePreview();
 	},
 
-	close: function() {
-		this.win.hide();
+	destroy: function() {
+		this.win.destroy();
 	}
 });
