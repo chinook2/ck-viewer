@@ -71,6 +71,6 @@ Ext.define('Ck.map.action.OpenPrint', {
 	},
 
 	destroy: function() {
-		this.win.destroy();
+		if(this.win) this.win.destroy();
 	}
 });
