@@ -14,6 +14,10 @@ Ext.define('Ck.print.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckprint',
 
+	config: {
+		maskMsg: 'Printing in progress...'
+	},
+
 	/**
 	 * List of parameters to configure the print (dpi, format, layout...)
 	 */
@@ -96,10 +100,16 @@ Ext.define('Ck.print.Controller', {
 		});
 		this.getOlMap().addInteraction(this.moveInteraction);
 		this.layoutChange(null, this.get("printParam.layout"));
+
+		// Create the mask
+		this.mask = new Ext.LoadMask({
+			msg: this.getMaskMsg(),
+			target: this.getMap().getView()
+		});
 	},
 
 	destroy: function () {
-
+		this.mask = null;
 	},
 
 	/**
@@ -265,6 +275,9 @@ Ext.define('Ck.print.Controller', {
 	 * Check how the document will be print
 	 */
 	beforePrint: function(btn) {
+		// Hide preview vector
+		this.previewLayer.setVisible(false);
+
 		var rendererType = this.getOlMap().getRenderer().getType();
 		switch(rendererType) {
 			case "canvas":
@@ -287,6 +300,10 @@ Ext.define('Ck.print.Controller', {
 				});
 				return false;
 		}
+
+		// Close popup
+		var win = this.getView().up('window');
+		if(win) win.close();
 	},
 
 	/**
@@ -300,8 +317,11 @@ Ext.define('Ck.print.Controller', {
 		this.oldRes = this.getOlView().getResolution();
 		this.oldCenter = this.getOlView().getCenter();
 		this.mapTarget = Ext.get(this.getOlMap().getTarget()).dom;
-		if(!this.canvasSize) return;
+		if(!this.canvasSize) {
+			return;
+		}
 
+		this.mask.show();
 		this.getOlMap().once('postcompose', function(event) {
 			// First display fake map on the screen during the real print
 			var mapCanvas = event.context.canvas;
@@ -329,8 +349,6 @@ Ext.define('Ck.print.Controller', {
 			});
 			this.getOlMap().setTarget(this.printDiv);
 
-			// Hide preview vector
-			this.previewLayer.setVisible(false);
 
 			// Zoom on the desired extent
 			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
@@ -423,6 +441,10 @@ Ext.define('Ck.print.Controller', {
 
 		// Delete fake image
 		this.mapTarget.removeChild(this.fakeMap);
+
+		// Close print popup, clear preview
+		this.cancel();
+		this.mask.hide();
 	},
 
 	/**
