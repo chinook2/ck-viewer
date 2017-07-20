@@ -191,13 +191,20 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 * @return {Ext.grid.Panel}
 	 */
 	createTab: function(lyr) {
-		var field, alias, data = [];
+		var field, alias, tpl, data = [];
 		var col = lyr.layer.getExtension("columns") || {};
 
 		for(var i = 0; i < lyr.features.length; i++) {
-			for(var f in lyr.features[i].values_) {
+			var values = lyr.features[i].getProperties();
+			for(var f in values) {
 				if(this.getFieldIgnored().indexOf(f) == -1) {
-					alias = (Ext.isObject(col[f])) ? col[f].alias : false;
+					alias = false;
+					tpl = false;
+					if (Ext.isObject(col[f])) {
+						alias = col[f].alias || false;
+						tpl = col[f].tpl || false;
+					}
+
 					field = alias || f;
 
 					// Ignore fields without Alias when onlyFieldWithAlias is true
@@ -205,10 +212,16 @@ Ext.define('Ck.map.action.FeatureInfo', {
 						continue;
 					}
 
+					var val = values[f] || '';
+					if (tpl) {
+						tpl = new Ext.Template(tpl);
+						val = tpl.apply(values) || '';
+					}
+
 					data.push({
 						featureid: i + 1,
 						field: (this.getCapitalize())? Ext.String.capitalize(field) : field,
-						value: (Ext.isEmpty(lyr.features[i].values_[f]))? "" : lyr.features[i].values_[f].toString()
+						value: val.toString()
 					});
 				}
 			}
