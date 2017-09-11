@@ -213,8 +213,13 @@ Ext.define('Ck.map.action.FeatureInfo', {
 					}
 
 					var val = values[f] || '';
+
 					if (tpl) {
-						tpl = new Ext.Template(tpl);
+						// Auto transform string to object for complex template (loop)
+						var oVal = Ext.decode(val, true);
+						if(oVal) values[f] = oVal;
+
+						tpl = new Ext.XTemplate(tpl);
 						val = tpl.apply(values) || '';
 					}
 
