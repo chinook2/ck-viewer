@@ -128,7 +128,8 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 			url = "";
 		}
 
-		if(url.indexOf("http") !== 0) {
+		// mapApi can be relative Url (without 'http')
+		if(url.indexOf("http") !== 0 && url.indexOf(Ck.getOption('mapApi')) !== 0) {
 			url = src.getUrl() + "?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=" + src.getParams().LAYERS + "&STYLE="+ (src.getParams().STYLES || '') +"&TRANSPARENT=true" + url;
 		}
 

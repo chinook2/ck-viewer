@@ -248,6 +248,15 @@ Ext.apply(Ck, {
 	 */
 	init: function() {
 		Ck.params = Ext.Object.fromQueryString(location.search);
+
+		// Init for templating
+		if (Ext.manifest.ckClient) {
+			var l = window.location;
+			if(!l.origin) {
+				l.origin = l.protocol + '//' + l.host;
+			}
+			Ext.manifest.ckClient.location = l;
+		}
 	},
 
 	/**
