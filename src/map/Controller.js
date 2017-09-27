@@ -709,7 +709,9 @@ Ext.define('Ck.map.Controller', {
 			},
 			failure: function(response, opts) {
 				Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
-				this.getContext('ck-default');
+				var d = Ck.getOption('defaults', '{}');
+				var c = d.context || 'ck-default';
+				this.getContext(c);
 			}
 		});
 	},
