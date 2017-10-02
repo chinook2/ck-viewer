@@ -84,6 +84,10 @@ Ext.define('Ck.toolbar.Controller', {
 		}
 
 		v.on('afterlayout', this.updateOlControls, this);
+
+		// sometimes layout is already done.
+		// need to call it first to init position
+		Ext.Function.defer(this.updateOlControls, 100, this);
 	},
 
 	/*
