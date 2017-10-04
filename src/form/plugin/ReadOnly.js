@@ -173,13 +173,13 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			cmp.setDisabled(r);
 			if(r) {
 				var dom = cmp.getEl().dom;
-				dom.classList.remove("x-item-disabled");
+				if(dom) dom.classList.remove("x-item-disabled");
 				// Add listener because Ext re-render field with x-item-disabled on setValue
 				cmp.disableTrigger = cmp.on({
 					destroyable: true,
 					change: function(cbx) {
 						var dom = cbx.getEl().dom;
-						dom.classList.remove("x-item-disabled");
+						if(dom) dom.classList.remove("x-item-disabled");
 					}
 				});
 			} else if(cmp.disableTrigger) {
