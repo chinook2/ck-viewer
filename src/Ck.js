@@ -307,7 +307,7 @@ Ext.apply(Ck, {
 	getMaps: function() {
 		// Return all maps components by CSS Selector
 		var maps = Ext.query('.ck-map');
-		for(m=0; m<maps.length; m++) {
+		for(var m=0; m<maps.length; m++) {
 			maps[m] = Ext.getCmp(maps[m].id).getController();
 		}
 		return maps;

@@ -10,7 +10,7 @@ Ext.define('Ck.Ajax', {
 	requires: [
 		'Ck'
 	],
-	
+
 	/**
 	 * @ignore
 	 */
@@ -206,8 +206,7 @@ Ext.define('Ck.Ajax', {
 	},
 
 	onRequestException: function(conn, response, options, eOpts) {
-		Ck.Notify.error('Request failure : ' + options.url);
-
+		Ck.Notify.error('Request failure : ' + options.url, response);
 		// TODO : parse error message ...
 	}
 });

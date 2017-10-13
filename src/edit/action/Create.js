@@ -24,9 +24,16 @@ Ext.define('Ck.edit.action.Create', {
 	 **/
 	toggleAction: function(btn, status) {
 		this.callParent([btn]);
+		var olMap = this.getOlMap();
+
+		if (!status) {
+			olMap.removeInteraction(this.drawInteraction);
+	        this.drawInteraction = null;
+			return;
+        }
 
 		// Create the interaction if it doesn't already exist
-		if(!this.drawInteraction) {
+		//if(!this.drawInteraction) {
 			this.drawSource = this.getLayerSource();
 			this.drawInteraction = new ol.interaction.Draw({
 				type: this.getGeometryType(),
@@ -66,7 +73,7 @@ Ext.define('Ck.edit.action.Create', {
 					})
 				})
 			];
-			this.getMap().getOlMap().addInteraction(this.drawInteraction);
+			olMap.addInteraction(this.drawInteraction);
 
 			//https://github.com/openlayers/ol3/issues/3610
 			this.drawInteraction.on('drawend', this.onFinishSelection, this);
@@ -124,8 +131,8 @@ Ext.define('Ck.edit.action.Create', {
 			}.bind(this);
 			*/
 
-			this.interactions["drawInteraction"] = this.drawInteraction;
-		}
+			//this.interactions["drawInteraction"] = this.drawInteraction;
+		//}
 
 		if(status && btn.single === true){
 			if(this.drawSource) this.drawSource.clear();
@@ -134,7 +141,7 @@ Ext.define('Ck.edit.action.Create', {
 			}, this);
 		}
 
-		this.drawInteraction.setActive(status);
+		//this.drawInteraction.setActive(status);
 	},
 
 	/**

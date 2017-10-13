@@ -112,7 +112,7 @@ Ext.define('Ck.Action', {
 		// If init action after app load (in new popup like edit) map is here, try to init it
 		this.setMap(Ck.getMap());
 
-		nconfig = Ext.applyIf(config || {}, {
+		var nconfig = Ext.applyIf(config || {}, {
 			disabled: this.disabled,
 			hidden: this.hidden,
 			itemId: this.itemId,
@@ -132,8 +132,7 @@ Ext.define('Ck.Action', {
 						this.doAction.apply(this, arguments);
 					}
 				} catch (e) {
-					Ck.Notify.error("Chinook Action Error :: " + e.message);
-					Ck.log(e.stack);
+					Ck.Notify.error("Chinook Action Error :: " + e.message, e);
 				}
 			},
 
@@ -143,8 +142,7 @@ Ext.define('Ck.Action', {
 				try {
 					this.toggleAction.apply(this, arguments);
 				} catch (e) {
-					Ck.Notify.error("Chinook Action Error :: " + e.message);
-					Ck.log(e.stack);
+					Ck.Notify.error("Chinook Action Error :: " + e.message, e);
 				}
 			},
 

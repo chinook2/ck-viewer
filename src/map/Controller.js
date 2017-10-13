@@ -519,7 +519,7 @@ Ext.define('Ck.map.Controller', {
 			sources[mainOffering.getType()].push(olSource);
 
 			var path = layer.getExtension('path') || "";
-			lyrGroup = this.getLayerGroup(path);
+			var lyrGroup = this.getLayerGroup(path);
 
 			// Resolution limits
 			var maxRes = layer.getMaxResolution();
@@ -554,7 +554,7 @@ Ext.define('Ck.map.Controller', {
 	 * @return {ol.Source}
 	 */
 	createSource: function(offering, layer, owc) {
-		var mainOperation, params;
+		var mainOperation, params, olSourceOptions;
 		var olSourceAdditional = {
 			layer: layer,
 			offering: offering
@@ -986,7 +986,7 @@ Ext.define('Ck.map.Controller', {
 	getNearestResolution: function(res, upper, offset) {
 		var idx = 0, mapRes = this.originOwc.getResolutions(true);
 
-		nrRes = Math.closest(res, mapRes);
+		var nrRes = Math.closest(res, mapRes);
 		idx = mapRes.indexOf(nrRes);
 
 		// Usefull only if offset > 0
