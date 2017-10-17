@@ -1,15 +1,15 @@
 ﻿/**
  * Data binding for map view. Allow to display parameters in the view and change parameters (two-way).
- * 
+ *
  * ### Simple binding
- * 
+ *
  * Parameters that can be displayed in the view (map view or child view)
  *
  *  - zoom
  *  - extent
  *  - xmin, ymin, xmax, ymax (calculated from extent)
  *  - scale
- * 
+ *
  * ### Two-way binding
  *
  * Parameters that can be displayed in the view and edited. Changing a parameter change the map parameter.
@@ -66,16 +66,16 @@ Ext.define('Ck.map.Model', {
 			center: undefined,
 			resolution: undefined,
 			rotation: undefined,
-			
+
 			projection:  {
 				code: undefined,
 				units: undefined
 			}
 		},
-		
+
 		ckOlLayerConnection :{
 			"osm": {
-				"source": "MapQuest",
+				"source": "OSM",
 				"layerType": "Tile"
 			},
 			"wmts": {
@@ -95,7 +95,7 @@ Ext.define('Ck.map.Model', {
 				"layerType": "Vector"
 			}
 		},
-		
+
 		/**
 		 * @cfg {Number}
 		 * Current zoom level of the map.
@@ -144,9 +144,9 @@ Ext.define('Ck.map.Model', {
 		ymax: function(get){
 			return get('extent')[3];
 		},
-		
-		
-		
+
+
+
 		/**
 		 * @cfg {Number}
 		 * Current center 'x' of the map. Calculated from center, and update center on change.
@@ -178,7 +178,7 @@ Ext.define('Ck.map.Model', {
 				this.set('center', [this.get('x'), Number(y)]);
 			}
 		},
-		
+
 		/**
 		 * @cfg {Number}
 		 * Current scale of the map (calculated from resolution).
@@ -201,7 +201,7 @@ Ext.define('Ck.map.Model', {
 				this.getViewController().setCenter(value);
 			}
 		},
-		
+
 		/**
 		 * @cfg {Number}
 		 * Current resolution of the map.
@@ -216,7 +216,7 @@ Ext.define('Ck.map.Model', {
 				this.getViewController().setResolution(value);
 			}
 		},
-		
+
 		/**
 		 * @cfg {Number}
 		 * Current rotation of the map.
@@ -230,9 +230,9 @@ Ext.define('Ck.map.Model', {
 			set: function(value) {
 				this.getViewController().setRotation(value);
 			}
-		}		
+		}
 	},
-	
+
 	/**
 	 * @ignore
 	 */
@@ -242,9 +242,9 @@ Ext.define('Ck.map.Model', {
 			data: []
 		}
 	},
-	
-	
-	
+
+
+
 	/**
 	 * Calculate the scale of the map from resolution and map unit.
 	 * @return {Number} scale
@@ -255,8 +255,8 @@ Ext.define('Ck.map.Model', {
 		var mpu = ol.proj.METERS_PER_UNIT[unit];
 		return Math.round(res * mpu * 39.37 * dpi);
 	},
-	
-	
+
+
 	/**
 	 * Get the map controller.
 	 * @return {Ck.map.Controller} controller
@@ -265,8 +265,8 @@ Ext.define('Ck.map.Model', {
 	getViewController: function() {
 		return this.getView().getController();
 	},
-	
-	
+
+
 	/**
 	 * Get the coordinates precision from the Ck.Map#coordPrecision.
 	 * @return {Number} coordPrecision
