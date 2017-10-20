@@ -448,17 +448,25 @@ Ext.define('Ck.map.Controller', {
 		var olLayer, olLayerType, olSourceOptions, olSource,
 			olSourceAdditional = {},
 			olStyle = false;
+
 		var mainOffering = layer.getOffering(0);
-
-		var olSource = this.createSource(mainOffering, layer, owc);
-
-		switch(mainOffering.getType()) {
+		var mainOfferingType;
+		if (!mainOffering) {
+			// Create default ol Source
+			olSource = new ol.source.Vector();
+			olStyle = Ck.map.Style.style;
+			mainOfferingType = "geojson";
+		} else {
+			olSource = this.createSource(mainOffering, layer, owc);
+			mainOfferingType = mainOffering.getType();
+		}
+		
+		switch(mainOfferingType) {
 			case "wfs":
 			case 'geojson':
 				olStyle = Ck.map.Style.style;
 				break;
 		}
-
 
 		if(!Ext.isEmpty(olSource)) {
 			var cluster = layer.getExtension("cluster");
@@ -499,7 +507,7 @@ Ext.define('Ck.map.Controller', {
 
 			var extent = layer.getExtent(viewProj) || owc.getExtent();
 
-			var ckLayerSpec = vm.getData().ckOlLayerConnection[mainOffering.getType()];
+			var ckLayerSpec = vm.getData().ckOlLayerConnection[mainOfferingType];
 
 			// Create others source
 			var sources = {};
@@ -513,10 +521,10 @@ Ext.define('Ck.map.Controller', {
 			}
 
 			// Reference main source into sources properties
-			if(!Ext.isArray(sources[mainOffering.getType()])) {
-				sources[mainOffering.getType()] = [];
+			if(!Ext.isArray(sources[mainOfferingType])) {
+				sources[mainOfferingType] = [];
 			}
-			sources[mainOffering.getType()].push(olSource);
+			sources[mainOfferingType].push(olSource);
 
 			var path = layer.getExtension('path') || "";
 			var lyrGroup = this.getLayerGroup(path);
