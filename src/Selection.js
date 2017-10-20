@@ -338,9 +338,9 @@ Ext.define('Ck.Selection', {
 
 		if(Ext.isEmpty(layers) || !Ext.isArray(layers)) {
 			layers = this.getMap().getLayers(function(lyr) {
-				return (lyr.getVisible() &&
-					(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) && lyr.ckLayer && lyr.ckLayer.getUserLyr()
-
+				return ((lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
+						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
+						(lyr.ckLayer && lyr.ckLayer.getUserLyr())
 				);
 			});
 			layers = layers.getArray();
@@ -444,11 +444,11 @@ Ext.define('Ck.Selection', {
 					query_layers: source.getParams().LAYERS,
 					bbox: extent,
 					srs: projCode,
-					feature_count: 10,
+					feature_count: this.getLimit(),
 					x: parseInt(xy[0]),
 					y: parseInt(xy[1]),
-					width: size[0],
-					height: size[1],
+					width: parseInt(size[0]),
+					height: parseInt(size[1]),
 					info_format: "application/vnd.ogc.gml",
 					geometriefeature: "bounds",
 					mod: "sheet",

@@ -26,6 +26,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		light: true,
 
 		/**
+		 * Number of feature needed. Limit per layer. If null no limit will be applied.
+		 */
+		limit: 1,
+
+		/**
 		 * Buffer around point click (in pixel)
 		 */
 		buffer: 5,
@@ -95,6 +100,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			highlight		: false,
 			layers			: this.getLayers(),
 			buffer			: this.getBuffer(),
+			limit			: this.getLimit(),
 			beforeProcess	: this.beforeSelection
 		});
 		if (this.btn && this.btn.pressed) {
