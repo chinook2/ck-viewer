@@ -36,11 +36,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
 						if(rec && rec.get('dummy')) return true;
+						if(rec && rec.isDummy === true) return false;
 						return false;
 					},
 					getClass: function(v, meta, rec) {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
+						if(rec && rec.isDummy === true) return false;
 						return 'ckEdit';
 					},
 					tooltip: 'Edit row',
@@ -57,11 +59,13 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
 						if(rec && rec.get('dummy')) return true;
+						if(rec && rec.isDummy === true) return false;
 						return false;
 					},
 					getClass: function(v, meta, rec) {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
+						if(rec && rec.isDummy === true) return false;
 						return 'ckClose';
 					},
 					tooltip: 'Delete row',
@@ -131,6 +135,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			}
 		}
 
+
 		grid.on({
 			validateedit: this.addNewRow,
 			edit: function(e, context){
@@ -145,7 +150,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			},
 			scope: this
 		});
-
+		/*
 		grid.getStore().on({
 			add: function (store, records) {
 				// Adding dummy row. return
@@ -163,6 +168,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			},
 			scope: this
 		});
+		*/
 	},
 
 	/**
@@ -185,7 +191,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		this.deleteNewRow();
 	},
 
-	addNewRow: function(e, context){
+	addNewRow: function(e, context) {
+		/*
 		var store = this.grid.getStore();
 
 		// Call on validate new row. The new row is now validated.
@@ -203,9 +210,11 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			});
 			this._hasdummy = true;
 		}
+		*/
 	},
 
 	deleteNewRow: function(){
+		/*
 		// Remove empty field for new record...
 		var store = this.grid.getStore();
 		var rec = store.findRecord('dummy', true);
@@ -213,6 +222,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			store.remove(rec);
 			this._hasdummy = false;
 		}
+		*/
 	},
 
 	deleteRow: function(grid, rowIndex) {

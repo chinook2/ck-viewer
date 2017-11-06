@@ -48,6 +48,6 @@ Ext.define('Ck.Notify', {
 	},
 
 	eventDetails: function (e) {
-		if(e && e.stack) Ext.Msg.alert('Ck.Notify error details',  e.stack);
+		if(e && e.stack) Ext.Msg.alert('Ck.Notify error details',  Ext.util.Format.nl2br(e.stack));
 	}
 });
