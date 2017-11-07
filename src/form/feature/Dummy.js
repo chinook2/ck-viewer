@@ -7,7 +7,8 @@ Ext.define('Ck.form.feature.Dummy', {
     alias: 'feature.dummy',
 
     panelBodyCls: Ext.baseCSSPrefix + 'dummy-',
-    dummyRowCls: Ext.baseCSSPrefix + 'grid-row-dummy',
+    dummyItemCls: Ext.baseCSSPrefix + 'grid-item',
+    dummyRowCls: Ext.baseCSSPrefix + 'grid-row '+ Ext.baseCSSPrefix +'grid-row-dummy',
     dummyRowSelector: '.' + Ext.baseCSSPrefix + 'grid-row-dummy',
 
     /**
@@ -43,9 +44,9 @@ Ext.define('Ck.form.feature.Dummy', {
 
         // Cell widths in the summary table are set directly into the cells. There's no <colgroup><col>
         // Some browsers use content box and some use border box when applying the style width of a TD
-        if (!me.summaryTableCls) {
-            me.summaryTableCls = Ext.baseCSSPrefix + 'grid-item';
-        }
+        //if (!me.summaryTableCls) {
+        //    me.summaryTableCls = Ext.baseCSSPrefix + 'grid-item';
+        //}
 
         if (grid.bufferedRenderer) {
             me.wrapsItem = true;
@@ -131,16 +132,16 @@ Ext.define('Ck.form.feature.Dummy', {
         if (!me.disabled && me.showDummyRow) {
             record = me.dummyRecord;
 
-            out.push('<table cellpadding="0" cellspacing="0" class="' +  me.summaryItemCls + '" style="table-layout: fixed; width: 100%;">');
+            out.push('<table cellpadding="0" cellspacing="0" class="' +  me.dummyItemCls + '" style="width: 0;">');
             me.outputDummyRecord((record && record.isModel) ? record : me.createDummyRecord(view), values, out, parent);
             out.push('</table>');
         }
     },
-
+    /*
     vetoEvent: function(record, row, rowIndex, e) {
         return !e.getTarget(this.dummyRowSelector);
     },
-
+    */
     onViewRefresh: function(view) {
         var me = this,
             record, row;
@@ -159,8 +160,8 @@ Ext.define('Ck.form.feature.Dummy', {
                 tag: 'table',
                 cellpadding: 0,
                 cellspacing: 0,
-                cls: me.summaryItemCls,
-                style: 'table-layout: fixed; width: 100%'
+                cls: me.dummyItemCls,
+                style: 'width: 0'
             }, false, true);
             row.appendChild(Ext.fly(view.createRowElement(record, -1)).down(me.dummyRowSelector, true));
         }
@@ -168,11 +169,8 @@ Ext.define('Ck.form.feature.Dummy', {
 
     createDummyRecord: function (view) {
         var me = this,
-            columns = view.headerCt.getVisibleGridColumns(),
-            remoteRoot = me.remoteRoot,
             dummyRecord = me.dummyRecord,
-            colCount = columns.length, i, column,
-            dataIndex, summaryValue, modelData;
+            modelData;
 
         if (!dummyRecord) {
             modelData = view.store.getModel();
