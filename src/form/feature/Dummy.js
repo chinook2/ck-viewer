@@ -203,13 +203,16 @@ Ext.define('Ck.form.feature.Dummy', {
     },
 
     onDummyClick: function () {
-        // Add new empty line
-        var rec = this.grid.getStore().add({}).pop();
+        if (this.grid.fireEvent('beforedummyclick', this) !== false) {
+            // Add new empty line
+            var rec = this.grid.getStore().add({}).pop();
 
-        // Start editing
-        var plg = this.grid.findPlugin('rowediting');
-        // colIndex = actioncolumn index... use column index 0 to start Edit
-        if(plg) plg.startEdit(rec, 0);
+            // Start editing
+            var plg = this.grid.findPlugin('rowediting');
+            if(plg) plg.startEdit(rec, 0);
+
+            this.grid.fireEvent('dummyclick', this);
+        }
     },
 
     destroy: function() {
