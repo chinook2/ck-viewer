@@ -333,26 +333,29 @@ Ext.define('Ck.Selection', {
 			this.debugLayer.getSource().addFeature(ft);
 		}
 
-		var i = 0;
 		var lyr, layers = this.getLayers();
+		var layersToQuery = [];
 
 		if(Ext.isEmpty(layers) || !Ext.isArray(layers)) {
-			layers = this.getMap().getLayers(function(lyr) {
+			layersToQuery = this.getMap().getLayers(function(lyr) {
 				return ((lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
 						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
 						(lyr.ckLayer && lyr.ckLayer.getUserLyr())
 				);
 			});
-			layers = layers.getArray();
+			layersToQuery = layersToQuery.getArray();
 		} else {
 			for(var i = 0; i < layers.length; i++) {
 				if(Ext.isString(layers[i])) {
 					lyr = this.getMap().getLayerById(layers[i]);
 					if(lyr) {
-						layers[i] = lyr;
+						if ((lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
+							(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
+							(lyr.ckLayer && lyr.ckLayer.getUserLyr())) {
+							layersToQuery.push(lyr);
+						}
 					} else {
 						Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
-						layers.splice(i--, 1);
 					}
 				}
 			}
@@ -360,14 +363,15 @@ Ext.define('Ck.Selection', {
 
 		var ft;
 		this.nbQueryDone = 0;
-		this.nbQuery = layers.length;
+		this.nbQuery = layersToQuery.length;
 
-		for(var i = 0; i < layers.length; i++) {
-			if(layers[i] instanceof ol.layer.Vector) {
-				ft = this.queryWFSLayer(layers[i], selFt, evntParams);
-				this.onSelect(ft, layers[i]);
+		for(var l = 0; l < layersToQuery.length; l++) {
+			lyr = layersToQuery[l];
+			if(lyr instanceof ol.layer.Vector) {
+				ft = this.queryWFSLayer(lyr, selFt, evntParams);
+				this.onSelect(ft, lyr);
 			} else {
-				this.queryWMSLayer(layers[i], selFt, evntParams);
+				this.queryWMSLayer(lyr, selFt, evntParams);
 			}
 		}
 	},
