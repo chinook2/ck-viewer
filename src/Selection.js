@@ -260,7 +260,6 @@ Ext.define('Ck.Selection', {
 		if(this.getBeforeProcess().bind(this.getScope())() === false) {
 			return false;
 		}
-		this.getMask().show();
 
 		// Get access to event in override
 		this.drawEvent = evntParams;
@@ -364,6 +363,8 @@ Ext.define('Ck.Selection', {
 		var ft;
 		this.nbQueryDone = 0;
 		this.nbQuery = layersToQuery.length;
+
+		if (this.nbQuery > 0) this.getMask().show();
 
 		for(var l = 0; l < layersToQuery.length; l++) {
 			lyr = layersToQuery[l];
