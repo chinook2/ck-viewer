@@ -337,9 +337,9 @@ Ext.define('Ck.Selection', {
 
 		if(Ext.isEmpty(layers) || !Ext.isArray(layers)) {
 			layersToQuery = this.getMap().getLayers(function(lyr) {
-				return ((lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
-						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
-						(lyr.ckLayer && lyr.ckLayer.getUserLyr())
+				return ((lyr.ckLayer && lyr.ckLayer.getUserLyr() &&
+						(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
+						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image))
 				);
 			});
 			layersToQuery = layersToQuery.getArray();
@@ -348,9 +348,9 @@ Ext.define('Ck.Selection', {
 				if(Ext.isString(layers[i])) {
 					lyr = this.getMap().getLayerById(layers[i]);
 					if(lyr) {
-						if ((lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
-							(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
-							(lyr.ckLayer && lyr.ckLayer.getUserLyr())) {
+						if ((lyr.ckLayer && lyr.ckLayer.getUserLyr()) &&
+							(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
+							(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)) {
 							layersToQuery.push(lyr);
 						}
 					} else {
