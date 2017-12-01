@@ -45,14 +45,14 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 				closeAction: 'hide',
 				collapsible: this.getWinCollapsible(),
 				maximizable: this.getWinMaximizable(),
+				ckview: this.getCkView().getView(),
 				items: {
 					xtype: 'ckaddlayer',
-					ckview: this.getCkView().getView(),
 					openner: this,
 					wms: typeof this.wms !== "undefined" ? this.wms : true,
 					wfs: typeof this.wfs !== "undefined" ? this.wfs : true,
 					vector: typeof this.vector !== "undefined" ? this.vector : defaultVectorConf,
-					activeTab: typeof this.activateTab !== "undefined" ? this.activateTab : 0 
+					activeTab: typeof this.activateTab !== "undefined" ? this.activateTab : 0
 				}
 			});
 		}
