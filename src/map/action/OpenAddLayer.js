@@ -26,6 +26,14 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 	 * Create and display a windows with import form
 	 */
 	doAction: function(btn) {
+		var defaultVectorConf = {
+			visible: true,
+			type: ['shapefile', 'mapinfo', 'gpx'],
+			projection: [
+				{id: "4326", label: "WGS 84"},
+				{id: "2154", label: "Lambert 93"}
+			]
+		};
 		if(!this.win) {
 			this.win = Ext.create(this.classWindow, {
 				title: 'Add Layer',
@@ -40,7 +48,11 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 				items: {
 					xtype: 'ckaddlayer',
 					ckview: this.getCkView().getView(),
-					openner: this
+					openner: this,
+					wms: typeof this.wms !== "undefined" ? this.wms : true,
+					wfs: typeof this.wfs !== "undefined" ? this.wfs : true,
+					vector: typeof this.vector !== "undefined" ? this.vector : defaultVectorConf,
+					activeTab: typeof this.activateTab !== "undefined" ? this.activateTab : 0 
 				}
 			});
 		}

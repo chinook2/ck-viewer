@@ -22,11 +22,10 @@ Ext.define("Ck.AddLayer", {
 		}
 	},
 	
-	activeTab: 1,
+	activeTab: 0,
 	
 	items: [{
 		xtype: "ckaddlayer-wfs",
-		hidden: true,
 		scope: this,
 		listeners: {
 			itemclick: "addLayer"

@@ -9,6 +9,72 @@ Ext.define('Ck.addlayer.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer',
 
+	
+	wms: true,
+	wfs: true,
+	vector: {
+		visible: true,
+		type: ['shp', 'mif', 'gpx']
+	},
+	
+	init : function(view) {
+		
+		// Enable or disable items according to config
+		this.view.items.items.forEach(function(element) {
+			var itemId = element.itemId ? element.itemId : element.xtype; 
+			switch(itemId) {
+			case 'addlayer-wfs': 
+				element.tab.setVisible(view.config.wfs);
+				break;
+			case 'addlayer-wms':
+				element.tab.setVisible(view.config.wms);
+				break;
+			case 'ckimportvector':
+				var myElement = element;
+				myElement.tab.setVisible(view.config.vector.visible);
+				
+				// Load format from configuration
+				//@see ck-viewer\src\importvector\Model.js for id
+				var formatStore = myElement.getViewModel().getStore("format");
+				
+				var newData = [];
+				// Remove unsused elements for format store
+				formatStore.data.items.forEach(function(el) {
+					// if el from store is not present in types, we removed it
+					if(view.config.vector.type.indexOf(el.id) != -1) {
+						newData.push(el);
+					}
+				});
+				
+				formatStore.on('load', function(records) {
+					this.loadRawData(newData);
+				});
+				
+				//Load projection for configuration
+				var projectionStore = myElement.getViewModel().getStore("projection");
+				
+				projectionStore.on('load', function(records) {
+					this.loadRawData(view.config.vector.projection);
+				});
+				myElement.getController().importParam = view.config.vector.importParam;
+				
+				// Force refresh of stores with new value .. 
+				formatStore.load();
+				projectionStore.load();
+				
+				
+				// ReInit combobox with new store value
+				myElement.getController().loadDefaultParam(); // If only one value is set as Types, combobox of selection is not displayed
+				
+				break;
+			default:
+				break;
+			}
+		});
+		
+		
+	},
+	
 	/**
 	 * Add a layer from node
 	 *
