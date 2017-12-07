@@ -201,40 +201,61 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		var col = lyr.layer.getExtension("columns") || {};
 
 		for(var i = 0; i < lyr.features.length; i++) {
-			var values = lyr.features[i].getProperties();
-			for(var f in values) {
-				if(this.getFieldIgnored().indexOf(f) == -1) {
-					alias = false;
-					tpl = false;
-					if (Ext.isObject(col[f])) {
-						alias = col[f].alias || false;
-						tpl = col[f].tpl || false;
-					}
+			var rawValues = lyr.features[i].getProperties() || {};
 
-					field = alias || f;
-
-					// Ignore fields without Alias when onlyFieldWithAlias is true
-					if (!alias && this.getOnlyFieldWithAlias()) {
-						continue;
-					}
-
-					var val = values[f] || '';
-
-					if (tpl) {
-						// Auto transform string to object for complex template (loop)
-						var oVal = Ext.decode(val, true);
-						if(oVal) values[f] = oVal;
-
-						tpl = new Ext.XTemplate(tpl);
-						val = tpl.apply(values) || '';
-					}
-
-					data.push({
-						featureid: i + 1,
-						field: (this.getCapitalize())? Ext.String.capitalize(field) : field,
-						value: val.toString()
-					});
+			// Order fields
+			var values = {};
+			// List all alias in order
+			for(var c in col) {
+				if (rawValues.hasOwnProperty(c)) {
+					values[c] = rawValues[c];
 				}
+			}
+			// Add the others fields
+			var diffValues = Ext.Array.toMap(Ext.Array.difference(
+				Ext.Object.getKeys(rawValues),
+				Ext.Object.getKeys(values)));
+			for(var df in diffValues) {
+				if(this.getFieldIgnored().indexOf(df) !== -1) {
+					continue;
+				}
+				if (rawValues.hasOwnProperty(df)) {
+					values[df] = rawValues[df];
+				}
+			}
+			//
+
+			for(var f in values) {
+				alias = false;
+				tpl = false;
+				if (Ext.isObject(col[f])) {
+					alias = col[f].alias || false;
+					tpl = col[f].tpl || false;
+				}
+
+				field = alias || f;
+
+				// Ignore fields without Alias when onlyFieldWithAlias is true
+				if (!alias && this.getOnlyFieldWithAlias()) {
+					continue;
+				}
+
+				var val = values[f] || '';
+
+				if (tpl) {
+					// Auto transform string to object for complex template (loop)
+					var oVal = Ext.decode(val, true);
+					if(oVal) values[f] = oVal;
+
+					tpl = new Ext.XTemplate(tpl);
+					val = tpl.apply(values) || '';
+				}
+
+				data.push({
+					featureid: i + 1,
+					field: (this.getCapitalize())? Ext.String.capitalize(field) : field,
+					value: val.toString()
+				});
 			}
 		}
 
