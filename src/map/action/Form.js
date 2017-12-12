@@ -43,6 +43,7 @@ Ext.define('Ck.map.action.Form', {
 				width: 600,
 				layout: 'fit',
 				headerPosition: 'right',
+				parentContainer: this.getMap().getView(),
 				//maximized: true,
 				//closable: false,
 				closeAction: 'hide',

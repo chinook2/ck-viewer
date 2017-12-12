@@ -26,6 +26,7 @@ Ext.define('Ck.map.action.OpenImport', {
 				width: 400,
 				layout: 'fit',
 				closeAction: 'hide',
+				parentContainer: this.getMap().getView(),
 				items: {
 					xtype: 'ckimportvector',
 					ckview: this.getCkView().getView(),

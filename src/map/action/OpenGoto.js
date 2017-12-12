@@ -36,6 +36,7 @@ Ext.define('Ck.map.action.Goto', {
 				layout: 'fit',
 				closeAction: 'hide',
 				collapsible: this.getWinCollapsible(),
+				parentContainer: this.getMap().getView(),
 				//resizable: true,
 				items: {
 					xtype: 'ckgoto',

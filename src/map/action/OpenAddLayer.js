@@ -46,6 +46,7 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 				collapsible: this.getWinCollapsible(),
 				maximizable: this.getWinMaximizable(),
 				ckview: this.getCkView().getView(),
+				parentContainer: this.getMap().getView(),
 				items: {
 					xtype: 'ckaddlayer',
 					openner: this,

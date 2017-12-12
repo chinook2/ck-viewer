@@ -19,7 +19,8 @@ Ext.define('Ck.map.action.OpenOverview', {
 	toggleGroup: 'ckOverview',
 
 	requires: [
-		'Ck.Overview'
+		'Ck.Overview',
+		'Ck.Window'
 	],
 
 	itemId: 'openoverview',
@@ -50,6 +51,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 				layout: 'fit',
 				closeAction: 'hide',
 				items: this.ov,
+				parentContainer: this.getMap().getView(),
 				header: {
 					height: 20,
 					cls: "ck-header-20"
