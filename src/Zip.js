@@ -1,25 +1,25 @@
 /**
- * 
+ *
  */
 Ext.define('Ck.Zip', {
 	alternateClassName: 'CkZip',
-	
+
 	/**
 	 * @event filesloaded
 	 * Fires when all files are loaded
 	 */
-	
+
 	/**
 	 * Type of parameter given to the onMetaData callback.
 	 * It can be "ProgressEvent" or "URL"
 	 */
 	outputFormat: "ProgressEvent",
-	
+
 	/**
 	 * Temporary storage location: RAM (Blob) or HDD (File)
 	 */
 	tempStorage: "Blob",
-	
+
 	/**
 	 * Called when Zip archives are open
 	 * @param {entry[]}
@@ -29,47 +29,52 @@ Ext.define('Ck.Zip', {
 		this.nbFiles = entries.length;
 		entries.forEach(this.getEntryFile.bind(this));
 	},
-	
+
 	/**
 	 * Called when file are read
 	 * @param {Blob}
 	 */
 	onGetData: Ext.emptyFn,
-	
+
 	/**
 	 * Function to display the progress of file opening
 	 */
 	onProgress: Ext.emptyFn,
-	
+
 	/**
 	 * Function to display the progress of file opening
 	 */
 	onFilesLoaded: Ext.emptyFn,
-	
+
 	scope: {
 		onGetEntries: this,
 		onGetData: this,
 		onProgress: this,
 		onFilesLoaded: this
 	},
-	
+
 	files: {},
-	
-	
+
+
 	/**
 	 * @ignore
 	 */
 	constructor: function(config) {
 		Ext.apply(this, config);
 		this.requestFileSystem = window.webkitRequestFileSystem || window.mozRequestFileSystem || window.requestFileSystem;
+
 		zip.workerScriptsPath = "packages/ck-viewer/libs/zip/";
+		var o = Ck.getOption('zip');
+		if (o && o.workerScriptsPath) {
+			zip.workerScriptsPath = o.workerScriptsPath;
+		}
 		// zip.useWebWorkers = false;
 	},
 
 	onerror: function(message) {
 		alert(message);
 	},
-	
+
 	/**
 	 * Create a temporary file. Used when this.tempStorage == "File"
 	 * @param {Function}
@@ -90,7 +95,7 @@ Ext.define('Ck.Zip', {
 			}, create);
 		});
 	},
-	
+
 	/**
 	 * Open the archive and call this.onGetEntry callback function
 	 */
@@ -100,8 +105,8 @@ Ext.define('Ck.Zip', {
 		};
 		zip.createReader(new zip.BlobReader(this.fileName), callback.bind(this));
 	},
-	
-	
+
+
 	getEntryFile : function(entry) {
 		var writer;
 
@@ -115,7 +120,7 @@ Ext.define('Ck.Zip', {
 			});
 		}
 	},
-	
+
 	/**
 	 * Open a file and call onGetData callback at end of reading
 	 * @param
@@ -128,14 +133,14 @@ Ext.define('Ck.Zip', {
 				extension: entry.filename.slice(-3).toLowerCase(),
 				url: (this.tempStorage == "Blob") ? URL.createObjectURL(blob) : fileEntry.toURL()
 			};
-			
+
 			var fileReader = new FileReader();
 			fileReader.onload = this.saveData.bind(this, file);
 			fileReader.readAsArrayBuffer(blob);
-			
+
 		}.bind(this, entry), this.onProgress.bind(this.scope["onProgress"] || this));
 	},
-	
+
 	/**
 	 * Call when file are read
 	 *
@@ -151,7 +156,7 @@ Ext.define('Ck.Zip', {
 			this.onFilesLoaded.bind(this.scope["onFilesLoaded"] || this)();
 		}
 	},
-	
+
 	/**
 	 * Get files from extension
 	 */
