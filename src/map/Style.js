@@ -192,3 +192,4 @@ Ck.Style.deleteStyle = [Ck.Style.redStroke, Ck.Style.redShape];
 Ck.Style.vertexStyle = [Ck.Style.redStroke, Ck.Style.redShape];
 Ck.Style.drawStyle = [Ck.Style.greenStroke, Ck.Style.greenCircle, Ck.Style.grayFill];
 Ck.Style.importStyle = [Ck.Style.blueStroke, Ck.Style.blueCircle];
+Ck.Style.orangeStyle = [Ck.Style.orangeStroke, Ck.Style.orangeCircle];

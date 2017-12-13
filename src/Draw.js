@@ -57,9 +57,9 @@ Ext.define('Ck.Draw', {
 	constructor: function(config) {
 		Ext.apply(config, {
 			olMap : config.map.getOlMap(),
-			drawStyle: Ck.map.Style.orange,
-			highlightStyle: Ck.map.Style.orange,
-			highlightZIndex: Ck.map.Style.zIndex.editInteraction
+			drawStyle: Ck.Style.orangeStyle,
+			highlightStyle: Ck.Style.orangeStyle,
+			highlightZIndex: Ck.Style.zIndex.editInteraction
 		});
 
 		this.initConfig(config);
@@ -70,7 +70,7 @@ Ext.define('Ck.Draw', {
 		var layer = new ol.layer.Vector({
 			id: this.layerId,
 			source: source,
-			zIndex: Ck.map.Style.zIndex.drawLayer,
+			zIndex: Ck.Style.zIndex.drawLayer,
 			style: Ck.Style.drawStyle
 		});
 

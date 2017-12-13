@@ -469,7 +469,7 @@ Ext.define('Ck.map.Controller', {
 		if (!mainOffering) {
 			// Create default ol Source
 			olSource = new ol.source.Vector();
-			olStyle = Ck.map.Style.style;
+			olStyle = Ck.Style.style;
 			mainOfferingType = "geojson";
 		} else {
 			olSource = this.createSource(mainOffering, layer, owc);
@@ -479,7 +479,7 @@ Ext.define('Ck.map.Controller', {
 		switch(mainOfferingType) {
 			case "wfs":
 			case 'geojson':
-				olStyle = Ck.map.Style.style;
+				olStyle = Ck.Style.style;
 				break;
 		}
 

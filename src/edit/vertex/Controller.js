@@ -116,8 +116,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 			this.vertexLayer = Ck.create("ol.layer.Vector", {
 				id: vertexLayerId,
 				source: new ol.source.Vector(),
-				style: Ck.map.Style.vertexStyle,
-				zIndex: Ck.map.Style.zIndex.vertexOverlay
+				style: Ck.Style.vertexStyle,
+				zIndex: Ck.Style.zIndex.vertexOverlay
 			});
 			// Add layer on top (temporary layer) - not in map layers collection
 			this.vertexLayer.setMap(this.olMap);

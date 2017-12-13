@@ -154,8 +154,8 @@ Ext.define('Ck.edit.Controller', {
 			this.wfsLayer = Ck.create("ol.layer.Vector", {
 				id: this.getLayer().getProperties().id + "vector-features",
 				source: new ol.source.Vector(),
-				style: Ck.map.Style.orange,
-				zIndex: Ck.map.Style.zIndex.featureOverlay
+				style: Ck.Style.orangeStyle,
+				zIndex: Ck.Style.zIndex.featureOverlay
 			});
 			this.wfsFeatures = [];
 			this.wfsSource = this.wfsLayer.getSource();
@@ -226,7 +226,7 @@ Ext.define('Ck.edit.Controller', {
 	 * @param {ol.Feature}
 	 */
 	onCreate: function(feature) {
-		feature.setStyle(Ck.map.Style.green);
+		feature.setStyle(Ck.Style.drawStyle);
 		var source = this.getSource();
 		if(this.getMulti()) {
 			var type = "Multi" + feature.getGeometry().getType();
@@ -269,7 +269,7 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	deleteFeature: function(feature) {
 		this.wfsSource.addFeature(feature);
-		feature.setStyle(Ck.map.Style.deleteStyle);
+		feature.setStyle(Ck.Style.deleteStyle);
 		if(!this.getIsWMS()) {
 			var src = this.getLayer().getSource();
 			src.removeFeature(feature);

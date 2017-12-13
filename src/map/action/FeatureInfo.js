@@ -59,11 +59,13 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		 * Capitalize first letter of field name
 		 */
 		capitalize: true,
-
+		
 		winWidth: 400,
 		winHeight: 400,
 		winCollapsible: true,
-		winEmptyResult: true
+		winEmptyResult: true,
+		
+		selectionConfig: {}
 	},
 
 	constructor: function(config) {
@@ -91,8 +93,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
-
-		this.draw = new Ck.Selection({
+		
+		var selConf = Ext.applyIf(this.getSelectionConfig(), {
 			type			: "Point",
 			map				: map,
 			callback		: this.displayInfo,
@@ -102,7 +104,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			buffer			: this.getBuffer(),
 			limit			: this.getLimit(),
 			beforeProcess	: this.beforeSelection
-		});
+		})
+
+		this.draw = new Ck.Selection(selConf);
 		if (this.btn && this.btn.pressed) {
 			this.draw.setActive(true);
 		}
@@ -122,6 +126,13 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		this.btn = btn;
 		if(this.draw) this.draw.setActive(pressed);
 		this.createContainer();
+		
+		// Action disable
+		if(!pressed) {
+			if(this.draw.getSelect()) {
+				this.draw.getSelect().getFeatures().clear()
+			}
+		}
 	},
 
 	/**

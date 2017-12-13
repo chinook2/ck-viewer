@@ -47,7 +47,7 @@ Ext.define('Ck.form.field.Map', {
 				this.layer = new ol.layer.Vector({
 					id: 'mapfieldLayer',
 					source: new ol.source.Vector(),
-					style: Ck.map.Style.style
+					style: Ck.Style.style
 				});
 				this.ckmap.addSpecialLayer(this.layer);
 			},

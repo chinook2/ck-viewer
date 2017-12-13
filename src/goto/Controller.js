@@ -58,7 +58,7 @@ Ext.define('Ck.goto.Controller', {
 					src: Ck.getPath() + "/images/crosshair.png"
 				}))
 			}),
-			zIndex: Ck.map.Style.zIndex.featureOverlay
+			zIndex: Ck.Style.zIndex.featureOverlay
 		});
 		this.layer.setMap(this.getOlMap());
 	},

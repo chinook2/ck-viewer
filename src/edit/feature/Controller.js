@@ -101,8 +101,8 @@ Ext.define('Ck.edit.feature.Controller', {
 			this.overlayLayer = Ck.create("ol.layer.Vector", {
 				id: featureLayerId,
 				source: new ol.source.Vector(),
-				style: Ck.map.Style.overlayStyle,
-				zIndex: Ck.map.Style.zIndex.featureOverlay
+				style: Ck.Style.overlayStyle,
+				zIndex: Ck.Style.zIndex.featureOverlay
 			});
 			
 			this.overlaySource = this.overlayLayer.getSource();
@@ -113,9 +113,9 @@ Ext.define('Ck.edit.feature.Controller', {
 			this.cloneLayer = Ck.create("ol.layer.Vector", {
 				id: this.layer.getProperties().id + "_clone-editor",
 				source: new ol.source.Vector(),
-				// style: Ck.map.Style.overlayStyle,
+				// style: Ck.Style.overlayStyle,
 				style: ol.interaction.Select.getDefaultStyleFunction(),
-				zIndex: Ck.map.Style.zIndex.cloneLayer
+				zIndex: Ck.Style.zIndex.cloneLayer
 			});
 			this.source = this.cloneLayer.getSource();
 			this.getMap().addSpecialLayer(this.cloneLayer);

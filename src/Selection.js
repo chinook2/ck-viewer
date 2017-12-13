@@ -151,11 +151,11 @@ Ext.define('Ck.Selection', {
 
 	constructor: function(config) {
 		var me = this;
-		Ext.apply(config, {
+		Ext.applyIf(config, {
 			olMap : config.map.getOlMap(),
-			drawStyle: Ck.map.Style.orange,
-			highlightStyle: Ck.map.Style.orange,
-			highlightZIndex: Ck.map.Style.zIndex.editInteraction
+			drawStyle: Ck.Style.orange,
+			highlightStyle: Ck.Style.orangeStyle,
+			highlightZIndex: Ck.Style.zIndex.editInteraction
 		});
 
 		this.initConfig(config);
@@ -652,7 +652,7 @@ Ext.define('Ck.Selection', {
 	 */
 	setDrawStyle: function(style) {
 		if(Ext.isEmpty(style)) {
-			this._drawStyle = Ck.map.Style.invisibleStyle;
+			this._drawStyle = Ck.Style.invisibleStyle;
 		} else {
 			this._drawStyle = style;
 		}
@@ -664,7 +664,7 @@ Ext.define('Ck.Selection', {
 	 */
 	setHighlightStyle: function(style) {
 		if(Ext.isEmpty(style)) {
-			this._highlightStyle = Ck.map.Style.invisibleStyle;
+			this._highlightStyle = Ck.Style.invisibleStyle;
 		} else {
 			this._highlightStyle = style;
 		}
