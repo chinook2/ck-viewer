@@ -53,7 +53,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 				modal: false,
 				closeAction: 'hide',
 				items: [this.print],
-				parentContainer: this.getMap().getView(),
+				parentMap: this.getMap(),
 				listeners: {
 					close: function() {
 						this.print.getController().clearPreview();

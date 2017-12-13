@@ -46,7 +46,6 @@ Ext.define('Ck.Action', {
 	],
 
 	classWindow: 'Ck.Window',
-	parentContainer: '',
 
 	disabled: false,
 	hidden: false,

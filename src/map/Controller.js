@@ -114,6 +114,16 @@ Ext.define('Ck.map.Controller', {
 	legend: null,
 
 	draw: {},
+	
+	/**
+	 *
+	 */
+	parentContainer: null,
+	
+	/**
+	 *
+	 */
+	bindedCmp: {},
 
 	/**
 	 * @var {ol.Geolocation}
@@ -129,6 +139,11 @@ Ext.define('Ck.map.Controller', {
 
 		if(Ck.params.context) {
 			v.setContext(Ck.params.context);
+		}
+		
+		// Set default parent container (if not set)
+		if(!this.parentContainer) {
+			this.setParentContainer(v);
 		}
 
 		// Create controls
@@ -1104,5 +1119,49 @@ Ext.define('Ck.map.Controller', {
 			inRange = (layer.ckLayer.getMaxResolution() > res && layer.ckLayer.getMinResolution() < res);
 		}
 		return inRange;
+	},
+	
+	setParentContainer: function(cmp) {
+		// If already exists, remove old listener
+		if(this.parentContainer) {
+			this.parentContainer.visibilityBind.destroy();
+		}
+		
+		this.parentContainer = cmp;
+		this.parentContainer.visibilityBind = cmp.on({
+			"hide" : {
+				fn: function() {
+					for(var k in this.bindedCmp) {
+						var c = this.bindedCmp[k];
+						c.tmpHide = c.isVisible();
+						if(c.tmpHide) {
+							c.hide();
+						}
+					}
+				},
+				scope: this,
+				destroyable: true
+			},
+			"show" : {
+				fn: function() {
+					for(var k in this.bindedCmp) {
+						var c = this.bindedCmp[k];
+						if(c.tmpHide) {
+							c.show();
+						}
+					}
+				},
+				scope: this,
+				destroyable: true
+			}
+		});
+	},
+	
+	/**
+	 * 
+	 * @params {Ext.component}
+	 */
+	bindComponent: function(cmp) {
+		this.bindedCmp[cmp.getItemId()] = cmp;
 	}
 });

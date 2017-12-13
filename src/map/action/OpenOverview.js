@@ -51,7 +51,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 				layout: 'fit',
 				closeAction: 'hide',
 				items: this.ov,
-				parentContainer: this.getMap().getView(),
+				parentMap: this.getMap(),
 				header: {
 					height: 20,
 					cls: "ck-header-20"

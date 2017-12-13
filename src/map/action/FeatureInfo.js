@@ -326,7 +326,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				minWidth: 300,
 				layout: 'fit',
 				y: 0,
-				parentContainer: this.getMap().getView(),
+				parentMap: this.getMap(),
 				header: (this.getLight())? { padding: 0 } : true,
 				closeAction: 'hide',
 				collapsible: this.getWinCollapsible(),
