@@ -114,12 +114,12 @@ Ext.define('Ck.map.Controller', {
 	legend: null,
 
 	draw: {},
-	
+
 	/**
 	 *
 	 */
 	parentContainer: null,
-	
+
 	/**
 	 *
 	 */
@@ -140,11 +140,11 @@ Ext.define('Ck.map.Controller', {
 		if(Ck.params.context) {
 			v.setContext(Ck.params.context);
 		}
-		
+
 		// Set default parent container (if not set)
-		if(!this.parentContainer) {
-			this.setParentContainer(v);
-		}
+		//if(!this.parentContainer) {
+		//	this.setParentContainer(v);
+		//}
 
 		// Create controls
 		var olControls = [];
@@ -475,7 +475,7 @@ Ext.define('Ck.map.Controller', {
 			olSource = this.createSource(mainOffering, layer, owc);
 			mainOfferingType = mainOffering.getType();
 		}
-		
+
 		switch(mainOfferingType) {
 			case "wfs":
 			case 'geojson':
@@ -1120,13 +1120,13 @@ Ext.define('Ck.map.Controller', {
 		}
 		return inRange;
 	},
-	
+
 	setParentContainer: function(cmp) {
 		// If already exists, remove old listener
 		if(this.parentContainer) {
 			this.parentContainer.visibilityBind.destroy();
 		}
-		
+
 		this.parentContainer = cmp;
 		this.parentContainer.visibilityBind = cmp.on({
 			"hide" : {
@@ -1156,9 +1156,9 @@ Ext.define('Ck.map.Controller', {
 			}
 		});
 	},
-	
+
 	/**
-	 * 
+	 *
 	 * @params {Ext.component}
 	 */
 	bindComponent: function(cmp) {
