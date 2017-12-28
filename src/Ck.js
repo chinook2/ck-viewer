@@ -370,6 +370,51 @@ Ext.apply(Ck, {
 
 		return false;
 	},
+	
+	/**
+	 * Get action(s) by widget name (eg: ckmapMeasure). Wildcard allowed
+	 * @param  {String} widget name of the action
+	 * @param  {Ck.Map} map    optional. map instance for the action
+	 * @return {Ck.Action}        [description]
+	 */
+	getActions: function(widget, map) {
+		var a;
+
+		// Try to find direct by index when map is not defined
+		if(!map) {
+			a = Ck.actions[widget];
+			if(a) return a;
+		}
+		
+		// Use regExp to allow wildcard and allow table of result
+		var arrAct = [];
+		widget = new RegExp("^" + widget);
+
+		// index can include itemId to make it unique
+		// try to find only with ckAction name
+		for(var an in Ck.actions) {
+			a = Ck.actions[an];
+			if(a.ckAction.match(widget) != null) {
+				if (map) {
+					// If map instance return the action associated to the map
+					var aMap = a.getMap();
+					if (aMap && aMap.getId() === map.getId()) {
+						arrAct.push(a);
+					}
+				} else {
+					arrAct.push(a);
+				}
+			}
+		}
+
+		if(arrAct.length == 0) {
+			return false
+		} else if(arrAct.length == 1) {
+			return arrAct[1];
+		} else {
+			return arrAct;
+		}
+	},
 
 	/**
 	 * Get informations of the package (from Ext.manifest).

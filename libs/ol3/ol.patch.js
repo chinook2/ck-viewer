@@ -46,7 +46,20 @@ ol.interaction.Draw.prototype.createOrUpdateSketchPoint_ = function(event) {
   }
 };
 
-
+ol.source.Vector.prototype.isExtentsLoaded = function(extents) {
+	var loadedExtentsRtree = this.loadedExtentsRtree_;
+	var i, ii;
+	for (i = 0, ii = extents.length; i < ii; ++i) {
+		var extentToLoad = extents[i];
+		var alreadyLoaded = loadedExtentsRtree.forEachInExtent(extentToLoad, function(object) {
+			return ol.extent.containsExtent(object.extent, extentToLoad);
+		});
+		if (!alreadyLoaded) {
+			return false
+		}
+	}
+	return true;
+}
 
 /**
  * Patch to add directly in ol-debug.js

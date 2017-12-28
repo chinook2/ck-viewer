@@ -115,6 +115,8 @@ Ext.define('Ck.map.Controller', {
 
 	draw: {},
 
+	measure: {},
+	
 	/**
 	 *
 	 */

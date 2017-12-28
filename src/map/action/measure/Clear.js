@@ -2,7 +2,7 @@
  *
  */
 Ext.define('Ck.map.action.measure.Clear', {
-	extend: 'Ck.map.action.Measure',
+	extend: 'Ck.Action',
 	alias: 'widget.ckmapMeasureClear',
 
 	itemId: 'measureclear',
@@ -12,9 +12,15 @@ Ext.define('Ck.map.action.measure.Clear', {
 
 	toggleGroup: null,
 	enableToggle: false,
-	type: null,
-
-	doAction: function() {
-		this.clearAll();
+	
+	ckLoaded: function(map) {
+		this.measure = Ck.Measure.getInstance({map: map});
+	},
+	
+	/**
+	 * 
+	 */
+	doAction: function(btn) {
+		this.measure.clearMeasure();
 	}
 });
