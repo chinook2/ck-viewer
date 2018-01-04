@@ -34,10 +34,10 @@ Ext.define('Ck.Measure', {
 		/**
 		 * Id for the layer storing the measurements
 		 */
-		layerId: "measureing-layer",
+		layerId: "measuring-layer",
 
 		/**
-		 * The layer store measureings
+		 * The layer store measures
 		 * @var {ol.layer.Vector}
 		 */
 		layer: null,
@@ -55,7 +55,7 @@ Ext.define('Ck.Measure', {
 		/**
 		 * Message while layer features snapping is loading
 		 */
-		layersSnapMsg: "Snap features are loading...",
+		layersSnapMsg: "Loading features for snap...",
 
 		/**
 		 * Measure style. Set to null to hide measureing.
@@ -78,8 +78,18 @@ Ext.define('Ck.Measure', {
 		 * Set measure mode. metric, imperial or both
 		 * @var {String|Array}
 		 */
-		mode: 'metric'
+		mode: 'metric',
+		
+		maxFeaturePerLayer: 500,
+		
+		tooManyFeatureMsg: "Loading these features (%d) could be long. Do you confirm ?"
 	},
+	
+	lyrToLoad: 0,
+	
+	lyrToMask: 0,
+	
+	layersFeatures: [],
 	
 	currentExtent: [],
 	
@@ -166,8 +176,8 @@ Ext.define('Ck.Measure', {
 		this.getMap().addSpecialLayer(this.getLayer());
 		
 		// Update snap
-		this.getOlMap().getView().on("change:center", this.updateSnappingFeatures, this);
-		this.getOlMap().getView().on("change:resolution", this.updateSnappingFeatures, this);
+		this.getOlMap().on("moveend", this.updateSnappingFeatures, this);
+		
 		
 		this.snapFeatures = new ol.Collection();
 		this.layerSnapping = new ol.interaction.Snap({features: this.snapFeatures});
@@ -409,61 +419,128 @@ Ext.define('Ck.Measure', {
 	
 	/**
 	 * Loop on layers used for snapping to load features for the current extent
+	 * @params {Object[]}
 	 */
-	updateSnappingFeatures: function() {
+	updateSnappingFeatures: function(lyrsToLoad) {
 		// Avoid multiple call execution
 		if(this.lyrToLoad > 0) {
 			return false;
 		}
 		
-		var sl, lyrs = this.getLayersSnapping();
+		if(!Ext.isArray(lyrsToLoad)) {
+			this.snapFeatures.clear();
+		}
+		
+		this.layersFeatures = [];
+		
+		var lyr, lyrsFinal = [], lyrs = this.getLayersSnapping();
 		var ex = this.getMap().getExtent();
 		
-		this.snapFeatures.clear();
-		
-		// First pass to know if a mask should be displayed 
-		var nbLyrSnap = 0;
-		for(var id in lyrs) {
-			if(lyrs[id].snap) {
-				nbLyrSnap++;
+		if(Ext.isArray(lyrsToLoad)) {
+			for(var i = 0; i < lyrsToLoad.length; i++) {
+				lyrsFinal.push(lyrs[lyrsToLoad[i].id]);
+			}
+		} else {
+			// First pass to know if a mask should be displayed 
+			var nbLyrSnap = 0;
+			for(var id in lyrs) {
+				if(lyrs[id].snap) {
+					lyrsFinal.push(lyrs[id]);
+				}
 			}
 		}
 		
-		if(nbLyrSnap > 0) {
-			this.lyrToLoad = 0;
-
-			// Load all snapping features
-			for(var id in lyrs) {
-				l = lyrs[id];
-				if(l.snap) {
-					if(!l.source) {
-						sl = l.layer.get("sources").wfs[0];
-						l.source = new ol.source.Vector({
-							url : function(ext) {
-								return sl.getUrl() + "&BBOX=" + ext.join(",");
-							},
-							format: sl.getFormat(),
-							strategy: ol.loadingstrategy.bbox
-						});
-						
-						// Replace loader to add action on load start (no event for it !?)
-						l.source.originLoader = l.source.loader_;
-						l.source.loader_ = function() {
-							this.loadSnappingFeaturesStart()
-							l.source.originLoader.apply(l.source, arguments);
-						}.bind(this);
-						
-						l.source.on("change", this.loadSnappingFeaturesDone, this);
-					}
-					
-					// Perform getFeatures if they have not been loaded
-					if(!l.source.isExtentsLoaded([ex])) {
-						l.source.loadFeatures(ex);
-					} else {
-						this.snapFeatures.extend(l.source.getFeatures());
-					}
+		// Load all snapping features
+		for(var id in lyrsFinal) {
+			lyr = lyrsFinal[id];
+			if(lyr.snap) {
+				// Create source for snap features loading
+				if(!lyr.source) {
+					lyr.source = this.createSource(lyr);
+				}
+				
+				// Perform getFeatures if they have not been loaded
+				if(!lyr.light && !lyr.source.isExtentsLoaded([ex])) {
+					lyr.source.loadFeatures(ex);
+				} else {
+					this.snapFeatures.extend(lyr.source.getFeatures());
 				}
 			}
+		}
+	},
+	
+	createSource: function(lyr) {
+		var sl = lyr.layer.get("sources").wfs[0];
+		var source = new ol.source.Vector({
+			url : (lyr.light)? sl.getUrl() : function(ext) { return sl.getUrl() + "&BBOX=" + ext.join(","); },
+			format: sl.getFormat(),
+			strategy: (lyr.light)? ol.loadingstrategy.all : ol.loadingstrategy.bbox
+		});
+		
+		if(lyr.light) {
+			source.on("change", function(evt) {
+				this.loadSnappingFeaturesDone(evt);
+			}, this);
+			this.loadSnappingFeaturesStart(source);
+			source.loadFeatures();
+		} else {
+			// Replace loader to add action on load start (no event for it !?)
+			source.originLoadFeatures = source.loadFeatures;
+			source.loadFeatures = function(source, ext) {
+				// Check number of feature before load (maybe too many ft)
+				this.showMask();
+				Ext.Ajax.request({
+					url: source.getUrl()(ext) + "&resultType=hits",
+					success: function(ext, source, response) {
+						
+						nbF = response.responseText.match(/numberOfFeatures="[0-9]*"/);
+						if(nbF) {
+							nbF = nbF[0].match(/[0-9]+/)[0];
+						}
+						// If too many ask for confirmation
+						if(parseInt(nbF) > this.getMaxFeaturePerLayer()) {
+							this.hideMask();
+							Ext.MessageBox.show({
+								title: 'Warning',
+								msg: this.getTooManyFeatureMsg().replace("%d", nbF),
+								icon: Ext.MessageBox.WARNING,
+								buttons: Ext.MessageBox.OKCANCEL,
+								scope: this,
+								fn: function(btn) {
+									if(btn == "ok") {
+										this.loadSnappingFeaturesStart();
+										source.originLoadFeatures.apply(source, [ext]);
+									}
+								}
+							});
+						} else {
+							this.loadSnappingFeaturesStart();
+							this.hideMask(); // Mask for feature count
+							source.originLoadFeatures.apply(source, [ext]);
+						}
+						
+						
+						
+						
+					}.bind(this, ext, source)
+				});
+			}.bind(this, source);
+			
+			source.on("change", this.loadSnappingFeaturesDone, this);
+			
+			return source;
+		}
+	},
+	
+	showMask: function() {
+		if(this.lyrToMask++ == 0) {
+			this.mask.show();
+		}
+	},
+	
+	hideMask: function() {
+		if(--this.lyrToMask == 0) {
+			this.mask.hide();
 		}
 	},
 	
@@ -473,7 +550,7 @@ Ext.define('Ck.Measure', {
 	loadSnappingFeaturesStart: function() {
 		if(this.lyrToLoad++ == 0) {
 			// Display mask
-			this.mask.show();
+			this.showMask();
 		}
 	},
 	
@@ -482,14 +559,18 @@ Ext.define('Ck.Measure', {
 	 * Hide the mask when all loadings end
 	 */
 	loadSnappingFeaturesDone: function(evt) {
-		this.snapFeatures.extend(evt.target.getFeatures());
+		this.layersFeatures.push(evt.target.getFeatures());
 		
 		if(--this.lyrToLoad == 0) {
+			for(var i = 0; i < this.layersFeatures.length; i++) {
+				this.snapFeatures.extend(this.layersFeatures[i]);
+			}
+			
 			// Refresh snap interaction
 			this.updateLayerSnapping();
 			
 			// Hide mask
-			this.mask.hide();
+			this.hideMask();
 		}
 	}
 });
