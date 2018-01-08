@@ -85,20 +85,46 @@ Ext.define('Ck.Measure', {
 		tooManyFeatureMsg: "Loading these features (%d) could be long. Do you confirm ?"
 	},
 	
-	lyrToLoad: 0,
+	/**
+	 * Number of layer currently loading (for snap)
+	 * @var {Integer}
+	 */
+	crtLoad: 0,
 	
-	lyrToMask: 0,
+	/**
+	 * Load mask counter
+	 * @var {Integer}
+	 */
+	needMask: 0,
 	
+	/**
+	 * Feature array used for snapping
+	 * @var {Integer}
+	 */
 	layersFeatures: [],
 	
-	currentExtent: [],
-	
+	/**
+	 * Interaction used for snap between measures and layers
+	 * @var {ol.interaction.Snap}
+	 */
 	layerSnapping: null,
 	
+	/**
+	 * Interaction used for snap between measures and measures
+	 * @var {ol.interaction.Snap}
+	 */
 	measureSnapping: null,
 	
+	/**
+	 * Number of layer 
+	 * @var Integer
+	 */
 	wgs84Sphere: new ol.Sphere(6378137),
 	
+	/**
+	 * Shortcut to get source storing the measures
+	 * @var Integer
+	 */
 	getSource: function() {
 		return this.getLayer().getSource();
 	},
@@ -423,7 +449,7 @@ Ext.define('Ck.Measure', {
 	 */
 	updateSnappingFeatures: function(lyrsToLoad) {
 		// Avoid multiple call execution
-		if(this.lyrToLoad > 0) {
+		if(this.crtLoad > 0) {
 			return false;
 		}
 		
@@ -533,13 +559,13 @@ Ext.define('Ck.Measure', {
 	},
 	
 	showMask: function() {
-		if(this.lyrToMask++ == 0) {
+		if(this.needMask++ == 0) {
 			this.mask.show();
 		}
 	},
 	
 	hideMask: function() {
-		if(--this.lyrToMask == 0) {
+		if(--this.needMask == 0) {
 			this.mask.hide();
 		}
 	},
@@ -548,7 +574,7 @@ Ext.define('Ck.Measure', {
 	 * Display the mask for first loading start
 	 */
 	loadSnappingFeaturesStart: function() {
-		if(this.lyrToLoad++ == 0) {
+		if(this.crtLoad++ == 0) {
 			// Display mask
 			this.showMask();
 		}
@@ -561,7 +587,7 @@ Ext.define('Ck.Measure', {
 	loadSnappingFeaturesDone: function(evt) {
 		this.layersFeatures.push(evt.target.getFeatures());
 		
-		if(--this.lyrToLoad == 0) {
+		if(--this.crtLoad == 0) {
 			for(var i = 0; i < this.layersFeatures.length; i++) {
 				this.snapFeatures.extend(this.layersFeatures[i]);
 			}
