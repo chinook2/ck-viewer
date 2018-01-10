@@ -59,12 +59,12 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		 * Capitalize first letter of field name
 		 */
 		capitalize: true,
-		
+
 		winWidth: 400,
 		winHeight: 400,
 		winCollapsible: true,
 		winEmptyResult: true,
-		
+
 		selectionConfig: {}
 	},
 
@@ -74,7 +74,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			Ext.define('FeatureInfoResult', {
 				extend: 'Ext.data.Model',
 				fields: [
-					{name: 'featureid', type: 'int'},
+					{name: 'groupby', type: 'string'},
 					{name: 'field', type: 'string'},
 					{name: 'value', type: 'string'}
 				]
@@ -93,7 +93,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
-		
+
 		var selConf = Ext.applyIf(this.getSelectionConfig(), {
 			type			: "Point",
 			map				: map,
@@ -126,7 +126,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		this.btn = btn;
 		if(this.draw) this.draw.setActive(pressed);
 		this.createContainer();
-		
+
 		// Action disable
 		if(!pressed) {
 			if(this.draw.getSelect()) {
@@ -210,9 +210,15 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	createTab: function(lyr) {
 		var field, alias, tpl, data = [];
 		var col = lyr.layer.getExtension("columns") || {};
-
+		var nameTpl = lyr.layer.getExtension("featureNameTpl");
+		if(nameTpl) nameTpl = new Ext.XTemplate(nameTpl);
 		for(var i = 0; i < lyr.features.length; i++) {
 			var rawValues = lyr.features[i].getProperties() || {};
+
+			var fName = 'Feature ' + (i+1);
+			if (nameTpl) {
+				fName = nameTpl.apply(rawValues) || '';
+			}
 
 			// Order fields
 			var values = {};
@@ -263,7 +269,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}
 
 				data.push({
-					featureid: i + 1,
+					groupby: fName,
 					field: (this.getCapitalize())? Ext.String.capitalize(field) : field,
 					value: val.toString()
 				});
@@ -277,17 +283,17 @@ Ext.define('Ck.map.action.FeatureInfo', {
 
 		var store = Ck.create("Ext.data.Store", {
 			model: "FeatureInfoResult",
-			groupField: "featureid",
+			groupField: "groupby",
 			data: data
 		});
 
 		var title = lyr.layer.get("title");
 
 		if(lyr.features.length < 2 && this.getLight()) {
-			var tpl = lyr.layer.getExtension("titleTpl");
-			if(Ext.isString(tpl)) {
-				tpl = new Ext.Template(tpl);
-				title = tpl.apply(lyr.features[0].getProperties());
+			var ttpl = lyr.layer.getExtension("titleTpl");
+			if(Ext.isString(ttpl)) {
+				ttpl = new Ext.Template(ttpl);
+				title = ttpl.apply(lyr.features[0].getProperties());
 			}
 		}
 
@@ -316,7 +322,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		if(lyr.features.length > 1 && this.getLight()) {
 			opt.features = [{
 				ftype: "groupingsummary",
-				groupHeaderTpl: "Feature {featureid}",
+				groupHeaderTpl: "{name}",
 				enableGroupingMenu: false,
 				showSummaryRow: false,
 				startCollapsed: true

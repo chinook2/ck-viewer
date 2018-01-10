@@ -122,6 +122,7 @@ Ext.define('Ck.Ajax', {
 		});
 
 		var xhr = new XMLHttpRequest();
+		var _async = (options.async !== false) ? true : false;
 
 		xhr.onreadystatechange = function() {
 			if (xhr.readyState == 4) {
@@ -133,8 +134,9 @@ Ext.define('Ck.Ajax', {
 			}
 		};
 
+		var fData;
 		if(Ext.isObject(options.params)) {
-			var fData = new FormData();
+			fData = new FormData();
 			for(var key in options.params) {
 				fData.append(key, options.params[key]);
 			}
@@ -145,10 +147,10 @@ Ext.define('Ck.Ajax', {
 				fData.append(f.name, f.value, f.filename);
 			}
 		} else {
-			var fData = options.params;
+			fData = options.params;
 		}
 
-		xhr.open(options.method, options.url, true);
+		xhr.open(options.method, options.url, _async);
 		xhr.send(fData);
 	},
 
