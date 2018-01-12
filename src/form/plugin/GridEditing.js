@@ -7,6 +7,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 
 	editrow: false,
 	deleterow: true,
+	deleteallrow: true,
 	dummyrow: true,
 
 	_hasdummy: false,
@@ -19,6 +20,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			this.initEditing(grid);
 		}, this, {delay: 50});
 	},
+
 
 	initEditing: function(grid) {
 		this.grid = grid;
@@ -91,22 +93,28 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				col = Ext.Array.pluck(this.grid.columns, 'initialConfig');
 			}
 
+			var txt = '';
+			if (this.deleteallrow !== false) {
+				// Html code to disply icon
+				txt = '<img role="button" alt="" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-action-col-icon ckClose" data-qtip="Delete all rows">';
+			}
 			col.push({
-				xtype		: 'actioncolumn',
-				hidden		: hide,
-				items		: actions,
-				editor		: false,
-				cellWrap	: false,
-				flex		: 0
+				xtype: 'actioncolumn',
+				text: txt,
+				hidden: hide,
+				items: actions,
+				editor: false,
+				cellWrap: false,
+				flex: 0
 			});
 
 			// Helper to identify by CSS first cell for dummy row
-			col[0].renderer = function(value, metaData, record, rowIndex, colIndex, store, view){
+			/*col[0].renderer = function(value, metaData, record, rowIndex, colIndex, store, view){
 				if(colIndex==0 && record.get('dummy')){
 					metaData.innerCls = 'ck-dummy-cell-inner';
 				}
 				return value;
-			}
+			}*/
 
 			this.grid.reconfigure(col);
 			this.actionColumn = this.grid.down('actioncolumn');
@@ -114,7 +122,20 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			// Add grid reference to the actionColumn
 			// this.actionColumn.ownerGrid = this.grid;
 
-			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
+			this.actionColumn.width = 12 + (this.actionColumn.items.length * 20);
+
+			if (this.deleteallrow !== false) {
+				this.actionColumn.on({
+					headerclick: function (ct, col, e) {
+						var t = e.target;
+						if (t && t.className.indexOf('ckClose') != -1) {
+							var recs = this.deleteAllRows(this.grid);
+							this.grid.fireEvent('actionColumnClick', 'deleteallrow', recs);
+						}
+					},
+					scope: this
+				});
+			}
 		}
 
 		if(formController){
@@ -235,6 +256,15 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				store.removed.push(rec);
 			}
 		}
+	},
 
+	deleteAllRows: function (grid) {
+		var store = grid.getStore();
+		var removed = store.removeAll();
+		// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
+		if (store.removed) {
+			store.removed = removed;
+		}
+		return removed;
 	}
 });
