@@ -9,39 +9,71 @@ Ext.define('Ck.goto.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckgoto',
 
+	config: {
+		/**
+		 * Number of digit after comma for decimal unit
+		 * @prop {Integer}
+		 */
+		mPrecision: 4,
+		
+		/**
+		 * Number of digit after comma for degree unit
+		 * @prop {Integer}
+		 */
+		degPrecision: 8,
+		
+		/**
+		 * Name of layer for display marker
+		 * @prop {String}
+		 */
+		layerName: "ckGotoMarker",
+		
+		/**
+		 * To empty fields on marker cleaning
+		 * @prop {Boolean}
+		 */
+		clearCoordinates: false,
+		
+		/**
+		 * Zoom on goto action
+		 * @prop {Integer}
+		 */
+		zoom: null
+	},
+	
 	/**
-	 * @prop {ol.proj}
+	 * Current projection used
+	 * @var {ol.proj}
 	 */
 	proj: null,
 
 	/**
-	 * @prop {ol.proj}
-	 */
-	mapProj: null,
-
-	/**
-	 * @prop {String}
+	 * Current unit used
+	 * @var {String}
 	 */
 	unit: "dec",
 
 	/**
-	 * @prop {Ext.form.FieldContainer}
+	 * Sub components for each units
+	 * @var {Ext.form.FieldContainer}
 	 */
 	dec: null,
 	dms: null,
 	dm: null,
-
-	config: {
-		mPrecision: 4,
-		degPrecision: 8,
-		layerName: "ckGotoMarker"
-	},
+	
+	/**
+	 * Map projection
+	 * @var {ol.proj}
+	 */
+	mapProj: null,
 
 	/**
 	 * @protected
 	 */
 	init: function(view) {
 		this.callParent([view]);
+		
+		this.setConfig(view.gotoConfig);
 
 		if (!this.mapProj) {
 			this.mapProj = this.getOlView().getProjection();
@@ -68,19 +100,15 @@ Ext.define('Ck.goto.Controller', {
 		this.dms = view.getComponent("goto-dms").getController();
 		this.dm = view.getComponent("goto-dm").getController();
 
-		// this.dec.goto = this;
-		// this.dms.goto = this;
-		// this.dm.goto = this;
-
 		// Init projection with map projection
 		var projCode = this.mapProj.getCode();
 		if(view.getComponent("projection").getStore().find("code", projCode) != -1) {
 			view.getComponent("projection").setValue(projCode);
 		} else {
-			Ck.error("The map projection does not exists in the combobox store")
+			Ck.log("The map projection does not exists in the combobox store of Search by Coordinates")
 		}
 
-		if (view.clearCoordinates === false) {
+		if (this.getClearCoordinates() === false) {
 			this.loadCenter();
 		}
 
@@ -117,6 +145,9 @@ Ext.define('Ck.goto.Controller', {
 		this.view.getComponent("goto-" + rb.inputValue).setVisible(value);
 	},
 
+	/**
+	 * Get center of current view and load coordinates into fields
+	 */
 	loadCenter: function() {
 		var geom = new ol.geom.Point(this.getOlView().getCenter());
 
@@ -162,12 +193,11 @@ Ext.define('Ck.goto.Controller', {
 		}.bind(this));
 	},
 
+	/**
+	 * Make fields empty
+	 */
 	clearCoordinates: function () {
 		var fcUnit = ["dec"];
-		/* Disable for now
-		if(this.proj.getUnits() == "degrees") {
-			fcUnit.push("dms", "dm")
-		} */
 
 		fcUnit.forEach(function(id) {
 			this[id].setCoordinates(null);
@@ -199,12 +229,16 @@ Ext.define('Ck.goto.Controller', {
 			});
 			this.getMap().setCenter(geom.getCoordinates());
 			this.layer.getSource().addFeature(ft);
+			
+			if(Ext.isNumber(this.getZoom())) {
+				this.getMap().setZoomScale(this.getZoom());
+			}
 		}
 	},
 
 	clearMarker: function() {
 		this.layer.getSource().clear();
-		if (this.getView().clearCoordinates === true) {
+		if (this.getClearCoordinates() === true) {
 			this.clearCoordinates();
 		}
 	}

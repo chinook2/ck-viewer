@@ -913,6 +913,12 @@ Ext.define('Ck.map.Controller', {
 	setZoom: function(zoom) {
 		return this.getOlView().setZoom(zoom);
 	},
+	
+	setZoomScale: function(scale) {
+		var res = Ck.getResolutionFromScale(scale, this.getProjection());
+		res = this.getNearestResolution(res);
+		this.setResolution(res);
+	},
 
 	/**
 	 * Recursive function to return all layers
