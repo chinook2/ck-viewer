@@ -5,7 +5,7 @@ Ext.define('Ck.Measure', {
 	statics: {
 		getInstance: function(config) {
 			config = Ext.applyIf(config || {}, this.prototype.config);
-			
+
 			var ckmap = config.map || Ck.getMap();
 			var measure = ckmap.measure[config.id];
 			if(!measure) {
@@ -41,17 +41,17 @@ Ext.define('Ck.Measure', {
 		 * @var {ol.layer.Vector}
 		 */
 		layer: null,
-		
+
 		/**
 		 * Allow snapping between measure
 		 */
 		snap: true,
-		
+
 		/**
 		 * List of layer used for snapping
 		 */
 		layersSnapping: {},
-		
+
 		/**
 		 * Message while layer features snapping is loading
 		 */
@@ -68,59 +68,59 @@ Ext.define('Ck.Measure', {
 		 * @var {ol.interaction.Measure}
 		 */
 		measure: null,
-		
+
 		/**
 		 *
 		 */
 		geodesic: true,
-		
+
 		/**
 		 * Set measure mode. metric, imperial or both
 		 * @var {String|Array}
 		 */
 		mode: 'metric',
-		
+
 		maxFeaturePerLayer: 500,
-		
+
 		tooManyFeatureMsg: "Loading these features (%d) could be long. Do you confirm ?"
 	},
-	
+
 	/**
 	 * Number of layer currently loading (for snap)
 	 * @var {Integer}
 	 */
 	crtLoad: 0,
-	
+
 	/**
 	 * Load mask counter
 	 * @var {Integer}
 	 */
 	needMask: 0,
-	
+
 	/**
 	 * Feature array used for snapping
 	 * @var {Integer}
 	 */
 	layersFeatures: [],
-	
+
 	/**
 	 * Interaction used for snap between measures and layers
 	 * @var {ol.interaction.Snap}
 	 */
 	layerSnapping: null,
-	
+
 	/**
 	 * Interaction used for snap between measures and measures
 	 * @var {ol.interaction.Snap}
 	 */
 	measureSnapping: null,
-	
+
 	/**
-	 * Number of layer 
+	 * Number of layer
 	 * @var Integer
 	 */
 	wgs84Sphere: new ol.Sphere(6378137),
-	
+
 	/**
 	 * Shortcut to get source storing the measures
 	 * @var Integer
@@ -128,7 +128,7 @@ Ext.define('Ck.Measure', {
 	getSource: function() {
 		return this.getLayer().getSource();
 	},
-	
+
 	/**
 	 * Define units and conversion for different mode
 	 * @type {Object}
@@ -191,7 +191,7 @@ Ext.define('Ck.Measure', {
 			source: new ol.source.Vector(),
 			style: this.getMeasureStyle()
 		}));
-		
+
 		if(this.getSnap()) {
 			this.measureSnapping = new ol.interaction.Snap({
 			  source: this.getSource()
@@ -200,29 +200,29 @@ Ext.define('Ck.Measure', {
 		}
 
 		this.getMap().addSpecialLayer(this.getLayer());
-		
+
 		// Update snap
 		this.getOlMap().on("moveend", this.updateSnappingFeatures, this);
-		
-		
+
+
 		this.snapFeatures = new ol.Collection();
 		this.layerSnapping = new ol.interaction.Snap({features: this.snapFeatures});
 		this.getOlMap().addInteraction(this.layerSnapping);
-		
+
 		// Create the mask
 		this.mask = new Ext.LoadMask({
 			msg: this.getLayersSnapMsg(),
 			target: this.getMap().getView()
 		});
 	},
-	
+
 	updateMeasureSnapping: function() {
 		if(this.getSnap()) {
 			this.getOlMap().removeInteraction(this.measureSnapping);
 			this.getOlMap().addInteraction(this.measureSnapping);
 		}
 	},
-	
+
 	updateLayerSnapping: function() {
 		this.getOlMap().removeInteraction(this.layerSnapping);
 		this.getOlMap().addInteraction(this.layerSnapping);
@@ -273,7 +273,7 @@ Ext.define('Ck.Measure', {
 		});
 		this.getOlMap().addOverlay(this.measureTooltip);
 	},
-	
+
 	/**
 	 * Format length measurement label
 	 * @param {ol.geom.LineString} line
@@ -398,16 +398,16 @@ Ext.define('Ck.Measure', {
 
 		return output.join('<br>');
 	},
-	
+
 	/**
 	 * Save sketch at measure start
 	 */
 	measureStart: function(evt) {
 		this.sketch = evt.feature;
 	},
-	
+
 	/**
-	 * Create the permanent label for the measurement taken 
+	 * Create the permanent label for the measurement taken
 	 */
 	measureEnd: function(evt) {
 		this.measureTooltipElement.className = 'tooltip tooltip-static';
@@ -426,23 +426,23 @@ Ext.define('Ck.Measure', {
 		this.measureTooltipElement = null;
 		this.createMeasureTooltip();
 	},
-	
+
 	/**
 	 * Remove tooltip
 	 */
 	clearTooltip: function() {
 		if(this.measureTooltip) {
 			this.getOlMap().removeOverlay(this.measureTooltip);
-		}	
+		}
 	},
-	
+
 	/**
 	 * Remove all measures
 	 */
 	clearMeasure: function() {
 		this.getSource().clear();
 	},
-	
+
 	/**
 	 * Loop on layers used for snapping to load features for the current extent
 	 * @params {Object[]}
@@ -452,22 +452,22 @@ Ext.define('Ck.Measure', {
 		if(this.crtLoad > 0) {
 			return false;
 		}
-		
+
 		if(!Ext.isArray(lyrsToLoad)) {
 			this.snapFeatures.clear();
 		}
-		
+
 		this.layersFeatures = [];
-		
+
 		var lyr, lyrsFinal = [], lyrs = this.getLayersSnapping();
 		var ex = this.getMap().getExtent();
-		
+
 		if(Ext.isArray(lyrsToLoad)) {
 			for(var i = 0; i < lyrsToLoad.length; i++) {
 				lyrsFinal.push(lyrs[lyrsToLoad[i].id]);
 			}
 		} else {
-			// First pass to know if a mask should be displayed 
+			// First pass to know if a mask should be displayed
 			var nbLyrSnap = 0;
 			for(var id in lyrs) {
 				if(lyrs[id].snap) {
@@ -475,16 +475,19 @@ Ext.define('Ck.Measure', {
 				}
 			}
 		}
-		
+
 		// Load all snapping features
-		for(var id in lyrsFinal) {
-			lyr = lyrsFinal[id];
+		for(var idf in lyrsFinal) {
+			lyr = lyrsFinal[idf];
 			if(lyr.snap) {
 				// Create source for snap features loading
 				if(!lyr.source) {
 					lyr.source = this.createSource(lyr);
 				}
-				
+				if(!lyr.source) {
+					continue;
+				}
+
 				// Perform getFeatures if they have not been loaded
 				if(!lyr.light && !lyr.source.isExtentsLoaded([ex])) {
 					lyr.source.loadFeatures(ex);
@@ -494,15 +497,30 @@ Ext.define('Ck.Measure', {
 			}
 		}
 	},
-	
+
 	createSource: function(lyr) {
 		var sl = lyr.layer.get("sources").wfs[0];
+		if(!sl) {
+			Ck.log("No WFS source for Layer '"+ lyr.layer.get('title') +"'.");
+			return false;
+		}
+
+		// Pass WMS ENV variables to WFS Query !
+		var env = '';
+		var wmsSrc = lyr.layer.get("sources").wms;
+		if(Ext.isArray(wmsSrc)) {
+			wmsSrc = wmsSrc[0];
+			var p = wmsSrc.getParams() || {};
+			env = '&ENV=' + p.ENV;
+		}
+		//
+
 		var source = new ol.source.Vector({
-			url : (lyr.light)? sl.getUrl() : function(ext) { return sl.getUrl() + "&BBOX=" + ext.join(","); },
+			url : (lyr.light)? sl.getUrl() + env : function(ext) { return sl.getUrl() + env + "&BBOX=" + ext.join(","); },
 			format: sl.getFormat(),
 			strategy: (lyr.light)? ol.loadingstrategy.all : ol.loadingstrategy.bbox
 		});
-		
+
 		if(lyr.light) {
 			source.on("change", function(evt) {
 				this.loadSnappingFeaturesDone(evt);
@@ -518,7 +536,7 @@ Ext.define('Ck.Measure', {
 				Ext.Ajax.request({
 					url: source.getUrl()(ext) + "&resultType=hits",
 					success: function(ext, source, response) {
-						
+
 						nbF = response.responseText.match(/numberOfFeatures="[0-9]*"/);
 						if(nbF) {
 							nbF = nbF[0].match(/[0-9]+/)[0];
@@ -544,32 +562,32 @@ Ext.define('Ck.Measure', {
 							this.hideMask(); // Mask for feature count
 							source.originLoadFeatures.apply(source, [ext]);
 						}
-						
-						
-						
-						
+
+
+
+
 					}.bind(this, ext, source)
 				});
 			}.bind(this, source);
-			
+
 			source.on("change", this.loadSnappingFeaturesDone, this);
-			
+
 			return source;
 		}
 	},
-	
+
 	showMask: function() {
 		if(this.needMask++ == 0) {
 			this.mask.show();
 		}
 	},
-	
+
 	hideMask: function() {
 		if(--this.needMask == 0) {
 			this.mask.hide();
 		}
 	},
-	
+
 	/**
 	 * Display the mask for first loading start
 	 */
@@ -579,22 +597,22 @@ Ext.define('Ck.Measure', {
 			this.showMask();
 		}
 	},
-	
+
 	/**
 	 * Add feature to snapping collection.
 	 * Hide the mask when all loadings end
 	 */
 	loadSnappingFeaturesDone: function(evt) {
 		this.layersFeatures.push(evt.target.getFeatures());
-		
+
 		if(--this.crtLoad == 0) {
 			for(var i = 0; i < this.layersFeatures.length; i++) {
 				this.snapFeatures.extend(this.layersFeatures[i]);
 			}
-			
+
 			// Refresh snap interaction
 			this.updateLayerSnapping();
-			
+
 			// Hide mask
 			this.hideMask();
 		}
