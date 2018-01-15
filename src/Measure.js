@@ -7,6 +7,7 @@ Ext.define('Ck.Measure', {
 			config = Ext.applyIf(config || {}, this.prototype.config);
 
 			var ckmap = config.map || Ck.getMap();
+			if(!ckmap.measure) ckmap.measure = [];
 			var measure = ckmap.measure[config.id];
 			if(!measure) {
 				measure = new this(config);

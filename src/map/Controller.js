@@ -115,8 +115,12 @@ Ext.define('Ck.map.Controller', {
 
 	draw: {},
 
-	measure: {},
-	
+	/**
+	 * @propety [{Ck.Measure}]
+	 * Measures associated to this map
+	 */
+	measure: null,
+
 	/**
 	 *
 	 */
