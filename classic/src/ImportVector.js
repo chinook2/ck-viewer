@@ -5,19 +5,19 @@
 Ext.define("Ck.ImportVector", {
 	extend: "Ext.form.Panel",
 	alias: "widget.ckimportvector",
-	
+
 	title: "File",
-	
+
 	requires: [
 		"Ck.importvector.*"
 	],
 
 	controller: "ckimportvector",
-	
+
 	viewModel: {
 		type: "ckimportvector"
 	},
-	
+
 	config: {
 		bodyPadding: 10,
 		defaultType: "combo",
@@ -25,7 +25,7 @@ Ext.define("Ck.ImportVector", {
 			width: "100%"
 		}
 	},
-	
+
 	items: [{
 		itemId: "format",
 		fieldLabel: "Format",
@@ -56,14 +56,12 @@ Ext.define("Ck.ImportVector", {
 		displayField: "label",
 		valueField: "id",
 		editable: false,
-		bind: {
-			"store": "{projection}"
-		},
+		store: "ckProjection",
 		listeners: {
 			change: "paramChange"
 		}
 	}],
-	
+
 	bbar: [{
 		text: "Import",
 		itemId: "import",

@@ -9,34 +9,39 @@ Ext.define('Ck.addlayer.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer',
 
-	
+
 	wms: true,
 	wfs: true,
 	vector: {
 		visible: true,
 		type: ['shp', 'mif', 'gpx']
 	},
-	
+
 	init : function(view) {
-		
+		var nbTabs = 0;
+
 		// Enable or disable items according to config
 		this.view.items.items.forEach(function(element) {
-			var itemId = element.itemId ? element.itemId : element.xtype; 
+			var itemId = element.itemId ? element.itemId : element.xtype;
 			switch(itemId) {
-			case 'addlayer-wfs': 
+			case 'addlayer-wfs':
 				element.tab.setVisible(view.config.wfs);
+				if(view.config.wfs) nbTabs++;
 				break;
 			case 'addlayer-wms':
 				element.tab.setVisible(view.config.wms);
+				if(view.config.wms) nbTabs++;
 				break;
 			case 'ckimportvector':
 				var myElement = element;
+				myElement.openner = view.openner;
 				myElement.tab.setVisible(view.config.vector.visible);
-				
+				if(view.config.vector.visible) nbTabs++;
+
 				// Load format from configuration
 				//@see ck-viewer\src\importvector\Model.js for id
 				var formatStore = myElement.getViewModel().getStore("format");
-				
+
 				var newData = [];
 				// Remove unsused elements for format store
 				formatStore.data.items.forEach(function(el) {
@@ -45,36 +50,40 @@ Ext.define('Ck.addlayer.Controller', {
 						newData.push(el);
 					}
 				});
-				
+
 				formatStore.on('load', function(records) {
 					this.loadRawData(newData);
 				});
-				
+
 				//Load projection for configuration
 				var projectionStore = myElement.getViewModel().getStore("projection");
-				
+
 				projectionStore.on('load', function(records) {
 					this.loadRawData(view.config.vector.projection);
 				});
 				myElement.getController().importParam = view.config.vector.importParam;
-				
-				// Force refresh of stores with new value .. 
+
+				// Force refresh of stores with new value ..
 				formatStore.load();
 				projectionStore.load();
-				
-				
+
+
 				// ReInit combobox with new store value
 				myElement.getController().loadDefaultParam(); // If only one value is set as Types, combobox of selection is not displayed
-				
+
 				break;
 			default:
 				break;
 			}
 		});
-		
-		
+
+		if (nbTabs < 2) {
+			var tabs = view.getTabBar();
+			tabs.hide();
+		}
+
 	},
-	
+
 	/**
 	 * Add a layer from node
 	 *

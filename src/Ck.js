@@ -370,7 +370,7 @@ Ext.apply(Ck, {
 
 		return false;
 	},
-	
+
 	/**
 	 * Get action(s) by widget name (eg: ckmapMeasure). Wildcard allowed
 	 * @param  {String} widget name of the action
@@ -385,7 +385,7 @@ Ext.apply(Ck, {
 			a = Ck.actions[widget];
 			if(a) return a;
 		}
-		
+
 		// Use regExp to allow wildcard and allow table of result
 		var arrAct = [];
 		widget = new RegExp("^" + widget);
@@ -835,6 +835,12 @@ Ext.apply(Ck, {
 
 	toCamelCase: function(name) {
 		return name.substring(0, 1).toUpperCase() + name.substring(1);
+	},
+
+	getFileExtension: function(filename) {
+		if(!filename) return '';
+		if(!Ext.isString(filename)) return '';
+		return filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2);
 	},
 
 	removeId: function(name) {
