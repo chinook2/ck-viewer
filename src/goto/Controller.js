@@ -66,14 +66,14 @@ Ext.define('Ck.goto.Controller', {
 	 * @var {ol.proj}
 	 */
 	mapProj: null,
-
+	
 	/**
 	 * @protected
 	 */
 	init: function(view) {
 		this.callParent([view]);
 		
-		this.setConfig(view.gotoConfig);
+		this.initConfig(view.gotoConfig);
 
 		if (!this.mapProj) {
 			this.mapProj = this.getOlView().getProjection();
