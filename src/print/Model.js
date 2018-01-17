@@ -8,7 +8,8 @@ Ext.define('Ck.print.Model', {
 
 	data: {
 		printParam: {
-			resolution: 1,
+			title: "",
+			resolution: null,
 			layout: "default-layout",
 			outputFormat: "pdf",
 			dpi: 96,
@@ -29,13 +30,18 @@ Ext.define('Ck.print.Model', {
 	 * @ignore
 	 */
 	stores: {
+		resolutions: {
+			fields: ["scale", "res"],
+			data: []
+		},
+		
 		layouts: {
 			fields: ["id", "label", "packageName"],
 			data: [
 				{id: "default-layout", label: "Default"}
 			]
 		},
-		outputformats: {
+		outputFormats: {
 			fields: ["id", "label"],
 			data: [
 				{id: "jpg", label: "JPG"},

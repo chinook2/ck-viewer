@@ -19,42 +19,43 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	/**
-	 * List of parameters to configure the print (dpi, format, layout...)
+	 * List of parameters to configure the print (dpi, format, layout, resolution, )
 	 */
 	// printParam: {},
-
+	
 	/**
 	 * List of values to integrate in the print layout
+	 * @var {Object}
 	 */
 	printValue: {},
 
 	/**
-	 * @property {ol.layer.Victor}
 	 * Layer hosting preview vector
+	 * @var {ol.layer.Victor}
 	 */
 	previewLayer: null,
 
 	/**
-	 * The layout as HTML
-	 * @property {String}
+	 * HTML layouts { layoutId : layoutHTMLString }
+	 * @var {Object}
 	 */
-	printLayout: null,
+	layoutsHTML: {},
 
 	/**
 	 * Div element
-	 * @property {DOMElement}
+	 * @var {DOMElement}
 	 */
 	layoutDiv: null,
 
 	/**
 	 * Div element where the canvas will be put
-	 * @property {DOMElement}
+	 * @var {DOMElement}
 	 */
 	printDiv: null,
 
 	/**
 	 * Printed map image. Delete it after each printing.
-	 * @property {DOMElement}
+	 * @var {DOMElement}
 	 */
 	mapImg: null,
 
@@ -99,7 +100,9 @@ Ext.define('Ck.print.Controller', {
 			features: new ol.Collection([])
 		});
 		this.getOlMap().addInteraction(this.moveInteraction);
-		this.layoutChange(null, this.get("printParam.layout"));
+		
+		// Hide layout combo if they are only 1 layout
+		this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 1);
 
 		// Create the mask
 		this.mask = new Ext.LoadMask({
@@ -117,48 +120,26 @@ Ext.define('Ck.print.Controller', {
 	 */
 	loadResolutions: function() {
 		var data = this.getMap().originOwc.getScales();
-		var combo = this.getView().items.get("resolution");
 
-		var store = new Ext.data.Store({
-			fields: ["scale", "res"],
-			data: data
-		});
-		combo.setStore(store);
-
-		this.initResolution();
-	},
-
-	initResolution: function () {
-		this.set("printParam.resolution", this.getOlView().getResolution());
-	},
-
-	/**
-	 * Update param for dpi, format and orientation then call this.updatePreview method
-	 */
-	paramChange: function(item, rec) {
-		if(Ext.isEmpty(rec)) return;
-		var val = item.getValue();
-		// if(item.getChecked) {
-		// 	var i = item = item.getChecked()[0];
-		// 	if(i && i.getSubmitValue) val = i.getSubmitValue();
-		// }
-
-		this.set("printParam." + item.name, val);
-		this.updatePreview();
+		this.getStore("resolutions").loadData(data);
+		
+		if(this.get("printParam.resolution") == null) {
+			this.set("printParam.resolution", data.pop().res);
+		}
 	},
 
 	/**
 	 * Load corresponding json print layout
 	 */
-	layoutChange: function(combo, newValue) {
-		this.set("printParam.layout", this.getStore("layouts").getById(newValue));
-
+	loadHTML: function(layoutId) {
+		var oLay = this.getStore("layouts").getById(layoutId);
+		
 		Cks.get({
-			url: Ck.getPath(this.get("printParam.layout").get("packageName")) + "/print/" + newValue + ".html",
+			url: Ck.getPath(oLay.get("packageName")) + "/print/" + layoutId + ".html",
 			scope: this,
 			success: function(response){
-				this.printLayout = response.responseText;
-				this.loadCss();
+				this.layoutsHTML[layoutId] = response.responseText;
+				this.loadCss(layoutId);
 			},
 			failure: function(response, opts) {
 				Ck.error('Error when loading the print layout !');
@@ -171,9 +152,11 @@ Ext.define('Ck.print.Controller', {
 	/**
 	 * Load and add CSS to the document
 	 */
-	loadCss: function() {
+	loadCss: function(layoutId) {
+		var oLay = this.getStore("layouts").getById(layoutId);
+		
 		Cks.get({
-			url: Ck.getPath(this.get("printParam.layout").get("packageName")) + "/print/" + this.get("printParam.layout").getId() + ".css",
+			url: Ck.getPath(oLay.get("packageName")) + "/print/" + oLay.getId() + ".css",
 			scope: this,
 			success: function(response){
 				this.style.innerHTML = response.responseText;
@@ -182,18 +165,70 @@ Ext.define('Ck.print.Controller', {
 		});
 
 	},
+	
+	/**
+	 * Display preview when view is rendered
+	 */
+	displayPreview: function() {
+		this.updatePreview();
+	},
+	
+	/**
+	 * Update preview box. Update view model data (binded data is refreshed too late)
+	 * Don't do anything for bind triggering (first call)
+	 */
+	changeValue: function(field, newValue, oldValue, opts) {
+		if(opts.firstCall !== false) {
+			opts.firstCall = false;
+		} else {
+			this.set("printParam." + field.itemId, newValue);
+			this.updatePreview();
+		}
+	},
+	
+	/**
+	 * Update the preview feature from layout, format and orientation
+	 */
+	updatePreview: function() {
+		var layoutHTML = this.layoutsHTML[this.get("printParam.layout")];
+		
+		if(!Ext.isString(layoutHTML)) {
+			this.loadHTML(this.get("printParam.layout"));
+			return false;
+		}
+		
+		this.renderLayout(layoutHTML);
+		
+		var center = this.getMap().getOlView().getCenter();
+		if(this.feature) {
+			center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
+			this.previewLayer.getSource().clear();
+		}
+
+		var coordinate = [
+			center[0] - (this.mapSize[0] / 2),
+			center[1] - (this.mapSize[1] / 2),
+			center[0] + (this.mapSize[0] / 2),
+			center[1] + (this.mapSize[1] / 2)
+		];
+
+		this.feature = new ol.Feature({
+			geometry: new ol.geom.Polygon.fromExtent(coordinate)
+		});
+		this.moveInteraction.features_ = new ol.Collection([this.feature]);
+		this.previewLayer.getSource().addFeature(this.feature);
+	},
 
 	/**
 	 * Render the HTML layout just to calculate some variables. Remove it after
 	 *		- pageSize : printed page in CENTIMETERS (with margins) -> use to create pageCanvas
 	 *		- mapSize : size of the map in METERS -> use to draw preview
 	 *		- canvasSize : canvas size to print in PIXEL -> use for making div
+	 * @param {String} The HTML string
 	 */
-	renderLayout: function() {
-		if (this.printLayout==='') return;
-
+	renderLayout: function(layoutHTML) {
 		var parser = new DOMParser();
-		var htmlLayout = parser.parseFromString(this.printLayout, "text/html");
+		var htmlLayout = parser.parseFromString(layoutHTML, "text/html");
 		this.pageDiv = htmlLayout.getElementById("ckPrint-page");
 		if (!this.pageDiv) return;
 
@@ -245,36 +280,11 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	/**
-	 * Update the preview feature from layout, format and orientation
-	 */
-	updatePreview: function() {
-		this.renderLayout();
-		if(!this.mapSize) return;
-
-		var center = this.getMap().getOlView().getCenter();
-		if(this.feature) {
-			center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
-			this.previewLayer.getSource().clear();
-		}
-
-		var coordinate = [
-			center[0] - (this.mapSize[0] / 2),
-			center[1] - (this.mapSize[1] / 2),
-			center[0] + (this.mapSize[0] / 2),
-			center[1] + (this.mapSize[1] / 2)
-		];
-
-		this.feature = new ol.Feature({
-			geometry: new ol.geom.Polygon.fromExtent(coordinate)
-		});
-		this.moveInteraction.features_ = new ol.Collection([this.feature]);
-		this.previewLayer.getSource().addFeature(this.feature);
-	},
-
-	/**
 	 * Check how the document will be print
 	 */
 	beforePrint: function(btn) {
+		
+		
 		// Hide preview vector
 		this.previewLayer.setVisible(false);
 
@@ -475,14 +485,15 @@ Ext.define('Ck.print.Controller', {
 		return this.getViewModel().set(id, value);
 	},
 
-	clearPreview: function () {
-		this.previewLayer.getSource().clear();
-		this.feature = null;
+	hidePreview: function () {
+		this.previewLayer.setVisible(false);
+	},
+	
+	showPreview: function() {
+		this.previewLayer.setVisible(true);
 	},
 
 	cancel: function() {
-		this.clearPreview();
-		var win = this.getView().up('window');
-		if(win) win.close();
+		this.getView().openner.close();
 	}
 });

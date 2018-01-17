@@ -23,74 +23,79 @@ Ext.define("Ck.Print", {
 			width: "100%"
 		}
 	},
+	
+	listeners: { render: "displayPreview" },
+	
+	defaults: {
+		editable: false,
+		xtype: "combo",
+		queryMode: "local"
+	},
 
 	items: [{
-		fieldLabel: "Title",
 		itemId: "title",
-		name: "title"
+		xtype: "textfield",
+		fieldLabel: "Title",
+		editable: true
 	},{
-		xtype: "combo",
 		itemId: "resolution",
 		fieldLabel: "Resolution",
-		name: "resolution",
 		displayField: "scale",
 		valueField: "res",
-		editable: false
+		bind: {
+			store: "{resolutions}",
+			value: "{printParam.resolution}"
+		},
+		listeners: { change: "changeValue" }
 	},{
-		xtype: "combo",
 		itemId: "printLayout",
 		fieldLabel: "Layout",
-		name: "printLayout",
 		displayField: "label",
 		valueField: "id",
-		editable: false,
 		bind: {
-			"store": "{printLayouts}"
-		}
+			store: "{layouts}",
+			value: "{printParam.layout}"
+		},
+		listeners: { change: "changeValue" }
 	},{
-		xtype: "combo",
 		itemId: "outputFormat",
 		fieldLabel: "Output format",
-		name: "outputFormat",
 		displayField: "label",
 		valueField: "id",
-		editable: false,
 		bind: {
-			"store": "{outputformats}"
-		}
+			store: "{outputFormats}",
+			value: "{printParam.outputFormat}"
+		},
+		listeners: { change: "changeValue" }
 	}/*,{
-		xtype: "combo",
 		itemId: "dpi",
 		fieldLabel: "Dot Per Inch",
-		name: "dpi",
 		displayField: "dpi",
 		valueField: "dpi",
-		editable: false,
-		bind: {
-			"store": "{dpi}"
-		}
+		bind: { "store": "{dpi}" },
+		listeners: { change: "changeValue" }
 	}*/,{
-		xtype: "combo",
 		itemId: "format",
 		fieldLabel: "Format",
-		name: "format",
 		displayField: "label",
 		valueField: "id",
-		editable: false,
 		bind: {
-			"store": "{formats}"
-		}
+			store: "{formats}",
+			value: "{printParam.format}"
+		},
+		listeners: { change: "changeValue" }
 	},{
 		xtype: "radiogroup",
 		itemId: "orientation",
 		fieldLabel: "Orientation",
 		columns: 2,
 		vertical: true,
-		name: "orientation",
 		items: [
 			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
 			{boxLabel: "Lanscape", name: "orientation", inputValue: "l"}
-		]
+		],
+		bind: { value: "{printParam.orientation}" },
+		listeners: { change: "changeValue" }
 	}],
 
 	buttons: [{

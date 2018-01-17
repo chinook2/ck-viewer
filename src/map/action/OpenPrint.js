@@ -43,7 +43,8 @@ Ext.define('Ck.map.action.OpenPrint', {
 		if(!this.win) {
 			this.print = Ext.create(Ext.applyIf(this.printOpt, {
 				xtype: 'ckprint',
-				ckview: this.getCkView().getView()
+				ckview: this.getCkView().getView(),
+				openner: this
 			}));
 
 			this.winOpt = Ext.applyIf(this.winOpt, {
@@ -55,10 +56,9 @@ Ext.define('Ck.map.action.OpenPrint', {
 				items: [this.print],
 				parentMap: this.getMap(),
 				listeners: {
-					close: function() {
-						this.print.getController().clearPreview();
-					},
-					scope: this
+					close: this.print.getController().hidePreview,
+					show: this.print.getController().showPreview,
+					scope: this.print.getController()
 				}
 			});
 
@@ -66,9 +66,10 @@ Ext.define('Ck.map.action.OpenPrint', {
 		}
 
 		this.win.show();
-
-		this.print.getController().initResolution();
-		this.print.getController().updatePreview();
+	},
+	
+	close: function() {
+		this.win.close();
 	},
 
 	destroy: function() {
