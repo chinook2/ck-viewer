@@ -124,7 +124,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	toggleAction: function(btn, pressed) {
 		this.btn = btn;
-		if(this.draw) this.draw.setActive(pressed);
+		if(!this.draw) return;
+		this.draw.setActive(pressed);
 		this.createContainer();
 
 		// Action disable

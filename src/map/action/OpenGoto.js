@@ -10,38 +10,38 @@ Ext.define('Ck.map.action.Goto', {
 	itemId: 'opengoto',
 	iconCls: 'ckfont ck-crosshairs',
 	tooltip: 'Open Go to Coordinates',
-	
+
 	config: {
 		/**
 		 * Width of window
 		 * @prop {Integer}
 		 */
 		winWidth: 400,
-		
+
 		/**
 		 * Height of window
 		 * @prop {Integer}
 		 */
 		winHeight: 200,
-		
+
 		/**
 		 * Title of window
 		 * @prop {Integer}
 		 */
 		winTitle: 'Go to Coordinates',
-		
+
 		/**
 		 * Set if window is collapsible
 		 * @prop {Boolean}
 		 */
 		winCollapsible: true,
-		
+
 		/**
 		 * Config passed to goto component
 		 * @prop {Object}
 		 */
 		gotoConfig: {},
-		
+
 		/**
 		 * To empty fields on window show
 		 * @prop {Boolean}
@@ -53,10 +53,12 @@ Ext.define('Ck.map.action.Goto', {
 	 * Create and display a windows with import form
 	 */
 	doAction: function(btn) {
+		this.button = btn || {};
+
 		if(this.getGotoConfig().clearCoordinates != null) {
 			this.setClearCoordinates(this.getGotoConfig().clearCoordinates);
 		}
-		
+
 		if(!this.win) {
 			this.win = Ext.create(this.classWindow, {
 				title: this.getWinTitle(),
@@ -76,7 +78,7 @@ Ext.define('Ck.map.action.Goto', {
 				}
 			});
 		}
-		
+
 		if(this.win.isVisible()) {
 			this.win.hide();
 		} else {
@@ -85,9 +87,31 @@ Ext.define('Ck.map.action.Goto', {
 				this.win.down('ckgoto').getController().clearCoordinates();
 			}
 		}
+
+		// Auto close overview popup when CkView or CkMap is hidden or destroy
+		this.getCkView().getView().on({
+			hide: function () {
+				this.close();
+			},
+			destroy: function () {
+				this.close(true);
+			},
+			scope: this
+		});
+
+		this.getMap().getView().on({
+			hide: function () {
+				this.close();
+			},
+			destroy: function () {
+				this.close(true);
+			},
+			scope: this
+		});
 	},
 
-	close: function() {
+	close: function(isDestroying) {
 		this.win.hide();
+		if(isDestroying!==true) this.button.setPressed(false);
 	}
 });
