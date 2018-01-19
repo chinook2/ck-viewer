@@ -32,13 +32,18 @@ Ext.define("Ck.Print", {
 		queryMode: "local"
 	},
 
+	/**
+	 * itemId needed for field getCmp, name needed for getValues
+	 */
 	items: [{
 		itemId: "title",
+		name: "title",
 		xtype: "textfield",
 		fieldLabel: "Title",
 		editable: true
 	},{
 		itemId: "resolution",
+		name: "resolution",
 		fieldLabel: "Resolution",
 		displayField: "scale",
 		valueField: "res",
@@ -49,6 +54,7 @@ Ext.define("Ck.Print", {
 		listeners: { change: "changeValue" }
 	},{
 		itemId: "printLayout",
+		name: "printLayout",
 		fieldLabel: "Layout",
 		displayField: "label",
 		valueField: "id",
@@ -59,6 +65,7 @@ Ext.define("Ck.Print", {
 		listeners: { change: "changeValue" }
 	},{
 		itemId: "outputFormat",
+		name: "outputFormat",
 		fieldLabel: "Output format",
 		displayField: "label",
 		valueField: "id",
@@ -69,6 +76,7 @@ Ext.define("Ck.Print", {
 		listeners: { change: "changeValue" }
 	}/*,{
 		itemId: "dpi",
+		name: "dpi",
 		fieldLabel: "Dot Per Inch",
 		displayField: "dpi",
 		valueField: "dpi",
@@ -76,6 +84,7 @@ Ext.define("Ck.Print", {
 		listeners: { change: "changeValue" }
 	}*/,{
 		itemId: "format",
+		name: "format",
 		fieldLabel: "Format",
 		displayField: "label",
 		valueField: "id",
@@ -86,6 +95,7 @@ Ext.define("Ck.Print", {
 		listeners: { change: "changeValue" }
 	},{
 		xtype: "radiogroup",
+		name: "orientation",
 		itemId: "orientation",
 		fieldLabel: "Orientation",
 		columns: 2,
