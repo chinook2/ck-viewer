@@ -124,7 +124,7 @@ Ext.define('Ck.print.Controller', {
 		this.getStore("resolutions").loadData(data);
 		
 		if(this.get("printParam.resolution") == null) {
-			this.getMap().getNearestResolution(this.getOlView().getResolution(), 1);
+			this.set("printParam.resolution", this.getMap().getNearestResolution(this.getOlView().getResolution(), 1));
 		}
 	},
 
