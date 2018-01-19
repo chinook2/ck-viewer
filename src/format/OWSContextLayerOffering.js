@@ -7,6 +7,7 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 	config: {
 		code		: null,
 		type		: null,
+		layers		: null,
 		operations	: [],
 		owsContext	: {},
 		data		: {}
@@ -25,26 +26,30 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 		var data = config.data;
 
 		Ext.apply(config, {
-			code	: data.code,
-			version	: data.version,
-			layers	: data.layers,
-			srs		: data.srs
+			code	: data.code
 		});
 
 		this.initConfig(config);
 
 		var operations = this.getOperations();
 
+		var layers = [];
 		for(var i = 0; i < data.operations.length; i++) {
-			operations.push(new Ck.owsOperation({
+			var op = new Ck.owsOperation({
 				data: data.operations[i],
 				owsOffering: this
-			}));
+			});
+			// Collect layers from operations
+			layers = layers.concat(op.getLayers().split(','));
+			operations.push(op);
 		}
 
 		if(operations.length == 0) {
 			Ck.log("No operations for the offering.");
 		}
+
+		layers = Ext.Array.unique(layers);
+		this.setLayers(layers.join(','));
 	},
 
 	/**

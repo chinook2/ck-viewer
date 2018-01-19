@@ -12,6 +12,7 @@ Ext.define('Ck.format.OWSContextLayer', {
 		name			: null,
 		title			: null,
 		visible			: true,
+		layers			: null,
 		userLyr			: true,
 		minScale		: 0,
 		maxScale		: Infinity,
@@ -48,18 +49,25 @@ Ext.define('Ck.format.OWSContextLayer', {
 		this.initConfig(config);
 
 		var offerings = this.getOfferings();
+		var layers = [];
 		if (data.properties.offerings) {
 			for(var i = 0; i < data.properties.offerings.length; i++) {
-				offerings.push(new Ck.owsOffering({
+				var off = new Ck.owsOffering({
 					data: data.properties.offerings[i],
 					owsLayer: this
-				}));
+				});
+				// Collect layers from operations
+				layers = layers.concat(off.getLayers().split(','));
+				offerings.push(off);
 			}
 		}
 
 		if(offerings.length == 0) {
 			Ck.log("No offering for this layer ("+ (data.properties.title || data.properties.name) +").");
 		}
+
+		layers = Ext.Array.unique(layers);
+		this.setLayers(layers.join(','));
 	},
 
 	setMinScale: function(value) {

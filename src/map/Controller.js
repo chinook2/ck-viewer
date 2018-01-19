@@ -709,7 +709,8 @@ Ext.define('Ck.map.Controller', {
 				},
 				getMaxResolution	: function() { return Infinity },
 				getMinResolution	: function() { return 0	},
-				getData				: function() { return { properties: {} } }
+				getData				: function() { return { properties: {} } },
+				getLayers			: function() { return ''}
 			},
 			getExtension : function() { return null }
 		})
@@ -917,7 +918,7 @@ Ext.define('Ck.map.Controller', {
 	setZoom: function(zoom) {
 		return this.getOlView().setZoom(zoom);
 	},
-	
+
 	setZoomScale: function(scale) {
 		var res = Ck.getResolutionFromScale(scale, this.getProjection());
 		res = this.getNearestResolution(res);
@@ -1155,6 +1156,16 @@ Ext.define('Ck.map.Controller', {
 						if(c.tmpHide) {
 							c.show();
 						}
+					}
+				},
+				scope: this,
+				destroyable: true
+			},
+			"destroy": {
+				fn: function() {
+					for(var k in this.bindedCmp) {
+						var c = this.bindedCmp[k];
+						if(c) c.destroy();
 					}
 				},
 				scope: this,
