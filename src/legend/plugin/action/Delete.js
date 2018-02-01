@@ -1,7 +1,7 @@
 /**
  *
  */
-Ext.define('Ck.legend.plugin.action.Remove', {
+Ext.define('Ck.legend.plugin.action.Delete', {
 	extend: 'Ck.legend.plugin.Action',
 	alias: 'plugin.legendlayerremove',
 

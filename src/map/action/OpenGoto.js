@@ -1,7 +1,7 @@
 /**
  *
  */
-Ext.define('Ck.map.action.Goto', {
+Ext.define('Ck.map.action.OpenGoto', {
 	extend: 'Ck.Action',
 	alias: "widget.ckOpenGoto",
 
