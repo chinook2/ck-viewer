@@ -122,14 +122,20 @@ Ext.define('Ck.map.Controller', {
 	measure: null,
 
 	/**
-	 *
+	 * Element 
 	 */
 	parentContainer: null,
 
 	/**
-	 *
+	 * Components binded to map container. Action done on show, hide and destroy
 	 */
 	bindedCmp: {},
+	
+	/**
+	 * List of contexts that are tempted to be loaded
+	 * @params {String[]}
+	 */
+	contextLoadFail: [],
 
 	/**
 	 * @var {ol.Geolocation}
@@ -148,9 +154,9 @@ Ext.define('Ck.map.Controller', {
 		}
 
 		// Set default parent container (if not set)
-		//if(!this.parentContainer) {
+		// if(!this.parentContainer) {
 		//	this.setParentContainer(v);
-		//}
+		// }
 
 		// Create controls
 		var olControls = [];
@@ -730,20 +736,25 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	getContext: function(contextName) {
-		Cks.get({
-			url: this.getFullUrl( this.getMapUrl(contextName) ),
-			scope: this,
-			success: function(response){
-				var owc = Ext.decode(response.responseText);
-				this.initContext(owc);
-			},
-			failure: function(response, opts) {
-				Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
-				var d = Ck.getOption('defaults', '{}');
-				var c = d.context || 'ck-default';
-				this.getContext(c);
-			}
-		});
+		if(this.contextLoadFail.indexOf(contextName) != -1) {
+			Ck.error("No context to load");
+		} else {
+			Cks.get({
+				url: this.getFullUrl( this.getMapUrl(contextName) ),
+				scope: this,
+				success: function(response){
+					var owc = Ext.decode(response.responseText);
+					this.initContext(owc);
+				},
+				failure: function(response, opts) {
+					Ck.error('Error when loading "'+contextName+'" context !. Loading the default context...');
+					this.contextLoadFail.push(contextName);
+					var d = Ck.getOption('defaults', '{}');
+					var c = d.context || 'ck-default';
+					this.getContext(c);
+				}
+			});
+		}
 	},
 
 	/**
@@ -1128,6 +1139,9 @@ Ext.define('Ck.map.Controller', {
 		return inRange;
 	},
 
+	/**
+	 * @param {Ext.component}
+	 */
 	setParentContainer: function(cmp) {
 		// If already exists, remove old listener
 		if(this.parentContainer) {
