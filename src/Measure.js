@@ -534,10 +534,9 @@ Ext.define('Ck.Measure', {
 			source.loadFeatures = function(source, ext) {
 				// Check number of feature before load (maybe too many ft)
 				this.showMask();
-				Ext.Ajax.request({
+				Cks.get({
 					url: source.getUrl()(ext) + "&resultType=hits",
 					success: function(ext, source, response) {
-
 						nbF = response.responseText.match(/numberOfFeatures="[0-9]*"/);
 						if(nbF) {
 							nbF = nbF[0].match(/[0-9]+/)[0];
@@ -563,10 +562,6 @@ Ext.define('Ck.Measure', {
 							this.hideMask(); // Mask for feature count
 							source.originLoadFeatures.apply(source, [ext]);
 						}
-
-
-
-
 					}.bind(this, ext, source)
 				});
 			}.bind(this, source);

@@ -4,7 +4,6 @@
 Ext.define('Ck.Ajax', {
 	extend: 'Ext.data.Connection',
 	alternateClassName: 'Cks',
-
 	singleton: true,
 
 	requires: [
@@ -15,6 +14,8 @@ Ext.define('Ck.Ajax', {
 	 * @ignore
 	 */
 	constructor: function() {
+		this.callParent(arguments);
+
 		this.ls = new Ext.util.LocalStorage({
 			id: 'Ck-' + Ext.manifest.name
 		});
@@ -29,6 +30,7 @@ Ext.define('Ck.Ajax', {
 				scope: this
 			});
 		}
+
 
 		// Ext.Ajax.setDefaultPostHeader('application/json; charset=UTF-8');
 		// if (Ck.getOption('defaultPostHeader')) {
@@ -103,7 +105,7 @@ Ext.define('Ck.Ajax', {
 		options.disableCaching = true;
 		//</debug>
 
-		Ext.Ajax.request(options);
+		this.callParent(arguments);
 	},
 
 	/**
