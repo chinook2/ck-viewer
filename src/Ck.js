@@ -491,7 +491,7 @@ Ext.apply(Ck, {
 				}
 				path = basePath + '/resources';
 			}
-			return path;
+			return Ck.getOption('inlineResources') || path;
 		}
 
 		// In Production
