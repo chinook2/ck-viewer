@@ -186,10 +186,11 @@ Ck.Style.blueCircle = new ol.style.Style({
 /**
  * Here is defined the directly used styles
  */
-Ck.Style.invisibleStyle = [];
-Ck.Style.measureStyle = [Ck.Style.lightGrayFill, Ck.Style.redStroke, Ck.Style.redCircle];
-Ck.Style.deleteStyle = [Ck.Style.redStroke, Ck.Style.redShape];
-Ck.Style.vertexStyle = [Ck.Style.redStroke, Ck.Style.redShape];
-Ck.Style.drawStyle = [Ck.Style.greenStroke, Ck.Style.greenCircle, Ck.Style.grayFill];
-Ck.Style.importStyle = [Ck.Style.blueStroke, Ck.Style.blueCircle];
-Ck.Style.orangeStyle = [Ck.Style.orangeStroke, Ck.Style.orangeCircle];
+Ck.Style.invisibleStyle	= [];
+Ck.Style.measureStyle	= [Ck.Style.lightGrayFill, Ck.Style.redStroke, Ck.Style.redCircle];
+Ck.Style.deleteStyle	= [Ck.Style.redStroke, Ck.Style.redShape];
+Ck.Style.vertexStyle	= [Ck.Style.redStroke, Ck.Style.redShape];
+Ck.Style.drawStyle		= [Ck.Style.greenStroke, Ck.Style.greenCircle, Ck.Style.grayFill];
+Ck.Style.importStyle	= [Ck.Style.blueStroke, Ck.Style.blueCircle];
+Ck.Style.orangeStyle	= [Ck.Style.orangeStroke, Ck.Style.orangeCircle];
+Ck.Style.blueStyle		= [Ck.Style.blueStroke, Ck.Style.blueCircle];
