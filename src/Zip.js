@@ -1,5 +1,5 @@
 /**
- *
+ * see zip library : https://gildas-lormeau.github.io/zip.js/
  */
 Ext.define('Ck.Zip', {
 	alternateClassName: 'CkZip',
@@ -19,6 +19,12 @@ Ext.define('Ck.Zip', {
 	 * Temporary storage location: RAM (Blob) or HDD (File)
 	 */
 	tempStorage: "Blob",
+
+	/**
+	 * File extensions to read as text
+	 * @type {Array} list of valid extensions
+	 */
+	readAsText: ['xml','txt','csv','json'],
 
 	/**
 	 * Called when Zip archives are open
@@ -130,14 +136,17 @@ Ext.define('Ck.Zip', {
 		entry.getData(writer, function(entry, blob) {
 			var file = {
 				filename: entry.filename,
-				extension: entry.filename.slice(-3).toLowerCase(),
+				extension: Ck.getFileExtension(entry.filename), //.slice(-3).toLowerCase(),
 				url: (this.tempStorage == "Blob") ? URL.createObjectURL(blob) : fileEntry.toURL()
 			};
 
 			var fileReader = new FileReader();
 			fileReader.onload = this.saveData.bind(this, file);
-			fileReader.readAsArrayBuffer(blob);
-
+			if (this.readAsText.indexOf(file.extension) != -1) {
+				fileReader.readAsText(blob);
+			} else {
+				fileReader.readAsArrayBuffer(blob);
+			}
 		}.bind(this, entry), this.onProgress.bind(this.scope["onProgress"] || this));
 	},
 

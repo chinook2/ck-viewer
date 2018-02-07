@@ -837,6 +837,7 @@ Ext.apply(Ck, {
 		return name.substring(0, 1).toUpperCase() + name.substring(1);
 	},
 
+	// http://www.jstips.co/en/javascript/get-file-extension/
 	getFileExtension: function(filename) {
 		if(!filename) return '';
 		if(!Ext.isString(filename)) return '';
