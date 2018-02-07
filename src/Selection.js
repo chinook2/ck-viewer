@@ -126,6 +126,11 @@ Ext.define('Ck.Selection', {
 		 * Stack selection or not
 		 */
 		stackSelection: false,
+		
+		/**
+		 * Allow deselect
+		 */
+		deselectOnClick: false,
 
 		/**
 		 *
@@ -583,7 +588,7 @@ Ext.define('Ck.Selection', {
 	 */
 	onSelect: function(features, layer) {
 		if(features && features.length !== 0 && layer) {
-			var res;
+			var sel;
 
 			// Force number of features limitation
 			if(this.getLimit() !== null) {
@@ -591,13 +596,14 @@ Ext.define('Ck.Selection', {
 			}
 
 			// Look whether a selection has been made on the same layer
-			for(var i = 0; ((i < this.selection.length) && Ext.isEmpty(res)); i++) {
+			for(var i = 0; ((i < this.selection.length) && Ext.isEmpty(sel)); i++) {
 				if(this.selection[i].layer == layer) {
-					res = this.selection[i];
+					sel = this.selection[i];
 				}
 			}
 
-			if(Ext.isEmpty(res)) {
+			// First selection for this layer
+			if(Ext.isEmpty(sel)) {
 				this.selection.push({
 					features: features,
 					layer: layer
@@ -605,11 +611,13 @@ Ext.define('Ck.Selection', {
 			} else {
 				var idx;
 				for(var i = 0; i < features.length; i++) {
-					idx = res.features.indexOf(features[i]);
+					idx = sel.features.eIndexOf(features[i]);
 					if(idx == -1) {
-						res.features.push(features[i]);
+						sel.features.push(features[i]);
 					} else {
-						res.features.slice(idx, 1);
+						if(this.getDeselectOnClick()) {
+							sel.features.splice(idx, 1);
+						}
 					}
 				}
 			}
@@ -625,15 +633,18 @@ Ext.define('Ck.Selection', {
 				var selCollection = select.getFeatures();
 				var selArray = selCollection.getArray();
 
-				// Loop on new selected features
+				// Add or remove (if unselect available) items
 				for(var i = 0; i < features.length; i++) {
-					idx = selArray.indexOf(features[i]);
+					idx = selArray.eIndexOf(features[i]);
 					if(idx == -1) {
 						selCollection.push(features[i]);
 					} else {
-						selCollection.remove(features[i]);
+						if(this.getDeselectOnClick()) {
+							selCollection.removeAt(idx);
+						}
 					}
 				}
+				
 				select.setActive(false);
 			}
 		}

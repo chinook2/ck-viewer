@@ -973,3 +973,19 @@ Ext.data.proxy.Ajax.prototype.createRequestCallback = function(request, operatio
 		}
 	};
 }
+
+/**
+ * Method to compare ol.Feature
+ */
+ol.Feature.prototype.equals = function(ft) {
+	return ft && this.getProperties().id === ft.getProperties().id;
+}
+
+Array.prototype.eIndexOf = function(it) {    
+    for(var i = 0; i < this.length; i++) {
+        if((this[i].equals && this[i].equals(it)) || this[i] === it ) {
+            return i;
+        }
+    }
+    return -1;
+}
