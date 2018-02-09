@@ -165,6 +165,8 @@ Ext.define('Ck.Selection', {
 
 		this.initConfig(config);
 
+		this.selection = new Array();
+		
 		if(config.scope) {
 			this.setCallback(config.callback.bind(config.scope));
 		}
