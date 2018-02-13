@@ -853,6 +853,48 @@ Ext.apply(Ck, {
 	},
 
 	/**
+	 * Adjust Extent to specific size (keep aspect ratio)
+	 * Used to build WMS call center on geometry for a specific image size
+	 * @param  {Array} extent Extent [minx, miny, maxx, maxy]
+	 * @param  {Array} size   Size [width, height]
+	 * @return {Array}        Extent adjusted
+	 */
+	ajustExtent: function (e, s) {
+		if (!Ext.isArray(e)) return;
+		if (!Ext.isArray(s)) return;
+
+		// Extent properties
+		var ew = e[2] - e[0]; // Width
+		var eh = e[3] - e[1]; // Height
+		var ec = [(e[0] + e[2]) / 2, (e[1] + e[3]) / 2]; // Center
+		var ea = ew/eh; // aspect ratio
+
+		// Size aspect ratio (w/h)
+		var a = s[0]/s[1];
+
+		// Adjust Extent width or Extent Height according to aspect ratio
+		var nw, nh;
+		if (a >= ea) {
+			ew = eh * a;
+		} else {
+			eh = ew / a;
+		}
+
+		// Calculate new extent with adjusted Width a Height
+		var sew = ew/2; // half width
+		var seh = eh/2; // half height
+		var nExtent = [
+			ec[0] - sew,	// min x
+			ec[1] - seh,	// min y
+			ec[0] + sew,	// max x
+			ec[1] + seh		// max y
+		];
+
+		return nExtent;
+	},
+
+
+	/**
 	 * Reproject an extent
 	 * @param {ol.Extent}
 	 * @param {ol.proj.ProjectionLike}
@@ -981,7 +1023,7 @@ ol.Feature.prototype.equals = function(ft) {
 	return ft && this.getProperties().id === ft.getProperties().id;
 }
 
-Array.prototype.eIndexOf = function(it) {    
+Array.prototype.eIndexOf = function(it) {
     for(var i = 0; i < this.length; i++) {
         if((this[i].equals && this[i].equals(it)) || this[i] === it ) {
             return i;
