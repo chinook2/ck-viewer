@@ -981,9 +981,26 @@ Ext.apply(Ck, {
 			limit--;
 		}
 		return exist;
+	},
+
+	/**
+	 * Find position of Item in Array
+	 * @param  {Array} array Array to scan
+	 * @param  {Object} it   item to search
+	 * @return {Integer}     return index of item in array or -1
+	 */
+	eIndexOf: function(array, it) {
+	    for(var i = 0; i < array.length; i++) {
+	        if((array[i].equals && array[i].equals(it)) || array[i] === it ) {
+	            return i;
+	        }
+	    }
+	    return -1;
 	}
+
 }).init();
 
+// TODO: move this in overrides files...
 
 /**
  * Override Ajax callback to fix Chrome and responseXML null member.
@@ -1021,13 +1038,4 @@ Ext.data.proxy.Ajax.prototype.createRequestCallback = function(request, operatio
  */
 ol.Feature.prototype.equals = function(ft) {
 	return ft && this.getProperties().id === ft.getProperties().id;
-}
-
-Array.prototype.eIndexOf = function(it) {
-    for(var i = 0; i < this.length; i++) {
-        if((this[i].equals && this[i].equals(it)) || this[i] === it ) {
-            return i;
-        }
-    }
-    return -1;
 }

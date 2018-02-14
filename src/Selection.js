@@ -126,7 +126,7 @@ Ext.define('Ck.Selection', {
 		 * Stack selection or not
 		 */
 		stackSelection: false,
-		
+
 		/**
 		 * Allow deselect
 		 */
@@ -166,7 +166,7 @@ Ext.define('Ck.Selection', {
 		this.initConfig(config);
 
 		this.selection = new Array();
-		
+
 		if(config.scope) {
 			this.setCallback(config.callback.bind(config.scope));
 		}
@@ -613,7 +613,8 @@ Ext.define('Ck.Selection', {
 			} else {
 				var idx;
 				for(var i = 0; i < features.length; i++) {
-					idx = sel.features.eIndexOf(features[i]);
+					//idx = sel.features.eIndexOf(features[i]);
+					idx = Ck.eIndexOf(sel.features, features[i]);
 					if(idx == -1) {
 						sel.features.push(features[i]);
 					} else {
@@ -637,7 +638,8 @@ Ext.define('Ck.Selection', {
 
 				// Add or remove (if unselect available) items
 				for(var i = 0; i < features.length; i++) {
-					idx = selArray.eIndexOf(features[i]);
+					//idx = selArray.eIndexOf(features[i]);
+					idx = Ck.eIndexOf(selArray, features[i]);
 					if(idx == -1) {
 						selCollection.push(features[i]);
 					} else {
@@ -646,7 +648,7 @@ Ext.define('Ck.Selection', {
 						}
 					}
 				}
-				
+
 				select.setActive(false);
 			}
 		}
