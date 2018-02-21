@@ -345,6 +345,10 @@ Ext.define('Ck.print.Controller', {
 				tag: 'img',
 				src: uri
 			});
+			
+			// Fix map size from web browser
+			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio));
+			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio));
 
 			// Move map to invisible div to print with right resolution
 			this.printDiv = dh.append(document.body, {
@@ -353,8 +357,8 @@ Ext.define('Ck.print.Controller', {
 				style: {
 					position: 'absolute',
 					top: (screen.height) + "px", // Comment to display div
-					width: (this.canvasSize[0]).toString() + "px",
-					height: (this.canvasSize[1]).toString() + "px"
+					width: mapWidth.toString() + "px",
+					height: mapHeight.toString() + "px"
 				}
 			});
 			this.getOlMap().setTarget(this.printDiv);
