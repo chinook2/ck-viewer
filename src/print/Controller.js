@@ -347,8 +347,8 @@ Ext.define('Ck.print.Controller', {
 			});
 			
 			// Fix map size from web browser
-			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio));
-			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio));
+			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
+			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
 
 			// Move map to invisible div to print with right resolution
 			this.printDiv = dh.append(document.body, {
