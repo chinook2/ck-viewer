@@ -46,6 +46,9 @@ ol.interaction.Draw.prototype.createOrUpdateSketchPoint_ = function(event) {
   }
 };
 
+/**
+ * New method
+ */
 ol.source.Vector.prototype.isExtentsLoaded = function(extents) {
 	var loadedExtentsRtree = this.loadedExtentsRtree_;
 	var i, ii;
@@ -59,7 +62,73 @@ ol.source.Vector.prototype.isExtentsLoaded = function(extents) {
 		}
 	}
 	return true;
-}
+};
+
+/**
+ *  ADD viewParams parameter (Geoserver SQL View parameters)
+ */
+ol.format.WFS.prototype.writeGetFeature = function(options) {
+  var node = ol.xml.createElementNS(ol.format.WFS.WFSNS, 'GetFeature');
+  node.setAttribute('service', 'WFS');
+  node.setAttribute('version', '1.1.0');
+  var filter;
+  if (options) {
+    if (options.handle) {
+      node.setAttribute('handle', options.handle);
+    }
+    if (options.outputFormat) {
+      node.setAttribute('outputFormat', options.outputFormat);
+    }
+    if (options.maxFeatures !== undefined) {
+      node.setAttribute('maxFeatures', options.maxFeatures);
+    }
+    if (options.resultType) {
+      node.setAttribute('resultType', options.resultType);
+    }
+    if (options.startIndex !== undefined) {
+      node.setAttribute('startIndex', options.startIndex);
+    }
+    if (options.count !== undefined) {
+      node.setAttribute('count', options.count);
+    }
+
+    //patch
+    if (options.viewParams !== undefined) {
+      node.setAttribute('viewParams', options.viewParams);
+    }
+    //patch
+
+    filter = options.filter;
+    if (options.bbox) {
+      ol.asserts.assert(options.geometryName,
+          12); // `options.geometryName` must also be provided when `options.bbox` is set
+      var bbox = ol.format.filter.bbox(
+          /** @type {string} */ (options.geometryName), options.bbox, options.srsName);
+      if (filter) {
+        // if bbox and filter are both set, combine the two into a single filter
+        filter = ol.format.filter.and(filter, bbox);
+      } else {
+        filter = bbox;
+      }
+    }
+  }
+  ol.xml.setAttributeNS(node, 'http://www.w3.org/2001/XMLSchema-instance',
+      'xsi:schemaLocation', this.schemaLocation_);
+  /** @type {ol.XmlNodeStackItem} */
+  var context = {
+    node: node,
+    'srsName': options.srsName,
+    'featureNS': options.featureNS ? options.featureNS : this.featureNS_,
+    'featurePrefix': options.featurePrefix,
+    'geometryName': options.geometryName,
+    'filter': filter,
+    'propertyNames': options.propertyNames ? options.propertyNames : []
+  };
+  ol.asserts.assert(Array.isArray(options.featureTypes),
+      11); // `options.featureTypes` should be an Array
+  ol.format.WFS.writeGetFeature_(node, /** @type {!Array.<string>} */ (options.featureTypes), [context]);
+  return node;
+};
 
 /**
  * Patch to add directly in ol-debug.js
