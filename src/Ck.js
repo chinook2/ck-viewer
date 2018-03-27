@@ -328,7 +328,12 @@ Ext.apply(Ck, {
 		} else {
 			// Return the map component by ID
 			map = Ext.getCmp(idMap);
-			if(!map) return false;
+			if(!map) {
+				// Try to find by itemId
+				map = Ext.ComponentQuery.query('ckmap[itemId='+ idMap +']').shift();
+				if(!map) return false;
+			}
+			
 			map = map.getController();
 		}
 
