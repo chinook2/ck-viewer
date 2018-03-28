@@ -15,32 +15,32 @@ Ext.define('Ck.goto.Controller', {
 		 * @prop {Integer}
 		 */
 		mPrecision: 4,
-		
+
 		/**
 		 * Number of digit after comma for degree unit
 		 * @prop {Integer}
 		 */
 		degPrecision: 8,
-		
+
 		/**
 		 * Name of layer for display marker
 		 * @prop {String}
 		 */
 		layerName: "ckGotoMarker",
-		
+
 		/**
 		 * To empty fields on marker cleaning
 		 * @prop {Boolean}
 		 */
 		clearCoordinates: false,
-		
+
 		/**
 		 * Zoom on goto action
 		 * @prop {Integer}
 		 */
 		zoom: null
 	},
-	
+
 	/**
 	 * Current projection used
 	 * @var {ol.proj}
@@ -60,19 +60,19 @@ Ext.define('Ck.goto.Controller', {
 	dec: null,
 	dms: null,
 	dm: null,
-	
+
 	/**
 	 * Map projection
 	 * @var {ol.proj}
 	 */
 	mapProj: null,
-	
+
 	/**
 	 * @protected
 	 */
 	init: function(view) {
 		this.callParent([view]);
-		
+
 		this.setConfig(view.gotoConfig);
 
 		if (!this.mapProj) {
@@ -127,6 +127,11 @@ Ext.define('Ck.goto.Controller', {
 			fcUnits.getComponent("units-dec").setValue(true);
 		}
 
+		// Do not Reproject input coordinates
+		// Only reproject input according selected projection & map projection
+		// TODO: add new tool reproject ...
+		
+		/*
 		var geom = this.getGeometry();
 		if(oldProj) {
 			// Reproject coordinates
@@ -135,6 +140,7 @@ Ext.define('Ck.goto.Controller', {
 				proj: oldProj
 			})
 		}
+		*/
 	},
 
 	/**
@@ -229,7 +235,7 @@ Ext.define('Ck.goto.Controller', {
 			});
 			this.getMap().setCenter(geom.getCoordinates());
 			this.layer.getSource().addFeature(ft);
-			
+
 			if(Ext.isNumber(this.getZoom())) {
 				this.getMap().setZoomScale(this.getZoom());
 			}
