@@ -17,7 +17,7 @@ Ext.define('Ck.map.scalelist.Controller', {
 		var view = this.getView();
 
 		// Re-render
-		if(view.isFloating()) {
+		if(view.el && view.isFloating()) {
 			var flCfg = view.getFloatConfig();
 			flCfg.alignEl = document.getElementsByClassName(flCfg.alignTo);
 			flCfg.alignEl = flCfg.alignEl[flCfg.alignEl.length - 1];
@@ -52,7 +52,7 @@ Ext.define('Ck.map.scalelist.Controller', {
 	 */
 	alignTo: function() {
 		var view = this.getView();
-		if (view) {
+		if (view && view.el) {
 			var flCfg = view.getFloatConfig();
 			view.alignTo(flCfg.alignEl, flCfg.alignPos, flCfg.alignOff);
 		}
@@ -60,7 +60,7 @@ Ext.define('Ck.map.scalelist.Controller', {
 
 	mapResolutionChange: function(evt) {
 		var view = this.getView();
-		if (view) {
+		if (view && view.el) {
 			view.setValue(evt.target.getResolution());
 		}
 	},
