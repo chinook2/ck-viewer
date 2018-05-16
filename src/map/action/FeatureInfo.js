@@ -46,6 +46,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		onlyFieldWithAlias: false,
 
 		/**
+		 * Display empty fields
+		 */
+		showEmptyFields: false,
+
+		/**
 		 *
 		 */
 		fieldIgnored: ["geom", "geometry", "shape", "boundedBy"],
@@ -227,6 +232,10 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			for(var c in col) {
 				if (rawValues.hasOwnProperty(c)) {
 					values[c] = rawValues[c];
+				} else {
+					if(this.getShowEmptyFields() || col[c].showIfEmpty === true) {
+						values[c] = '';
+					}
 				}
 			}
 			// Add the others fields
