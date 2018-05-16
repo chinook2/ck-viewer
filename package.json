@@ -306,6 +306,8 @@
 			"path": "libs/x2js/xml2json.min.js"
 		},{
 			"path": "libs/xmljs/xmllint.js"
+		},{
+			"path": "libs/dxf/dxf-parser.js"
 		}]
 	},
 	"development": {
@@ -350,6 +352,8 @@
 			"path": "libs/x2js/xml2json.js"
 		},{
 			"path": "libs/xmljs/xmllint.js"
+		},{
+			"path": "libs/dxf/dxf-parser.js"
 		}]
     },
 	"testing": {"environment": "testing"}
