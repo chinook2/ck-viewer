@@ -78,59 +78,6 @@ Ext.define('Ck.edit.action.Create', {
 			//https://github.com/openlayers/ol3/issues/3610
 			this.drawInteraction.on('drawend', this.onFinishSelection, this);
 			//
-
-
-			/*
-			// Overload the end-drawing callback to use snapGeometry
-			this.drawInteraction.finishDrawing = function() {
-				var sketchFeature = this.drawInteraction.abortDrawing_();
-				sketchFeature = this.snapGeometry(sketchFeature);
-
-				goog.asserts.assert(!goog.isNull(sketchFeature));
-				var coordinates;
-				var geometry = sketchFeature.getGeometry();
-				switch(this.drawInteraction.mode_) {
-					case ol.interaction.DrawMode.POINT:
-						goog.asserts.assertInstanceof(geometry, ol.geom.Point);
-						coordinates = geometry.getCoordinates();
-						break;
-					case ol.interaction.DrawMode.LINE_STRING :
-						goog.asserts.assertInstanceof(geometry, ol.geom.LineString);
-						coordinates = geometry.getCoordinates();
-						// Remove the redundant last point
-						coordinates.pop();
-						geometry.setCoordinates(coordinates);
-						break;
-					case ol.interaction.DrawMode.POLYGON :
-						goog.asserts.assertInstanceof(geometry, ol.geom.Polygon);
-						// When we finish drawing a polygon on the last point,
-						// the last coordinate is duplicated as for LineString
-						// we force the replacement by the first point
-						this.drawInteraction.sketchPolygonCoords_ = geometry.getCoordinates();
-						this.drawInteraction.sketchPolygonCoords_[0].pop();
-						this.drawInteraction.sketchPolygonCoords_[0].push(this.drawInteraction.sketchPolygonCoords_[0][0]);
-						geometry.setCoordinates(this.drawInteraction.sketchPolygonCoords_);
-						coordinates = geometry.getCoordinates();
-						break;
-				}
-
-				// cast multi-part geometries
-				switch(this.drawInteraction.type_) {
-					case ol.geom.GeometryType.MULTI_POINT :
-						sketchFeature.setGeometry(new ol.geom.MultiPoint([coordinates]));
-						break;
-					case ol.geom.GeometryType.MULTI_LINE_STRING :
-						sketchFeature.setGeometry(new ol.geom.MultiLineString([coordinates]));
-						break;
-						sketchFeature.setGeometry(new ol.geom.MultiPolygon([coordinates]));
-					case ol.geom.GeometryType.MULTI_POLYGON :
-				}
-
-				this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
-				this.controller.fireEvent("featurecreate", sketchFeature);
-			}.bind(this);
-			*/
-
 			//this.interactions["drawInteraction"] = this.drawInteraction;
 		//}
 
@@ -208,6 +155,9 @@ Ext.define('Ck.edit.action.Create', {
 	//https://github.com/openlayers/ol3/issues/3610
 	//Setup drawend event handle function
 	onFinishSelection: function (evt) {
+
+		this.controller.fireEvent("featurecreate", evt.feature);
+
 		var me = this;
 		//Call to double click zoom control function to deactivate zoom event
 		me.controlDoubleClickZoom(false);

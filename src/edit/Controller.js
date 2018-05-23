@@ -217,7 +217,7 @@ Ext.define('Ck.edit.Controller', {
 			this.historyPanel.add(this.historyView);
 		}
 
-		this.on("featurecreate", this.onCreate, this);
+		//this.on("featurecreate", this.onCreate, this);
 	},
 
 	/**
@@ -459,13 +459,7 @@ Ext.define('Ck.edit.Controller', {
 			var multiForReal = this.getLayer().getExtension("multiForReal");
 
 			var currSrs = this.getMap().getProjection().getCode();
-			var lyrSrs = ope.getSrs();
-
-			var f = Ck.create("ol.format.WFS", {
-				featureNS: "http://mapserver.gis.umn.edu/mapserver",
-				//gmlFormat: Ck.create("ol.format.GML2"),
-				featureType: ope.getLayers()
-			});
+			var lyrSrs = ope.getSrs() || currSrs;
 
 			// Loop on history store items
 			for(var i = 0; i < this.history.store.getCount(); i++) {
@@ -510,30 +504,28 @@ Ext.define('Ck.edit.Controller', {
 
 			var lyr = ope.getLayers().split(":");
 
-			transacOpt = {
-				featureNS		: "feature",
-				srsName			: currSrs,
-				featureType		: lyr[0],
-				gmlOptions: {
-					schemaLocation: "wfs"
-				}
-			};
+			var f = new ol.format.WFS();
+			var formatGML = new ol.format.GML({
+			    featureNS: 'https://geoserver.org/ows/'+lyr[0],
+			    featureType: lyr[1],
+			    srsName: currSrs
+			});
 
-			if(!Ext.isEmpty(lyr[1])) {
-				transacOpt.featurePrefix = lyr[1];
-			}
-
-			var transac = f.writeTransaction(inserts, updates, deletes, transacOpt);
+			var transac = f.writeTransaction(inserts, updates, deletes, formatGML);
+			var params = new XMLSerializer().serializeToString(transac);
 
 			// Temporary parent to get the whole innerHTML
-			var pTemp = document.createElement("div");
-			pTemp.appendChild(transac);
+			//var pTemp = document.createElement("div");
+			//pTemp.appendChild(transac);
 
 			// Do the getFeature query
-			Ck.Ajax.post({
+			Cks.post({
 				scope: this,
-				url: ope.getUrl(),
-				rawData: pTemp.innerHTML,
+				url: this.getMap().getMapUrl(ope.getUrl()),
+				headers: {
+					'Content-Type': 'text/xml; charset=UTF-8'
+				},
+				xmlData: params,
 				success: function(response) {
 					this.fireEvent("savesuccess");
 					var ins, upd, del;

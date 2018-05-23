@@ -5,43 +5,43 @@
 Ext.define("Ck.Edit", {
 	extend: "Ext.Panel",
 	alias: "widget.ckedit",
-	
+
 	controller: "ckedit",
-	
+
 	cls: "ck-edit",
 
 	requires: [
 		"Ck.edit.*",
 		"Ck.edit.action.*"
 	],
-	
+
 	editConfig: {
 		layerId: "ckedit-layer",
 		snapLayer: "",
 		tolerance: 10000,
 		deleteConfirmation: true
 	},
-	
+
 	layout: {
 		type: "fit"
 	},
-	
+
 	items: [{
 		id: "edit-historypanel",
 		tbar: [{
-			action: "ckEditCreate",
+			ckAction: "ckEditCreate",
 			enableToggle: true,
 			toggleGroup: "ckmapAction"
 		},{
-			action: "ckEditAttribute",
+			ckAction: "ckEditAttribute",
 			enableToggle: true,
 			toggleGroup: "ckmapAction"
 		},{
-			action: "ckEditGeometry",
+			ckAction: "ckEditGeometry",
 			enableToggle: true,
 			toggleGroup: "ckmapAction"
 		},{
-			action: "ckEditDelete",
+			ckAction: "ckEditDelete",
 			enableToggle: true,
 			toggleGroup: "ckmapAction"
 		},{
@@ -51,14 +51,14 @@ Ext.define("Ck.Edit", {
 			tooltip: "Advance operation",
 			dock: "right",
 			menu: [{
-				action: "ckEditCrop",
+				ckAction: "ckEditCrop",
 				xtype: "button",
 				text: "Cut",
 				enableToggle: true,
 				toggleGroup: "ckmapAction",
 				iconCls: "fa fa-crop"
 			},{
-				action: "ckEditUnion",
+				ckAction: "ckEditUnion",
 				xtype: "button",
 				text: "Gather",
 				enableToggle: true,
@@ -67,7 +67,7 @@ Ext.define("Ck.Edit", {
 			}]
 		}]
 	}],
-	
+
 
 	buttons: [{
 		text: "Save",
@@ -79,5 +79,5 @@ Ext.define("Ck.Edit", {
 		text: "Close",
 		itemId: "close"
 	}]
-	
+
 });

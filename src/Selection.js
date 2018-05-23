@@ -354,15 +354,17 @@ Ext.define('Ck.Selection', {
 			for(var i = 0; i < layers.length; i++) {
 				if(Ext.isString(layers[i])) {
 					lyr = this.getMap().getLayerById(layers[i]);
-					if(lyr) {
-						if ((lyr.ckLayer && lyr.ckLayer.getUserLyr()) &&
-							(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
-							(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)) {
-							layersToQuery.push(lyr);
-						}
-					} else {
-						Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
+				} else {
+					lyr = layers[i];
+				}
+				if(lyr) {
+					if ((lyr.ckLayer && lyr.ckLayer.getUserLyr()) &&
+						(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
+						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)) {
+						layersToQuery.push(lyr);
 					}
+				} else {
+					Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
 				}
 			}
 		}

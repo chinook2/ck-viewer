@@ -81,6 +81,8 @@ Ext.define('Ck.edit.Action', {
 	 **/
 	getLayerSource: function(layer) {
 		if(Ext.isEmpty(layer)) {
+			if(this.controller.getSource) return this.controller.getSource();
+
 			var lyr = this.getLayer()
 			if(lyr) return lyr.getSource();
 			return null;

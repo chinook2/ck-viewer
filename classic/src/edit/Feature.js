@@ -8,18 +8,18 @@
 Ext.define("Ck.edit.Feature", {
 	extend: "Ext.panel.Panel",
 	alias: "widget.ckedit-feature",
-	
+
 	controller: "ckedit.feature",
-	
+
 	cls: "ck-edit-feature",
 	itemId: "edit-feature",
 	height: "auto",
 	hidden: true,
-	
+
 	layout: {
 		type: "fit"
 	},
-	
+
 	items: [{
 		xtype: "gridpanel",
 		itemId: "featuregrid",
@@ -44,7 +44,7 @@ Ext.define("Ck.edit.Feature", {
 			fields: ["number", "area", "feature"]
 		}
 	}],
-	
+
 	bbar: [{
 		iconCls: 'fa fa-check',
 		itemId: "save"
@@ -52,7 +52,7 @@ Ext.define("Ck.edit.Feature", {
 		iconCls: 'fa fa-remove',
 		itemId: "cancel"
 	},"->",{
-		action: "ckEditCreate",
+		ckAction: "ckEditCreate",
 		enableToggle: true,
 		toggleGroup: "feature-tools"
 	},{
@@ -68,14 +68,14 @@ Ext.define("Ck.edit.Feature", {
 		tooltip: "Advance operation",
 		dock: "right",
 		menu: [{
-			action: "ckEditCrop",
+			ckAction: "ckEditCrop",
 			xtype: "button",
 			text: "Crop in half",
 			enableToggle: true,
 			toggleGroup: "feature-tools",
 			iconCls: "fa fa-crop"
 		},{
-			action: "ckEditUnion",
+			ckAction: "ckEditUnion",
 			xtype: "button",
 			text: "Gathering",
 			enableToggle: true,
