@@ -299,6 +299,10 @@
 		},{
 			"path": "libs/zip/zip.js"
 		},{
+			"path": "libs/zip/zip-ext.js"
+		},{
+			"path": "libs/zip/zip-fs.js"
+		},{
 			"path": "libs/shapefile-js/shp.min.js"
 		},{
 			"path": "libs/papaparse/papaparse.min.js"
@@ -345,6 +349,10 @@
     	},{
     		"path": "libs/zip/zip.js"
     	},{
+			"path": "libs/zip/zip-ext.js"
+		},{
+			"path": "libs/zip/zip-fs.js"
+		},{
     		"path": "libs/shapefile-js/shp.js"
     	},{
     		"path": "libs/papaparse/papaparse.js"

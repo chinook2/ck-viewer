@@ -109,7 +109,15 @@ Ext.define('Ck.Zip', {
 		var callback = function(zipReader) {
 			zipReader.getEntries(this.onGetEntries.bind(this.scope["onGetEntries"] || this));
 		};
-		zip.createReader(new zip.BlobReader(this.fileName), callback.bind(this));
+		// Read from Blob filename
+		if (this.fileName) {
+			zip.createReader(new zip.BlobReader(this.fileName), callback.bind(this));
+		}
+		// Read from file content as text
+		else if (this.fileUrl) {
+			zip.createReader(new zip.HttpReader(this.fileUrl), callback.bind(this));
+		}
+		
 	},
 
 
