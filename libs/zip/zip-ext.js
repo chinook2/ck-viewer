@@ -33,7 +33,7 @@
 
 	var Reader = zip.Reader;
 	var Writer = zip.Writer;
-	
+
 	var ZipDirectoryEntry;
 
 	var appendABViewSupported;
@@ -70,6 +70,15 @@
 		}
 
 		function init(callback, onerror) {
+
+			
+			/** Hack - never use HEAD (jma 06/06/2018)
+			 */
+			 getData(callback, onerror);
+			 return;
+			/* --- */
+
+
 			if (!isHttpFamily(url)) {
 				// For schemas other than http(s), HTTP HEAD may be unavailable,
 				// so use HTTP GET instead.
