@@ -91,8 +91,7 @@ Ext.define('Ck.legend.Controller', {
 				checked: (layer.get('visible') && !(layer instanceof ol.layer.Group)),
 				iconCls: 'x-tree-noicon',
 				layer: layer,
-				allowDrop: (layer instanceof ol.layer.Group),
-				qtip: layer.getExtension("legendQtip")
+				allowDrop: (layer instanceof ol.layer.Group)
 			};
 
 			var grpNode = layer.get("group").get("node");
