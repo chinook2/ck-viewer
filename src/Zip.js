@@ -47,6 +47,8 @@ Ext.define('Ck.Zip', {
 	 */
 	onProgress: Ext.emptyFn,
 
+	onError: null,
+
 	/**
 	 * Function to display the progress of file opening
 	 */
@@ -111,13 +113,13 @@ Ext.define('Ck.Zip', {
 		};
 		// Read from Blob filename
 		if (this.fileName) {
-			zip.createReader(new zip.BlobReader(this.fileName), callback.bind(this));
+			zip.createReader(new zip.BlobReader(this.fileName), callback.bind(this), this.onError);
 		}
 		// Read from file content as text
 		else if (this.fileUrl) {
-			zip.createReader(new zip.HttpReader(this.fileUrl), callback.bind(this));
+			zip.createReader(new zip.HttpReader(this.fileUrl), callback.bind(this), this.onError);
 		}
-		
+
 	},
 
 
