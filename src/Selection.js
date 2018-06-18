@@ -575,8 +575,12 @@ Ext.define('Ck.Selection', {
 				}
 				*/
 				var format = new ol.format.WFS();
-				var features = format.readFeatures(response.responseXML, readOptions);
-
+				var features = [];
+				// Test if response is not an Exception
+				if (response.responseText.indexOf('ExceptionReport') == -1) {
+					features = format.readFeatures(response.responseXML, readOptions);
+				}
+				
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
 			failure: function() {
