@@ -140,7 +140,12 @@ Ext.define('Ck.Selection', {
 		/**
 		 * Loading mask
 		 */
-		mask: null
+		mask: null,
+
+		/**
+		 * When provide several layers, ignore WMS/WFS layers if found features in local Vector layers
+		 */
+		skipOwsLayers: false
 	},
 
 	/**
@@ -286,6 +291,7 @@ Ext.define('Ck.Selection', {
 		var type = feature.getGeometry().getType();
 		var refPrj = ol.proj.get("EPSG:4326");
 		var mapPrj = this.getMap().getOlView().getProjection();
+		var selFt;
 
 		switch(type) {
 			case "Circle" :
@@ -294,23 +300,21 @@ Ext.define('Ck.Selection', {
 				var pt = turf.point(feature.getGeometry().getCenter());
 
 				var geom = turf.buffer(pt, radius, "meters");
-				var selFt = geom.features[0];
+				selFt = geom.features[0];
 				selFt.getGeometry().transform(refPrj, mapPrj);
 				break;
 			case "Point" :
-				var radius = this.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
+				var pradius = this.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
 				feature.getGeometry().transform(mapPrj, refPrj);
-				var pt = turf.point(feature.getGeometry().getCoordinates());
-				var geom = turf.buffer(pt, radius, "meters");
+				var ppt = turf.point(feature.getGeometry().getCoordinates());
+				var pgeom = turf.buffer(ppt, pradius, "meters");
 				selFt = new ol.Feature({
-					geometry: new ol.geom.Polygon(geom.geometry.coordinates)
+					geometry: new ol.geom.Polygon(pgeom.geometry.coordinates)
 				});
 				selFt.getGeometry().transform(refPrj, mapPrj)
-
-				// var selFt = geom.features[0];
 				break;
 			default :
-				var selFt = geoJSON.writeFeatureObject(feature);
+				selFt = geoJSON.writeFeatureObject(feature);
 		}
 
 		// Draw the feature used for getFeature query if debug is true. Use this to clean map : window.lyr.getSource().clear()
@@ -370,6 +374,8 @@ Ext.define('Ck.Selection', {
 		}
 
 		var ft;
+		var skip = false;
+
 		this.nbQueryDone = 0;
 		this.nbQuery = layersToQuery.length;
 
@@ -379,9 +385,16 @@ Ext.define('Ck.Selection', {
 			lyr = layersToQuery[l];
 			if(lyr instanceof ol.layer.Vector) {
 				ft = this.queryWFSLayer(lyr, selFt, evntParams);
+				if (ft.length > 0 && this.getSkipOwsLayers()) {
+					skip = true;
+				}
 				this.onSelect(ft, lyr);
 			} else {
-				this.queryWMSLayer(lyr, selFt, evntParams);
+				if (skip) {
+					this.onSelect();
+				} else {
+					this.queryWMSLayer(lyr, selFt, evntParams);
+				}
 			}
 		}
 	},
@@ -469,15 +482,16 @@ Ext.define('Ck.Selection', {
 					env: source.getParams().ENV
 				},
 				success: function(layer, response) {
+					var features;
 					var parser = new ol.format.WMSGetFeatureInfo();
 					var parseOptions = {
 						dataProjection: projCode,
 						featureProjection: projCode
 					};
 					if(response.responseXML) {
-						var features = parser.readFeatures(response.responseXML, parseOptions);
+						features = parser.readFeatures(response.responseXML, parseOptions);
 					} else {
-						var features = parser.readFeatures(response.responseText, parseOptions);
+						features = parser.readFeatures(response.responseText, parseOptions);
 					}
 					this.onSelect(features, layer);
 				}.bind(this, layer),
@@ -580,7 +594,7 @@ Ext.define('Ck.Selection', {
 				if (response.responseText.indexOf('ExceptionReport') == -1) {
 					features = format.readFeatures(response.responseXML, readOptions);
 				}
-				
+
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
 			failure: function() {
