@@ -325,7 +325,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				dataIndex: 'value',
 				flex: 1,
 				menuDisabled: true,
-				hideable: false
+				hideable: false,
+				skipEncode: true // for innola!
 			}]
 		};
 
