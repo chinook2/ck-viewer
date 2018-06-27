@@ -145,7 +145,7 @@ Ext.define('Ck.Action', {
 					Ck.Notify.error("Chinook Action Error :: " + e.message, e);
 				}
 			},
-			
+
 			// Compatibility for menucheckitem
 			checkHandler: function () {
 				try {
@@ -160,7 +160,10 @@ Ext.define('Ck.Action', {
 					this.onRender(btn, config, opts);
 					this.render(btn, opts);
 				},
-				destroy: this.destroy,
+				destroy: function (btn) {
+					this.onDestroy(btn, config);
+					this.destroy(btn);
+				},
 				scope: this
 			},
 
@@ -191,7 +194,7 @@ Ext.define('Ck.Action', {
 		} else {
 			Ck.log('Action "'+ btn.ckAction +'" as no ckview !');
 		}
-		
+
 		// Allow uncheck action on radio button
 		if(btn.getXType() == "menucheckitem" && !Ext.isEmpty(btn.group)) {
 			btn.originalOnClick = btn.onClick;
@@ -203,6 +206,10 @@ Ext.define('Ck.Action', {
 				}
 			}
 		}
+	},
+
+	onDestroy: function (btn, config) {
+		if (this.helpTip) this.helpTip.destroy();
 	},
 
 	render: Ext.emptyFn,
