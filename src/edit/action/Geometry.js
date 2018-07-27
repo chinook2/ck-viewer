@@ -6,9 +6,9 @@ Ext.define('Ck.edit.action.Geometry', {
 	extend: 'Ck.edit.Action',
 	alias: 'widget.ckEditGeometry',
 
-	iconCls: 'fa fa-edit',
+	iconCls: 'ckfont ck-edit',
 	tooltip: 'Edit geometry',
-	
+
 	interactionId: "geometryInteraction",
 
 	toggleAction: function(btn, status) {
@@ -17,8 +17,21 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.firstUse();
 		}
 		
+		// Force disable action when change tab or close window
+		if (!this.initialized) {
+			var win = btn.up('window');
+			if (win) {
+				win.on({
+					hide: function () {
+						btn.toggle(false);
+					}
+				});
+			}
+			this.initialized = true;
+		}
+
 		var source = this.getLayerSource();
-		
+
 		if(!this.geometryInteraction) {
 			this.geometryInteraction = Ck.create("Ck.Selection", {
 				layers			: [this.getLayer()],
@@ -46,7 +59,7 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.geometryInteraction.resetSelection();
 		}
 	},
-	
+
 	firstUse: function() {
 		this.controller.addListener("featuresessionstart", function() {
 			this.reset();
@@ -62,15 +75,15 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.geometryInteraction.resetSelection();
 		}, this);
 	},
-	
+
 	disableInteraction: function() {
 		this.geometryInteraction.setActive(false);
 	},
-	
+
 	enableInteraction: function() {
 		this.geometryInteraction.setActive(true);
 	},
-	
+
 	/**
 	 * Unhighlight feature
 	 */

@@ -217,6 +217,8 @@ Ext.define('Ck.edit.Controller', {
 			this.historyPanel.add(this.historyView);
 		}
 
+		this.getView().relayEvents(this, ['featurecreate', 'featureremove']);
+
 		//this.on("featurecreate", this.onCreate, this);
 	},
 
@@ -453,127 +455,129 @@ Ext.define('Ck.edit.Controller', {
 	 * Save the changes. If it concerne
 	 */
 	save: function() {
-		if(this.getIsWMS()) {
-			var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
-			var geometryName = this.getLayer().getExtension("geometryColumn");
-			var multiForReal = this.getLayer().getExtension("multiForReal");
+		// Need to save Vector Layer also...
+		// if(this.getIsWMS()) return;
+		
+		var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
+		var geometryName = this.getLayer().getExtension("geometryColumn");
+		var multiForReal = this.getLayer().getExtension("multiForReal");
 
-			var currSrs = this.getMap().getProjection().getCode();
-			var lyrSrs = ope.getSrs() || currSrs;
+		var currSrs = this.getMap().getProjection().getCode();
+		var lyrSrs = ope.getSrs() || currSrs;
 
-			// Loop on history store items
-			for(var i = 0; i < this.history.store.getCount(); i++) {
-				data = this.history.store.getAt(i).data;
-				ft = data.feature
+		// Loop on history store items
+		for(var i = 0; i < this.history.store.getCount(); i++) {
+			data = this.history.store.getAt(i).data;
+			ft = data.feature
 
-				if(currSrs != lyrSrs) {
-					ft.getGeometry().transform(currSrs, lyrSrs);
-				}
-
-				if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
-					ft.set(geometryName, ft.getGeometry());
-					ft.unset("geometry");
-					ft.setGeometryName(geometryName);
-				}
-
-				// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
-				var geom = ft.getGeometry();
-				if(multiForReal === true && data.actionId != 3 && !Ext.isEmpty(geom) && geom.getType().indexOf("Multi") == -1) {
-					var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
-					ft.setGeometry(mGeom);
-				}
-
-				switch(data.actionId) {
-					case 0:
-						// Create
-						inserts.push(ft);
-						break;
-					case 1:
-					case 2:
-					case 4:
-					case 5:
-						// Geometry or attributes, crop or union
-						updates.push(ft);
-						break;
-					case 3:
-						// Remove
-						deletes.push(ft);
-						break;
-				}
+			if(currSrs != lyrSrs) {
+				ft.getGeometry().transform(currSrs, lyrSrs);
 			}
 
-			var lyr = ope.getLayers().split(":");
+			if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
+				ft.set(geometryName, ft.getGeometry());
+				ft.unset("geometry");
+				ft.setGeometryName(geometryName);
+			}
 
-			var f = new ol.format.WFS();
-			var formatGML = new ol.format.GML({
-			    featureNS: 'https://geoserver.org/ows/'+lyr[0],
-			    featureType: lyr[1],
-			    srsName: currSrs
-			});
+			// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
+			var geom = ft.getGeometry();
+			if(multiForReal === true && data.actionId != 3 && !Ext.isEmpty(geom) && geom.getType().indexOf("Multi") == -1) {
+				var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
+				ft.setGeometry(mGeom);
+			}
 
-			var transac = f.writeTransaction(inserts, updates, deletes, formatGML);
-			var params = new XMLSerializer().serializeToString(transac);
+			switch(data.actionId) {
+				case 0:
+					// Create
+					inserts.push(ft);
+					break;
+				case 1:
+				case 2:
+				case 4:
+				case 5:
+					// Geometry or attributes, crop or union
+					updates.push(ft);
+					break;
+				case 3:
+					// Remove
+					deletes.push(ft);
+					break;
+			}
+		}
 
-			// Temporary parent to get the whole innerHTML
-			//var pTemp = document.createElement("div");
-			//pTemp.appendChild(transac);
+		var lyr = ope.getLayers().split(":");
 
-			// Do the getFeature query
-			Cks.post({
-				scope: this,
-				url: this.getMap().getMapUrl(ope.getUrl()),
-				headers: {
-					'Content-Type': 'text/xml; charset=UTF-8'
-				},
-				xmlData: params,
-				success: function(response) {
-					this.fireEvent("savesuccess");
-					var ins, upd, del;
-					ins = response.responseXML.getElementsByTagName("totalInserted")[0];
-					upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
-					del = response.responseXML.getElementsByTagName("totalDeleted")[0];
+		var f = new ol.format.WFS();
+		var formatGML = new ol.format.GML({
+		    featureNS: 'https://geoserver.org/ows/'+lyr[0],
+		    featureType: lyr[1],
+		    srsName: currSrs
+		});
 
-					if(ins || upd || del) {
-						var msg = "Registration successfully : <br/>";
-						if(ins && ins.innerHTML != "0") {
-							msg += "Inserted : " + ins.innerHTML + "<br/>";
-						}
-						if(upd && upd.innerHTML != "0") {
-							msg += "Updated : " + upd.innerHTML + "<br/>";
-						}
-						if(del && del.innerHTML != "0") {
-							msg += "Deleted : " + del.innerHTML;
-						}
+		var transac = f.writeTransaction(inserts, updates, deletes, formatGML);
+		var params = new XMLSerializer().serializeToString(transac);
 
-						Ext.Msg.show({
-							title: "Edition",
-							message: msg,
-							buttons: Ext.Msg.OK,
-							icon: Ext.Msg.INFO
-						});
-						this.reset();
+		// Temporary parent to get the whole innerHTML
+		//var pTemp = document.createElement("div");
+		//pTemp.appendChild(transac);
+
+		// Do the getFeature query
+		Cks.post({
+			scope: this,
+			url: this.getMap().getMapUrl(ope.getUrl()),
+			headers: {
+				'Content-Type': 'text/xml; charset=UTF-8'
+			},
+			xmlData: params,
+			success: function(response) {
+				this.fireEvent("savesuccess");
+				var ins, upd, del;
+				ins = response.responseXML.getElementsByTagName("totalInserted")[0];
+				upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
+				del = response.responseXML.getElementsByTagName("totalDeleted")[0];
+
+				if(ins || upd || del) {
+					var msg = "Registration successfully : <br/>";
+					if(ins && ins.innerHTML != "0") {
+						msg += "Inserted : " + ins.innerHTML + "<br/>";
 					}
-				},
-				failure: function(response) {
-					this.fireEvent("savefailed");
-					var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
-					var msg = "Layer edition failed";
-					if(exception) {
-						var pre = document.createElement('pre');
-						var text = document.createTextNode(exception.innerHTML);
-						pre.appendChild(text);
-						msg += ". Error message : <br/>" + pre.innerHTML;
+					if(upd && upd.innerHTML != "0") {
+						msg += "Updated : " + upd.innerHTML + "<br/>";
+					}
+					if(del && del.innerHTML != "0") {
+						msg += "Deleted : " + del.innerHTML;
 					}
 
 					Ext.Msg.show({
 						title: "Edition",
 						message: msg,
 						buttons: Ext.Msg.OK,
-						icon: Ext.Msg.ERROR
+						icon: Ext.Msg.INFO
 					});
+					this.reset();
 				}
-			});
-		}
+			},
+			failure: function(response) {
+				this.fireEvent("savefailed");
+				var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
+				var msg = "Layer edition failed";
+				if(exception) {
+					var pre = document.createElement('pre');
+					var text = document.createTextNode(exception.innerHTML);
+					pre.appendChild(text);
+					msg += ". Error message : <br/>" + pre.innerHTML;
+				}
+
+				Ext.Msg.show({
+					title: "Edition",
+					message: msg,
+					buttons: Ext.Msg.OK,
+					icon: Ext.Msg.ERROR
+				});
+			}
+		});
+
 	},
 
 	reset: function() {
