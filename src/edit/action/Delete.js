@@ -20,7 +20,7 @@ Ext.define('Ck.edit.action.Delete', {
 		if(!this.used) {
 			this.callParent([btn]);
 		}
-		
+
 		// Force disable action when change tab or close window
 		if (!this.initialized) {
 			var win = btn.up('window');
@@ -97,7 +97,7 @@ Ext.define('Ck.edit.action.Delete', {
 	 * @param {ol.Feature}
 	 */
 	removeFeature: function(feature) {
-		this.delInteraction
+		//this.delInteraction
 		var source = this.getLayerSource();
 		source.removeFeature(feature);
 		this.controller.fireEvent("featureremove", feature);

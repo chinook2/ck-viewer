@@ -104,16 +104,28 @@ Ext.define('Ck.edit.Controller', {
 							fn: function(btn) {
 								if (btn === 'yes') {
 									this.cancel();
+									this.close();
 								}
 							}
 						});
+					} else {
+						this.close();
 					}
 				},
 				scope: this
 			},"ckedit button#save": {
 				click: this.save,
 				scope: this
-			},"ckedit button#close": {
+			},"ckedit button#saveclose": {
+				click: function () {
+					this.save();
+					this.close();
+				},
+				scope: this
+			},
+
+			//TODO: remove ?
+			"ckedit button#close": {
 				click: function() {
 					if(this.history.store.getCount() != 0) {
 						Ext.Msg.show({
@@ -404,6 +416,7 @@ Ext.define('Ck.edit.Controller', {
 	 * Cancel all modifications.
 	 */
 	cancel: function() {
+		/*
 		var data, ft;
 
 		if(this.getIsWMS()) {
@@ -421,16 +434,20 @@ Ext.define('Ck.edit.Controller', {
 					case 4:
 					case 5:
 						// Geometry or attributes, crop or union
-						updates.push(ft);
+						//updates.push(ft);
 						break;
 					case 3:
 						// Remove
-						deletes.push(ft);
+						//deletes.push(ft);
 						break;
 				}
 			}
 		}
 		this.history.store.removeAll();
+		*/
+
+		this.reset();
+		this.close();
 	},
 
 	close: function() {
@@ -457,7 +474,7 @@ Ext.define('Ck.edit.Controller', {
 	save: function() {
 		// Need to save Vector Layer also...
 		// if(this.getIsWMS()) return;
-		
+
 		var data, ft, inserts = [], updates = [], deletes = [], ope = this.getLayer().ckLayer.getOffering("wfs").getOperation("GetFeature");
 		var geometryName = this.getLayer().getExtension("geometryColumn");
 		var multiForReal = this.getLayer().getExtension("multiForReal");
@@ -533,20 +550,25 @@ Ext.define('Ck.edit.Controller', {
 			success: function(response) {
 				this.fireEvent("savesuccess");
 				var ins, upd, del;
-				ins = response.responseXML.getElementsByTagName("totalInserted")[0];
-				upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
-				del = response.responseXML.getElementsByTagName("totalDeleted")[0];
+
+				var f = new ol.format.WFS();
+				var res = f.readTransactionResponse(response.responseXML);
+				if(res) {
+					ins = res.transactionSummary.totalInserted;
+					upd = res.transactionSummary.totalUpdated;
+					del = res.transactionSummary.totalDeleted;
+				}
 
 				if(ins || upd || del) {
 					var msg = "Registration successfully : <br/>";
-					if(ins && ins.innerHTML != "0") {
-						msg += "Inserted : " + ins.innerHTML + "<br/>";
+					if(ins && ins != "0") {
+						msg += "Inserted : " + ins + "<br/>";
 					}
-					if(upd && upd.innerHTML != "0") {
-						msg += "Updated : " + upd.innerHTML + "<br/>";
+					if(upd && upd != "0") {
+						msg += "Updated : " + upd + "<br/>";
 					}
-					if(del && del.innerHTML != "0") {
-						msg += "Deleted : " + del.innerHTML;
+					if(del && del != "0") {
+						msg += "Deleted : " + del;
 					}
 
 					Ext.Msg.show({
@@ -585,14 +607,20 @@ Ext.define('Ck.edit.Controller', {
 			this.history.reset.bind(this.history)();
 		}
 
-		if(this.getIsWMS()) {
-			this.wfsSource.clear();
+		var lyr = this.getLayer();
+		var src = lyr.getSource();
+		
+		this.wfsSource.clear();
 
-			// Redraw
-			src = this.getLayer().getSource();
+		if(this.getIsWMS()) {
+
 			var params = src.getParams();
 			params.t = new Date().getMilliseconds();
 			src.updateParams(params);
+		} else {
+			// Redraw
+			src.clear();
+			src.refresh();
 		}
 
 	}

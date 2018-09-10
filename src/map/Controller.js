@@ -122,7 +122,7 @@ Ext.define('Ck.map.Controller', {
 	measure: null,
 
 	/**
-	 * Element 
+	 * Element
 	 */
 	parentContainer: null,
 
@@ -130,7 +130,7 @@ Ext.define('Ck.map.Controller', {
 	 * Components binded to map container. Action done on show, hide and destroy
 	 */
 	bindedCmp: {},
-	
+
 	/**
 	 * List of contexts that are tempted to be loaded
 	 * @params {String[]}
@@ -661,7 +661,7 @@ Ext.define('Ck.map.Controller', {
 							format = new ol.format.WFS();
 							break;
 						case "json":
-							format = new ol.format.JSONFeature();
+							format = new ol.format.GeoJSON();
 							break;
 						case "text":
 							format = new ol.format.TextFeature();
@@ -841,7 +841,9 @@ Ext.define('Ck.map.Controller', {
 	 * @return {ol.Map} The Ol map
 	 */
 	getOlMap: function() {
-		return this.getView().getMap();
+		var v = this.getView();
+		if(!v) return false;
+		return v.getMap();
 	},
 
 	/**
@@ -850,7 +852,9 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	getOlView: function() {
-		return this.getOlMap().getView();
+		var m = this.getOlMap();
+		if (!m) return false;
+		return m.getView();
 	},
 
 	/**
@@ -865,7 +869,9 @@ Ext.define('Ck.map.Controller', {
 	 * @return {ol.proj.Projection} proj
 	 */
 	getProjection: function() {
-		return  this.getOlView().getProjection();
+		var v = this.getOlView();
+		if (!v) return false;
+		return v.getProjection();
 	},
 
 	/**

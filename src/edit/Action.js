@@ -21,6 +21,14 @@ Ext.define('Ck.edit.Action', {
 		// this.olMap = this.map.getOlMap();
 	},
 
+	doAction: function (el) {
+		this.associatedEl = el;
+		this.controller = el.lookupController();
+		// fix if edit btn config in subclass after 'constructor' call
+		if(!this.config.layer && el.layer) this.config.layer = el.layer;
+		this.used = true;		
+	},
+
 	/**
 	 * Save the associated element
 	 * @param {Ext.Component}
