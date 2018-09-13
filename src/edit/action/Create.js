@@ -56,6 +56,39 @@ Ext.define('Ck.edit.action.Create', {
 				source: this.drawSource
 			});
 
+			// Set special style when point is snapped
+			this.drawInteraction.styleSnapped_ = [
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						radius: 12,
+						stroke: new ol.style.Stroke({
+							color: 'red',
+							width: 1
+						})
+					})
+				}),
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						fill: new ol.style.Fill({
+							color: 'white'
+						}),
+						radius: 6,
+						stroke: new ol.style.Stroke({
+							color: 'red',
+							width: 1
+						})
+					})
+				}),
+				new ol.style.Style({
+					image: new ol.style.Circle({
+						fill: new ol.style.Fill({
+							color: 'red'
+						}),
+						radius: 2
+					})
+				})
+			];
+			
 			olMap.addInteraction(this.drawInteraction);
 
 			//https://github.com/openlayers/ol3/issues/3610
@@ -66,7 +99,7 @@ Ext.define('Ck.edit.action.Create', {
 
 		// Enable snap interaction to existing parcels
 		if (this.snap === true) {
-			if (!this.snapInteraction) {
+			if (!this.snapInteraction && this.drawSource) {
 				// The snap interaction must be added after the Modify and Draw interactions
 				// in order for its map browser event handlers to be fired first. Its handlers
 				// are responsible of doing the snapping.

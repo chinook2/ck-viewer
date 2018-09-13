@@ -11,6 +11,7 @@ Ext.define('Ck.Notify', {
 		Ext.toast({
 			html: msg,
 			align: this.align,
+			hideDuration: 1500,
 			slideInDuration: 400
 		});
 		Ck.log(msg);
