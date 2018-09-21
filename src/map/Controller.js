@@ -1174,7 +1174,7 @@ Ext.define('Ck.map.Controller', {
 					for(var k in this.bindedCmp) {
 						var c = this.bindedCmp[k];
 						if(c.tmpHide) {
-							c.show();
+							if(c.el) c.show();
 						}
 					}
 				},
