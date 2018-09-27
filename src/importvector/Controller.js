@@ -226,7 +226,7 @@ Ext.define('Ck.importvector.Controller', {
 	 */
 	createLayer: function(name) {
 		var vm = this.getViewModel();
-		name = Ext.String.capitalize(name.toLowerCase()) || "Imported layer n°" + this.nbImport++;
+		name = Ext.String.capitalize(name.toLowerCase()) || "Imported layer No." + this.nbImport++;
 
 		this.importLayer = new ol.layer.Vector({
 			title: name,
