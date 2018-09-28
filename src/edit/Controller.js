@@ -553,7 +553,7 @@ Ext.define('Ck.edit.Controller', {
 
 				var f = new ol.format.WFS();
 				var res = f.readTransactionResponse(response.responseXML);
-				if(res) {
+				if(res && res.transactionSummary) {
 					ins = res.transactionSummary.totalInserted;
 					upd = res.transactionSummary.totalUpdated;
 					del = res.transactionSummary.totalDeleted;
@@ -578,6 +578,13 @@ Ext.define('Ck.edit.Controller', {
 						icon: Ext.Msg.INFO
 					});
 					this.reset();
+				} else {
+					Ext.Msg.show({
+						title: "Edition",
+						message: "Registration failed.",
+						buttons: Ext.Msg.OK,
+						icon: Ext.Msg.WARNING
+					});
 				}
 			},
 			failure: function(response) {
@@ -609,7 +616,7 @@ Ext.define('Ck.edit.Controller', {
 
 		var lyr = this.getLayer();
 		var src = lyr.getSource();
-		
+
 		this.wfsSource.clear();
 
 		if(this.getIsWMS()) {
