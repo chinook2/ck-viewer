@@ -539,10 +539,14 @@ Ext.define('Ck.edit.Controller', {
 		//var pTemp = document.createElement("div");
 		//pTemp.appendChild(transac);
 
+		var p = ope.getParams() || {};
+		var env = 'ENV=' + p.ENV;
+		var url =  this.getMap().getMapUrl(ope.getUrl() + '?' + env) ;
+
 		// Do the getFeature query
 		Cks.post({
 			scope: this,
-			url: this.getMap().getMapUrl(ope.getUrl()),
+			url: url,
 			headers: {
 				'Content-Type': 'text/xml; charset=UTF-8'
 			},
@@ -589,13 +593,15 @@ Ext.define('Ck.edit.Controller', {
 			},
 			failure: function(response) {
 				this.fireEvent("savefailed");
-				var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
 				var msg = "Layer edition failed";
-				if(exception) {
-					var pre = document.createElement('pre');
-					var text = document.createTextNode(exception.innerHTML);
-					pre.appendChild(text);
-					msg += ". Error message : <br/>" + pre.innerHTML;
+				if (response.responseXML) {
+					var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
+					if(exception) {
+						var pre = document.createElement('pre');
+						var text = document.createTextNode(exception.innerHTML);
+						pre.appendChild(text);
+						msg += ". Error message : <br/>" + pre.innerHTML;
+					}
 				}
 
 				Ext.Msg.show({
