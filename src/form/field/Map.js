@@ -37,7 +37,8 @@ Ext.define('Ck.form.field.Map', {
 	
 	initComponent: function() {
 		this.map = Ext.create(Ext.applyIf({
-			xtype: 'ckmap'
+			xtype: 'ckmap',
+            plugins: ['mapprogress']
 		}, this.initialConfig));
 		this.ckmap = this.map.getController();
 
