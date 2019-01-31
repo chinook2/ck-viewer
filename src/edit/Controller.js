@@ -19,6 +19,11 @@ Ext.define('Ck.edit.Controller', {
 		 */
 		multi: false,
 
+        /**
+         * Use vertex panel for edit Line & Polygon
+         */
+        vertex: true,
+
 		/**
 		 * If the edited layer is a WMS layer
 		 */
@@ -90,6 +95,7 @@ Ext.define('Ck.edit.Controller', {
 		this.setLayer(view.initialConfig.layer);
 		//this.setOpenner(view.initialConfig.openner);
 		this.setMulti((view.initialConfig.layer.getExtension("geometryType").indexOf("Multi") != -1));
+        this.setVertex(view.initialConfig.vertex);
 
 		this.control({
 			"ckedit button#cancel": {
@@ -194,15 +200,13 @@ Ext.define('Ck.edit.Controller', {
 			this.feature.addListener("validate", this.saveFeatureChange, this);
 			this.feature.addListener("cancel", this.cancelFeatureChange, this);
 
-
-
 			// Hide feature splitting button
 			var tbar = this.getView().items.getAt(0).getDockedItems()[0];
 			tbar.items.getAt(4).getMenu().items.getAt(0).setVisible(false);
 		}
 
 		// Display vertex panel for line and polygon
-		if(view.layer.getExtension("geometryType") != "Point") {
+		if(this.getVertex() && view.layer.getExtension("geometryType") != "Point") {
 			var vertexContainer = Ext.getCmp("edit-vertexpanel");
 			vertexContainer = (Ext.isEmpty(vertexContainer))? view : vertexContainer;
 
@@ -322,8 +326,10 @@ Ext.define('Ck.edit.Controller', {
 			// delete this.moveInteraction.previousCursor_;
 			this.moveInteraction.setActive(true);
 		} else {
-			this.vertex.loadFeature(feature);
-			this.switchPanel(this.vertexPanel);
+            if (this.vertexPanel) {
+    			this.vertex.loadFeature(feature);
+    			this.switchPanel(this.vertexPanel);
+            }
 		}
 	},
 
