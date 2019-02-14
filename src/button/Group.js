@@ -57,7 +57,7 @@
 			cls: this.toolbarCls,
 			width: (((w + 10) * this.items.length)) +'px',
 			vertical: vertical,
-			defaults: this.defaults || mainToolbar.defaults
+			defaults: Ext.apply(this.defaults || {}, mainToolbar.defaults)
 		});
 		
 		if(this.autoClose === true) {
