@@ -44,18 +44,20 @@ Ext.define('Ext.overrides.Component', {
 	},
 
 	initComponent: function() {
-		var me = this,
-			configurator = me.getConfigurator(),
-			localeConfig = configurator.configs.locale,
-			locale = me.locale || Ck.Locale.get();
+		var me = this;
+		if(me.getConfigurator) {
+			var configurator = me.getConfigurator(),
+			localeConfig = configurator.configs.locale;
+		}
+		var locale = me.locale || Ck.Locale.get();
 
-		if(!localeConfig) {
+		if(!localeConfig && configurator) {
 			configurator.add({
 				locale: locale
 			});
 		}
 		// Wait for locale.json loaded
-		if(Ext.localeReady) {
+		if(Ext.localeReady && me.setLocale) {
 			me.setLocale(locale);
 		}
 
@@ -70,7 +72,10 @@ Ext.define('Ext.overrides.Component', {
 
 	cascadeLocale:function(locale) {
 		var me = this;
-		me.setLocale(locale);
+		
+		if(me.setLocale) {
+			me.setLocale(locale);
+		}
 
 		if(me.items) {
 			if(!Ext.isArray(me.items)){
