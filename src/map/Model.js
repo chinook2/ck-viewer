@@ -75,7 +75,7 @@ Ext.define('Ck.map.Model', {
 		
 		ckOlLayerConnection :{
 			"osm": {
-				"source": "MapQuest",
+				"source": "XYZ",
 				"layerType": "Tile"
 			},
 			"wmts": {
