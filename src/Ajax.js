@@ -64,7 +64,7 @@ Ext.define('Ck.Ajax', {
 			}
 		});
 
-		if(options.encode !== false) {
+		if(options.encode !== false && options.params) {
 			options.params = Ext.encode(options.params);
 			delete options.encode;
 		}
@@ -73,28 +73,34 @@ Ext.define('Ck.Ajax', {
 	},
 
 	put: function(options) {
-		options.method = 'PUT';
+		Ext.applyIf(options, {
+			method: 'PUT',
+			headers: {
+				'Content-Type': 'application/json; charset=UTF-8'
+			}
+		});
 
-		// TODO : chek if we have file to upload ...
-		// application/x-www-form-urlencoded;charset=UTF-8
-		options.headers = {
-			'Content-Type': 'application/json; charset=UTF-8'
-		};
+		if(options.encode !== false && options.params) {
+			options.params = Ext.encode(options.params);
+			delete options.encode;
+		}
 
-		options.params = Ext.encode(options.params);
 		this.request(options);
 	},
 
 	del: function(options) {
-		options.method = 'DELETE';
+		Ext.applyIf(options, {
+			method: 'DELETE',
+			headers: {
+				'Content-Type': 'application/json; charset=UTF-8'
+			}
+		});
 
-		// TODO : chek if we have file to upload ...
-		// application/x-www-form-urlencoded;charset=UTF-8
-		options.headers = {
-			'Content-Type': 'application/json; charset=UTF-8'
-		};
+		if(options.encode !== false && options.params) {
+			options.params = Ext.encode(options.params);
+			delete options.encode;
+		}
 
-		options.params = Ext.encode(options.params);
 		this.request(options);
 	},
 
@@ -153,6 +159,13 @@ Ext.define('Ck.Ajax', {
 		}
 
 		xhr.open(options.method, options.url, _async);
+
+		if(Ext.isObject(options.headers)) {
+			for(var h in options.headers) {
+				var v = options.headers[h];
+				xhr.setRequestHeader(h, v);
+			}
+		}
 		xhr.send(fData);
 	},
 
