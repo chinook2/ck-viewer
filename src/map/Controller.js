@@ -919,6 +919,35 @@ Ext.define('Ck.map.Controller', {
 	},
 
 	/**
+	 * Move to specific position / zoom using a animation
+	 * @param {ol.coordinate} The coordinates to go to
+	 * @param {Integer} The final zoom
+	 * @param {Integer}
+	 * @param {Function}
+	 */
+	flyTo: function(position, zoom, animateZoom, duration, callback) {
+		position = (Ext.isArray(position))? position : this.getOlView().getCenter();
+		zoom = (Ext.isNumber(parseInt(zoom)))? parseInt(zoom) : this.getOlView().getZoom();
+		animateZoom = (Ext.isNumber(parseInt(animateZoom)))? parseInt(animateZoom) : 0;
+		duration = (Ext.isNumber(parseInt(duration)))? parseInt(duration) : 2000;
+		callback = (Ext.isFunction(callback))? callback : Ext.emptyFn;
+		
+		
+		this.getOlView().animate({
+			center: position,
+			duration: duration
+		});
+		
+		this.getOlView().animate({
+			zoom: animateZoom,
+			duration: duration / 2
+		},{
+			zoom: zoom,
+			duration: duration / 2
+		}, callback);
+	},
+	
+	/**
 	 * Recursive function to return all layers
 	 * @param {ol.layer.Group}
 	 * @return {Array}
