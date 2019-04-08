@@ -182,7 +182,7 @@ Ext.define('Ck.Zip', {
 	getFilesByExtension: function(extension) {
 		var aFile = [];
 		for(var file in this.files) {
-			if(this.files[file].extension == extension) {
+			if(this.files[file].extension.toLowerCase() == extension.toLowerCase()) {
 				aFile.push(this.files[file]);
 			}
 		}
