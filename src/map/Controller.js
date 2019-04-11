@@ -987,10 +987,13 @@ Ext.define('Ck.map.Controller', {
 	 * @return {Boolean}
 	 */
 	removeLayer: function (layer, group) {
+        if(!layer) return false;
+        // Use 'root' group if not set
         if(!group) group = this.getOlMap().getLayerGroup();
+
+		var res = false;
         var col = group.getLayers();
         var arr = col.getArray();
-		var res = false;
 		for(var i = 0; i < arr.length; i++) {
 			if(arr[i] instanceof ol.layer.Group) {
                 // Enter into subgroup to search layer to remove
