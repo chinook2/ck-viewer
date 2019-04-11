@@ -158,7 +158,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	loadVertex: function() {
 		this.store.erase();
-		
+
 		// Remove the duplicate first/last vertex from the store
 		this.coords = this.ftCoords; //[0];
 		if(this.coords.length==0) return;
@@ -585,7 +585,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 
 	close: function() {
-		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+		Ck.getMap().removeLayer(this.vertexLayer);
 	}
 
 });

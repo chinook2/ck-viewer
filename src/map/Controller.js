@@ -981,6 +981,32 @@ Ext.define('Ck.map.Controller', {
 		return res;
 	},
 
+    /**
+	 * Recursive function to remove a layer with Groups and subgroups
+	 * @param {ol.layer.Group}
+	 * @return {Boolean}
+	 */
+	removeLayer: function (layer, group) {
+        if(!group) group = this.getOlMap().getLayerGroup();
+        var col = group.getLayers();
+        var arr = col.getArray();
+		var res = false;
+		for(var i = 0; i < arr.length; i++) {
+			if(arr[i] instanceof ol.layer.Group) {
+                // Enter into subgroup to search layer to remove
+				res = this.removeLayer(layer, arr[i]);
+                if(res) break;
+			} else {
+				// remove the Layer
+                if (layer === arr[i]) {
+                    col.remove(layer);
+                    return true;
+                }
+			}
+		}
+		return res;
+    },
+
 	/**
 	 * Get a layer according the passed function
 	 * @param {Function}
