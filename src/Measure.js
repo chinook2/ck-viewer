@@ -56,7 +56,7 @@ Ext.define('Ck.Measure', {
 		/**
 		 * Message while layer features snapping is loading
 		 */
-		layersSnapMsg: "Loading features for snap...",
+		layersSnapMsg: "Initializing data for snapping ...",
 
 		/**
 		 * Measure style. Set to null to hide measureing.
@@ -81,9 +81,10 @@ Ext.define('Ck.Measure', {
 		 */
 		mode: 'metric',
 
-		maxFeaturePerLayer: 500,
+		maxFeaturePerLayer: 1500,
 
-		tooManyFeatureMsg: "Loading these features (%d) could be long. Do you confirm ?"
+		//tooManyFeatureMsg: "Loading these features (%d) could be long. Do you confirm ?"
+		tooManyFeatureMsg: "Unable to initialize snapping.<br>Consider zoom in to enable measurements snapping."
 	},
 
 	/**
@@ -548,12 +549,13 @@ Ext.define('Ck.Measure', {
 								title: 'Warning',
 								msg: this.getTooManyFeatureMsg().replace("%d", nbF),
 								icon: Ext.MessageBox.WARNING,
-								buttons: Ext.MessageBox.OKCANCEL,
+								//buttons: Ext.MessageBox.OKCANCEL,
+								buttons: Ext.MessageBox.OK,
 								scope: this,
 								fn: function(btn) {
 									if(btn == "ok") {
-										this.loadSnappingFeaturesStart();
-										source.originLoadFeatures.apply(source, [ext]);
+										//this.loadSnappingFeaturesStart();
+										//source.originLoadFeatures.apply(source, [ext]);
 									}
 								}
 							});
