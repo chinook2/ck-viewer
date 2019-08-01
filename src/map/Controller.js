@@ -503,7 +503,23 @@ Ext.define('Ck.map.Controller', {
 						url: mainOperation.getHref()
 					};
 					break;
-
+				
+				case 'ign':
+					mainOperation = offering.getOperation("GetTile");
+					olSourceOptions = {
+						url: "http://wxs.ign.fr/24gowke4c4lfuwtjgykouc40/wmts?",
+						layer: "ORTHOIMAGERY.ORTHOPHOTOS",
+						matrixSet: "PM",
+						format: "image/jpeg",
+						style: "normal",
+						tileGrid : new ol.tilegrid.WMTS({
+							origin: [-20037508,20037508], // topLeftCorner
+							resolutions: owc.getResolutions(false),
+							matrixIds: ["9","10","11","12","13","14","15","16"] // ids des TileMatrix
+						})
+					};
+					break;
+		
 				case 'wms':
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {

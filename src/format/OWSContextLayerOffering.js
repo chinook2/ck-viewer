@@ -61,6 +61,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 				this.type = 'google';
 			} else if (c.indexOf('osm') != -1) {
 				this.type = 'osm';
+			} else if (c.indexOf('ign') != -1) {
+				this.type = 'ign';
 			} else if (c.indexOf('wms') != -1) {
 				this.type = 'wms';
 			} else if (c.indexOf('wmts') != -1) {
