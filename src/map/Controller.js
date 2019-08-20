@@ -503,22 +503,6 @@ Ext.define('Ck.map.Controller', {
 						url: mainOperation.getHref()
 					};
 					break;
-				
-				case 'ign':
-					mainOperation = offering.getOperation("GetTile");
-					olSourceOptions = {
-						url: "http://wxs.ign.fr/24gowke4c4lfuwtjgykouc40/wmts?",
-						layer: "ORTHOIMAGERY.ORTHOPHOTOS",
-						matrixSet: "PM",
-						format: "image/jpeg",
-						style: "normal",
-						tileGrid : new ol.tilegrid.WMTS({
-							origin: [-20037508,20037508], // topLeftCorner
-							resolutions: owc.getResolutions(false),
-							matrixIds: ["9","10","11","12","13","14","15","16"] // ids des TileMatrix
-						})
-					};
-					break;
 		
 				case 'wms':
 					mainOperation = offering.getOperation("GetMap");
@@ -529,11 +513,17 @@ Ext.define('Ck.map.Controller', {
 					};
 					break;
 
+				// Use WMTS for IGN Layers
+				// "href" : "http://wxs.ign.fr/{apiKey}/wmts?LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIXSET=PM&FORMAT=image/jpeg&STYLE=normal"
 				case 'wmts':
 					mainOperation = offering.getOperation("GetTile");
 					params = mainOperation.getParams();
+
+					// get grid origin from layer extent or context extent
+					var origin = layer.getExtension('topLeftCorner') || ol.extent.getTopLeft(layer.getExtent() || owc.getExtent());
+
 					// get resolution from main view. need inverse order
-					var resolutions = owc.getResolutions(false).slice(0);
+					var resolutions = layer.getExtension('resolutions') || owc.getResolutions(false);
 
 					// generate resolutions and matrixIds arrays for this WMTS
 					var matrixIds = [];
@@ -555,12 +545,12 @@ Ext.define('Ck.map.Controller', {
 						url: this.getMapUrl(mainOperation.getUrl()),
 						layer: params.LAYER,
 						matrixSet: params.TILEMATRIXSET,
-						format: params.FORMAT || 'image/png',
+						format: params.FORMAT || mainOperation.getFormat() || 'image/png',
 						style: params.STYLE || 'default',
 
 						// TODO : use extent, resolutions different from main view.
 						tileGrid: new ol.tilegrid.WMTS({
-							origin: ol.extent.getTopLeft(owc.getExtent()),
+							origin: origin,
 							resolutions: resolutions,
 							matrixIds: matrixIds
 						})
