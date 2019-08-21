@@ -904,8 +904,8 @@ Ext.define('Ck.map.Controller', {
 	 * Fit the map view to the passed extent.
 	 * @param {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
 	 */
-	setExtent: function(extent) {
-		return this.getOlView().fit(extent, this.getOlMap().getSize());
+	setExtent: function(extent, opt) {
+		return this.getOlView().fit(extent, this.getOlMap().getSize(), opt);
 	},
 
 	/**
@@ -1074,8 +1074,8 @@ Ext.define('Ck.map.Controller', {
 	/**
 	 * Reset the current view to initial extend
 	 */
-	resetView: function() {
-		this.setExtent(this.originOwc.getExtent());
+	resetView: function(opt) {
+		this.setExtent(this.originOwc.getExtent(), opt);
 	},
 
 	redraw: function() {
