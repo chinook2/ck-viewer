@@ -76,6 +76,8 @@
 		mainToolbar.on('positionUpdated', function() {
 			this.updatePosition();
 		}, this);
+		// Init Position (fix for layout absolute)
+		this.updatePosition();
 
 		this.callParent(arguments);
 	},
