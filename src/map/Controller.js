@@ -615,7 +615,7 @@ Ext.define('Ck.map.Controller', {
 				case 'geojson':
 					mainOperation = offering.getOperation("GetMap");
 					olSourceOptions = {
-						url: this.getMapUrl(mainOperation.getUrl()),
+						url: this.getMapUrl(mainOperation.getHref()),
 						format: new ol.format.GeoJSON()
 					};
 					break;
