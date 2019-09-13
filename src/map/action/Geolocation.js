@@ -1,11 +1,5 @@
 /**
  *
- *
- *
- *
- *
- *
- *
  */
 Ext.define('Ck.map.action.Geolocation', {
 	extend: 'Ck.Action',
@@ -15,6 +9,7 @@ Ext.define('Ck.map.action.Geolocation', {
 	tooltip: 'Mark your location',
 	iconCls: 'fa fa-street-view',
 
+	zoomTo: 8,
 	itemId: 'geolocation',
 
 	config: {
@@ -26,10 +21,25 @@ Ext.define('Ck.map.action.Geolocation', {
 		/**
 		 * @var {ol.Overlay}
 		 */
-		geolocationMarker: null
+		geolocationMarker: null,
+
+		marker: {	
+			//cls: 'gps-marker',
+			cls: 'marker-blue',
+			positioning: 'bottom-center',
+			offset: [0, 12.5]
+		}
 	},
 	
 	geoListener: null,
+
+	
+	destroy: function (params) {
+		if(this.geoListener) {
+			this.geoListener.destroy();
+			delete this.geoListener;
+		}
+	},
 
 	/**
 	 * @param {Ck.map.Controller}
@@ -37,19 +47,18 @@ Ext.define('Ck.map.action.Geolocation', {
 	ckLoaded: function(map) {
 		if(!Ext.isEmpty(map.geolocation)) {
 			var body = Ext.getBody();
+			var markerCfg = this.getMarker();
 
 			this.marker = body.createChild({
-				"class": "gps-marker marker-blue",
-				"style": {
-					"visibility": "hidden"
-				}
+				"class": markerCfg.cls + ' ' + markerCfg.extraCls
 			});
-
-			this.setGeolocationMarker(new ol.Overlay({
+			var geolocationMarker = new ol.Overlay({
 				element: this.marker.dom,
-				positioning: 'bottom-center',
+				positioning: markerCfg.positioning,
+				offset: markerCfg.offset,
 				stopEvent: false
-			}));
+			});
+			this.setGeolocationMarker(geolocationMarker);
 
 			this.setGeolocation(map.geolocation);
 
@@ -69,8 +78,9 @@ Ext.define('Ck.map.action.Geolocation', {
 		if(pressed) {
 			var geoloc = this.getMap().geolocation.getPosition();
 			if(Ext.isArray(geoloc)) {
-				this.setPosition();
+				this.setPosition(geoloc);
 				this.getOlView().setCenter(geoloc);
+				this.getOlView().setZoom(this.zoomTo || 8);
 			}
 			
 			// Add listener to move marker on geolocation change
@@ -82,7 +92,7 @@ Ext.define('Ck.map.action.Geolocation', {
 				});
 			}
 		} else {
-			this.marker.setVisible(false);
+			this.setPosition();
 			this.geoListener.destroy();
 			delete this.geoListener;
 		}
@@ -94,10 +104,12 @@ Ext.define('Ck.map.action.Geolocation', {
 	 * @params {ol.coordinate}
 	 */
 	setPosition: function(geoloc) {
+		var mark = this.getGeolocationMarker();
 		if(Ext.isArray(geoloc)) {
-			var mark = this.getGeolocationMarker();
-			this.marker.setVisible(true);
 			mark.setPosition(geoloc);
+		} else {
+			// unset position > hide marker
+			mark.setPosition();
 		}
 	}
 });
