@@ -302,7 +302,7 @@ Ext.define('Ck.map.Controller', {
 
 			// Init GPS manager. Overwrite getPosition to integrate offset to facilitate development
 			// TODO Use navigator.geolocaiton directly because ol.Geolocation sucks
-			if(cfg.geolocation === true) {
+			if(cfg.geolocation === true && !Ext.os.is.Desktop) {
 				this.geolocation = new ol.Geolocation({
 					projection: viewProj,
 					tracking: true,
