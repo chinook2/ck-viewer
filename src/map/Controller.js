@@ -500,6 +500,7 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetTile");
 					olSourceOptions = {
 						layer: 'osm',
+						attributions: [ol.source.OSM.ATTRIBUTION],
 						url: mainOperation.getHref()
 					};
 					break;
@@ -541,12 +542,21 @@ Ext.define('Ck.map.Controller', {
 						}
 					}
 
+					var attributions = null;
+					if(mainOperation.getUrl().indexOf('.ign.fr') != -1) {
+						attributions = new ol.Attribution({
+							html: '&copy; <a href="https://www.ign.fr">IGN</a>'
+						});
+						//TODO others providers... grab from context...
+					}
+
 					olSourceOptions = {
 						url: this.getMapUrl(mainOperation.getUrl()),
 						layer: params.LAYER,
 						matrixSet: params.TILEMATRIXSET,
 						format: params.FORMAT || mainOperation.getFormat() || 'image/png',
 						style: params.STYLE || 'default',
+						attributions: attributions,
 
 						// TODO : use extent, resolutions different from main view.
 						tileGrid: new ol.tilegrid.WMTS({
