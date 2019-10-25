@@ -344,16 +344,16 @@ Ext.define('Ck.Selection', {
 		}
 
 		var lyr, layers = this.getLayers();
-		var layersToQuery = [];
+		this.layersToQuery = [];
 
 		if(Ext.isEmpty(layers) || !Ext.isArray(layers)) {
-			layersToQuery = this.getMap().getLayers(function(lyr) {
+			var lyrToQuery = this.getMap().getLayers(function(lyr) {
 				return ((lyr.ckLayer && lyr.ckLayer.getUserLyr() &&
 						(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
 						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image))
 				);
 			});
-			layersToQuery = layersToQuery.getArray();
+			this.layersToQuery = lyrToQuery.getArray().reverse();
 		} else {
 			for(var i = 0; i < layers.length; i++) {
 				if(Ext.isString(layers[i])) {
@@ -365,7 +365,7 @@ Ext.define('Ck.Selection', {
 					if ((lyr.ckLayer && lyr.ckLayer.getUserLyr()) &&
 						(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
 						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)) {
-						layersToQuery.push(lyr);
+						this.layersToQuery.push(lyr);
 					}
 				} else {
 					Ck.log("Layer \"" + layers[i] + "\" not found, unable to query it");
@@ -377,12 +377,13 @@ Ext.define('Ck.Selection', {
 		var skip = false;
 
 		this.nbQueryDone = 0;
-		this.nbQuery = layersToQuery.length;
+		this.nbQuery = this.layersToQuery.length;
+		this.selection = new Array(this.nbQuery);
 
 		if (this.nbQuery > 0) this.getMask().show();
 
-		for(var l = 0; l < layersToQuery.length; l++) {
-			lyr = layersToQuery[l];
+		for(var l = 0; l < this.layersToQuery.length; l++) {
+			lyr = this.layersToQuery[l];
 			if(lyr instanceof ol.layer.Vector) {
 				ft = this.queryWFSLayer(lyr, selFt, evntParams);
 				if (ft.length > 0 && this.getSkipOwsLayers()) {
@@ -619,17 +620,21 @@ Ext.define('Ck.Selection', {
 
 			// Look whether a selection has been made on the same layer
 			for(var i = 0; ((i < this.selection.length) && Ext.isEmpty(sel)); i++) {
-				if(this.selection[i].layer == layer) {
+				if(this.selection[i] && this.selection[i].layer == layer) {
 					sel = this.selection[i];
 				}
 			}
 
 			// First selection for this layer
 			if(Ext.isEmpty(sel)) {
-				this.selection.push({
-					features: features,
-					layer: layer
-				});
+				// Try to preserve layer order in response
+				var pos = this.layersToQuery.indexOf(layer);
+				if (pos != -1) {
+					this.selection[pos] = {
+						features: features,
+						layer: layer
+					};					
+				}
 			} else {
 				var idx;
 				for(var i = 0; i < features.length; i++) {
@@ -677,6 +682,9 @@ Ext.define('Ck.Selection', {
 
 		if(this.nbQueryDone == this.nbQuery) {
 			this.getMask().hide();
+			// remove empty row
+			this.selection = Ext.Array.clean(this.selection);
+
 			this.getCallback()(this.selection);
 		}
 	},
