@@ -261,6 +261,10 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}
 
 				field = alias || f;
+				if(field && Ext.manifest.ckClient) {
+					var ftpl = new Ext.Template(field);
+					field = ftpl.apply(Ext.manifest.ckClient);
+				}
 
 				// Ignore fields without Alias when onlyFieldWithAlias is true
 				if (!alias && this.getOnlyFieldWithAlias()) {
