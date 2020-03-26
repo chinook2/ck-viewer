@@ -8,14 +8,29 @@ Ext.define('Ck.Locale', {
     locale: null,
     defaultLocale: 'en',
 
+    ckview: null,
+
+    constructor: function () {
+        // Override defaultLocale in app.json
+        if(Ext.manifest.locale) {
+            this.defaultLocale = Ext.manifest.locale;
+        }
+    },
+
     /**
      *
      * @param config
      */
-    constructor: function (config) {
+    init: function (view) {
+        this.ckview = view;
         var locale = this.defaultLocale;
-        if(Ext.manifest.locale) locale = Ext.manifest.locale;
         if(Ck.params.locale) locale = Ck.params.locale;
+        //this.set(this.defaultLocale);
+        
+        var localeUrl = Ck.getPath() + '/locale.json';
+        if(Ext.manifest.localeUrl) {
+            localeUrl = Ext.manifest.localeUrl;
+        }
 
         var store = Ext.create('Ext.data.Store',{
             storeId: 'I18n',
@@ -23,7 +38,7 @@ Ext.define('Ck.Locale', {
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Ck.getPath() + '/locale.json',
+                url: localeUrl,
                 noCache: false,
                 reader: {
                     type: 'json',
@@ -44,7 +59,7 @@ Ext.define('Ck.Locale', {
     set: function (locale) {
         this.locale = locale;
         Ext.localeReady = true;
-		
+		/*
         // update the Ck.View page
         // TODO : Manage multiples views
         var v = Ext.query('.ck-view')[0];
@@ -58,7 +73,8 @@ Ext.define('Ck.Locale', {
         } else {
             v = Ext.getCmp(v.id);
         }
-        if(v) v.cascadeLocale(locale);
+        */
+        if(this.ckview) this.ckview.cascadeLocale(locale);
 
         // Update windows
         var aw = Ext.query('.x-window');
@@ -73,10 +89,12 @@ Ext.define('Ck.Locale', {
             var tip = Ext.getCmp(t.id);
             if(tip) tip.cascadeLocale(locale);
         })
+
+        Ext.GlobalEvents.fireEvent('cklocaleReady', this);
     },
 
     get: function () {
-        return this.locale;
+        return this.locale || this.defaultLocale;
     }
 });
 

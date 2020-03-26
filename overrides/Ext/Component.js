@@ -45,22 +45,37 @@ Ext.define('Ext.overrides.Component', {
 
 	initComponent: function() {
 		var me = this;
+		var configurator, localeConfig;
 		if(me.getConfigurator) {
-			var configurator = me.getConfigurator(),
+			configurator = me.getConfigurator();
 			localeConfig = configurator.configs.locale;
 		}
-		var locale = me.locale || Ck.Locale.get();
+		// For Ext 6.2
+		else if(me.self.getConfigurator) {
+			configurator = me.self.getConfigurator();
+			localeConfig = configurator.configs.locale;
+		}
+		//
+		
+		//var locale = me.locale || Ck.Locale.get();
+		var locale = Ck.Locale.get();
 
 		if(!localeConfig && configurator) {
 			configurator.add({
 				locale: locale
 			});
 		}
-		// Wait for locale.json loaded
-		if(Ext.localeReady && me.setLocale) {
-			me.setLocale(locale);
-		}
 
+		// Wait for locale.json loaded
+		//if(me.setLocale) {
+			if(Ext.localeReady) {
+				me.cascadeLocale(locale);
+			} else {
+				Ext.on('cklocaleReady', function() {
+					me.cascadeLocale(Ck.Locale.get());
+				}, this);
+			}
+		//}
 		this.callParent();
 	},
 
@@ -73,6 +88,10 @@ Ext.define('Ext.overrides.Component', {
 	cascadeLocale:function(locale) {
 		var me = this;
 		
+		//<debug>
+		console.log('cascadeLocale::['+ me.getXType() +'] ' + me.id + ' (' + locale + ')');
+		//</debug>
+
 		if(me.setLocale) {
 			me.setLocale(locale);
 		}
@@ -93,7 +112,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 		}
 
-		if(me.dockedItems) {
+		if(me.dockedItems && me.dockedItems.each) {
 			me.dockedItems.each(function(item){
 				if(item.cascadeLocale) {
 					item.cascadeLocale(locale);
@@ -120,9 +139,17 @@ Ext.define('Ext.overrides.Component', {
 	},
 
 	_createLocaleSetter : function(property) {
-		var me = this,
-			configurator = me.getConfigurator(),
-			config = configurator.configs[property],
+		var me = this;
+		var configurator;
+		if(me.getConfigurator) {
+			configurator = me.getConfigurator();
+		}
+		// For Ext 6.2
+		else if(me.self.getConfigurator) {
+			configurator = me.self.getConfigurator();
+		}
+		
+		var config = configurator.configs[property],
 			setName,
 			localeName,
 			oldSetter,
@@ -142,24 +169,31 @@ Ext.define('Ext.overrides.Component', {
 		translate = function(val, localeName) {
 			var me = this,
 				// toLocale : special to force a language (used with action cklocaleSet)
-				locale = me.toLocale || me.getLocale(),
+				toLocale = me.toLocale || me.getLocale(),
 				store = Ext.getStore(me.localeStore),
 				str,
 				rec;
-			if (store && val && me[localeName] !== locale) {
-				rec = store.findRecord(me[localeName] || 'en', val, 0, false, true, true);
-				str = rec ? rec.get(locale) : null;
+			var fromLocale = me[localeName] || Ck.Locale.defaultLocale;
+
+			if (store && val && fromLocale !== toLocale) {
+				rec = store.findRecord(fromLocale, val, 0, false, true, true);
+				str = rec ? rec.get(toLocale) : null;
 				if(str) {
-					me[localeName] = locale;
+					me[localeName] = toLocale;
 				}
 			}
-
+			/*
+			store > "Commune*"
+			val = "Commune : Penvénan"
+			*/
+			
 			if(Ext.Localisable.indexOf(val) == -1) {
 				Ext.Localisable.push(val);
 			}
 
 			//<debug>
-			//Ck.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
+			//Ck.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + fromLocale + ' -> ' + toLocale + ') :: '+ localeName );
+			console.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + fromLocale + ' -> ' + toLocale + ') :: '+ localeName );
 			//</debug>
 			return str ? str : val;
 		};
@@ -191,7 +225,12 @@ Ext.define('Ext.overrides.Component', {
 			property = properties[i];
 			// if((!me.hasOwnProperty(property)) && (me.config.bind && !me.config.bind.hasOwnProperty(property))) continue;
 
-			value = me[property];
+			if (me.hasOwnProperty(property)) {
+				value = me[property];
+			} else if (me.config && me.config.hasOwnProperty(property)) {
+				value = me.config[property];
+			}
+
 			setter = me._createLocaleSetter(property);
 			if (value && value != '&#160;') {
 				setter.call(me, value);
@@ -271,7 +310,7 @@ Ext.define('Ext.overrides.panel.Panel', {
 });
 Ext.define('Ext.overrides.panel.Title', {
 	override: 'Ext.panel.Title',
-	localeProperties: ['title', 'html']
+	localeProperties: ['text','title', 'html']
 });
 Ext.define("Ext.overrides.button.Button", {
 	override: "Ext.button.Button",
@@ -300,7 +339,7 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 		me.items.forEach(function (item, idx) {
 			var val = item.tooltip;
 			if (store && val && item[localeName] !== locale) {
-				rec = store.findRecord(item[localeName] || 'en', val, 0, false, true, true);
+				rec = store.findRecord(item[localeName] || Ck.Locale.defaultLocale, val, 0, false, true, true);
 				str = rec ? rec.get(locale) : null;
 				if (str) {
 					item[localeName] = locale;
@@ -343,14 +382,22 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 	}
 });
 
-
+Ext.define("Ext.overrides.form.Label", {
+	override: "Ext.form.field.Label",
+	localeProperties: ["html","text"],
+	setHtml: function(html){
+		// Label avec texte dynamique, la source est toujours en 'en'
+		this['_htmlLocale'] = Ck.Locale.defaultLocale;
+		this.callParent(arguments);
+	}	
+});
 Ext.define("Ext.overrides.form.field.Base", {
 	override: "Ext.form.field.Base",
 	localeProperties: "fieldLabel"
 });
 Ext.define("Ext.overrides.form.field.Text", {
 	override: "Ext.form.field.Text",
-	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "regexText"]
+	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "regexText", "emptyText"]
 });
 
 
@@ -380,7 +427,7 @@ Ext.define("Ext.overrides.tip.ToolTip", {
 	localeProperties: "html",
 	setHtml: function(html){
 		// Tooltip avec texte dynamique dans une action (mesure), la source est toujours en 'en'
-		this['_htmlLocale'] = 'en';
+		this['_htmlLocale'] = Ck.Locale.defaultLocale;
 		this.callParent(arguments);
 	}
 });

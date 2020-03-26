@@ -17,7 +17,7 @@ Ext.define("Ck.View", {
 		
 		'Ck.*' // Load all Ck class...
 	],
-	plugins: 'viewport',
+	//plugins: 'viewport',
 	
 	controller: 'ckview',
 	

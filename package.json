@@ -259,12 +259,12 @@
      * see app.json for complete description
      */
     "js": [{
-		"path": "libs/ol3/ol-debug.js"
+        "path": "libs/ol3/ol-debug.js"
 	},{
-		"path": "libs/ol3/ol.patch.js"
+        "path": "libs/ol3/ol.patch.js"
 	},{
-		"path": "libs/proj4js/proj4-src.js"
-	},{
+        "path": "libs/proj4js/proj4-src.js"
+	}/*,{
 		"path": "libs/proj4js/defs/EPSG2154.js"
 	},{
 		"path": "libs/proj4js/defs/EPSG4258.js"
@@ -287,7 +287,7 @@
 		"path": "libs/shapefile-js/shp.js"
 	},{
 		"path": "libs/papaparse/papaparse.js"
-	}],
+	}*/],
     
     /**
      * List of all CSS assets in the right inclusion order.
@@ -317,11 +317,11 @@
 		 */
 		"js": [{
 			"path": "libs/ol3/ol-debug.js"
-		},{
+        },{
 			"path": "libs/ol3/ol.patch.js"
-		},{
+        },{
 			"path": "libs/proj4js/proj4.js"
-		},{
+        }/*,{
 			"path": "libs/proj4js/defs/EPSG2154.js"
 		},{
 			"path": "libs/proj4js/defs/EPSG4258.js"
@@ -341,10 +341,10 @@
 		},{
 			"path": "libs/zip/zip.js"
 		},{
-			"path": "libs/shapefile-js/shp.min.js"
+			"path": "libs/shapefile-js/shp.js"
 		},{
 			"path": "libs/papaparse/papaparse.min.js"
-		}]
+		}*/]
 	},
 	"development": {"environment": "development"},
 	"testing": {"testing": "testing"}

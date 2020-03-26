@@ -45,6 +45,9 @@ Ext.define('Ck.view.Controller', {
 			this.view.add(ui);
 		}
 		
+		// Init Locale (translate) when UI is ready
+		Ck.Locale.init(this.view);
+
 		return true;
 	},
 	
@@ -70,6 +73,35 @@ Ext.define('Ck.view.Controller', {
 				if(this.attempt <= this.maxAttempt) this.getUi('ck-default');
 			}
 		});
-	}
+	},
 
+	getCkMap: function () {
+		return this.ckMap;
+	},
+
+	setCkMap: function (ckmap) {
+		if(ckmap) {
+			this.relayEvents(ckmap, ['ready', 'loaded'], 'map');
+			this.getView().relayEvents(ckmap, ['ready', 'loaded'], 'map');
+			this.ckMap = ckmap;
+		}
+	},
+
+	onMapReady: function(fn, scope, options) {
+		var m = this.getCkMap();
+		if (m && m.ready === true) {
+			fn.apply(scope, [m]);
+		} else {
+			this.on('mapready', fn, scope, options);
+		}
+	},
+
+	onMapLoaded: function (fn, scope, options) {
+		var m = this.getCkMap();
+		if (m && m.loaded === true) {
+			fn.apply(scope, [m]);
+		} else {
+			this.on('maploaded', fn, scope, options);
+		}
+	}
 });

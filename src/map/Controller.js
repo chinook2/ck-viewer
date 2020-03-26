@@ -500,7 +500,9 @@ Ext.define('Ck.map.Controller', {
 					mainOperation = offering.getOperation("GetTile");
 					olSourceOptions = {
 						layer: 'osm',
-						attributions: [ol.source.OSM.ATTRIBUTION],
+						attributions: new ol.Attribution({
+							html: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a> contributors.'
+						}),
 						url: mainOperation.getHref()
 					};
 					break;
@@ -545,7 +547,7 @@ Ext.define('Ck.map.Controller', {
 					var attributions = null;
 					if(mainOperation.getUrl().indexOf('.ign.fr') != -1) {
 						attributions = new ol.Attribution({
-							html: '&copy; <a href="https://www.ign.fr">IGN</a>'
+							html: '&copy; <a href="http://www.ign.fr" target="_blank">IGN</a>'
 						});
 						//TODO others providers... grab from context...
 					}
