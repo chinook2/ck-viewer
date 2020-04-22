@@ -147,8 +147,8 @@ Ext.define('Ck.map.action.Select', {
 				this.container = Ext.create('Ext.window.Window', Ext.apply({
 					title		: "Result selection",
 					id			: this.getResultPanelContainerId(),
-					width		: 800,
-					height		: 620,
+					width		: 350, // Fix #274
+					height		: 420, // Fix #274
 					layout		: 'fit',
 					collapsible	: true,
 					closable	: false,

@@ -1,0 +1,12 @@
+.edit-tbar-text {
+  text-overflow: ellipsis;
+  /* width: 70px; */
+  white-space: nowrap !important;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .edit-tbar-text {
+    /* width: 100px; */
+  }
+}

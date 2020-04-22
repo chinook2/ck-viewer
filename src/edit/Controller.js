@@ -206,7 +206,11 @@ Ext.define('Ck.edit.Controller', {
 
 		
 		// Reference to the main toolbar
-		var tbar = view.items.getAt(0).getDockedItems()[0];
+		var tbar = view.getDockedItems()[1]; // Fix #275
+		/*
+		if(view.items.getAt(0) && view.items.getAt(0).getDockedItems) {
+			tbar = view.items.getAt(0).getDockedItems()[0];
+		} */
 
 		this.control({
 			"ckedit button#cancel": {
@@ -311,8 +315,8 @@ Ext.define('Ck.edit.Controller', {
 
 
 			// Hide feature splitting button
-			var vertexLive = tbar.getComponent("vertex-live-edit");
-			if(vertexLive) {
+			if(tbar && tbar.getComponent("vertex-live-edit")) {
+				var vertexLive = tbar.getComponent("vertex-live-edit");
 				vertexLive.getComponent("edit-crop").setVisible(false);
 			}
 		}

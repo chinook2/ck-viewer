@@ -1868,7 +1868,7 @@ Ext.define('Ck.form.Controller', {
 
 				var tpl = new Ext.Template(dataUrl);
 				if(Ext.isEmpty(fid)) fid = '';
-				if(Ext.isString(fid)) {
+				if(Ext.isString(fid) || Ext.isNumeric(fid)) {
 					fid = {
 						fid: fid,
 						layer: lyr

@@ -34,7 +34,7 @@ Ext.define("Ck.Result", {
 	items: [{
 		itemId: "layer_tree",
 		xtype: "treepanel",
-		width: 205,
+		width: 105,
 		resizable: true,
 		rootVisible: false,
 		store: {
@@ -70,11 +70,13 @@ Ext.define("Ck.Result", {
 			
 			layerTree.columns = [{
 				text: 'Couches',
+				// width: 100, // Fix #274
 				dataIndex: 'layer'
-			},{
+			}/*,{
 				text: 'Sélectionnés',
+        		width: 50,
 				dataIndex: 'selected'
-			}];
+			}*/];
 		}
 		me.callParent(arguments);
 	}
