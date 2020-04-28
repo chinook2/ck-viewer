@@ -4,105 +4,15 @@
         "en": "Choose a language",
         "fr": "Selectionner une langue",
         "es": "Cambiar idioma"
-    },
-    
-    {
-        "en": "Select shellfish<br/> gathering site",
-        "fr": "Choisissez<br/> votre site de pêche"
     },{
-        "en": "City",
-        "fr": "Communes"
+        "en": "AppDemo",
+        "fr": "AppDemo - FR",
+        "es": "AppDemo - ES"
     },{
-        "en": "Shellfish gathering site",
-        "fr": "Site de pêche"
+        "en": "Display overview",
+        "fr": "Vue générale",
+        "es": "en espagnol..."
     },{
-        "en": "Shellfish gathering advice",
-        "fr": "Consignes de pêche"
-    },{
-        "en": "<span style='font-weight: bold'>Permanent</span> ban",
-        "fr": "Interdiction<br/><span style='font-weight: bold'>permanente</span>"
-    },{
-        "en": "<span style='font-weight: bold'>Temporary</span> ban",
-        "fr": "Interdiction<br/><span style='font-weight: bold'>temporaire</span>"
-    },{
-        "en": "Exit full screen view",
-        "fr": "Quitter le mode plein écran"
-    },{
-        "en": "Full screen view",
-        "fr": "Mode plein écran"
-    },{
-        "en": "Default view",
-        "fr": "Vue par défaut"
-    },{
-        "en": "Zoom in",
-        "fr": "Zoom avant"
-    },{
-        "en": "Zoom out",
-        "fr": "Zoom arrière"
-    },{
-        "en": "Hide sites",
-        "fr": "Cacher des sites"
-    },
-    {
-        "en": "Unable to hide prohibited sites",
-        "fr": "Impossible de cacher les sites interdits"
-    },{
-        "en": "Show/Hide discouraged sites",
-        "fr": "Afficher/Masquer les sites déconseillés"
-    },{
-        "en": "Show/Hide tolerated sites",
-        "fr": "Afficher/Masquer les sites tolérés"
-    },{
-        "en": "Show/Hide authorized sites",
-        "fr": "Afficher/Masquer les sites autorisés"
-    },
-    {
-        "en": "Select background map",
-        "fr": "Choisir son fond de plan"
-    },{
-        "en": "Site information",
-        "fr": "Info sur le site de pêche"
-    },{
-        "en": "Tide*",
-        "fr": "Marée*"
-    },{
-        "en": "Weather",
-        "fr": "Météo"
-    },{
-        "en": "Please select a Site",
-        "fr": "Veuillez cliquer sur un site"
-    },{
-        "en": "Authorized",
-        "fr": "Autorisé"
-    },{
-        "en": "Tolerated",
-        "fr": "Toléré"
-    },{
-        "en": "Discouraged",
-        "fr": "Déconseillé"
-    },{
-        "en": "Permanent ban",
-        "fr": "Interdiction permanente"
-    },{
-        "en": "Temporary ban",
-        "fr": "Interdiction temporaire"
-    },{
-        "en": "City",
-        "fr": "Commune"
-    },{
-        "en": "Reason",
-        "fr": "Motif"
-    },{
-        "en": "Since",
-        "fr": "Depuis"
-    },{
-        "en": "further information",
-        "fr": "Informations complémentaires"
-    },
-    
-
-    
-    {
         "en": "Login",
         "fr": "Connexion",
         "es": "-"

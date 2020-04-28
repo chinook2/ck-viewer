@@ -25,21 +25,23 @@ Ext.define('Ck.Locale', {
         this.ckview = view;
         var locale = this.defaultLocale;
         if(Ck.params.locale) locale = Ck.params.locale;
-        //this.set(this.defaultLocale);
         
-        var localeUrl = Ck.getPath() + '/locale.json';
+        var localeUrl = '/locale.json';
         if(Ext.manifest.localeUrl) {
             localeUrl = Ext.manifest.localeUrl;
         }
-
+        
         var store = Ext.create('Ext.data.Store',{
             storeId: 'I18n',
             fields: ['en', 'fr', 'es'],
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: localeUrl,
+                url: this.getFullUrl(localeUrl),
                 noCache: false,
+                limitParam: '',
+                startParam: '',
+                pageParam: '',
                 reader: {
                     type: 'json',
                     rootProperty: 'data'
@@ -95,6 +97,35 @@ Ext.define('Ck.Locale', {
 
     get: function () {
         return this.locale || this.defaultLocale;
-    }
+    },
+
+
+	/**
+	 * Get the full URL of resource.
+	 *
+	 * - /name : static resource in application
+	 * - name : static resource in ck-viewer package
+	 *
+	 * @param {string} name of the resource
+	 * @return {string} the full Url
+	 */
+	getFullUrl: function(name) {
+		var url = name;
+
+		if(Ext.String.startsWith(name, '/')) {
+            // Static resource in application
+			url = 'resources' + name;
+			url = url.replace('//', '/');
+		}
+        else {
+            // Static resource in ck-viewer package
+			url = Ck.getPath() + name;
+		}
+        
+		// Security for url path
+		url = url.replace(/\.\./g, '');
+
+		return url;
+	}    
 });
 
