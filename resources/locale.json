@@ -63,14 +63,14 @@
         "en": "Site information",
         "fr": "Info sur le site de pêche"
     },{
-        "en": "Tide",
-        "fr": "Marée"
+        "en": "Tide*",
+        "fr": "Marée*"
     },{
         "en": "Weather",
         "fr": "Météo"
     },{
         "en": "Please select a Site",
-        "fr": "Veuillez cliquez sur un site"
+        "fr": "Veuillez cliquer sur un site"
     },{
         "en": "Authorized",
         "fr": "Autorisé"
@@ -95,6 +95,9 @@
     },{
         "en": "Since",
         "fr": "Depuis"
+    },{
+        "en": "further information",
+        "fr": "Informations complémentaires"
     },
     
 

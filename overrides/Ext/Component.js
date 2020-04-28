@@ -310,7 +310,7 @@ Ext.define('Ext.overrides.panel.Panel', {
 });
 Ext.define('Ext.overrides.panel.Title', {
 	override: 'Ext.panel.Title',
-	localeProperties: ['text','title', 'html']
+	localeProperties: ['text', 'title']
 });
 Ext.define("Ext.overrides.button.Button", {
 	override: "Ext.button.Button",
