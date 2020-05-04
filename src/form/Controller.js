@@ -331,11 +331,12 @@ Ext.define('Ck.form.Controller', {
 					if(fcw.title) win.setTitle(fcw.title);
 				// Adjust form popup Size on PC (tablet is full screen)
 
+				/*
 				if(Ck.isDesktop()) {
 					if(fcw.width) win.setWidth(fcw.width);
 					if(fcw.height) win.setHeight(fcw.height);
 				}
-
+				*/
 			}
 
 			if(form.dataUrl) {
@@ -550,6 +551,9 @@ Ext.define('Ck.form.Controller', {
 			if(c.xtype && c.xtype.substr(0,3) == 'ck_') {
 				c.xtype = c.xtype.substr(3);
 				this.compatibiltyMode = true;
+			}
+			if(c.xtype && c.xtype == 'forms_addbutton') {
+				return c;
 			}
 
 			// Subforms : init default params and exit

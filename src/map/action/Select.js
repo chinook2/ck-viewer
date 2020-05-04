@@ -147,12 +147,13 @@ Ext.define('Ck.map.action.Select', {
 				this.container = Ext.create('Ext.window.Window', Ext.apply({
 					title		: "Result selection",
 					id			: this.getResultPanelContainerId(),
-					width		: 350, // Fix #274
-					height		: 420, // Fix #274
+					//width		: 350, // Fix #274
+					//height		: 420, // Fix #274
 					layout		: 'fit',
 					collapsible	: true,
 					closable	: false,
 					maximizable	: true,
+					maximized	: true,	// Fix #274
 					items		: [this.result]
 				}), this.getContainerOpt());
 			} else {
