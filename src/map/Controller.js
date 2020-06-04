@@ -140,6 +140,14 @@ Ext.define('Ck.map.Controller', {
 		var control, controls = v.getControls();
 		for(var controlName in controls) {
 			if(controls[controlName]===false) continue;
+
+			// 
+			if ((Ck.Locale.get() == "en" || Ck.params.locale == "en")  && controlName == "ScaleLine") {
+				controls[controlName] = {
+					units: "imperial"
+				}
+			}
+
 			control = Ck.create("ol.control." + controlName, controls[controlName]);
 			if(control) {
 				olControls.push(control);
