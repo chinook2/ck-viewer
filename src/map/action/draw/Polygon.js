@@ -34,7 +34,7 @@ Ext.define('Ck.map.action.draw.Polygon', {
 					}
 					this.draw.getSource().clear();
 				}
-			}, this);
+			}.bind(this));
 		}
 	}
 });

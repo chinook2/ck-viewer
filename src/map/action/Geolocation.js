@@ -78,11 +78,11 @@ Ext.define('Ck.map.action.Geolocation', {
 			if(Ext.isEmpty(this.geoListener)) {
 				this.geoListener = this.getGeolocation().on('change', function(evt) {
 					this.setPosition(evt.target);
-				}, this);
+				}.bind(this));
 			}
 		} else {
 			this.marker.setVisible(false);
-			this.getGeolocation().unByKey(this.geoListener);
+			ol.Observable.unByKey(this.geoListener);
 			delete this.geoListener;
 		}
 	},

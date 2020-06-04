@@ -376,7 +376,7 @@ Ext.define('Ck.print.Controller', {
 			});
 
 			this.getMap().redraw();
-		}, this);
+		}.bind(this));
 		this.getOlMap().renderSync();
 	},
 
@@ -403,7 +403,7 @@ Ext.define('Ck.print.Controller', {
 			}).then(function(canvas) {
 			    this.finishPrinting(canvas);
 			}.bind(this));
-		}, this);
+		}.bind(this));
 		this.getOlMap().renderSync();
 	},
 

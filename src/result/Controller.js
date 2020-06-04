@@ -69,7 +69,7 @@ Ext.define('Ck.result.Controller', {
 		}];
 		
 		this.layerRoot.appendChild(result);
-		this.layerTree.selectPath(firstId, null, null, function(success, lastNode) { this.loadFeature(this.layerTree, lastNode) }, this);
+		this.layerTree.selectPath(firstId, null, null, function(success, lastNode) { this.loadFeature(this.layerTree, lastNode) }.bind(this));
 		
 		
 	},

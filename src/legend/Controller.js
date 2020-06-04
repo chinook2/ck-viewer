@@ -58,7 +58,7 @@ Ext.define('Ck.legend.Controller', {
 		v.getView().getRowClass = this.getNodeClasses.bind(this);
 
 		// Event on ol view resolution change
-		this.getMap().getOlView().on('change:resolution',	this.setLegendLayersStyle, this);
+		this.getMap().getOlView().on('change:resolution', this.setLegendLayersStyle.bind(this));
 
 		this.fireEvent('ready', this);
 	},

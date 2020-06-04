@@ -26,11 +26,11 @@ Ext.define('Ck.map.plugin.Tooltip', {
 					return;
 				}
 	        	this.displayFeatureInfo(this.olMap.getEventPixel(evt.originalEvent));
-		  	}, this);
+		  	}.bind(this));
 
 	        this.olMap.on('click', function(evt) {
 				this.displayFeatureInfo(evt.pixel);
-	        }, this);
+	        }.bind(this));
 		}
 
 		//ckMap.getController().on("addLayer", this.addLoadListeners, this);

@@ -1,5 +1,14 @@
 {
     /**
+     * The namespace of this package.
+     *
+     * As a general rule, all classes that belong to this package should be under this namespace
+     * if multiple namespaces are part of this package, set this to "".
+     */
+    "namespace": "Ck",
+
+
+    /**
      * The name of the package.
      */
     "name": "ck-viewer",
@@ -31,13 +40,15 @@
      */
     "toolkit": "classic",
 
+    "theme": "theme-material",
+
      /**
       * The author of the package.
       *
       * Required only if you are distributing this package through a Sencha Cmd repository,
       * in which case it should match the name you assign to your local package repository.
       */
-    "creator": "Memoris",
+    "creator": "GEOFIT",
 
     /**
      * A summarized description of this package.
@@ -70,6 +81,10 @@
      * This is set automatically by Sencha Cmd when first generating this file
      */
     "format": "1",
+
+    "properties": {
+        "skip.slice": 1
+    },
 
     /**
      * Additional resources used during theme slicing operations
@@ -254,7 +269,7 @@
      */
     "css": [
         {
-            "path": "libs/ol3/ol.css"
+            "path": "libs/ol-5.2.0/ol.css"
         }
     ],
 
@@ -274,9 +289,9 @@
 		 * Use "bundle" and "includeInBundle" proterties
 		 */
 		"js": [{
-			"path": "libs/ol3/ol-debug.js"
+			"path": "libs/ol-5.2.0/ol.js"
 		},{
-			"path": "libs/ol3/ol.patch.js"
+			"path": "libs/ol-5.2.0/ol.patch.js"
 		},{
 			"path": "libs/proj4js/proj4.js"
 		},{
@@ -324,9 +339,9 @@
          * see app.json for complete description
          */
         "js": [{
-    		"path": "libs/ol3/ol-debug.js"
+    		"path": "libs/ol-5.2.0/ol.js"
     	},{
-    		"path": "libs/ol3/ol.patch.js"
+    		"path": "libs/ol-5.2.0/ol.patch.js"
     	},{
     		"path": "libs/proj4js/proj4-src.js"
     	},{

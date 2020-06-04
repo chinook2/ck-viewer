@@ -92,7 +92,7 @@ Ext.define('Ck.edit.action.Create', {
 			olMap.addInteraction(this.drawInteraction);
 
 			//https://github.com/openlayers/ol3/issues/3610
-			this.drawInteraction.on('drawend', this.onFinishSelection, this);
+			this.drawInteraction.on('drawend', this.onFinishSelection.bind(this));
 			//
 			//this.interactions["drawInteraction"] = this.drawInteraction;
 		}
@@ -116,7 +116,7 @@ Ext.define('Ck.edit.action.Create', {
 			if(this.drawSource) this.drawSource.clear();
 			this.drawInteraction.on('drawstart', function(){
 				if(this.drawSource) this.drawSource.clear();
-			}, this);
+			}.bind(this));
 		}
 
 		this.drawInteraction.setActive(status);

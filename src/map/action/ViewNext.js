@@ -52,7 +52,7 @@ Ext.define('Ck.map.action.ViewNext', {
 				}
 			}
 			map.historyIgnore = false;
-		}, this);
+		}.bind(this));
 	},
 
 	/**

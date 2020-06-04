@@ -212,9 +212,12 @@ Ext.define('Ck.Ajax', {
 		}
 	},
 
-	onRequestComplete: function(conn, response, options, eOpts) {
+	onRequestComplete: function(conn) {
+		var options = conn.options;
+		var response = conn.result;
+
 		//<debug>
-		Ck.Notify.info('Request success : '+ options.url);
+		//Ck.Notify.info('Request success : '+ options.url);
 		//</debug>
 
 		if(!this.isCacheAvailable(options)) return true;
@@ -222,7 +225,10 @@ Ext.define('Ck.Ajax', {
 		this.ls.setItem(options.url, response.responseText);
 	},
 
-	onRequestException: function(conn, response, options, eOpts) {
+	onRequestException: function(conn) {
+		var options = conn.options;
+		var response = conn.result;
+
 		Ck.Notify.error('Request failure : ' + options.url, response);
 		// TODO : parse error message ...
 	}

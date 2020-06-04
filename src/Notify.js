@@ -5,6 +5,10 @@ Ext.define('Ck.Notify', {
 	//alternateClassName: 'Ckn',
 	singleton: true,
 
+    requires: [
+		'Ck'
+	],
+	
 	align: 'tr',
 
 	info: function(msg, e) {

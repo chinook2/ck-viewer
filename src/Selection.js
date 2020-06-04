@@ -11,7 +11,9 @@
  * For WFS callback parameter contain the reals features and not a clone
  */
 Ext.define('Ck.Selection', {
-
+    requires: [
+		'Ck'
+	],
 	config: {
 		/**
 		 * True to draw geometry use for getFeature
@@ -223,9 +225,9 @@ Ext.define('Ck.Selection', {
 
 		draw.on('drawstart', function(evt) {
 			this.sketch = evt.feature;
-		}, this);
+		}.bind(this));
 
-		draw.on('drawend', this.processSelection, this);
+		draw.on('drawend', this.processSelection.bind(this));
 
 		olMap.addInteraction(draw);
 		draw.setActive(false);

@@ -24,7 +24,7 @@ Ext.define('Ck.map.action.draw.Action', {
 			if(this.getBtn()) {
 				this.getBtn().toggle(false);
 			}
-		}, this);
+		}.bind(this));
 	},
 
 	destroy: function () {
@@ -53,7 +53,7 @@ Ext.define('Ck.map.action.draw.Action', {
 			if(this.draw.getSource()) this.draw.getSource().clear();
 			this.interaction.on('drawstart', function(){
 				this.draw.getSource().clear();
-			}, this);
+			}.bind(this));
 		}
 
 		this.draw.activeDraw(this.type, pressed);

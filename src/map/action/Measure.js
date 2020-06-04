@@ -114,11 +114,11 @@ Ext.define('Ck.map.action.Measure', {
 		this.draw.on('drawstart', function(evt) {
 			this.setHelpMsg(this.helpMessages.continueMsg);
 			this.measure.measureStart(evt);
-		}, this);
+		}.bind(this));
 		this.draw.on('drawend', function(evt) {
 			this.setHelpMsg(this.helpMessages.startMsg);
 			this.measure.measureEnd(evt);
-		}, this);
+		}.bind(this));
 		
 		// Update snap interaction
 		this.measure.updateMeasureSnapping();

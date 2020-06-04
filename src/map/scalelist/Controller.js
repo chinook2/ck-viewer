@@ -29,7 +29,7 @@ Ext.define('Ck.map.scalelist.Controller', {
 
 				view.onAlignToScroll = Ext.emptyFn; // Hard fix (when scroll list)
 				this.alignTo();
-				this.getOlMap().on("change:size", this.alignTo, this);
+				this.getOlMap().on("change:size", this.alignTo.bind(this));
 			} else {
 				Ck.log({
 					msg: "Element of \"" + flCfg.alignTo + "\" doesn't exist. Scale list rendering impossible",
@@ -43,8 +43,8 @@ Ext.define('Ck.map.scalelist.Controller', {
 		view.setStore(this.getMap().getViewModel().getStore("scales"));
 		this.getView().setValue(this.getOlView().getResolution());
 
-		this.getOlView().on("change:resolution", this.mapResolutionChange, this);
-		view.on("select", this.resolutionChange, this);
+		this.getOlView().on("change:resolution", this.mapResolutionChange.bind(this));
+		view.on("select", this.resolutionChange.bind(this));
 	},
 
 	/**

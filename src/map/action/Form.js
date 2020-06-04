@@ -88,7 +88,7 @@ Ext.define('Ck.map.action.Form', {
 				//
 
 				this.mapFormWindow.show();
-			}, this);
+			}.bind(this));
 
 			// this.mapFormSelect.on('change:active', this.clearSelection, this);
 		}

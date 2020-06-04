@@ -252,7 +252,7 @@ Ext.define('Ck.map.Model', {
 	 */
 	getScale: function(res, unit) {
 		var dpi = 25.4 / 0.28;
-		var mpu = ol.proj.METERS_PER_UNIT[unit];
+		var mpu = ol.proj.Units.METERS_PER_UNIT[unit];
 		return Math.round(res * mpu * 39.37 * dpi);
 	},
 

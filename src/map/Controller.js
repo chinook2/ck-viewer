@@ -437,6 +437,7 @@ Ext.define('Ck.map.Controller', {
 	 */
 	relayMapEvents: function(olGroup) {
 		// Relay olMap events
+		var me = this;
 		olGroup.getLayers().on('add', function(colEvent) {
 			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
 				return;
@@ -450,15 +451,15 @@ Ext.define('Ck.map.Controller', {
 			layer.getExtension = function(key) {
 				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
 			};
-			this.fireEvent('addlayer', layer, idx);
-		}, this);
+			me.fireEvent('addlayer', layer, idx);
+		});
 		olGroup.getLayers().on('remove', function(colEvent) {
 			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
 				return;
 			}
 			var layer = colEvent.element;
-			this.fireEvent('removelayer', layer);
-		}, this);
+			me.fireEvent('removelayer', layer);
+		});
 	},
 
 	/**
@@ -917,7 +918,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
 	 */
 	setExtent: function(extent) {
-		return this.getOlView().fit(extent, this.getOlMap().getSize());
+		return this.getOlView().fit(extent);
 	},
 
 	/**
