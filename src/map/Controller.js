@@ -257,13 +257,22 @@ Ext.define('Ck.map.Controller', {
 			res.push(viewScales[i].res);
 		}
 
+		var viewExtent = this.originOwc.getExtent();
+		var smoothExtent = true;
+		if (this.originOwc.getExtension("limit_drag_to_extent")) {
+			viewExtent = this.originOwc.getExtent();
+			smoothExtent = false;
+		}
 		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
 		olMap.setView(new ol.View({
 			projection: viewProj,
 			center: v.getCenter(),
 			zoom: v.getZoom(),
-			resolutions: res
+			resolutions: res,
+			extent: viewExtent,
+			smoothExtentConstraint: smoothExtent
 		}));
+		
 		this.bindMap(olMap);
 
 		// Remove all layers
