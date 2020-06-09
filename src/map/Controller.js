@@ -147,6 +147,7 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	init: function() {
+		var me = this;
 		var v = this.getView();
 
 		if(Ck.params.context) {
@@ -166,6 +167,11 @@ Ext.define('Ck.map.Controller', {
 			control = Ck.create("ol.control." + controlName, controls[controlName]);
 			if(control) {
 				olControls.push(control);
+				// Use a not collapsible/collapsible attribution according map size
+				if (controlName=="Attribution") {
+					control.setCollapsible(false);
+					control.setCollapsed(false);
+				}
 			}
 		}
 
@@ -692,6 +698,9 @@ Ext.define('Ck.map.Controller', {
 						format: new ol.format.GeoJSON()
 					};
 					break;
+			}
+			if (layer.getExtension("attribution")) {
+				olSourceOptions.attributions = layer.getExtension("attribution");
 			}
 
 			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
