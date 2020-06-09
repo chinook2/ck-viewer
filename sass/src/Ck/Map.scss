@@ -3,6 +3,10 @@
     cursor: zoom-in !important;
 }
 
+.ol-control button:hover {
+	cursor: pointer;
+}
+
 .ol-dragzoom {
     border: dashed 2px black;
     background-color: rgba(255, 255, 255, 0.35);
