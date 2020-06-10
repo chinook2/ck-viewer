@@ -3,17 +3,17 @@
  */
 .ck-toolbar {
 	background: none;
-	width: 40px !important;
+	width: 72px;
 }
 
-.ck-toolbar *{
+.ck-toolbar * {
 	overflow: visible;
 }
 
-.ck-toolbar > div{
+.ck-toolbar > div {
 	width: 0px !important;
 }
 
-.ck-toolbar > div > div{
+.ck-toolbar > div > div {
 	width: 0px !important;
 }

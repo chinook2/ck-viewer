@@ -13,14 +13,14 @@ Ext.define('Ext.overrides.Component', {
 	 * @cfg {string/Array} [localeProperties=html] A string or array of strings
 	 * of properties on the component to be localized.
 	 */
-	//localeProperties: 'html',
+	localeProperties: 'html',
 
 
 	/**
 	 * @cfg {string} localeStore storeId of the store that holds strings
 	 * translated in multiple languages.
 	 */
-	//localeStore: 'I18n',
+	localeStore: 'I18n',
 
 	constructor: function(config) {
 		config = config || {};
@@ -60,16 +60,26 @@ Ext.define('Ext.overrides.Component', {
 				if(key) delete Ck.actions[key];
 			}
 		});
-	}//,
+	},
 
-/*
+
 	initComponent: function() {
-		var me = this,
-			configurator = me.getConfigurator(),
-			localeConfig = configurator.configs.locale,
-			locale = me.locale || Ck.Locale.get();
+		var me = this;
+		var configurator, localeConfig;
+		if(me.getConfigurator) {
+			configurator = me.getConfigurator();
+			localeConfig = configurator.configs.locale;
+		}
+		// For Ext > 6.2
+		else if(me.self.getConfigurator) {
+			configurator = me.self.getConfigurator();
+			localeConfig = configurator.configs.locale;
+		}
 
-		if(!localeConfig) {
+		var locale = Ck.Locale.get();
+
+		//
+		if(!localeConfig && configurator) {
 			configurator.add({
 				locale: locale
 			});
@@ -129,9 +139,17 @@ Ext.define('Ext.overrides.Component', {
 	},
 
 	_createLocaleSetter : function(property) {
-		var me = this,
-			configurator = me.getConfigurator(),
-			config = configurator.configs[property],
+		var me = this;
+		var configurator;
+		if(me.getConfigurator) {
+			configurator = me.getConfigurator();
+		}
+		// For Ext > 6.2
+		else if(me.self.getConfigurator) {
+			configurator = me.self.getConfigurator();
+		}
+		
+		var config = configurator.configs[property],
 			setName,
 			localeName,
 			oldSetter,
@@ -168,7 +186,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 
 			//<debug>
-			// Ext.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
+			Ext.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
 			//</debug>
 			return str ? str : val;
 		};
@@ -207,7 +225,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 		}
 	}
-*/
+
 }
 /*,
  function(){
@@ -276,7 +294,7 @@ Ext.define('Ext.overrides.Component', {
  */
 );
 
-/*
+
 Ext.define('Ext.overrides.panel.Panel', {
 	override: 'Ext.panel.Panel',
 	localeProperties: ['title', 'html']
@@ -406,7 +424,7 @@ Ext.define("Ext.overrides.slider.Single",  {
 		//this.callParent(arguments);
 	}
 });
-*/
+
 
 /*
  Ext.define("Ext.overrides.toolbar.TextItem", {override: "Ext.toolbar.TextItem",localeProperties: ["text", "html"]});

@@ -1,6 +1,14 @@
 {
 	"success": true,
 	"data": [{
+        "en": "Yes",
+        "fr": "Oui",
+        "es": "Sí"
+    },{
+        "en": "No",
+        "fr": "Non",
+        "es": "No"
+    },{
         "en": "Choose a language",
         "fr": "Selectionner une langue",
         "es": "Cambiar idioma"
@@ -13,13 +21,53 @@
         "fr": "Vue générale",
         "es": "en espagnol..."
     },{
+        "en": "Login",
+        "fr": "Connexion",
+        "es": "-"
+    },{
+        "en": "User ID",
+        "fr": "Utilisateur",
+        "es": "-"
+    },{
+        "en": "Password",
+        "fr": "Mot de passe",
+        "es": "-"
+    },{
+        "en": "Logout",
+        "fr": "Déconnexion",
+        "es": "-"
+    },{
         "en": "Close",
         "fr": "Fermer",
         "es": "Close ES"
     },{
+        "en": "Close panel",
+        "fr": "Fermer la fenêtre",
+        "es": ""
+    },{
+        "en": "Collapse panel",
+        "fr": "Réduire la fenêtre",
+        "es": ""
+    },{
+        "en": "Add vertex",
+        "fr": "Ajouter un vertex",
+        "es": ""
+    },{
+        "en": "Remove vertex",
+        "fr": "Supprimer un vertex",
+        "es": ""
+    },{
         "en": "Save",
         "fr": "Enregistrer",
         "es": "Guardar"
+    },{
+        "en": "No graphics of type POLYGON have been added!",
+        "fr": "Aucune entité à enregistrer.",
+        "es": "-"
+    },{
+        "en": "Error generating shapefile",
+        "fr": "Erreur de génération du Shapefile",
+        "es": "-"
     },{
         "en": "Cancel",
         "fr": "Annuler",
@@ -32,6 +80,18 @@
         "en": "Edit",
         "fr": "Editer",
         "es": "Editar"
+    },{
+        "en": "Add",
+        "fr": "Ajouter",
+        "es": "-"
+    },{
+        "en": "New",
+        "fr": "Nouveau",
+        "es": "-"
+    },{
+        "en": "Update",
+        "fr": "Mettre à jour",
+        "es": "-"
     },{
         "en": "Title",
         "fr": "Titre",
@@ -55,6 +115,22 @@
     },{
         "en": "Measure tools",
         "fr": "Outils de mesure",
+        "es": " - "
+    },{
+        "en": "Measure length",
+        "fr": "Mesurer une longueur",
+        "es": " - "
+    },{
+        "en": "Measure area",
+        "fr": "Mesurer une surface",
+        "es": " - "
+    },{
+        "en": "Clear all measures",
+        "fr": "Effacer tout",
+        "es": " - "
+    },{
+        "en": "Get feature info",
+        "fr": "Information",
         "es": " - "
     },{
         "en": "Clear history",
@@ -93,6 +169,10 @@
         "fr": "Sélection par polygone",
         "es": " - "
     },{
+        "en": "Select by rectangle",
+        "fr": "Sélection par rectangle",
+        "es": " - "
+    },{
         "en": "Reset view",
         "fr": "Vue initiale",
         "es": " - "
@@ -120,6 +200,137 @@
         "en": "Selection in progress",
         "fr": "Sélection en cours",
         "es": " - "
-    }
-    ]
+    },{
+        "en": "Snapping options",
+        "fr": "Options d'accrochages",
+        "es": " - "
+    },{
+        "en": "Layer",
+        "fr": "Couche",
+        "es": " - "
+    },{
+        "en": "Layers",
+        "fr": "Couches",
+        "es": " - "
+    },{
+        "en": "Tolerance",
+        "fr": "Tolérance",
+        "es": " - "
+    },{
+        "en": "Additional layer",
+        "fr": "Ajout de couches",
+        "es": " - "
+    },{
+        "en": "Add layer",
+        "fr": "Ajouter une couche",
+        "es": " - "
+    },{
+        "en": "Save layer",
+        "fr": "Sauvegarder une couche",
+        "es": " - "
+    },{
+        "en": "End creation",
+        "fr": "Finaliser",
+        "es": " - "
+    },{
+        "en": "Create features",
+        "fr": "Créer un objet",
+        "es": " - "
+    },{
+        "en": "You need to activate creation mode first before using this feature.",
+        "fr": "Activer le mode création avant d'utiliser cette fonctionnalité.",
+        "es": " - "
+    },{
+        "en": "The first and the last point must be outside of the polygon",
+        "fr": "Le premier et le dernier point doivent être en dehors du polygone",
+        "es": " - "
+    },{
+        "en": "The selected plygons must have at least 2 commons points",
+        "fr": "Les polygones sélectionnés doivent avoir au moins 2 points commun",
+        "es": " - "
+    },{
+        "en": "Result feature will receive the first selected feature's attributes.",
+        "fr": "L'entité créée héritera des attributs de la première sélection.",
+        "es": " - "
+    },{
+        "en": "Close edit session without save any changes ?",
+        "fr": "Fermer la session d'édition sans sauvegarder les changements ?",
+        "es": " - "
+    },{
+        "en": "Please complete the current editing session",
+        "fr": "Terminer la session d'édition courante avant d'en ouvrir une autre",
+        "es": " - "
+    },{
+        "en": "Selection in progress...",
+        "fr": "Sélection en cours...",
+        "es": " - "
+    },{
+        "en": "Crop features",
+        "fr": "Diviser une entité",
+        "es": " - "
+    },{
+        "en": "Gather features",
+        "fr": "Unir deux entités",
+        "es": " - "
+    },{
+        "en": "Create features at GPS position",
+        "fr": "Créer un objet à la position GPS",
+        "es": " - "
+    },{
+        "en": "Which polygon keeps attributes data ?",
+        "fr": "Quel polygone garde les attributs ?",
+        "es": " - "
+    },{
+        "en": "First polygon",
+        "fr": "Premier polygone",
+        "es": " - "
+    },{
+        "en": "Second polygon",
+        "fr": "Second polygone",
+        "es": " - "
+    },{
+        "en": "Validate",
+        "fr": "Valider",
+        "es": " - "
+    },{
+        "en": "Edit attribute",
+        "fr": "Editer les attributs",
+        "es": " - "
+    },{
+        "en": "Edit geometry",
+        "fr": "Editer une géometrie",
+        "es": " - "
+    },{
+        "en": "Move feature at GPS position",
+        "fr": "Déplacer l'objet à la position GPS",
+        "es": " - "
+    },{
+        "en": "Delete feature",
+        "fr": "Supprimer une entité",
+        "es": " - "
+    },{
+		"en": "GPS position not available",
+        "fr": "Position GPS indisponible",
+        "es": " - "
+	},{
+		"en": "Registration successfully",
+        "fr": "Sauvegardé avec succès",
+        "es": " - "
+	},{
+		"en": "Inserted",
+        "fr": "Ajouté",
+        "es": " - "
+	},{
+		"en": "Updated",
+        "fr": "Mis à jour",
+        "es": " - "
+	},{
+		"en": "Deleted",
+        "fr": "Supprimé",
+        "es": " - "
+	},{
+		"en": "Please complete the current editing session",
+        "fr": "Terminer la session d'édition courante",
+        "es": " - "
+	}]
 }

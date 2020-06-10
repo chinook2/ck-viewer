@@ -19,15 +19,15 @@
             "items": [{
                 "text": "en",
                 "toLocale": "en",
-                "action": "cklocaleSet"
+                "ckAction": "cklocaleSet"
             },{
                 "text": "fr",
                 "toLocale": "fr",
-                "action": "cklocaleSet"
+                "ckAction": "cklocaleSet"
             },{
                 "text": "es",
                 "toLocale": "es",
-                "action": "cklocaleSet"
+                "ckAction": "cklocaleSet"
             }]
         }]
     },{
@@ -47,34 +47,34 @@
 				"scale": "large"
 			},
 			"items": [{
-				"action": "ckOpenOverview"
+				"ckAction": "ckOpenOverview"
 			},{
-				"action": "ckmapResetview"
+				"ckAction": "ckmapResetview"
 			},{
-				"action": "ckmapZoomin"
+				"ckAction": "ckmapZoomin"
 			},{
-				"action": "ckmapZoomout"
+				"ckAction": "ckmapZoomout"
 			},{
 				"xtype": "ckgroup",
 				"tooltip": "Measure tools",
 				"iconCls": "fa fa-asterisk",
 				"items": [{
-					"action": "ckmapMeasureLength"
+					"ckAction": "ckmapMeasureLength"
 				},{
-					"action": "ckmapMeasureArea"
+					"ckAction": "ckmapMeasureArea"
 				},{
-					"action": "ckmapMeasureClear"
+					"ckAction": "ckmapMeasureClear"
 				}]
 			},{
 				"xtype": "ckgroup",
 				"tooltip": "Select tools",
 				"iconCls": "fa fa-info-circle",
 				"items": [{
-					"action": "ckmapSelectPoint"
+					"ckAction": "ckmapSelectPoint"
 				},{
-					"action": "ckmapSelectCircle"
+					"ckAction": "ckmapSelectCircle"
 				},{
-					"action": "ckmapSelectBox"
+					"ckAction": "ckmapSelectBox"
 				}]
 			}]
 		},{

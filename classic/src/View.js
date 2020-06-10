@@ -34,7 +34,8 @@ Ext.define("Ck.View", {
         'Ck.Print',
         'Ck.Pdf',
         'Ck.PdfViewer',
-        'Ck.view.*'
+		'Ck.view.*',
+		'Ck.login.*'
 	],
 	//plugins: 'viewport',
 

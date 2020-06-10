@@ -66,7 +66,7 @@
      * Typically, changes to the package should come along with changes to the version.
      * This number should be in this format: d+(.d+)*
      */
-    "version": "2.0.0",
+    "version": "2.2.0",
 
     /**
      * The version that users can transparently update from without requiring code changes.
@@ -74,7 +74,7 @@
      * In addition the version property, packages can also indicate the degree to which
      * they are backward compatible using the compatVersion property.
      */
-    "compatVersion": "2.0.0",
+    "compatVersion": "2.2.0",
 
     /**
      * Spec. version of this package.json file.
@@ -269,7 +269,7 @@
      */
     "css": [
         {
-            "path": "libs/ol-5.2.0/ol.css"
+            "path": "libs/ol-6.3.1/ol.css"
         }
     ],
 
@@ -289,10 +289,10 @@
 		 * Use "bundle" and "includeInBundle" proterties
 		 */
 		"js": [{
-			"path": "libs/ol-5.2.0/ol.js"
-		},{
-			"path": "libs/ol-5.2.0/ol.patch.js"
-		},{
+            "path": "libs/ol-6.3.1/ol.js"
+		},/*{
+			"path": "libs/ol-6.3.1/ol.patch.js"
+		},*/{
 			"path": "libs/proj4js/proj4.js"
 		},{
 			"path": "libs/proj4js/defs/EPSG2154.js"
@@ -311,22 +311,6 @@
 			"path": "libs/pdf.js/pdf.worker.js"
 		},{
 			"path": "libs/html2canvas/html2canvas.js"
-		},{
-			"path": "libs/zip/zip.js"
-		},{
-			"path": "libs/zip/zip-ext.js"
-		},{
-			"path": "libs/zip/zip-fs.js"
-		},{
-			"path": "libs/shapefile-js/shp.min.js"
-		},{
-			"path": "libs/papaparse/papaparse.min.js"
-		},{
-			"path": "libs/x2js/xml2json.min.js"
-		},{
-			"path": "libs/xmljs/xmllint.js"
-		},{
-			"path": "libs/dxf/dxf-parser.js"
 		}]
 	},
 	"development": {
@@ -339,9 +323,7 @@
          * see app.json for complete description
          */
         "js": [{
-    		"path": "libs/ol-5.2.0/ol.js"
-    	},{
-    		"path": "libs/ol-5.2.0/ol.patch.js"
+    		"path": "libs/ol-6.3.1/ol.js"
     	},{
     		"path": "libs/proj4js/proj4-src.js"
     	},{

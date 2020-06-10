@@ -55,7 +55,7 @@ Ext.define('Ck.toolbar.Controller', {
 				v.el.setRight(6);
 
 
-				var height = (v.items.length * 50) + 10;
+				var height = (v.items.length * 50); // + 10;
 				/*
 				var maxHeight = Ck.getMap().getOlMap().getSize()[1] - 80;
 				// If toolbar taller than map
