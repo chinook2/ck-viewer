@@ -269,7 +269,7 @@
      */
     "css": [
         {
-            "path": "libs/ol-5.2.0/ol.css"
+            "path": "libs/ol-6.3.1/ol.css"
         }
     ],
 
@@ -289,9 +289,9 @@
 		 * Use "bundle" and "includeInBundle" proterties
 		 */
 		"js": [{
-			"path": "libs/ol-5.2.0/ol.js"
+			"path": "libs/ol-6.3.1/ol.js"
 		},{
-			"path": "libs/ol-5.2.0/ol.patch.js"
+			"path": "libs/ol-6.3.1/ol.patch.js"
 		},{
 			"path": "libs/proj4js/proj4.js"
 		},{
@@ -339,9 +339,9 @@
          * see app.json for complete description
          */
         "js": [{
-    		"path": "libs/ol-5.2.0/ol.js"
+    		"path": "libs/ol-6.3.1/ol.js"
     	},{
-    		"path": "libs/ol-5.2.0/ol.patch.js"
+    		"path": "libs/ol-6.3.1/ol.patch.js"
     	},{
     		"path": "libs/proj4js/proj4-src.js"
     	},{

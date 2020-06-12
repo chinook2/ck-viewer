@@ -276,7 +276,9 @@ Ext.define('Ck.map.Controller', {
 			zoom: v.getZoom(),
 			resolutions: res,
 			extent: viewExtent,
-			smoothExtentConstraint: smoothExtent
+			smoothExtentConstraint: smoothExtent,
+			constrainResolution: true,
+			smoothResolutionConstraint: false
 		}));
 		
 		this.bindMap(olMap);
