@@ -6,6 +6,7 @@ Ext.define('Ck.form.plugin.Subform', {
 	alias: 'plugin.gridsubform',
 
 	clicksToEdit: 1,
+	selectFirst: false,
 
 	editrow: true,
 
@@ -48,6 +49,19 @@ Ext.define('Ck.form.plugin.Subform', {
 
 		var formController = grid.lookupController();
 
+		var formName = '/' + subForm.url;
+		// Build formname with parent Url
+		if (Ext.String.startsWith(subForm.url, '.') && Ext.String.startsWith(formController.currentFormUrl, 'http')) {
+			var urlParts = formController.currentFormUrl.split('?');
+			if (urlParts.length == 2) {
+				var url = Ext.Object.fromQueryString(urlParts[1]);
+				if(url.name) {
+					url.name += subForm.url;
+				}
+				formName = urlParts[0] + '?' + Ext.Object.toQueryString(url);
+			}
+		}
+
 		// Can't create subform instance here. Need to add in page first, to get viewModel hierarchy
 		this._subform = {
 			xtype: 'ckform',
@@ -67,11 +81,11 @@ Ext.define('Ck.form.plugin.Subform', {
 			layout: subForm.layout || '',
 			scrollable: subForm.scrollable || 'y',
 
-			formName: '/' + subForm.url,
+			formName: formName,
 
 			// TODO verify
 			// for compatibility mode only
-			layer: subForm.url,
+			layer: subForm.layer || formController.getView().getLayer(),
 			//
 
 			// Default toolbar
@@ -87,6 +101,13 @@ Ext.define('Ck.form.plugin.Subform', {
 					handler: this.addItem,
 					bind: {
 						hidden: '{updating}'
+					},
+					scope: this
+				}, {
+					text: 'New',
+					handler: this.newItem,
+					bind: {
+						hidden: '{!updating}'
 					},
 					scope: this
 				}, {
@@ -109,6 +130,9 @@ Ext.define('Ck.form.plugin.Subform', {
 					return;
 				}
 				ct.removeAll(true);
+				// Prevent getValues of subForms, data already saved by main gridPanel
+				this._subform.ignoreSave = true;
+				
 				this._subform = ct.add(this._subform);
 
 		//  dock subform on right of the grid
@@ -164,10 +188,13 @@ Ext.define('Ck.form.plugin.Subform', {
 					scope: this
 				}]
 			});
+			//
 
 			// Get subform
 			this._subform = this._subformWindow.down('ckform');
 		}
+
+
 
 		var vm = this._subform.getViewModel();
 		vm.set('updating', false);
@@ -283,6 +310,23 @@ Ext.define('Ck.form.plugin.Subform', {
 					this.loadItem(cmp, record, tr, rowIndex);
 				}
 			}, this);
+		}
+
+
+		if(subForm.selectFirst === true) {
+			var store = grid.getStore();
+
+			// Après le chargement du subform, on init avec le 1er enregistrement
+			this._subform.on("afterShow", function() {
+				grid.getSelectionModel().select(0, true);
+				this.loadItem(grid, store.first(), null, 0);
+			}, this);
+			/*
+			formController.on("afterload", function() {
+				grid.getSelectionModel().select(0, true);
+				this.loadItem(grid, store.first(), null, 0);
+			}, this);
+			*/
 		}
 	},
 
@@ -449,14 +493,11 @@ Ext.define('Ck.form.plugin.Subform', {
 		//
 
 		// By default load subform with data from the grid
-		var options = {
-			raw: data
-		};
-
 		// If find un Feature Id, try load with it
 		if(fidValue) {
 			options = {
-				fid: fidValue
+				fid: fidValue,
+				raw: data
 			};
 		}
 

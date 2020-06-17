@@ -17,7 +17,11 @@ Ext.define('Ck.context.Controller', {
 	 */
 	init: function(view) {
 		this.callParent(arguments);
-		
+
+		if(Ck.params.context) {
+			this.getView().context = Ck.params.context;
+		}
+
 		this.initStore();
 	},
 

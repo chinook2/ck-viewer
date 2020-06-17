@@ -130,8 +130,18 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	formSave: function(btn) {
-		var res = this.saveData(null, function() {
+		var res = this.saveData(null, function(data) {
 			//After save success.
+			
+			if (data && data.success === false) {
+				Ext.Msg.show({
+					title: "Edition - Erreur",
+					message: data.data,
+					buttons: Ext.Msg.OK,
+					icon: Ext.Msg.WARNING
+				});
+				return;
+			}
 
 			// Link to another form
 			if(btn && btn.nextFormName) {
@@ -1284,7 +1294,7 @@ Ext.define('Ck.form.Controller', {
 				fn.apply(this, args);
 			}
 		} else {
-			field = this.fields[this.fieldsProcessed];
+			var field = this.fields[this.fieldsProcessed];
 			var f = form.findField(field);
 			if(!Ext.isEmpty(f)) {
 				var xtype = f.getXType();
@@ -1518,7 +1528,7 @@ Ext.define('Ck.form.Controller', {
 		var bSilent = false;
 
 		// Call beforeLoad plugin. If it return false then cancel the loading
-		if(this.oController.beforeLoad(options) === false) {
+		if(this.oController && this.oController.beforeLoad(options) === false) {
 			Ck.log("beforeLoad cancel loadFeature.");
 			return;
 		}
@@ -1648,7 +1658,7 @@ Ext.define('Ck.form.Controller', {
 		// Initialize the submit empty
 		me.resetData();
 
-		if(this.oController.afterLoad(data) === false) {
+		if(this.oController && this.oController.afterLoad(data) === false) {
 			Ck.log("afterLoad cancel loadFeature.");
 			return;
 		}
@@ -1685,7 +1695,7 @@ Ext.define('Ck.form.Controller', {
 			this.fieldsToProcess = this.fields.length;
 
 			this.formsProcessed = 0;
-			this.formsToProcess = v.query('ckform').length;
+			this.formsToProcess = v.query('ckform[ignoreSave!=true]').length;
 
 			this.getValues(this.saveData, {}, options);
 			return;
@@ -1855,6 +1865,9 @@ Ext.define('Ck.form.Controller', {
 		if(Ext.isEmpty(url)) {
 			if(this.compatibiltyMode) {
 				url = Ck.getApi() + "service=forms&request=edit&name={layer}&fid={fid}";
+				if (Ck.isMobileDevice()) {
+					url += "&mod=mobile";
+				}
 			} else {
 				url = "resources/data/{layer}/{fid}.json";
 			}
