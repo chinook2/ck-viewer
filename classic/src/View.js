@@ -37,7 +37,8 @@ Ext.define("Ck.View", {
 		'Ck.view.*',
 		'Ck.login.*'
 	],
-	//plugins: 'viewport',
+	
+	plugins: 'viewport',
 
 	controller: 'ckview',
 
