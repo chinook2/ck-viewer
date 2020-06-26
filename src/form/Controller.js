@@ -625,7 +625,7 @@ Ext.define('Ck.form.Controller', {
 
 						// Init-Actualise avec la date du jour (après le chargement)
 						if(c.value == 'now') {
-							me.view.on('afterload', function() {
+							me.on('afterload', function() {
 								var f = me.view.form.findField(c.name);
 								if(f) f.setValue(Ext.Date.clearTime(new Date()));
 							});
@@ -640,14 +640,15 @@ Ext.define('Ck.form.Controller', {
 					case "timefield":
 						Ext.applyIf(c, {
 							format: "H:i",
-							submitFormat: "H:i"
+							submitFormat: "H:i",
+							altFormats: "H:i:s|g:ia|g:iA|g:i a|g:i A|h:i|g:i|H:i|ga|ha|gA|h a|g a|g A|gi|hi|gia|hia|g|H|gi a|hi a|giA|hiA|gi A|hi A"
 						});
 
 						// Init-Actualise avec la date du jour (après le chargement)
 						if(c.value == 'now') {
-							me.view.on('afterload', function() {
+							me.on('afterload', function() {
 								var f = me.view.form.findField(c.name);
-								if(f) f.setValue(Ext.Date.format(new Date(), c.format));
+								if(f) f.setValue(Ext.Date.format(new Date(), c.format));		
 							});
 						}
 						break;
@@ -1113,6 +1114,21 @@ Ext.define('Ck.form.Controller', {
 
 								c.items.push(refreshBtn);
 							}
+						}
+						if (c.defaultValue) {
+							Ext.applyIf(c, {
+								value: c.defaultValue,
+								listeners: {
+									change: function(el, newValue, oldValue) {
+										if (newValue === null) {
+											newValue = c.defaultValue;
+											el.suspendEvents();
+											el.setValue(newValue);
+											el.resumeEvents();
+										}
+									}
+								}
+							});							
 						}
 						break;
 				}
