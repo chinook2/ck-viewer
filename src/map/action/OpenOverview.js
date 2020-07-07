@@ -28,6 +28,11 @@ Ext.define('Ck.map.action.OpenOverview', {
 
 	iconCls: 'fa fa-eye',
 	tooltip: 'Display overview',
+	
+	config: {
+		light: true,
+		winClass: undefined
+	},
 
 	firstView: true,
 
@@ -45,17 +50,16 @@ Ext.define('Ck.map.action.OpenOverview', {
 				openner: this
 			});
 
-			this.win = Ext.create(this.classWindow, {
+			var header = this.getLight() ? {height: 20,cls: "ck-header-20"} : undefined;
+			this.win = Ext.create(this.getWinClass() ? this.getWinClass() : this.classWindow, {
 				resizable: false,
 				modal: false,
 				layout: 'fit',
 				closeAction: 'hide',
 				items: this.ov,
+				bodyPadding: "0 0 0 0",
 				parentMap: this.getMap(),
-				header: {
-					height: 20,
-					cls: "ck-header-20"
-				},
+				header: header,
 				listeners: {
 					close: function() {
 						this.close();
