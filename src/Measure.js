@@ -360,7 +360,11 @@ Ext.define('Ck.Measure', {
 			} else {
 				var coordinates = geom.getLinearRing(0).getCoordinates();
 				//area = Math.abs(this.wgs84Sphere.geodesicArea(coordinates));
-				area = Math.abs(ol.sphere.getArea(coordinates));
+				if (sourceProj.getUnits() == "m") {
+					area = Math.abs(ol.sphere.getArea(polygon.clone(), {projection:sourceProj}));
+				} else {
+					area = Math.abs(ol.sphere.getArea(polygon.clone().transform(sourceProj, 'EPSG:3857')));
+				}
 			}
 		} else {
 			area = polygon.getArea();
