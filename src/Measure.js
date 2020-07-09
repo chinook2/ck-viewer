@@ -461,6 +461,17 @@ Ext.define('Ck.Measure', {
 			return false;
 		}
 
+		// Don't update if no measure tool is active
+		var isMeasureToolActive = false;
+		var buttons = this.getMap().getView().query('button');
+		for (var i =0; i<buttons.length; i++) {
+			if (buttons[i].baseAction && buttons[i].baseAction.ckAction && buttons[i].baseAction.ckAction.startsWith('ckmapMeasure') && buttons[i].pressed) {
+				isMeasureToolActive = true;
+				break;
+			}
+		}
+		if (!isMeasureToolActive) return false;
+		
 		if(!Ext.isArray(lyrsToLoad)) {
 			this.snapFeatures.clear();
 		}
