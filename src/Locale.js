@@ -27,7 +27,7 @@ Ext.define('Ck.Locale', {
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Ck.getPath() + '/locale.json',
+                url: Ck.getPath() + 'locale.json',
                 noCache: false,
                 reader: {
                     type: 'json',
