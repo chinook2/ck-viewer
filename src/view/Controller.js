@@ -38,6 +38,7 @@ Ext.define('Ck.view.Controller', {
 		if(this.fireEvent('beforeadd', ui) !== false) {
 			this.view.add(ui);
 		}
+		Ck.Locale.init(this.view);
 
 		return true;
 	},
