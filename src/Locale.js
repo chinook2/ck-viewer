@@ -89,6 +89,20 @@ Ext.define('Ck.Locale', {
             var tip = Ext.getCmp(t.id);
             if(tip) tip.cascadeLocale(locale);
         })
+		
+		// Update OL tooltips
+		if (ol) {
+			var bt = Ext.query('.ol-control [title]');
+			bt.forEach(function(b) {
+				var store = Ext.getStore('I18n');
+				var fromLocale = Ck.Locale.defaultLocale;
+				var rec = store.findRecord(fromLocale, b.title, 0, false, true, true);
+				str = rec ? rec.get(locale) : null;
+				if(str) {
+					b.title = str;
+				}
+			});
+		}
 
         Ext.GlobalEvents.fireEvent('cklocaleReady', this);
     },

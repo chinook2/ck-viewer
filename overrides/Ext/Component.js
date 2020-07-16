@@ -91,19 +91,18 @@ Ext.define('Ext.overrides.Component', {
 		//<debug>
 		console.log('cascadeLocale::['+ me.getXType() +'] ' + me.id + ' (' + locale + ')');
 		//</debug>
-
 		if(me.setLocale) {
 			me.setLocale(locale);
 		}
 
 		if(me.items) {
-			if(!Ext.isArray(me.items) && Ext.isFunction(me.items.each)){
-			/*	me.items.forEach(function (item) {
+			if(Ext.isFunction(me.items.forEach)){
+				me.items.forEach(function (item) {
 					if (item.cascadeLocale) {
 						item.cascadeLocale(locale);
 					}
 				});
-			} else {*/
+			} else if (Ext.isFunction(me.items.each)) {
 				me.items.each(function (item) {
 					if (item.cascadeLocale) {
 						item.cascadeLocale(locale);
@@ -310,6 +309,7 @@ Ext.define("Ext.overrides.button.Button", {
 		this.tooltip = b;
 	}
 });
+
 Ext.define("Ext.overrides.grid.column.Column",  {
 	override: "Ext.grid.column.Column",
 	localeProperties: ["text", "header"]
@@ -392,6 +392,7 @@ Ext.define("Ext.overrides.form.field.Text", {
 
 
 Ext.define("Ext.overrides.window.Window", {override: "Ext.window.Window",localeProperties: ["title", "html"]});
+Ext.define("Ext.overrides.form.Label", {override: "Ext.form.Label",localeProperties: ["text", "html"]});
 
 Ext.define("Ext.overrides.window.Toast", {
 	override: "Ext.window.Toast",
@@ -431,13 +432,18 @@ Ext.define("Ext.overrides.slider.Single",  {
 		//this.callParent(arguments);
 	}
 });
+Ext.define("Ext.overrides.tree.View", {
+	override: "Ext.tree.View",
+	
+});
 
 
 /*
  Ext.define("Ext.overrides.toolbar.TextItem", {override: "Ext.toolbar.TextItem",localeProperties: ["text", "html"]});
  Ext.define("Ext.overrides.form.field.Number", {override: "Ext.form.field.Number",localeProperties: ["fieldLabel", "minText", "maxText", "negativeText", "nanText", "blankText", "minLengthText", "maxLengthText"]});
- Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
- Ext.define("Ext.overrides.picker.Date", {override: "Ext.picker.Date",localeProperties: ["disabledDaysText", "disabledDatesText", "nextText", "prevText", "monthYearText", "todayTip", "format", "minText", "maxText", "todayText"],format: "m/d/Y"});
+*/
+Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
+/* Ext.define("Ext.overrides.picker.Date", {override: "Ext.picker.Date",localeProperties: ["disabledDaysText", "disabledDatesText", "nextText", "prevText", "monthYearText", "todayTip", "format", "minText", "maxText", "todayText"],format: "m/d/Y"});
  Ext.define("Ext.overrides.toolbar.Paging", {override: "Ext.toolbar.Paging",localeProperties: ["afterPageText", "displayMsg", "emptyMsg"],setLocale: function(e) {
  var f = this, d = f.calledFromRender;
  f.callParent(arguments);
