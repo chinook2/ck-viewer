@@ -101,7 +101,6 @@ Ext.define('Ck.map.action.FeatureInfo', {
 
 		var selConf = Ext.applyIf(this.getSelectionConfig(), {
 			type			: "Point",
-			map				: map,
 			callback		: this.displayInfo,
 			scope			: this,
 			highlight		: false,
@@ -109,7 +108,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			buffer			: this.getBuffer(),
 			limit			: this.getLimit(),
 			beforeProcess	: this.beforeSelection
-		})
+		});
+		// Force override with active map
+		selConf.map = map;
 
 		this.draw = new Ck.Selection(selConf);
 		if (this.btn && this.btn.pressed) {

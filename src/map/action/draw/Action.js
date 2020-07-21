@@ -30,7 +30,7 @@ Ext.define('Ck.map.action.draw.Action', {
 	destroy: function () {
 		// TODO: review draw instance managment !
 		var ckmap = this.getMap();
-		if(ckmap) delete ckmap.draw[this.draw.getId()];
+		if(ckmap && this.draw) delete ckmap.draw[this.draw.getId()];
 
 		this.draw = null;
 		this.interaction = null;
