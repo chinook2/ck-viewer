@@ -21,9 +21,16 @@ Ext.define('Ck.form.feature.Dummy', {
     // This will only see action when summary rows are being updated and Table.onUpdate->Table.bufferRender renders the individual updated sumary row.
     dummyRowTpl: {
         fn: function(out, values, parent) {
-            // If a summary record comes through the rendering pipeline, render it simply instead of proceeding through the tplchain
+            var me = this.dummyFeature,
+                record = me.dummyRecord,
+                view = values.view;            
+            
+                // If a summary record comes through the rendering pipeline, render it simply instead of proceeding through the tplchain
             if (values.record.isDummy && this.dummyFeature.showDummyRow) {
-                this.dummyFeature.outputDummyRecord(values.record, values, out, parent);
+                this.dummyFeature.outputDummyRecord(
+                    (record && record.isModel) ? record : me.createSummaryRecord(view),
+                    values, out, parent
+                );
             } else {
                 this.nextTpl.applyOut(values, out, parent);
             }
@@ -40,18 +47,9 @@ Ext.define('Ck.form.feature.Dummy', {
         me.view.dummyFeature = me;
         me.rowTpl = me.view.self.prototype.rowTpl;
 
-        // Add a high priority interceptor which renders summary records simply
-        // This will only see action ona bufferedRender situation where summary records are updated.
-        me.view.addRowTpl(me.dummyRowTpl).dummyFeature = me;
-
-        // Cell widths in the summary table are set directly into the cells. There's no <colgroup><col>
-        // Some browsers use content box and some use border box when applying the style width of a TD
-        //if (!me.summaryTableCls) {
-        //    me.summaryTableCls = Ext.baseCSSPrefix + 'grid-item';
-        //}
-
         if (grid.bufferedRenderer) {
             me.wrapsItem = true;
+            me.view.addRowTpl(me.dummyRowTpl).dummyFeature = me;
             view.on('refresh', me.onViewRefresh, me);
         } else {
             me.wrapsItem = false;
@@ -139,7 +137,7 @@ Ext.define('Ck.form.feature.Dummy', {
             out.push('</table>');
         }
     },
-    getSummaryRowPlaceholder: function(view) {
+    getDummyRowPlaceholder: function(view) {
         var placeholderCls = this.dummyItemCls,
             nodeContainer, row;
  
@@ -186,7 +184,7 @@ Ext.define('Ck.form.feature.Dummy', {
         // we won't have anything rendered, so we need to push the row in here
         if (!me.disabled && me.showDummyRow) {
             record = me.createDummyRecord(view);
-            row = me.getSummaryRowPlaceholder(view);
+            row = me.getDummyRowPlaceholder(view);
 
             var el = view.createRowElement(record, -1).querySelector(me.dummyRowSelector);
             if(el) row.tBodies[0].appendChild(el);
