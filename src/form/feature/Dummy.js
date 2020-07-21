@@ -34,6 +34,8 @@ Ext.define('Ck.form.feature.Dummy', {
     init: function(grid) {
         var me = this,
             view = me.view;
+        
+        me.callParent([grid]);
 
         me.view.dummyFeature = me;
         me.rowTpl = me.view.self.prototype.rowTpl;
@@ -137,6 +139,34 @@ Ext.define('Ck.form.feature.Dummy', {
             out.push('</table>');
         }
     },
+    getSummaryRowPlaceholder: function(view) {
+        var placeholderCls = this.dummyItemCls,
+            nodeContainer, row;
+ 
+        nodeContainer = Ext.fly(view.getNodeContainer());
+ 
+        if (!nodeContainer) {
+            return null;
+        }
+ 
+        row = nodeContainer.down('.' + placeholderCls, true);
+ 
+        if (!row) {
+            row = nodeContainer.createChild({
+                tag: 'table',
+                cellpadding: 0,
+                cellspacing: 0,
+                cls: placeholderCls,
+                style: 'table-layout: fixed; width: 100%',
+                children: [{
+                    tag: 'tbody' // Ensure tBodies property is present on the row
+                }]
+            }, false, true);
+        }
+ 
+        return row;
+    },
+
     /*
     vetoEvent: function(record, row, rowIndex, e) {
         return !e.getTarget(this.dummyRowSelector);
@@ -156,14 +186,10 @@ Ext.define('Ck.form.feature.Dummy', {
         // we won't have anything rendered, so we need to push the row in here
         if (!me.disabled && me.showDummyRow) {
             record = me.createDummyRecord(view);
-            row = Ext.fly(view.getNodeContainer()).createChild({
-                tag: 'table',
-                cellpadding: 0,
-                cellspacing: 0,
-                cls: me.dummyItemCls,
-                style: 'width: 0'
-            }, false, true);
-            row.appendChild(Ext.fly(view.createRowElement(record, -1)).down(me.dummyRowSelector, true));
+            row = me.getSummaryRowPlaceholder(view);
+
+            var el = view.createRowElement(record, -1).querySelector(me.dummyRowSelector);
+            if(el) row.tBodies[0].appendChild(el);
         }
     },
 
