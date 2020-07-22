@@ -13,36 +13,54 @@ Ext.define('Ext.overrides.Component', {
 	 * @cfg {string/Array} [localeProperties=html] A string or array of strings
 	 * of properties on the component to be localized.
 	 */
-	localeProperties: 'html',
+	//localeProperties: 'html',
 
 
 	/**
 	 * @cfg {string} localeStore storeId of the store that holds strings
 	 * translated in multiple languages.
 	 */
-	localeStore: 'I18n',
+	//localeStore: 'I18n',
 
 	constructor: function(config) {
 		config = config || {};
 		if(config.ckAction) {
-			var action = key = config.ckAction;
+			var key = config.ckAction;
+			var action = key;
+			
 			// Allow to add same action twice or more with a different itemId
 			if(config.itemId) key += config.itemId;
 			// Special test for actions to change Locale (init simpliest)
 			if(config.toLocale) {
 				config.itemId = key += '-' + config.toLocale;
 			}
+
 			if( Ck.actions[key] ) {
 				config = Ck.actions[key];
 			} else {
-				config = Ext.create('widget.'+action, config);
-				Ck.actions[key] = config;
+				try {
+					config = Ext.create('widget.'+action, config);
+					Ck.actions[key] = config;
+				} catch (e) {
+					Ck.log("Enable to init action '"+ action +"'");
+				}					
 			}
 		}
 
 		this.callParent([config]);
+
+		// Register actions on render & Unregister on destroy
+		this.on({
+			render: function () {
+				if(key) Ck.actions[key] = config;
+			},
+			destroy: function () {
+				if(key) delete Ck.actions[key];
+			}
+		});		
 	},
 
+	/*
 	initComponent: function() {
 		var me = this;
 		var configurator, localeConfig;
@@ -89,7 +107,7 @@ Ext.define('Ext.overrides.Component', {
 		var me = this;
 		
 		//<debug>
-		console.log('cascadeLocale::['+ me.getXType() +'] ' + me.id + ' (' + locale + ')');
+		//console.log('cascadeLocale::['+ me.getXType() +'] ' + me.id + ' (' + locale + ')');
 		//</debug>
 		if(me.setLocale) {
 			me.setLocale(locale);
@@ -124,11 +142,11 @@ Ext.define('Ext.overrides.Component', {
 		}
 
 		if(me.getMenu) {
-			me.getMenu();
+			// me.getMenu();
 		}
 
 		if(me.menu) {
-			me.menu.cascadeLocale(locale);
+			//me.menu.cascadeLocale(locale);
 		}
 
 		// TODO : translate plugins here ?
@@ -181,10 +199,6 @@ Ext.define('Ext.overrides.Component', {
 					me[localeName] = toLocale;
 				}
 			}
-			/*
-			store > "Commune*"
-			val = "Commune : Penvénan"
-			*/
 			
 			if(Ext.Localisable.indexOf(val) == -1) {
 				Ext.Localisable.push(val);
@@ -192,7 +206,7 @@ Ext.define('Ext.overrides.Component', {
 
 			//<debug>
 			//Ck.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + fromLocale + ' -> ' + toLocale + ') :: '+ localeName );
-			console.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + fromLocale + ' -> ' + toLocale + ') :: '+ localeName );
+			//console.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + fromLocale + ' -> ' + toLocale + ') :: '+ localeName );
 			//</debug>
 			return str ? str : val;
 		};
@@ -236,6 +250,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 		}
 	}
+	*/
 } /*,
  function(){
  var cProto = Ext.Component.prototype,
@@ -292,7 +307,7 @@ Ext.define('Ext.overrides.Component', {
  }*/
 );
 
-
+/*
 Ext.define('Ext.overrides.panel.Panel', {
 	override: 'Ext.panel.Panel',
 	localeProperties: ['title', 'html']
@@ -436,13 +451,13 @@ Ext.define("Ext.overrides.tree.View", {
 	override: "Ext.tree.View",
 	
 });
-
+*/
 
 /*
  Ext.define("Ext.overrides.toolbar.TextItem", {override: "Ext.toolbar.TextItem",localeProperties: ["text", "html"]});
  Ext.define("Ext.overrides.form.field.Number", {override: "Ext.form.field.Number",localeProperties: ["fieldLabel", "minText", "maxText", "negativeText", "nanText", "blankText", "minLengthText", "maxLengthText"]});
 */
-Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
+//Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
 /* Ext.define("Ext.overrides.picker.Date", {override: "Ext.picker.Date",localeProperties: ["disabledDaysText", "disabledDatesText", "nextText", "prevText", "monthYearText", "todayTip", "format", "minText", "maxText", "todayText"],format: "m/d/Y"});
  Ext.define("Ext.overrides.toolbar.Paging", {override: "Ext.toolbar.Paging",localeProperties: ["afterPageText", "displayMsg", "emptyMsg"],setLocale: function(e) {
  var f = this, d = f.calledFromRender;
