@@ -42,7 +42,11 @@ Ext.define('Ck.toolbar.Controller', {
 		if(v.overlay === true && v.dock == 'top') {
 			// workaround of post layout process
 			//v.on('afterlayout', function() {
-			v.el.setLeft(30);
+			if (v.isParentRtl()) {
+				v.el.setRight(30);
+			} else {
+				v.el.setLeft(30);
+			}
 			//	v.fireEvent("positionUpdated", v);
 			//}, this);
 		}
@@ -51,9 +55,13 @@ Ext.define('Ck.toolbar.Controller', {
 		if(v.overlay === true && v.dock == 'right') {
 			// workaround of post layout process
 			v.on('afterlayout', function() {
-				v.el.setLeft(null);
-				v.el.setRight(6);
-
+				if (v.isParentRtl()) {
+					v.el.setRight(null);
+					v.el.setLeft(6);
+				} else {
+					v.el.setLeft(null);
+					v.el.setRight(6);
+				}
 
 				var height = (v.items.length * 50) + 10;
 				/*
@@ -101,7 +109,11 @@ Ext.define('Ck.toolbar.Controller', {
 		if(v.overlay === true && v.dock == 'top') {
 			// workaround of post layout process
 			//v.on('afterlayout', function() {
-			v.el.setLeft(30);
+			if (v.isParentRtl()) {
+				v.el.setRight(30);
+			} else {
+				v.el.setLeft(30);
+			}
 			//	v.fireEvent("positionUpdated", v);
 			//}, this);
 		}

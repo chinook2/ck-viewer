@@ -203,3 +203,21 @@
 .ck-big-text {
     font-size: x-large;
 }
+/****************************************************************************************/
+/***************************** Aligment for Right to Left *******************************/
+/****************************************************************************************/
+
+body.x-rtl {
+	.ol-zoomslider, .ol-zoom {
+		left: unset !important;
+		right: .5em !important;
+	}
+	.ck-mouse-position {
+		right: unset !important;
+		left: 8px !important;
+	}
+	.ol-attribution {
+		right: unset !important;
+		left: 0px !important;
+	}
+}
