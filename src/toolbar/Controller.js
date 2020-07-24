@@ -42,7 +42,7 @@ Ext.define('Ck.toolbar.Controller', {
 		if(v.overlay === true && v.dock == 'top') {
 			// workaround of post layout process
 			//v.on('afterlayout', function() {
-			if (v.isParentRtl()) {
+			if (Ext.isFunction(v.isParentRtl) && v.isParentRtl()) {
 				v.el.setRight(30);
 			} else {
 				v.el.setLeft(30);
@@ -55,7 +55,7 @@ Ext.define('Ck.toolbar.Controller', {
 		if(v.overlay === true && v.dock == 'right') {
 			// workaround of post layout process
 			v.on('afterlayout', function() {
-				if (v.isParentRtl()) {
+				if (Ext.isFunction(v.isParentRtl) && v.isParentRtl()) {
 					v.el.setRight(null);
 					v.el.setLeft(6);
 				} else {
@@ -109,7 +109,7 @@ Ext.define('Ck.toolbar.Controller', {
 		if(v.overlay === true && v.dock == 'top') {
 			// workaround of post layout process
 			//v.on('afterlayout', function() {
-			if (v.isParentRtl()) {
+			if (Ext.isFunction(v.isParentRtl) && v.isParentRtl()) {
 				v.el.setRight(30);
 			} else {
 				v.el.setLeft(30);
