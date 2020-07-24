@@ -90,11 +90,11 @@ Ext.define('Ck.overview.Controller', {
 		for (var i=0;i<this.ovLayers.getLength();i++) {
 			var lyr = this.ovLayers.getArray()[i];
 			if (lyr instanceof ol.layer.Image) {
-				newOvLayers.push(new ol.layer.Image({source:this.ovLayers.getArray()[0].getSource()}));
+				newOvLayers.push(new ol.layer.Image({source:lyr.getSource()}));
 			} else if (lyr instanceof ol.layer.Tile) {
-				newOvLayers.push(new ol.layer.Tile({source:this.ovLayers.getArray()[0].getSource()}));
+				newOvLayers.push(new ol.layer.Tile({source:lyr.getSource()}));
 			}else if (lyr instanceof ol.layer.Vector) {
-				newOvLayers.push(new ol.layer.Vector({source:this.ovLayers.getArray()[0].getSource()}));
+				newOvLayers.push(new ol.layer.Vector({source:lyr.getSource()}));
 			}
 		}
 
