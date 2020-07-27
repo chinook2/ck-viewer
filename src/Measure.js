@@ -451,6 +451,21 @@ Ext.define('Ck.Measure', {
 		this.getSource().clear();
 	},
 
+	isExtentsLoaded: function(source, extents) {
+		var loadedExtentsRtree = source.loadedExtentsRtree_;
+		var i, ii;
+		for (i = 0, ii = extents.length; i < ii; ++i) {
+			var extentToLoad = extents[i];
+			var alreadyLoaded = loadedExtentsRtree.forEachInExtent(extentToLoad, function(object) {
+				return ol.extent.containsExtent(object.extent, extentToLoad);
+			});
+			if (!alreadyLoaded) {
+				return false
+			}
+		}
+		return true;
+	},
+
 	/**
 	 * Loop on layers used for snapping to load features for the current extent
 	 * @params {Object[]}
@@ -508,7 +523,7 @@ Ext.define('Ck.Measure', {
 				}
 
 				// Perform getFeatures if they have not been loaded
-				if(!lyr.light && !lyr.source.isExtentsLoaded([ex])) {
+				if(!lyr.light && !this.isExtentsLoaded(lyr.source, [ex])) {
 					lyr.source.loadFeatures(ex);
 				} else {
 					this.snapFeatures.extend(lyr.source.getFeatures());
@@ -534,8 +549,10 @@ Ext.define('Ck.Measure', {
 		}
 		//
 
+		var mapProj = this.getMap().getProjection().getCode();
+
 		var source = new ol.source.Vector({
-			url : (lyr.light)? sl.getUrl() + env : function(ext) { return sl.getUrl() + env + "&BBOX=" + ext.join(","); },
+			url : (lyr.light)? sl.getUrl() + env : function(ext) { return sl.getUrl() + env + "&BBOX=" + ext.join(",") + "," + mapProj + "&srsName=" + mapProj; },
 			format: sl.getFormat(),
 			strategy: (lyr.light)? ol.loadingstrategy.all : ol.loadingstrategy.bbox
 		});
