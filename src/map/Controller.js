@@ -623,6 +623,36 @@ Ext.define('Ck.map.Controller', {
 						layer: 'osm'
 					};
 					break;
+				case 'TileArcGISRest':
+					mainOperation = offering.getOperation("GetTile");
+					params = mainOperation.getParams();
+
+					// get grid origin from layer extent or context extent
+					var origin = layer.getExtension('topLeftCorner') || ol.extent.getTopLeft(layer.getExtent() || owc.getExtent());
+
+					// get resolution from main view. need inverse order
+					var resolutions = layer.getExtension('resolutions') || owc.getResolutions(false);
+
+					// generate resolutions and matrixIds arrays for this WMTS
+					var matrixIds = [];
+					for (var z = 0; z < resolutions.length; ++z) {
+						matrixIds[z] = z;
+					}
+
+					olSourceOptions = {
+						url: this.getMapUrl(mainOperation.getUrl()),
+						layer: params.LAYER,
+						matrixSet: params.TILEMATRIXSET,
+						format: params.FORMAT || mainOperation.getFormat() || 'image/png',
+						style: params.STYLE || 'default',
+
+						tileGrid: new ol.tilegrid.WMTS({
+							origin: origin,
+							resolutions: resolutions,
+							matrixIds: matrixIds
+						})
+					};
+					break;
 
 				case 'wms':
 					mainOperation = offering.getOperation("GetMap");

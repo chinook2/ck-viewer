@@ -93,6 +93,11 @@ Ext.define('Ck.map.Model', {
 			"geojson": {
 				"source": "Vector",
 				"layerType": "Vector"
+			},
+			"TileArcGISRest": {
+				"source": "TileArcGISRest",
+				"layerType": "Tile"
+				
 			}
 		},
 

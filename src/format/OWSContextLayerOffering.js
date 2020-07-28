@@ -67,6 +67,8 @@ Ext.define('Ck.format.OWSContextLayerOffering', {
 				this.type = 'google';
 			} else if (c.indexOf('osm') != -1) {
 				this.type = 'osm';
+			} else if (c.indexOf('TileArcGISRest') != -1) {
+				this.type = 'TileArcGISRest';
 			} else if (c.indexOf('wms') != -1) {
 				this.type = 'wms';
 			} else if (c.indexOf('wmts') != -1) {
