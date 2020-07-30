@@ -87,7 +87,7 @@ Ext.define('Ck.goto.Controller', {
 			style: new ol.style.Style({
 				image: new ol.style.Icon(({
 					anchor: [0.5, 0.5],
-					src: Ck.getPath() + "/images/crosshair.png"
+					src: (Ck.getPath() + "/images/crosshair.png").replace(/\/\//g,"/")
 				}))
 			}),
 			zIndex: Ck.Style.zIndex.featureOverlay
