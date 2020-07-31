@@ -30,7 +30,7 @@ Ext.define('Ck.map.action.draw.Polygon', {
 				var sip = turf.kinks(poly);
 				if (sip && sip.features.length>0) {
 					if (this.selfIntersectAlert) {
-						Ext.Msg.alert("Invalid polygon", this.selfIntersectText);
+						Ck.alert("Invalid polygon", this.selfIntersectText);
 					}
 					this.draw.getSource().clear();
 				}
