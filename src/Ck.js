@@ -563,6 +563,14 @@ Ext.apply(Ck, {
 	},
 
 	/**
+	 * @inheritdoc Ext.Msg#alert
+	 */
+	alert: function(title, msg) {
+		if(!msg) return;
+		Ext.Msg.alert(title, msg);
+	},
+
+	/**
 	 * Create an object from a config object
 	 * @param {String/Object}		Class name or config object. Config object must have "xtype" and "config" member
 	 * @param {Object/undefined}	Config object if first param is a string
