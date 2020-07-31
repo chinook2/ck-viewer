@@ -44,7 +44,7 @@ Ext.define('Ck.addlayer.datasourceselector.Controller', {
 				// Charge le getcapabilities (simule select ds la liste)
 				cbx.fireEvent('select', cbx, newService, cbx.store.getTotalCount());
 			} else {
-				Ext.Msg.alert("Add Layer", "This is not a valid URL : " + url);
+				Ck.alert("Add Layer", "This is not a valid URL : " + url);
 			}
 		}
 	}
