@@ -220,4 +220,23 @@ body.x-rtl {
 		right: unset !important;
 		left: 0px !important;
 	}
+	
+	.ol-overviewmap {
+		direction: ltr !important;
+		.ol-overviewmap-map {
+			direction: ltr !important;
+			.ol-viewport {
+				direction: ltr !important;
+				.ol-overlaycontainer-stopevent {
+					direction: ltr !important;
+					.ol-overlaycontainer {
+						direction: ltr !important;
+						.ol-overviewmap-box {
+							direction: ltr !important;
+						}
+					}
+				}
+			}
+		}
+	}
 }
