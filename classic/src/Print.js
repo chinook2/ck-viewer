@@ -25,13 +25,19 @@ Ext.define("Ck.Print", {
 	},
 	
 	listeners: { render: "displayPreview" },
-	
+	fieldDefaults: {
+        labelWidth: 80,
+        anchor: '100%'
+    },	
 	defaults: {
 		editable: false,
 		xtype: "combo",
 		queryMode: "local"
 	},
-
+    layout: {
+        type: 'vbox',
+        align: 'stretch'  // Child items are stretched to full width
+    },
 	/**
 	 * itemId needed for field getCmp, name needed for getValues
 	 */
@@ -39,7 +45,7 @@ Ext.define("Ck.Print", {
 		itemId: "title",
 		name: "title",
 		xtype: "textfield",
-		fieldLabel: "Title",
+		fieldLabel: "Title...",
 		editable: true
 	},{
 		itemId: "resolution",
@@ -47,11 +53,11 @@ Ext.define("Ck.Print", {
 		fieldLabel: "Resolution",
 		displayField: "scale",
 		valueField: "res",
+		anchor: '0',
 		bind: {
 			store: "{resolutions}",
 			value: "{printParam.resolution}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	},{
 		itemId: "printLayout",
 		name: "printLayout",
@@ -61,8 +67,7 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{layouts}",
 			value: "{printParam.layout}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	},{
 		itemId: "outputFormat",
 		name: "outputFormat",
@@ -72,16 +77,14 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{outputFormats}",
 			value: "{printParam.outputFormat}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	}/*,{
 		itemId: "dpi",
 		name: "dpi",
 		fieldLabel: "Dot Per Inch",
 		displayField: "dpi",
 		valueField: "dpi",
-		bind: { "store": "{dpi}" },
-		listeners: { change: "changeValue" }
+		bind: { "store": "{dpi}" }
 	}*/,{
 		itemId: "format",
 		name: "format",
@@ -91,8 +94,7 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{formats}",
 			value: "{printParam.format}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	},{
 		xtype: "radiogroup",
 		name: "orientation",
@@ -104,8 +106,7 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
 			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
 		],
-		bind: { value: "{printParam.orientation}" },
-		listeners: { change: "changeValue" }
+		bind: { value: "{printParam.orientation}" }
 	}],
 
 	buttons: [{

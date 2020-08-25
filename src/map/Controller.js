@@ -735,6 +735,11 @@ Ext.define('Ck.map.Controller', {
 				olSourceOptions.attributions = layer.getExtension("attribution");
 			}
 
+			// For printing canvas.toDataUrl
+			Ext.apply(olSourceOptions,{
+				crossOrigin: "Anonymous"
+			});
+
 			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
 
 			// For vector layer only, if we want a clustered representation
