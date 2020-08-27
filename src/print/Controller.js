@@ -142,9 +142,12 @@ Ext.define('Ck.print.Controller', {
 	 */
 	loadHTML: function(layoutId) {
 		var oLay = this.getStore("layouts").getById(layoutId);
-		
+		var path = Ck.getPath(oLay.get("packageName"));
+		if (path && !path.endsWith('/')) {
+			path = path + '/';
+		}
 		Cks.get({
-			url: Ck.getPath(oLay.get("packageName")) + "/print/" + layoutId + ".html",
+			url:  path + "print/" + layoutId + ".html",
 			scope: this,
 			success: function(response){
 				this.layoutsHTML[layoutId] = response.responseText;
@@ -163,9 +166,12 @@ Ext.define('Ck.print.Controller', {
 	 */
 	loadCss: function(layoutId) {
 		var oLay = this.getStore("layouts").getById(layoutId);
-		
+		var path = Ck.getPath(oLay.get("packageName"));
+		if (path && !path.endsWith('/')) {
+			path = path + '/';
+		}
 		Cks.get({
-			url: Ck.getPath(oLay.get("packageName")) + "/print/" + oLay.getId() + ".css",
+			url: path + "print/" + oLay.getId() + ".css",
 			scope: this,
 			success: function(response){
 				this.style.innerHTML = response.responseText;
