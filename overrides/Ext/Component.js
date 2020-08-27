@@ -57,10 +57,10 @@ Ext.define('Ext.overrides.Component', {
 			destroy: function () {
 				if(key) delete Ck.actions[key];
 			}
-		});		
+		});
 	},
 
-	/*
+	
 	initComponent: function() {
 		var me = this;
 		var configurator, localeConfig;
@@ -113,6 +113,9 @@ Ext.define('Ext.overrides.Component', {
 			me.setLocale(locale);
 		}
 
+		if (me.xtype == "radiogroup") {
+			console.log('radiogroup');
+		}
 		if(me.items) {
 			if(Ext.isFunction(me.items.forEach)){
 				me.items.forEach(function (item) {
@@ -146,13 +149,14 @@ Ext.define('Ext.overrides.Component', {
 		}
 
 		if(me.menu) {
-			//me.menu.cascadeLocale(locale);
+			me.menu.cascadeLocale(locale);
 		}
 
 		// TODO : translate plugins here ?
 		if(me.plugins) {}
 		// TODO : translate actions here ?
 		if(me.action) {}
+		
 	},
 
 	_createLocaleSetter : function(property) {
@@ -250,7 +254,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 		}
 	}
-	*/
+	
 } /*,
  function(){
  var cProto = Ext.Component.prototype,
@@ -307,7 +311,7 @@ Ext.define('Ext.overrides.Component', {
  }*/
 );
 
-/*
+
 Ext.define('Ext.overrides.panel.Panel', {
 	override: 'Ext.panel.Panel',
 	localeProperties: ['title', 'html']
@@ -315,6 +319,57 @@ Ext.define('Ext.overrides.panel.Panel', {
 Ext.define('Ext.overrides.panel.Title', {
 	override: 'Ext.panel.Title',
 	localeProperties: ['text','title', 'html']
+});
+Ext.define('Ext.overrides.panel.Tool', {
+	override: 'Ext.panel.Tool',
+	localeProperties: ["text", "tooltip"],
+	_translateItems: function(locale) {
+		var me = this,
+			//locale = me.getLocale(),
+			store = Ext.getStore(me.localeStore),
+			str,
+			rec;
+
+		var localeName = '_tooltipLocale';
+		var item = this;
+		var val = item.tooltip;
+		if (store && val && item[localeName] !== locale) {
+			rec = store.findRecord(item[localeName] || Ck.Locale.defaultLocale, val, 0, false, true, true);
+			str = rec ? rec.get(locale) : null;
+			if (str) {
+				item[localeName] = locale;
+				item.tooltip = str;
+			}
+		}
+
+		// Update tooltip already rendered !
+		var el = me.getEl();
+		if (el) {
+			el.select('.x-tool').set({
+				"data-qtip": item.tooltip
+			});
+		}
+
+
+		// Keep all words to translate
+		if(Ext.Localisable.indexOf(val) == -1) {
+			Ext.Localisable.push(val);
+		}
+
+		//<debug>
+		// Ck.log("  *[" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + item[localeName] + ' -> ' + locale + ') :: '+ localeName );
+		//</debug>
+	},
+
+	setLocale: function(locale) {
+		var me = this;
+		me._translateItems(locale);
+		
+		// Translate new added actions
+		me.on('add', me._translateItems, this, {
+			args: [locale]
+		});
+	}
 });
 Ext.define("Ext.overrides.button.Button", {
 	override: "Ext.button.Button",
@@ -327,7 +382,7 @@ Ext.define("Ext.overrides.button.Button", {
 
 Ext.define("Ext.overrides.grid.column.Column",  {
 	override: "Ext.grid.column.Column",
-	localeProperties: ["text", "header"]
+	localeProperties: ["text"]
 });
 
 Ext.define("Ext.overrides.grid.column.Action",  {
@@ -400,15 +455,19 @@ Ext.define("Ext.overrides.form.field.Base", {
 	override: "Ext.form.field.Base",
 	localeProperties: "fieldLabel"
 });
-Ext.define("Ext.overrides.form.field.Text", {
+Ext.define("Ext.overrides.form.field.Radio", {
+	override: "Ext.form.field.Radio",
+	localeProperties: ["fieldLabel","boxLabel"]
+});
+/*Ext.define("Ext.overrides.form.field.Text", {
 	override: "Ext.form.field.Text",
 	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "regexText", "emptyText"]
 });
 
-
+*/
 Ext.define("Ext.overrides.window.Window", {override: "Ext.window.Window",localeProperties: ["title", "html"]});
 Ext.define("Ext.overrides.form.Label", {override: "Ext.form.Label",localeProperties: ["text", "html"]});
-
+/*
 Ext.define("Ext.overrides.window.Toast", {
 	override: "Ext.window.Toast",
 	localeProperties: ['html'],
@@ -423,7 +482,7 @@ Ext.define("Ext.overrides.window.Toast", {
 	}
 });
 
-Ext.define("Ext.overrides.Action",  {
+*/Ext.define("Ext.overrides.Action",  {
 	override: "Ext.Action",
 	localeProperties: ["text", "tooltip", "startMsg", "continueMsg"]
 });
@@ -451,13 +510,84 @@ Ext.define("Ext.overrides.tree.View", {
 	override: "Ext.tree.View",
 	
 });
-*/
+
 
 /*
  Ext.define("Ext.overrides.toolbar.TextItem", {override: "Ext.toolbar.TextItem",localeProperties: ["text", "html"]});
  Ext.define("Ext.overrides.form.field.Number", {override: "Ext.form.field.Number",localeProperties: ["fieldLabel", "minText", "maxText", "negativeText", "nanText", "blankText", "minLengthText", "maxLengthText"]});
 */
-//Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
+Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
+Ext.define("Ext.overrides.LoadMask", {
+	override: "Ext.LoadMask",
+	//localeProperties: ["msg"],
+	initRenderData: function() {
+        var result = this.callParent(arguments);
+ 
+        result.msg = this._translate(this.msg) || '';
+ 
+        return result;
+    },
+	syncMaskState: function() {
+        var me = this,
+            ownerCt = me.ownerCt,
+            el = me.el;
+ 
+        if (me.isVisible()) {
+            // Allow dynamic setting of msgWrapCls
+            if (me.hasOwnProperty('msgWrapCls')) {
+                el.dom.className = me.msgWrapCls;
+            }
+ 
+            if (me.useMsg) {
+                me.msgTextEl.setHtml(me._translate(me.msg));
+                me.ariaEl.dom.setAttribute('aria-valuetext', me._translate(me.msg));
+            }
+            else {
+                // Only the mask is visible if useMsg is false
+                me.msgWrapEl.hide();
+            }
+ 
+            if (me.shim || Ext.useShims) {
+                el.enableShim(null, true);
+            }
+            else {
+                // Just in case me.shim was changed since last time we were shown (by
+                // Component#setLoading())
+                el.disableShim();
+            }
+ 
+            // If owner contains focus, focus this.
+            // Component level onHide processing takes care of focus reversion on hide.
+            if (ownerCt.el.contains(Ext.Element.getActiveElement())) {
+                me.focus();
+            }
+ 
+            me.sizeMask();
+        }
+    },
+	_translate: function(msg) {
+		var newMsg = msg;
+		try {
+			var me = this,
+				//locale = me.getLocale(),
+				store = Ext.getStore(me.localeStore),
+				str,
+				rec;
+
+			var val = msg;
+			if (store && val) {
+				rec = store.findRecord(Ck.Locale.defaultLocale, val, 0, false, true, true);
+				str = rec ? rec.get(Ck.Locale.get()) : null;
+				if (str) {
+					newMsg = str;
+				}
+			}
+		} catch(e) {
+			
+		}
+		return newMsg;
+	}
+});
 /* Ext.define("Ext.overrides.picker.Date", {override: "Ext.picker.Date",localeProperties: ["disabledDaysText", "disabledDatesText", "nextText", "prevText", "monthYearText", "todayTip", "format", "minText", "maxText", "todayText"],format: "m/d/Y"});
  Ext.define("Ext.overrides.toolbar.Paging", {override: "Ext.toolbar.Paging",localeProperties: ["afterPageText", "displayMsg", "emptyMsg"],setLocale: function(e) {
  var f = this, d = f.calledFromRender;

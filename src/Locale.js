@@ -27,8 +27,9 @@ Ext.define('Ck.Locale', {
         var locale = this.defaultLocale;
         if(Ck.params.locale) locale = Ck.params.locale;
         //this.set(this.defaultLocale);
-        
-        var localeUrl = Ck.getPath() + '/locale.json';
+        var path = Ck.getPath();
+		if (path && !path.endsWith('/')) path = path + '/';
+        var localeUrl =  path + 'locale.json';
         if(Ext.manifest.localeUrl) {
             localeUrl = Ext.manifest.localeUrl;
         }
@@ -60,7 +61,7 @@ Ext.define('Ck.Locale', {
     set: function (locale) {
         this.locale = locale;
         Ext.localeReady = true;
-		/*
+		
         // update the Ck.View page
         // TODO : Manage multiples views
         var v = Ext.query('.ck-view')[0];
@@ -73,9 +74,9 @@ Ext.define('Ck.Locale', {
         } else {
             v = Ext.getCmp(v.id);
         }
-        */
+        
         if(this.ckview && this.ckview.cascadeLocale) this.ckview.cascadeLocale(locale);
-
+		
         // Update windows
         var aw = Ext.query('.x-window');
         aw.forEach(function(w){
@@ -88,6 +89,13 @@ Ext.define('Ck.Locale', {
         at.forEach(function(t){
             var tip = Ext.getCmp(t.id);
             if(tip && tip.cascadeLocale) tip.cascadeLocale(locale);
+        })
+
+        // Update globals menus
+        var at = Ext.query('.x-menu');
+        at.forEach(function(m){
+            var menu = Ext.getCmp(m.id);
+            if(menu && menu.cascadeLocale) menu.cascadeLocale(locale);
         })
 		
 		// Update OL tooltips
