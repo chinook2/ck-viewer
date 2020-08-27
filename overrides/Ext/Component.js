@@ -13,14 +13,14 @@ Ext.define('Ext.overrides.Component', {
 	 * @cfg {string/Array} [localeProperties=html] A string or array of strings
 	 * of properties on the component to be localized.
 	 */
-	//localeProperties: 'html',
+	localeProperties: 'html',
 
 
 	/**
 	 * @cfg {string} localeStore storeId of the store that holds strings
 	 * translated in multiple languages.
 	 */
-	//localeStore: 'I18n',
+	localeStore: 'I18n',
 
 	constructor: function(config) {
 		config = config || {};
@@ -102,8 +102,30 @@ Ext.define('Ext.overrides.Component', {
 		if(!Ext.localeReady) return;
 		this.doLocale();
 	},
-
+	/* Search for parent component:
+		 * - if Innola as parent but not Ck as parent => don't apply cascade (ensure we don't apply translate where not necessary)
+		 * - if Innola as parent and Ck as parent => apply cascade (means inside a map Ck-laSpatialUnit panel)
+		 * - element directly in body (window, tooltip, menu, ...) are often protected (because they have a parent Innola )
+		 */
+	isLocaleToBeApplied: function() {
+		if (this.__proto__.$className.startsWith('Innola.')) {
+			return false;
+		}
+		
+		var parentInnola = this.findParentBy(function(parent) {
+			return parent.__proto__.$className.startsWith('Innola.');
+		});
+		var parentCk =  this.findParentBy(function(parent) {
+			return parent.__proto__.$className.startsWith('Ck.');
+		});
+		if (parentInnola && !parentCk) {
+			return false;
+		}
+		return true;
+	},
 	cascadeLocale:function(locale) {
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
 		var me = this;
 		
 		//<debug>
@@ -113,9 +135,6 @@ Ext.define('Ext.overrides.Component', {
 			me.setLocale(locale);
 		}
 
-		if (me.xtype == "radiogroup") {
-			console.log('radiogroup');
-		}
 		if(me.items) {
 			if(Ext.isFunction(me.items.forEach)){
 				me.items.forEach(function (item) {
@@ -148,7 +167,7 @@ Ext.define('Ext.overrides.Component', {
 			// me.getMenu();
 		}
 
-		if(me.menu) {
+		if(me.menu && me.menu.cascadeLocale) {
 			me.menu.cascadeLocale(locale);
 		}
 
@@ -232,13 +251,17 @@ Ext.define('Ext.overrides.Component', {
 	},
 
 	doLocale : function() {
+		
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
 		var me = this,
 			properties = Ext.Array.from(me.localeProperties),
 			i = 0,
 			length = properties.length,
-			property, value, setter;
+			property,setter;
 
 		for (; i < length; i++) {
+			var value = null;
 			property = properties[i];
 			// if((!me.hasOwnProperty(property)) && (me.config.bind && !me.config.bind.hasOwnProperty(property))) continue;
 
@@ -249,7 +272,8 @@ Ext.define('Ext.overrides.Component', {
 			}
 
 			setter = me._createLocaleSetter(property);
-			if (value && value != '&#160;') {
+			if ((value == '' && this.xtypes.indexOf('textfield') > -1 && ['emptyText'].indexOf(property) > -1) || // ensure to keep some default value at ''
+				(value && value != '&#160;')) {
 				setter.call(me, value);
 			}
 		}
@@ -325,7 +349,6 @@ Ext.define('Ext.overrides.panel.Tool', {
 	localeProperties: ["text", "tooltip"],
 	_translateItems: function(locale) {
 		var me = this,
-			//locale = me.getLocale(),
 			store = Ext.getStore(me.localeStore),
 			str,
 			rec;
@@ -459,13 +482,13 @@ Ext.define("Ext.overrides.form.field.Radio", {
 	override: "Ext.form.field.Radio",
 	localeProperties: ["fieldLabel","boxLabel"]
 });
-/*Ext.define("Ext.overrides.form.field.Text", {
+Ext.define("Ext.overrides.form.field.Text", {
 	override: "Ext.form.field.Text",
 	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "regexText", "emptyText"]
 });
 
-*/
-Ext.define("Ext.overrides.window.Window", {override: "Ext.window.Window",localeProperties: ["title", "html"]});
+
+Ext.define("Ext.overrides.window.Window", {override: "Ext.window.Window",localeProperties: ["title"]});
 Ext.define("Ext.overrides.form.Label", {override: "Ext.form.Label",localeProperties: ["text", "html"]});
 /*
 Ext.define("Ext.overrides.window.Toast", {
