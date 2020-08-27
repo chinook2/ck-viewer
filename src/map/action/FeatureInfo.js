@@ -320,7 +320,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			hideHeaders: this.getLight(),
 			header: (this.getLight())? { padding: 0 } : true,
 			columns: [{
-				text: 'Attribut',
+				text: 'Attribute',
 				dataIndex: 'field',
 				width: 150,
 				menuDisabled: true,
