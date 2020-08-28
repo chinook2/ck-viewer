@@ -45,6 +45,8 @@ Ext.define('Ck.map.action.OpenLegendImage', {
 		this.button = btn || {};
 
 		if(!this.win) {
+			var imgSrcTpl = new Ext.Template(this.getImgSrc()); // Allow to use template text in img path
+			var imgSrc = Ck.getPath(this.getImgPackage()) + imgSrcTpl.apply(Ext.manifest.ckClient);
 			this.win = Ext.create(this.classWindow, {
 				title: this.getWinTitle(),
 				height: this.getWinHeight(),
@@ -61,7 +63,7 @@ Ext.define('Ck.map.action.OpenLegendImage', {
 					bodyPadding: 20,
 					items: [{
 						xtype: 'image',
-						src:Ck.getPath(this.getImgPackage()) + this.getImgSrc(),
+						src:imgSrc,
 						width: this.getImgWidth(),
 						height: this.getImgHeight()
 					}]
