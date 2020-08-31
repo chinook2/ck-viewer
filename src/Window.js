@@ -10,7 +10,7 @@ Ext.define('Ck.Window', {
 	initComponent: function() {
 		this.callParent(arguments);
 		
-		if(this.parentMap) {
+		if(this.parentMap && this.parentMap.bindVisibility) {
 			this.parentMap.bindVisibility(this);
 		}
 	}

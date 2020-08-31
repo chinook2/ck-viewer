@@ -521,11 +521,48 @@ Ext.define('Ck.Selection', {
 
 		// Pass WMS ENV variables to WFS Query !
 		var env = '';
+		var filter = '';
 		var wmsSrc = layer.get("sources").wms;
 		if(Ext.isArray(wmsSrc)) {
 			wmsSrc = wmsSrc[0];
 			var p = wmsSrc.getParams() || {};
-			env = '?ENV=' + p.ENV;
+			var i = 0;
+
+			// AGA - 28072020 - Update to catch SQLFILTER parameter of WMS
+			for ([key, value] of Object.entries(p)) {
+				if(key){
+					if(key == 'ENV'){
+						var env = '&ENV=' + value;
+						i++;
+					}else if (key == 'SQL_FILTER'){
+						value = value.replace(/ /g, '%20').replace(/'/g, '%27').replace(/=/g, "%3D");
+						var filter = '&SQL_QUERY=' + value;
+						i++;
+					}else if (key == 'LAYERS' || key == 'TYPENAME' || key == 'LAYER'){
+						if(key == 'TYPENAME'){
+							value = value.replace(/ /g, '%20').replace(/'/g, '%27').replace(/=/g, "%3D");
+							var typename = '&TYPENAME=' + value;
+						}else{
+							value = value.replace(/ /g, '%20').replace(/'/g, '%27').replace(/=/g, "%3D");
+							var typename = '&LAYERS=' + value;
+						}
+						i++;
+					}
+				}
+			}
+			// AGA - End update
+
+/* 			for(var i = 0 ; i < Object.keys(p).length ; i++){
+				if(i !== 0){
+					add = '&';
+				}
+				if(p.ENV){
+					env = add + 'ENV=' + p.ENV;
+
+				}else if (p.SQL_FILTER){
+					filter = add + 'SQL_FILTER=' + p.SQL_FILTER
+				}
+			} */
 		}
 		//
 
@@ -552,7 +589,7 @@ Ext.define('Ck.Selection', {
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
-			url: this.getMap().getMapUrl(ope.getUrl()) + env,
+			url: this.getMap().getMapUrl(ope.getUrl()) + "?s=WFS&REQUEST=GetFeature" + typename + env + filter,
 			rawData: new XMLSerializer().serializeToString(gf),
 			success: function(layer, ope, readOptions, response) {
 				/*

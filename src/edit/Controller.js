@@ -531,12 +531,16 @@ Ext.define('Ck.edit.Controller', {
 
 		var lyr = ope.getLayers().split(":");
 
+		// AGA 05082020 - Update du FeatureType car l'appel comprend la layer comme layerundefined (quand lyr[1] == null)
 		var f = new ol.format.WFS();
 		var formatGML = new ol.format.GML({
 		    featureNS: 'https://geoserver.org/ows/'+lyr[0],
-		    featureType: lyr[1],
 		    srsName: currSrs
 		});
+		if (lyr[1] !== ""){
+			formatGML["featureType"] = lyr[0];
+		}
+		// AGA - Fin update
 
 		var transac = f.writeTransaction(inserts, updates, deletes, formatGML);
 		var params = new XMLSerializer().serializeToString(transac);

@@ -59,7 +59,7 @@ Ext.define('Ck.print.Controller', {
 	 */
 	mapImg: null,
 
-    bindings: {
+	bindings: {
         onChangeValue: {
 			resolution: '{printParam.resolution}',
 			format: '{printParam.format}',
@@ -67,7 +67,7 @@ Ext.define('Ck.print.Controller', {
 			dpi:  '{printParam.dpi}'
 		}
 	},
-	
+
 	/**
 	 * Init the map component, init the viewModel.
 	 * @protected
@@ -117,6 +117,22 @@ Ext.define('Ck.print.Controller', {
 		this.mask = new Ext.LoadMask({
 			msg: this.getMaskMsg(),
 			target: this.getMap().getView()
+		});
+
+		this.control({
+			"ckprint button#print": {
+				click: this.beforePrint,
+				scope: this
+			},
+			"ckprint button#cancel": {
+				click: this.cancel
+			},
+			"ckprint textfield#title": {
+				change: this.valueChange
+			},
+			"ckprint numberfield#rotate": {
+				change: this.rotatemap
+			}
 		});
 	},
 
@@ -190,6 +206,10 @@ Ext.define('Ck.print.Controller', {
 		this.set(newValue);
 		this.updatePreview();
 	},
+	rotatemap: function(item, newValue, oldValue){
+		this._olView.setRotation(newValue * Math.PI / 180);
+		this.updatePreview();
+	},
 
 	/**
 	 * Update the preview feature from layout, format and orientation
@@ -209,6 +229,12 @@ Ext.define('Ck.print.Controller', {
 			center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 			this.previewLayer.getSource().clear();
 		}
+		var rotation = this._olView.getRotation();
+		var x0 = center[0];
+		var y0 = center[1];
+		var w = this.mapSize[0];
+		var h = this.mapSize[1];
+		
 
 		var coordinate = [
 			center[0] - (this.mapSize[0] / 2),
@@ -217,8 +243,15 @@ Ext.define('Ck.print.Controller', {
 			center[1] + (this.mapSize[1] / 2)
 		];
 
+		var coordinate = [
+			this.rotate([x0 - w / 2, y0 - h / 2], rotation, center),
+			this.rotate([x0 + w / 2, y0 - h / 2], rotation, center),
+			this.rotate([x0 + w / 2, y0 + h / 2], rotation, center),
+			this.rotate([x0 - w / 2, y0 + h / 2], rotation, center)
+		];
+
 		this.feature = new ol.Feature({
-			geometry: new ol.geom.Polygon.fromExtent(coordinate)
+			geometry: new ol.geom.Polygon([coordinate])
 		});
 		this.moveInteraction.features_ = new ol.Collection([this.feature]);
 		this.previewLayer.getSource().addFeature(this.feature);
@@ -291,7 +324,8 @@ Ext.define('Ck.print.Controller', {
 		// Hide preview vector
 		this.previewLayer.setVisible(false);
 
-		var rendererType = "canvas"; //this.getOlMap().getRenderer().getType();
+		/* var rendererType = this.getOlMap().getRenderer().getType(); */
+		var rendererType =  "canvas"; //this.getOlMap().getRenderer().getType()
 		switch(rendererType) {
 			case "canvas":
 				if(!Ext.supports.Canvas) {
@@ -418,8 +452,6 @@ Ext.define('Ck.print.Controller', {
 		this.getOlMap().renderSync();
 	},
 
-
-
 	/**
 	 * Once all layers loaded, create an image of map and integrate it into the HTML layout <br/>
 	 * Launch an html2canvas to create a canvas of HTML layout
@@ -429,7 +461,6 @@ Ext.define('Ck.print.Controller', {
 			this.integratePrintValue();
 			// refresh mapDiv after integratePrintValue
 			this.mapDiv = Ext.get("ckPrint-map").dom;
-
 			var mapCanvas = this.composeCanvas();
 
 			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
@@ -540,6 +571,21 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	cancel: function() {
+		var rotInput = this.getView().items.get("rotate");
+		rotInput.setValue(0);
+		this._olView.setRotation(0);
+		this.previewLayer.getSource().clear();
 		this.getView().openner.close();
-	}
+	},
+
+    rotate: function(point, angle, origin) {
+        //angle *= Math.PI / 180;
+		/* var radius = this.distance(point, origin); */
+		var line = new ol.geom.LineString([point, origin]);
+		var radius =  Math.round(line.getLength() * 100) / 100;
+        var theta = angle + Math.atan2(point[1] - origin[1], point[0] - origin[0]);
+        var x = origin[0] + (radius * Math.cos(theta));
+        var y = origin[1] + (radius * Math.sin(theta));
+        return [x, y];
+    }
 });

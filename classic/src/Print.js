@@ -28,7 +28,7 @@ Ext.define("Ck.Print", {
 	fieldDefaults: {
         labelWidth: 80,
         anchor: '100%'
-    },	
+    },
 	defaults: {
 		editable: false,
 		xtype: "combo",
@@ -37,7 +37,7 @@ Ext.define("Ck.Print", {
     layout: {
         type: 'vbox',
         align: 'stretch'  // Child items are stretched to full width
-    },
+	},
 	/**
 	 * itemId needed for field getCmp, name needed for getValues
 	 */
@@ -107,7 +107,15 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Lanscape", name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
-	}],
+	},{
+        xtype: 'numberfield',
+        name: 'rotate',
+		itemId: "rotate",
+        fieldLabel: 'Tourner la carte',
+        value: 0,
+        maxValue: 360,
+        minValue: 0
+    }],
 
 	buttons: [{
 		text: "Print",

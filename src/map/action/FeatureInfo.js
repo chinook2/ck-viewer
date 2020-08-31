@@ -174,6 +174,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 						defaults: {
 							width: "100%"
 						},
+						collapsible: true,
 						items: tab
 					});
 					this.win.add(this.panel);
@@ -198,12 +199,12 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			});
 		}
 
-		if (this.getWinCollapsible() === true) {
+/* 		if (this.getWinCollapsible() === true) {
 			this.timerId = setTimeout(function() {
 				this.collapse(Ext.Component.DIRECTION_TOP, 1000);
 			}.bind(this.win), 1000);
-		}
-
+		} */
+		this.win.center();
 		this.win.show();
 		this.win.expand(1000);
 	},
@@ -357,13 +358,15 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				minHeight: 250,
 				minWidth: 300,
 				layout: 'fit',
-				y: 0,
+				y: 20,
 				parentMap: this.getMap(),
-				header: (this.getLight())? { padding: 0 } : true,
+				title: 'Informations',
+				header: (this.getLight())? { padding: 10 } : true,
 				closeAction: 'hide',
 				collapsible: this.getWinCollapsible(),
 				maximizable: !this.getLight(),
-				items: []
+				items: [], 
+				constrain: true,
 			};
 
 			opt.x = Ext.getBody().getSize().width - opt.width;

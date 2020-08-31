@@ -17,7 +17,7 @@ Ext.define('Ck.map.scalelist.Controller', {
 		var view = this.getView();
 
 		// Re-render
-		if(view.el && view.isFloating()) {
+		if(view.isFloating()) {
 			var flCfg = view.getFloatConfig();
 			flCfg.alignEl = document.getElementsByClassName(flCfg.alignTo);
 			flCfg.alignEl = flCfg.alignEl[flCfg.alignEl.length - 1];

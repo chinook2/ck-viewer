@@ -61,6 +61,8 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			},*/
 			listeners: {
 				beforeshow: function(tip) {
+					if (!tip.getData()) 
+						return false;
 					//if(!this.draw.get('active')) return false;
 
 					//var helpMsg = this.startMsg;

@@ -31,7 +31,8 @@ Ext.define('Ck.edit.action.Attribute', {
 				map				: this.getMap(),
 				drawStyle		: null,
 				overHighlight	: true,
-				highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
+				// AGA - Update 04042020 getDefaultStyleFunction is not a function
+				//highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
 				selectId		: "ckmapSelectEdit"
 			});
 			this.interactions["attributeInteraction"] = this.attributeInteraction;

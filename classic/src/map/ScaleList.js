@@ -11,6 +11,7 @@ Ext.define("Ck.map.ScaleList", {
 	
 	itemId: "map-scalelist",
 	controller: "ckmap.scalelist",
+	cls: "ckmap-scalelist",
 	
 	emptyText: 'Error, no scale available...',
 	
