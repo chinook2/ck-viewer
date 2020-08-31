@@ -59,6 +59,15 @@ Ext.define('Ck.print.Controller', {
 	 */
 	mapImg: null,
 
+    bindings: {
+        onChangeValue: {
+			resolution: '{printParam.resolution}',
+			format: '{printParam.format}',
+			orientation: '{printParam.orientation}',
+			dpi:  '{printParam.dpi}'
+		}
+	},
+	
 	/**
 	 * Init the map component, init the viewModel.
 	 * @protected
@@ -177,15 +186,11 @@ Ext.define('Ck.print.Controller', {
 	 * Update preview box. Update view model data (binded data is refreshed too late)
 	 * Don't do anything for bind triggering (first call)
 	 */
-	changeValue: function(field, newValue, oldValue, opts) {
-		if(opts.firstCall !== false) {
-			opts.firstCall = false;
-		} else {
-			this.set("printParam." + field.itemId, newValue);
-			this.updatePreview();
-		}
+	onChangeValue: function(newValue) {
+		this.set(newValue);
+		this.updatePreview();
 	},
-	
+
 	/**
 	 * Update the preview feature from layout, format and orientation
 	 */
@@ -283,12 +288,10 @@ Ext.define('Ck.print.Controller', {
 	 * Check how the document will be print
 	 */
 	beforePrint: function(btn) {
-		
-		
 		// Hide preview vector
 		this.previewLayer.setVisible(false);
 
-		var rendererType = this.getOlMap().getRenderer().getType();
+		var rendererType = "canvas"; //this.getOlMap().getRenderer().getType();
 		switch(rendererType) {
 			case "canvas":
 				if(!Ext.supports.Canvas) {
@@ -317,6 +320,41 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	/**
+	 * 
+	 */
+	composeCanvas: function() {
+		var mapCanvas = document.createElement('canvas');
+		var size = this.getOlMap().getSize();
+		mapCanvas.width = size[0];
+		mapCanvas.height = size[1];
+		var mapContext = mapCanvas.getContext('2d');
+
+		Array.prototype.forEach.call(
+		  document.querySelectorAll('.ol-layer canvas'),
+		  function (canvas) {
+			if (canvas.width > 0) {
+			  var opacity = canvas.parentNode.style.opacity;
+			  mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+			  var transform = canvas.style.transform;
+			  // Get the transform parameters from the style's transform matrix
+			  var matrix = transform
+				.match(/^matrix\(([^\(]*)\)$/)[1]
+				.split(',')
+				.map(Number);
+			  // Apply the transform to the export map context
+			  CanvasRenderingContext2D.prototype.setTransform.apply(
+				mapContext,
+				matrix
+			  );
+			  mapContext.drawImage(canvas, 0, 0);
+			}
+		  }
+		);
+
+		return mapCanvas;
+	},
+
+	/**
 	 * Create a snapshot of the map and display it on the user interface. <br/>
 	 * Move the ol.Map in an invisible div to zoom on the right extent <br/>
 	 * Hide preview box to didn't print it <br/>
@@ -332,9 +370,9 @@ Ext.define('Ck.print.Controller', {
 		}
 
 		this.mask.show();
-		this.getOlMap().once('postcompose', function(event) {
+		this.getOlMap().once('rendercomplete', function() {
 			// First display fake map on the screen during the real print
-			var mapCanvas = event.context.canvas;
+			var mapCanvas = this.composeCanvas();
 			var mapCtx = mapCanvas.getContext("2d");
 			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 
@@ -380,17 +418,21 @@ Ext.define('Ck.print.Controller', {
 		this.getOlMap().renderSync();
 	},
 
+
+
 	/**
 	 * Once all layers loaded, create an image of map and integrate it into the HTML layout <br/>
 	 * Launch an html2canvas to create a canvas of HTML layout
 	 */
 	print: function() {
-		this.getOlMap().once('postcompose', function(event) {
+		this.getOlMap().once('rendercomplete', function(event) {
 			this.integratePrintValue();
 			// refresh mapDiv after integratePrintValue
 			this.mapDiv = Ext.get("ckPrint-map").dom;
 
-			var uri = event.context.canvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+			var mapCanvas = this.composeCanvas();
+
+			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 			var dh = Ext.DomHelper;
 			this.mapImg = dh.append(this.mapDiv, {
 				tag: 'img',
