@@ -8,6 +8,15 @@
         "items": [{
             "xtype": "panel",
             "html": "Default form !"
+        },{
+            "name": "equipement",
+            "xtype": "ck_combobox",
+            "listWidth": 250,
+            "layer": "equipement",
+            "fieldLabel": "Equipements",
+            "autocomplete": true,
+            "store": "http://hubim.apps.geofit.fr/admin/?s=WFS&REQUEST=GetFeature&LAYERS={layer}&SQL_QUERY=id={id}",
+            "value": "http://hubim.apps.geofit.fr/admin/?s=WFS&REQUEST=GetFeature&LAYERS={layer}&SQL_QUERY=id={id}"
         }]
     }
 }
