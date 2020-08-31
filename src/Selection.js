@@ -538,15 +538,6 @@ Ext.define('Ck.Selection', {
 						value = value.replace(/ /g, '%20').replace(/'/g, '%27').replace(/=/g, "%3D");
 						var filter = '&SQL_QUERY=' + value;
 						i++;
-					}else if (key == 'LAYERS' || key == 'TYPENAME' || key == 'LAYER'){
-						if(key == 'TYPENAME'){
-							value = value.replace(/ /g, '%20').replace(/'/g, '%27').replace(/=/g, "%3D");
-							var typename = '&TYPENAME=' + value;
-						}else{
-							value = value.replace(/ /g, '%20').replace(/'/g, '%27').replace(/=/g, "%3D");
-							var typename = '&LAYERS=' + value;
-						}
-						i++;
 					}
 				}
 			}
@@ -589,7 +580,7 @@ Ext.define('Ck.Selection', {
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
-			url: this.getMap().getMapUrl(ope.getUrl()) + "?s=WFS&REQUEST=GetFeature" + typename + env + filter,
+			url: this.getMap().getMapUrl(ope.getUrl()) + "?" + env + filter,
 			rawData: new XMLSerializer().serializeToString(gf),
 			success: function(layer, ope, readOptions, response) {
 				/*
