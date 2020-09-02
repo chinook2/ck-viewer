@@ -9,9 +9,9 @@ Ext.define('Ck.addlayer.datasourcecapabilities.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.ckaddlayer.datasourcecapabilities',
 	
-	requires: [
-		'Ck.CapabilitiesLoader'
-	],
+	//requires: [
+	//	'Ck.CapabilitiesLoader'
+	//],
 	
 	config: {
 		groupName: 'Mes données',

@@ -24,7 +24,8 @@ Ext.define("Ck.View", {
         'Ck.Notify',
 
         'Ck.Map',
-        'Ck.Legend',
+		'Ck.Legend',
+		'Ck.Context',
         'Ck.Toolbar',
         'Ck.Form',
         'Ck.Edit',
