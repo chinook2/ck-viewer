@@ -5,7 +5,7 @@ Ext.define('Ck.map.action.draw.Line', {
 	alias: 'widget.ckmapDrawLine',
 	
 	itemId: 'drawLine',
-	iconCls: 'ckfont ck-draw-linestring',
+	iconCls: 'ckfont ck-flow-line',
 	
 	type: "LineString"
 });

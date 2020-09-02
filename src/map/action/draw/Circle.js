@@ -5,7 +5,7 @@ Ext.define('Ck.map.action.draw.Circle', {
 	alias: 'widget.ckmapDrawCircle',
 
 	itemId: 'drawCircle',
-	iconCls: 'ckfont ck-draw-circle',
+	iconCls: 'ckfont ck-circle',
 
 	type: "Circle"
 });

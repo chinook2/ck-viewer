@@ -5,7 +5,7 @@ Ext.define('Ck.map.action.draw.Text', {
 	alias: 'widget.ckmapDrawText',
 	
 	itemId: 'drawText',
-	iconCls: 'ckfont ck-draw-text',
+	iconCls: 'ckfont ck-format_color_text',
 	text:"",
 	
 	type: "Text"
