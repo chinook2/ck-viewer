@@ -4,7 +4,7 @@ Ext.define('Ck.map.action.draw.Clear', {
 	extend: 'Ck.Action',
 	alias: 'widget.ckmapDrawClear',
 	itemId: 'drawClear',
-	iconCls: 'ckfont ck-eraser',
+	iconCls: 'ckfont ck-draw-clear',
 	
 	drawId: "default",
 	requires: [
@@ -12,7 +12,8 @@ Ext.define('Ck.map.action.draw.Clear', {
 	],
 	
 	/**
-	 *
+	 * [ckLoaded description]
+	 * @param  {Ck.map} map [description]
 	 */
 	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
@@ -24,7 +25,8 @@ Ext.define('Ck.map.action.draw.Clear', {
 	},
 	
 	/**
-	 * 
+	 * [doAction description]
+	 * @param  {Ext.button.Button} btn [description]
 	 */
 	doAction: function(btn) {
 		this.draw.getSource().clear();

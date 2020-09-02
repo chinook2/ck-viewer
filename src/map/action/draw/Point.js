@@ -5,7 +5,8 @@ Ext.define('Ck.map.action.draw.Point', {
 	alias: 'widget.ckmapDrawPoint',
 	
 	itemId: 'drawPoint',
-	iconCls: 'fa fa-asterisk',
+	iconCls: 'ckfont ck-draw-point',
 	
-	type: "Point"
+	type: "Point",
+	win: null
 });
