@@ -634,31 +634,51 @@ Ext.define("Ext.overrides.LoadMask", {
  c.picker.setLocale(d)
  }
  }});
- Ext.define("Ext.overrides.form.field.ComboBox", {override: "Ext.form.field.ComboBox",localeProperties: ["fieldLabel"],_translateData: function(f, g) {
- var j = this, i = j.getStore(), h = Ext.getStore(j.localeStore);
- if (i && h) {
- i.each(function(b) {
- var c = b.get(j.displayField), d = h.findRecord(f, c, 0, false, true, true), a;
- if (d) {
- a = d.get(g);
- if (a) {
- b.set(j.displayField, a)
- }
- }
- });
- j.setValue(j.value)
- }
- },setLocale: function(h) {
- var l = this, k = l.getStore(), j = Ext.getStore(l.localeStore), i = l.getLocale() || "en", g = k && j && h !== i && true === l.translateData;
- l.callParent(arguments);
- if (g) {
- if (l.rendered) {
- l._translateData(i, h)
- } else {
- l.on({beforerender: {fn: function() {
- l._translateData(i, h)
- },single: true}})
- }
- }
- }});
  */
+Ext.define("Ext.overrides.form.field.ComboBox", {
+	override: "Ext.form.field.ComboBox",
+	localeProperties: ["fieldLabel"],
+	_translateData: function(f, g) {
+		var j = this, i = j.getStore(), h = Ext.getStore(j.localeStore);
+		if (i && h) {
+			i.each(function(b) {
+				var c = b.get(j.displayField), 
+					d = h.findRecord(f, c, 0, false, true, true), 
+					a;
+				if (d) {
+					a = d.get(g);
+					if (a) {
+						b.set(j.displayField, a)
+					}
+				}
+			});
+			j.setValue(j.value)
+		}
+	},
+	setLocale: function(h) {
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
+		
+		var l = this, 
+			k = l.getStore(), 
+			j = Ext.getStore(l.localeStore), 
+			i = l.getLocale() || "en", 
+			g = k && j && h !== i && l._translateData;
+		l.callParent(arguments);
+		if (g) {
+			if (l.rendered) {
+				l._translateData(i, h)
+			} else {
+				l.on({
+					beforerender: {
+						fn: function() {
+							l._translateData(i, h)
+						},
+						single: true
+					}
+				});
+			}
+		}
+	}
+});
+ 
