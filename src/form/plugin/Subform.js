@@ -96,8 +96,11 @@ Ext.define('Ck.form.plugin.Subform', {
 					hidden: '{!editing}'
 				},
 				style: {border: 0},
-				items: ['->', {
-					text: 'Add',
+				items: [
+					//'->',
+				{
+					//text: 'Add',
+					text: 'Validate',
 					handler: this.addItem,
 					bind: {
 						hidden: '{updating}'
@@ -111,7 +114,8 @@ Ext.define('Ck.form.plugin.Subform', {
 					},
 					scope: this
 				}, {
-					text: 'Update',
+					//text: 'Update',
+					text: 'Validate',
 					handler: this.updateItem,
 					bind: {
 						hidden: '{!updating}'
@@ -123,17 +127,17 @@ Ext.define('Ck.form.plugin.Subform', {
 
 		// add subform in a panel
 		if(subForm.renderTo) {
-				var ct = Ext.getCmp(subForm.renderTo);
-				if(!ct) ct = formController.lookupReference(subForm.renderTo);
-				if(!ct){
-					Ck.Notify.error("Enable to render subform '"+ subForm.url +"' in '"+ subForm.renderTo +"'")
-					return;
-				}
-				ct.removeAll(true);
-				// Prevent getValues of subForms, data already saved by main gridPanel
-				this._subform.ignoreSave = true;
-				
-				this._subform = ct.add(this._subform);
+			var ct = Ext.getCmp(subForm.renderTo);
+			if(!ct) ct = formController.lookupReference(subForm.renderTo);
+			if(!ct){
+				Ck.Notify.error("Enable to render subform '"+ subForm.url +"' in '"+ subForm.renderTo +"'")
+				return;
+			}
+			ct.removeAll(true);
+			// Prevent getValues of subForms, data already saved by main gridPanel
+			this._subform.ignoreSave = true;
+			
+			this._subform = ct.add(this._subform);
 
 		//  dock subform on right of the grid
 		} else if(subForm.docked){
@@ -338,6 +342,16 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Enable rowediting plugin
 		var sfplugin = this._grid.findPlugin('rowediting');
 		if(sfplugin) sfplugin.enable();
+
+		// Form is already on page - init Edit mode...
+		if (this._subform && !this._subformWindow) {
+			var formController = this._subform.getController();
+			if (formController) formController.startEditing();
+
+			// Fix force toolbar visible
+			var tb = this._subform.getDockedItems()[0];
+			if(tb) tb.setVisible(true);
+		}
 	},
 
 	stopEditing: function() {
@@ -356,6 +370,12 @@ Ext.define('Ck.form.plugin.Subform', {
 
 		// Force
 		this.clicksToEdit = 1;
+
+		// Form is already on page need to 
+		if (this._subform && !this._subformWindow) {
+			var formController = this._subform.getController();
+			if (formController) formController.stopEditing();
+		}
 	},
 
 	newItem: function() {
