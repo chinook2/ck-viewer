@@ -48,9 +48,10 @@ Ext.define('Ck.context.Controller', {
 	
 	selectDefault: function() {
 		var map = this.getMap();
+		if(!map) return;
 
-		// A context is already loaded or loading, by pass default context from combobox
-		if (map && map.contextName != '') {
+		// A context is already loaded or loading (restore context state), by-pass default context from combobox
+		if (map.contextName) {
 			this.getView().select(map.contextName);
 			return;
 		}
