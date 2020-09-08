@@ -92,7 +92,13 @@ Ext.define('Ck.map.Controller', {
 	 * Fires when layer is removed from the map
 	 * @param {ol.layer.*} layer
 	 */
-	 
+
+	/**
+	 * @event visibilitylayer
+	 * Fires when layer is show/hidden from the map
+	 * @param {ol.layer.*} layer
+	 */	
+
 	 /**
 	 * @event geolocationchange
 	 * Fires when geolocation change was detected
@@ -388,6 +394,7 @@ Ext.define('Ck.map.Controller', {
 
 			// Fire when layers are loaded
 			Ck.log('fireEvent ckmapLoaded');
+			v.fireEvent('loaded', this);
 			this.fireEvent('loaded', this);
 			Ext.GlobalEvents.fireEvent('ckmapLoaded', this);
 		}		
@@ -429,6 +436,13 @@ Ext.define('Ck.map.Controller', {
 				}
 				olLayer.ckLayer = layer;
 				lyrGroup.getLayers().insertAt(index, olLayer);
+
+				// Relay map event for layers
+				var v = this.getView();
+				olLayer.on('change:visible', function() {
+					v.fireEvent('visibilitylayer', olLayer);
+					this.fireEvent('visibilitylayer', olLayer);
+				}, this);
 			}
 		}
 	},
@@ -851,6 +865,7 @@ Ext.define('Ck.map.Controller', {
 	 */
 	getContext: function(contextName) {
 		if(contextName !== false) {
+			this.contextName = contextName;
 			Cks.get({
 				url: this.getFullUrl(contextName),
 				scope: this,
@@ -872,8 +887,9 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	bindMap: function(olMap) {
-		var v = this.getView();
-		var vm = this.getViewModel();
+		var me = this;
+		var v = me.getView();
+		var vm = me.getViewModel();
 
 		v.setMap(olMap);
 
@@ -908,6 +924,9 @@ Ext.define('Ck.map.Controller', {
 
 			var z = olv.getZoom();
 			vm.set('zoom', z);
+
+			v.fireEvent('mapchange', vm.getData());
+			me.fireEvent('mapchange', vm.getData());
 		});
 	},
 

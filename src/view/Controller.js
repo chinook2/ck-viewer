@@ -17,7 +17,15 @@ Ext.define('Ck.view.Controller', {
 		if(Ck.params.app) {
 			this.getView().setName(Ck.params.app);
 		}
-				
+
+		// Init state via LocalStorage si dispo sinon via Cookie
+		if (window.localStorage) {
+			Ext.state.Manager.setProvider(new Ext.state.LocalStorageProvider({prefix:'ck-'}))
+		} else {
+			var oneYear = new Date(new Date().getTime()+(1000*60*60*24*365))
+			Ext.state.Manager.setProvider(new Ext.state.CookieProvider({prefix: "ck-", expires: oneYear}))
+		}
+
 		this.initUi();				
 	},
 	

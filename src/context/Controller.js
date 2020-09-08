@@ -47,7 +47,18 @@ Ext.define('Ck.context.Controller', {
 	},
 	
 	selectDefault: function() {
+		var map = this.getMap();
+
+		// A context is already loaded or loading, by pass default context from combobox
+		if (map && map.contextName != '') {
+			this.getView().select(map.contextName);
+			return;
+		}
+
+		// Select default Context in the list
 		this.getView().select(this.getView().context);
+
+		// Load default context (plugin load)
 		this.getView().fireEvent("select", this.getView(), this.getView().getSelection());
 	}
 });

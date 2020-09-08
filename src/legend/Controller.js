@@ -28,6 +28,16 @@ Ext.define('Ck.legend.Controller', {
 		rootNode.set("layer", mainGrp);
 	},
 
+	ckReady: function(ckmap) {
+		// Need to sync checkbox after restore layer state (!= init context)
+		this.getMap().on('visibilitylayer', function(layer) {
+			var node = this.getNodeByLayer(layer);
+			if (node) {
+				node.set('checked', layer.getVisible());
+			}
+		}, this);
+	},
+
 	ckLoaded: function() {
 		var v = this.getView();
 
@@ -44,8 +54,7 @@ Ext.define('Ck.legend.Controller', {
 		// Event on ol view resolution change
 		var olv = this.getMap().getOlView();
 			olv.on('change:resolution',	this.setLegendLayersStyle, this
-			);
-		
+		);
 		v.getRootNode().on('expand' , this.setLegendLayersStyle, this);
 		
 		this.fireEvent('ready', this);
@@ -126,9 +135,9 @@ Ext.define('Ck.legend.Controller', {
 			var resultNode;
 			var data = node.getData();
 			if(data.layer) {
-				if(data.layer == layer)
-					return node;
-			} else if(node.childNodes && node.childNodes.length > 0) {
+				if(data.layer == layer) return node;
+			}
+			if (node.childNodes && node.childNodes.length > 0) {
 				for(var i = 0; i < node.childNodes.length; i++) {
 					resultNode = searchNode(node.childNodes[i], layer);
 					if(resultNode) {

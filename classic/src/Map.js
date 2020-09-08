@@ -24,9 +24,16 @@ Ext.define("Ck.Map", {
 	viewModel: {
 		type: "ckmap"
 	},
+	
+	stateful: true,
+	stateId: 'ckmap',
+    stateEvents: ['loaded','mapchange','visibilitylayer'],	
 
 	plugins: [
-		'mapprogress'
+		'mapprogress',
+		'contextstate',
+		'layerstate',
+		'mapstate'
 	],
 	
 	layout: {
@@ -58,7 +65,7 @@ Ext.define("Ck.Map", {
 
 		urlTemplate: {
 			st: '{0}/context/{1}.json',
-			ws: '{0}/context/{1}'
+			ws: '{0}service=wmc&request=getContext&format=json&context={1}'
 		},
 
 		/**
