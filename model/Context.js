@@ -10,7 +10,7 @@
 
 		{name: "combined", type: "string", calculate: function (data) {
 			var res = data.Title;
-			if (data.private === true) {
+			if (data['private'] === true) {
 				res = "1_" + data.Title;
 			} else {
 				res = "0_" + data.Title;
