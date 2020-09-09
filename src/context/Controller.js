@@ -34,6 +34,12 @@ Ext.define('Ck.context.Controller', {
 			store.on("load", this.selectDefault, this);
 		}
 		
+		// Sort list by public/private and Title (sort on multiple field failed !)
+		store.setSorters({
+			property: 'combined',
+			direction: 'ASC'
+		});
+
 		store.load({
 			url: this.getFullUrl(Ck.getApi()) + "service=wmc&request=getCapabilities"
 		});

@@ -352,12 +352,20 @@ Ext.define('Ck.CapabilitiesStore', {
 			attr.uiProvider = this.uiProvider;
 		}
 
-		// Boucle sur les attributs
+		// Boucle sur les Balises
 		for(var i=0;i< data.childNodes.length;i++) {
 			var child = data.childNodes[i];
 			if(typeof child.tagName == 'string' && child.tagName != this.getNodeName()) {
 				var textContent = Ext.DomQuery.selectValue('', child, ''); // assure compatibilite FF, IE...
 				attr[child.tagName] = textContent;
+			}
+		}
+
+		// Boucle sur les attributs
+		for(var i=0;i< data.attributes.length;i++) {
+			var child = data.attributes[i];
+			if(typeof child.nodeName == 'string' && child.nodeName != this.getNodeName()) {
+				attr[child.nodeName] = child.nodeValue;
 			}
 		}
 

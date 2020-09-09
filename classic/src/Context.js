@@ -17,5 +17,11 @@ Ext.define("Ck.Context", {
 		defaults: {
 			width: "100%"
 		}
-	}
+	},
+
+	tpl: Ext.create('Ext.XTemplate',
+		'<ul class="x-list-plain"><tpl for=".">',
+			'<li role="option" class="x-boundlist-item ck-private-context-{private}">{Title}</li>',
+		'</tpl></ul>'
+	)
 });
