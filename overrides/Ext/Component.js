@@ -108,15 +108,15 @@ Ext.define('Ext.overrides.Component', {
 		 * - element directly in body (window, tooltip, menu, ...) are often protected (because they have a parent Innola )
 		 */
 	isLocaleToBeApplied: function() {
-		if (this.__proto__.$className.startsWith('Innola.')) {
+		if (this.__proto__.$className.startsWith('Innola')) {
 			return false;
 		}
 		
 		var parentInnola = this.findParentBy(function(parent) {
-			return parent.__proto__.$className.startsWith('Innola.');
+			return parent.__proto__.$className.startsWith('Innola');
 		});
 		var parentCk =  this.findParentBy(function(parent) {
-			return parent.__proto__.$className.startsWith('Ck.');
+			return parent.__proto__.$className.startsWith('Ck');
 		});
 		if (parentInnola && !parentCk) {
 			return false;
@@ -385,6 +385,8 @@ Ext.define('Ext.overrides.panel.Tool', {
 	},
 
 	setLocale: function(locale) {
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
 		var me = this;
 		me._translateItems(locale);
 		
@@ -452,6 +454,8 @@ Ext.define("Ext.overrides.grid.column.Action",  {
 
 	setLocale: function(locale) {
 		var me = this;
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
 
 		// Translate existing actions (Array of items)
 		if (me.items) {
@@ -484,7 +488,7 @@ Ext.define("Ext.overrides.form.field.Radio", {
 });
 Ext.define("Ext.overrides.form.field.Text", {
 	override: "Ext.form.field.Text",
-	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "regexText", "emptyText"]
+	localeProperties: ["fieldLabel", "blankText", "minLengthText", "maxLengthText", "emptyText"] // Still some issue with regexText and Innola
 });
 
 
@@ -589,6 +593,8 @@ Ext.define("Ext.overrides.LoadMask", {
         }
     },
 	_translate: function(msg) {
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
 		var newMsg = msg;
 		try {
 			var me = this,
@@ -628,31 +634,51 @@ Ext.define("Ext.overrides.LoadMask", {
  c.picker.setLocale(d)
  }
  }});
- Ext.define("Ext.overrides.form.field.ComboBox", {override: "Ext.form.field.ComboBox",localeProperties: ["fieldLabel"],_translateData: function(f, g) {
- var j = this, i = j.getStore(), h = Ext.getStore(j.localeStore);
- if (i && h) {
- i.each(function(b) {
- var c = b.get(j.displayField), d = h.findRecord(f, c, 0, false, true, true), a;
- if (d) {
- a = d.get(g);
- if (a) {
- b.set(j.displayField, a)
- }
- }
- });
- j.setValue(j.value)
- }
- },setLocale: function(h) {
- var l = this, k = l.getStore(), j = Ext.getStore(l.localeStore), i = l.getLocale() || "en", g = k && j && h !== i && true === l.translateData;
- l.callParent(arguments);
- if (g) {
- if (l.rendered) {
- l._translateData(i, h)
- } else {
- l.on({beforerender: {fn: function() {
- l._translateData(i, h)
- },single: true}})
- }
- }
- }});
  */
+Ext.define("Ext.overrides.form.field.ComboBox", {
+	override: "Ext.form.field.ComboBox",
+	localeProperties: ["fieldLabel"],
+	_translateData: function(f, g) {
+		var j = this, i = j.getStore(), h = Ext.getStore(j.localeStore);
+		if (i && h) {
+			i.each(function(b) {
+				var c = b.get(j.displayField), 
+					d = h.findRecord(f, c, 0, false, true, true), 
+					a;
+				if (d) {
+					a = d.get(g);
+					if (a) {
+						b.set(j.displayField, a)
+					}
+				}
+			});
+			j.setValue(j.value)
+		}
+	},
+	setLocale: function(h) {
+		// Don't apply for Innola component
+		if (!this.isLocaleToBeApplied()) return;
+		
+		var l = this, 
+			k = l.getStore(), 
+			j = Ext.getStore(l.localeStore), 
+			i = l.getLocale() || "en", 
+			g = k && j && h !== i && l._translateData;
+		l.callParent(arguments);
+		if (g) {
+			if (l.rendered) {
+				l._translateData(i, h)
+			} else {
+				l.on({
+					beforerender: {
+						fn: function() {
+							l._translateData(i, h)
+						},
+						single: true
+					}
+				});
+			}
+		}
+	}
+});
+ 
