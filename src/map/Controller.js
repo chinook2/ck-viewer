@@ -200,6 +200,7 @@ Ext.define('Ck.map.Controller', {
 		this.layersAreLoading = false;
 
 		this.registerMap();
+		this.relayMapEvents(olMap.getLayerGroup());
 	},
 
 	layersLoading: function() {
@@ -267,7 +268,8 @@ Ext.define('Ck.map.Controller', {
 		this.bindMap(olMap);
 
 		// Remove all layers
-		this.getLayers().clear();
+		// this.getLayers().clear();
+		olMap.getLayerGroup().getLayers().clear();
 
 		// Use specific user zoom and extent from ckmap view. (different from default values)
 		var cfg = v.initialConfig;
@@ -278,7 +280,7 @@ Ext.define('Ck.map.Controller', {
 		// Set the bbox from context only if no zoom / center or extent
 		if(!cfg.zoom && !cfg.center && !cfg.extent) this.setExtent(owc.getExtent());
 
-		this.relayMapEvents(olMap.getLayerGroup());
+		//this.relayMapEvents(olMap.getLayerGroup());
 
 		// Add a layer group to host special layer (draw, measure...)
 		this.specialGroup = Ck.create("ol.layer.Group", {
@@ -376,6 +378,13 @@ Ext.define('Ck.map.Controller', {
 			} else {
 				this.addNormalLayer(olLayer, index);
 			}
+
+			// Relay map event for layers
+			var v = this.getView();
+			olLayer.on('change:visible', function() {
+				v.fireEvent('visibilitylayer', olLayer);
+				this.fireEvent('visibilitylayer', olLayer);
+			}.bind(this));
 		}
 	},
 
@@ -449,7 +458,7 @@ Ext.define('Ck.map.Controller', {
 
 			// Alias to get extension property directly
 			layer.getExtension = function(key) {
-				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
+				return (Ext.isEmpty(me.get("extension")))? undefined : me.get("extension")[key];
 			};
 			me.fireEvent('addlayer', layer, idx);
 		});
@@ -773,6 +782,7 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	getContext: function(contextName) {
+		if(contextName === false) return;
 		if(this.contextLoadFail.indexOf(contextName) != -1) {
 			Ck.error("No context to load");
 		} else {

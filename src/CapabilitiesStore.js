@@ -127,7 +127,8 @@ Ext.define('Ck.CapabilitiesStore', {
 		
 		Ext.apply(this.proxy, {
 			model: config.model,
-			reader: reader
+			reader: reader,
+			responseType: this.getFormat().toLowerCase()
 		});
 	},
 	

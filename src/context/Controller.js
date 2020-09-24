@@ -46,12 +46,12 @@ Ext.define('Ck.context.Controller', {
 	/**
 	 * Select the first source / context
 	 */
-	selectFirst: function() {
-		this.getView().fireEvent("select", this, this.store.getAt(0).data);
-	},
+	//selectFirst: function() {
+	//	this.getView().fireEvent("select", this, this.store.getAt(0).data);
+	//},
 	
 	selectDefault: function() {
 		this.getView().select(this.getView().context);
-		this.getView().fireEvent("select", this.getView(), this.getView().getSelection());
+		//this.getView().fireEvent("select", this.getView(), this.getView().getSelection());
 	}
 });
