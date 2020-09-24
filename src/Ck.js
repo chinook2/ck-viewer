@@ -58,6 +58,9 @@ Math.closest = function(num, arr) {
 	return curr;
 };
 
+// Headers par défaut à passer à ttes les requêtes Ext
+Ext.Ajax.setDefaultHeaders({ "Powered-By": "Chinook" });
+
 var Ck = Ck || {};
 
 // @define Ck
@@ -1016,6 +1019,7 @@ Ext.apply(Ck, {
  * > SetEnvIfNoCase Connection "keep-alivea" HAVE_TOTO
  * > Header set Test "application/xml" env=HAVE_TOTO
  */
+/*
 Ext.data.proxy.Ajax.prototype.createRequestCallback = function(request, operation) {
 	var me = this;
 	return function(options, success, response) {
@@ -1037,6 +1041,7 @@ Ext.data.proxy.Ajax.prototype.createRequestCallback = function(request, operatio
 		}
 	};
 }
+*/
 
 /**
  * Method to compare ol.Feature

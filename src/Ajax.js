@@ -105,6 +105,10 @@ Ext.define('Ck.Ajax', {
 	},
 
 	request: function(options) {
+		Ext.applyIf(options, {
+			defaultHeaders: Ext.Ajax.getDefaultHeaders()
+		});
+				
 		options.disableCaching = false;
 		//<debug>
 		// Dev Mode use standard disable cache system : each call is unique
