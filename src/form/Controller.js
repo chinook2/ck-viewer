@@ -1386,7 +1386,9 @@ Ext.define('Ck.form.Controller', {
             // Boucle sur les records modifiés du gridpanel
             for(var r=0; r<mrecs.length; r++){
                 // 0 si nouvelle ligne sinon recup l'id de la ligne (il est dans les data mais pas affiché)
-                var params = mrecs[r].getData();
+                var params = mrecs[r].getData({
+					persist: true
+				});
 
 				// Empty field when plugin gridediting is active to add new record to the grid...
 				if(params.dummy===true) continue;
