@@ -412,7 +412,7 @@ Ext.define('Ck.form.plugin.Subform', {
 				}
 				this._grid.getView().refresh();
 
-				this.resetSubForm();
+				//this.resetSubForm();
 			},
 			create: true,
 			scope: this
@@ -426,18 +426,21 @@ Ext.define('Ck.form.plugin.Subform', {
 		// Save if params available
 		formController.saveData(null, {
 			success: function(res) {
+
+				// Keep form in Edit mode (no reset)
+
 				// End update mode
-				var vm = this._subform.getViewModel();
-				vm.set('updating', false);
+				//var vm = this._subform.getViewModel();
+				//vm.set('updating', false);
 
 				// Update selected record
 				var rec = this._grid.getStore().getAt(this._subform.rowIndex);
 				if(rec) rec.set(res);
 				this._grid.getView().refresh();
 
-				delete this._subform.rowIndex;
+				//delete this._subform.rowIndex;
 
-				this.resetSubForm();
+				//this.resetSubForm();
 			},
 			scope: this
 		});
