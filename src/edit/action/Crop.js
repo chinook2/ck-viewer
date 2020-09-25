@@ -8,6 +8,7 @@ Ext.define('Ck.edit.action.Crop', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-crop',
 	iconCls: 'fa fa-crop',
 	tooltip: 'Crop features',
 	
@@ -31,7 +32,7 @@ Ext.define('Ck.edit.action.Crop', {
 	 * Activate the geometry crop interaction. First, select the geom what want to crop.
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
+		this.callParent(arguments);
 		
 		var source = this.getLayerSource();
 
@@ -40,7 +41,7 @@ Ext.define('Ck.edit.action.Crop', {
 			this.createInteraction();
 		}
 		
-		this.multi = (Ext.isEmpty(this.multi))? (this.getGeometryType().indexOf("Multi") !== -1) : this.multi;
+		this.multi = (Ext.isEmpty(this.multi))? (this.controller.getGeometryType().indexOf("Multi") !== -1) : this.multi;
 
 		this.cropInteraction.setActive(status);
 
@@ -76,7 +77,7 @@ Ext.define('Ck.edit.action.Crop', {
 			// One selected object, we lock selection on it
 			this.cropInteraction.setActive(false);
 			this.editCropDraw();
-		}.bind(this));
+		}, this);
 		this.interactions["cropInteraction"] = this.cropInteraction;
 		this.cropInteraction.setActive(false)
 	},
@@ -95,9 +96,9 @@ Ext.define('Ck.edit.action.Crop', {
 				displayInLayerSwitcher: false
 			});
 
-			this.getMap().addSpecialLayer(this.editCropLayer);
+			this.olMap.addLayer(this.editCropLayer);
 		}
-		this.editCropLayer.getSource().on("addfeature", this.editCropFeature.bind(this));
+		this.editCropLayer.getSource().on("addfeature", this.editCropFeature, this);
 
 		if(!this.cropDrawInteraction){
 			this.cropDrawInteraction = new ol.interaction.Draw({
@@ -117,11 +118,11 @@ Ext.define('Ck.edit.action.Crop', {
 		// Cropping line
 		var featureLine = evt.feature;
 
-		var layer = this.getLayer();
-		var source = this.getLayerSource(layer);
+		var source = this.controller.getSource();
 
 		// We keep a backup of the feature
 		var cropFeatureBackup = this.cropFeature.clone();
+		cropFeatureBackup.setId(this.cropFeature.getId());
 
 		// From > https://github.com/Turfjs/turf-crop/blob/master/index.js
 		var geojson  = new ol.format.GeoJSON();
@@ -164,7 +165,13 @@ Ext.define('Ck.edit.action.Crop', {
 		var properties = this.cropFeature.getProperties();
 		delete properties.geometry;
 
-		source.removeFeature(this.cropFeature);
+		var fid = this.controller.getFid(this.cropFeature);
+		var ft = this.controller.wfsSource.getFeatureById(fid);
+
+		if(!Ext.isEmpty(ft)) {
+			source.removeFeature(ft);
+		}	
+		
 		this.cropInteraction.getFeatures().clear();
 
 		// Add the 2 pieces, result of the crop
@@ -191,6 +198,16 @@ Ext.define('Ck.edit.action.Crop', {
 				date: date,
 				cedula: c
 			});
+			
+			var id = "";
+			if(this.controller.getIsWMS()) {
+				id = "CROPED_" + (this.controller.getSource().getFeatures().length + i);
+			} else {
+				id = "CROPED_" + (this.controller.getLayer().getSource().getFeatures().length + i);
+			}
+			
+			f.setId(id);
+			
 			features.push(f)
 
 		}, this);
@@ -210,7 +227,7 @@ Ext.define('Ck.edit.action.Crop', {
 			features[0].setStyle(this.cropSelectedStyle);
 			// Choice the polygon what keep attributes data
 			this.winCrop = new Ext.window.Window({
-				title: "Witch polygon keep attribute data ?",
+				title: "Which polygon keeps attributes data ?",
 				height: 160,
 				width: 300,
 				defaultAlign: "tr-tr",
@@ -263,9 +280,8 @@ Ext.define('Ck.edit.action.Crop', {
 									var values = form.getFieldValues();
 									features[values.polygonCrop - 1].setProperties(properties);
 									features[values.polygonCrop - 1].setStyle(null);
-									delete cropFeatureBackup;
 
-									this.endCrop(features[values.polygonCrop - 1]);
+									this.endCrop(features[values.polygonCrop - 1], features, cropFeatureBackup);
 								}
 							},
 							scope: this
@@ -293,9 +309,9 @@ Ext.define('Ck.edit.action.Crop', {
 	/**
 	 * Close crop session
 	 */
-	endCrop: function(ft) {
+	endCrop: function(ft, features, initialFeature) {
 		if(!Ext.isEmpty(ft)) {
-			this.controller.fireEvent("featurecrop", ft);
+			this.controller.fireEvent("featurecrop", ft, features, initialFeature);
 		}
 		this.cropInteraction.setActive(true);
 		if(this.winCrop) {

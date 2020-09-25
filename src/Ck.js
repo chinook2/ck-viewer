@@ -380,6 +380,19 @@ Ext.apply(Ck, {
 	},
 
 	/**
+	 * Get action by itemId (eg: ck-map-mesure-id)
+	 * @param {String}
+	 * @return {Ck.Action}
+	 */
+	getActionByItemId: function(itemId) {
+		for(var i = 0; i < Ck.actions.length; i++) {
+			if(Ck.actions[i].itemId == itemId) {
+				return Ck.actions[i];
+			}
+		}
+	},
+	
+	/**
 	 * Get action(s) by widget name (eg: ckmapMeasure). Wildcard allowed
 	 * @param  {String} widget name of the action
 	 * @param  {Ck.Map} map    optional. map instance for the action
@@ -749,6 +762,11 @@ Ext.apply(Ck, {
 	 * @param callback the function to call when the forEach has ended
 	 */
 	asyncForEach: function(array, fn, callback) {
+		if(!Ext.isArray(array)) {
+			Ck.log("asyncForEach: first argument must be an Array.")
+			return;
+		}
+		
 		array = array.slice(0); // Just to be sure
 		function processOne() {
 			var item = array.pop();
@@ -990,6 +1008,11 @@ Ext.apply(Ck, {
 		}
 		return exist;
 	},
+	
+	getResolutionForScale: function(scale, units) {
+		var mpu = ol.proj.METERS_PER_UNIT[units];
+		return parseFloat(scale) / (mpu * Ck.INCHES_PER_UNIT.m * Ck.DOTS_PER_INCH);
+	},
 
 	/**
 	 * Find position of Item in Array
@@ -1004,7 +1027,25 @@ Ext.apply(Ck, {
 	        }
 	    }
 	    return -1;
-	}
+	},
+
+	/**
+	 * Returns true if executed on a mobile device
+	 * For testing purposes the deviceType can be overridden by adding a deviceType parameter to the URL of the page, like so: http://localhost/mypage.html?deviceType=Tablet
+	 */
+	isMobileDevice: function() {
+		//<debug>
+		return true;
+		//</debug>
+		return Ext.os.deviceType == "Phone" || Ext.os.deviceType == "Tablet";
+	},
+	
+	/**
+	 * Returns true if executed on a desktop
+	 */
+	isDesktop: function() {
+		return Ext.os.deviceType == "Desktop";
+	}	
 
 }).init();
 

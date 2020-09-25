@@ -7,29 +7,35 @@ Ext.define('Ck.form.plugin.GridEditing', {
 
 	editrow: false,
 	deleterow: true,
-	deleteallrow: true,
-	dummyrow: true,
-
-	_hasdummy: false,
-
+	
 	init: function(grid) {
-		if(this.disabled) return;
-
-		// Init subform after grid rendering
-		grid.on('afterrender', function() {
-			this.initEditing(grid);
-		}, this, {delay: 50});
-	},
-
-
-	initEditing: function(grid) {
 		this.grid = grid;
-
-		// Get parent ckform
-		var formController;
-		var ckform = grid.view.up('ckform');
-		if(ckform) formController = ckform.getController();
-
+				
+		var formController = grid.lookupController();
+		
+		// Init store fields from column definition
+		var store = grid.getStore();
+		if(!store.getFields()){
+			store.setFields(this.getFields());
+		}
+		
+		grid.addDocked({
+			xtype: 'toolbar',
+			dock: 'top',
+			bind: {
+				hidden: '{!editing}'
+			},
+			style: {border: 0},
+			items: ['->', {
+				text: 'Add',
+				handler: this.handleNewRow,
+				bind: {
+					hidden: '{updating}'
+				},
+				scope: this
+			}]
+		});
+			
 		// Get the Action Column
 		this.actionColumn = this.grid.down('actioncolumn');
 		if(!this.actionColumn) {
@@ -38,21 +44,17 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
 						if(rec && rec.get('dummy')) return true;
-						if(rec && rec.isDummy === true) return false;
 						return false;
 					},
 					getClass: function(v, meta, rec) {
-						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
-						if(rec && rec.isDummy === true) return false;
-						return 'ckEdit';
+						return 'fa fa-edit';
 					},
 					tooltip: 'Edit row',
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
 						var plg = grid.getPlugin('rowediting');
 						// colIndex = actioncolumn index... use column index 0 to start Edit
 						if(plg) plg.startEdit(rec, 0);
-						grid.fireEvent('actionColumnClick', 'editrow', rec);
 					},
 					scope: this
 				});
@@ -61,135 +63,48 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				actions.push({
 					isDisabled: function(v, r, c, i, rec) {
 						if(rec && rec.get('dummy')) return true;
-						if(rec && rec.isDummy === true) return false;
 						return false;
 					},
 					getClass: function(v, meta, rec) {
-						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
-						if(rec && rec.isDummy === true) return false;
-						return 'ckClose';
+						return 'fa fa-close';
 					},
 					tooltip: 'Delete row',
-					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
-						this.deleteRow(view, rowIndex);
-						grid.fireEvent('actionColumnClick', 'deleterow', rec);
-					},
+					handler: this.deleteRow,
 					scope: this
 				});
 			}
-
+			
 			var conf = this.grid.getInitialConfig();
-
-			// Default hide action column when editing = false or no action enable
-			var hide = (formController)? !formController.getView().getEditing() : false;
-			hide = (actions.length == 0)? true : hide;
-
 			// Add action column for editing by plugin GridEditing
-			var col = [];
-			if (conf.columns) {
-				col = (Ext.isArray(conf.columns))? conf.columns : conf.columns.items;
-			} else {
-				col = Ext.Array.pluck(this.grid.columns, 'initialConfig');
-			}
-
-			var txt = '';
-			if (this.deleteallrow !== false) {
-				// Html code to disply icon
-				txt = '<img role="button" alt="" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-action-col-icon ckClose" data-qtip="Delete all rows">';
-			}
-			col.push({
+			conf.columns.push({
 				xtype: 'actioncolumn',
-				text: txt,
-				hidden: hide,
-				items: actions,
-				editor: false,
-				cellWrap: false,
-				flex: 0
+				hidden: !formController.getView().getEditing(),
+				items: actions
 			});
 
-			// Helper to identify by CSS first cell for dummy row
-			/*col[0].renderer = function(value, metaData, record, rowIndex, colIndex, store, view){
-				if(colIndex==0 && record.get('dummy')){
-					metaData.innerCls = 'ck-dummy-cell-inner';
-				}
-				return value;
-			}*/
-
-			this.grid.reconfigure(col);
+			this.grid.reconfigure(conf.columns);
 			this.actionColumn = this.grid.down('actioncolumn');
 
 			// Add grid reference to the actionColumn
 			// this.actionColumn.ownerGrid = this.grid;
-
-			this.actionColumn.width = 12 + (this.actionColumn.items.length * 20);
-
-			if (this.deleteallrow !== false) {
-				this.actionColumn.on({
-					headerclick: function (ct, col, e) {
-						var t = e.target;
-						if (t && t.className.indexOf('ckClose') != -1) {
-							var recs = this.deleteAllRows(this.grid);
-							this.grid.fireEvent('actionColumnClick', 'deleteallrow', recs);
-						}
-					},
-					scope: this
-				});
-			}
+			
+			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
 		}
 
-		if(formController){
-			// On start editing
-			formController.on({
-				startEditing: this.startEditing,
-				stopEditing: this.stopEditing,
-				scope: this
-			});
-			// If already editing (in subform...)
-			if(formController.view.getEditing()===true) this.startEditing();
-		} else {
-			var c = grid.getConfig();
-			if ((grid.editing === true) || (c && c.editing === true)){
-				this.startEditing();
-			} else {
-				this.stopEditing();
-			}
-		}
-
-
+		// On start editing
+		formController.on({
+			startEditing: this.startEditing,
+			stopEditing: this.stopEditing,
+			scope: this
+		});
+		// If already editing (in subform...)
+		if(formController.view.getEditing()===true) this.startEditing();
+		
 		grid.on({
 			validateedit: this.addNewRow,
-			edit: function(e, context){
-				// After edit row select first cell of next row
-				if(this.dummyrow===true && context) {
-					var v = context.view;
-					v.getSelectionModel().selectNext();
-					var pos = v.selectionModel.getCurrentPosition();
-					pos.setColumn(0);
-					v.focusCell(pos);
-				}
-			},
 			scope: this
 		});
-		/*
-		grid.getStore().on({
-			add: function (store, records) {
-				// Adding dummy row. return
-				if(records.length===1 && records[0].get('dummy')===true) return;
-
-				// Move dummy row to the end
-				this.deleteNewRow();
-				this.addNewRow();
-			},
-			clear: function (store) {
-				// When remove all records, add dummy row if was here
-				if (this._hasdummy === true) {
-					this.addNewRow();
-				}
-			},
-			scope: this
-		});
-		*/
 	},
 
 	/**
@@ -199,11 +114,30 @@ Ext.define('Ck.form.plugin.GridEditing', {
 	destroy: function() {
 	},
 
-
+	handleNewRow: function() {
+		this.startEditing();
+		
+		var store = this.grid.getStore();
+		var view = this.grid.getView();		
+		var row = view.getRow(store.getAt(store.getCount() - 1));
+		
+		// Focus the 1st non-actioncolumn cell of the new row
+		for(var i=0; i<row.cells.length; i++) {
+			if(row.cells[i].className.indexOf("actioncolumn") == -1) {
+				view.editingPlugin.startEdit(store.getAt(store.getCount() - 1), i);
+				break;
+			}
+		}
+	},
+	
 	startEditing: function() {
 		// add & show action column
-		if(this.actionColumn.items.length>0) this.actionColumn.show();
+		this.actionColumn.show();
 		this.addNewRow();
+		
+		// Enable rowediting plugin
+		var sfplugin = this.grid.findPlugin('rowediting');
+		if(sfplugin) sfplugin.enable();
 	},
 
 	stopEditing: function() {
@@ -211,60 +145,65 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		this.actionColumn.hide();
 		this.deleteNewRow();
 	},
-
-	addNewRow: function(e, context) {
-		/*
+	
+	addNewRow: function(e, context){
 		var store = this.grid.getStore();
-
+		
 		// Call on validate new row. The new row is now validated.
-		if(context) {
+		if(context && context.record) {
 			delete context.record.data['dummy'];
 		}
-
+		
 		// We allready have un empty field for new record...
 		if(store.findRecord('dummy', true)) return;
 
 		// Add empty row at the end
-		if(this.dummyrow===true){
-			store.add({
-				dummy: true
-			});
-			this._hasdummy = true;
-		}
-		*/
+		store.add({
+			dummy: true
+		});		
 	},
-
+	
 	deleteNewRow: function(){
-		/*
 		// Remove empty field for new record...
 		var store = this.grid.getStore();
-		var rec = store.findRecord('dummy', true);
-		if(rec) {
-			store.remove(rec);
-			this._hasdummy = false;
-		}
-		*/
+		var row = store.find('dummy', true);
+		if(row) store.removeAt(row);
 	},
-
+	
 	deleteRow: function(grid, rowIndex) {
-		var store = grid.getStore();
+        var store = grid.getStore();
 		var rec = store.getAt(rowIndex);
 		if(rec){
 			store.remove(rec);
 			// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
-			if (store.removed) {
-				store.removed.push(rec);
-			}
+			store.removed.push(rec);		
 		}
 	},
+	
+	getFields: function(){
+		if(!this.grid.columns) return;
+		var fields = [];
+		var cols = this.grid.columns;
 
-	deleteAllRows: function (grid) {
-		var store = grid.getStore();
-		var removed = store.removeAll();
-		// Not added by Ext ! need for compatibility to get back deleted records via store.getRemovedRecords()
-		if (store.removed) {
-			store.removed = removed;
+		// Column Model
+		for(var col in cols){
+			if(cols[col] && cols[col].dataIndex) {
+				var colname = cols[col].text;
+				var colindex = cols[col].dataIndex;
+
+				fields.push({
+					name: colindex,
+					//defaultValue: colname,
+					type: cols[col].type || 'auto' //,
+					// rendererOption: cols[col].rendererOption || {},
+					// convert: function(v, n) {
+						// return n[v];
+					// }
+				});
+			}
 		}
-		return removed;
+		
+		return fields;
 	}
+	
 });

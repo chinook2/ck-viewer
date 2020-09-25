@@ -7,12 +7,12 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 
 	iconCls: 'ckEdit ck-plugin',
 	tooltip: 'Edit layer',
-
+	
 	/**
 	 * Where display the edit panel
 	 */
 	target: "window",
-
+	
 	/**
 	 * Options merged to the target instanciation options
 	 */
@@ -32,61 +32,65 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			},
 			scope: this
 		}
-
+		
 		this.actionColumn.items.push(action);
 		this.actionColumn.width = this.actionColumn.items.length * 20;
 	},
-
-	doAction: function(layer) {
+	
+	doAction: function(layer) {		
 		var map = this.getMap();
-
+		
 		var editOpt = {
 			xtype	: "ckedit",
 			layer	: layer,
 			openner	: this
 		};
-
+		
 		if(!Ext.isEmpty(this.win)) {
-			this.close();
-		}
+			Ck.Msg.show({
+				title: "Edition",
+				message: "Please complete the current editing session",
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.INFO
+			});
+		} else {
+			switch(this.target) {
+				case "window":
+					this.win = Ext.create('Ext.window.Window', Ext.apply({
+						title: "Edit layer " + layer.get('title'),
+						width: 410,
+						height: 300,
+						layout: 'fit',
+						collapsible: true,
+						closable: false,
+						items: [editOpt]
+					}), this.targetOpt);
 
-		switch(this.target) {
-			case "window":
-				this.win = Ext.create('Ext.window.Window', Ext.apply({
-					title: "Edit layer " + layer.get('title'),
-					width: 410,
-					height: 300,
-					layout: 'fit',
-					collapsible: true,
-					closable: false,
-					items: [editOpt]
-				}), this.targetOpt);
-
-				this.win.show();
-				break;
-			case "docked":
-				var view = map.getView();
-				this.win = view.addDocked(Ext.apply({
-					dock : "top"
-				}, this.targetOpt, editOpt));
-				this.getMap().getOlMap().updateSize()
-				break;
-		}
-
+					this.win.show();
+					break;
+				case "docked":
+					var view = map.getView();
+					this.win = view.addDocked(Ext.apply({
+						dock : "top"
+					}, this.targetOpt, editOpt));
+					this.getMap().getOlMap().updateSize()
+					break;
+			}
+ 		}
 	},
-
+	
 	/**
 	 * @param {ol.layer.Base}
 	 */
 	isEditable: function(layer) {
-		if(!Ext.isEmpty(layer)) {
-			if(layer.getExtension("editable")) {
+		if(!Ext.isEmpty(layer) && !(layer instanceof ol.layer.Group)) {
+			if((layer.getExtension("editable") || layer.ckLayer.getPermission("edit")) && layer.getExtension("geometryType")) {
 				return true;
 			}
 		}
 		return false;
 	},
-
+	
 	close: function() {
 		switch(this.target) {
 			case "window":
@@ -94,9 +98,13 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 				this.win.destroy();
 				break;
 			case "docked":
-				this.win[0].close();
-				this.win[0].destroy();
-				this.getMap().getOlMap().updateSize()
+				var dock = this.win[0];
+				if(dock) {
+					var map = this.getMap();
+					var view = map.getView();
+					view.removeDocked(dock);
+					this.getMap().getOlMap().updateSize();
+				}
 				break;
 		}
 		delete this.win;

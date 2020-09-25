@@ -9,145 +9,214 @@ Ext.define('Ck.edit.action.Create', {
 	/**
 	 * Default properties when this action is used through a button
 	 */
+	itemId: 'edit-create',
 	iconCls: 'ckfont ck-plus',
 	tooltip: 'Create features',
-
-	toggleGroup: 'ckmapAction',
-
-	/**
+	
+	/** 
 	 * True to snap vertex to nearest point
 	 */
 	snap: true,
-	snapTolerance: 10,
+	
+	/**
+	 * True to add point at GPS geolocation
+	 */
+	gps: false,
 
+	/** 
+	 * True to livesnap vertex to nearest point
+	 */
+	allowLiveSnap: false,
+	
 	/**
 	 * Activate the geometry creation interaction
 	 **/
 	toggleAction: function(btn, status) {
-		this.callParent([btn]);
-		var olMap = this.getOlMap();
-
-		// Force disable action when change tab or close window
-		if (!this.initialized) {
-			var win = btn.up('window');
-			if (win) {
-				win.on({
-					hide: function () {
-						btn.toggle(false);
-					}
-				});
-			}
-			this.initialized = true;
-		}
-
-		if (!status) {
-			olMap.removeInteraction(this.drawInteraction);
-			olMap.removeInteraction(this.snapInteraction);
-	        this.drawInteraction = null;
-			this.snapInteraction = null;
-			return;
-        }
+		this.callParent(arguments);
 
 		// Create the interaction if it doesn't already exist
-		if(!this.drawInteraction) {
-			this.drawSource = this.getLayerSource();
+		if(!this.drawInteraction && !btn.gps) {
+			this.drawSource = new ol.source.Vector();
 			this.drawInteraction = new ol.interaction.Draw({
-				type: this.getGeometryType(),
+				type: this.controller.getGeometryTypeBehavior(),
+				snapGeometry: this.snapGeometry,
 				source: this.drawSource
 			});
-
-			// Set special style when point is snapped
-			this.drawInteraction.styleSnapped_ = [
-				new ol.style.Style({
-					image: new ol.style.Circle({
-						radius: 12,
-						stroke: new ol.style.Stroke({
-							color: 'red',
-							width: 1
-						})
-					})
-				}),
-				new ol.style.Style({
-					image: new ol.style.Circle({
-						fill: new ol.style.Fill({
-							color: 'white'
-						}),
-						radius: 6,
-						stroke: new ol.style.Stroke({
-							color: 'red',
-							width: 1
-						})
-					})
-				}),
-				new ol.style.Style({
-					image: new ol.style.Circle({
-						fill: new ol.style.Fill({
-							color: 'red'
-						}),
-						radius: 2
-					})
-				})
-			];
+			this.map.getOlMap().addInteraction(this.drawInteraction);
 			
-			olMap.addInteraction(this.drawInteraction);
+			// Livesnapping
+			if(this.allowLiveSnap) {
+				var map = Ck.getMap();
+				
+				if(!map.livesnap) {
+					var snappingOptions = this.controller.getSnappingOptions();
+					map.livesnap = new Ck.LiveSnap(snappingOptions);
+					Ext.on("layerSnapActive", map.livesnap.manageLayerActive, map.livesnap);
+					Ext.on("layerSnapTolerance", map.livesnap.manageLayerTolerance, map.livesnap);
+				} else {
+					map.livesnap.reInitInteractions();
+				}					
+			}
+			
+			// Overload the end-drawing callback to use snapGeometry
+			this.drawInteraction.finishDrawing = function() {
+				var sketchFeature = this.drawInteraction.abortDrawing_();
+				
+				if(!sketchFeature) {
+					var coords = this.drawInteraction.sketchCoords_;
+					if(coords && Ext.isArray(coords)) {
+						var type = this.controller.getGeometryTypeBehavior();
+						
+						if(type == "Polygon") {
+							sketchFeature = new ol.Feature(
+								new ol.geom.Polygon(
+									coords
+								)
+							);
+						} else if(type == "LineString")  {
+							sketchFeature = new ol.Feature(
+								new ol.geom.LineString(
+									coords
+								)
+							);
+						} else {
+							sketchFeature = new ol.Feature(
+								new ol.geom.Point(
+									coords
+								)
+							);
+						}
+					}				
+				}
 
-			//https://github.com/openlayers/ol3/issues/3610
-			this.drawInteraction.on('drawend', this.onFinishSelection.bind(this));
-			//
-			//this.interactions["drawInteraction"] = this.drawInteraction;
+				var geometry = sketchFeature.getGeometry();	
+
+				var opt = {
+					layers		: this.controller.getSnappingOptions(),
+					layer		: this.getLayer(),
+					geometries	: [geometry],
+					callback	: this.endProcess,
+					scope		: this
+				}
+				if(opt.layers.length > 0) {
+					var geometry = Ck.Snap.snap(opt);
+				} else {
+					this.endProcess(geometry);
+				}
+			}.bind(this);
+			
+			this.interactions["drawInteraction"] = this.drawInteraction;
 		}
 
-		// Enable snap interaction to existing parcels
-		if (this.snap === true) {
-			if (!this.snapInteraction && this.drawSource) {
-				// The snap interaction must be added after the Modify and Draw interactions
-				// in order for its map browser event handlers to be fired first. Its handlers
-				// are responsible of doing the snapping.
-				this.snapInteraction = new ol.interaction.Snap({
-					source: this.drawSource,
-					pixelTolerance: this.snapTolerance
-				});
-				olMap.addInteraction(this.snapInteraction);
+		if(btn.gps){
+			if(status) {
+				var geoloc = this.getMap().geolocation.getPosition();
+				// geoloc = [1424431, 2232227]; Testing
+				if(Ext.isArray(geoloc)) {
+					var geomType = this.controller.getGeometryTypeBehavior();
+					if(geomType=='Point') {
+						if(!this.drawSource) {
+							this.drawSource = new ol.source.Vector();
+						}
+						
+						// Create un new  feature
+						var geometry = new ol.geom.Point(geoloc)
+						var feature = new ol.Feature({
+							geometry: geometry,
+							status: "CREATED"
+						});
+						this.drawSource.addFeature(feature);
+						this.endProcess(geometry);
+						btn.toggle(false);
+						Ck.Msg.show({
+							title: "Creation",
+							message: "Point added at GPS position : [ " + geoloc[0] + ", "+ geoloc[1] + "]",
+							buttons: Ext.Msg.OK,
+							icon: Ext.Msg.INFO
+						});
+					}
+				} else {
+					Ck.Msg.show({
+						title: "Create features",
+						message: "GPS position not available",
+						buttons: Ext.Msg.OK,
+						icon: Ext.Msg.ERROR
+					});
+				}				
+			}			
+		} else {
+			this.drawInteraction.setActive(status);
+		}
+	},
+
+	doAction: function(btn) {
+		this.callParent(arguments);
+	},
+
+	// A voir si plus fonctionnel !
+	// Create object with GPS position
+	// doAction: function(btn) {
+		// if(btn.gps) this.toggleAction(btn, false);		
+	// },
+	
+	/**
+	 * Hang the polygon's points to those nearest according to the tolerance.
+	 * @params {ol.Feature}
+	 **/
+	endProcess: function(geometry) {
+		
+		var sketchFeature = new ol.Feature({
+			geometry: geometry,
+			status: "CREATED"
+		});
+		
+		goog.asserts.assert(!goog.isNull(sketchFeature));
+		var coordinates;
+		var geometry = sketchFeature.getGeometry();
+		
+		if(!this.gps) {
+			switch(this.drawInteraction.mode_) {
+				case ol.interaction.DrawMode.POINT:
+					goog.asserts.assertInstanceof(geometry, ol.geom.Point);
+					coordinates = geometry.getCoordinates();
+					break;
+				case ol.interaction.DrawMode.LINE_STRING :
+					goog.asserts.assertInstanceof(geometry, ol.geom.LineString);
+					coordinates = geometry.getCoordinates();
+					// Remove the redundant last point
+					coordinates.pop();
+					geometry.setCoordinates(coordinates);
+					break;
+				case ol.interaction.DrawMode.POLYGON :
+					goog.asserts.assertInstanceof(geometry, ol.geom.Polygon);
+					// When we finish drawing a polygon on the last point,
+					// the last coordinate is duplicated as for LineString
+					// we force the replacement by the first point
+					this.drawInteraction.sketchPolygonCoords_ = geometry.getCoordinates();
+					this.drawInteraction.sketchPolygonCoords_[0].pop();
+					this.drawInteraction.sketchPolygonCoords_[0].push(this.drawInteraction.sketchPolygonCoords_[0][0]);
+					geometry.setCoordinates(this.drawInteraction.sketchPolygonCoords_);
+					coordinates = geometry.getCoordinates();
+					break;
 			}
 		}
 
-
-		if(status && btn.single === true){
-			if(this.drawSource) this.drawSource.clear();
-			this.drawInteraction.on('drawstart', function(){
-				if(this.drawSource) this.drawSource.clear();
-			}.bind(this));
+		// Cast multi-part geometries
+		switch(this.controller.getGeometryTypeBehavior()) {
+			case ol.geom.GeometryType.MULTI_POINT :
+				sketchFeature.setGeometry(new ol.geom.MultiPoint([coordinates]));
+				break;
+			case ol.geom.GeometryType.MULTI_LINE_STRING :
+				sketchFeature.setGeometry(new ol.geom.MultiLineString([coordinates]));
+				break;
+				sketchFeature.setGeometry(new ol.geom.MultiPolygon([coordinates]));
+			case ol.geom.GeometryType.MULTI_POLYGON :
 		}
 
-		this.drawInteraction.setActive(status);
-	},
-
-
-	//https://github.com/openlayers/ol3/issues/3610
-	//Setup drawend event handle function
-	onFinishSelection: function (evt) {
-		var me = this;
-
-		this.controller.fireEvent("featurecreate", evt.feature, me);
-
-		//Call to double click zoom control function to deactivate zoom event
-		me.controlDoubleClickZoom(false);
-
-		//Delay execution of activation of double click zoom function
-		setTimeout(function(){
-			me.controlDoubleClickZoom(true);
-		}, 251);
-	},
-
-	//Control active state of double click zoom interaction
-	controlDoubleClickZoom:function (active){
-	    //Find double click interaction
-	    var interactions = this.getMap().getOlMap().getInteractions();
-	    for (var i = 0; i < interactions.getLength(); i++) {
-	        var interaction = interactions.item(i);
-	        if (interaction instanceof ol.interaction.DoubleClickZoom) {
-	            interaction.setActive(active);
-	        }
-	    }
+		if(!this.gps) {
+			this.drawInteraction.dispatchEvent(new ol.interaction.DrawEvent(ol.interaction.DrawEventType.DRAWEND, sketchFeature));
+		}
+		
+		this.controller.fireEvent("featurecreate", sketchFeature);
 	}
 });

@@ -333,6 +333,10 @@ Ext.define('Ck.map.Controller', {
 		}
 		this.specialGroup.getLayers().insertAt(index, layer);
 	},
+	
+	removeSpecialLayer: function(layer) {
+		this.specialGroup.getLayers().remove(layer);
+	},
 
 	/**
 	 * Add layer to map
@@ -458,8 +462,9 @@ Ext.define('Ck.map.Controller', {
 
 			// Alias to get extension property directly
 			layer.getExtension = function(key) {
-				return (Ext.isEmpty(me.get("extension")))? undefined : me.get("extension")[key];
+				return (Ext.isEmpty(layer.get("extension")))? undefined : layer.get("extension")[key];
 			};
+
 			me.fireEvent('addlayer', layer, idx);
 		});
 		olGroup.getLayers().on('remove', function(colEvent) {

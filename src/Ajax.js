@@ -235,5 +235,179 @@ Ext.define('Ck.Ajax', {
 
 		Ck.Notify.error('Request failure : ' + options.url, response);
 		// TODO : parse error message ...
-	}
+	},
+
+	/**
+	 * Send WFS request to insert, update or delete features.
+	 *
+	 * @param {ol.layer.Base}
+	 * @param {Object} Features to transac. Member name : inserts, updates, deletes
+	 * @param {Function}
+	 * @param {Function}
+	 */
+	sendTransaction: function(layer, features, success, failure) {
+		var currSrs = Ck.getMap().getProjection().getCode();
+		ope = layer.ckLayer.getOffering("wfs").getOperation("GetFeature");
+			
+		var f = Ck.create("ol.format.WFS", {
+			featureNS: "http://mapserver.gis.umn.edu/mapserver",
+			gmlFormat: Ck.create("ol.format.GML2"),
+			featureType: ope.getLayers()
+		});
+		
+
+		var lyr = ope.getLayers().split(":");
+
+		transacOpt = {
+			featureNS		: "feature",
+			srsName			: currSrs,
+			featureType		: lyr[lyr.length - 1],
+			gmlOptions: {
+				schemaLocation: "wfs"
+			}
+		};
+
+		if(lyr.length > 1) {
+			transacOpt.featurePrefix = lyr[0];
+		}
+		
+		if(!Ext.isArray(features.inserts)) {
+			features.inserts = features.inserts || [];
+		}
+		
+		if(!Ext.isArray(features.updates)) {
+			features.updates = features.updates || [];
+		}
+		
+		if(!Ext.isArray(features.deletes)) {
+			features.deletes = features.deletes || [];
+		}
+
+		var transac = f.writeTransaction(features.inserts, features.updates, features.deletes, transacOpt);
+
+		// Temporary parent to get the whole innerHTML
+		var pTemp = document.createElement("div");
+		pTemp.appendChild(transac);
+		
+		// Defaults callbacks
+		var defSucc = function(response) {
+			var ins, upd, del;
+			ins = response.responseXML.getElementsByTagName("totalInserted")[0];
+			upd = response.responseXML.getElementsByTagName("totalUpdated")[0];
+			del = response.responseXML.getElementsByTagName("totalDeleted")[0];
+
+			if(ins || upd || del) {
+				var msg = "Registration successfully : <br/>";
+				if(ins && ins.innerHTML != "0") {
+					msg += "Inserted : " + ins.innerHTML + "<br/>";
+				}
+				if(upd && upd.innerHTML != "0") {
+					msg += "Updated : " + upd.innerHTML + "<br/>";
+				}
+				if(del && del.innerHTML != "0") {
+					msg += "Deleted : " + del.innerHTML;
+				}
+
+				Ext.Msg.show({
+					title: "Edition",
+					message: msg,
+					buttons: Ext.Msg.OK,
+					icon: Ext.Msg.INFO
+				});
+			}
+		};
+		
+		var defFail = function(response) {
+			var exception = response.responseXML.getElementsByTagName("ServiceException")[0];
+			var msg = "Layer edition failed";
+			if(exception) {
+				var pre = document.createElement('pre');
+				var text = document.createTextNode(exception.innerHTML);
+				pre.appendChild(text);
+				msg += ". Error message : <br/>" + pre.innerHTML;
+			}
+
+			Ext.Msg.show({
+				title: "Edition",
+				message: msg,
+				buttons: Ext.Msg.OK,
+				icon: Ext.Msg.ERROR
+			});
+		};
+		
+		var successCallback, failureCallback;
+		// Define callbacks
+		if(Ext.isObject(success)) {
+			successCallback = function(response) {
+				if(success.showMsg !== false) {
+					defSucc(response);
+				}
+				if(Ext.isFunction(success.fn)) {
+					success.fn.call(success.scope || this, response);
+				}
+			}
+		}
+		if(Ext.isObject(failure)) {
+			failureCallback = function(response) {
+				if(failure.showMsg !== false) {
+					defFail(response);
+				}
+				if(Ext.isFunction(failure.fn)) {
+					failure.fn.call(failure.scope || this, response);
+				}
+			}
+		}
+		
+		// Do the getFeature query
+		Cks.post({
+			scope: this,
+			url: ope.getUrl(),
+			rawData: pTemp.innerHTML,
+			success: successCallback || defSucc,
+			failure: failureCallback || defFail
+		});
+	},
+	
+	/**
+	 * Download a file in the persistent storage
+	 * @param {Object} Object with theses attributes :
+	 *	- url
+	 *	- directory
+	 *	- file
+	 *	- onSuccess
+	 *	- onError
+	 */
+	download: function(opt) {
+		Ext.applyIf(opt, {
+			directory	: Ck.getDefaultDirectory(),
+			file		: Ext.Date.format(new Date(), "Y-m-d-H-i-s"),
+			onSuccess	: Ext.emptyFn,
+			onError		: Ext.emptyFn,
+			scope		: this
+		});
+
+		opt.file = opt.url.split("/").pop();
+		
+		window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, function(opt, fs) {
+				fs.root.getFile(opt.file, {
+						create: true, 
+						exclusive: false
+					}, function(fileEntry) {
+						fileTransfer = new FileTransfer();        
+						fileTransfer.download(
+							opt.url,
+							opt.directory + opt.file,
+							function(opt, entry) {
+								opt.onSuccess.call(opt.scope, entry.nativeURL);
+							}.bind(opt.scope, opt), function (opt, error) {
+								opt.onError.call(opt.scope, error);
+							}.bind(opt.scope, opt)
+						);
+					}.bind(opt.scope, opt),
+					opt.onError.bind(opt.scope)
+				);
+			}.bind(opt.scope, opt),
+			opt.onError.bind(opt.scope)
+		);
+	}	
 });

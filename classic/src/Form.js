@@ -11,7 +11,6 @@ Ext.define("Ck.Form",{
 		'Ext.tab.*',
 		'Ext.grid.*',
 		'Ck.form.*'
-		//'Ext.ux.printer.*',
 	],
 	
 	controller: "ckform",
@@ -20,32 +19,94 @@ Ext.define("Ck.Form",{
 	},
 	
 	config: {
-		fieldset: false,
+		/**
+		 * True to init form in editing states
+		 */
 		editing: false,
-		processing: true,
-		
-		layer: null,	// nom du layer = nom de la table
-		sid: null,		// Storage ID (peut être = au fid) : Identifiant unique de la base (utile avec persistencejs)
 
-		defaultFormName: 'ck-default',
-		formName: null,	// nom du formulaire
-		formUrl: null,	// URL du formulaire
-		formRaw: null, // definition du formulaire inline
+		/**
+		 * Layer name (can prefixed with context)
+		 * @var {String}
+		 */
+		layer: null,
 		
+		/**
+		 * Storage ID (can be equal to fid) : Unique identifier of the DB (usefull with persistencejs)
+		 * @var {String}
+		 */
+		sid: null,
+		
+		/**
+		 * Default form name
+		 */
+		defaultFormName: 'ck-default',
+		
+		/**
+		 * The specific form name
+		 * @var {String}
+		 */
+		formName: null,
+		
+		/**
+		 * Form URL
+		 * @var {String}
+		 */
+		formUrl: null,
+		
+		/**
+		 * Inline form definition
+		 * @var {String/Object}
+		 */
+		formRaw: null,
+		
+		/**
+		 * 
+		 */
 		urlTemplate: {
 			st: '{0}/forms/{1}.json',
 			ws: '{0}/forms/{1}'
 		},
 
-		dataFid: null,		// Feature ID : recup depuis le geoJSON
-		dataRaw: null,		// Données inline
-		dataUrl : null, //
-		dataModel : null,
-		// dataStore : null,
+		/** 
+		 * Feature ID : recup depuis le geoJSON
+		 * @var {String}
+		 */
+		dataFid: null,
 		
+		/** 
+		 * Inline data
+		 * @var {Object}
+		 */
+		dataRaw: null,
+		
+		/** 
+		 * Object data
+		 * @var {Object}
+		 */
+		dataObject: null,
+		
+		/** 
+		 * Data object
+		 * @var {Object}
+		 */
+		dataUrl : null,
+		
+		/** 
+		 * Data object
+		 * @var {Object}
+		 */
+		dataModel : null,
+		
+		/** 
+		 * True if it's a subform
+		 * @var {Object}
+		 */
 		isSubForm: false,
-		parentForm: null, // refrence the parent form view for subForms
-		autoLoad: true		// Try populate form after initautoLoad
+		
+		/** 
+		 * Try populate form after initautoLoad
+		 */
+		autoLoad: true
 	},
 
 	bodyPadding: 10,
@@ -88,9 +149,14 @@ Ext.define("Ck.Form",{
 		},{
 			xtype: "button",
 			text: "Close",
-			handler: 'formClose'
+			handler: 'formClose',
+			force: true
 		}]
 	}],
+	
+	getLayer: function() {
+		return this.layer.split(":").pop();
+	},
 	
 	cls: 'ckform',
 

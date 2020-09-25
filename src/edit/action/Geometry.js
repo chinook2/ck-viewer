@@ -1,36 +1,36 @@
 /**
  * This action is used to modify the geometry of a feature.
+ * Click on a feature on the map to edit it.
  * A geometryInteraction was created
  */
 Ext.define('Ck.edit.action.Geometry', {
 	extend: 'Ck.edit.Action',
 	alias: 'widget.ckEditGeometry',
 
+	itemId: 'edit-geometry',
 	iconCls: 'ckfont ck-edit',
 	tooltip: 'Edit geometry',
 
 	interactionId: "geometryInteraction",
 
+	/**
+	*  Click tolerance to select features
+	*/
+	tolerance: 20,
+	
+	/** 
+	 * True to livesnap vertex to nearest point
+	 */
+	allowLiveSnap: false,
+	
+	/**
+	 * True to show the vertex panel
+	 */
+	showVertexContainer: false,
+	
 	toggleAction: function(btn, status) {
-		if(!this.used) {
-			this.callParent([btn]);
-			this.firstUse();
-		}
-		
-		// Force disable action when change tab or close window
-		if (!this.initialized) {
-			var win = btn.up('window');
-			if (win) {
-				win.on({
-					hide: function () {
-						btn.toggle(false);
-					}
-				});
-			}
-			this.initialized = true;
-		}
-
-		var source = this.getLayerSource();
+		this.callParent(arguments);
+		this.btn = btn;
 
 		if(!this.geometryInteraction) {
 			this.geometryInteraction = Ck.create("Ck.Selection", {
@@ -41,27 +41,53 @@ Ext.define('Ck.edit.action.Geometry', {
 						var ft = layers[0].features;
 						if(ft.length == 1) {
 							this.controller.startGeometryEdition(ft[0]);
+							
+							if(this.controller.vertexContainer !== undefined && this.showVertexContainer) {
+								this.controller.vertexContainer.setVisible(true);
+							}
 						}
 					}
 				},
 				scope			: this,
-				map				: this.getMap(),
+				map				: this.map,
 				drawStyle		: null,
 				overHighlight	: true,
-				// AGA - Update 04042020 getDefaultStyleFunction is not a function
 				//highlightStyle	: ol.interaction.Select.getDefaultStyleFunction(),
-				selectId		: "ckmapSelectEdit"
+				highlightStyle	: Ck.Style.orangeStroke,
+				selectId		: "ckmapSelectEdit",
+				tolerance       : this.tolerance
 			});
 			this.interactions["geometryInteraction"] = this.geometryInteraction;
+			
+			this.controller.on("savesuccess", function(evt) {
+				this.geometryInteraction.resetSelection();
+			}, this);
+			
+			this.controller.on("savefailed", function(evt) {
+				this.geometryInteraction.resetSelection();
+			}, this);
 		}
 
 		this.geometryInteraction.setActive(status);
 		if(!status) {
+			if(this.controller.geolocationBtn) this.controller.geolocationBtn.disable();
+			if(this.controller.moveInteraction) {
+				this.controller.moveInteraction.setActive(false);
+			}
 			this.geometryInteraction.resetSelection();
+
+			if(this.controller.vertex !== undefined) {
+				this.controller.vertex.closeAll();
+			}
+			
+			if(this.controller.vertexContainer !== undefined) {
+				this.controller.vertexContainer.setVisible(false);
+			}
 		}
 	},
 
 	firstUse: function() {
+		this.callParent();
 		this.controller.addListener("featuresessionstart", function() {
 			this.reset();
 			this.disableInteraction();
@@ -70,10 +96,11 @@ Ext.define('Ck.edit.action.Geometry', {
 			this.disableInteraction();
 		}, this);
 		this.controller.addListener("sessioncomplete", function() {
-			this.reset(); this.enableInteraction();
+			this.reset();
+			this.enableInteraction();
 		}, this);
 		this.controller.addListener("savesuccess", function() {
-			this.geometryInteraction.resetSelection();
+			this.reset();
 		}, this);
 	},
 
@@ -90,5 +117,6 @@ Ext.define('Ck.edit.action.Geometry', {
 	 */
 	reset: function() {
 		this.geometryInteraction.resetSelection();
+		this.toggleAction(this.btn, true);
 	}
 });
