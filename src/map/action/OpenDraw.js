@@ -76,8 +76,8 @@ Ext.define('Ck.map.action.OpenDraw', {
 
 			this.win = Ext.create('Ext.window.Window', {
 				title: this.winTitle,
-				width: 400,
-				height: 350,
+				width: 450,
+				height: 400,
 				cls: "ck-draw-window",
 				currentType: null,
 				layout: 'card',

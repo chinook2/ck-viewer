@@ -70,13 +70,12 @@ Ext.define('Ck.map.action.draw.Action', {
 				this.draw.getSource().clear();
 			}).bind(this);
 		}
-		/*
+
 		var type = this.type ? this.type : (/modify$/i.test(this.itemId) ? "Modify" : "");
-		console.log(type);
+		// console.log(type);
 		if (type) {
 			this.draw.activeDraw(type, pressed);
 		}
-		*/
 	},
 
 	/**
