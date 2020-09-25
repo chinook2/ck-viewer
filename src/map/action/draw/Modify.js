@@ -4,7 +4,7 @@ Ext.define('Ck.map.action.draw.Modify', {
 	extend: 'Ck.map.action.draw.Action',
 	alias: 'widget.ckmapDrawModify',
 	itemId: 'drawModify',
-	iconCls: 'ckfont ck-draw-edit',
+	iconCls: 'ckfont ck-edit',
 
 	drawId: "default",
 	requires: [

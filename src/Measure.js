@@ -118,12 +118,6 @@ Ext.define('Ck.Measure', {
 	measureSnapping: null,
 
 	/**
-	 * Number of layer
-	 * @var Integer
-	 */
-	wgs84Sphere: null, //new ol.Sphere(6378137),
-
-	/**
 	 * Shortcut to get source storing the measures
 	 * @var Integer
 	 */
@@ -296,7 +290,6 @@ Ext.define('Ck.Measure', {
 			for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
 				var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
 				var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
-				//length += this.wgs84Sphere.haversineDistance(c1, c2);
 				length += ol.sphere.getDistance(c1, c2);
 			}
 		} else {
@@ -359,7 +352,6 @@ Ext.define('Ck.Measure', {
 				area = (Math.PI * Math.pow(geom.getRadius(), 2) * 10000000000);
 			} else {
 				var coordinates = geom.getLinearRing(0).getCoordinates();
-				//area = Math.abs(this.wgs84Sphere.geodesicArea(coordinates));
 				if (sourceProj.getUnits() == "m") {
 					area = Math.abs(ol.sphere.getArea(polygon.clone(), {projection:sourceProj}));
 				} else {

@@ -453,18 +453,13 @@ Ext.define('Ck.map.Style', {
 					
 					var polyArea = 0;	
 					
-					var sphere = new ol.Sphere(6378137);
-					
-					
-					
 					console.log(feature.getProperties());
 					for(var feat in feature.getProperties()){
 						template = template.replace("{"+ feat +"}", feature.get(feat));
 					
 					}					
 					
-					coordinates = clonedGeometry.getCoordinates()[0];
-					polyArea = sphere.geodesicArea(coordinates)/1000000;
+					polyArea = Math.abs(ol.sphere.getArea(clonedGeometry));
 					template = template.replace("{geom_area}", polyArea.toFixed(2));
 					
 					var labelStyle = new ol.style.Style({

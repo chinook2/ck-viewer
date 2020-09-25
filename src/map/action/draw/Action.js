@@ -70,12 +70,13 @@ Ext.define('Ck.map.action.draw.Action', {
 				this.draw.getSource().clear();
 			}).bind(this);
 		}
-
+		/*
 		var type = this.type ? this.type : (/modify$/i.test(this.itemId) ? "Modify" : "");
 		console.log(type);
 		if (type) {
 			this.draw.activeDraw(type, pressed);
 		}
+		*/
 	},
 
 	/**
@@ -84,61 +85,19 @@ Ext.define('Ck.map.action.draw.Action', {
 	 */
 	createInteraction: function(opt) {
 		opt = (Ext.isObject(opt))? opt : {};
-		
-			if (this.type == 'Circle') {
-				var wgs84Sphere = new ol.Sphere(6378137 * 1.47);
-				function geometryFunction(coordinates, geometry) {
-					if (!geometry) {
-						geometry = new ol.geom.Polygon(null);
-					}
-					var center = coordinates[0];
-					var last = coordinates[1];
-					var dx = center[0] - last[0];
-					var dy = center[1] - last[1];
-					var radius = Math.sqrt(dx * dx + dy * dy);
-					var circle = ol.geom.Polygon.circular(wgs84Sphere, ol.proj.toLonLat(center), radius);
-					circle.transform('EPSG:4326', 'EPSG:3857');
-					geometry.setCoordinates(circle.getCoordinates());
-					return geometry;
-				}
-				this.interaction = new ol.interaction.Draw(Ext.applyIf(opt, {
-					source: this.draw.getSource(),
-					type: this.type,
-					geometryFunction: geometryFunction,
-					maxPoints: 2,
-					style: Ck.Style.drawStyle
-				}));
- 			
-			} else {
-				if(this.type == "Text"){
-					strtype = "Point";
-				}else{
-					strtype = this.type;
-				}
-				this.interaction = new ol.interaction.Draw(Ext.applyIf(opt, {
-					source: this.draw.getSource(),
-					type: strtype,
-					style: Ck.Style.drawStyle
-				}));
-			}
-		
+
+		if(this.type == "Text"){
+			strtype = "Point";
+		}else{
+			strtype = this.type;
+		}
+
+		this.interaction = new ol.interaction.Draw(Ext.applyIf(opt, {
+			source: this.draw.getSource(),
+			type: strtype,
+			style: Ck.Style.drawStyle
+		}));
 		this.draw.getOlMap().addInteraction(this.interaction);
-		var drawSource = this.draw.getSource();
-		/*drawSource.on('addfeature', function(feature){
-			var geojsonStr = (new ol.format.GeoJSON()).writeFeatures(drawSource.getFeatures());
-			localStorage.setItem("shapes", geojsonStr);
-			
-			var features = drawSource.getFeatures();
-			if (features.length > 0) {
-				var styles = [];
-				for(i = 0; i < features.length; i++) {
-					styles[i] = features[i].getStyle();
-				}
-				localStorage.setItem("shapesStyle", JSON.stringify(styles));
-			}
-			
-		});*/
-		this.objprt.recupStyle(this.type);
 	},
 
 	/**
