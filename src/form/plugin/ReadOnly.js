@@ -68,6 +68,9 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 		if(cmp.triggerWrap) {
 			this.labelEl.insertAfter(cmp.triggerWrap);
 		}
+		if(cmp.isCheckbox) {
+			this.labelEl.insertAfter(cmp.innerWrapEl);
+		}
 
 		// By default hide inputs if form.readOnly == true
 		this.setReadOnly();
@@ -84,12 +87,14 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 	 */
 	setReadOnly: function() {
 		var cmp = this.getCmp();
-		if(!cmp.rendered || !cmp.triggerWrap || !this.labelEl || !this.labelEl.dom) {
-			return false;
+		// !cmp.triggerWrap
+		if(!cmp.rendered || !this.labelEl || !this.labelEl.dom) {
+			return;
 		}
 		
 		// Set visibility mode
-		cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
+		if(cmp.triggerWrap) cmp.triggerWrap.setVisibilityMode(Ext.Element.DISPLAY);
+		if(cmp.innerWrapEl) cmp.innerWrapEl.setVisibilityMode(Ext.Element.DISPLAY);
 		
 		// get("editing") set in startEditing or stopEditing form.Controller methods
 		var readOnly = !this.getFormViewModel().get("editing");
@@ -113,9 +118,10 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			readOnly = true;
 		}
 
-		
 		if(readOnly) {
-			cmp.triggerWrap.hide();
+			if(cmp.triggerWrap) cmp.triggerWrap.hide();
+			if(cmp.innerWrapEl) cmp.innerWrapEl.hide();
+
 			if(!cmp.hideLabel) {
 				cmp.setFieldLabel(cmp.initialConfig.fieldLabel);
 			}
@@ -144,6 +150,15 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 						var title = this.getTitle();
 						val = "<a href='" + val + "' " + title + " target='" + this.getTarget() + "'>" + val + "</a>";
 					}					
+				}
+
+				if(cmp.isCheckbox) {
+					//cmp.readOnly = true;
+					if (val) {
+						val = '<span class="x-form-checkbox-default"></span>';
+					} else {
+						val = '<span class="x-form-checkbox-default"></span>';
+					}
 				}
 
 				this.textEl.update(val);
@@ -201,7 +216,8 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 			this.labelEl.show();
 		} else {
 			this.labelEl.hide();
-			cmp.triggerWrap.show();
+			if(cmp.triggerWrap) cmp.triggerWrap.show();
+			if(cmp.innerWrapEl) cmp.innerWrapEl.show();
 
 			// Add a marker for required fields when editing
 			if(cmp.allowBlank === false) {
@@ -232,7 +248,7 @@ Ext.define('Ck.form.plugin.ReadOnly', {
 					}
 				}
 				
-			}
+			}			
 		}
 
 		if(cmp.inputEl) {
