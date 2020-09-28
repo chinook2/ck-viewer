@@ -169,6 +169,7 @@ Ext.define('Ck.Selection', {
 			highlightStyle: Ck.Style.orangeStroke,
 			highlightZIndex: Ck.Style.zIndex.editInteraction
 		});
+		if (config.limit === null) config.limit = -1;
 
 		this.initConfig(config);
 
