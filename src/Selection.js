@@ -165,8 +165,8 @@ Ext.define('Ck.Selection', {
 		var me = this;
 		Ext.applyIf(config, {
 			olMap : config.map.getOlMap(),
-			drawStyle: Ck.Style.orange,
-			highlightStyle: Ck.Style.orangeStyle,
+			drawStyle: Ck.Style.orangeStroke,
+			highlightStyle: Ck.Style.orangeStroke,
 			highlightZIndex: Ck.Style.zIndex.editInteraction
 		});
 
@@ -191,22 +191,13 @@ Ext.define('Ck.Selection', {
 			type = "Polygon";
 		} else if(type.indexOf("circle") != -1) {
 			type = "Circle";
+			geometryFunction = ol.interaction.Draw.createRegularPolygon(24);
 		} else if(type.indexOf("square") != -1) {
 			type = "Circle";
 			geometryFunction = ol.interaction.Draw.createRegularPolygon(4);
 		} else if(type.indexOf("box") != -1) {
-			type = "LineString";
-			geometryFunction = function(coordinates, geometry) {
-				if (!geometry) {
-					geometry = new ol.geom.Polygon(null);
-				}
-				var start = coordinates[0];
-				var end = coordinates[1];
-				geometry.setCoordinates([
-					[start, [start[0], end[1]], end, [end[0], start[1]], start]
-				]);
-				return geometry;
-			};
+			type = "Circle";
+			geometryFunction = ol.interaction.Draw.createBox();
 		}
 
 		// Initializ draw interaction
@@ -291,32 +282,14 @@ Ext.define('Ck.Selection', {
 		// Parse les géométries en GeoJSON
 		var geoJSON  = new ol.format.GeoJSON();
 		var type = feature.getGeometry().getType();
-		var refPrj = ol.proj.get("EPSG:4326");
-		var mapPrj = this.getMap().getOlView().getProjection();
-		var selFt;
 
-		switch(type) {
-			case "Circle" :
-				var radius = feature.getGeometry().getRadius();
-				feature.getGeometry().transform(mapPrj, refPrj);
-				var pt = turf.point(feature.getGeometry().getCenter());
-
-				var geom = turf.buffer(pt, radius, "meters");
-				selFt = geom.features[0];
-				selFt.getGeometry().transform(refPrj, mapPrj);
-				break;
-			case "Point" :
-				var pradius = this.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
-				feature.getGeometry().transform(mapPrj, refPrj);
-				var ppt = turf.point(feature.getGeometry().getCoordinates());
-				var pgeom = turf.buffer(ppt, pradius, "meters");
-				selFt = new ol.Feature({
-					geometry: new ol.geom.Polygon(pgeom.geometry.coordinates)
-				});
-				selFt.getGeometry().transform(refPrj, mapPrj)
-				break;
-			default :
-				selFt = geoJSON.writeFeatureObject(feature);
+		var selFt = feature;
+		if(type=="Point"){
+			var radius = Ck.getMap().getOlView().getResolution() * this.getBuffer(); // 10px buffer
+			var bbox = feature.getGeometry().getExtent();
+			var selFt = new ol.Feature({
+				geometry: new ol.geom.Polygon.fromExtent(ol.extent.buffer(bbox, radius))
+			});
 		}
 
 		// Draw the feature used for getFeature query if debug is true. Use this to clean map : window.lyr.getSource().clear()
