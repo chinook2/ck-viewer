@@ -20,6 +20,7 @@ Ext.define('Ck.form.Controller', {
 	},
 
 	fields: [],
+	childrens: [],
 
 	// TODO in config param in form json...
 	compatibiltyMode: false,
@@ -547,6 +548,7 @@ Ext.define('Ck.form.Controller', {
 	applyFormDefaults: function(cfg) {
 		var me = this;
 		this.fields = [];
+		this.childrens = [];
 
 		var fn = function(c) {
 			// Get Alls direct fields of the form with includes (exclude subform)
@@ -998,6 +1000,23 @@ Ext.define('Ck.form.Controller', {
 									cbx.setEditable(false);
 								}
 							}
+							
+							if(me.compatibiltyMode) {
+								// alias : childs ou children ...
+								if(c.children) {
+									c.childs = c.children;
+									if (Ext.isString(c.children)) {
+										this.childrens.push(c.children);
+									} else {
+										this.childrens = this.childrens.concat(c.children);
+									}
+								}
+
+								c.parentValue = {};
+								c.plugins.push({
+									ptype: 'formchainedcombo'
+								});
+							}
 						}
 						
 						Ext.Object.merge(c, {
@@ -1018,6 +1037,7 @@ Ext.define('Ck.form.Controller', {
 									valueField: "value"
 								});
 							} else {
+								delete c.displayField;
 								Ext.applyIf(c, {
 									displayField: "value"
 								});
