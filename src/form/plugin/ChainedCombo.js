@@ -18,8 +18,8 @@ Ext.define('Ck.form.plugin.ChainedCombo', {
     },
     
 	init: function(cmp) {
-		// Apply only on subclass of component/box/field/{xtype}
-		if(cmp.getXTypes().indexOf('/combobox/') == -1) {
+		// Apply only on combobox
+		if(cmp.getXType() != 'combo' && cmp.getXType() != 'combobox') {
 			return;
 		}
 		
