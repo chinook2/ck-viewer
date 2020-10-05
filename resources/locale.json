@@ -329,8 +329,80 @@
         "fr": "Supprimé",
         "es": " - "
 	},{
+		"en": "Delete",
+        "fr": "Supprimer",
+        "es": " - "
+	},{
+		"en": "Move",
+        "fr": "Déplacer",
+        "es": " - "
+	},{
+		"en": "Rotate",
+        "fr": "Orienter",
+        "es": " - "
+	},{
 		"en": "Please complete the current editing session",
         "fr": "Terminer la session d'édition courante",
         "es": " - "
-	}]
+	},{
+		"en": "Drawing tools",
+        "fr": "Outils de dessin",
+        "es": " - "
+    },{
+		"en": "Draw points",
+        "fr": "Dessiner des points",
+        "es": " - "
+    },{
+		"en": "Draw lines",
+        "fr": "Dessiner des lignes",
+        "es": " - "
+    },{
+		"en": "Draw circles",
+        "fr": "Dessiner des cercles",
+        "es": " - "
+    },{
+		"en": "Draw polygones",
+        "fr": "Dessiner des polygones",
+        "es": " - "
+    },{
+		"en": "Draw texts",
+        "fr": "Dessiner des textes",
+        "es": " - "
+    },{
+		"en": "Remove all drawings",
+        "fr": "Supprimer tous les dessins",
+        "es": " - "
+    },{
+		"en": "Edit drawing",
+        "fr": "Modifier un dessin",
+        "es": " - "
+    },{
+		"en": "Color",
+        "fr": "Couleur",
+        "es": " - "
+    },{
+		"en": "Radius",
+        "fr": "Rayon",
+        "es": " - "
+    },{
+		"en": "Opacity",
+        "fr": "Opacité",
+        "es": " - "
+    },{
+		"en": "Width",
+        "fr": "Epaisseur",
+        "es": " - "
+    },{
+		"en": "Size",
+        "fr": "Taille",
+        "es": " - "
+    },{
+		"en": "Stroke",
+        "fr": "Bordure",
+        "es": " - "
+    },{
+		"en": "Fill",
+        "fr": "Remplissage",
+        "es": " - "
+    }]
 }

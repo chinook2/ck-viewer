@@ -6,6 +6,8 @@ Ext.define('Ck.map.action.draw.Clear', {
 	itemId: 'drawClear',
 	iconCls: 'ckfont ck-eraser',
 	
+	tooltip: "Remove all drawings",
+	
 	drawId: "default",
 	requires: [
 		'Ck.Draw'

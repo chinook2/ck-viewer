@@ -186,7 +186,7 @@ Ext.define('Ext.overrides.Component', {
 			}
 
 			//<debug>
-//			Ext.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
+			// Ext.log("  [" + me.getXType() + ']\t\t' + val + ' >> ' + str + '    (' + me[localeName] + ' -> ' + locale + ') :: '+ localeName );
 			//</debug>
 			return str ? str : val;
 		};
@@ -417,7 +417,7 @@ Ext.define("Ext.overrides.tip.ToolTip", {
 
 Ext.define("Ext.overrides.slider.Single",  {
 	override: "Ext.slider.Single",
-	localeProperties: ["tipPrefix"],
+	localeProperties: ["fieldLabel", "tipPrefix"],
 	setTipPrefix: function (txt) {
 		this.tipPrefix = txt;
 		if(!this.rendered) return;

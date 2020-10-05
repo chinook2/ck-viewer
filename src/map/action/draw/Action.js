@@ -3,7 +3,7 @@
 Ext.define('Ck.map.action.draw.Action', {
 	extend: 'Ck.Action',
 	itemId: 'drawPoint',
-	toggleGroup: 'ckmapDraw',
+	toggleGroup: 'ckmapAction',
 
 	drawId: "default",
 	interaction: null,
@@ -52,17 +52,25 @@ Ext.define('Ck.map.action.draw.Action', {
 	 * @param  {boolean} pressed [description]
 	 */
 	toggleAction: function(btn, pressed, opt) {
-		if (this.interaction) {
-			this.draw.getOlMap().removeInteraction(this.interaction);
+
+		// OFF
+		if (!pressed) {
+			if (this.interaction) {
+				this.draw.getOlMap().removeInteraction(this.interaction);
+				this.interaction.setActive(false);
+				this.interaction = null;
+				return;
+			}
 		}
 
+		// ON
+		// TODO: review source of truth for current type
+		// need init here to init correct style 
+		this.win.currentType = this.type;
+
 		this.createInteraction(opt);
+		this.interaction.setActive(true);
 		
-		if (pressed) {
-			this.interaction.setActive(true);
-		} else {
-			this.interaction.setActive(false);
-		}
 
 		if (pressed && btn.single === true) {
 			if (this.draw.getSource()) this.draw.getSource().clear();
@@ -93,10 +101,19 @@ Ext.define('Ck.map.action.draw.Action', {
 
 		this.interaction = new ol.interaction.Draw(Ext.applyIf(opt, {
 			source: this.draw.getSource(),
-			type: strtype,
-			style: Ck.Style.drawStyle
+			type: strtype
 		}));
 		this.draw.getOlMap().addInteraction(this.interaction);
+		
+		// Copy layer style (= Current style) to Feature
+		this.interaction.on('drawstart', function(evt) {
+			var style = this.interaction.getOverlay().getStyle();
+		    evt.feature.setStyle([style]);
+		}.bind(this));
+
+		if (this.objprt) {
+			this.objprt.updateStyle(); // call updateInteraction()
+		}
 	},
 
 	/**
@@ -104,9 +121,8 @@ Ext.define('Ck.map.action.draw.Action', {
 	 * @param  {[type]} style [description]
 	 */
 	updateInteraction: function(style) {
-		this.interaction.on('drawstart', function(evt) {
-		    evt.feature.setStyle([style]);
-		});
+		if(!this.interaction) return;	
+		this.interaction.getOverlay().setStyle(style);
 	},
 
 	/**

@@ -82,10 +82,11 @@ Ext.define('Ck.map.Style', {
 	style: null,
 	
 	zIndex: {
+		drawLayer		: 499,
 		editInteraction	: 500,
 		cloneLayer		: 520,
 		featureOverlay	: 540,
-		vertexOverlay	: 560
+		vertexOverlay	: 560,
 	},
 	
 	/**

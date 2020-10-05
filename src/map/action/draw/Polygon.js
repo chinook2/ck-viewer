@@ -7,6 +7,8 @@ Ext.define('Ck.map.action.draw.Polygon', {
 	itemId: 'drawPolygon',
 	iconCls: 'ckfont ck-draw-polygon',
 
+	tooltip: "Draw polygones",
+
 	type: "Polygon",
 
 	allowSelfIntersect: true,

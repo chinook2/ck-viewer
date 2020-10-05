@@ -177,13 +177,14 @@ Ext.define('Ck.Draw', {
 		}
 */
 		var layer = new ol.layer.Vector({
-			id: this.layerId,
+			id: this.getLayerId(),
 			source: source,
 			zIndex: Ck.Style.zIndex.drawLayer
 			//style: Ck.Style.drawStyle
 		});		
 
-		layer.setMap(this.getOlMap());
+		this.getMap().addSpecialLayer(layer);
+		//layer.setMap(this.getOlMap());
 
 		this.setLayer(layer);
 		this.setSource(source);

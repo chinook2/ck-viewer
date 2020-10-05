@@ -19,51 +19,55 @@ Ext.define('Ck.map.action.OpenDraw', {
 	text: '',
 	
 	iconCls: 'ckfont ck-draw',
-	tooltip: 'Outil de dessin',
+	tooltip: 'Drawing tools',
 
-	winTitle: "Outil de dessin",
+	winTitle: "Drawing tools",
 
 	currentOperation: "add",		// valid operations are "add" or "edit"
 	selectedFeature: null,			// feature selection in modification mode
+
+	defaultAction: "ckmapDrawPoint",
+	currentAction: null,
 
 	// point config
 	pointConfig: {
 		color: Ck.Style.stroke.color,
 		radius: Ck.Style.minorRadius,
-		opacity: 0.7
+		opacity: 70
 	},
 
 	// linestring config
 	linestringConfig: {
 		color: Ck.Style.stroke.color,
 		width: Ck.Style.minorRadius,
-		opacity: 0.7
+		opacity: 70
 	},
 
 	// circle config
 	circleConfig: {
 		borderColor: Ck.Style.stroke.color,
 		borderWidth: Ck.Style.minorRadius,
-		borderOpacity: 0.7,
+		borderOpacity: 70,
 		backgroundColor: Ck.Style.fill.color,
-		backgroundOpacity: 0.3
+		backgroundOpacity: 30
 	},
 
 	// polygon config
 	polygonConfig: {
 		borderColor: Ck.Style.stroke.color,
 		borderWidth: Ck.Style.minorRadius,
-		borderOpacity: 0.7,
+		borderOpacity: 70,
 		backgroundColor: Ck.Style.fill.color,
-		backgroundOpacity: 0.3
+		backgroundOpacity: 30
 	},
-    textConfig: {
-		color: Ck.Style.stroke.color,
+
+	textConfig: {
+		color: '#333333',
 		radius: Ck.Style.minorRadius,
-		opacity: 0.9,
-        text:'Texte',
-        taille:24,
-        police:'Arial'        
+		opacity: 90,
+        text: 'Texte',
+        taille: 24,
+        police: 'Arial'        
 	},
 	
 	/**
@@ -77,32 +81,54 @@ Ext.define('Ck.map.action.OpenDraw', {
 			this.win = Ext.create('Ext.window.Window', {
 				title: this.winTitle,
 				width: 450,
-				height: 400,
+				height: 450,
 				cls: "ck-draw-window",
-				currentType: null,
+				currentType: 'Point',
 				layout: 'card',
 				closeAction: 'hide',
 				bodyStyle: {
 					padding: "40px 5px 5px"
 				},
+				viewModel: {
+					hasSelectedFeature: false
+				},
 				items: [
-					{ html: "" },
+					//{ html: "" },
 					this.pointPanel, 
 					this.lineStringPanel,
 					this.circlePanel,
 					this.polygonPanel,
-					this.textPanel,
-					this.modifyPanel
+					this.textPanel //,
+					//this.modifyPanel
 				],
+				buttons:[{
+					text: "Delete",
+					scope: this,
+					handler: this.removeFeature,
+					bind: {
+						hidden: "{!hasSelectedFeature}"
+					}
+				}],
 				listeners: {
 					scope: this,
 					render: this.onWinRender,
-					close: this.onWinClose
+					close: this.onWinClose,
+					show: this.onWinShow
 				}
 			});
+			this.win.getViewModel().set('hasSelectedFeature', false);
 		}
 		
+		this.draw = Ck.Draw.getInstance({
+			map: this.getMap(),
+			id: 'default'
+		});
+
 		this.win.show();
+	},
+
+	destroy: function() {
+		if(this.win) this.win.destroy();
 	},
 
 	/**
@@ -113,122 +139,29 @@ Ext.define('Ck.map.action.OpenDraw', {
 		this.lineStringPanel = this.createLineStringPanel();
 		this.circlePanel = this.createCirclePanel();
 		this.polygonPanel = this.createPolygonPanel();
-		this.modifyPanel = this.createModifyPanel();
 		this.textPanel = this.createtextPanel();
 	},	
 	
 	/**
-	 * [createtextPanel description]
-	 */
-	createtextPanel: function(opt) {
-		if (!opt) {
-			opt = this.textConfig;
-		}
-		
-		var textlabelField = Ext.create('Ext.form.field.Text', {
-	        name: 'label',
-	        width: 160,
-	        fieldLabel: 'Label',
-	        allowBlank: false,
-            value: opt.text,
-            listeners: {
-	        	scope: this,	        	
-	        	change: this.onLabelChange
-	        }
-		});
-		
-		var textColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'textColor',
-	        width: 160,
-	        fieldLabel: 'Couleur',
-	        allowBlank: false,
-	        value: opt ? opt.color : Ck.Style.stroke.color,
-	        listeners: {
-	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
-	        	change: this.onColorChange
-	        }
-		});
-		var FONTS = [
-            ["Arial","Arial"],
-            ["Verdana","Verdana"],
-            ["Times","Times"],
-            ["Tahoma","Tahoma"]
-        ];
-	    var textfontField =  Ext.create('Ext.form.field.ComboBox', {
-            width:160,
-            fieldLabel: "Police",
-            listeners: {
-	        	scope: this,
-	        	change: this.onPoliceChange
-	       },
-            store: new Ext.data.SimpleStore({
-                    fields: ['value','display'],
-                    data : FONTS
-                }),
-            value: opt ? opt.police : 'Arial',
-            mode: 'local',
-            displayField:'display',
-            triggerAction: 'all',
-            selectOnFocus:true
-        });
-	textfontField.setValue(opt.police);	
-		
-        var texttailleField = Ext.create('Ext.slider.Single', {
-			name: "taille",
-	        fieldLabel: 'Taille',
-	        width: 200,
-			value: opt ? opt.taille : 5,
-			increment: 1,
-		    minValue: 8,
-		    maxValue: 100,
-		    listeners: {
-	        	scope: this,
-	        	change: this.onWidthOrRadiusChange
-	        }
-		});
-        
-		var panel = Ext.create('Ext.panel.Panel', {
-			layout: 'form',
-			itemId: 'Text',
-			items: [
-				textlabelField,
-				textColorField,
-				textfontField,
-				texttailleField
-			]
-		});
-
-		return panel;
-	},
-
-	/**
 	 * [createPointPanel description]
 	 */
 	createPointPanel: function(opt) {
-		if (!opt) {
-			opt = this.pointConfig;
-		}
-		var pointColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'pointColor',
+		var pointColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'color',
 	        width: 160,
-	        fieldLabel: 'Couleur',
+	        fieldLabel: 'Color',
 	        allowBlank: false,
-	        value: opt ? opt.color : Ck.Style.stroke.color,
 	        listeners: {
 	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
 	        	change: this.onColorChange
 	        }
 		});
 
 		var pointRadius = Ext.create('Ext.slider.Single', {
-			name: "pointRadius",
-	        fieldLabel: 'Radius',
+			name: "radius",
+			fieldLabel: 'Radius',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.radius : 5,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -239,10 +172,10 @@ Ext.define('Ck.map.action.OpenDraw', {
 		});
 
 		var pointOpacity = Ext.create('Ext.slider.Single', {
-			name: "pointOpacity",
-	        fieldLabel: 'Opacity',
+			name: "opacity",
+			fieldLabel: 'Opacity',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.opacity : 50,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -252,7 +185,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 	        }
 		});
 
-		var panel = Ext.create('Ext.panel.Panel', {
+		var panel = Ext.create('Ext.form.Panel', {
 			layout: 'form',
 			itemId: 'Point',
 			items: [
@@ -262,6 +195,9 @@ Ext.define('Ck.map.action.OpenDraw', {
 			]
 		});
 
+		if (!opt) opt = this.pointConfig;
+		panel.getForm().setValues(opt);
+
 		return panel;
 	},
 
@@ -269,28 +205,22 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 * [createLineStringPanel description]
 	 */
 	createLineStringPanel: function(opt) {
-		if (!opt) {
-			opt = this.linestringConfig;
-		}
-		var lineStringColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'lineStringColor',
+		var lineStringColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'color',
 	        width: 160,
-	        fieldLabel: 'Couleur',
+	        fieldLabel: 'Color',
 	        allowBlank: false,
-	        value: opt ? opt.color : Ck.Style.stroke.color,
 	        listeners: {
 	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
 	        	change: this.onColorChange
 	        }
 		});
 
 		var lineStringWidth = Ext.create('Ext.slider.Single', {
-			name: "lineStringWidth",
-	        fieldLabel: 'Width',
+			name: "width",
+			fieldLabel: 'Width',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.width : 5,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -301,10 +231,10 @@ Ext.define('Ck.map.action.OpenDraw', {
 		});
 
 		var lineStringOpacity = Ext.create('Ext.slider.Single', {
-			name: "lineStringOpacity",
-	        fieldLabel: 'Opacity',
+			name: "opacity",
+			fieldLabel: 'Opacity',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.opacity : 50,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -314,7 +244,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 	        }
 		});
 
-		var panel = Ext.create('Ext.panel.Panel', {
+		var panel = Ext.create('Ext.form.Panel', {
 			layout: 'form',
 			itemId: 'LineString',
 			items: [
@@ -323,6 +253,9 @@ Ext.define('Ck.map.action.OpenDraw', {
 				lineStringOpacity
 			]
 		});
+
+		if (!opt) opt = this.linestringConfig;
+		panel.getForm().setValues(opt);
 
 		return panel;
 	},
@@ -334,25 +267,22 @@ Ext.define('Ck.map.action.OpenDraw', {
 		if (!opt) {
 			opt = this.circleConfig;
 		}
-		var circleBorderColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'circleBorderColor',
+		var circleBorderColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'borderColor',
 	        width: 160,
-	        fieldLabel: 'Bordure',
+	        fieldLabel: 'Stroke',
 	        allowBlank: false,
-	        value: opt ? opt.borderColor : Ck.Style.stroke.color,
 	        listeners: {
 	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
 	        	change: this.onColorChange
 	        }
 		});
 
 		var circleBorderWidth = Ext.create('Ext.slider.Single', {
-			name: "circleBorderWidth",
-	        fieldLabel: 'Taille',
+			name: "borderWidth",
+			fieldLabel: 'Size',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.borderWidth : 5,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -363,10 +293,10 @@ Ext.define('Ck.map.action.OpenDraw', {
 		});
 
 		var circleBorderOpacity = Ext.create('Ext.slider.Single', {
-			name: "circleBorderOpacity",
-	        fieldLabel: 'Opacité',
+			name: "borderOpacity",
+			fieldLabel: 'Opacity',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.borderOpacity : 50,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -376,25 +306,22 @@ Ext.define('Ck.map.action.OpenDraw', {
 	        }
 		});
 
-		var circleBackgroundColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'circleBackgroundColor',
+		var circleBackgroundColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'backgroundColor',
 	        width: 160,
-	        fieldLabel: 'Remplissage',
+	        fieldLabel: 'Fill',
 	        allowBlank: false,
-	        value: opt ? opt.backgroundColor : Ck.Style.stroke.color,
 	        listeners: {
 	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
 	        	change: this.onColorChange
 	        }
 		});
 
 		var circleBackgroundOpacity = Ext.create('Ext.slider.Single', {
-			name: "circleBackgroundOpacity",
-	        fieldLabel: 'Opacité',
+			name: "backgroundOpacity",
+			fieldLabel: 'Opacity',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.backgroundOpacity : 50,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -404,7 +331,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 	        }
 		});
 
-		var panel = Ext.create('Ext.panel.Panel', {
+		var panel = Ext.create('Ext.form.Panel', {
 			layout: 'form',
 			itemId: 'Circle',
 			items: [
@@ -416,6 +343,9 @@ Ext.define('Ck.map.action.OpenDraw', {
 			]
 		});
 
+		if (!opt) opt = this.circleConfig;
+		panel.getForm().setValues(opt);
+
 		return panel;
 	},
 
@@ -426,25 +356,22 @@ Ext.define('Ck.map.action.OpenDraw', {
 		if (!opt) {
 			opt = this.polygonConfig;
 		}
-		var polygonBorderColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'polygonBorderColor',
+		var polygonBorderColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'borderColor',
 	        width: 160,
-	        fieldLabel: 'Bordure',
+	        fieldLabel: 'Stroke',
 	        allowBlank: false,
-	        value: opt ? opt.borderColor : Ck.Style.stroke.color,
 	        listeners: {
 	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
 	        	change: this.onColorChange
 	        }
 		});
 
 		var polygonBorderWidth = Ext.create('Ext.slider.Single', {
-			name: "polygonBorderWidth",
-	        fieldLabel: 'Taille',
+			name: "borderWidth",
+			fieldLabel: 'Size',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.borderWidth : 5,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -455,10 +382,10 @@ Ext.define('Ck.map.action.OpenDraw', {
 		});
 
 		var polygonBorderOpacity = Ext.create('Ext.slider.Single', {
-			name: "polygonBorderOpacity",
-	        fieldLabel: 'Opacité',
+			name: "borderOpacity",
+			fieldLabel: 'Opacity',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.borderOpacity : 50,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -468,25 +395,22 @@ Ext.define('Ck.map.action.OpenDraw', {
 	        }
 		});
 
-		var polygonBackgroundColorField = Ext.create('Ext.form.field.Text', {
-	        name: 'polygonBackgroundColor',
+		var polygonBackgroundColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'backgroundColor',
 	        width: 160,
-	        fieldLabel: 'Remplissage',
+	        fieldLabel: 'Fill',
 	        allowBlank: false,
-	        value: opt ? opt.backgroundColor : Ck.Style.stroke.color,
 	        listeners: {
 	        	scope: this,
-	        	render: this.onColorRender,
-	        	focus: this.onColorFocus,
 	        	change: this.onColorChange
 	        }
 		});
 
 		var polygonBackgroundOpacity = Ext.create('Ext.slider.Single', {
-			name: "polygonBackgroundOpacity",
-	        fieldLabel: 'Opacité',
+			name: "backgroundOpacity",
+			fieldLabel: 'Opacity',
+			labelSeparator: '',
 	        width: 200,
-			value: opt ? opt.backgroundOpacity : 50,
 			increment: 1,
 		    minValue: 0,
 		    maxValue: 100,
@@ -496,7 +420,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 	        }
 		});
 
-		var panel = Ext.create('Ext.panel.Panel', {
+		var panel = Ext.create('Ext.form.Panel', {
 			layout: 'form',
 			itemId: 'Polygon',
 			items: [
@@ -508,338 +432,94 @@ Ext.define('Ck.map.action.OpenDraw', {
 			]
 		});
 
+		if (!opt) opt = this.polygonConfig;
+		panel.getForm().setValues(opt);
+
 		return panel;
 	},
 
 	/**
-	 * [createModifyPanel description]
+	 * [createtextPanel description]
 	 */
-	createModifyPanel: function() {
-		var defaultPanel = Ext.create('Ext.panel.Panel', {
-			html: "Veuillez selectionner un objet"
+	createtextPanel: function(opt) {
+		var textlabelField = Ext.create('Ext.form.field.Text', {
+	        name: 'text',
+	        width: 160,
+	        fieldLabel: 'Label',
+	        allowBlank: false,
+            listeners: {
+	        	scope: this,	        	
+	        	change: this.onLabelChange
+	        }
+		});
+		
+		var textColorField = Ext.create('Ext.ux.colorpick.Field', {
+	        name: 'color',
+	        width: 160,
+	        fieldLabel: 'Color',
+	        allowBlank: false,
+	        listeners: {
+	        	scope: this,
+	        	change: this.onColorChange
+	        }
 		});
 
-		var modifyPointPanel = Ext.create('Ext.panel.Panel', {
-			layout: 'form',
-			itemId: 'ModifyPoint',
-			listeners: {
-				scope: this,
-				deactivate: this.onInnerPanelDeactivate
-			}/*,
-			items: [{
-				xtype: 'radiogroup',
-	            //fieldLabel: 'Width',
-	            columns: 1,
-        		vertical: true,
-                listeners: {
-                	scope: this,
-                	change: this.onRadioChange
-                },
-	            items: [{
-                	boxLabel: 'Aucun',
-                    name: 'point-modify',
-                    inputValue: 'point-nothing',
-                    hidden: true,
-                    checked: true
-                },{
-                    boxLabel: 'Deplacer',
-                    name: 'point-modify',
-                    inputValue: 'point-translate'
-                }]
-			}]*/
+		var FONTS = [
+            ["Arial","Arial"],
+            ["Verdana","Verdana"],
+            ["Times","Times"],
+            ["Tahoma","Tahoma"]
+        ];
+	    var textfontField =  Ext.create('Ext.form.field.ComboBox', {
+			width:160,
+			name: "police",
+            fieldLabel: "Police",
+            listeners: {
+	        	scope: this,
+	        	change: this.onPoliceChange
+	        },
+            store: new Ext.data.SimpleStore({
+				fields: ['value','display'],
+				data : FONTS
+			}),
+            mode: 'local',
+            displayField:'display',
+            triggerAction: 'all',
+            selectOnFocus:true
+        });
+		
+        var texttailleField = Ext.create('Ext.slider.Single', {
+			name: "taille",
+			fieldLabel: 'Size',
+			labelSeparator: '',
+	        width: 200,
+			increment: 1,
+		    minValue: 8,
+		    maxValue: 100,
+		    listeners: {
+	        	scope: this,
+	        	change: this.onWidthOrRadiusChange
+	        }
 		});
-
-		var modifyLineStringPanel = Ext.create('Ext.panel.Panel', {
-			layout: 'form',
-			itemId: 'ModifyLineString',
-			listeners: {
-				scope: this,
-				deactivate: this.onInnerPanelDeactivate
-			}/*,
-			items: [{
-				xtype: 'radiogroup',
-	            columns: 1,
-        		vertical: true,
-                listeners: {
-                	scope: this,
-                	change: this.onRadioChange
-                },
-	            items: [{
-                	boxLabel: 'Aucun',
-                    name: 'linestring-modify',
-                    inputValue: 'linestring-nothing',
-                    hidden: true,
-                    checked: true
-                },{
-                    boxLabel: 'Modifier la forme',
-                    name: 'linestring-modify',
-                    inputValue: 'linestring-shape',
-                    id: 'linestring-shape'
-                },{
-                    boxLabel: 'Deplacer',
-                    name: 'linestring-modify',
-                    inputValue: 'linestring-translate',
-                    id: 'linestring-translate'
-                }/*,{
-                    boxLabel: 'Tourner',
-                    name: 'linestring-modify',
-                    inputValue: 'linestring-rotate',
-                    id: 'linestring-rotate'
-                },{
-                    boxLabel: 'Modifier la taille',
-                    name: 'linestring-modify',
-                    inputValue: 'linestring-scale',
-                    id: 'linestring-scale'
-                }]
-			}]*/
-		});
-
-		var modifyCirclePanel = Ext.create('Ext.panel.Panel', {
-			layout: 'form',
-			itemId: 'ModifyCircle',
-			listeners: {
-				scope: this,
-				deactivate: this.onInnerPanelDeactivate
-			}/*,
-			items: [{
-				xtype: 'radiogroup',
-	            columns: 1,
-        		vertical: true,
-                listeners: {
-                	scope: this,
-                	change: this.onRadioChange
-                },
-	            items: [{
-                	boxLabel: 'Aucun',
-                    name: 'circle-modify',
-                    inputValue: 'circle-nothing',
-                    hidden: true,
-                    checked: true
-                },{
-                    boxLabel: 'Deplacer',
-                    name: 'circle-modify',
-                    inputValue: 'circle-translate'
-                }/*,{
-                    boxLabel: 'Modifier la taille',
-                    name: 'circle-modify',
-                    inputValue: 'circle-scale',
-                    id: 'circle-scale'
-                }]
-			}]*/
-		});
-
         
-		var modifyPolygonPanel = Ext.create('Ext.panel.Panel', {
+		var panel = Ext.create('Ext.form.Panel', {
 			layout: 'form',
-			itemId: 'ModifyPolygon',
-			listeners: {
-				scope: this,
-				deactivate: this.onInnerPanelDeactivate
-			}/*,
-			items: [{
-				xtype: 'radiogroup',
-	            columns: 1,
-        		vertical: true,
-                listeners: {
-                	scope: this,
-                	change: this.onRadioChange
-                },
-	            items: [{
-                	boxLabel: 'Aucun',
-                    name: 'polygon-modify',
-                    inputValue: 'polygon-nothing',
-                    hidden: true,
-                    checked: true
-                },{
-                    boxLabel: 'Modifier la forme',
-                    name: 'polygon-modify',
-                    inputValue: 'polygon-shape'
-                },{
-                    boxLabel: 'Deplacer',
-                    name: 'polygon-modify',
-                    inputValue: 'polygon-translate'
-                }/*,{
-                    boxLabel: 'Tourner',
-                    name: 'polygon-modify',
-                    inputValue: 'polygon-rotate'
-                },{
-                    boxLabel: 'Modifier la taille',
-                    name: 'polygon-modify',
-                    inputValue: 'polygon-scale',
-                    id: 'polygon-scale'
-                }]
-			}]*/
-		});
-
-        var modifyTextPanel = Ext.create('Ext.panel.Panel', {
-			layout: 'form',
-			itemId: 'ModifyText',
-			listeners: {
-				scope: this,
-				deactivate: this.onInnerPanelDeactivate
-			}
-		});
-
-        
-		var panel = Ext.create('Ext.panel.Panel', {
-			layout: 'card',
-			itemId: 'Modify',
-			drawCt: this,
-			dockedItems: [{
-				xtype: 'toolbar',
-				docked: 'top',
-				hidden: true,
-				items: [{
-					text: "Modifier",
-					tooltip: "Modifier l'apparence",
-					//hidden: true,
-					scope: this,
-					handler: this.editFeature
-				},{
-					text: "Supprimer",
-					tooltip: "Supprimer l'objet selectionne",
-					scope: this,
-					handler: this.removeFeature
-				},{
-					text: "Selectionner un autre",
-					tooltip: "Selectionner un autre objet",
-					scope: this,
-					handler: this.selectFeature
-				}]
-			}],
+			itemId: 'Text',
 			items: [
-				defaultPanel,
-				modifyPointPanel,
-				modifyLineStringPanel,
-				modifyCirclePanel,
-				modifyPolygonPanel,
-                modifyTextPanel
+				textlabelField,
+				textColorField,
+				textfontField,
+				texttailleField
 			]
 		});
 
+		if (!opt) opt = this.textConfig;
+		panel.getForm().setValues(opt);
+
 		return panel;
 	},
 
-	/**
-	 * [showColorWin description]
-	 * @param  {[type]} opener [description]
-	 */
-	showColorWin: function(opener) {
-		if (!this.colorWin) {
-			this.colorWin = Ext.create('Ext.window.Window', {
-				title: "Choix de couleur",
-				width: 200,
-				height: 200,
-				layout: 'fit',
-				style:'z-index:9999999',
-				closeAction: 'hide',
-				items: [{
-					xtype: "colorpicker",
-					value: '993300',
-					itemId: 'drawColorPicker',
-					opener: opener,
-					listeners: {
-						scope: this,
-						select: this.onColorSelect
-					}
-				}]
-			});
-		} else {
-			var colorpicker = this.colorWin.query('#drawColorPicker')[0] || null;
-			if (colorpicker) {
-				colorpicker.opener = opener;
-			}
-		}
-		
-		this.colorWin.show();
-		this.colorWin.toFront();
-	},
 
-	/**
-	 * [updateStyle description]
-	 * @param  {[type]} config [description]
-	 */
-	recupStyle: function(type) {
-		var style, tool;
-		var drawQuery = /^line/i.test(type) ? '#drawLine' : '#draw'+type;
-		tool = this.toolbar.query(drawQuery)[0] || null;
-
-		var key = type.toLowerCase()+"Config";
-
-		switch (type.toLowerCase()) {
-			case 'point':
-				style = new ol.style.Style({
-					image: new ol.style.Circle({
-						fill: new ol.style.Fill({
-							color: this.hexToRgb(this[key].color, this[key].opacity)
-						}),
-						radius: this[key].radius,
-						stroke: new ol.style.Stroke({
-							color: 'rgba(25, 25, 25, 0.9)',
-							width: 1
-						})
-					})
-				});
-				break;
-
-			case 'linestring':
-			case 'line':
-				style = new ol.style.Style({
-					stroke: new ol.style.Stroke({
-						color: this.hexToRgb(this[key].color, this[key].opacity),
-						width: this[key].width
-					})
-				});
-				break;
-
-			case 'circle':
-			case 'polygon':
-				style = new ol.style.Style({
-					fill: new ol.style.Fill({
-						color: this.hexToRgb(this[key].backgroundColor, this[key].backgroundOpacity)
-					}),
-					stroke: new ol.style.Stroke({
-						color: this.hexToRgb(this[key].borderColor, this[key].borderOpacity),
-						width: this[key].borderWidth
-					})
-				});
-				break;
-			case 'text':
-				style = new ol.style.Style({
-					image: new ol.style.Circle({
-						fill: new ol.style.Fill({
-							color: this.hexToRgb(this[key].color, '0.01')
-						}),
-						radius: 20
-						//stroke: new ol.style.Stroke({
-						//	color: 'rgba(25, 25, 25, 0.9)',
-						//	width: 1
-						//})
-					}),
-                    text:new ol.style.Text({
-                        textAlign: 'center',
-                        textBaseline: 'middle',
-                        font: 'Normal ' + this[key].taille + 'px ' + this[key].police,
-
-                        text: this[key].text,
-                        fill: new ol.style.Fill({
-							color: this.hexToRgb(this[key].color, this[key].opacity)
-						}),
-                        //stroke: new Stroke({color: outlineColor, width: outlineWidth}),
-                        //offsetX: offsetX,
-                        //offsetY: offsetY,
-                        placement: 'point'
-                        //maxAngle: maxAngle,
-                        //overflow: overflow,
-                        //rotation: rotation,
-                      })
-				});
-				break;
-                
-		}
-		
-		tool.baseAction.updateInteraction(style);
-	},
 
 	/**
 	 * [updateStyle description]
@@ -851,8 +531,6 @@ Ext.define('Ck.map.action.OpenDraw', {
 		tool = this.toolbar.query(drawQuery)[0] || null;
 
 		var key = type.toLowerCase()+"Config";
-		var test=this[key].taille;
-
 		switch (type.toLowerCase()) {
 			case 'point':
 				style = new ol.style.Style({
@@ -892,18 +570,12 @@ Ext.define('Ck.map.action.OpenDraw', {
 				});
 				break;
 			case 'text':
-                var test=this[key].taille;
-		var test2=this[key];
 				style = new ol.style.Style({
 					image: new ol.style.Circle({
 						fill: new ol.style.Fill({
 							color: this.hexToRgb(this[key].color, '0.01')
 						}),
 						radius: 20
-						//stroke: new ol.style.Stroke({
-						//	color: 'rgba(25, 25, 25, 0.9)',
-						//	width: 1
-						//})
 					})
                     ,
                     text:new ol.style.Text({
@@ -914,139 +586,133 @@ Ext.define('Ck.map.action.OpenDraw', {
                         fill: new ol.style.Fill({
 							color: this.hexToRgb(this[key].color, this[key].opacity)
 						}),
-                        //stroke: new Stroke({color: outlineColor, width: outlineWidth}),
-                        //offsetX: offsetX,
-                        //offsetY: offsetY,
                         placement: 'point'
-                        //maxAngle: maxAngle,
-                        //overflow: overflow,
-                        //rotation: rotation,
                       })
 				});
 				break;
-
 		}
 		
 		if (feature) {
 			feature.setStyle([style]);
-		} else {
-			if (tool) {
-				tool.baseAction.updateInteraction(style);
-			}
-		}
-	},
-
-	/**
-	 * [editFeature description]
-	 * @param  {[type]} cmp [description]
-	 */
-	editFeature: function(cmp) {
-		var item = this.modifyPanel.getLayout().getActiveItem(),
-			type = item.itemId.replace(/^modify(.*)$/i, '$1');
-		
-		var drawQuery = '#drawModify';
-		var tool = this.toolbar.query(drawQuery)[0] || null;
+		} 
 		if (tool) {
-			var feature = tool.baseAction.selectedFeatures.getArray()[0];
-			
-			var panel, color, borderColor, backgroundColor,text, widthOrRadius,
-				rgba, borderRGBA, backgroundRGBA, 
-				opacity, borderOpacity, backgroundOpacity,
-				opt = {},
-				style = feature.getStyle()[0] || null;
-			
-			this.win.currentType = type;
-			this.currentOperation = "edit";
-			this.selectedFeature = feature;
-
-			switch (type.toLowerCase()) {
-				case 'point':
-					color = style ? style.getImage().getFill().getColor() : this.pointConfig.color;
-					widthOrRadius = style ? style.getImage().getRadius() : this.pointConfig.radius;
-					rgba = this.parseRGBColor(color);
-					opacity = /^[0-9\.]+$/g.test(rgba[3]) ? (rgba[3] <= 1 ? parseInt(rgba[3]*100) : parseInt(rgba[3])) : 100;
-					color = this.rgbToHex(rgba[0], rgba[1], rgba[2]);
-					opt.color = color;
-					opt.opacity = opacity;
-					opt.radius = widthOrRadius;
-					
-					panel = this.createPointPanel(opt);
-					break;
-				case 'linestring':
-					panel = this.createLineStringPanel(opt);
-					break;
-				case 'circle':
-					borderColor = style ? style.getStroke().getColor() : this.circleConfig.borderColor;
-					borderRGBA = this.parseRGBColor(borderColor);
-					borderColor = this.rgbToHex(borderRGBA[0], borderRGBA[1], borderRGBA[2]);
-					borderOpacity = /^[0-9\.]+$/g.test(borderRGBA[3]) ? parseInt(borderRGBA[3]) : 100;
-					backgroundColor = style ? style.getFill().getColor() : this.circleConfig.backgroundColor;
-					backgroundRGBA = this.parseRGBColor(backgroundColor);
-					backgroundColor = this.rgbToHex(backgroundRGBA[0], backgroundRGBA[1], backgroundRGBA[2]);
-					backgroundOpacity = /^[0-9\.]+$/g.test(backgroundRGBA[3]) ? parseInt(backgroundRGBA[3]) : 100;
-					opt.borderColor = borderColor;
-					opt.borderOpacity = borderOpacity;
-					opt.backgroundColor = backgroundColor;
-					opt.backgroundOpacity = backgroundOpacity;
-					
-					panel = this.createCirclePanel(opt);
-					break;
-				case 'polygon':
-					borderColor = style ? style.getStroke().getColor() : this.circleConfig.borderColor;
-					borderRGBA = this.parseRGBColor(borderColor);
-					borderColor = this.rgbToHex(borderRGBA[0], borderRGBA[1], borderRGBA[2]);
-					borderOpacity = /^[0-9\.]+$/g.test(borderRGBA[3]) ? parseInt(borderRGBA[3]) : 100;
-					backgroundColor = style ? style.getFill().getColor() : this.circleConfig.backgroundColor;
-					backgroundRGBA = this.parseRGBColor(backgroundColor);
-					backgroundColor = this.rgbToHex(backgroundRGBA[0], backgroundRGBA[1], backgroundRGBA[2]);
-					backgroundOpacity = /^[0-9\.]+$/g.test(backgroundRGBA[3]) ? parseInt(backgroundRGBA[3]) : 100;
-					opt.borderColor = borderColor;
-					opt.borderOpacity = borderOpacity;
-					opt.backgroundColor = backgroundColor;
-					opt.backgroundOpacity = backgroundOpacity;
-					
-					panel = this.createPolygonPanel(opt);
-					break;
-                    
-                    
-                case 'text':
-					color = style ? style.getImage().getFill().getColor() : this.textConfig.color;
-					widthOrRadius = style ? style.getImage().getRadius() : this.textConfig.radius;
-					rgba = this.parseRGBColor(color);
-					opacity = /^[0-9\.]+$/g.test(rgba[3]) ? (rgba[3] <= 1 ? parseInt(rgba[3]*100) : parseInt(rgba[3])) : 100;
-					color = this.rgbToHex(rgba[0], rgba[1], rgba[2]);
-                    text=style.getText().getText();
-                    
-                    var font=style.getText().getFont();
-					opt.color = color;
-					opt.opacity = opacity;
-					opt.radius = widthOrRadius;
-                    opt.text = text;
-                    opt.taille = font.split(' ')[1].replace('px','');
-                    opt.police = font.split(' ')[2];
-					
-					panel = this.createtextPanel(opt);
-					break;    
-                    
-			}
-			if (panel) {
-				var win = Ext.create('Ext.window.Window', {
-					title: "Edition d'objet",
-					width: 280,
-					height: 280,
-					layout: 'fit',
-					items: [panel],
-					listeners: {
-						scope: this,
-						close: function(cmp) {
-							this.currentOperation = "add";
-						}
-					}
-				});
-				win.show();
-			}
+			tool.baseAction.updateInteraction(style);
 		}
+
+		return style;
 	},
+
+	modifyFeature: function(feature) {
+		if(!feature) {
+			this.win.getViewModel().set('hasSelectedFeature', false);
+			return;
+		}
+
+		this.selectedFeature = feature;
+		this.currentOperation = "edit";
+		this.win.getViewModel().set('hasSelectedFeature', true);
+
+		var type = this.getFeatureType(feature);
+		if (!type) return;
+
+		this.win.currentType = type;
+
+		var style = this.getFeatureStyle(feature);
+
+		this.draw.activeDraw(type, true);
+
+		var p = this.win.query('#'+type)[0];
+		if(p) p.getForm().setValues(style);
+	},
+
+	getFeatureStyle: function(feature) {
+		var color, borderColor, backgroundColor, 
+		    hexColor, kexBorderColor, hexBackgroundColor, 
+			rgba, borderRGBA, backgroundRGBA, 
+			opacity, borderOpacity, backgroundOpacity,
+			font, widthOrRadius,
+			opt = {};
+		
+		var type = this.getFeatureType(feature);
+
+		var style = feature.getStyle();
+		if (!style) return false;
+		style = style[0];
+
+		switch (type.toLowerCase()) {
+			case 'point':
+				color = style.getImage().getFill().getColor();
+				rgba = this.parseRGBColor(color);
+				hexColor = this.rgbToHex(rgba[0], rgba[1], rgba[2]);
+				opacity = this.parseOpacity(color);
+				widthOrRadius = style.getImage().getRadius();
+
+				opt.color = hexColor;
+				opt.opacity = opacity;
+				opt.radius = widthOrRadius;
+				break;
+			case 'linestring':
+				color = style.getStroke().getColor();
+				rgba = this.parseRGBColor(color);
+				hexColor = this.rgbToHex(rgba[0], rgba[1], rgba[2]);
+				opacity = this.parseOpacity(color);
+				widthOrRadius = style.getStroke().getWidth();
+
+				opt.color = hexColor;
+				opt.opacity = opacity;
+				opt.width = widthOrRadius;			
+				break;
+			case 'circle':
+				borderColor = style.getStroke().getColor();
+				borderRGBA = this.parseRGBColor(borderColor);
+				kexBorderColor = this.rgbToHex(borderRGBA[0], borderRGBA[1], borderRGBA[2]);
+				borderOpacity = this.parseOpacity(borderColor);
+				backgroundColor = style.getFill().getColor();
+				backgroundRGBA = this.parseRGBColor(backgroundColor);
+				hexBackgroundColor = this.rgbToHex(backgroundRGBA[0], backgroundRGBA[1], backgroundRGBA[2]);
+				backgroundOpacity = this.parseOpacity(backgroundColor);
+
+				opt.borderColor = kexBorderColor;
+				opt.borderOpacity = borderOpacity;
+				opt.backgroundColor = hexBackgroundColor;
+				opt.backgroundOpacity = backgroundOpacity;			
+				break;
+			case 'polygon':
+				borderColor = style.getStroke().getColor();
+				borderRGBA = this.parseRGBColor(borderColor);
+				kexBorderColor = this.rgbToHex(borderRGBA[0], borderRGBA[1], borderRGBA[2]);
+				borderOpacity = this.parseOpacity(borderColor);
+				backgroundColor = style.getFill().getColor();
+				backgroundRGBA = this.parseRGBColor(backgroundColor);
+				hexBackgroundColor = this.rgbToHex(backgroundRGBA[0], backgroundRGBA[1], backgroundRGBA[2]);
+				backgroundOpacity = this.parseOpacity(backgroundColor);
+
+				opt.borderColor = kexBorderColor;
+				opt.borderOpacity = borderOpacity;
+				opt.backgroundColor = hexBackgroundColor;
+				opt.backgroundOpacity = backgroundOpacity;
+				break;
+			case 'text':
+				color = style.getImage().getFill().getColor();
+				widthOrRadius = style.getImage().getRadius();
+				rgba = this.parseRGBColor(color);
+				opacity = this.parseOpacity(color);
+				hexColor = this.rgbToHex(rgba[0], rgba[1], rgba[2]);
+				text = style.getText().getText();
+				font = style.getText().getFont();
+
+				opt.color = hexColor;
+				opt.opacity = opacity;
+				opt.radius = widthOrRadius;
+				opt.text = text;
+				opt.taille = font.split(' ')[1].replace('px','');
+				opt.police = font.split(' ')[2];
+				break;
+		}
+		
+		return opt;
+	},
+
 
 	/**
 	 * [removeFeature description]
@@ -1084,57 +750,6 @@ Ext.define('Ck.map.action.OpenDraw', {
 	},
 
 	/**
-	 * [updateFeatureConfig description]
-	 * @param  {[type]} attribute [description]
-	 */
-	updateFeatureConfig: function(attribute, val) {
-		// color
-		var opacityKey, opacity,
-			type = this.win.currentType,
-			reg = new RegExp('^'+type, 'gi'),
-			key = type.toLowerCase()+"Config";
-
-		attribute = attribute.replace(reg, '');
-		attribute = attribute[0].toLowerCase() + attribute.substring(1, attribute.length);
-		
-
-		if (attribute === "color") {				// color
-			opacityKey = attribute.replace(/^(background|border)?.+$/gi, function(s, m) {
-			  return /^(opacity|color)$/i.test(s) ? "opacity" : m+"Opacity";
-			});
-			opacity = (this[key][opacityKey] > 1) ? this[key][opacityKey]/100 : this[key][opacityKey];
-			this[key][attribute] = this.hexToRgb(val, opacity);
-			this[key][opacityKey] = opacity;
-
-		} else if (attribute === "radius") {		// width || radius			
-			if (/point/i.test(type)) {
-				this[key].radius = val;
-			} else if (/linestring/i.test(type)) {
-				this[key].width = val;
-			} else {
-				this[key].borderWidth = val;
-			}
-
-		} else if (attribute === "opacity") {		// opacity			
-			var colorKey, rgba, color;
-			if (/point/i.test(type)) {
-				rgba = this.parseRGBColor(this[key].color);
-				color = this.rgbToHex(rgba[0], rgba[1], rgba[2]);
-				this[key].color = color;
-				this[key].opacity = val/100;
-			} else if (/linestring/i.test(type)) {
-				this[key].opacity = val/100;
-			} else {
-				colorKey = attribute.replace(/^(background|border)?.+$/gi, function(s, m) {
-				  return /^(opacity|color)$/i.test(s) ? "color" : m+"Color";
-				});
-				this[key][attribute] = val/100;
-				this[key][colorKey] = /^rgba?\(/i.test(this[key][colorKey]) ? this[key][colorKey].replace(/,\s*[0-9\.]+\)$/i, ', '+val/100+')') : '#c3c3c3';				
-			}
-		}
-	},
-
-	/**
 	 * [updateFeature description]
 	 * @param  {[type]} attribute [description]
 	 */
@@ -1145,69 +760,32 @@ Ext.define('Ck.map.action.OpenDraw', {
 	},
 
 	/**
-	 * [onColorRender description]
-	 * @param  {[type]} cmp [description]
-	 */
-	onColorRender: function(cmp) {
-		if (cmp.inputEl) {
-			cmp.inputEl.setStyle({
-	        	background: cmp.value
-			});
-		}
-	},
-
-	/**
-	 * [onColorFocus description]
-	 * @param  {[type]} cmp [description]
-	 * @param  {[type]} e   [description]
-	 */
-	onColorFocus: function(cmp, e) {
-		this.showColorWin(cmp);
-	},
-
-	/**
-	 * [onColorSelect description]
-	 * @param  {[type]} cmp   [description]
-	 * @param  {[type]} color [description]
-	 */
-	onColorSelect: function(cmp, color) {	
-		if (cmp.opener && cmp.opener.getXType() === 'textfield') {
-			cmp.opener.setValue('#'+color);
-			this.updateFeature(cmp.opener.config.name, color);
-		}
-		if (cmp.ownerCt.getXType() === 'window') {
-			cmp.ownerCt.close();
-		}
-	},
-
-	/**
 	 * [onColorChange description]
 	 * @param  {[type]} cmp [description]
 	 * @param  {[type]} val [description]
 	 */
 	onColorChange: function(cmp, val) {
-		cmp.inputEl.setStyle({
-			color: this.invertColor(val),
-			background: val
-		})
+		if(!this.win) return;
 		type = this.win.currentType;
 		var key = type.toLowerCase()+"Config";
-		if(cmp.config.name == 'circleBorderColor'){
+
+		if(cmp.config.name == 'borderColor'){
 			this[key].borderColor = val;
-		}else if(cmp.config.name == 'circleBackgroundColor'){
+		}else if(cmp.config.name == 'backgroundColor'){
 			this[key].backgroundColor = val;
-		}else if(cmp.config.name == 'pointColor'){
+		}else if(cmp.config.name == 'color'){
 			this[key].color = val;
-		}else if(cmp.config.name == 'lineStringColor'){
+		}else if(cmp.config.name == 'color'){
 			this[key].color = val;
-		}else if(cmp.config.name == 'polygonBorderColor'){
+		}else if(cmp.config.name == 'borderColor'){
 			this[key].borderColor = val;
-		}else if(cmp.config.name == 'polygonBackgroundColor'){
+		}else if(cmp.config.name == 'backgroundColor'){
 			this[key].backgroundColor = val;
 		}else if(cmp.config.name == 'textColor'){
 			this[key].color = val;
 		}
-		
+
+		this.updateFeature(cmp.config.name, val);
 	},
 
     
@@ -1216,13 +794,13 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 * @param  {[type]} cmp [description]
 	 * @param  {[type]} val [description]
 	 */
-	onLabelChange: function(cmp, val) {				
+	onLabelChange: function(cmp, val) {	
+		if(!this.win) return;			
     	type = this.win.currentType;
 		var key = type.toLowerCase()+"Config";
 		this[key].text = val;	
 
-        this.updateFeature(cmp.config.name, val);        
-		
+        this.updateFeature(cmp.config.name, val);
 	},
 
     
@@ -1231,16 +809,14 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 * @param  {[type]} cmp [description]
 	 * @param  {[type]} val [description]
 	 */
-	onPoliceChange: function(cmp, val) {				
+	onPoliceChange: function(cmp, val) {
+		if(!this.win) return;				
     	type = this.win.currentType;
 		var key = type.toLowerCase()+"Config";
 		this[key].police= val;	
 
-        this.updateFeature(cmp.config.name, val);        
-		
+        this.updateFeature(cmp.config.name, val);
 	},
-
-
 
 
 	/**
@@ -1248,23 +824,21 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 * @param  {[type]} cmp [description]
 	 * @param  {[type]} val [description]
 	 */
-	onWidthOrRadiusChange: function(cmp, val) {	
+	onWidthOrRadiusChange: function(cmp, val) {
+		if(!this.win) return;	
 		type = this.win.currentType;
 		var key = type.toLowerCase()+"Config";
-		if(cmp.config.name == 'circleBorderWidth'){
+		if(cmp.config.name == 'borderWidth'){
 			this[key].borderWidth = val;
-		}else if(cmp.config.name == 'pointRadius'){
+		}else if(cmp.config.name == 'radius'){
 			this[key].radius = val;
-		}else if(cmp.config.name == 'lineStringWidth'){
+		}else if(cmp.config.name == 'width'){
 			this[key].width = val;
-		}else if(cmp.config.name == 'polygonBorderWidth'){
+		}else if(cmp.config.name == 'borderWidth'){
 			this[key].borderWidth = val;
 		}else if(cmp.config.name == 'taille'){
 			this[key].taille = val;
 		}
-
-
-        
 	
 		this.updateFeature(cmp.config.name, val);
 	},  
@@ -1275,59 +849,26 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 * @param  {[type]} val [description]
 	 */
 	onOpacityChange: function(cmp, val) {
+		if(!this.win) return;	
 		type = this.win.currentType;
 		var key = type.toLowerCase()+"Config";
-		if(cmp.config.name == 'circleBorderOpacity'){
+		if(cmp.config.name == 'borderOpacity'){
 			this[key].borderOpacity = val/100;
-		}else if(cmp.config.name == 'circleBackgroundOpacity'){
+		}else if(cmp.config.name == 'backgroundOpacity'){
 			this[key].backgroundOpacity = val/100;
-		}else if(cmp.config.name == 'pointOpacity'){
+		}else if(cmp.config.name == 'opacity'){
 			this[key].opacity = val/100;
-		}else if(cmp.config.name == 'lineStringOpacity'){
+		}else if(cmp.config.name == 'opacity'){
 			this[key].opacity = val/100;
-		}else if(cmp.config.name == 'polygonBorderOpacity'){
+		}else if(cmp.config.name == 'borderOpacity'){
 			this[key].borderOpacity = val/100;
-		}else if(cmp.config.name == 'polygonBackgroundOpacity'){
+		}else if(cmp.config.name == 'backgroundOpacity'){
 			this[key].backgroundOpacity = val/100;
 		}
 
-	
 		this.updateFeature(cmp.config.name, val);
 	},
 
-	/**
-	 * [onRadioChange description]
-	 * @param  {[type]} cmp    [description]
-	 * @param  {[type]} newVal [description]
-	 * @param  {[type]} oldVal [description]
-	 */
-	onRadioChange: function(cmp, newVal, oldVal) {
-		var interactionType = Object.values(cmp.getValue())[0].toLowerCase().replace(/^[^\-]+-(\w+)$/i, '$1');
-		if (interactionType) {		
-			var drawQuery = '#drawModify';
-			var tool = this.toolbar.query(drawQuery)[0] || null;
-			if (tool) {
-				//tool.baseAction.toggleInteraction(interactionType);
-			}
-		}
-	},
-
-	/**
-	 * [onRadioChange description]
-	 * @param  {[type]} cmp [description]
-	 * @param  {[type]} selected [description]
-	 */
-	onRadioChange_old: function(cmp, selected) {
-		
-		if (selected) {
-			var interactionType = cmp.inputValue.split('-')[1];			
-			var drawQuery = '#drawModify';
-			var tool = this.toolbar.query(drawQuery)[0] || null;
-			if (tool) { 
-				tool.baseAction.toggleInteraction(interactionType);
-			}
-		}
-	},
 
 	/**
 	 * [onInnerPanelDeactivate description]
@@ -1383,7 +924,8 @@ Ext.define('Ck.map.action.OpenDraw', {
 			},{
 				ckAction: "ckmapDrawModify",
 				win: cmp,
-				choicePanel: this.modifyPanel
+				objprt: this,
+				//choicePanel: this.modifyPanel
 			}]
 		});
 
@@ -1396,24 +938,69 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 */
 	onWinClose: function(cmp) {
 		var type = this.win.currentType;
-		var tool = this.toolbar.query('#draw'+type)[0] || null;
-		cmp.setActiveItem(0);
+		this.currentAction = 'draw'+type;
+
+		var tool = this.toolbar.query('#'+this.currentAction)[0] || null;
+		//cmp.setActiveItem(0);
 		if (tool) {
 			tool.toggle(false);
 		}
 	},
-
+		
+	/**
+	 * [onWinShow description]
+	 * @param  {[type]} cmp [description]
+	 */
+	onWinShow: function(cmp) {
+		if(!this.currentAction) return;
+		var tool = this.toolbar.query('#'+this.currentAction)[0] || null;
+		//cmp.setActiveItem(0);
+		if (tool) {
+			tool.toggle(true);
+		}
+	},
+	
 	/**
 	 * 
 	 */
 	onToolbarRender: function(cmp) {
 		var map = Ck.getMap();
 		cmp.items.each(function(tool) {
-			if (tool.baseAction && typeof(tool.baseAction.ckLoaded) !== undefined) {
-				tool.baseAction.ckLoaded(map);
+			if (tool.baseAction) {
+				if (typeof(tool.baseAction.ckLoaded) !== undefined) {
+					tool.baseAction.ckLoaded(map);
+				}
+
+				// Init default tool
+				if (this.defaultAction && this.defaultAction == tool.ckAction) {
+					tool.toggle(true);
+					this.win.currentType = tool.baseAction.type;
+				}
 			}
-		});
+		}, this);
 	},
+
+	getFeatureType: function(feature) {
+		if(!feature) return false;
+		if(!feature.getGeometry()) return false;
+
+		var type = feature.getGeometry().getType();
+			
+		// !! specify a style interaction - otherwise getStyle can return a function !
+		var style = feature.getStyle()
+		if(!style) return type;
+		
+		style = style[0];
+		if(!style) return type;
+
+		var text = style.getText();
+		if (text != null) {
+			type='Text';
+		}
+
+		return type;
+	},
+
 
 	/**
 	 * parse rgba color string to array containing : r, g, b, alpha
@@ -1421,7 +1008,16 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 * @return {array}       [r, g, b, alpha]
 	 */
 	parseRGBColor: function(color) {
+		if(Ext.isArray(color)) return color;
 		return color.replace(/(rgba?\(|\))/g, '').split(/,\s*/);
+	},
+
+	parseOpacity: function(color) {
+		if(!Ext.isArray(color)) {
+			color = this.parseRGBColor(color);
+		}
+		var opacity = /^[0-9\.]+$/g.test(color[3]) ? (color[3] <= 1 ? parseInt(color[3]*100) : parseInt(color[3])) : 100;
+		return opacity;
 	},
 
 	/**
@@ -1506,14 +1102,5 @@ Ext.define('Ck.map.action.OpenDraw', {
 	 */
 	close: function() {
 		//this.win.hide();
-	},
-	
-	render: function(c){
-		Ext.create('Ext.tip.ToolTip', {
-			target: c.getEl(),
-			html: this.tooltip,
-			anchor:"left",
-			animCollapse:false
-		},this);
 	}
 });
