@@ -18,7 +18,11 @@ Ext.define('Ck.legend.plugin.Slider', {
 
 	onItemclick: function(tree, record, item, index, e, eOpts ) {
 		var layer = record.get('layer');
-		if(layer && record.isLeaf() && e.target.tagName == "SPAN" && !Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
+		if(layer 
+			&& record.isLeaf() 
+			&& (e.target.tagName == "SPAN" || e.target.tagName == "DIV")
+			&& !Ext.String.startsWith(e.target.className.trim(), "x-action") 
+			&& !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 			var opacity = layer.getOpacity();
 
 			var slider = record.get('slider');
