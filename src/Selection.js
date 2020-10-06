@@ -618,7 +618,7 @@ Ext.define('Ck.Selection', {
 			var sel;
 
 			// Force number of features limitation
-			if(this.getLimit() !== null) {
+			if(this.getLimit() !== null && this.getLimit() > 0) {
 				features = features.slice(0, this.getLimit());
 			}
 

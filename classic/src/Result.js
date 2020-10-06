@@ -70,8 +70,10 @@ Ext.define("Ck.Result", {
 			
 			layerTree.columns = [{
 				text: 'Couches',
-				width: 200, // Fix #274
-				dataIndex: 'layer'
+				width: 200,
+				dataIndex: 'text',
+				menuDisabled: true,
+				sortable: false
 			}/*,{
 				text: 'Sélectionnés',
         		width: 50,

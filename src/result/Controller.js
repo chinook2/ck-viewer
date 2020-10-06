@@ -99,16 +99,20 @@ Ext.define('Ck.result.Controller', {
 		this.layerRoot.removeAll();
 		var result = [];
 		for(var i in res) {
+			var id = res[i].layer.get("id");
+			var nb = res[i].features.length.toString();
+			var title = res[i].layer.get("title");
+
 			if(Ext.isEmpty(firstId)) {
-				firstId = res[i].layer.get("id") + "-" + now;
+				firstId = id + "-" + now;
 			}
-			
+
 			result.push({
 				leaf	: true,
-				id		: res[i].layer.get("id") + "-" + now,
-				text	: res[i].layer.get("title") + " (" + res[i].features.length.toString() + ")",
-				layer	: res[i].layer.get("title"),
-				selected: res[i].features.length.toString(),
+				id		: id + "-" + now,
+				text	: title + " (" + nb + ")",
+				layer	: title,
+				selected: nb,
 				data	: res[i]
 			});
 		};
