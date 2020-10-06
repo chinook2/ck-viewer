@@ -51,8 +51,15 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 
 		if(!(layer instanceof ol.layer.Group)) {
 			var src = layer.getSource();
-			if(src.getUrl && Ext.isString(src.getUrl()) && e.target.tagName == "SPAN" && record.isLeaf() && layer && layer.ckLayer && layer.ckLayer.getData().properties.legend &&
-				!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
+			if (src.getUrl 
+				&& Ext.isString(src.getUrl()) 
+				&& (e.target.tagName == "SPAN" || e.target.tagName == "DIV")
+				&& record.isLeaf() 
+				&& layer 
+				&& layer.ckLayer 
+				//&& layer.ckLayer.getData().properties.legend 
+				&& !Ext.String.startsWith(e.target.className.trim(), "x-action") 
+				&& !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 				var graphic = record.get('graphic');
 
 				if(graphic && graphic.getEl() && graphic.getEl().dom && Ext.get(graphic.getEl().dom.id)) {
