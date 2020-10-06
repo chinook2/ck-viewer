@@ -108,13 +108,15 @@ Ext.define("Ck.Print", {
 		],
 		bind: { value: "{printParam.orientation}" }
 	},{
-        xtype: 'numberfield',
+        xtype: 'slider',
         name: 'rotate',
 		itemId: "rotate",
         fieldLabel: 'Tourner la carte',
-        value: 0,
+		value: 0,
+		increment: 10,
         maxValue: 360,
-        minValue: 0
+		minValue: 0,
+		bind: { value: "{printParam.angle}" }
     }],
 
 	buttons: [{

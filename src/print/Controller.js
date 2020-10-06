@@ -130,7 +130,7 @@ Ext.define('Ck.print.Controller', {
 			"ckprint textfield#title": {
 				change: this.valueChange
 			},
-			"ckprint numberfield#rotate": {
+			"ckprint slider#rotate": {
 				change: this.rotatemap
 			}
 		});
