@@ -108,7 +108,7 @@ Ext.define('Ck.map.action.Select', {
 					this.result = Ext.create(resOpt);
 					this.win = Ext.create('Ext.window.Window', Ext.apply({
 						title: "Result selection",
-						width: 800,
+						width: 950,
 						height: 600,
 						layout: 'fit',
 						collapsible: true,

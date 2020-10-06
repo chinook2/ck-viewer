@@ -13,7 +13,16 @@ Ext.define("Ck.Result", {
 	requires: [],
 	
 	config: {
-		pageSize: 15
+		pageSize: 15,
+		
+		/**
+		 * @param {Object[]}
+		 */
+		widgetColumns: [{
+			type: "sheet"
+		}],
+		
+		layerTreeToColumns: false
 	},
 	
 	layout: {
@@ -25,8 +34,8 @@ Ext.define("Ck.Result", {
 	items: [{
 		itemId: "layer_tree",
 		xtype: "treepanel",
-		width: 200,
-		resizable: true,
+		width: 205,
+		resizable: false,
 		rootVisible: false,
 		store: {
 			xtype: "tree",
@@ -37,26 +46,38 @@ Ext.define("Ck.Result", {
 		},
 		bbar: [{
 			text: "Clear history",
+			// JMA Hard fix - temp
+			hidden: true,
+			//
 			itemId: "clear-history"
 		}]
 	},{
-		title: "Features",
 		itemId: "feature_grid",
-		xtype: "gridpanel",
-		flex: 1,
-		bbar: [{
-			xtype: "pagingtoolbar",
-			itemId: "feature_paging",
-			displayInfo: true,
-			displayMsg: "Displaying features {0} - {1} of {2}",
-			emptyMsg: "No features to display"
-		}]
+		xtype: "ckresult-feature"
 	}],
 	
 
 	buttons: [{
 		text: "Close",
 		itemId: "close"
-	}]
+	}],
 	
+	initComponent: function() {
+		var me = this;
+
+		if(this.getConfig("layerTreeToColumns")) {
+			var layerTree = this.items[0];
+			
+			layerTree.columns = [{
+				text: 'Couches',
+				width: 200, // Fix #274
+				dataIndex: 'layer'
+			}/*,{
+				text: 'Sélectionnés',
+        		width: 50,
+				dataIndex: 'selected'
+			}*/];
+		}
+		me.callParent(arguments);
+	}
 });
