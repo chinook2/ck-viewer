@@ -452,13 +452,9 @@ Ext.define('Ck.map.Controller', {
 		// Relay olMap events
 		var me = this;
 		olGroup.getLayers().on('add', function(colEvent) {
-			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
-				return;
-			}
 			var layer = colEvent.element;
 			var col = colEvent.target;
 			var idx = col.getArray().indexOf(layer);
-
 
 			// Alias to get extension property directly
 			layer.getExtension = function(key) {
@@ -468,9 +464,6 @@ Ext.define('Ck.map.Controller', {
 			me.fireEvent('addlayer', layer, idx);
 		});
 		olGroup.getLayers().on('remove', function(colEvent) {
-			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
-				return;
-			}
 			var layer = colEvent.element;
 			me.fireEvent('removelayer', layer);
 		});

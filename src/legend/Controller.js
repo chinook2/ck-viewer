@@ -5,6 +5,8 @@ Ext.define('Ck.legend.Controller', {
 	extend: 'Ck.Controller',
 	alias: 'controller.cklegend',
 	
+	isMoving: false,
+
 	/**
 	 * Class list possible for node main <tr> with associate
 	 * function returned boolean to indicated if node have to be added.
@@ -48,12 +50,14 @@ Ext.define('Ck.legend.Controller', {
 		v.getStore().on('update', this.onUpdate);
 
 		// Expand on item click
+		/*
 		v.on('itemclick', function(view, rec, item, index, e, eOpts) {
 			if(!Ext.String.startsWith(e.target.className.trim(), "x-action") && !Ext.String.startsWith(e.target.className.trim(), "x-tree-checkbox")) {
 				view.toggle(rec);
 			}
 		});
-		
+		*/
+
 		// Manage row style
 		v.getView().getRowClass = this.getNodeClasses.bind(this);
 
@@ -84,6 +88,7 @@ Ext.define('Ck.legend.Controller', {
 	 * @param {Number} Index of the layer in the layer group
 	 */
 	layerAdd: function(layer, idx) {
+		if(this.isMoving) return;
 		if(!Ext.isEmpty(layer.get("title")) && !Ext.isEmpty(layer.get("group")) && (layer instanceof ol.layer.Group || layer.ckLayer.getUserLyr())) {
 			var node = {
 				leaf: !(layer instanceof ol.layer.Group),
@@ -116,19 +121,20 @@ Ext.define('Ck.legend.Controller', {
 		oldCol = oldGrp.get("layer").getLayers(),
 		newCol = newGrp.get("layer").getLayers();
 
-		// Set new group to layer and invert index to respect layer display order
+		// Set new group to layer
 		lyr.set("group", newGrp.get("layer"));
+		// invert index to respect layer display order
 		idx = (newGrp.childNodes.length - idx) - 1;
 
-		// Exception for root folder
-		if(oldGrp.get("layer") == this.getOlMap().getLayerGroup()) {
-			idx++;
-		}
+		// Disable events remove/add layer
+		this.isMoving = true;
 
-		// Inhibit remove and add layer map event (in Ck.map.Controller with Ck.functionInStackTrace)
 		oldCol.remove(lyr);
 		newCol.insertAt(idx, lyr);
 		
+		// Enable events remove/add layer
+		this.isMoving = false;
+
 		// Return false to avoid move event recusion. Action already done by OpenLayers group managment
 		return false;
 	},
@@ -138,6 +144,7 @@ Ext.define('Ck.legend.Controller', {
 	 * @param {ol.layer}
 	 */
 	layerRemove: function(layer) {
+		if(this.isMoving) return;
 		var node = layer.get("node");
 		if(node) {
 			node.remove();
