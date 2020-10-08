@@ -53,6 +53,8 @@ Ext.define('Ck.form.Controller', {
 	 */
 
 	init: function() {
+		this.callParent(arguments);
+
 		this.isSubForm = this.view.getIsSubForm();
 		this.autoLoad = this.view.getAutoLoad();
 		this.editing = this.view.getEditing();
@@ -93,14 +95,24 @@ Ext.define('Ck.form.Controller', {
                 }
 			}
 			//
-
+			
 			// Try find parent form name (used for overriden controllers)
 			if(inlineForm && !inlineForm.name) {
 				inlineForm.name = parentForm.getController().name;
 			}
 		}
 
-		if(this.editing === true) this.startEditing();
+		// Display "Edit" button only if layer is editable
+		this.getViewModel().set("isEditable", false);
+		var layer = this.getMap().getLayerById(this.view.layer);
+		if(layer && layer.getExtension("editable")) {
+			this.getViewModel().set("isEditable", true);
+
+			// Only if layer is editable
+			if(this.editing === true) this.startEditing();
+		}
+		//
+		
 		this.initForm(inlineForm);
 	},
 
@@ -1829,7 +1841,7 @@ Ext.define('Ck.form.Controller', {
 		var dataObject = this.view.getDataObject();
 		
 		if(dataObject && lyr && !Ext.isEmpty(fid)) {
-			var map=Ck.getMap();
+			var map = this.getMap();
 			var layer = map.getLayerById(lyr);
 			
 			if(layer) {
