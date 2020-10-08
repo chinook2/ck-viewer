@@ -43,7 +43,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		/**
 		 * Hide fields without Alias
 		 */
-		onlyFieldWithAlias: false,
+		onlyFieldWithAlias: true,
 
 		/**
 		 * Display empty fields
@@ -240,15 +240,17 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}
 			}
 			// Add the others fields
-			var diffValues = Ext.Array.toMap(Ext.Array.difference(
-				Ext.Object.getKeys(rawValues),
-				Ext.Object.getKeys(values)));
-			for(var df in diffValues) {
-				if(this.getFieldIgnored().indexOf(df) !== -1) {
-					continue;
-				}
-				if (rawValues.hasOwnProperty(df)) {
-					values[df] = rawValues[df];
+			if(!this.getOnlyFieldWithAlias()) {
+				var diffValues = Ext.Array.toMap(Ext.Array.difference(
+					Ext.Object.getKeys(rawValues),
+					Ext.Object.getKeys(values)));
+				for(var df in diffValues) {
+					if(this.getFieldIgnored().indexOf(df) !== -1) {
+						continue;
+					}
+					if (rawValues.hasOwnProperty(df)) {
+						values[df] = rawValues[df];
+					}
 				}
 			}
 			//
@@ -275,6 +277,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				var val = values[f] || '';
 
 				if (tpl) {
+					// Can be encoded (from PHP htmlentities)
+					tpl = Ext.String.htmlDecode(tpl);
+					
 					// Auto transform string to object for complex template (loop)
 					var oVal = Ext.decode(val, true);
 					if(oVal) values[f] = oVal;
