@@ -1034,9 +1034,6 @@ Ext.apply(Ck, {
 	 * For testing purposes the deviceType can be overridden by adding a deviceType parameter to the URL of the page, like so: http://localhost/mypage.html?deviceType=Tablet
 	 */
 	isMobileDevice: function() {
-		//<debug>
-		return true;
-		//</debug>
 		return Ext.os.deviceType == "Phone" || Ext.os.deviceType == "Tablet";
 	},
 	
