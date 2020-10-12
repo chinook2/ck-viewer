@@ -232,8 +232,12 @@ Ext.define('Ck.map.Controller', {
 			Ck.log("This context is not a OWS context !");
 			return;
 		}
-
+		
 		this.originOwc = owc;
+		
+		// Before Context load
+		this.fireEvent("loading", this);
+		Ext.GlobalEvents.fireEvent('ckmapLoading', this);
 
 		var v = this.getView();
 		var olMap = this.getOlMap();
@@ -802,6 +806,13 @@ Ext.define('Ck.map.Controller', {
 		}
 	},
 
+	getContextName: function() {
+		if(this.originOwc) {
+			return this.originOwc.data.id
+		}
+		return false;
+	},
+	
 	/**
 	 * Bind the map with the model. Update the model on map moveend event.
 	 * @param {ol.Map} olMap

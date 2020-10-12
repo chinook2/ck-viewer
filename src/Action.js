@@ -185,6 +185,12 @@ Ext.define('Ck.Action', {
 			ckview.onMapReady(function (mapController) {
 				this.setMap(mapController);
 				this.ckReady(mapController, config);
+				
+				// reset action when loading context
+				mapController.on("loading", function() {
+					if (btn && btn.pressed) btn.toggle(false);
+					//this.destroy();
+				});
 			}, this, {priority: 100});
 
 			ckview.onMapLoaded(function (mapController) {
