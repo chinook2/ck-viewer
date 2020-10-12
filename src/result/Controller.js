@@ -68,12 +68,7 @@ Ext.define('Ck.result.Controller', {
 		this.plugins = [{
 			xtype: "gridmenu",
 			text: "Click me"
-		}];
-		
-		Ck.getMap().on("contextloading", function(ctx) {
-			this.getOpenner().resetSelection();
-			this.getOpenner().close();	
-		}, this);	
+		}];	
 	},
 	
 	addUpdate: function() {
