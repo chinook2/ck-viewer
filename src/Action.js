@@ -188,8 +188,7 @@ Ext.define('Ck.Action', {
 				
 				// reset action when loading context
 				mapController.on("loading", function() {
-					if (btn && btn.pressed) btn.toggle(false);
-					//this.destroy();
+					if (btn && btn.pressed && !btn.isDestroyed) btn.toggle(false);
 				});
 			}, this, {priority: 100});
 

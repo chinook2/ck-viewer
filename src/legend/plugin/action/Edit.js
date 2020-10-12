@@ -73,7 +73,13 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 					this.win = view.addDocked(Ext.apply({
 						dock : "top"
 					}, this.targetOpt, editOpt));
-					this.getMap().getOlMap().updateSize()
+					map.getOlMap().updateSize();
+
+					// Window is close automatically, dock not
+					map.on("loading", function() {
+						this.close();
+					}, this);
+
 					break;
 			}
  		}
@@ -92,6 +98,8 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 	},
 	
 	close: function() {
+		if(!this.win) return;
+		
 		switch(this.target) {
 			case "window":
 				this.win.close();
