@@ -67,18 +67,11 @@ Ext.define('Ck.print.Controller', {
 			dpi:  '{printParam.dpi}'
 		}
 	},
-
-	/**
-	 * Init the map component, init the viewModel.
-	 * @protected
-	 */
-	init: function() {
-		this.callParent(arguments);
-
-		this.loadResolutions();
-
+	
+	ckLoaded: function(map) {
 		// Creation preview layer
 		this.previewLayer = new ol.layer.Vector({
+			id: 'printpreview-layer',
 			source: new ol.source.Vector(),
 			style: new ol.style.Style({
 				fill: new ol.style.Fill({
@@ -91,6 +84,16 @@ Ext.define('Ck.print.Controller', {
 			})
 		});
 		this.getMap().addSpecialLayer(this.previewLayer);
+	},
+
+	/**
+	 * Init the map component, init the viewModel.
+	 * @protected
+	 */
+	init: function() {
+		this.callParent(arguments);
+
+		this.loadResolutions();
 
 		// Init print value
 		var fields = this.view.getForm().getFields();
@@ -567,6 +570,7 @@ Ext.define('Ck.print.Controller', {
 	},
 	
 	showPreview: function() {
+		this.updatePreview();
 		this.previewLayer.setVisible(true);
 	},
 

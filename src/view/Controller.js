@@ -88,11 +88,13 @@ Ext.define('Ck.view.Controller', {
 	},
 
 	onMapLoaded: function (fn, scope, options) {
+		// Add the listener (if map not loaded OR if reload the map)
+		this.on('maploaded', fn, scope, options);
+		
+		// Direct call if map is loaded
 		var m = this.getCkMap();
 		if (m && m.loaded === true) {
 			fn.apply(scope, [m]);
-		} else {
-			this.on('maploaded', fn, scope, options);
 		}
 	}
 });
