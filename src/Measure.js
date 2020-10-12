@@ -7,11 +7,21 @@ Ext.define('Ck.Measure', {
 			config = Ext.applyIf(config || {}, this.prototype.config);
 
 			var ckmap = config.map || Ck.getMap();
+			var id = ckmap.getContextName() || config.id;
+
 			if(!ckmap.measure) ckmap.measure = [];
-			var measure = ckmap.measure[config.id];
+			
+			var measure = ckmap.measure[id];
 			if(!measure) {
 				measure = new this(config);
-				ckmap.measure[config.id] = measure;
+
+				// TODO: review instance managment
+				// Keep only one Instance 
+				// With multiple context, load different context, need to add drawing-layer
+				ckmap.measure = [];
+				//
+
+				ckmap.measure[id] = measure;
 			}
 			return measure;
 		}
@@ -177,7 +187,7 @@ Ext.define('Ck.Measure', {
 	constructor: function(config) {
 		Ext.apply(config, {
 			olMap : config.map.getOlMap(),
-			measureStyle: Ck.Style.measureStyle
+			measureStyle: Ck.Style.redStroke
 		});
 
 		this.initConfig(config);
@@ -200,6 +210,10 @@ Ext.define('Ck.Measure', {
 		// Update snap
 		this.getOlMap().on("moveend", this.updateSnappingFeatures.bind(this));
 
+		this.getMap().on("loading", function () {
+			//this.getOlMap().removeInteraction(this.layerSnapping);
+			this.clearMeasure();
+		}, this);
 
 		this.snapFeatures = new ol.Collection();
 		this.layerSnapping = new ol.interaction.Snap({features: this.snapFeatures});
