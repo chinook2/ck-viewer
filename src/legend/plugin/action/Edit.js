@@ -56,7 +56,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 		} else {
 			switch(this.target) {
 				case "window":
-					this.win = Ext.create('Ext.window.Window', Ext.apply({
+					this.win = Ext.create('Ck.Window', Ext.apply({
 						title: "Edit layer " + layer.get('title'),
 						width: 410,
 						height: 300,

@@ -78,7 +78,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 		if (!this.win) {
 			this.createInnerPanels();
 
-			this.win = Ext.create('Ext.window.Window', {
+			this.win = Ext.create(this.classWindow, {
 				title: this.winTitle,
 				width: 450,
 				height: 450,

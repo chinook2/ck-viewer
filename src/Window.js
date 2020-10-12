@@ -13,5 +13,10 @@ Ext.define('Ck.Window', {
 		if(this.parentMap && this.parentMap.bindVisibility) {
 			this.parentMap.bindVisibility(this);
 		}
+
+		// When loading context (change context) close all Windows
+		Ext.on('ckmapLoading', function() {
+			this.close();
+		}, this);
 	}
 });

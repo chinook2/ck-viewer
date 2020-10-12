@@ -106,7 +106,7 @@ Ext.define('Ck.map.action.Select', {
 			case "window":
 				if(Ext.isEmpty(this.win)) {
 					this.result = Ext.create(resOpt);
-					this.win = Ext.create('Ext.window.Window', Ext.apply({
+					this.win = Ext.create(this.classWindow, Ext.apply({
 						title: "Result selection",
 						width: 950,
 						height: 600,

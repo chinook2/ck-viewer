@@ -26,7 +26,7 @@ Ext.define('Ck.map.action.DisplaySettings', {
 		
 		if(!this.win) {
 			this.createSettingsPanel();
-			this.win = Ext.create('Ext.window.Window', {
+			this.win = Ext.create(this.classWindow, {
 				title: "Display settings",
 				resizable: true,
 				width: 400,

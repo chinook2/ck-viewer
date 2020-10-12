@@ -96,7 +96,7 @@ Ext.define('Ck.edit.action.Attribute', {
 		this.mapFormPanel.getController().on("aftersave", this.editingComplete, this);
 		this.mapFormPanel.getController().on("afterclose", this.editingComplete, this);
 		
-		this.mapFormWindow = Ext.create('Ext.window.Window', {
+		this.mapFormWindow = Ext.create(this.classWindow, {
 			layout: 'fit',
 			headerPosition: 'right',
 			

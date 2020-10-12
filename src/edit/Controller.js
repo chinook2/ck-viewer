@@ -386,7 +386,7 @@ Ext.define('Ck.edit.Controller', {
 	 */
 	getMainWindow: function() {
 		if(Ext.isEmpty(this.mainWindow)) {
-			this.mainWindow = Ck.create("Ext.window.Window", {
+			this.mainWindow = Ck.create(this.classWindow, {
 				title: "Edition",
 				height: 400,
 				width: 600,
@@ -1058,7 +1058,7 @@ Ext.define('Ck.edit.Controller', {
 			dataObject	: dataObject
 		});
 				
-		this.mapFormWindow = Ext.create('Ext.window.Window', {
+		this.mapFormWindow = Ext.create(this.classWindow, {
 			layout: 'fit',
 			headerPosition: 'right',
 			

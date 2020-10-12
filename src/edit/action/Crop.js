@@ -226,7 +226,7 @@ Ext.define('Ck.edit.action.Crop', {
 		} else {
 			features[0].setStyle(this.cropSelectedStyle);
 			// Choice the polygon what keep attributes data
-			this.winCrop = new Ext.window.Window({
+			this.winCrop = new Ck.Window({
 				title: "Which polygon keeps attributes data ?",
 				height: 160,
 				width: 300,

@@ -17,6 +17,8 @@ Ext.define('Ck.Controller', {
 		olView	: null,
 		ckView  : null
 	},
+	
+	classWindow: 'Ck.Window',
 
 	/**
 	 * Called when the map is ready.

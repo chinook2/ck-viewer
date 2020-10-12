@@ -169,7 +169,7 @@ Ext.define('Ck.form.plugin.Subform', {
 					maximized: true
 				}
 			}
-			this._subformWindow = Ext.create('Ext.window.Window', Ext.applyIf({
+			this._subformWindow = Ext.create('Ck.Window', Ext.applyIf({
 				layout: 'fit',
 				closeAction: 'hide',
 				items: this._subform
