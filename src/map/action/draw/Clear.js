@@ -9,28 +9,31 @@ Ext.define('Ck.map.action.draw.Clear', {
 	tooltip: "Remove all drawings",
 	
 	drawId: "default",
+
 	requires: [
 		'Ck.Draw'
 	],
 	
-	/**
-	 * [ckLoaded description]
-	 * @param  {Ck.map} map [description]
-	 */
-	ckLoaded: function(map) {
-		this.olMap = map.getOlMap();
-		
-		this.draw = Ck.Draw.getInstance({
-			map: map,
-			id: "default"
-		});
-	},
 	
 	/**
 	 * [doAction description]
 	 * @param  {Ext.button.Button} btn [description]
 	 */
 	doAction: function(btn) {
+		this.getDraw();
 		this.draw.getSource().clear();
+	},
+
+	/**
+	 * [getDraw description]
+	 * @param  {[type]} map [description]
+	 */
+	getDraw: function(map) {
+		if(!map) map = this.getMap();
+		this.draw = Ck.Draw.getInstance({
+			map: map,
+			id: this.drawId
+		});
+		this.draw.win = this.win;
 	}
 });

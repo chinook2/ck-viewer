@@ -18,21 +18,6 @@ Ext.define('Ck.map.action.draw.Action', {
 	},
 
 	/**
-	 *
-	 */
-	ckLoaded: function(map) {
-		this.olMap = map.getOlMap();
-
-		this.getDraw(map);
-
-		map.on("contextloading", function() {
-			if (this.getBtn()) {
-				this.getBtn().toggle(false);
-			}
-		}, this);
-	},
-
-	/**
 	 * [destroy description]
 	 */
 	destroy: function() {
@@ -52,8 +37,7 @@ Ext.define('Ck.map.action.draw.Action', {
 	 * @param  {boolean} pressed [description]
 	 */
 	toggleAction: function(btn, pressed, opt) {
-
-		// OFF
+		// OFF (keep existingf this.draw)
 		if (!pressed) {
 			if (this.interaction) {
 				this.draw.getOlMap().removeInteraction(this.interaction);
@@ -67,6 +51,10 @@ Ext.define('Ck.map.action.draw.Action', {
 		// TODO: review source of truth for current type
 		// need init here to init correct style 
 		this.win.currentType = this.type;
+
+		// Get fresh instance of this.draw
+		//this.olMap = this.getMap().getOlMap();
+		this.getDraw();
 
 		this.createInteraction(opt);
 		this.interaction.setActive(true);
@@ -130,6 +118,7 @@ Ext.define('Ck.map.action.draw.Action', {
 	 * @param  {[type]} map [description]
 	 */
 	getDraw: function(map) {
+		if(!map) map = this.getMap();
 		this.draw = Ck.Draw.getInstance({
 			map: map,
 			id: this.drawId

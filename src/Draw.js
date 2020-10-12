@@ -51,10 +51,19 @@ Ext.define('Ck.Draw', {
 	statics: {
 		getInstance: function(config) {
 			var ckmap = config.map || Ck.getMap();
-			var draw = (ckmap.draw && ckmap.draw.hasOwnProperty(config.id)) ? ckmap.draw[config.id] : null;
+			var id = ckmap.getContextName() || config.id;
+
+			var draw = (ckmap.draw && ckmap.draw.hasOwnProperty(id)) ? ckmap.draw[id] : null;
 			if (!draw) {
 				draw = new this(config);
-				ckmap.draw[config.id] = draw;
+
+				// TODO: review instance managment
+				// Keep only one Instance 
+				// With multiple context, load different context, need to add drawing-layer
+				ckmap.draw = [];
+				//
+
+				ckmap.draw[id] = draw;
 			}
 			return draw;
 		}
@@ -74,16 +83,17 @@ Ext.define('Ck.Draw', {
 
 		this.initConfig(config);
 
-		if (!config.map.draw) {
-			config.map.draw = new ol.interaction.Select();
-		}
+		//if (!config.map.draw) {
+		//	config.map.draw = new ol.interaction.Select();
+		//}
 
-		config.map.draw[config.id] = this;
+		//config.map.draw[config.id] = this;
 		//config.map.addInteraction(config.map.draw);
 
 		var source = new ol.source.Vector();
 		localStorage.removeItem('shapes');
 		localStorage.removeItem('shapesStyle');
+
 		/*
 		var geojsonObject = {
 			'type': 'FeatureCollection',

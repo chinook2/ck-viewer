@@ -70,6 +70,13 @@ Ext.define('Ck.map.action.OpenDraw', {
         police: 'Arial'        
 	},
 	
+	ckLoaded: function(map) {
+		this.draw = Ck.Draw.getInstance({
+			map: this.getMap(),
+			id: 'default'
+		});	
+	},
+
 	/**
 	 * Create and display a windows with print form
 	 * @param  {Ext.button.Button} btn [description]
@@ -118,11 +125,6 @@ Ext.define('Ck.map.action.OpenDraw', {
 			});
 			this.win.getViewModel().set('hasSelectedFeature', false);
 		}
-		
-		this.draw = Ck.Draw.getInstance({
-			map: this.getMap(),
-			id: 'default'
-		});
 
 		this.win.show();
 	},
