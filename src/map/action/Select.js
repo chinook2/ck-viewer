@@ -113,6 +113,7 @@ Ext.define('Ck.map.action.Select', {
 						layout: 'fit',
 						collapsible: true,
 						closable: false,
+						closeAction: 'hide',
 						maximizable: true,
 						items: [this.result]
 					}), this.targetOpt);

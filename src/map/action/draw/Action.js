@@ -21,6 +21,8 @@ Ext.define('Ck.map.action.draw.Action', {
 	 * [destroy description]
 	 */
 	destroy: function() {
+		if(!this.draw) return;
+		
 		// TODO: review draw instance managment !
 		var ckmap = this.getMap();
 		if (ckmap) {
