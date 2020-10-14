@@ -115,6 +115,10 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 	 */
 	generateSrc: function(lyr) {
 		var src = lyr.getSource();
+		var bbox =  Ck.getMap().getExtent();
+		var width =  Ck.getMap().getView().getSize()["width"];
+		var height =  Ck.getMap().getView().getSize()["height"];
+		var srs =  Ck.getMap().getProjection().getCode();
 		if (!src.getUrl) return false;
 
 		var url = lyr.ckLayer.getData().properties.legend;
@@ -137,7 +141,7 @@ Ext.define('Ck.legend.plugin.LegendGraphic', {
 
 		// mapApi can be relative Url (without 'http')
 		if(url.indexOf("http") !== 0 && url.indexOf(Ck.getOption('mapApi')) !== 0) {
-			url = src.getUrl() + "?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=" + src.getParams().LAYERS + "&STYLE="+ (src.getParams().STYLES || '') +"&TRANSPARENT=true" + url;
+			url = src.getUrl() + "?SERVICE=WMS&REQUEST=GetLegendGraphic&FORMAT=image/png&LAYER=" + src.getParams().LAYERS + "&STYLE="+ (src.getParams().STYLES || '') +"&TRANSPARENT=true" + url + "&BBOX=" + encodeURIComponent(bbox) + "&WIDTH=" + width + "&HEIGHT=" + height +  "&SRS=" + srs ;
 		}
 
 		return url;
