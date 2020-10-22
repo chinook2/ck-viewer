@@ -551,10 +551,17 @@ Ext.define('Ck.Selection', {
 			featureProjection: this.getMap().getProjection().getCode()
 		};
 
+		// Allow add to current selection (Shift key by default)
+		var modifiers = '';
+		if(this.inAddition) {
+			modifiers = "&modifiers="+this.getMergeKey();
+		}
+		//
+
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
-			url: this.getMap().getMapUrl(ope.getUrl()) + "?" + env + filter,
+			url: this.getMap().getMapUrl(ope.getUrl()) + "?" + env + filter + modifiers,
 			rawData: new XMLSerializer().serializeToString(gf),
 			success: function(layer, ope, readOptions, response) {
 				/*
