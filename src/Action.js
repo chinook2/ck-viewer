@@ -118,6 +118,9 @@ Ext.define('Ck.Action', {
 			itemId: this.itemId,
 			text: this.text,
 			iconCls: this.iconCls,
+			// fix for Material theme - btn color when toggle off -
+			focusable: false,
+			//
 			handler: function () {
 				try {
 					// When use action.execute always call 'handler' method
