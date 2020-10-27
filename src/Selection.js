@@ -62,9 +62,9 @@ Ext.define('Ck.Selection', {
 
 		/**
 		 * Witch key used to stack selection. Can be "ctrlKey", "shitftKey", "altKey"
-		 * @var {String} By default "shitftKey"
+		 * @var {String} By default "ctrlKey"
 		 */
-		mergeKey: "shiftKey",
+		mergeKey: "ctrlKey",
 
 		/**
 		 * The function will be called when feature selected
