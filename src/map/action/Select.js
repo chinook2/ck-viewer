@@ -104,8 +104,18 @@ Ext.define('Ck.map.action.Select', {
 		
 		switch(this.target) {
 			case "window":
+				// Try get existing window result
+				// Each Select mode/type have it's own instance of this.win - this.result
 				if(Ext.isEmpty(this.win)) {
-					this.result = Ext.create(resOpt);
+					// this.win = Ext.ComponentQuery.query('ckresult ^ window').pop();
+					var ckresult = Ext.ComponentQuery.query('ckresult').pop();
+					if (ckresult) {
+						this.win = ckresult.up("window");
+						this.result = ckresult.getController();
+					}
+				}
+				if(Ext.isEmpty(this.win)) {
+					var ckresult = Ext.create(resOpt);
 					this.win = Ext.create(this.classWindow, Ext.apply({
 						title: "Result selection",
 						width: 950,
@@ -115,9 +125,9 @@ Ext.define('Ck.map.action.Select', {
 						closable: false,
 						closeAction: 'hide',
 						maximizable: true,
-						items: [this.result]
+						items: [ckresult]
 					}), this.targetOpt);
-					this.result = this.result.getController();
+					this.result = ckresult.getController();
 				}
 				
 				this.result.loadData(res);
