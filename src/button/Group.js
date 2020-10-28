@@ -11,6 +11,7 @@
 	alternateClassName: 'Ck.GroupButton',
 
 	enableToggle: true,
+	focusable: false,
 
     /**
      * CLose the sub toolbar when click on button.
