@@ -539,9 +539,23 @@ Ext.define('Ck.print.Controller', {
 
 	/**
 	 * Loop on all this.printValue members and put the values in the layout
+	 * AGA - 28/10/2020 - Update print params and insert filters params on template
 	 */
 	integratePrintValue: function() {
 		this.printValue = this.getView().getForm().getValues();
+		this.printValue['date'] = Date.now();
+		this.printValue['scale'] = Ck.getMap().getScale();
+		this.printValue['srs'] = Ck.getMap().getProjection().getCode();
+		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]') !== 0){
+			var comboFilters = Ext.ComponentQuery.query('[componentCls~=comboFilter]');
+			comboFilters.forEach(function(combo,value){
+				if(combo.getRawValue() !== "" && combo.getRawValue !== null && combo.getRawValue !== undefined){
+					this.mapDiv = Ext.get("ckPrint-filters-list").dom;
+					var dh = Ext.DomHelper;
+					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() + "</div>");
+				}
+			}, this)
+		}
 		this.addDefaultValues();
 
 		// Do substitutions
