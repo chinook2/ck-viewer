@@ -20,7 +20,11 @@ Ext.define('Ck.map.plugin.Progress', {
 	},
 
 	destroy: function(){
-		if(this.el) this.el.remove();
+		if(this.el) {
+			var e = Ext.get(this.el);
+			if(e) e.destroy();
+			delete this.el;
+		}
 	},
 
 	/**
