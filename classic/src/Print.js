@@ -113,7 +113,7 @@ Ext.define("Ck.Print", {
 		itemId: "rotate",
         fieldLabel: 'Tourner la carte',
 		value: 0,
-		increment: 10,
+		increment: 1,
         maxValue: 360,
 		minValue: 0,
 		bind: { value: "{printParam.angle}" }
