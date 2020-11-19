@@ -92,8 +92,8 @@ Ext.define('Ck.map.action.OpenDraw', {
 					this.circlePanel,
 					this.polygonPanel,
 					this.textPanel,
-					this.modifyPanel,
-//                    this.exportPanel,
+					this.modifyPanel
+                    //this.exportPanel,
 				],
 				listeners: {
 					scope: this,
@@ -130,10 +130,10 @@ Ext.define('Ck.map.action.OpenDraw', {
 	    var comboExport =  Ext.create('Ext.form.field.ComboBox', {
             width:160,
             fieldLabel: "Export",
-            listeners: {
-	        	scope: this,
+            //listeners: {
+	        	//scope: this,
 	        	//change: this.onPoliceChange
-	       },
+	        //},
             store: new Ext.data.SimpleStore({
                     fields: ['value','display'],
                     data : typesExports

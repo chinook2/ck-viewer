@@ -94,6 +94,6 @@ Ext.define('Ck.legend.plugin.action.Zoom', {
 			}
 		}
 		return false;
-	},
+	}
 
 });
