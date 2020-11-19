@@ -1,0 +1,181 @@
+#ckPrint-page div{
+	float: left;
+}
+
+#ckPrint-page{
+	position: relative;
+	background-color: white;
+	border:1px solid gray;
+}
+ 
+#ckPrint-title a {
+    text-decoration: none;
+    border-bottom: 3px solid black;
+    padding-bottom: 2px;
+	color: black;
+}
+
+#ckPrint-title{
+	word-wrap: break-word; 
+	/* text-decoration-line: underline !important; */
+	/* text-decoration-thickness: 0.1em !important; */
+	/* text-underline-offset: 10px !important; */
+	line-height: 1;
+	position: absolute;
+	width:270px;
+	left: 3px;
+	top: 40px;
+	margin-bottom: 5px;
+	text-align: center;
+	font-size: 24px;
+	font-weight:bold;
+}
+
+#ckPrint-map{
+	position: absolute;
+	right: 3px;
+	top: 3px;
+	left: 279px;
+	bottom: 3px;
+	background-color: white;
+}
+
+#ckPrint-logo{
+	position: absolute;
+	height: 221px;
+	width:270px;
+	left:3px;
+	bottom: 3px;
+}
+
+#ckPrint-logo ul {
+    list-style-type: none;
+	margin-top: 1px;
+}
+
+#ckPrint-logo li {
+    padding-bottom: 20px;
+}
+
+.ckPrint-logtitle{
+	position: absolute;
+	left:5px;
+	right:0px;
+}
+
+.ckPrint-logo-part{
+	position: relative;
+}
+.ckPrint-logo-partcnt{
+	position:relative;
+	top: 0px;
+	padding:4px;
+}
+#ckPrint-ref{
+	border: 2px solid gray;
+	position: absolute;
+	height: 122px;
+	width: 122px;
+	right: 19px;
+    top: 19px;
+	background-color: white;
+}
+
+#ckPrint-legend{
+	position: absolute;
+	top: 100px;
+	width:270px;
+	left:3px;
+	bottom: 221px;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-icopart{
+	position: absolute;
+	height: 100px;
+	width:275px;
+	bottom: 25px;
+    left: 3px;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-cpr{
+	position: absolute;
+	height: 20px;
+	width:275px;
+	bottom: 3px;
+    left: 3px;
+	background-color: rgba(255, 255, 255, 0.83);
+	text-align:right;
+	font-size:8px;
+}
+
+#ulleg {
+    list-style-type: none;
+    margin: 1px 0 0;
+    padding: 0;
+}
+
+#ulleg li {
+    padding-bottom: 20px;
+}
+
+.ckPrint-legtitle{
+	font-size:8px;
+	position: absolute;
+	left:25px;
+	width:120px;
+}
+
+.ckPrint-legimg{
+	position: absolute;
+	left:0px;
+	width:24px;
+	height:15px;
+	margin-top:2px;
+}
+
+
+#ckPrint-legend1 div{
+	float: left;
+}
+
+#ckPrint-legend1{
+	position: relative;
+	background-color: white;
+	border:1px solid gray;
+}
+ 
+#ckPrint-cntleg1{
+	position: absolute;
+	right: 0px;
+	left: 0px;
+	top:122px;
+	bottom: 0px;
+	height:1102px;
+	width:100%;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-logo11{
+	border-bottom: 4px solid gray;
+	position: absolute;
+	height: 122px;
+	background-size :145px 82px;
+	left:0px;
+	right:0px;
+	top:0px;
+}
+
+#ckPrint-cntleg1 ul {
+    list-style-type: none;
+    margin: 34px 0 0;
+    padding: 0;
+}
+
+#ckPrint-cntleg1 li {
+    padding-bottom: 20px;
+}
+
+
+
