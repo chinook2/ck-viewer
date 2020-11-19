@@ -971,11 +971,11 @@ Ext.define('Ck.edit.Controller', {
 			ft = data.feature
 			ft.setStyle(null);
 			
-			if(currSrs != lyrSrs) {
+			if (currSrs != lyrSrs) {
 				ft.getGeometry().transform(currSrs, lyrSrs);
 			}
 
-			if(!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
+			if (!Ext.isEmpty(geometryName) && geometryName != ft.getGeometryName()) {
 				ft.set(geometryName, ft.getGeometry());
 				ft.unset("geometry");
 				ft.setGeometryName(geometryName);
@@ -983,12 +983,20 @@ Ext.define('Ck.edit.Controller', {
 
 			// Cast to multi geometry if needed (except for deletion, if geom is set and if it doesn't already a multi geom)
 			var geom = ft.getGeometry();
-			if(data.actionId != 3 && !Ext.isEmpty(geom) && (geom.getType() != this.getGeometryType())) {
+			if (data.actionId != 3 && !Ext.isEmpty(geom) && (geom.getType() != this.getGeometryType())) {
 				var mGeom = Ck.create("ol.geom.Multi" + geom.getType(), [geom.getCoordinates()]);
 				ft.setGeometry(mGeom);
 			}
 
-			switch(data.actionId) {
+			// fix z coordinate
+			/*
+			var coords = geom.getCoordinates()[0][0].map(function(r) {
+			  	return (r[2] === 0) ? [r[0], r[1], 1e-7] : r;
+			});
+			geom.setCoordinates([[coords]]);
+			*/
+			
+			switch (data.actionId) {
 				case 0:
 					// Create
 					inserts.push(ft);

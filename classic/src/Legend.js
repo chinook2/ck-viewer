@@ -31,6 +31,9 @@ Ext.define("Ck.Legend", {
 			ptype: 'treeviewdragdrop',
 			containerScroll: true,
 			allowParentInserts: true
+		},
+		getRowClass: function(record, rowIndex, rowParams, store){
+			return record.get("disabled") ? "ck-disabled-layer" : "";
 		}
 	},
 	
@@ -49,6 +52,17 @@ Ext.define("Ck.Legend", {
 		text: 'Layers',
 		dataIndex: 'text',
 		flex: 1
+		/*
+		,
+        renderer: function (val, meta, rec) {
+            if (rec.get('disabled')) {
+				if(meta){
+					meta.style = 'color: gray; font-style: italic;background:#dedede';
+				}
+            }
+            return val;
+        }
+		*/
 	},{
 		xtype: 'actioncolumn'
 	}]

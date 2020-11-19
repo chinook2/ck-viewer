@@ -36183,11 +36183,14 @@ ol.control.Zoom = function(opt_options) {
 
   var zoomInLabel = options.zoomInLabel !== undefined ? options.zoomInLabel : '+';
   var zoomOutLabel = options.zoomOutLabel !== undefined ? options.zoomOutLabel : '\u2212';
-
+/*
   var zoomInTipLabel = options.zoomInTipLabel !== undefined ?
-      options.zoomInTipLabel : 'Zoom in';
+      options.zoomInTipLabel : 'Zoomer';
   var zoomOutTipLabel = options.zoomOutTipLabel !== undefined ?
-      options.zoomOutTipLabel : 'Zoom out';
+      options.zoomOutTipLabel : 'Dézoomer';
+	  */
+	var zoomInTipLabel = 'Zoomer';
+	var zoomOutTipLabel = 'Dézoomer';
 
   var inElement = goog.dom.createDom('BUTTON', {
     'class': className + '-in',

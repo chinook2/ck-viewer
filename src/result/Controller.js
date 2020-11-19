@@ -60,6 +60,11 @@ Ext.define('Ck.result.Controller', {
 					this.getOpenner().close();
 				}
 			},
+			"ckresult button#exportcsvsel": {
+				click: function() {
+					this.prepareexportcsv();
+				}
+			},
 			"ckresult button#clear-history": {
 				click: this.clearHistory
 			}
@@ -149,6 +154,7 @@ Ext.define('Ck.result.Controller', {
 	 * @param {Ext.data.Model} Layer data model (typeof data.data.features == ol.Features[])
 	 */
 	loadFeature: function(tree, record) {
+		
 		if(Ext.isEmpty(record)) {
 			record = this.currentLayer;
 		} else {
@@ -160,7 +166,7 @@ Ext.define('Ck.result.Controller', {
 		}
 		
 		var fts = record.data.data.features;
-		
+		this.colorresult(fts);
 		// List columns
 		var columns = [];
 		
@@ -209,6 +215,7 @@ Ext.define('Ck.result.Controller', {
 		}
 		
 		this.featureGrid.reconfigure(this.featureStore, columns);
+		this.featureGrid.addListener("cellclick",this.onGridCellClick,this);
 	},
 	
 	/**
@@ -216,5 +223,346 @@ Ext.define('Ck.result.Controller', {
 	 */
 	clearHistory: function() {
 		this.layerRoot.removeAll();
+	},
+	
+	/**
+	 * exporte all results en csv
+	 */
+	prepareexportcsv: function(){
+		ares = this.data[0];
+		var strlstcpr = "";
+		for(i=0 ; i < ares.length; i ++) {
+			iteratb = 0;
+			arestmp = ares[i].features; 
+			strlstcpr += ares[i].layer.ckLayer._title+"\n";
+			for(t=0 ; t < arestmp.length; t ++) {
+				avaltmp = arestmp[t].values_;
+				if(iteratb == 0){
+					itercol = 0;
+					for(var index in avaltmp) { 
+						if(index != 'boundedBy' && index != 'the_geom' && index != 'geom' && index != 'id' && index != 'ckFeature'){
+							if(itercol != 0){
+								strlstcpr += ";";
+							}
+							strlstcpr += index;
+							itercol = itercol + 1;
+						} 
+					}
+					strlstcpr += "\n";
+				}
+				itercol1 = 0;
+				for(var index1 in avaltmp) { 
+					if(index1 != 'boundedBy' && index1 != 'the_geom' && index1 != 'geom' && index1 != 'id' && index1 != 'ckFeature'){
+						if(itercol1 != 0){
+							strlstcpr += ";";
+						}
+						strlstcpr += avaltmp[index1];
+						itercol1 = itercol1 + 1;
+					} 
+				}
+				strlstcpr += "\n\n";
+				
+				iteratb = iteratb + 1;
+			}
+			
+		}
+		var blob = new Blob(["\ufeff",strlstcpr], {type: 'text/csv'});
+		var downloadLink = document.createElement("a");
+		downloadLink.href = window.URL.createObjectURL(blob);
+		downloadLink.download = "Selection.csv";
+		document.body.appendChild(downloadLink);
+		downloadLink.click();
+		document.body.removeChild(downloadLink);
+					
+	},
+	
+	colorresult: function(features){
+		
+		allfeat = Ck.resultFeature;		
+		for(i=0 ; i < allfeat.length; i++){
+			alay = allfeat[i];
+			 for(u = 0 ; u <alay.length; u++){
+				afeat = alay[u];
+				if(afeat.getGeometry()){
+					switch (afeat.getGeometry().getType().toLowerCase()) {
+						case 'multipoint':
+						case 'point':
+							style = new ol.style.Style({
+								image: new ol.style.Circle({
+									radius: 5,
+									stroke: new ol.style.Stroke({
+										color: 'rgba(255, 149, 61, 0.9)',
+										width: 1
+									})
+								})
+							});
+							break;
+
+						case 'linestring':
+						case 'line':
+							style = new ol.style.Style({
+								stroke: new ol.style.Stroke({
+									color:  'rgba(255, 149, 61, 0.9)',
+									width: 1
+								})
+							});
+							break;
+
+						case 'circle':
+						case 'polygon':
+						case 'multipolygon':
+							style = new ol.style.Style({
+								image: new ol.style.Circle({
+									radius: 5,
+									stroke: new ol.style.Stroke({
+										color: 'rgba(255, 149, 61, 0.9)',
+										width: 1
+									})
+								}),
+								stroke: new ol.style.Stroke({
+									color: 'rgba(255, 149, 61, 0.9)',
+									width: 1
+								})
+							});
+							break;
+					}
+					if(style) afeat.setStyle(style);
+				}
+			}
+		}
+		
+		for(i = 0; i < features.length; i++) {
+			if(features[i].getGeometry()){
+				switch (features[i].getGeometry().getType().toLowerCase()) {
+					case 'multipoint':
+					case 'point':
+						style = new ol.style.Style({
+							image: new ol.style.Circle({
+								fill: new ol.style.Fill({
+									color:  'rgba(255, 149, 61, 0.5)'
+								}),
+								radius: 6,
+								stroke: new ol.style.Stroke({
+									color: 'rgba(255, 149, 61, 0.9)',
+									width: 1
+								})
+							})
+						});
+						break;
+
+					case 'linestring':
+					case 'line':
+						style = new ol.style.Style({
+							stroke: new ol.style.Stroke({
+								color:  'rgba(255, 149, 61, 0.9)',
+								width: 2
+							})
+						});
+						break;
+
+					case 'circle':
+					case 'polygon':
+					case 'multipolygon':
+						style = new ol.style.Style({
+							image: new ol.style.Circle({
+								fill: new ol.style.Fill({
+									color: 'rgba(255, 149, 61, 0.5)'
+								}),
+								radius: 6,
+								stroke: new ol.style.Stroke({
+									color: 'rgba(255, 149, 61, 0.9)',
+									width: 2
+								})
+							}),
+							fill: new ol.style.Fill({
+								color: 'rgba(255, 149, 61, 0.5)'
+							}),
+							stroke: new ol.style.Stroke({
+								color: 'rgba(255, 149, 61, 0.9)',
+								width: 2
+							})
+						});
+						break;
+				}
+				if(style) features[i].setStyle([style]);
+			}
+		}
+		
+	},
+	
+	onGridCellClick : function(g, td, cellIndex, rec, tr, rowIndex, e, eOpts ){
+		
+		// if(cellIndex != 0){			
+			allfeat = Ck.resultFeature;		
+			for(i=0 ; i < allfeat.length; i++){
+				alay = allfeat[i];
+				 for(u = 0 ; u <alay.length; u++){
+					afeat = alay[u];
+					if(afeat.getGeometry()){
+						switch (afeat.getGeometry().getType().toLowerCase()) {
+							case 'multipoint':
+							case 'point':
+								style = new ol.style.Style({
+									image: new ol.style.Circle({
+										radius: 5,
+										stroke: new ol.style.Stroke({
+											color: 'rgba(255, 149, 61, 0.9)',
+											width: 1
+										})
+									})
+								});
+								break;
+
+							case 'linestring':
+							case 'line':
+								style = new ol.style.Style({
+									stroke: new ol.style.Stroke({
+										color:  'rgba(255, 149, 61, 0.9)',
+										width: 1
+									})
+								});
+								break;
+
+							case 'circle':
+							case 'polygon':
+							case 'multipolygon':
+								style = new ol.style.Style({
+									image: new ol.style.Circle({
+										radius: 5,
+										stroke: new ol.style.Stroke({
+											color: 'rgba(255, 149, 61, 0.9)',
+											width: 1
+										})
+									}),
+									stroke: new ol.style.Stroke({
+										color: 'rgba(255, 149, 61, 0.9)',
+										width: 1
+									})
+								});
+								break;
+						}
+						if(style) afeat.setStyle(style);
+					}
+				}
+			}
+						
+			allfeacur = g.getStore().data.items;
+			
+			for(i = 0; i < allfeacur.length; i++) {
+				recfea = allfeacur[i];
+				feacur = recfea.get('ckFeature');
+				if(feacur.getGeometry()){
+					switch (feacur.getGeometry().getType().toLowerCase()) {
+						case 'multipoint':
+						case 'point':
+							style = new ol.style.Style({
+								image: new ol.style.Circle({
+									fill: new ol.style.Fill({
+										color:  'rgba(255, 149, 61, 0.5)'
+									}),
+									radius: 6,
+									stroke: new ol.style.Stroke({
+										color: 'rgba(255, 149, 61, 0.9)',
+										width: 1
+									})
+								})
+							});
+							break;
+
+						case 'linestring':
+						case 'line':
+							style = new ol.style.Style({
+								stroke: new ol.style.Stroke({
+									color:  'rgba(255, 149, 61, 0.9)',
+									width: 2
+								})
+							});
+							break;
+
+						case 'circle':
+						case 'polygon':
+						case 'multipolygon':
+							style = new ol.style.Style({
+								image: new ol.style.Circle({
+									fill: new ol.style.Fill({
+										color: 'rgba(255, 149, 61, 0.5)'
+									}),
+									radius: 6,
+									stroke: new ol.style.Stroke({
+										color: 'rgba(255, 149, 61, 0.9)',
+										width: 2
+									})
+								}),
+								fill: new ol.style.Fill({
+									color: 'rgba(255, 149, 61, 0.5)'
+								}),
+								stroke: new ol.style.Stroke({
+									color: 'rgba(255, 149, 61, 0.9)',
+									width: 2
+								})
+							});
+							break;
+					}
+					if(style) feacur.setStyle([style]);
+				}
+			}
+			
+			 features = rec.get('ckFeature');
+			 
+			if(features.getGeometry()){
+				 switch (features.getGeometry().getType().toLowerCase()) {
+					 case 'multipoint':
+					case 'point':
+						style = new ol.style.Style({
+							image: new ol.style.Circle({
+								fill: new ol.style.Fill({
+									color:  'rgba(0, 149, 61, 0.5)'
+								}),
+								radius: 6,
+								stroke: new ol.style.Stroke({
+									color: 'rgba(0, 149, 61, 0.9)',
+									width: 1
+								})
+							})
+						});
+						break;
+
+					case 'linestring':
+					case 'line':
+						style = new ol.style.Style({
+							stroke: new ol.style.Stroke({
+								color:  'rgba(0, 149, 61, 0.9)',
+								width: 2
+							})
+						});
+						break;
+
+					case 'circle':
+					case 'polygon':
+					case 'multipolygon':
+						style = new ol.style.Style({
+							image: new ol.style.Circle({
+								fill: new ol.style.Fill({
+									color: 'rgba(0, 149, 61, 0.5)'
+								}),
+								radius: 6,
+								stroke: new ol.style.Stroke({
+									color: 'rgba(0, 149, 61, 0.9)',
+									width: 2
+								})
+							}),
+							fill: new ol.style.Fill({
+								color: 'rgba(0, 149, 61, 0.5)'
+							}),
+							stroke: new ol.style.Stroke({
+								color: 'rgba(0, 149, 61, 0.9)',
+								width: 2
+							})
+						});
+						break;
+			}
+			if(style) features.setStyle([style]);
+		}
 	}
+	
 });

@@ -120,7 +120,9 @@ Ext.define('Ck.map.action.Select', {
 	 * Process the result
 	 */
 	processResult: function(res) {
- 		
+		
+ 		// this.colorresult(res);
+		
  		if(res.length == 0) {
  			return false;
  		}
@@ -202,5 +204,17 @@ Ext.define('Ck.map.action.Select', {
 	 */
 	close: function() {
 		this.container.hide();
+		Ck.resultFeature = [];
+		Ck.resultLayer = [];
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
+	
 });

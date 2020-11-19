@@ -102,7 +102,7 @@ Ext.define("Ck.Map", {
 			 */
 			Rotate: {
 				className: "ck-rotate",
-				tipLabel: "Click + AltShift to rotate"
+				tipLabel: "Nord"
 			}
 		},
 		

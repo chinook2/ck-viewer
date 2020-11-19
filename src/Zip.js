@@ -62,7 +62,7 @@ Ext.define('Ck.Zip', {
 	constructor: function(config) {
 		Ext.apply(this, config);
 		this.requestFileSystem = window.webkitRequestFileSystem || window.mozRequestFileSystem || window.requestFileSystem;
-		zip.workerScriptsPath = "packages/local/ck-viewer/libs/zip/WebContent/";
+		zip.workerScriptsPath = "packages/ck-viewer/libs/zip/WebContent/";
 	},
 
 	onerror: function(message) {
@@ -162,5 +162,44 @@ Ext.define('Ck.Zip', {
 			}
 		}
 		return aFile;
+	},
+	
+	addFiles : function addFiles(files, onend) {
+		var addIndex = 0;
+
+		function nextFile(obj) {
+			var file = files[addIndex];
+			obj.zipWriter.add(file.name, new zip.BlobReader(file), function() {
+				addIndex++;
+				if (addIndex < files.length){
+					nextFile(obj);
+				}else{
+					onend();
+				}
+			});
+		}
+
+		function createZipWriter(obj) {
+			zip.createWriter(obj.writer, function(writer) {
+				obj.zipWriter = writer;
+				nextFile(obj);
+			}, onerror);
+		}
+
+		if (this.zipWriter){
+			nextFile(this);
+		}else{
+			this.writer = new zip.BlobWriter();
+			createZipWriter(this);
+		}
+	},
+	
+	getBlobURL : function(callback) {
+		this.zipWriter.close(function(blob) {
+			var URL = window.webkitURL || window.mozURL || window.URL;
+			var blobURL = URL.createObjectURL(blob);
+			callback(blobURL);
+			this.zipWriter = null;
+		},this);
 	}
 });

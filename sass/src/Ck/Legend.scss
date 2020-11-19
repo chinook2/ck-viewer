@@ -20,3 +20,15 @@
     margin-left: 5px;
 	font-size: 15px;
 }
+
+/* To disable legend entry */
+.ck-disabled-layer{
+	opacity: 0.5;
+	pointer-events: none;
+}
+
+/* Disable Slider, LegendGraphic and more */
+.ck-disabled-layer ~ tr, .ck-disabled-layer ~ tr *{
+	visibility: hidden;
+	height: 0px;
+}

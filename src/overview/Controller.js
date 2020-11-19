@@ -96,15 +96,15 @@ Ext.define('Ck.overview.Controller', {
 		}
 		
 		var opt = {
-			collapsed	: false,
-			collapsible	: false,
-			target		: this.getView().getEl(),
-			layers		: this.getMap().overviewCollection,
-			view		: new ol.View({
-				projection		: this.getOlView().getProjection(),
-				resolutions		: res,
-				maxResolution	: res[res.length - 1],
-				minResolution	: res[0]
+			collapsed: false,
+			collapsible: false,
+			target: this.getView().getEl(),
+			layers: this.getMap().overviewCollection,
+			view: new ol.View({
+				projection: this.getOlView().getProjection(),
+				resolutions: res,
+				maxResolution: res[res.length - 1],
+				minResolution: res[0]
 			})
 		};
 		

@@ -47,7 +47,7 @@ Ext.define('Ck.format.OWSContext', {
 		// Resolutions
 		if(!Ext.isEmpty(scales) && Ext.isArray(scales)) {
 			scales.forEach(function(o) {
-				if(o &&  o.res) resolutions.push(o.res);
+				if(o &&  o.res) resolutions.push(parseFloat(o.res));
 			});
 		}
 		
@@ -77,11 +77,13 @@ Ext.define('Ck.format.OWSContext', {
 	 * @param {Boolean} True to return in ascending order
 	 */
 	getResolutions: function(ascending) {
-		if(!Ext.isEmpty(this._resolutions) && Ext.isArray(this._resolutions) && this._resolutions.length > 1) {
-			if((ascending && this._resolutions[0] > this._resolutions[1]) || (!ascending && this._resolutions[0] < this._resolutions[1])) {
-				this._resolutions.reverse();
-			}	
+		var res = this._resolutions;
+		if(!Ext.isEmpty(res) && Ext.isArray(res) && res.length > 1) {
+			res = res.slice(0); //clone Array (prevent reverse resolution in tilegrid.WMTS)
+			if((ascending && res[0] > res[1]) || (!ascending && res[0] < res[1])) {
+				res.reverse();
+			}
 		}
-		return this._resolutions;
+		return res;
 	}
 });

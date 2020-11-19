@@ -14,13 +14,14 @@ Ext.define('Ck.map.plugin.Progress', {
 		this.map = ckMap;
 		this.loaded = 0;
 		this.loading = 0;
-		this.el = this.createLoadElement();
+		this.el = null;
 		
 		ckMap.getController().on("addLayer", this.addLoadListeners, this);
 	},
 	
 	destroy: function(){
 		this.el.remove();
+		this.el = null;
 	},
 	
 	/**
@@ -29,8 +30,12 @@ Ext.define('Ck.map.plugin.Progress', {
 	createLoadElement: function() {
 		var el = document.createElement("div");
 		el.className = "ck-progress";
-		document.body.appendChild(el);
-		return el;
+		
+		var ct = this.map.getEl();
+		if(!ct) ct = document.body;
+		ct.appendChild(el);
+		
+		return this.el = el;
 	},
 	
 	/**
@@ -38,6 +43,8 @@ Ext.define('Ck.map.plugin.Progress', {
 	 * @param {ol.layer}
 	 */
 	addLoadListeners: function(layer) {
+		if(!this.el) this.createLoadElement();
+		
 		if(!(layer instanceof ol.layer.Group)) {
 			var olSource = layer.getSource();
 			// Add loading event

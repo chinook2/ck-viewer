@@ -76,6 +76,13 @@
 		mainToolbar.on('positionUpdated', function() {
 			this.updatePosition();
 		}, this);
+		
+		Ext.create('Ext.tip.ToolTip', {
+			target: this.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 
 		this.callParent(arguments);
 	},

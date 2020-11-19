@@ -10,7 +10,7 @@
         "es": "No"
     },{
         "en": "Choose a language",
-        "fr": "Selectionner une langue",
+        "fr": "Sélectionner une langue",
         "es": "Cambiar idioma"
     },{
         "en": "AppDemo",
@@ -110,7 +110,7 @@
         "es": "Ver todo !"
     },{
         "en": "Measure tools",
-        "fr": "Outils de mesure",
+        "fr": "Outil de mesure",
         "es": " - "
     },{
         "en": "Measure length",
@@ -150,7 +150,7 @@
         "es": " - "
     },{
         "en": "Select tools",
-        "fr": "Outils de sélections",
+        "fr": "Outil de sélection",
         "es": " - "
     },{
         "en": "Select by click",
@@ -327,6 +327,10 @@
 	},{
 		"en": "Please complete the current editing session",
         "fr": "Terminer la session d'édition courante",
+        "es": " - "
+	},{
+		"en": "Request attribute",
+        "fr": "Requête attributaire",
         "es": " - "
 	}]
 }

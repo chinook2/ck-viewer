@@ -38,5 +38,14 @@ Ext.define('Ck.map.action.OpenImport', {
 	
 	close: function() {
 		this.win.hide();
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });

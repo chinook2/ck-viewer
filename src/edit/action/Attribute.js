@@ -99,7 +99,7 @@ Ext.define('Ck.edit.action.Attribute', {
 			layout: 'fit',
 			headerPosition: 'right',
 			
-			maximized: true,
+			//maximized: true,
 			closable: false,
 			
 			closeAction: 'hide',

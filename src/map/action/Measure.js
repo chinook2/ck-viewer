@@ -83,6 +83,10 @@ Ext.define('Ck.map.action.Measure', {
 	 */
 	ckLoaded: function(map) {		
 		this.olMap = map.getOlMap();
+		this.draw = Ck.Draw.getInstance({
+			map: map,
+			id: this.drawId
+		});
 		
 		this.measureLayer = map.getLayerById('measureLayer');
 		if(!this.measureLayer) {
@@ -115,7 +119,7 @@ Ext.define('Ck.map.action.Measure', {
 		if(this.type) {
 			var gtype = (this.type == 'area' ? 'Polygon' : 'LineString');
 
-			this.draw = new ol.interaction.Draw({
+			this.interaction = new ol.interaction.Draw({
 				source: source,
 				type: gtype,
 				style: new ol.style.Style({
@@ -138,18 +142,18 @@ Ext.define('Ck.map.action.Measure', {
 					})
 				})
 			});
-			this.olMap.addInteraction(this.draw);
-			this.draw.setActive(false);
+			this.olMap.addInteraction(this.interaction);
+			this.interaction.setActive(false);
 			
 			this.createMeasureTooltip();
 			this.createHelpTooltip();
 			
-			this.draw.on('drawstart', function(evt) {
+			this.interaction.on('drawstart', function(evt) {
 				// set sketch
 				this.sketch = evt.feature;
 			}, this);
 
-			this.draw.on('drawend', function(evt) {
+			this.interaction.on('drawend', function(evt) {
 				this.measureTooltipElement.className = 'tooltip tooltip-static';
 				this.measureTooltip.setOffset([0, -7]);
 				
@@ -190,8 +194,8 @@ Ext.define('Ck.map.action.Measure', {
 	 */
 	toggleAction: function(btn, pressed) {
 		this.btn = btn;
-		if(!this.draw) return;
-		this.draw.setActive(pressed);
+		if(!this.interaction) return;
+		this.interaction.setActive(pressed);
 		if(this.tip) this.tip.setVisible(pressed);
 		if(pressed) {
 			this.olMap.on('pointermove', this.pointerMoveHandler, this);
@@ -340,6 +344,15 @@ Ext.define('Ck.map.action.Measure', {
 					' ' + 'm<sup>2</sup>';
 		}
 		return output;
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });
 

@@ -46,10 +46,11 @@ Ext.define('Ck.map.action.OpenOverview', {
 				layout: 'fit',
 				closeAction: 'hide',
 				items: this.ov,
-				header: {
+				header: false,
+				/*header: {
 					height: 20,
 					cls: "ck-header-20"
-				},
+				},*/
 				listeners: {
 					close: function() {
 						this.button.setPressed(false);
@@ -63,7 +64,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 		if(pressed) {
 			this.win.show();
 			if(this.firstView || this.ov.config.replaceEverytime) {
-				this.win.alignTo(Ck.getMap().getOlMap().getViewport(), "tl", [50, 10]);
+				this.win.alignTo(Ck.getMap().getOlMap().getViewport(), "tl", [60, 10]);
 				this.firstView = false;
 			}
 		} else {
@@ -74,5 +75,14 @@ Ext.define('Ck.map.action.OpenOverview', {
 	close: function() {
 		this.win.hide();
 		this.button.setPressed(false);
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });

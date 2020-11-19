@@ -27,5 +27,14 @@ Ext.define('Ck.map.action.ZoomIn', {
 	doAction: function(btn) {
 		var map = Ck.getMap();
 		map.setZoom( map.getZoom() + 1 );
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });

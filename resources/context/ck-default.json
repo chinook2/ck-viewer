@@ -1,20 +1,20 @@
 {
 	"type": "FeatureCollection",
 	"id": "http://www.opengis.net/owc/1.0/examples/geojson/1",
-	"properties" : {
-		"lang" : "en",
-		"title" : "Default Context",
-		"subtitle" : "Chinook default OWS Context in JSON.",
-		"updated" : "2015-07-22T00:00:00Z",
-		"authors" : [{
-			"name" : "Memoris",
-			"email" : "",
-			"uri": ""
+	"properties": {
+		"lang": "en",
+		"title": "Default Context",
+		"subtitle": "Chinook default OWS Context in JSON.",
+		"updated": "2018-09-22T00:00:00Z",
+		"authors": [{
+			"name": "Geofit",
+			"email": "dev@geofit.fr",
+			"uri": "https://www.geofit.fr"
 		}],
-		"publisher" : "",
-		"creator" : "Chinook Server",
-		"rights" : "Chinook, licensed under a BSD License",
-		"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
+		"publisher": "",
+		"creator": "Chinook Server",
+		"rights": "Chinook, licensed under a BSD License",
+		"bbox": [-292156.361036074, 5823138.65848441, 102041.064733775, 6201873.81430252],
 		"srs": "EPSG:3857",
 		"scales": [
 			{"res": 2.3886571339117578125, "scale": "1 / 8 530"},
@@ -29,65 +29,13 @@
 			{"res": 1222.99245256282, "scale": "1 / 4 367 821"},
 			{"res": 2445.98490512564, "scale": "1 / 8 735 643"}
 		],
-		"categories" : [],
-		"links" : [{
-			"rel" : "profile",
-			"href" : "http://www.opengis.net/spec/owc-geojson/1.0/req/core",
-			"title" : "Compliant with version 1.0 of OGC Context"
+		"categories": [],
+		"links": [{
+			"rel": "profile",
+			"href": "http://www.opengis.net/spec/owc-geojson/1.0/req/core",
+			"title": "Compliant with version 1.0 of OGC Context"
 		}],
-		"extension" : []
+		"extension": []
 	},
-	"features" : [{
-		"type": "Feature",
-		"id": "http://www.opengis.net/spec/owc-geojson/1.0/req/wmts/1",
-		"geometry": {},
-		"properties": {
-			"title" : "Open Stree Map",
-			"updated" : "2015-07-22T00:00:00Z",
-			"content" : "Open Stree Map",
-			"authors" : [],
-			"publisher" : "OSM Server",
-			"categories" : [],
-			"links" : [],
-			"active" : true,
-			"minscale" : 100,
-			"maxscale" : 10000000,
-			"latlongbbox": [-179, -89, 179, 89],
-			"overviewLayer": true,			
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/osm",
-				"operations" : [{ 
-					"code" : "GetTile",
-					"method" : "GET",
-					"type" : "image/png",
-					"href" : "https://otile{1-4}-s.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.jpg",
-					"request":{},
-					"result":{}
-				}],
-				"extension" : []
-			}]
-		}
-	},{
-		"type": "Feature",
-		"id": "departement",
-		"properties": {
-			"title" : "Limites départementales",
-			"updated" : "2015-07-16T00:00:00Z",
-			"publisher" : "GEOFLA",
-			"active" : false,
-			"bbox" : [-610070.44,5042682.29,1082551.12,6644802.40],
-			"offerings" : [{
-				"code" : "http://www.opengis.net/spec/owc-geojson/1.0/req/geojson",
-				"operations" : [{ 
-					"code" : "GetMap",
-					"method" : "GET",
-					"type" : "application/json",
-					"href" : "https://raw.githubusercontent.com/chinook2/ck-viewer/master/resources/data/geojson_2154_limite_departement.geojson"
-				}]
-			}],
-			"extension" : {
-				"path": ""
-			}
-		}
-	}]
+	"features": []
 }

@@ -235,13 +235,14 @@ Ext.define('Ck.Selection', {
 	 * @param {ol.interaction.DrawEvent}
 	 */
 	processSelection: function(evntParams) {
+		Ck.resultFeature = [];
+		Ck.resultLayer = [];
 		this.getMask().show();
 		
 		// Fix if selection is fired from code and not from user interaction
 		if(evntParams !== undefined) {
 			this.inAddition = evntParams[this.getMergeKey()];
 		}
-		
 		var feature = evntParams.feature;
 		var draw = this.getDraw();
 		
@@ -252,7 +253,7 @@ Ext.define('Ck.Selection', {
 		// Unset sketch
 		draw.sketch = null;
 		
-		// Parse les géométries en GeoJSON
+		// Parse les géometries en GeoJSON
 		var geoJSON  = new ol.format.GeoJSON();
 		var type = feature.getGeometry().getType();
 		
@@ -300,7 +301,7 @@ Ext.define('Ck.Selection', {
 			layers = Ck.getMap().getLayers(function(lyr) {
 				return (lyr.getVisible() && Ck.getMap().layerInRange(lyr) && 
 					(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
-					lyr.getProperties("id") != "measureLayer"
+					lyr.getProperties().id != "measureLayer"
 				);
 			});
 			layers = layers.getArray();
@@ -310,7 +311,8 @@ Ext.define('Ck.Selection', {
 		for(var i=0; i<layers.length; i++) {
 			var layer = layers[i];
 			
-			if(!Ext.isFunction(layer.getExtension) || layer.getExtension("queryable") !== true) {
+			//if(!Ext.isFunction(layer.getExtension) || layer.getExtension("queryable") !== true) {
+			if(layer.getExtension("queryable") !== true) {
 				var index = layers.indexOf(layer);
 
 				if (index > -1) {
@@ -462,13 +464,12 @@ Ext.define('Ck.Selection', {
 		// Temporary parent to get the whole innerHTML
 		var pTemp = document.createElement("div");
 		pTemp.appendChild(gf);
-		
+				
 		// Pre make reader options for readFeatures method
 		var readOptions = {
 			dataProjection: ope.getSrs(),
 			featureProjection: this.getMap().getProjection().getCode()
 		};
-		
 		// Do the getFeature query
 		Ck.Ajax.post({
 			scope: this,
@@ -488,6 +489,8 @@ Ext.define('Ck.Selection', {
 				});
 				
 				var features = format.readFeatures(response.responseXML, readOptions);
+				Ck.resultLayer.push(lyr);
+				Ck.resultFeature.push(features);
 				this.onSelect(features, layer);
 			}.bind(this, layer, ope, readOptions),
 			failure: function() {
@@ -618,6 +621,8 @@ Ext.define('Ck.Selection', {
 	},
 	
 	destroy: function() {
+		Ck.resultFeature = [];
+		Ck.resultLayer = [];
 		this.resetSelection();
 		var olMap = this.getOlMap();
 		var draw = this.getDraw();

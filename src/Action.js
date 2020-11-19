@@ -107,6 +107,13 @@ Ext.define('Ck.Action', {
 		Ext.on('ckmapLoaded', function(map) {
 			this.setMap(map);
 			this.ckLoaded(map);
+			
+			// Instanciate draw to load shapes from localStorage
+			this.draw = Ck.Draw.getInstance({
+				map: map,
+				id: Ck.map.action.draw.Action.drawId
+			});
+			
 		}, this);
 
 		config = Ext.applyIf(config || {}, {

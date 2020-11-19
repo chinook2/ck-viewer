@@ -58,6 +58,9 @@ Ext.define("Ck.Result", {
 	
 
 	buttons: [{
+		text: "Exporter",
+		itemId: "exportcsvsel"
+	},{
 		text: "Close",
 		itemId: "close"
 	}],

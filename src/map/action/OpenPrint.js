@@ -24,7 +24,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 	text: '',
 	
 	iconCls: 'fa fa-print',
-	tooltip: 'Open print panel',
+	tooltip: 'Impression',
 	
 	/**
 	 * Create and display a windows with print form
@@ -49,5 +49,14 @@ Ext.define('Ck.map.action.OpenPrint', {
 	
 	close: function() {
 		this.win.hide();
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });

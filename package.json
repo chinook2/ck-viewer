@@ -276,6 +276,8 @@
 		// jspdf.debug.js doesn't work (Uncaught Error: Mismatched anonymous define() module)
 		"path": "libs/jspdf/jspdf.min.js"
 	},{
+		"path": "libs/jspdf/jspdf.plugin.autotable.js"
+	},{
 		"path": "libs/pdf.js/pdf.js"
 	},{
 		"path": "libs/pdf.js/pdf.worker.js"

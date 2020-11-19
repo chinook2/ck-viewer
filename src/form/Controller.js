@@ -153,13 +153,15 @@ Ext.define('Ck.form.Controller', {
 					force: true
 				});
 			}
-
+			/*
 			Ext.Msg.show({
 				title: "Edition",
 				message: "Mise à jour effectuée",
+				preventRefocus: true,
 				buttons: Ext.Msg.OK,
 				icon: Ext.Msg.INFO
 			});
+			*/
 		});
 
 		// If we have error exit here (log message is in saveData())
@@ -199,6 +201,7 @@ Ext.define('Ck.form.Controller', {
 
 			var win = this.view.up('window');
 			if(win) {
+				win.preventRefocus = true;
 				win.destroy();
 			} else {
 				this.view.destroy();
@@ -281,6 +284,9 @@ Ext.define('Ck.form.Controller', {
 			this.oController = Ext.create(controllerName);
 			this.oController._parent = this;
 			//
+
+			// Init isEditable from layer permissions
+			this.getViewModel().set("isEditable", this.isEditable());
 
 			if(this.oController.beforeShow(form) === false) {
 				Ck.log("beforeShow cancel initForm.");
@@ -1198,6 +1204,18 @@ Ext.define('Ck.form.Controller', {
 		return cfg;
 	},
 
+	isEditable: function() {
+		var layer = Ck.getMap().getLayerById(this.formConfig.layername);
+		
+		if(!Ext.isEmpty(layer) && !(layer instanceof ol.layer.Group)) {
+			if((layer.getExtension("editable") || layer.ckLayer.getPermission("edit")) && layer.getExtension("geometryType")) {
+				return true;
+			}
+		}
+		
+		return false;
+	},
+	
 	startEditing: function() {
 		this.getViewModel().set("editing", true);
 		this.getViewModel().set("isEditable", false);

@@ -25,28 +25,28 @@ Ext.define("Ck.Print", {
 	},
 	
 	items: [{
-		fieldLabel: "Title",
+		fieldLabel: "<b>Titre&nbsp;</b>",
 		itemId: "title",
 		name: "title"
 	},{
 		xtype: "combo",
 		itemId: "resolution",
-		fieldLabel: "Resolution",
+		fieldLabel: "<b>Echelle&nbsp;</b>",
 		name: "resolution",
 		displayField: "scale",
 		valueField: "res",
 		editable: false
-	},{
+	}/*,{
 		xtype: "combo",
 		itemId: "printLayout",
-		fieldLabel: "Layout",
+		fieldLabel: "<b>Modèle</b>",
 		name: "printLayout",
 		editable: false,
 		store: ["default-layout"]
-	},{
+	}*/,{
 		xtype: "combo",
 		itemId: "outputFormat",
-		fieldLabel: "Output format",
+		fieldLabel: "<b>Type&nbsp;</b>",
 		name: "outputFormat",
 		displayField: "label",
 		valueField: "id",
@@ -68,7 +68,7 @@ Ext.define("Ck.Print", {
 	}*/,{
 		xtype: "combo",
 		itemId: "format",
-		fieldLabel: "Format",
+		fieldLabel: "<b>Format&nbsp;</b>",
 		name: "format",
 		displayField: "label",
 		valueField: "id",
@@ -79,15 +79,53 @@ Ext.define("Ck.Print", {
 	},{
 		xtype: "radiogroup",
 		itemId: "orientation",
-		fieldLabel: "Orientation",
+		fieldLabel: "<b>Orientation&nbsp;</b>",
 		columns: 2,
 		vertical: true,
 		name: "orientation",
 		items: [
 			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
-			{boxLabel: "Lanscape", name: "orientation", inputValue: "l"}
+			{boxLabel: "Paysage", name: "orientation", inputValue: "l"}
 		]
-	}],
+	},{
+		xtype: "radiogroup",
+		itemId: "affleg",
+		columns: 3,
+		vertical: true,
+		fieldLabel:"<b>Légende&nbsp;</b>",
+		name: "affleg",
+		items: [
+			{boxLabel: "Cacher", name: "affleg", inputValue: "naleg",value:1},
+			{boxLabel: "Intégrer", name: "affleg", inputValue: "itgleg"},
+			{boxLabel: "Séparer", name: "affleg", inputValue: "sprleg"}
+		]
+	},{
+		xtype: "checkbox",
+		itemId: "cpr",
+		labelWidth:150,
+		fieldLabel:"<b>Copyright&nbsp;</b>",
+		name: "cpr"
+	},{
+		xtype: "checkbox",
+		itemId: "crtref",
+		labelWidth:150,
+		name: "crtref",
+		fieldLabel: "<b>Carte de référence&nbsp;</b>"
+	},{
+		xtype: "checkbox",
+		itemId: "lstressel",
+		labelWidth:150,
+		name: "lstressel",
+		fieldLabel: "<b>Liste résultat Séléction&nbsp;</b>"
+	},{
+        xtype: 'numberfield',
+        name: 'rotate',
+		itemId: "rotate",
+        fieldLabel: 'Tourner la carte&nbsp;',
+        value: 0,
+        maxValue: 360,
+        minValue: 0
+    }],
 	
 	buttons: [{
 		text: "Print",

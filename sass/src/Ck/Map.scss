@@ -71,9 +71,9 @@
 /****************************************************************************************/
 .ck-progress {
 	position: absolute;
-	bottom: 0;
+	top: 0;
 	height: 5px;
-	background: rgba(0, 60, 136, 0.4);
+	background: rgba(95, 165, 221, 1);
 	width: 100%;
 	transition: width 250ms;
 	visibility: hidden;
@@ -119,9 +119,9 @@
 /****************************************************************************************/
 /*********************************** Rotation Control ***********************************/
 /****************************************************************************************/
-.ck-rotate{
-	right: 0.5em;
-    bottom: 5.5em;
+.ck-rotate {
+	top: 0.5em;
+  left: 2.5em;
 }
 
 /****************************************************************************************/
@@ -133,7 +133,7 @@
 	background-size: 32px;
 }
 
-.marker-blue{
+.marker-blue {
 	background-image: url("ck-viewer/images/marker_gray.png");
 }
 
@@ -178,3 +178,21 @@
 .tooltip-static:before {
 	border-top-color: #ff0000;
 }
+
+/* draw panel */
+.ck-draw-tbar .x-btn-icon-el {
+  width: 16px;
+  height: 16px;
+  background-origin: 0 0;
+  background-repeat: no-repeat;
+}
+.ck-draw-tbar .ck-draw-point { background-image: url(ck-viewer/images/drawpanel/point.gif); }
+.ck-draw-tbar .ck-draw-linestring { background-image: url(ck-viewer/images/drawpanel/linestring.gif); }
+.ck-draw-tbar .ck-draw-box { background-image: url(ck-viewer/images/drawpanel/box.gif); }
+.ck-draw-tbar .ck-draw-circle { background-image: url(ck-viewer/images/drawpanel/circle.gif); }
+.ck-draw-tbar .ck-draw-polygon { background-image: url(ck-viewer/images/drawpanel/polygon.gif); }
+.ck-draw-tbar .ck-draw-edit { background-image: url(ck-viewer/images/drawpanel/edit.gif); }
+.ck-draw-tbar .ck-draw-text { background-image: url(ck-viewer/images/drawpanel/text.gif); }
+.ck-draw-tbar .ck-draw-clear { background-image: url(ck-viewer/images/drawpanel/clear.gif); }
+.ck-draw-tbar .ck-draw-export { background-image: url(ck-viewer/images/drawpanel/export.png); }
+

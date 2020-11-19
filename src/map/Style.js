@@ -12,6 +12,23 @@
 Ext.define('Ck.map.Style', {
 	alternateClassName: 'Ck.Style',
 	singleton: true,
+
+	/**
+	 * Default width. Typically for stroke
+	 */
+	defaultWidth: 2,
+
+	/**
+	 * Default colors
+	 */
+	color: {
+		lightGray: "rgba(255, 255, 255, 0.2)",
+		gray: "rgba(255, 255, 255, 0.4)",
+		red: "#ff3333",
+		green: "#33cc33",
+		blue: "#3399cc",
+		orange: "#ff953d"
+	},
 	
 	/**
 	 * Default fill color.
@@ -48,7 +65,7 @@ Ext.define('Ck.map.Style', {
 	 * Default select stroke color and width
 	 */
 	selectStroke: {
-		color: "#FF953D",
+		color: "#ff953d",
 		width: 2
 	},
 	
@@ -62,7 +79,7 @@ Ext.define('Ck.map.Style', {
 	 */
 	radius: 10,
 	
-	style:null,
+	style: null,
 	
 	zIndex: {
 		editInteraction	: 500,
@@ -82,7 +99,7 @@ Ext.define('Ck.map.Style', {
 				}),
 				radius: 5,
 				stroke: new ol.style.Stroke({
-					color: '#ff0',
+					color: '#333',
 					width: 1
 				})
 			})
@@ -494,7 +511,24 @@ Ck.map.Style.style = [
 	})
 ];
 
-Ck.map.Style.redStroke = [
+/**
+ * Gray
+ */
+Ck.Style.grayFill = [
+	new ol.style.Style({ 
+		fill: new ol.style.Fill({ color: Ck.Style.color.gray }) 
+	})
+];
+Ck.Style.lightGrayFill = [
+	new ol.style.Style({ 
+		fill: new ol.style.Fill({ color: Ck.Style.color.lightGray} )
+	})
+];
+
+/**
+ * Red
+ */
+Ck.Style.redStroke = [
 	new ol.style.Style({
 		image: new ol.style.RegularShape({
 			points: 4,
@@ -506,17 +540,31 @@ Ck.map.Style.redStroke = [
 	})
 ];
 
-Ck.map.Style.greenStroke = [
+/**
+ * Green
+ */
+Ck.Style.greenStroke = [
 	new ol.style.Style({
 		image: new ol.style.Circle({
-			stroke: new ol.style.Stroke(Ck.map.Style.greenStroke),
+			stroke: new ol.style.Stroke(Ck.Style.greenStroke),
 			radius: Ck.map.Style.minorRadius
 		}),
-		stroke: new ol.style.Stroke(Ck.map.Style.greenStroke)
+		stroke: new ol.style.Stroke(Ck.Style.greenStroke)
+	})
+];
+Ck.Style.greenCircle = [
+	new ol.style.Style({
+		image: new ol.style.Circle({
+			stroke: new ol.style.Stroke({ color: Ck.Style.color.green, width: Ck.Style.defaultWidth }),
+			radius: Ck.Style.minorRadius
+		})
 	})
 ];
 
-Ck.map.Style.orangeStroke = [
+/**
+ * 
+ */
+Ck.Style.orangeStroke = [
 	new ol.style.Style({
 		image: new ol.style.Circle({
 			stroke: new ol.style.Stroke(Ck.map.Style.selectStroke),
@@ -526,4 +574,8 @@ Ck.map.Style.orangeStroke = [
 	})
 ];
 
-Ck.map.Style.invisibleStyle = [];
+/**
+ * Here is defined the directly used styles
+ */
+Ck.Style.invisibleStyle = [];
+//Ck.Style.drawStyle = [Ck.Style.greenStroke, Ck.Style.greenCircle, Ck.Style.grayFill];

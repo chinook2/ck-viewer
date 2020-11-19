@@ -28,5 +28,14 @@ Ext.define('Ck.map.action.ResetView', {
 	doAction: function(btn) {
 		var map = Ck.getMap();
 		map.resetView();
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });

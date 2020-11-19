@@ -38,13 +38,14 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 * Button associate with this action
 	 */
 	btn: null,
+	cntfrstclk : false,
 	
 	/**
 	 * FeatureInfo on vector layer
 	 */
 	ckLoaded: function(map) {
 		this.olMap = map.getOlMap();
-		
+		/*
 		this.draw = new Ck.Selection({
 			type		: "Point",
 			map			: map,
@@ -52,8 +53,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			scope		: this,
 			highlight	: false,
 			limit		: null
-		});
-		
+		});	
+		*/
 		// Disable on context loading
 		map.on("contextloading", function() {
 			if(this.btn) {
@@ -67,6 +68,18 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	 */
 	toggleAction: function(btn, pressed) {
 		this.btn = btn;
+		
+		if(!this.cntfrstclk){
+			this.draw = new Ck.Selection({
+				type		: "Point",
+				map			: Ck.getMap(),
+				callback	: this.displayInfo,
+				scope		: this,
+				highlight	: false,
+				limit		: null
+			});	
+			this.cntfrstclk = true;
+		}
 		this.draw.setActive(pressed);
 	},
 	
@@ -163,5 +176,14 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				this.win.close();	
 			}, this);
 		}
+	},
+	
+	render: function(c){
+		Ext.create('Ext.tip.ToolTip', {
+			target: c.getEl(),
+			html: this.tooltip,
+			anchor:"left",
+			animCollapse:false
+		},this);
 	}
 });

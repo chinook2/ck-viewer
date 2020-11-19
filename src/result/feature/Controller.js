@@ -47,6 +47,10 @@ Ext.define('Ck.result.feature.Controller', {
 			}
 		}
 		
+		if(!fid){
+			fid = this.currentRecord.data.ckFeature.getId();
+		}
+		
 		var dataObject = null;
 		var offerings = layer.ckLayer.getOfferings();
 		if(offerings) {
@@ -74,7 +78,7 @@ Ext.define('Ck.result.feature.Controller', {
 			layout: 'fit',
 			headerPosition: 'right',
 			
-			maximized: true,
+			//maximized: true,
 			closable: false,
 			
 			closeAction: 'hide',

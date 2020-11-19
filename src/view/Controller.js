@@ -4,7 +4,7 @@
 //<debug>
 // Mini hack to load Ck.js main static class in dev mode
 // Ext.manifest.paths doesn't in production and testing !!
-if(Ext.manifest.paths) Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
+if (Ext.manifest.paths) Ext.Loader.loadScriptsSync([Ext.manifest.paths.Ck + "/Ck.js"]);
 //</debug>
 
 Ext.define('Ck.view.Controller', {
@@ -14,7 +14,7 @@ Ext.define('Ck.view.Controller', {
 	attempt: 0,
 	
 	init: function() {
-		if(Ck.params.app) {
+		if (Ck.params.app) {
 			this.getView().setName(Ck.params.app);
 		}
 				
@@ -33,7 +33,7 @@ Ext.define('Ck.view.Controller', {
 	 * @private
 	 */
 	initUi: function(ui) {
-		if(!ui) {
+		if (!ui) {
 			var uiName = this.getView().getName();
 			this.getUi(uiName);
 			return;
@@ -41,7 +41,7 @@ Ext.define('Ck.view.Controller', {
 		
 		ui = this.beforeAdd(ui);
 		
-		if(this.fireEvent('beforeadd', ui) !== false) {
+		if (this.fireEvent('beforeadd', ui) !== false) {
 			this.view.add(ui);
 		}
 		
@@ -54,9 +54,14 @@ Ext.define('Ck.view.Controller', {
 	 */
 	getUi: function(uiName) {
 		Cks.get({
-			url: this.getFullUrl(uiName),
+			//url: this.getFullUrl(uiName),
+			url: Ck.getApi(),
+			params: {
+				s: 'user',
+				r: 'getui'
+			},
 			scope: this,
-			success: function(response){
+			success: function(response) {
 				var uiConfig = Ext.decode(response.responseText);
 				this.initUi(uiConfig);
 			},
@@ -67,7 +72,7 @@ Ext.define('Ck.view.Controller', {
 				
 				Ck.error('Error when loading "'+uiName+'" interface !. Loading the default interface...');
 				this.attempt++;
-				if(this.attempt <= this.maxAttempt) this.getUi('ck-default');
+				if (this.attempt <= this.maxAttempt) this.getUi('ck-default');
 			}
 		});
 	}

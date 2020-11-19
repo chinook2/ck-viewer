@@ -1,32 +1,196 @@
-﻿#ckPrint-page div{
+#ckPrint-page div{
 	float: left;
 }
 
 #ckPrint-page{
 	position: relative;
-	background-color: gray;
+	background-color: white;
+	border:1px solid gray;
 }
 
-#ckPrint-body{
+#ckPrint-logo{
 	position: absolute;
-	margin: 10px;
-	background-color: rgb(155, 155, 155);
-	top: 0px;
-	bottom: 0px;
-	right: 0px;
-	left: 0px;
+	height: 50px;
+	width:120px;
+	left:3px;
+	top:3px;
+	border:none;
 }
 
-#ckPrint-title{
-	position: absolute;	right: 0px;	left: 0px;	top: 0px;	height: 30px;	margin-bottom: 5px;	background-color: red;
-	text-align: center;
+.ckPrint-logtitle{
+	position: absolute;
+	left:5px;
+	right:0px;
+}
+
+.ckPrint-logo-part{
+	position: relative;
+}
+.ckPrint-logo-partcnt{
+	position:relative;
+	padding:4px;
+}
+
+#ckPrint-title a {
+    text-decoration: none;
+    border-bottom: 3px solid black;
+    padding-bottom: 2px;
+	color: black;
+}
+
+#ckPrint-title{ 
+	word-wrap: break-word; 
+	/* text-decoration-line: underline !important; */
+	/* text-decoration-thickness: 0.1em !important; */
+	/* text-underline-offset: 10px !important; */
+	line-height: 1;
 	font-size: 24px;
+    font-weight: bold !important;
+	width:370px;
+    height: 121px;
+    left: 123px;
+    right: 278px;
+    margin-bottom: 5px;
+    padding-top: 20px;
+    position: absolute;
+    text-align: center;
+    top: 0;
+}
+
+#ckPrint-param{
+	position: absolute;
+	height: 121px;
+	width:275px;
+	top: 3px;
+	bottom: 0px;
+	right:3px;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-param ul {
+    list-style-type: none;
+	margin-top: 1px;
+}
+
+#ckPrint-param li {
+    padding-bottom: 20px;
 }
 
 #ckPrint-legend{
-	position: absolute;	top: 35px;	width: 100px;	bottom: 0px;	background-color: green;
+	position: absolute;
+	height: 321px;
+	top: 124px;
+	bottom: 0px;
+	left:3px;
+    right: 280px;
+	background-color: rgba(255, 255, 255, 0.83);
 }
 
-#ckPrint-map{
-	position: absolute;	right: 0px;	top: 35px;	left: 105px;	bottom: 0px;	background-color: white;
+#ckPrint-icopart{
+	position: absolute;
+	height: 200px;
+	top: 200px;
+	width:275px;
+	bottom: 0px;
+    right: 3px;
+	background-color: rgba(255, 255, 255, 0.83);
 }
+
+#ckPrint-cpr{
+	position: absolute;
+	height: 20px;
+	top: 300px;
+	width:275px;
+	bottom: 0px;
+    right: 3px;
+	background-color: rgba(255, 255, 255, 0.83);
+	text-align:right;
+	font-size:8px;
+}
+
+#ulleg{
+    list-style-type: none;
+    margin: 1px 0 0;
+    padding: 0;
+}
+
+#ulleg li {
+    padding-bottom: 20px;
+}
+
+.ckPrint-legtitle{
+	font-size:8px;
+	position: absolute;
+	left:25px;
+	width:120px;
+}
+
+.ckPrint-legimg{
+	position: absolute;
+	left:0px;
+	width:24px;
+	height:15px;
+	margin-top:2px;
+}
+
+#ckPrint-map {
+    background-color: white;
+    bottom: 3px;
+    left: 3px;
+    position: absolute;
+    right: 3px;
+    top: 330px;
+}
+
+#ckPrint-ref{
+	border: 2px solid gray;
+	position: absolute;
+	height: 122px;
+	width: 122px;
+	right: 19px;
+    top: 350px;
+	background-color: white;
+}
+
+
+#ckPrint-legend1 div{
+	float: left;
+}
+
+#ckPrint-legend1{
+	position: relative;
+	background-color: white;
+	border:1px solid gray;
+}
+ 
+#ckPrint-cntleg1{
+	position: absolute;
+	right: 0px;
+	left: 0px;
+	top:122px;
+	bottom: 0px;
+	height:1102px;
+	width:100%;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-logo11{
+	border-bottom: 4px solid gray;
+	position: absolute;
+	height: 122px;
+	background-size :145px 82px;
+	left:0px;
+	right:0px;
+	top:0px;
+}
+
+#ckPrint-cntleg1 ul {
+    list-style-type: none;
+    margin: 34px 0 0;
+    padding: 0;
+}
+
+#ckPrint-cntleg1 li {
+    padding-bottom: 20px;
+}
+

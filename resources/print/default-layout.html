@@ -1,19 +1,34 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 	<head>
 		<link rel="stylesheet" href="default-layout.css" />
 	</head>
-	<body>
+	<body> 
 		<div id="ckPrint-page" style="width: 774px; height: 1102px;">
-			<div id="ckPrint-body">
-				<div id="ckPrint-title">
-					{value:title}
+			<div id="ckPrint-logo">
+				<div class="ckPrint-logo-partcnt">
+					<div class="ckPrint-logo-part" style='background: rgba(255, 255, 255, 1);'><img src="resources/images/LogoSIEML2.png" style="height:50px;margin-left:2px;"></div>
 				</div>
-				<div id="ckPrint-legend">
-					{value:legend}
-				</div>
-				<div id="ckPrint-map"></div>
 			</div>
+			<div id="ckPrint-title">
+				<a href="#">{value:title}</a>
+			</div>
+			<div id="ckPrint-param">
+				<ul>
+					<li><div class='ckPrint-logtitle'>Commune(s) : </div></li>
+					<li><div class='ckPrint-logtitle'>Echelle : {value:scale}</div></li>
+					<li><div class='ckPrint-logtitle'>Date d'&eacute;dition : {value:date}</div></li>
+					<li><div class='ckPrint-logtitle'>Syst&egrave;me de projection : {value:projection}</div></li>
+				</ul>
+			</div>
+			
+			<div id="ckPrint-legend" style="display:none;"></div>
+			<div id="ckPrint-icopart" style="display:block;"></div>
+			<div id="ckPrint-cpr" style="display:block;"></div>
+			<div id="ckPrint-map"></div>
+			<div id="ckPrint-ref" style="display:none"> </div>
 		</div>
+		
 	</body>
 </html>
+

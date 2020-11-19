@@ -11,6 +11,7 @@ Ext.define('Ck.legend.Controller', {
 				// Called when add layer to map
 				addlayer: 'onMapAddLayer',
 				removelayer: 'onMapRemoveLayer',
+				layersloading : 'onlayersloading',
 				contextloading: 'prepareLegend'
 			}
 		}
@@ -30,7 +31,17 @@ Ext.define('Ck.legend.Controller', {
 
 	ckLoaded: function() {
 		var v = this.getView();
-
+		
+		var trit = v.items.items;
+		var ligitem = trit[0].dataSource.data.items;
+		var expandedGroups = Ck.getOption('expandedGroups') || [];
+		/*for(i=0 ; i < ligitem.length; i++){
+			if(ligitem[i].data.parentId == 'root'){
+				if(expandedGroups.indexOf(ligitem[i].data.text)  != -1 ){
+					ligitem[i].expand();
+				}
+			}
+		}*/
 		// Attach events
 		v.getStore().on('update', this.onUpdate);
 		
@@ -44,9 +55,11 @@ Ext.define('Ck.legend.Controller', {
 		// Event on ol view resolution change
 		var olv = this.getMap().getOlView();
 			olv.on('change:resolution',	this.setLegendLayersStyle, this
-			);
+		);
 		
 		v.getRootNode().on('expand' , this.setLegendLayersStyle, this);
+		
+		this.setLegendLayersStyle();
 		
 		this.fireEvent('ready', this);
 	},
@@ -105,6 +118,29 @@ Ext.define('Ck.legend.Controller', {
 		return false;
 	},
 	
+	onlayersloading: function(){
+		/*
+		var v = this.getView();
+		trit = v.items.items;
+		ligitem = trit[0].dataSource.data.items;
+		for(i=0 ; i < ligitem.length; i++){
+			if(ligitem[i].data.parentId == 'root'){
+				
+			}else{
+				if(ligitem[i].data.text == 'affleurantenveloppepcrs'){
+					if(ligitem[i].data.disabled == true){
+						ligitem[i].data.disabled = false;
+					}else{
+						ligitem[i].data.disabled = true;
+					}
+					
+					trit[0].refresh();
+				}
+			}
+		}
+		*/
+	},
+	
 	/**
 	 * Called when a layer is removed from the map
 	 * @param {ol.layer}
@@ -125,10 +161,9 @@ Ext.define('Ck.legend.Controller', {
 		var searchNode = function(node, layer) {
 			var resultNode;
 			var data = node.getData();
-			if(data.layer) {
-				if(data.layer == layer)
+			if(data.layer && data.layer == layer){
 					return node;
-			} else if(node.childNodes && node.childNodes.length > 0) {
+			}else if(node.childNodes && node.childNodes.length > 0) {
 				for(var i = 0; i < node.childNodes.length; i++) {
 					resultNode = searchNode(node.childNodes[i], layer);
 					if(resultNode) {
@@ -177,14 +212,31 @@ Ext.define('Ck.legend.Controller', {
 			var nodeDom;
 			for(var i = 0; i < layers.array_.length; i++) {				
 				layer = layers.array_[i];
+				if(layer instanceof ol.layer.Group) continue;
+				
 				node = layer.get("node");
 				if(node){
-					nodeDom = this.getNodeDomElement(node);
-					if(!(layer instanceof ol.layer.Group) && !Ck.getMap().layerInRange(layer) && (nodeDom)){					
-						nodeDom.style.color = '#dbdbdb';
-					}else if(!(layer instanceof ol.layer.Group) && Ck.getMap().layerInRange(layer) && (nodeDom)) {
-						nodeDom.style.color = '#404040';
-					}	
+					node.set("disabled", true);
+					if (Ck.getMap().layerInRange(layer)) {
+						node.set("disabled", false);
+					}
+					
+					/*
+					//nodeDom = this.getNodeDomElement(node);
+					//if(!(layer instanceof ol.layer.Group) && !Ck.getMap().layerInRange(layer) && (nodeDom)){					
+					if(!Ck.getMap().layerInRange(layer)){					
+						//nodeDom.style.color = '#FF000';
+						//nodeDom.classList.add("ck-disabled-layer");
+						//Ext.fly(nodeDom).addCls("ck-disabled-layer");
+						node.set("disabled", true);
+					//}else if(!(layer instanceof ol.layer.Group) && Ck.getMap().layerInRange(layer) && (nodeDom)) {
+					} else if(Ck.getMap().layerInRange(layer)) {
+						//nodeDom.style.color = '#404040';
+						//nodeDom.classList.remove("ck-disabled-layer");
+						//Ext.fly(nodeDom).removeCls("ck-disabled-layer");
+						node.set("disabled", false);
+					}
+					*/
 				}				
 			}
 	},
@@ -195,7 +247,7 @@ Ext.define('Ck.legend.Controller', {
 	setLegendLayerStyle: function(layer, node){
 		var nodeDom = this.getNodeDomElement(node);;	
 		if(!(layer instanceof ol.layer.Group) && !Ck.getMap().layerInRange(layer) && (nodeDom)){				 
-			nodeDom.style.color = '#dbdbdb';
+			//nodeDom.style.color = '#FF000';
 		}
 	},
 	

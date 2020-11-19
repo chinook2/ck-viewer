@@ -78,7 +78,7 @@ Ext.define('Ck.legend.plugin.action.Edit', {
 			}
  		}
 	},
-	
+	 
 	/**
 	 * @param {ol.layer.Base}
 	 */

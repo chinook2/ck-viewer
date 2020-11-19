@@ -413,7 +413,7 @@
         if (!realURL.createObjectURL) {
             URL = view.URL = {};
         }
-        URL.createObjectURL = function(blob){
+        /*URL.createObjectURL = function(blob){
             var type = blob.type, data_URI_header;
             if (type === null) {
                 type = "application/octet-stream";
@@ -438,7 +438,7 @@
                 if (typeof(real_create_object_url) !== "undefined") {
                     return real_create_object_url.call(realURL, blob);
                 }
-        };
+        };*/
         URL.revokeObjectURL = function(object_url){
             if (object_url.substring(0, 5) !== "data:" && real_revoke_object_url) {
                 real_revoke_object_url.call(realURL, object_url);

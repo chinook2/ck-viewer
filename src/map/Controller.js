@@ -192,7 +192,7 @@ Ext.define('Ck.map.Controller', {
 
 		this.bindMap(olMap);
 
-		if(Ck.getAction("ckmapPreviousview") && Ck.getAction("ckmapNextview")) {
+		//if (Ck.getAction("ckmapPreviousview") && Ck.getAction("ckmapNextview")) {
 			Ext.define('StoredView', {
 				extend: 'Ext.data.Model',
 				fields: [
@@ -210,9 +210,9 @@ Ext.define('Ck.map.Controller', {
 				this.registerView();
 			}, this);
 			
-			Ck.getAction("ckmapPreviousview").controller = this;
-			Ck.getAction("ckmapNextview").controller = this;
-		}
+		//	Ck.getAction("ckmapPreviousview").controller = this;
+		//	Ck.getAction("ckmapNextview").controller = this;
+		//}
 		
 		this.on("layersloading", this.layersLoading, this);
 		this.on("layersloaded", this.layersLoaded, this);
@@ -354,6 +354,7 @@ Ext.define('Ck.map.Controller', {
 					this.addLayer(currLayer, owc, Infinity);
 				}
 			}
+			//console.log(this.overviewCollection);
 
 			// Init GPS manager. Overwrite getPosition to integrate offset to facilitate development
 			// TODO Use navigator.geolocaiton directly because ol.Geolocation sucks
@@ -512,11 +513,28 @@ Ext.define('Ck.map.Controller', {
 				sources[off.getType()].push(this.createSource(off, layer, owc));
 			}
 			
+			var attribution = layer.getExtension('attribution') || "";
 			var path = layer.getExtension('path') || "";
 			lyrGroup = this.getLayerGroup(path);
 			
 			var opacity = layer.getExtension("opacity");
 			opacity = (!isNaN(parseFloat(opacity)) && isFinite(opacity)) ? opacity : 1;
+			
+			units = Ck.getMap().getOlView().getProjection().units_;
+			minscaletmp = layer.getMinScale();
+			if(minscaletmp){
+				minrestmp = Ck.getResolutionForScale(minscaletmp, units);
+				layer.setMinResolution(minrestmp);
+			}else{
+				minrestmp = layer.getMinResolution();
+			}
+			maxscaletmp = layer.getMaxScale();
+			if(maxscaletmp){
+				maxrestmp = Ck.getResolutionForScale(maxscaletmp, units);
+				layer.setMaxResolution(maxrestmp);
+			}else{
+				maxrestmp = layer.getMaxResolution();
+			}
 			
 			// Layer creation
 			olLayer = Ck.create("ol.layer." + ckLayerSpec.layerType, {
@@ -530,11 +548,15 @@ Ext.define('Ck.map.Controller', {
 				visible: layer.getVisible(),
 				zIndex: layer.getZIndex(),
 				path: path,
-				minResolution: layer.getMinResolution(),
-				maxResolution: layer.getMaxResolution(),
+				attribution:attribution,
+				// minResolution: layer.getMinResolution(),
+				// maxResolution: layer.getMaxResolution(),
+				minResolution: minrestmp,
+				maxResolution: maxrestmp,
 				opacity: opacity
 			});
 		}
+		
 		return olLayer;
 	},
 	
