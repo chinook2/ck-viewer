@@ -602,6 +602,14 @@ Ext.define('Ck.map.Controller', {
 					if (Ext.isArray(origin)) {
 						origin = origin.map(parseFloat);
 					}
+					if(Ck.getOption("mapcacheOffset")) {
+						var offset = Ck.getOption("mapcacheOffset");
+						if (Ext.isArray(offset) && offset.length == 2) {							
+							origin = origin.map(function (num, idx) {
+								return num + offset[idx];
+							});
+						}
+					}
 
 					// get resolution from main view. need inverse order
 					var resolutions = layer.getExtension('resolutions') || owc.getResolutions(false);
