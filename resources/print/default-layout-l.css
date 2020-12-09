@@ -1,0 +1,87 @@
+﻿#ckPrint-page{
+	padding:1%;
+	background-color: #d0d0d0;
+	width: 100%;
+}
+
+	.ckPrint-white-frame{
+		background-color: #ffffff;
+	}
+
+		#ckPrint-body{
+			width: 100%;
+		}
+
+		#ckPrint-title{
+			background-color: #2196f3;
+			width: 100%;
+			color:white;
+			font-size: 24px;
+			font-weight: 600;
+			font-family: Roboto, sans-serif;
+			line-height: 22px;
+			text-align: center;
+			padding:1%;
+			margin-bottom: 1%;
+		}
+
+		#ckPrint-app-name{
+			padding:1%;
+			width:100%;
+		}
+
+		#ckPrint-details{
+			margin-left:60%;
+		}
+
+		#ckPrint-legend{
+			/* margin-top: 10px; */
+			background-color: #ffffff;
+		}
+
+		#ckPrint-map{
+			background-color: white;
+		}
+
+		#ckPrint-filters{
+			background-color: white;
+			padding:1%;
+		}
+
+		#ckPrint-filters-list{
+			padding:1%;
+			display: inline-block;
+			position: absolute;
+			top:0px;
+			left:0px;
+			background-color: rgba(255,255,255,0.8);
+		}
+
+		.flex-container {
+			display: flex;
+			flex-direction: row;
+		}
+
+		.ckPrint-legimg{
+			padding-right: 5px;
+		}
+
+		.ulleg {
+			text-decoration:none;
+			padding:5px
+		}
+
+		#whiteDivLegend{
+			width:30%;
+			margin-left: 1%;
+		}
+
+		#whiteDivMap{
+			width:69%;
+			position:relative;
+			margin-right:1%;
+		}
+
+		#rowMap{
+			display:flex;
+		}

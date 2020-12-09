@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Data binding for map view. Allow to display parameters in the view and change parameters (two-way).
  */
 Ext.define('Ck.print.Model', {
@@ -38,7 +38,9 @@ Ext.define('Ck.print.Model', {
 		layouts: {
 			fields: ["id", "label", "packageName"],
 			data: [
-				{id: "default-layout", label: "Default"}
+				{id: "default-layout", label: "Default"},
+				{id: "default-layout-p", label: "Portrait"},
+				{id: "default-layout-l", label: "Landscape"}
 			]
 		},
 		outputFormats: {
@@ -50,12 +52,12 @@ Ext.define('Ck.print.Model', {
 			]
 		},
 		formats: {
-			fields: ["id", "label"],
+			fields: ["id", "label", "ratio"],
 			data: [
-				{id: "a4", label: "A4"},
-				{id: "a3", label: "A3"},
-				{id: "a2", label: "A2"},
-				{id: "a1", label: "A1"}
+				{id: "a4", label: "A4", ratio: 1.00},
+				{id: "a3", label: "A3", ratio: 1.41},
+				{id: "a2", label: "A2", ratio: 2.00},
+				{id: "a1", label: "A1", ratio: 2.83}
 			]
 		},
 		dpi: {

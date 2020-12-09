@@ -104,7 +104,7 @@ Ext.define("Ck.Print", {
 		vertical: true,
 		items: [
 			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
-			{boxLabel: "Lanscape", name: "orientation", inputValue: "l"}
+			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
 	},{

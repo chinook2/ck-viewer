@@ -1,0 +1,81 @@
+﻿#ckPrint-page{
+	padding:10px;
+	background-color: #d0d0d0;
+}
+
+	.ckPrint-white-frame{
+		padding-top: 10px;
+		padding-bottom: 10px;
+		background-color: #ffffff;
+		margin-bottom: 10px;
+	}
+
+		#ckPrint-title{
+			background-color: #2196f3;
+			width: 100%;
+			color:white;
+			font-size: 24px;
+			font-weight: 600;
+			font-family: Roboto, sans-serif;
+			line-height: 22px;
+			text-align: center;
+			padding:10px;
+			margin-bottom: 10px;
+		}
+
+		#ckPrint-app-name{
+			padding:10px;
+			width:100%;
+		}
+
+		#ckPrint-details{
+			margin-left:60%;
+		}
+
+		#ckPrint-legend{
+			/* margin-top: 10px; */
+			background-color: #ffffff;
+			padding:10px;
+			height:150px;
+		}
+
+		#ckPrint-map{
+			background-color: white;
+		}
+
+		#ckPrint-filters{
+			background-color: white;
+			padding:10px;
+		}
+
+		#ckPrint-filters-list{
+			display: inline-block;
+		}
+
+		.flex-container {
+			display: flex;
+			flex-direction: row;
+		}
+
+		.ckPrint-legimg{
+			padding-right: 5px;
+		}
+
+		.ulleg {
+			-webkit-column-count: 2;
+			-moz-column-count: 2;
+			column-count: 2;
+		}
+		
+		#ckPrint-filters-list{
+			padding:1%;
+			display: inline-block;
+			position: absolute;
+			top:0px;
+			left:0px;
+			background-color: rgba(255,255,255,0.8);
+		}
+
+		#whiteDivMap{
+			position:relative;
+		}

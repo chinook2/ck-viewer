@@ -64,6 +64,7 @@ Ext.define('Ck.print.Controller', {
 			resolution: '{printParam.resolution}',
 			format: '{printParam.format}',
 			orientation: '{printParam.orientation}',
+			//title: '{printParam.title}',
 			dpi:  '{printParam.dpi}'
 		}
 	},
@@ -217,10 +218,18 @@ Ext.define('Ck.print.Controller', {
 	 * Update the preview feature from layout, format and orientation
 	 */
 	updatePreview: function() {
-		var layoutHTML = this.layoutsHTML[this.get("printParam.layout")];
+		if(this.get("printParam.orientation").__proto__.orientation !== undefined){
+			var layoutHTML = this.layoutsHTML[this.get("printParam.layout") + "-" + this.get("printParam.orientation").__proto__.orientation];
+		}else if (this.get("printParam.orientation").orientation !== undefined){
+			var layoutHTML = this.layoutsHTML[this.get("printParam.layout") + "-" + this.get("printParam.orientation").orientation];
+		}
 		
 		if(!Ext.isString(layoutHTML)) {
-			this.loadHTML(this.get("printParam.layout"));
+			if(this.get("printParam.orientation").__proto__.orientation !== undefined){
+				this.loadHTML(this.get("printParam.layout") + "-" + this.get("printParam.orientation").__proto__.orientation);
+			}else if (this.get("printParam.orientation").orientation !== undefined){
+				this.loadHTML(this.get("printParam.layout") + "-" + this.get("printParam.orientation").orientation);
+			}
 			return false;
 		}
 		
@@ -306,16 +315,30 @@ Ext.define('Ck.print.Controller', {
 		});
 		this.layoutDiv.appendChild(this.pageDiv);
 
+		if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+			var ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+		}else{
+			var ratio = 1;
+		}
+
 		// Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
 		var mapDiv = Ext.get("ckPrint-map");
 		this.mapDiv = mapDiv.dom;
+
+		// Adapt component size to format thanks to ratio
+		mapDiv.setWidth(mapDiv.getWidth() * ratio);
+		mapDiv.setHeight(mapDiv.getHeight() * ratio);
+		Ext.get("ckPrint-map").setWidth(Ext.get("ckPrint-map").getWidth() * ratio);
+		Ext.get("ckPrint-map").setHeight(Ext.get("ckPrint-map").getHeight() * ratio);
+		
 		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 
 		// Calculate mapSize
 		var res = this.get("printParam.resolution");
+
 		this.mapSize = [
-			(this.canvasSize[0] * res),
-			(this.canvasSize[1] * res)
+			(this.canvasSize[0] * res * ratio),
+			(this.canvasSize[1] * res * ratio)
 		];
 	},
 
@@ -391,6 +414,24 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	/**
+	 * 
+	 */
+	getClassLength : function(layer) {
+		//Get class length
+		Cks.get({
+			url: Ck.getApi() + "service=SLD&request=get&layers=" + layer.get("id"),
+			scope: this,
+			async: false,
+			success: function(response){
+				this.nbClass = response.responseXML.getElementsByTagName('sld:Rule').length;
+			},
+			failure: function(response, opts) {
+				Ck.error('Error count class !');
+			}
+		});
+	},
+
+	/**
 	 * Create a snapshot of the map and display it on the user interface. <br/>
 	 * Move the ol.Map in an invisible div to zoom on the right extent <br/>
 	 * Hide preview box to didn't print it <br/>
@@ -420,6 +461,118 @@ Ext.define('Ck.print.Controller', {
 				src: uri
 			});
 			
+			//Insertion légende
+			if (Ext.get('ckPrint-legend')){
+				Ext.get("ckPrint-legend").dom.style.display = "block";
+				listlay = Ck.getMap().getLayers().getArray();
+				colcnt = "";
+				var ittest = 0;
+				var irgt = 0;
+				if(this.get("printParam.orientation").__proto__.orientation == "p"){
+					cntor = 9;
+				}else{
+					cntor = 24;
+				}
+				var parser = new DOMParser();
+
+				for(i=0 ; i < listlay.length; i++) {
+					//Si c'est un vecteur 
+					if(listlay[i].values_.title != 'Photo aérienne' && listlay[i].values_.title != 'OpenStreetMap' && listlay[i].values_.title != 'Surfaces' && listlay[i].values_.title != 'Types locaux' && listlay[i].values_.title != 'Codes locaux'){
+						if(Ext.isFunction(listlay[i].getLayersArray)){
+							listlay2 = listlay[i].getLayersArray();
+							for(t=0 ; t < listlay2.length; t++) {  
+								if(listlay2[t].ckLayer){
+								laytemp = listlay2[t].ckLayer;
+									if(listlay2[t].getVisible() == true){
+										//Count list elmnt
+										if(ittest == 0){
+											colcnt += "<div><ul class='ulleg'>";
+										}						
+
+										//Get params
+										if(this.getOlMap().getLayers().getArray()[1].getLayersArray()[2].getSource().getParams()['SQL_FILTER']){
+											var str = "&SQL_FILTER=" + encodeURIComponent(this.getOlMap().getLayers().getArray()[1].getLayersArray()[0].getSource().getParams()['SQL_FILTER']);
+											var params = str.replace(/'/g, "%27");
+										}else{
+											var params = "";
+										}
+
+										//Get number classes
+										this.getClassLength(listlay2[t]);
+										if(this.nbClass !== 1){
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15" + params;
+											colcnt += "<li><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' src='"+ url + "'></li>";
+										}else{
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15";
+											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' src='"+ url + "'><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
+										}
+
+										//Iterate on column
+										if(ittest == cntor){
+											colcnt += "</ul></div>";
+											ittest = 0;
+											irgt = irgt + 120;
+										}else{
+											ittest = ittest + 1;
+										}
+									}
+								}
+							}
+						}
+					}
+					//Si c'est un fond de plan (type raster par exemple)
+					else{
+						if(Ext.isFunction(listlay[i].getLayers)){
+							listlay2 = listlay[i].getLayers().getArray();
+							for(t=0 ; t < listlay2.length; t++) {  
+								if(listlay2[t].ckLayer){
+								laytemp = listlay2[t].ckLayer;
+									if(listlay2[t].getVisible() == true){
+										colcnt += "<li><div style='background: rgba(255, 255, 255, 0.83) no-repeat scroll left 0px;'></div><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
+									}
+								}
+							}
+						}
+					}
+				}
+				colcnt += "</ul></div>";
+				var targetleg = Ext.get("ckPrint-legend").dom;
+				targetleg.innerHTML = colcnt;	
+			}
+			
+			//Use Ck1 to generate legend
+/* 			Cks.get({
+				url: Ck.getApi() + "service=wmc&request=getContext",
+				scope: this,
+				async: false,
+				success: function(response){
+					var context = response.responseText;
+					Cks.post({
+						url: Ck.getApi(),
+						scope: this,
+						headers: {
+							'Content-Type': 'application/json; charset=UTF-8'
+						},
+						params:{
+							service: "print",
+							request: "create",
+							wmc: encodeURIComponent(context)
+						},
+						async: false,
+						success: function(response){
+							var legend = response.responseXML;
+						},
+						failure: function(response, opts) {
+							Ck.error('Error count class !');
+						}
+					});
+		
+				},
+				failure: function(response, opts) {
+					Ck.error('Error count class !');
+				}
+			});
+ */
 			// Fix map size from web browser
 			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
 			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
@@ -542,6 +695,8 @@ Ext.define('Ck.print.Controller', {
 	 */
 	integratePrintValue: function() {
 		this.printValue = this.getView().getForm().getValues();
+		//this.printValue['title'] = Ext.ComponentQuery.query("#printTitle")[0].getValue();
+		this.printValue['title'] = this.get("printParam.title");
 		this.printValue['date'] = Date.now();
 		this.printValue['scale'] = Ck.getMap().getScale();
 		this.printValue['srs'] = Ck.getMap().getProjection().getCode();
@@ -551,7 +706,7 @@ Ext.define('Ck.print.Controller', {
 				if(combo.getRawValue() !== "" && combo.getRawValue !== null && combo.getRawValue !== undefined){
 					this.mapDiv = Ext.get("ckPrint-filters-list").dom;
 					var dh = Ext.DomHelper;
-					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() + "</div>");
+					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
 				}
 			}, this)
 		}
