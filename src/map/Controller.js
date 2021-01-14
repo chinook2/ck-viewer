@@ -302,7 +302,7 @@ Ext.define('Ck.map.Controller', {
 			// Set scales for combobox and olView
 			var vmStores = vm.storeInfo;
 			vmStores.scales = new Ext.data.Store({
-				fields: ['res', 'scale'],
+				fields: ['zoom', 'res', 'scale'],
 				data: viewScales
 			});
 
