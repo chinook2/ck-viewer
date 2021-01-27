@@ -29,7 +29,10 @@ Ext.define('Ck.map.action.MousePosition', {
 
 		this.mousePositionControl = new ol.control.MousePosition({
 			coordinateFormat: function(coordinate) {
-				return ol.coordinate.toStringXY(coordinate, 0) + '<br>' + ol.coordinate.toStringHDMS( ol.proj.toLonLat(coordinate, projMap) );
+				if(Ext.ComponentQuery.query('#lblCoord')){
+					Ext.ComponentQuery.query('#lblCoord')[0].setHtml(ol.coordinate.toStringXY(coordinate, 3));
+				};
+				return ol.coordinate.toStringXY(coordinate, 3) + '<br>' + ol.coordinate.toStringHDMS(ol.proj.toLonLat(coordinate, projMap), 3);
 			},
 			className: 'ol-control ck-mouse-position'
 			//projection: 'EPSG:4326',
@@ -50,6 +53,7 @@ Ext.define('Ck.map.action.MousePosition', {
 			this.olMap.addControl(this.mousePositionControl);
 		}else{
 			this.olMap.removeControl(this.mousePositionControl);
+			Ext.ComponentQuery.query('#lblCoord')[0].setHtml('');
 		}
 	}
 });

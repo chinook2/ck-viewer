@@ -84,7 +84,35 @@ Ext.define('Ck.print.Controller', {
 				})
 			})
 		});
+		//this.previewLayerSelect = new ol.interaction.Select({
+		//	wrapX: false,
+		//});
+
+		this.previewLayerTransform = new ol.interaction.Transform({
+			enableRotatedTransform: false,
+			addCondition: ol.events.condition.shiftKeyOnly,
+			// filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
+			layers: this.previewLayer,
+			hitTolerance: 6,
+			translateFeature: true,
+			scale: true,
+			rotate: false,
+			keepAspectRatio: ol.events.condition.always,
+			translate: true,
+			stretch:false
+		});
+
+/* 		this.previewLayer.on('change', function(evt){
+			//var map = evt.map;
+			if(this.feature){
+				var mapSizeWidth = ol.extent.getWidth(this.feature.getGeometry().getExtent());
+				this.res = mapSizeWidth / this.canvasSize[0] * this.ratio;
+			}
+		}); */
+
 		this.getMap().addSpecialLayer(this.previewLayer);
+		//this.getOlMap().addInteraction(this.previewLayerSelect);
+		this.getOlMap().addInteraction(this.previewLayerTransform);
 	},
 
 	/**
@@ -115,7 +143,7 @@ Ext.define('Ck.print.Controller', {
 		this.getOlMap().addInteraction(this.moveInteraction);
 		
 		// Hide layout combo if they are only 1 layout
-		this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 1);
+		this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 3);
 
 		// Create the mask
 		this.mask = new Ext.LoadMask({
@@ -130,9 +158,6 @@ Ext.define('Ck.print.Controller', {
 			},
 			"ckprint button#cancel": {
 				click: this.cancel
-			},
-			"ckprint textfield#title": {
-				change: this.valueChange
 			},
 			"ckprint slider#rotate": {
 				change: this.rotatemap
@@ -316,9 +341,9 @@ Ext.define('Ck.print.Controller', {
 		this.layoutDiv.appendChild(this.pageDiv);
 
 		if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
-			var ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+			this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
 		}else{
-			var ratio = 1;
+			this.ratio = 1;
 		}
 
 		// Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
@@ -326,10 +351,10 @@ Ext.define('Ck.print.Controller', {
 		this.mapDiv = mapDiv.dom;
 
 		// Adapt component size to format thanks to ratio
-		mapDiv.setWidth(mapDiv.getWidth() * ratio);
-		mapDiv.setHeight(mapDiv.getHeight() * ratio);
-		Ext.get("ckPrint-map").setWidth(Ext.get("ckPrint-map").getWidth() * ratio);
-		Ext.get("ckPrint-map").setHeight(Ext.get("ckPrint-map").getHeight() * ratio);
+		mapDiv.setWidth(mapDiv.getWidth() * this.ratio);
+		mapDiv.setHeight(mapDiv.getHeight() * this.ratio);
+		Ext.get("ckPrint-map").setWidth(Ext.get("ckPrint-map").getWidth() * this.ratio);
+		Ext.get("ckPrint-map").setHeight(Ext.get("ckPrint-map").getHeight() * this.ratio);
 		
 		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 
@@ -337,8 +362,8 @@ Ext.define('Ck.print.Controller', {
 		var res = this.get("printParam.resolution");
 
 		this.mapSize = [
-			(this.canvasSize[0] * res * ratio),
-			(this.canvasSize[1] * res * ratio)
+			(this.canvasSize[0] * res * this.ratio),
+			(this.canvasSize[1] * res * this.ratio)
 		];
 	},
 
@@ -593,7 +618,10 @@ Ext.define('Ck.print.Controller', {
 
 			// Zoom on the desired extent
 			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
-			var res = this.get("printParam.resolution");
+				//var res = this.get("printParam.resolution");
+			var mapSizeWidth = ol.extent.getWidth(this.feature.getGeometry().getExtent());
+			var res = mapSizeWidth / this.canvasSize[0] * this.ratio;
+
 			this.getMap().setCenter(center);
 			this.getMap().setResolution(res);
 
@@ -696,7 +724,7 @@ Ext.define('Ck.print.Controller', {
 	integratePrintValue: function() {
 		this.printValue = this.getView().getForm().getValues();
 		//this.printValue['title'] = Ext.ComponentQuery.query("#printTitle")[0].getValue();
-		this.printValue['title'] = this.get("printParam.title");
+		this.printValue['title'];
 		this.printValue['date'] = Date.now();
 		this.printValue['scale'] = Ck.getMap().getScale();
 		this.printValue['srs'] = Ck.getMap().getProjection().getCode();

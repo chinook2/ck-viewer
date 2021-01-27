@@ -47,7 +47,7 @@ Ext.define("Ck.Print", {
 		xtype: "textfield",
 		fieldLabel: "Title...",
 		editable: true
-	},{
+	}/* ,{
 		itemId: "resolution",
 		name: "resolution",
 		fieldLabel: "Resolution",
@@ -58,7 +58,7 @@ Ext.define("Ck.Print", {
 			store: "{resolutions}",
 			value: "{printParam.resolution}"
 		}
-	},{
+	} */,{
 		itemId: "printLayout",
 		name: "printLayout",
 		fieldLabel: "Layout",
