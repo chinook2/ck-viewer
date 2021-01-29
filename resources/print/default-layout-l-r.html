@@ -1,16 +1,13 @@
 ﻿<!DOCTYPE html>
 <html>
 	<head>
-		<link rel="stylesheet" href="default-layout.css" />
+		<link rel="stylesheet" href="default-layout-l-r.css" />
 	</head>
 	<body>
 		<div id="ckPrint-page">
 			<div id="ckPrint-body">
-				<div id="ckPrint-title">
-					<div id="ckPrint-app-name">Hub'im : {value:title}</div>
-				</div>
-				<div class="ckPrint-white-frame">
-<!-- 					<div id="ckPrint-details">
+<!-- 			<div class="ckPrint-white-frame">
+					<div id="ckPrint-details">
 						<ul>
 							<li><div class='ckPrint-logtitle'><b>Test</b> default-portrait.html</div></li>
 							<li><div class='ckPrint-logtitle'><b>Echelle :</b> {value:scale}</div></li>
@@ -20,14 +17,16 @@
 							<li><div class='ckPrint-logtitle'><b>Coordonn&eacute;es en projection :</b> {value:srs}</div></li>
 						</ul>
 					</div> -->
-					<div id="ckPrint-legend">
+					<div id="ckPrint-overlay">
+						<div><b>{value:title}</b></div>
+						<div id="ckPrint-legend"></div>
 					</div>
-				</div>
-				<div id="whiteDivMap" class="ckPrint-white-frame">
+				<!-- </div> -->
+				<!-- <div id="whiteDivMap" class="ckPrint-white-frame"> -->
 					<div id="ckPrint-filters-list"></div>
-					<div id="ckPrint-map" style="width: 774px; height: 825px;">
+					<div id="ckPrint-map" style="width: 1108px; height: 784px;">
 					</div>
-				</div>
+				<!-- </div> -->
 			</div>
 		</div>
 	</body>

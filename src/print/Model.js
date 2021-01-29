@@ -14,6 +14,7 @@ Ext.define('Ck.print.Model', {
 			outputFormat: "pdf",
 			dpi: 96,
 			format: "a4",
+			shape: {shape: 'c'},
 			orientation: {orientation: 'p'}
 		},
 		previewParam: {
@@ -39,16 +40,18 @@ Ext.define('Ck.print.Model', {
 			fields: ["id", "label", "packageName"],
 			data: [
 				{id: "default-layout", label: "Default"},
-				{id: "default-layout-p", label: "Portrait"},
-				{id: "default-layout-l", label: "Landscape"}
-			]
+				{id: "default-layout-p-c", label: "Portrait Carré"},
+				{id: "default-layout-p-r", label: "Portrait Rectangle"},
+				{id: "default-layout-l-c", label: "Landscape Carré"},
+				{id: "default-layout-l-r", label: "Landscape Rectangle"}
+			],
 		},
 		outputFormats: {
 			fields: ["id", "label"],
 			data: [
 				{id: "jpg", label: "JPG"},
 				{id: "png", label: "PNG"},
-				{id: "pdf", label: "Pdf"}
+				{id: "pdf", label: "PDF"}
 			]
 		},
 		formats: {

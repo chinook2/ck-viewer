@@ -63,6 +63,7 @@ Ext.define('Ck.print.Controller', {
         onChangeValue: {
 			resolution: '{printParam.resolution}',
 			format: '{printParam.format}',
+			shape: '{printParam.shape}',
 			orientation: '{printParam.orientation}',
 			//title: '{printParam.title}',
 			dpi:  '{printParam.dpi}'
@@ -74,45 +75,30 @@ Ext.define('Ck.print.Controller', {
 		this.previewLayer = new ol.layer.Vector({
 			id: 'printpreview-layer',
 			source: new ol.source.Vector(),
-			style: new ol.style.Style({
+			style: getStyle
+		});
+
+		function getStyle(feature) {
+			return [ 
+			new ol.style.Style({
+				image: new ol.style.RegularShape({
+					fill: new ol.style.Fill({ color: [0,0,255,0.4]}),
+					stroke: new ol.style.Stroke({color: [0,0,255,1],width: 1}),
+					radius: 10,
+					points: 3,
+					angle: feature.get('angle')||0
+				}),
 				fill: new ol.style.Fill({
-					color: this.get("previewParam.fill.color") || 'rgba(255, 255, 255, 0.2)'
+					color: 'rgba(255, 255, 255, 0.2)'
 				}),
 				stroke: new ol.style.Stroke({
-					color: this.get("previewParam.stroke.color") || '#ffcc33',
-					width: this.get("previewParam.stroke.width") || 1
+					color: '#ec7306',
+					width: 5
 				})
-			})
-		});
-		//this.previewLayerSelect = new ol.interaction.Select({
-		//	wrapX: false,
-		//});
-
-		this.previewLayerTransform = new ol.interaction.Transform({
-			enableRotatedTransform: false,
-			addCondition: ol.events.condition.shiftKeyOnly,
-			// filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
-			layers: this.previewLayer,
-			hitTolerance: 6,
-			translateFeature: true,
-			scale: true,
-			rotate: false,
-			keepAspectRatio: ol.events.condition.always,
-			translate: true,
-			stretch:false
-		});
-
-/* 		this.previewLayer.on('change', function(evt){
-			//var map = evt.map;
-			if(this.feature){
-				var mapSizeWidth = ol.extent.getWidth(this.feature.getGeometry().getExtent());
-				this.res = mapSizeWidth / this.canvasSize[0] * this.ratio;
-			}
-		}); */
-
+			})];
+		}
 		this.getMap().addSpecialLayer(this.previewLayer);
 		//this.getOlMap().addInteraction(this.previewLayerSelect);
-		this.getOlMap().addInteraction(this.previewLayerTransform);
 	},
 
 	/**
@@ -140,10 +126,50 @@ Ext.define('Ck.print.Controller', {
 		this.moveInteraction = new ol.interaction.Translate({
 			features: new ol.Collection([])
 		});
+		this.previewLayerTransform = new ol.interaction.Transform({
+			enableRotatedTransform: true,
+			addCondition: ol.events.condition.shiftKeyOnly,
+			// filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
+			layers: this.previewLayer,
+			hitTolerance: 6,
+			translateFeature: true,
+			scale: true,
+			rotate: false,
+			keepAspectRatio: ol.events.condition.always,
+			translate: true,
+			stretch:false, 
+		});
 		this.getOlMap().addInteraction(this.moveInteraction);
-		
+		this.getOlMap().addInteraction(this.previewLayerTransform);
+
+		//Transform Interaction Event
+		this.previewLayerTransform.on (['rotatestart'], function(e){
+			startangle = e.feature.get('angle')||0;
+		});
+		this.previewLayerTransform.on('rotating', function (e){
+			e.feature.set('angle', startangle - e.angle);
+		});
+		this.previewLayerTransform.on('rotateend', function (e){
+			this.printAngle = e.feature.get('angle'); 
+		});
+
+		this.previewLayerTransform.on('scaleend', function (e) {
+			if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+				this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+			}else{
+				this.ratio = 1;
+			}
+			var canvasSize = Ext.get("ckPrint-map").getWidth();
+			var mapSizeWidth = ol.extent.getWidth(e.feature.getGeometry().getExtent());
+
+			this.res = mapSizeWidth / canvasSize * this.ratio;
+			this.set("printParam.resolution", this.res);
+			Ext.ComponentQuery.query('#resolution')[0].setValue(this.res);
+		});
+
+
 		// Hide layout combo if they are only 1 layout
-		this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 3);
+		//this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 3);
 
 		// Create the mask
 		this.mask = new Ext.LoadMask({
@@ -244,16 +270,16 @@ Ext.define('Ck.print.Controller', {
 	 */
 	updatePreview: function() {
 		if(this.get("printParam.orientation").__proto__.orientation !== undefined){
-			var layoutHTML = this.layoutsHTML[this.get("printParam.layout") + "-" + this.get("printParam.orientation").__proto__.orientation];
+			var layoutHTML = this.layoutsHTML[this.get("printParam.layout") + "-" + this.get("printParam.orientation").__proto__.orientation + "-" + this.get("printParam.shape")['shape']];
 		}else if (this.get("printParam.orientation").orientation !== undefined){
-			var layoutHTML = this.layoutsHTML[this.get("printParam.layout") + "-" + this.get("printParam.orientation").orientation];
+			var layoutHTML = this.layoutsHTML[this.get("printParam.layout") + "-" + this.get("printParam.orientation").orientation + "-" + this.get("printParam.shape")['shape']];
 		}
 		
 		if(!Ext.isString(layoutHTML)) {
 			if(this.get("printParam.orientation").__proto__.orientation !== undefined){
-				this.loadHTML(this.get("printParam.layout") + "-" + this.get("printParam.orientation").__proto__.orientation);
+				this.loadHTML(this.get("printParam.layout") + "-" + this.get("printParam.orientation").__proto__.orientation + "-" + this.get("printParam.shape")['shape']);
 			}else if (this.get("printParam.orientation").orientation !== undefined){
-				this.loadHTML(this.get("printParam.layout") + "-" + this.get("printParam.orientation").orientation);
+				this.loadHTML(this.get("printParam.layout") + "-" + this.get("printParam.orientation").orientation + "-" + this.get("printParam.shape")['shape']);
 			}
 			return false;
 		}
@@ -771,8 +797,8 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	cancel: function() {
-		var rotInput = this.getView().items.get("rotate");
-		rotInput.setValue(0);
+		//var rotInput = this.getView().items.get("rotate");
+		//rotInput.setValue(0);
 		this._olView.setRotation(0);
 		this.previewLayer.getSource().clear();
 		this.getView().openner.close();

@@ -47,7 +47,7 @@ Ext.define("Ck.Print", {
 		xtype: "textfield",
 		fieldLabel: "Title...",
 		editable: true
-	}/* ,{
+	},{
 		itemId: "resolution",
 		name: "resolution",
 		fieldLabel: "Resolution",
@@ -57,8 +57,9 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{resolutions}",
 			value: "{printParam.resolution}"
-		}
-	} */,{
+		},
+		hidden: true
+	},{
 		itemId: "printLayout",
 		name: "printLayout",
 		fieldLabel: "Layout",
@@ -67,7 +68,8 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{layouts}",
 			value: "{printParam.layout}"
-		}
+		},
+		hidden: true
 	},{
 		itemId: "outputFormat",
 		name: "outputFormat",
@@ -78,14 +80,15 @@ Ext.define("Ck.Print", {
 			store: "{outputFormats}",
 			value: "{printParam.outputFormat}"
 		}
-	}/*,{
+	},{
 		itemId: "dpi",
 		name: "dpi",
 		fieldLabel: "Dot Per Inch",
 		displayField: "dpi",
 		valueField: "dpi",
-		bind: { "store": "{dpi}" }
-	}*/,{
+		bind: { "store": "{dpi}" },
+		hidden: true
+	},{
 		itemId: "format",
 		name: "format",
 		fieldLabel: "Format",
@@ -95,6 +98,18 @@ Ext.define("Ck.Print", {
 			store: "{formats}",
 			value: "{printParam.format}"
 		}
+	},{
+		xtype: "radiogroup",
+		name: "shape",
+		itemId: "shape",
+		fieldLabel: "Forme",
+		columns: 2,
+		vertical: true,
+		items: [
+			{boxLabel: "Carré", name: "shape", inputValue: "c"},
+			{boxLabel: "Rectangle", name: "shape", inputValue: "r"},
+		],
+		bind: { value: "{printParam.shape}" }
 	},{
 		xtype: "radiogroup",
 		name: "orientation",
@@ -114,8 +129,8 @@ Ext.define("Ck.Print", {
         fieldLabel: 'Tourner la carte',
 		value: 0,
 		increment: 1,
-        maxValue: 360,
-		minValue: 0,
+        maxValue: 180,
+		minValue: -180,
 		bind: { value: "{printParam.angle}" }
     }],
 

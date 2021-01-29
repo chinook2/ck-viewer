@@ -32,16 +32,21 @@
 			margin-left:60%;
 		}
 
-		#ckPrint-legend{
+		#ckPrint-overlay{
 			background-color: #ffffffc5;
 			padding:10px;
 			position: absolute;
 			bottom:5px;
 			right:5px;
+			z-index:2;
 		}
 
 		#ckPrint-map{
 			background-color: white;
+			position: absolute;
+			top:5px;
+			right:5px;
+			z-index:1;
 		}
 
 		#ckPrint-filters{
@@ -50,7 +55,11 @@
 		}
 
 		#ckPrint-filters-list{
+			position: absolute;
+			top:5px;
+			right:5px;
 			display: inline-block;
+			z-index:3;
 		}
 
 		.flex-container {
@@ -72,8 +81,8 @@
 			padding:1%;
 			display: inline-block;
 			position: absolute;
-			top:0px;
-			left:0px;
+			top:5px;
+			left:5px;
 			background-color: rgba(255,255,255,0.8);
 		}
 
