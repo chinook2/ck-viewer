@@ -12,7 +12,7 @@ Ext.define("Ck.goto.Dec", {
 	
 	width: "100%",
 	layout: 'vbox',
-	title: 'Coordinates (Dec)',
+	title: 'Coordonnées (Dec)',
 	defaults: {
 		regex: new RegExp('[0-9]{1,15}[.,]?[0-9]{0,10}'),
 		width: "100%"

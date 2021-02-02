@@ -13,22 +13,27 @@
         "fr": "Vue générale",
         "es": "en espagnol..."
     },{
+        "code": "action.close",
         "en": "Close",
         "fr": "Fermer",
         "es": "Close ES"
     },{
+        "code": "action.save",
         "en": "Save",
         "fr": "Enregistrer",
         "es": "Guardar"
     },{
+        "code": "action.cancel",
         "en": "Cancel",
         "fr": "Annuler",
         "es": "Cancelar"
     },{
+        "code": "action.print",
         "en": "Print",
         "fr": "Imprimer",
         "es": "Print ES"
     },{
+        "code": "action.edit",
         "en": "Edit",
         "fr": "Editer",
         "es": "Editar"

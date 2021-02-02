@@ -11,7 +11,7 @@ Ext.define("Ck.goto.DMS", {
 	itemId: "goto-dms",
 	
 	layout: 'vbox',
-	title: 'Coordinates (DMS)',
+	title: 'Coordonnées (DMS)',
 	defaultType: 'textfield',
 	defaults: {
 		flex: 1
