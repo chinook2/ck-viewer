@@ -16,6 +16,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 	iconCls: "ckfont ck-info2",
 
 	itemId: 'featureinfo',
+	tooltip: Ck.text('feature_info'),
 
 	timerId: null,
 
@@ -320,13 +321,13 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			hideHeaders: this.getLight(),
 			header: (this.getLight())? { padding: 0 } : true,
 			columns: [{
-				text: 'Attribute',
+				text: Ck.text('select_attribute'),
 				dataIndex: 'field',
 				width: 150,
 				menuDisabled: true,
 				hideable: false
 			},{
-				text: 'Value',
+				text: Ck.text('select_value'),
 				dataIndex: 'value',
 				flex: 1,
 				menuDisabled: true,

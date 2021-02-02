@@ -8,9 +8,9 @@ Ext.define('Ck.map.action.measure.Radius', {
 	itemId: 'measurelength',
 	text: '',
 	iconCls: 'ckfont ck-measure-radius',
-	tooltip: 'Measure radius',
+	tooltip: Ck.text('measure_radius'),
 		
-	continueMsg: 'Click to continue measuring the radius',
+	continueMsg: Ck.text('measure_radius_msg'),
 
 	/**
 	 * length or area

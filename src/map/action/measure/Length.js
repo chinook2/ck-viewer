@@ -8,9 +8,9 @@ Ext.define('Ck.map.action.measure.Length', {
 	itemId: 'measurelength',
 	text: '',
 	iconCls: 'ckfont ck-measure-length',
-	tooltip: 'Measure length',
+	tooltip: Ck.text('measure_length'),
 		
-	continueMsg: 'Click to continue measuring the length',
+	continueMsg: Ck.text('measure_length_msg'),
 
 	/**
 	 * length or area

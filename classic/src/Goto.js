@@ -75,10 +75,10 @@ Ext.define("Ck.Goto", {
 		hidden: true
 	}],
 	bbar: ["->",{
-		text: "Effacer le marqueur",
+		text: Ck.text('goto_clear_marker'),
 		handler: "clearMarker"
 	},{
-		text: "Aller à la position",
+		text: Ck.text('goto_go_to_position'),
 		handler: "goTo"
 	}]
 });

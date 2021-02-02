@@ -9,7 +9,7 @@ Ext.define('Ck.map.action.OpenGoto', {
 
 	itemId: 'opengoto',
 	iconCls: 'ckfont ck-crosshairs',
-	tooltip: 'Open Go to Coordinates',
+	tooltip: Ck.text('goto_open'),
 
 	config: {
 		/**
@@ -28,7 +28,7 @@ Ext.define('Ck.map.action.OpenGoto', {
 		 * Title of window
 		 * @prop {Integer}
 		 */
-		winTitle: 'Go to Coordinates',
+		winTitle: Ck.text('goto_wintitle'),
 
 		/**
 		 * Set if window is collapsible

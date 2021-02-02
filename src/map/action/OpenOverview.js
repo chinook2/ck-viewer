@@ -27,7 +27,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 	text: '',
 
 	iconCls: 'fa fa-eye',
-	tooltip: 'Display overview',
+	tooltip: Ck.text('open_overview'),
 	
 	config: {
 		light: true,

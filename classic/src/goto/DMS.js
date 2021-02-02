@@ -11,14 +11,14 @@ Ext.define("Ck.goto.DMS", {
 	itemId: "goto-dms",
 	
 	layout: 'vbox',
-	title: 'Coordonnées (DMS)',
+	title: Ck.text('goto_dms_title'),
 	defaultType: 'textfield',
 	defaults: {
 		flex: 1
 	},
 	items: [{
-		label: "Longitude (X)"
+		label: Ck.text('goto_dms_easting')
 	},{
-		label: "Latitude (Y)"
+		label: Ck.text('goto_dms_northing')
 	}]
 });

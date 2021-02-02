@@ -12,7 +12,7 @@ Ext.define("Ck.goto.Dec", {
 	
 	width: "100%",
 	layout: 'vbox',
-	title: 'Coordonnées (Dec)',
+	title: Ck.text('goto_dec_title'),
 	defaults: {
 		regex: new RegExp('[0-9]{1,15}[.,]?[0-9]{0,10}'),
 		width: "100%"
@@ -28,7 +28,7 @@ Ext.define("Ck.goto.Dec", {
 		},
 		items: [{
 			xtype: "label",
-			html: "Longitude (X)",
+			html: Ck.text('goto_dec_easting'),
 			width: 85
 		},{
 			xtype: 'textfield',
@@ -51,7 +51,7 @@ Ext.define("Ck.goto.Dec", {
 		},
 		items: [{
 			xtype: "label",
-			html: "Latitude (Y)",
+			html: Ck.text('goto_dec_northing'),
 			width: 85
 		},{
 			xtype: 'textfield',

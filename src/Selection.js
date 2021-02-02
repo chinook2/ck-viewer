@@ -12,6 +12,7 @@
  */
 Ext.define('Ck.Selection', {
     requires: [
+		'Ck._Lang',
 		'Ck'
 	],
 	config: {
@@ -137,7 +138,7 @@ Ext.define('Ck.Selection', {
 		/**
 		 *
 		 */
-		maskMsg: "Selection in progress...",
+		maskMsg: Ck.text('select_in_progress'),
 
 		/**
 		 * Loading mask

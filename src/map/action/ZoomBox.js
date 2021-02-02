@@ -10,7 +10,7 @@ Ext.define('Ck.map.action.ZoomBox', {
 
     text: '',
     iconCls: 'ckfont ck-zoom-box',
-    tooltip: 'Zoom by rectangle',
+    tooltip: Ck.text('zoom_box'),
     toggleGroup: 'ckmapAction',
 
     /**

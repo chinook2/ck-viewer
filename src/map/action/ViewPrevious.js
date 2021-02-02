@@ -19,7 +19,7 @@ Ext.define('Ck.map.action.ViewPrevious', {
 	itemId: 'viewprevious',
 	text: '',
 	iconCls: 'ckfont ck-previous',
-	tooltip: 'Previous view',
+	tooltip: Ck.text('view_previous'),
 	disabled: true,
 
 	_next: null,

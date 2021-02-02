@@ -8,9 +8,9 @@ Ext.define('Ck.map.action.measure.Area', {
 	itemId: 'measurearea',
 	text: '',
 	iconCls: 'ckfont ck-measure-area',
-	tooltip: 'Measure area',
+	tooltip: Ck.text('measure_area'),
 		
-	continueMsg: 'Click to continue measuring the area',
+	continueMsg: Ck.text('measure_area_msg'),
 	
 	/**
 	 * length or area

@@ -19,7 +19,7 @@ Ext.define('Ck.map.action.ViewNext', {
 	itemId: 'viewnext',
 	text: '',
 	iconCls: 'ckfont ck-next',
-	tooltip: 'Next view',
+	tooltip: Ck.text('view_next'),
 	disabled: true,
 
 	_previous: null,
