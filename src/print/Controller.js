@@ -98,6 +98,52 @@ Ext.define('Ck.print.Controller', {
 			})];
 		}
 		this.getMap().addSpecialLayer(this.previewLayer);
+		this.previewLayerTransform = new ol.interaction.Transform({
+			enableRotatedTransform: true,
+			addCondition: ol.events.condition.shiftKeyOnly,
+			// filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
+			layers: this.previewLayer,
+			hitTolerance: 15,
+			translateFeature: true,
+			scale: true,
+			rotate: false,
+			keepAspectRatio: ol.events.condition.always,
+			translate: true,
+			stretch:false, 
+		});
+		this.getOlMap().addInteraction(this.previewLayerTransform);
+		//Transform Interaction Event
+		this.previewLayerTransform.on (['translating'], function(e){
+			d[0]+=e.delta[0];
+			d[1]+=e.delta[1];
+			if (firstPoint) {
+				this.previewLayerTransform.setCenter(e.features.getArray()[0].getGeometry().getFirstCoordinate());
+			}
+		});
+		this.previewLayerTransform.on (['rotatestart'], function(e){
+			startangle = e.feature.get('angle')||0;
+		});
+		this.previewLayerTransform.on('rotating', function (e){
+			e.feature.set('angle', startangle - e.angle);
+		});
+		this.previewLayerTransform.on('rotateend', function (e){
+			this.printAngle = e.feature.get('angle'); 
+		});
+
+		this.previewLayerTransform.on('scaleend', function (e) {
+			if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+				this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+			}else{
+				this.ratio = 1;
+			}
+			var canvasSize = Ext.get("ckPrint-map").getWidth();
+			var mapSizeWidth = ol.extent.getWidth(e.feature.getGeometry().getExtent());
+
+			this.res = mapSizeWidth / canvasSize * this.ratio;
+			this.set("printParam.resolution", this.res);
+			Ext.ComponentQuery.query('#resolution')[0].setValue(this.res);
+		});
+
 		//this.getOlMap().addInteraction(this.previewLayerSelect);
 	},
 
@@ -123,50 +169,6 @@ Ext.define('Ck.print.Controller', {
 
 		// Use ol.interaction.Translate
 		// Add DragFeature interaction to move preview
-		this.moveInteraction = new ol.interaction.Translate({
-			features: new ol.Collection([])
-		});
-		this.previewLayerTransform = new ol.interaction.Transform({
-			enableRotatedTransform: true,
-			addCondition: ol.events.condition.shiftKeyOnly,
-			// filter: function(f,l) { return f.getGeometry().getType()==='Polygon'; },
-			layers: this.previewLayer,
-			hitTolerance: 6,
-			translateFeature: true,
-			scale: true,
-			rotate: false,
-			keepAspectRatio: ol.events.condition.always,
-			translate: true,
-			stretch:false, 
-		});
-		this.getOlMap().addInteraction(this.moveInteraction);
-		this.getOlMap().addInteraction(this.previewLayerTransform);
-
-		//Transform Interaction Event
-		this.previewLayerTransform.on (['rotatestart'], function(e){
-			startangle = e.feature.get('angle')||0;
-		});
-		this.previewLayerTransform.on('rotating', function (e){
-			e.feature.set('angle', startangle - e.angle);
-		});
-		this.previewLayerTransform.on('rotateend', function (e){
-			this.printAngle = e.feature.get('angle'); 
-		});
-
-		this.previewLayerTransform.on('scaleend', function (e) {
-			if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
-				this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
-			}else{
-				this.ratio = 1;
-			}
-			var canvasSize = Ext.get("ckPrint-map").getWidth();
-			var mapSizeWidth = ol.extent.getWidth(e.feature.getGeometry().getExtent());
-
-			this.res = mapSizeWidth / canvasSize * this.ratio;
-			this.set("printParam.resolution", this.res);
-			Ext.ComponentQuery.query('#resolution')[0].setValue(this.res);
-		});
-
 
 		// Hide layout combo if they are only 1 layout
 		//this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 3);
@@ -315,7 +317,6 @@ Ext.define('Ck.print.Controller', {
 		this.feature = new ol.Feature({
 			geometry: new ol.geom.Polygon([coordinate])
 		});
-		this.moveInteraction.features_ = new ol.Collection([this.feature]);
 		this.previewLayer.getSource().addFeature(this.feature);
 	},
 
@@ -737,7 +738,7 @@ Ext.define('Ck.print.Controller', {
 
 		// Delete fake image
 		this.mapTarget.removeChild(this.fakeMap);
-
+		delete this.feature;
 		// Close print popup, clear preview
 		this.cancel();
 		this.mask.hide();
@@ -799,6 +800,7 @@ Ext.define('Ck.print.Controller', {
 	cancel: function() {
 		//var rotInput = this.getView().items.get("rotate");
 		//rotInput.setValue(0);
+		delete this.feature;
 		this._olView.setRotation(0);
 		this.previewLayer.getSource().clear();
 		this.getView().openner.close();
