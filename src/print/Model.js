@@ -14,7 +14,7 @@ Ext.define('Ck.print.Model', {
 			outputFormat: "pdf",
 			dpi: 96,
 			format: "a4",
-			shape: {shape: 'c'},
+			shape: {shape: 'r'},
 			orientation: {orientation: 'p'}
 		},
 		previewParam: {

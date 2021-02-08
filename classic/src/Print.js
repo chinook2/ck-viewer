@@ -106,8 +106,8 @@ Ext.define("Ck.Print", {
 		columns: 2,
 		vertical: true,
 		items: [
-			{boxLabel: "Carré", name: "shape", inputValue: "c"},
 			{boxLabel: "Rectangle", name: "shape", inputValue: "r"},
+			{boxLabel: "Carré", name: "shape", inputValue: "c"},
 		],
 		bind: { value: "{printParam.shape}" }
 	},{

@@ -112,14 +112,6 @@ Ext.define('Ck.print.Controller', {
 			stretch:false, 
 		});
 		this.getOlMap().addInteraction(this.previewLayerTransform);
-		//Transform Interaction Event
-		this.previewLayerTransform.on (['translating'], function(e){
-			d[0]+=e.delta[0];
-			d[1]+=e.delta[1];
-			if (firstPoint) {
-				this.previewLayerTransform.setCenter(e.features.getArray()[0].getGeometry().getFirstCoordinate());
-			}
-		});
 		this.previewLayerTransform.on (['rotatestart'], function(e){
 			startangle = e.feature.get('angle')||0;
 		});
@@ -139,7 +131,7 @@ Ext.define('Ck.print.Controller', {
 			var canvasSize = Ext.get("ckPrint-map").getWidth();
 			var mapSizeWidth = ol.extent.getWidth(e.feature.getGeometry().getExtent());
 
-			this.res = mapSizeWidth / canvasSize * this.ratio;
+			this.res = mapSizeWidth / canvasSize;
 			this.set("printParam.resolution", this.res);
 			Ext.ComponentQuery.query('#resolution')[0].setValue(this.res);
 		});
@@ -380,8 +372,6 @@ Ext.define('Ck.print.Controller', {
 		// Adapt component size to format thanks to ratio
 		mapDiv.setWidth(mapDiv.getWidth() * this.ratio);
 		mapDiv.setHeight(mapDiv.getHeight() * this.ratio);
-		Ext.get("ckPrint-map").setWidth(Ext.get("ckPrint-map").getWidth() * this.ratio);
-		Ext.get("ckPrint-map").setHeight(Ext.get("ckPrint-map").getHeight() * this.ratio);
 		
 		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 
@@ -389,8 +379,8 @@ Ext.define('Ck.print.Controller', {
 		var res = this.get("printParam.resolution");
 
 		this.mapSize = [
-			(this.canvasSize[0] * res * this.ratio),
-			(this.canvasSize[1] * res * this.ratio)
+			(this.canvasSize[0] * res),
+			(this.canvasSize[1] * res)
 		];
 	},
 
@@ -647,7 +637,7 @@ Ext.define('Ck.print.Controller', {
 			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 				//var res = this.get("printParam.resolution");
 			var mapSizeWidth = ol.extent.getWidth(this.feature.getGeometry().getExtent());
-			var res = mapSizeWidth / this.canvasSize[0] * this.ratio;
+			var res = mapSizeWidth / this.canvasSize[0];
 
 			this.getMap().setCenter(center);
 			this.getMap().setResolution(res);
