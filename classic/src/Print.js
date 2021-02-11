@@ -60,6 +60,14 @@ Ext.define("Ck.Print", {
 		},
 		hidden: true
 	},{
+		itemId: "angle",
+		name: "angle",
+		fieldLabel: "Angle",
+		displayField: "angle",
+		valueField: "angle",
+		value: "0",
+		hidden: true
+	},{
 		itemId: "printLayout",
 		name: "printLayout",
 		fieldLabel: "Layout",
@@ -122,7 +130,7 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
-	},{
+	}/* ,{
         xtype: 'slider',
         name: 'rotate',
 		itemId: "rotate",
@@ -132,7 +140,7 @@ Ext.define("Ck.Print", {
         maxValue: 180,
 		minValue: -180,
 		bind: { value: "{printParam.angle}" }
-    }],
+    } */],
 
 	buttons: [{
 		text: "Print",
