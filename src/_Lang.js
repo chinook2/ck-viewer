@@ -35,6 +35,9 @@ Ext.define('Ck._Lang', {
 			'action_validate': 'Validate',
 			'action_update': 'Update',
 			'action_cancel': 'Cancel',
+			'action_import': 'Import',
+			'action_clear': 'Clear',
+			'action_copy': 'Copy',
 			'edit': 'Edition',
 			"name": "Name",
             'map' : 'Map',
@@ -210,7 +213,34 @@ Ext.define('Ck._Lang', {
 			'select_in_progress': 'Selection in progress...',
 			'select_attribute': 'Attribute',
 			'select_value': 'Value',
-			'identify_parcel': "Identify parcels"
+			'identify_parcel': "Identify parcels",
+			'import_shp_zip': 'Import Shapefile as zip',
+			'import_shp_title': 'Import a Shapefile',
+			'import_shp_msg_from_doc_list': 'Select a Shapefile Zip from document list',
+			'import_shp_upload': 'Upload a shapefile zip.',
+			'import_shp_help_text': ['Please upload a Shapefile as ZIP',
+				'Zip archive must contains 4 files (without folder):',
+				' - {shapefile_name}.shp',
+				' - {shapefile_name}.dbf',
+				' - {shapefile_name}.shx',
+				' - {shapefile_name}.prj',
+				'Shapefile need geometry as polygon',
+				'Projection can be one of the following:',
+				' - WGS84 / UTM Zone 30N (EPSG:32630)',
+				' - WGS84 / UTM Zone 29N (EPSG:32629)'
+			],
+			'import_shp_importing_msg': 'Importing shapefile ...',
+			'import_shp_error_noproj_nofile': 'Please select a projection and a file',
+			'import_shp_error_extension': "Please select a .zip file to import",
+			'import_shp_error_content': "Please select a .zip file with valid shapefile content (required files, projection, ...)",
+			'import_shp_error_pattern': 'No shapefile found with name starting by "Parcel_"',
+			'import_shp_error_missing_extension': "Some extensions have not been found",
+			'import_shp_error_empty': 'The shapefile is empty',
+			'import_shp_error_not_poly': 'The shapefile shall contain a polygon',
+			'import_shp_clear_msg': 'Clear the imported geometries',
+			'import_shp_copy_msg': 'Copy the imported geometry to the selected Spatial Unit',
+			'confirm_erase_existing_geom': 'Do you want to erase the geometry previously entered?',
+			'lbl_projection': 'Projection'
         },
         'fr': {
             'action_close': 'Fermer',
@@ -218,6 +248,9 @@ Ext.define('Ck._Lang', {
 			'action_validate': 'Valider',
 			'action_update': 'Mettre à jour',
 			'action_cancel': 'Annuler',
+			'action_import': 'Importer',
+			'action_clear': 'Effacer',
+			'action_copy': 'Copier',
 			'edit': 'Edition',
             'map' : 'Carte SIFOR',
 			'map_accuracy': 'Précision',
@@ -395,11 +428,43 @@ Ext.define('Ck._Lang', {
 			'select_attribute': 'Attribut',
 			'select_value': 'Valeur',
 			'identify_parcel': "Identifier les parcelles",
-			
-        }
-    }
+			'import_shp_zip': 'Importer un Shapefile zippé',
+			'import_shp_title': 'Importer un Shapefile',
+			'import_shp_msg_from_doc_list': 'Selectionner un Zip de Shapefile dans la liste de documents.',
+			'import_shp_upload': 'Téléverser un zip de Shapefile',
+			'import_shp_help_text': ['Veuillez téléverser un Shapefile en archive ZIP',
+				"L'archive Zip doit contenir 4 fichiers (sans dossier):",
+				' - {nom_shapefile}.shp',
+				' - {nom_shapefile}.dbf',
+				' - {nom_shapefile}.shx',
+				' - {nom_shapefile}.prj',
+				'Le shapefile doit avoir une géométrie de type Polygone',
+				'La projection doit être une des suivantes:',
+				' - WGS84 / UTM Zone 30N (EPSG:32630)',
+				' - WGS84 / UTM Zone 29N (EPSG:32629)'
+			],
+			'import_shp_importing_msg': 'Import shapefile en cours ...',
+			'import_shp_error_noproj_nofile': 'Veuillez sélectionner une projection et un fichier',
+			'import_shp_error_extension': "Veuillez choisir un fichier .zip pour l'import",
+			'import_shp_error_content': "Veuillez sélectionner un fichier .zip avec un shapefile valide (fichiers avec extensions requises, projection, ...)",
+			'import_shp_error_pattern': 'Aucun shapefile trouvé avec le nom commençant par "Parcel_"',
+			'import_shp_error_missing_extension': "Certaines extensions n'ont pas été trouvées",
+			'import_shp_error_empty': 'Le shapefile est vide',
+			'import_shp_error_not_poly': 'Le shapefile doit contenir un polygone',
+			'import_shp_clear_msg': 'Effacer les géométries importées',
+			'import_shp_copy_msg': "Copier la géométrie importée dans l'Unité Spatiale sélectionnée",
+			'confirm_erase_existing_geom': 'Voulez-vous effacer la géométrie existante?',
+			'lbl_projection': 'Projection',
+		}
+	}
 });
-Ck._Lang.setCurrentLang((LOCALE || 'en').split('-')[0]);
+var loc = 'en';
+try {
+	loc = LOCALE;
+} catch (e) {
+	// Do nothing, use the default value
+}
+Ck._Lang.setCurrentLang(loc.split('-')[0]);
 Ck.text = function(label, lang) { return Ck._Lang.t(label, lang || Ck._Lang.getCurrentLang() || Ck._Lang.getDefaultLang());};
 Ck.textFormat = function(label, variables) {
 	var text = Ck.text(label);
