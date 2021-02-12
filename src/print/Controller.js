@@ -763,6 +763,9 @@ Ext.define('Ck.print.Controller', {
 		this.getOlMap().setTarget(this.mapTarget);
 		this.getMap().setCenter(this.oldCenter);
 		this.getMap().setResolution(this.oldRes);
+		this.getMap().setResolution(this.oldRes);
+		Ext.ComponentQuery.query('#angle')[0].setValue(0);
+
 		//Ext.ComponentQuery.query('#resolution')[0].setValue(this.previewLayerTransform.res);
 
 		// Delete fake image
@@ -837,6 +840,7 @@ Ext.define('Ck.print.Controller', {
 		this._olView.setRotation(0);
 		this.previewLayer.getSource().clear();
 		this.getView().openner.close();
+		Ext.ComponentQuery.query('#angle')[0].setValue(0);
 		this.getOlMap().removeInteraction(this.previewLayerTransform);
 	},
 
