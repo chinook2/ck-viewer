@@ -310,7 +310,8 @@ Ext.define('Ck.print.Controller', {
 			center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 			this.previewLayer.getSource().clear();
 		}
-		var rotation = this._olView.getRotation();
+		//var rotation = this._olView.getRotation();
+		var rotation = Ext.ComponentQuery.query('#angle')[0].getValue();
 		var x0 = center[0];
 		var y0 = center[1];
 		var w = this.mapSize[0];
@@ -670,7 +671,12 @@ Ext.define('Ck.print.Controller', {
 			// Zoom on the desired extent
 			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 			//var res = this.get("printParam.resolution");
-			var mapSizeWidth = ol.extent.getWidth(this.feature.getGeometry().getExtent());
+			//var mapSizeWidth = ol.extent.getWidth(this.feature.getGeometry().getExtent());
+			//var mapSizeWidth = this.feature.getGeometry().getCoordinates()[0][0][0] - this.feature.getGeometry().getCoordinates()[0][1][0];
+			
+			var line = new ol.geom.LineString([this.feature.getGeometry().getCoordinates()[0][0], this.feature.getGeometry().getCoordinates()[0][1]]);
+			var mapSizeWidth =  Math.round(line.getLength() * 100) / 100;
+
 			var res = mapSizeWidth / this.canvasSize[0];
 
 			this.getMap().setCenter(center);
