@@ -417,6 +417,11 @@ Ext.define('Ck.print.Controller', {
 			(this.canvasSize[0] * res),
 			(this.canvasSize[1] * res)
 		];
+
+		//Edit with new resolution to not be included on mapSize (and print shape)
+		mapDiv.setWidth(mapDiv.getWidth() * 2)
+		mapDiv.setHeight(mapDiv.getHeight() * 2);
+		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 	},
 
 	/**
@@ -528,7 +533,7 @@ Ext.define('Ck.print.Controller', {
 			// First display fake map on the screen during the real print
 			var mapCanvas = this.composeCanvas();
 			var mapCtx = mapCanvas.getContext("2d");
-			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+			var uri = mapCanvas.toDataURL('image/jpg', 1).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 
 			var dh = Ext.DomHelper;
 
@@ -566,6 +571,17 @@ Ext.define('Ck.print.Controller', {
 											colcnt += "<div><ul class='ulleg'>";
 										}						
 
+										this.getOlMap().getLayers().forEach(function(grp) {
+											grp.getLayersArray().forEach(function(layer) {
+												var source = layer.getSource();
+												if(source.getParams && source.updateParams) {
+													var params = source.getParams();
+													params['RESOLUTION'] = 300;
+													source.updateParams(params);
+												}
+											})
+										});
+
 										//Get params
 										if(this.getOlMap().getLayers().getArray()[1].getLayersArray()[2].getSource().getParams()['SQL_FILTER']){
 											var str = "&SQL_FILTER=" + encodeURIComponent(this.getOlMap().getLayers().getArray()[1].getLayersArray()[0].getSource().getParams()['SQL_FILTER']);
@@ -577,10 +593,10 @@ Ext.define('Ck.print.Controller', {
 										//Get number classes
 										this.getClassLength(listlay2[t]);
 										if(this.nbClass !== 1){
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15" + params;
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=300" + params;
 											colcnt += "<li><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' src='"+ url + "'></li>";
 										}else{
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15";
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=300";
 											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' src='"+ url + "'><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
 										}
 
@@ -617,39 +633,6 @@ Ext.define('Ck.print.Controller', {
 				targetleg.innerHTML = colcnt;	
 			}
 			
-			//Use Ck1 to generate legend
-/* 			Cks.get({
-				url: Ck.getApi() + "service=wmc&request=getContext",
-				scope: this,
-				async: false,
-				success: function(response){
-					var context = response.responseText;
-					Cks.post({
-						url: Ck.getApi(),
-						scope: this,
-						headers: {
-							'Content-Type': 'application/json; charset=UTF-8'
-						},
-						params:{
-							service: "print",
-							request: "create",
-							wmc: encodeURIComponent(context)
-						},
-						async: false,
-						success: function(response){
-							var legend = response.responseXML;
-						},
-						failure: function(response, opts) {
-							Ck.error('Error count class !');
-						}
-					});
-		
-				},
-				failure: function(response, opts) {
-					Ck.error('Error count class !');
-				}
-			});
- */
 			// Fix map size from web browser
 			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
 			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
@@ -702,12 +685,24 @@ Ext.define('Ck.print.Controller', {
 	print: function() {
 		this.getOlMap().removeInteraction(this.previewLayerTransform);
 		this.getOlMap().once('rendercomplete', function(event) {
+			//Reset init resolution after print
+			this.getOlMap().getLayers().forEach(function(grp) {
+				grp.getLayersArray().forEach(function(layer) {
+					var source = layer.getSource();
+					if(source.getParams && source.updateParams) {
+						var params = source.getParams();
+						params['RESOLUTION'] = 96;
+						source.updateParams(params);
+					}
+				})
+			});
+
 			this.integratePrintValue();
 			// refresh mapDiv after integratePrintValue
 			this.mapDiv = Ext.get("ckPrint-map").dom;
 			var mapCanvas = this.composeCanvas();
 
-			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+			var uri = mapCanvas.toDataURL('image/jpg', 1).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 			var dh = Ext.DomHelper;
 			this.mapImg = dh.append(this.mapDiv, {
 				tag: 'img',
@@ -732,7 +727,7 @@ Ext.define('Ck.print.Controller', {
 		switch(this.get("printParam.outputFormat")) {
 			case "jpg":
 			case "png":
-				var uri = canvas.toDataURL('image/' + this.get("printParam.outputFormat")).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+				var uri = canvas.toDataURL('image/' + this.get("printParam.outputFormat"), 1).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 				// Pop the download prompt
 				var downloadLink = document.createElement("a");
 				downloadLink.href = uri;
@@ -748,7 +743,7 @@ Ext.define('Ck.print.Controller', {
 					format: this.get("printParam.format"),
 					unit: "cm"
 				});
-				var imgURL = canvas.toDataURL("image/jpg");
+				var imgURL = canvas.toDataURL("image/jpg", 1);
 				pdf.addImage({
 					imageData: imgURL,
 					format: 'jpeg',

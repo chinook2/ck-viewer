@@ -12,7 +12,7 @@ Ext.define('Ck.print.Model', {
 			resolution: null,
 			layout: "default-layout",
 			outputFormat: "pdf",
-			dpi: 96,
+			dpi: 192,
 			format: "a4",
 			shape: {shape: 'r'},
 			orientation: {orientation: 'p'}
@@ -63,9 +63,17 @@ Ext.define('Ck.print.Model', {
 				{id: "a1", label: "A1", ratio: 2.83}
 			]
 		},
-		dpi: {
-			fields: ["dpi"],
-			data: [{dpi: 72}, {dpi: 96}, {dpi: 150}, {dpi: 300}, {dpi: 600}, {dpi: 900}, {dpi: 1200}]
+		dpis: {
+			fields: ["id", "dpi"],
+			data: [
+				{id:72, dpi: 72}, 
+				{id:96, dpi: 96}, 
+				{id:150, dpi: 150}, 
+				{id:300, dpi: 300}, 
+				{id:600, dpi: 600}, 
+				{id:900, dpi: 900}, 
+				{id:1200, dpi: 1200}
+			]
 		}
 	}
 });

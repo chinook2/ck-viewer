@@ -93,8 +93,11 @@ Ext.define("Ck.Print", {
 		name: "dpi",
 		fieldLabel: "Dot Per Inch",
 		displayField: "dpi",
-		valueField: "dpi",
-		bind: { "store": "{dpi}" },
+		valueField: "id",
+		bind: { 
+			store: "{dpis}",
+			value: "{printParam.dpi}"
+		},
 		hidden: true
 	},{
 		itemId: "format",
