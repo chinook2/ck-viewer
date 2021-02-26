@@ -405,8 +405,8 @@ Ext.define('Ck.print.Controller', {
 		this.mapDiv = mapDiv.dom;
 
 		// Adapt component size to format thanks to ratio
-		mapDiv.setWidth(mapDiv.getWidth() * this.ratio);
-		mapDiv.setHeight(mapDiv.getHeight() * this.ratio);
+		mapDiv.setWidth(mapDiv.getWidth());
+		mapDiv.setHeight(mapDiv.getHeight());
 		
 		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 
@@ -419,8 +419,8 @@ Ext.define('Ck.print.Controller', {
 		];
 
 		//Edit with new resolution to not be included on mapSize (and print shape)
-		mapDiv.setWidth(mapDiv.getWidth() * 2)
-		mapDiv.setHeight(mapDiv.getHeight() * 2);
+		mapDiv.setWidth(mapDiv.getWidth() * this.ratio * 2)
+		mapDiv.setHeight(mapDiv.getHeight() * this.ratio * 2);
 		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 	},
 
@@ -574,9 +574,15 @@ Ext.define('Ck.print.Controller', {
 										this.getOlMap().getLayers().forEach(function(grp) {
 											grp.getLayersArray().forEach(function(layer) {
 												var source = layer.getSource();
+												var context = Ck.getMap().originOwc.data.id;
 												if(source.getParams && source.updateParams) {
+/* 													if(source.getParams().LAYERS == context + ":habillage_all"){
+														var params = source.getParams();
+														params['RESOLUTION'] = 198;
+														source.updateParams(params);
+													} */
 													var params = source.getParams();
-													params['RESOLUTION'] = 300;
+													params['RESOLUTION'] = 192;
 													source.updateParams(params);
 												}
 											})
@@ -593,10 +599,10 @@ Ext.define('Ck.print.Controller', {
 										//Get number classes
 										this.getClassLength(listlay2[t]);
 										if(this.nbClass !== 1){
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=300" + params;
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15" + params;
 											colcnt += "<li><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' src='"+ url + "'></li>";
 										}else{
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=300";
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15";
 											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' src='"+ url + "'><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
 										}
 
