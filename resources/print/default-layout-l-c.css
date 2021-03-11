@@ -1,22 +1,26 @@
 ﻿#ckPrint-page{
 	padding:1%;
 	background-color: #d0d0d0;
-	width: 100%;
 }
 
 	.ckPrint-white-frame{
 		background-color: #ffffff;
 	}
 
-		#ckPrint-body{
-			width: 100%;
+		#ckPrint-logo{
+			position: absolute;
+			top:0px;
+			left:0px;
+			z-index:2;
+			padding:20px;
 		}
 
 		#ckPrint-title{
 			background-color: #2196f3;
 			width: 100%;
+			height:100px;
 			color:white;
-			font-size: 24px;
+			font-size: 28px;
 			font-weight: 600;
 			font-family: Roboto, sans-serif;
 			line-height: 22px;
@@ -26,7 +30,9 @@
 		}
 
 		#ckPrint-app-name{
-			padding:1%;
+			padding:10px;
+			padding-top:20px;
+			font-size: 32px;
 			width:100%;
 		}
 
@@ -39,6 +45,33 @@
 			background-color: #ffffff;
 		}
 
+		#ckPrint-overlay-right-bottom{
+			background-color: #ffffffee;
+			padding:10px;
+			position: absolute;
+			bottom:5px;
+			right:5px;
+			z-index:2;
+		}
+
+		#ckPrint-overlay-right-top{
+			padding:10px;
+			position: absolute;
+			text-align:right;
+			top:5px;
+			right:5px;
+			z-index:3;
+		}
+
+		#ckPrint-overlay-left-bottom{
+			background-color: #ffffffee;
+			padding:10px;
+			position: absolute;
+			bottom:5px;
+			left:5px;
+			z-index:2;
+		}
+
 		#ckPrint-map{
 			background-color: white;
 		}
@@ -47,23 +80,30 @@
 			background-color: white;
 			padding:1%;
 		}
-
+		
 		#ckPrint-filters-list{
-			padding:1%;
-			display: inline-block;
 			position: absolute;
+			padding:1%;
+			background-color: #ffffffee;
+			display: inline-block;
 			top:0px;
 			left:0px;
-			background-color: rgba(255,255,255,0.8);
+			font-size:20px;
+			z-index:3;
 		}
 
 		.flex-container {
 			display: flex;
+			padding-bottom:20px; 
 			flex-direction: row;
 		}
 
 		.ckPrint-legimg{
 			padding-right: 5px;
+		}
+
+		.ckPrint-legtitle{
+			font-size: 20px;
 		}
 
 		.ulleg {
@@ -80,6 +120,11 @@
 			width:69%;
 			position:relative;
 			margin-right:1%;
+		}
+
+		.textMap{
+			font-size:20px;
+			padding-top:10px;
 		}
 
 		#rowMap{

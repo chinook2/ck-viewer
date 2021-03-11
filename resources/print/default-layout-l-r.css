@@ -32,8 +32,8 @@
 			margin-left:60%;
 		}
 
-		#ckPrint-overlay{
-			background-color: #ffffffc5;
+		#ckPrint-overlay-right-bottom{
+			background-color: #ffffffee;
 			padding:10px;
 			position: absolute;
 			bottom:5px;
@@ -41,11 +41,27 @@
 			z-index:2;
 		}
 
+		#ckPrint-overlay-right-top{
+			padding:10px;
+			position: absolute;
+			text-align:right;
+			top:5px;
+			right:5px;
+			z-index:3;
+		}
+
+		#ckPrint-overlay-left-bottom{
+			background-color: #ffffffee;
+			padding:10px;
+			position: absolute;
+			bottom:5px;
+			left:5px;
+			z-index:2;
+		}
+
 		#ckPrint-map{
 			background-color: white;
 			position: absolute;
-			top:5px;
-			right:5px;
 			z-index:1;
 		}
 
@@ -54,21 +70,18 @@
 			padding:10px;
 		}
 
-		#ckPrint-filters-list{
-			position: absolute;
-			top:5px;
-			right:5px;
-			display: inline-block;
-			z-index:3;
-		}
-
 		.flex-container {
 			display: flex;
+			padding-bottom:10px; 
 			flex-direction: row;
 		}
 
 		.ckPrint-legimg{
 			padding-right: 5px;
+		}
+
+		.ckPrint-legtitle{
+			font-size: 20px;
 		}
 
 		.ulleg {
@@ -78,12 +91,19 @@
 		}
 		
 		#ckPrint-filters-list{
-			padding:1%;
-			display: inline-block;
 			position: absolute;
+			padding:1%;
+			background-color: #ffffffee;
 			top:5px;
 			left:5px;
-			background-color: rgba(255,255,255,0.8);
+			display: inline-block;
+			font-size:20px;
+			z-index:3;
+		}
+
+		.textMap{
+			font-size:20px;
+			padding-top:10px;
 		}
 
 		#whiteDivMap{

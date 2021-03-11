@@ -7,33 +7,29 @@
 		<div id="ckPrint-page">
 			<div id="ckPrint-body">
 				<div id="ckPrint-title">
-					<div id="ckPrint-app-name">Hub'im : {value:title}</div>
+					<div id="ckPrint-logo"><img id="ckPrint-logo" src="admin/img/logo.gif" style="width:182px"></div>
+					<div id="ckPrint-app-name">Hub'im</div>
 				</div>
 				<div id="rowMap">
 					<div id="whiteDivMap" class="ckPrint-white-frame">
 						<div id="ckPrint-filters-list"></div>
-						<div id="ckPrint-map" style="width: 774px; height: 700px;">
+
+						<div id="ckPrint-overlay-right-top">
+							<div id="ckPrint-north"><img id="northArrow" src="packages/ck-viewer/resources/print/north.png" style="width:60px;padding:10px"></div>
 						</div>
+						
+						<div id="ckPrint-overlay-left-bottom">
+							<div class="textMap">Date : <b>{value:date}</b></div>
+							<div class="textMap">Echelle : <b>{value:scale}</b></div>
+						</div>
+
+						<div id="ckPrint-map" style="width: 774px; height: 700px;"></div>
 					</div>
 					<div id="whiteDivLegend" class="ckPrint-white-frame">
-						<!-- <div id="ckPrint-details">
-							<ul>
-								<li><div class='ckPrint-logtitle'><b>Test</b> landscape</div></li>
-								<li><div class='ckPrint-logtitle'><b>Echelle :</b> {value:scale}</div></li>
-								<li><div class='ckPrint-logtitle'><b>R&eacute;solution :</b> {value:resolution}</div></li>
-								<li><div class='ckPrint-logtitle'><b>Rotation :</b> {value:rotate}</div></li>
-								<li><div class='ckPrint-logtitle'><b>Date d'&eacute;dition :</b> {value:date}</div></li>
-								<li><div class='ckPrint-logtitle'><b>Coordonn&eacute;es en projection :</b> {value:srs}</div></li>
-							</ul>
-						</div> -->
+						<div><b>{value:title}</b></div>
 						<div id="ckPrint-legend"></div>
 					</div>
 				</div>
-<!-- 				<div id="ckPrint-filters" class="ckPrint-white-frame">
-					<h3>Filtres</h3>
-					<div id="ckPrint-filters-list">
-					</div>
-				</div> -->
 			</div>
 		</div>
 	</body>

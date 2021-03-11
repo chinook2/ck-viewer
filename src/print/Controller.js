@@ -576,11 +576,6 @@ Ext.define('Ck.print.Controller', {
 												var source = layer.getSource();
 												var context = Ck.getMap().originOwc.data.id;
 												if(source.getParams && source.updateParams) {
-/* 													if(source.getParams().LAYERS == context + ":habillage_all"){
-														var params = source.getParams();
-														params['RESOLUTION'] = 198;
-														source.updateParams(params);
-													} */
 													var params = source.getParams();
 													params['RESOLUTION'] = 192;
 													source.updateParams(params);
@@ -599,10 +594,10 @@ Ext.define('Ck.print.Controller', {
 										//Get number classes
 										this.getClassLength(listlay2[t]);
 										if(this.nbClass !== 1){
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15" + params;
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + params;
 											colcnt += "<li><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' src='"+ url + "'></li>";
 										}else{
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15";
+											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192";
 											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' src='"+ url + "'><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
 										}
 
@@ -791,9 +786,15 @@ Ext.define('Ck.print.Controller', {
 		this.printValue = this.getView().getForm().getValues();
 		//this.printValue['title'] = Ext.ComponentQuery.query("#printTitle")[0].getValue();
 		this.printValue['title'];
-		this.printValue['date'] = Date.now();
-		this.printValue['scale'] = Ck.getMap().getScale();
+		this.printValue['date'] = new Date(Date.now()).toLocaleDateString();
+		this.printValue['scale'] = "1 / " + Math.round(Ck.getMap().getScale());
 		this.printValue['srs'] = Ck.getMap().getProjection().getCode();
+		//Rotate north arrow
+		//Ext.get("northArrow").setStyle("transform", "rotate(" + Ext.ComponentQuery.query('#angle')[0].getValue() + "deg)");
+		if (document.getElementById("northArrow")){
+			document.getElementById("northArrow").style.transform = 'rotate(' + Ext.ComponentQuery.query('#angle')[0].getValue()*100 + 'deg)';
+		}
+
 		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]') !== 0){
 			var comboFilters = Ext.ComponentQuery.query('[componentCls~=comboFilter]');
 			comboFilters.forEach(function(combo,value){
@@ -803,6 +804,9 @@ Ext.define('Ck.print.Controller', {
 					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
 				}
 			}, this)
+			if(Ext.get("ckPrint-filters-list").dom.childElementCount == 0){
+				Ext.destroy(Ext.get("ckPrint-filters-list"));
+			}
 		}
 		this.addDefaultValues();
 
