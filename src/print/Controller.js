@@ -797,10 +797,11 @@ Ext.define('Ck.print.Controller', {
 
 		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]') !== 0){
 			var comboFilters = Ext.ComponentQuery.query('[componentCls~=comboFilter]');
+			this.mapDiv = Ext.get("ckPrint-filters-list").dom;
+			var dh = Ext.DomHelper;
+			dh.append(this.mapDiv, "<em><b>Filtres utilisés : </b></em>");
 			comboFilters.forEach(function(combo,value){
 				if(combo.getRawValue() !== "" && combo.getRawValue !== null && combo.getRawValue !== undefined){
-					this.mapDiv = Ext.get("ckPrint-filters-list").dom;
-					var dh = Ext.DomHelper;
 					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
 				}
 			}, this)
