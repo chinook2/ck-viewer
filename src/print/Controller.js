@@ -805,7 +805,7 @@ Ext.define('Ck.print.Controller', {
 					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
 				}
 			}, this)
-			if(Ext.get("ckPrint-filters-list").dom.childElementCount == 0){
+			if(Ext.get("ckPrint-filters-list").dom.childElementCount == 1){
 				Ext.destroy(Ext.get("ckPrint-filters-list"));
 			}
 		}
