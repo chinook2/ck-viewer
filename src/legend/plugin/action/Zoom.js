@@ -17,8 +17,8 @@ Ext.define('Ck.legend.plugin.action.Zoom', {
 	},
 	*/
 
-	iconCls: 'ckZoom ck-plugin',
-	tooltip: 'Zoom on layer',
+	iconCls: 'ck-zoom ck-plugin',
+	tooltip: Ck.text('zoom_on_layer'),
 
 	doAction: function(layer) {
 		var extent = layer.getExtent();
