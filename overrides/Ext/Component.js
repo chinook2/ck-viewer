@@ -108,6 +108,7 @@ Ext.define('Ext.overrides.Component', {
 		 * - element directly in body (window, tooltip, menu, ...) are often protected (because they have a parent Innola )
 		 */
 	isLocaleToBeApplied: function() {
+		return false;// Disable
 		if (this.__proto__.$className.startsWith('Innola')) {
 			return false;
 		}

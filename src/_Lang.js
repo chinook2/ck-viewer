@@ -99,6 +99,7 @@ Ext.define('Ck._Lang', {
 			'createedit_parcel': 'Create/Edit parcel',
 			'edit_parcel': 'Edit parcel',
 			'parcel': 'Parcel',
+			'parcels': 'Parcels',
 			'points': 'Points',
 			'traverses': 'Traverses',
 			'coord_sys': 'Coord. Syst.',
@@ -313,7 +314,18 @@ Ext.define('Ck._Lang', {
 				' - {nom_shapefile}.prj'
 			],
 			'confirm_erase_existing_geom': 'Do you want to erase the geometry previously entered?',
-			'lbl_projection': 'Projection'
+			'lbl_projection': 'Projection',
+			'reg_status_current': 'Active',
+			'reg_status_historic': 'Archived',
+			'reg_status_pending': 'Pending',
+			'reg_status_previous': 'Previous',
+			'reg_status_rejecte': 'Rejected',
+			'reg_status_temporal': 'Temporal',
+			'reg_status_deleted': 'Deleted',
+			'area_unit_type_acres': 'ac',
+			'area_unit_type_hectares': 'ha',
+			'area_unit_type_sqft': 'ft',
+			'area_unit_type_sqm': 'sq m'
         },
         'fr': {
             'action_close': 'Fermer',
@@ -385,6 +397,7 @@ Ext.define('Ck._Lang', {
 			'createedit_parcel': 'Créer/Editer la parcelle',
 			'edit_parcel': 'Editer la parcelle',
 			'parcel': 'Parcelle',
+			'parcels': 'Parcelles',
 			'points': 'Points',
 			'traverses': 'Segments',
 			'coord_sys': 'Syst. Coord.',
@@ -600,6 +613,17 @@ Ext.define('Ck._Lang', {
 			],
 			'confirm_erase_existing_geom': 'Voulez-vous effacer la géométrie existante?',
 			'lbl_projection': 'Projection',
+			'reg_status_current': 'Actif',
+			'reg_status_historic': 'Archivé',
+			'reg_status_pending': 'En cours',
+			'reg_status_previous': 'Précédent',
+			'reg_status_rejecte': 'Rejeté',
+			'reg_status_temporal': 'Temporel',
+			'reg_status_deleted': 'Supprimé',
+			'area_unit_type_acres': 'ac',
+			'area_unit_type_hectares': 'ha',
+			'area_unit_type_sqft': 'ft',
+			'area_unit_type_sqm': 'm²'
 		}
 	}
 });
