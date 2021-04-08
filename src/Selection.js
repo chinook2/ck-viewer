@@ -148,7 +148,12 @@ Ext.define('Ck.Selection', {
 		/**
 		 * When provide several layers, ignore WMS/WFS layers if found features in local Vector layers
 		 */
-		skipOwsLayers: false
+		skipOwsLayers: false,
+		
+		/**
+		 * Specify if it is for Feature Info. This permits to reduce the layer list according parameters.
+		 */
+		isFeatureInfo: false
 	},
 
 	/**
@@ -272,6 +277,7 @@ Ext.define('Ck.Selection', {
 	 * @param {ol.interaction.DrawEvent}
 	 */
 	processSelection: function(evntParams) {
+		var me = this;
 		if(this.getBeforeProcess().bind(this.getScope())() === false) {
 			return false;
 		}
@@ -353,7 +359,8 @@ Ext.define('Ck.Selection', {
 			var lyrToQuery = this.getMap().getLayers(function(lyr) {
 				return ((lyr.ckLayer && lyr.ckLayer.getUserLyr() &&
 						(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
-						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image))
+						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
+						(me.getIsFeatureInfo()==false || lyr.getExtension("excludeGetFeatureInfo") !== true))
 				);
 			});
 			this.layersToQuery = lyrToQuery.getArray().reverse();
@@ -367,7 +374,8 @@ Ext.define('Ck.Selection', {
 				if(lyr) {
 					if ((lyr.ckLayer && lyr.ckLayer.getUserLyr()) &&
 						(lyr.getVisible() || lyr.getExtension("alwaysQueryable")) &&
-						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image)) {
+						(lyr instanceof ol.layer.Vector || lyr instanceof ol.layer.Image) &&
+						(me.getIsFeatureInfo()==false || lyr.getExtension("excludeGetFeatureInfo") !== true)) {
 						this.layersToQuery.push(lyr);
 					}
 				} else {

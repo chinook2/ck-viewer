@@ -108,7 +108,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			layers			: this.getLayers(),
 			buffer			: this.getBuffer(),
 			limit			: this.getLimit(),
-			beforeProcess	: this.beforeSelection
+			beforeProcess	: this.beforeSelection,
+			isFeatureInfo		: true
 		});
 		// Force override with active map
 		selConf.map = map;
