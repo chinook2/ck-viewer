@@ -84,7 +84,7 @@ Ext.define('Ck.Measure', {
 		maxFeaturePerLayer: 1500,
 
 		//tooManyFeatureMsg: "Loading these features (%d) could be long. Do you confirm ?"
-		tooManyFeatureMsg: "Unable to initialize snapping.<br>Consider zoom in to enable measurements snapping."
+		tooManyFeatureMsg: Ck.text('snap_init_error')
 	},
 
 	/**
@@ -580,7 +580,7 @@ Ext.define('Ck.Measure', {
 						if(parseInt(nbF) > this.getMaxFeaturePerLayer()) {
 							this.hideMask();
 							Ext.MessageBox.show({
-								title: 'Warning',
+								title: Ck.text('validate_warnings'),
 								msg: this.getTooManyFeatureMsg().replace("%d", nbF),
 								icon: Ext.MessageBox.WARNING,
 								//buttons: Ext.MessageBox.OKCANCEL,
