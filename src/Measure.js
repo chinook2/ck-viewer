@@ -2,6 +2,9 @@
  * Chinook measure interaction
  */
 Ext.define('Ck.Measure', {
+	requires: [
+		'Ck._Lang'
+	],
 	statics: {
 		getInstance: function(config) {
 			config = Ext.applyIf(config || {}, this.prototype.config);
