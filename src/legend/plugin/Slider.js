@@ -6,7 +6,7 @@ Ext.define('Ck.legend.plugin.Slider', {
 	extend: 'Ext.AbstractPlugin',
 	alias: 'plugin.legendslider',
 
-	tipPrefix: 'Opacity',
+	tipPrefix: Ck.text('opacity'),
 
 	init: function(cmp) {
 		cmp.on({
