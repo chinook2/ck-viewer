@@ -48,7 +48,7 @@ Ext.define('Ck.map.action.MousePosition', {
 	toggleMousePosition(event){
 		var coordinate = ol.coordinate.toStringXY(event.coordinate,3);
 		if(Ext.ComponentQuery.query('#lblCoord')){
-			Ext.ComponentQuery.query('#lblCoord')[0].setHtml(coordinate);
+			Ext.ComponentQuery.query('#lblCoord')[0].setHtml(coordinate.replace(',', ''));
 		};
 	},
 
