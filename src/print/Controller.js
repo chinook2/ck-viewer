@@ -744,20 +744,21 @@ Ext.define('Ck.print.Controller', {
 					format: this.get("printParam.format"),
 					unit: "cm"
 				});
-				var imgURL = canvas.toDataURL("image/jpg", 1);
+				var imgURL = canvas.toDataURL("image/png", 1);
 				pdf.addImage({
 					imageData: imgURL,
-					format: 'jpeg',
+					format: 'png',
 					x: 0,
 					y: 0,
 					w: this.pageSize[0],
-					h: this.pageSize[1]
+					h: this.pageSize[1],
+					compression: 'FAST'
 				});
 				pdf.save("map.pdf");
 		}
 
 		// Replace the map at the right place and remove temp div
-		this.printDiv.parentNode.removeChild(this.printDiv);
+		//this.printDiv.parentNode.removeChild(this.printDiv);
 		this.mapDiv.removeChild(this.mapImg);
 
 		// Reset center, resolution and preview
