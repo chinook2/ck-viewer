@@ -65,8 +65,8 @@ Ext.define('Ck.map.Model', {
 		olview: {
 			center: undefined,
 			resolution: undefined,
+			zoom: undefined,
 			rotation: undefined,
-			
 			projection:  {
 				code: undefined,
 				units: undefined
@@ -108,7 +108,7 @@ Ext.define('Ck.map.Model', {
 		 * @cfg {Number}
 		 * Current zoom level of the map.
 		 */
-		zoom: undefined,
+		// zoom: undefined,
 
 		/**
 		 * @cfg {Array}
@@ -227,6 +227,21 @@ Ext.define('Ck.map.Model', {
 		
 		/**
 		 * @cfg {Number}
+		 * Current Zoom level of the map.
+		 *
+		 * Two-way binding
+		 */
+		zoom: {
+			get: function(get) {
+				return get('olview.zoom');
+			},
+			set: function(value) {
+				this.getViewController().setZoom(value);
+			}
+		},
+
+		/**
+		 * @cfg {Number}
 		 * Current rotation of the map.
 		 *
 		 * Two-way binding
@@ -246,7 +261,7 @@ Ext.define('Ck.map.Model', {
 	 */
 	stores: {
 		scales: {
-			fields: ['res', 'scale'],
+			fields: ['zoom', 'res', 'scale'],
 			data: []
 		}
 	},

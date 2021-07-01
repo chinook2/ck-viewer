@@ -318,6 +318,7 @@ Ext.define('Ck.map.Controller', {
 				maxResolution	: viewScales[viewScales.length-1].res
 			}));
 			this.bindMap(olMap);
+			vm.notify();
 
 			// Set the bbox
 			this.setExtent(owc.getExtent());
@@ -923,7 +924,6 @@ Ext.define('Ck.map.Controller', {
 		vm.set('olview.projection.units', units);
 
 		olMap.on('moveend', function(e){
-
 			var c = olv.getCenter();
 			vm.set('olview.center', c );
 
@@ -944,8 +944,11 @@ Ext.define('Ck.map.Controller', {
 			]);
 
 			var z = olv.getZoom();
-			vm.set('zoom', z);
+			vm.set('olview.zoom', z);
 		});
+		
+		var z = olv.getZoom();
+		vm.set('olview.zoom', z);
 	},
 
 	/**
