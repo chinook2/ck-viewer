@@ -64,12 +64,12 @@ Ext.define('Ck.map.action.Measure', {
 		/**
 		 * Message to show when the user start measure.
 		 */
-		startMsg : 'Click to start measuring (shift and hold click for free measure)',
+		startMsg : 'Cliquer pour commencer à mesurer (shift et clic pour une mesure libre)',
 
 		/**
 		 * Message to show when the user is measuring.
 		 */
-		continueMsg: 'Click to continue measuring'
+		continueMsg: 'Cliquer pour continuer à mesurer'
 	},
 
 	/**

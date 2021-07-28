@@ -8,7 +8,7 @@ Ext.define('Ck.map.action.draw.Text', {
 	iconCls: 'ckfont ck-format_color_text',
 	text:"",
 	
-	tooltip: "Draw texts",
+	tooltip: "Insérez des textes",
 
 	type: "Text"
 });

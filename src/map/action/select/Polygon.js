@@ -10,7 +10,7 @@ Ext.define('Ck.map.action.select.Polygon', {
 	iconCls: 'ckfont ck-select_polygon',
 	tooltip: 'Select by polygon',
 	
-	continueMsg: 'Click on the map to start polygon selection',
+	continueMsg: "Clickez sur la carte pour commencer la sélection à partir d'un rectangle",
 
 	/**
 	 * Type used in Selection

@@ -6,7 +6,7 @@ Ext.define('Ck.map.action.draw.Modify', {
 	itemId: 'drawModify',
 	iconCls: 'ckfont ck-edit',
 
-	tooltip: "Edit drawing",
+	tooltip: "Modifiez les dessins",
 	
 	drawId: "default",
 	requires: [

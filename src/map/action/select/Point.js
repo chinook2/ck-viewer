@@ -8,7 +8,8 @@ Ext.define('Ck.map.action.select.Point', {
 	itemId: 'selectpoint',
 	text: '',
 	iconCls: 'ckfont ck-select-point',
-	tooltip: 'Select by click',
+	tooltip: 'Sélectionnez par un click',
+	waitMsg: "Sélection en progression",
 		
 	//continueMsg: 'Click to select a feature',
 

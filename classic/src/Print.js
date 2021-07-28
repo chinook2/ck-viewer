@@ -45,7 +45,7 @@ Ext.define("Ck.Print", {
 		itemId: "title",
 		name: "title",
 		xtype: "textfield",
-		fieldLabel: "Title...",
+		fieldLabel: "Titre...",
 		editable: true
 	},{
 		itemId: "resolution",
@@ -81,7 +81,7 @@ Ext.define("Ck.Print", {
 	},{
 		itemId: "outputFormat",
 		name: "outputFormat",
-		fieldLabel: "Output format",
+		fieldLabel: "Format de sortie",
 		displayField: "label",
 		valueField: "id",
 		bind: {
@@ -130,7 +130,7 @@ Ext.define("Ck.Print", {
 		vertical: true,
 		items: [
 			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
-			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
+			{boxLabel: "Paysage", name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
 	}/* ,{

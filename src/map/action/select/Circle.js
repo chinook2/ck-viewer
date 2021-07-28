@@ -10,7 +10,7 @@ Ext.define('Ck.map.action.select.Circle', {
 	iconCls: 'ckfont ck-select-circle',
 	tooltip: 'Select by circle',
 		
-	continueMsg: 'Drag to draw a circle and select features',
+	continueMsg: 'Glissez pour dessiner un cercle et sélectionner des entités',
 
 	/**
 	 * length or area

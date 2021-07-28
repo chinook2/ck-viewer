@@ -18,7 +18,7 @@ Ext.define('Ck.map.action.MousePosition', {
 	itemId: 'mouseposition',
 	text: '',
 	iconCls: 'ckfont ck-compass',
-	tooltip: 'Mouse position',
+	tooltip: 'Position de la souris',
 
 	// Can stay active with other actions
 	toggleGroup: 'ckmapActionMulti',

@@ -282,7 +282,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 
 		var circleBorderWidth = Ext.create('Ext.slider.Single', {
 			name: "borderWidth",
-			fieldLabel: 'Size',
+			fieldLabel: 'Width',
 			labelSeparator: '',
 	        width: 200,
 			increment: 1,
@@ -371,7 +371,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 
 		var polygonBorderWidth = Ext.create('Ext.slider.Single', {
 			name: "borderWidth",
-			fieldLabel: 'Size',
+			fieldLabel: 'Width',
 			labelSeparator: '',
 	        width: 200,
 			increment: 1,

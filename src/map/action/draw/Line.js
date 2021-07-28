@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.draw.Line', {
 	itemId: 'drawLine',
 	iconCls: 'ckfont ck-flow-line',
 	
-	tooltip: "Draw lines",
+	tooltip: "Dessinez des lignes",
 
 	type: "LineString"
 });

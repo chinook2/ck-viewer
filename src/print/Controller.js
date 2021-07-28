@@ -155,8 +155,9 @@ Ext.define('Ck.print.Controller', {
 			var canvasSize = Ext.get("ckPrint-map").getWidth();
 			var mapSizeWidth = ol.extent.getWidth(e.feature.getGeometry().getExtent());
 			var mapSizeWidth = e.feature.getGeometry().flatCoordinates[0] - e.feature.getGeometry().flatCoordinates[2];
+			var zoomNavRatio = window.devicePixelRatio;
 
-			this.res = mapSizeWidth / canvasSize;
+			this.res = mapSizeWidth * zoomNavRatio / canvasSize;
 			this.set("printParam.resolution", this.res);
 			//Ext.ComponentQuery.query('#resolution')[0].setValue(this.res);
 		});
@@ -405,8 +406,9 @@ Ext.define('Ck.print.Controller', {
 		this.mapDiv = mapDiv.dom;
 
 		// Adapt component size to format thanks to ratio
-		mapDiv.setWidth(mapDiv.getWidth());
-		mapDiv.setHeight(mapDiv.getHeight());
+		var zoomNavRatio = window.devicePixelRatio;
+		mapDiv.setWidth(mapDiv.getWidth() * zoomNavRatio);
+		mapDiv.setHeight(mapDiv.getHeight() * zoomNavRatio);
 		
 		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 

@@ -10,7 +10,7 @@ Ext.define('Ck.map.action.select.Box', {
 	iconCls: 'ckfont ck-select-box',
 	tooltip: 'Select by rectangle',
 	
-	continueMsg: 'Drag to draw a rectangle and select features',
+	continueMsg: 'Glissez pour dessiner un rectange et sélectionner des entités',
 
 	/**
 	 * Type used in Selection

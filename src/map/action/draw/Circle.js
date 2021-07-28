@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.draw.Circle', {
 	itemId: 'drawCircle',
 	iconCls: 'ckfont ck-circle',
 
-	tooltip: "Draw circles",
+	tooltip: "Dessinez des cercles",
 	
 	type: "Circle"
 });

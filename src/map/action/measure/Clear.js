@@ -8,7 +8,7 @@ Ext.define('Ck.map.action.measure.Clear', {
 	itemId: 'measureclear',
 	text: '',
 	iconCls: 'ckfont ck-eraser',
-	tooltip: 'Clear all measures',
+	tooltip: 'Supprimer toutes les surfaces',
 
 	toggleGroup: null,
 	enableToggle: false,

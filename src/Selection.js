@@ -137,7 +137,7 @@ Ext.define('Ck.Selection', {
 		/**
 		 *
 		 */
-		maskMsg: "Selection in progress...",
+		maskMsg: "Sélection en cours...",
 
 		/**
 		 * Loading mask

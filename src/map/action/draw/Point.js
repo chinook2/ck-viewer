@@ -7,7 +7,7 @@ Ext.define('Ck.map.action.draw.Point', {
 	itemId: 'drawPoint',
 	iconCls: 'ckfont ck-map-marker2',
 	
-	tooltip: 'Draw points',
+	tooltip: 'Dessinez des points',
 	
 	type: "Point",
 	win: null
