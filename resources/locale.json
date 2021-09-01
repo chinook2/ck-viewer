@@ -77,6 +77,10 @@
         "fr": "Imprimer",
         "es": "Print ES"
     },{
+        "en": "Print book",
+        "fr": "Impression de carnet de plan",
+        "es": "Impresion de cuaderno"
+    },{
         "en": "Edit",
         "fr": "Editer",
         "es": "Editar"
