@@ -80,7 +80,8 @@ Ext.define("Ck.Printbook", {
 				store: "{pbZoneStore}",
 				value: "{printbookParam.pbZoneStore}",
 				disabled: "{disabledFilter}"
-			}
+			},
+			disabled: true
 		}]
 	},{
 		columnWidth:0.5,
@@ -92,8 +93,8 @@ Ext.define("Ck.Printbook", {
 			columns: 2,
 			vertical: true,
 			items: [
-				{boxLabel: "Local", name: "iterateField", inputValue: "pre_code_local_gmao", padding: "0 20 0 0", checked: true},
-				{boxLabel: "Zone", name: "iterateField", inputValue: "zone"}
+				{boxLabel: "Zone", name: "iterateField", inputValue: "zone", checked: true, padding: "0 20 0 0"},
+				{boxLabel: "Local", name: "iterateField", inputValue: "pre_code_local_gmao"}
 			],
 			bind: { value: "{printbookParam.iterateField}" }
 		},{
@@ -126,7 +127,7 @@ Ext.define("Ck.Printbook", {
 			typeAhead: true,
 			minChars: 0,
 			queryParam: "searchStr",
-			emptyText: "Tous",
+			emptyText: "Aucun",
 			queryMode: "local",
 			bind: {
 				store: "{pbThematicsValuesStore}",

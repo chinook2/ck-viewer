@@ -153,12 +153,12 @@ Ext.define('Ck.printbook.Controller', {
 	 */
 	 disabledFilter: function() {
 		var component = Ext.ComponentQuery.query('#pbZoneFilter')[0];
-		if(Ext.ComponentQuery.query('#iterateField')[0].getValue()['iterateField'] === "zone"){
-			component.setValue("");
-			component.setDisabled(true);
-		}else{
+		if(Ext.ComponentQuery.query('#iterateField')[0].getValue()['iterateField'] === "pre_code_local_gmao"){
 			component.setValue("");
 			component.setDisabled(false);
+		}else{
+			component.setValue("");
+			component.setDisabled(true);
 		}
 	},
 
@@ -314,7 +314,11 @@ Ext.define('Ck.printbook.Controller', {
 				link.click();
 			},
 			failure: function(response, opts) {
-				console.log('server-side failure with status code ' + response.status);
+				if(response.statusText == "communication failure"){
+					Ext.Msg.alert('Attention', 'L\'impression du carnet de plan prenant trop de temps, il ne sera pas téléchargé directement. Merci de le télécharger votre carnet de plan grâce à cet URL lorsque l\'impression sera terminée.', Ext.emptyFn);
+				}else{
+					Ext.Msg.alert('Erreur d\'impression', 'Une erreur est survenue lors de l\'impression. Merci de réessayer ou de contacter le support.', Ext.emptyFn);
+				}
 			}
 		})
 	},
