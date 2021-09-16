@@ -315,7 +315,8 @@ Ext.define('Ck.printbook.Controller', {
 			},
 			failure: function(response, opts) {
 				if(response.statusText == "communication failure"){
-					Ext.Msg.alert('Attention', 'L\'impression du carnet de plan prenant trop de temps, il ne sera pas téléchargé directement. Merci de le télécharger votre carnet de plan grâce à cet URL lorsque l\'impression sera terminée.', Ext.emptyFn);
+					var downloadUrl = document.location.href + "admin/uploads/reports/" + params['reportName'] + ".pdf"
+					Ext.Msg.alert('Attention', 'L\'impression du carnet de plan prenant trop de temps, il ne sera pas téléchargé directement. Merci de le télécharger grâce à cet URL lorsque l\'impression sera terminée : <a href="' + downloadUrl + '">' + params['reportName'] + ".pdf" + "</a>" , Ext.emptyFn);
 				}else{
 					Ext.Msg.alert('Erreur d\'impression', 'Une erreur est survenue lors de l\'impression. Merci de réessayer ou de contacter le support.', Ext.emptyFn);
 				}
