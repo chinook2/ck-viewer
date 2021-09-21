@@ -30,6 +30,15 @@ Ext.define("Ck.Printbook", {
 	 * itemId needed for field getCmp, name needed for getValues
 	 */
 	items: [{
+		columnWidth:1,
+			items: [{
+				itemId: "pbLabelIntro",
+				name: "pbLabelIntro",
+				xtype: "label",
+				width: '100%',
+				html: "<p style='margin:0px'>La thématique utilisée dans l'application sera reprise lors de l'impression.</p>",
+			}]
+	},{
 		columnWidth:0.5,
 		items: [{
 			itemId: "reportName",
@@ -101,12 +110,12 @@ Ext.define("Ck.Printbook", {
 			itemId: "pbLabelThematics",
 			name: "pbLabelThematics",
 			xtype: "label",
-			html: "<h3 style='margin-bottom:0px'>Thématiser par :</h3>",
+			html: "<h3 style='margin-bottom:0px'>Filtres supplémentaires :</h3>",
 		},{
 			itemId: "pbThematics",
 			name: "pbThematics",
 			reference:"pbThematics",
-			fieldLabel: "Thématiques",
+			fieldLabel: "Filtres supplémentaires",
 			displayField: "thematics",
 			valueField: "thematics",
 			width: '100%',
@@ -121,13 +130,13 @@ Ext.define("Ck.Printbook", {
 			name: "tagThematicsValues",
 			padding : "7px",
 			width: "100%",
-			fieldLabel: "Valeurs de la thématique filtrées",
+			fieldLabel: "Valeurs du filtre supplémentaire",
 			displayField: "thematiques_values",
 			valueField: "thematiques_values",
 			typeAhead: true,
 			minChars: 0,
 			queryParam: "searchStr",
-			emptyText: "Aucun",
+			emptyText: "Tous",
 			queryMode: "local",
 			bind: {
 				store: "{pbThematicsValuesStore}",
