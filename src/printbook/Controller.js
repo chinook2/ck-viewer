@@ -130,9 +130,9 @@ Ext.define('Ck.printbook.Controller', {
 			"ckprintbook combo#tagThematicsFiltersValues": {
 				change: this.onChangeValue
 			},
-			"ckprintbook #iterateField": {
+/* 			"ckprintbook #iterateField": {
 				change: this.disabledFilter
-			}
+			} */
 		});
 	},
 	
@@ -176,7 +176,7 @@ Ext.define('Ck.printbook.Controller', {
 
 		// Update extraparams store
 		fields.each(function(field) {
-			if(field.getItemId() !== 'reportName' && field.getName() !== 'iterateField'){
+			if(field.getItemId() !== 'reportName' && field.getName() !== 'iterateField' && field.getName() !== 'pbOutputFormat'){
 				this.printbookValue[field.name] = field.getValue() || "";
 				if (field.getDisplayField() != filterSelect){
 					if (field.getStore().getProxy().type == 'ajax'){
@@ -219,7 +219,8 @@ Ext.define('Ck.printbook.Controller', {
 	 * 
 	 */
 	composeCanvas: function() {
-
+		//Set title value name
+		Ext.ComponentQuery.query('#reportName')[0].setValue( "carnet_" + sessionStorage.getItem("CkLoggedIn") + "_" + new Date(Date.now()).toLocaleDateString().split("/").join("") + "_" + new Date(Date.now()).getHours() + new Date(Date.now()).getMinutes());
 	},
 
 	/**
@@ -316,7 +317,7 @@ Ext.define('Ck.printbook.Controller', {
 			failure: function(response, opts) {
 				if(response.statusText == "communication failure"){
 					var downloadUrl = document.location.href + "admin/uploads/reports/" + params['reportName'] + ".pdf"
-					Ext.Msg.alert('Attention', 'L\'impression du carnet de plan prenant trop de temps, il ne sera pas téléchargé directement. Merci de le télécharger grâce à cet URL lorsque l\'impression sera terminée : <a href="' + downloadUrl + '">' + params['reportName'] + ".pdf" + "</a>" , Ext.emptyFn);
+					Ext.Msg.alert('Attention', 'L\'impression du carnet de plan prenant trop de temps, il ne sera pas téléchargé automatiquement. Merci de le télécharger grâce à cet URL lorsque l\'impression sera terminée : <a target="_blank" href="' + downloadUrl + '">' + params['reportName'] + ".pdf" + "</a>" , Ext.emptyFn);
 				}else{
 					Ext.Msg.alert('Erreur d\'impression', 'Une erreur est survenue lors de l\'impression. Merci de réessayer ou de contacter le support.', Ext.emptyFn);
 				}
