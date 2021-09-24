@@ -48,6 +48,18 @@ Ext.define("Ck.Printbook", {
 			editable: true,
 			allowBlank: false
 		},{
+			xtype: "radiogroup",
+			name: "pbOutputFormat",
+			itemId: "pbOutputFormat",
+			fieldLabel: "Format d'impression",
+			columns: 2,
+			vertical: true,
+			items: [
+				{boxLabel: "A4", name: "pbOutputFormat", inputValue: "A4", checked: true, padding: "0 20 0 0"},
+				{boxLabel: "A3", name: "pbOutputFormat", inputValue: "A3"}
+			],
+			bind: { value: "{printbookParam.pbOutputFormat}" }
+		},{
 			itemId: "pbLabelFilters",
 			name: "pbLabelFilters",
 			xtype: "label",
@@ -90,7 +102,7 @@ Ext.define("Ck.Printbook", {
 				value: "{printbookParam.pbZoneStore}",
 				disabled: "{disabledFilter}"
 			},
-			disabled: true
+			disabled: false
 		}]
 	},{
 		columnWidth:0.5,
