@@ -48,7 +48,8 @@ Ext.define('Ck.print.Controller', {
 		var dateaff = new Array("00","01","02","03","04","05","06","07","08","09","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31");
 		
 		var dateaffiche = dateaff[date.getDate()]+"/"+monthaff[date.getMonth()]+"/"+date.getFullYear();
-	 
+		
+		this.printValue["nomcom"] = '';
 		this.printValue["date"] = dateaffiche;
 		this.printValue["projection"] = Ck.getMap().getOlView().getProjection().getCode();
 		
@@ -387,10 +388,41 @@ Ext.define('Ck.print.Controller', {
 		this.previewLayer.getSource().addFeature(this.feature);
 	},
 	
+	
 	/**
 	 * Check how the document will be print
 	 */
 	beforePrint: function(btn) {
+		varurl = Ck.getApi().replace('?','index.php');
+		var extent = this.feature.getGeometry().getExtent();		
+		this.printValue["nomcom"] = '';
+		Ck.Ajax.request({
+			url: varurl,
+			params : {
+				s:"recherche",
+				r:"recupnomcomprint",
+				minx:extent[0],
+				miny:extent[1],
+				maxx:extent[2],
+				maxy:extent[3]
+			},
+			scope:this,
+			success: function(res) {
+				rep = Ext.decode(res.responseText);
+				if(rep.nomcom.trim != ''){
+					this.printValue["nomcom"] = rep.nomcom;
+					this.beforePrintGo(btn);
+				}
+			}
+		});
+		
+		
+	},
+	
+	/**
+	 * Check how the document will be print
+	 */
+	beforePrintGo: function(btn) {
 		this.csvselection = [];
 		this.listselection = [];
 		var rendererType = this.olMap.getRenderer().getType();
@@ -478,7 +510,7 @@ Ext.define('Ck.print.Controller', {
 				var targetidoterit = Ext.get("ckPrint-icopart").dom;
 				icopart = "";
 				for(i=0; i < resit.length; i++){
-					icopart += "<div class='ckPrint-logo-part' style='background: rgba(255, 255, 255, 1);'><img src='resources/images/partenaires/"+resit[i]+"' style='height:50px;margin-left:2px;'></div>";
+					icopart = "<div class='ckPrint-logo-part' style='background: rgba(255, 255, 255, 1);'><img src='resources/images/partenaires/"+resit[0]+"' style='height:100px;margin-left:2px;'></div>";
 				}
 				
 				targetidoterit.innerHTML = icopart;
@@ -511,7 +543,6 @@ Ext.define('Ck.print.Controller', {
 			var targetidcpr = Ext.get("ckPrint-cpr").dom;
 			targetidcpr.innerHTML = strlstcpr;
 			
-			
 			if(this.printParam.affleg == "itgleg"){
 				Ext.get("ckPrint-legend").dom.style.display = "block";
 				listlay = this.olMap.getLayers().getArray();
@@ -520,10 +551,13 @@ Ext.define('Ck.print.Controller', {
 				colcnt = "";
 				var ittest = 0;
 				var irgt = 0;
+				var valw = 215;
 				if(this.printParam.orientation == "p"){
-					cntor = 9;
+					cntor = 8;
+					valw = 215;
 				}else{
-					cntor = 24;
+					cntor = 48;
+					valw = 180;
 				}
 				
 				for(i=0 ; i < listlay.length; i++) {
@@ -542,7 +576,7 @@ Ext.define('Ck.print.Controller', {
 										if(ittest == cntor){
 											colcnt += "</ul></div>";
 											ittest = 0;
-											irgt = irgt + 120;
+											irgt = irgt + valw;
 										}else{
 											ittest = ittest + 1;
 										}
@@ -565,7 +599,7 @@ Ext.define('Ck.print.Controller', {
 										if(ittest == cntor){
 											colcnt += "</ul></div>";
 											ittest = 0;
-											irgt = irgt + 120;
+											irgt = irgt + valw;
 										}else{
 											ittest = ittest + 1;
 										}
@@ -587,6 +621,12 @@ Ext.define('Ck.print.Controller', {
 				}
 				listlay = this.olMap.getLayers().getArray();
 				var ulct = document.createElement('ul');
+				
+				colcnt = "";
+				var ittest = 0;
+				var irgt = 0;
+				var cntor = 74;
+								
 				for(i=0 ; i < listlay.length; i++) {
 					if(listlay[i].values_.title != 'Fond de Plan' && listlay[i].values_.title != 'PCRS Image'){
 						if(Ext.isFunction(listlay[i].getLayers)){
@@ -595,9 +635,19 @@ Ext.define('Ck.print.Controller', {
 								if(listlay2[t].ckLayer){
 								laytemp = listlay2[t].ckLayer;
 									if(listlay2[t].getVisible() == true){
-										var lict = document.createElement('li');
-										ulct.appendChild(lict);
-										lict.innerHTML = lict.innerHTML+"<div class='ckPrint-legimg' style='background: rgba(255, 255, 255, 0.83) url("+Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id")+") no-repeat scroll left 0px;'></div><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div>";
+										if(ittest == 0){
+											colcnt += "<div style='position:absolute;left:"+irgt+"px'><ul class='ulleg'>";
+										}
+										
+										colcnt += "<li><div class='ckPrint-legimg' style='background: rgba(255, 255, 255, 0.83) url("+Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id")+") no-repeat scroll left 0px;'></div><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
+										
+										if(ittest == cntor){
+											colcnt += "</ul></div>";
+											ittest = 0;
+											irgt = irgt + 250;
+										}else{
+											ittest = ittest + 1;
+										}
 									}
 								}
 							}
@@ -609,28 +659,30 @@ Ext.define('Ck.print.Controller', {
 								if(listlay2[t].ckLayer){
 								laytemp = listlay2[t].ckLayer;
 									if(listlay2[t].getVisible() == true){
-										var lict = document.createElement('li');
-										ulct.appendChild(lict);
-										lict.innerHTML = lict.innerHTML+"<div class='ckPrint-legimg' style='background: rgba(255, 255, 255, 0.83) no-repeat scroll left 0px;'></div><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div>";
+										if(ittest == 0){
+											colcnt += "<div style='position:absolute;left:"+irgt+"px'><ul class='ulleg'>";
+										}
+										colcnt += "<li><div style='background: rgba(255, 255, 255, 0.83) no-repeat scroll left 0px;'></div><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
+										
+										if(ittest == cntor){
+											colcnt += "</ul></div>";
+											ittest = 0;
+											irgt = irgt + 250;
+										}else{
+											ittest = ittest + 1;
+										}
 									}
 								}
 							}
 						}
 					}
 				}
+				
+				colcnt += "</ul></div>";
+				// console.log(colcnt);
 				var targetleg = Ext.get("ckPrint-cntleg1").dom;
-				if (targetleg.hasChildNodes()) {
-				  var children = targetleg.childNodes;
-
-					for (var c = 0; c < children.length; c++){ 
-						targetleg.removeChild(children[c]);
-					}
-				}
+				targetleg.innerHTML = colcnt;
 				
-				
-				targetleg.appendChild(ulct);
-				
-					//document.body.removeChild(this.layoutlegDiv);
 				
 				html2canvas(this.pageDivLeg, {
 					printControl: this,

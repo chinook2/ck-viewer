@@ -14,7 +14,7 @@ Ext.define('Ck.print.Model', {
 			resolution: 1,
 			printLayout: "default-layout",
 			outputFormat: "png",
-			dpi: 96,
+			dpi: 150,
 			format: "a4",
 			orientation: 'p'
 		},
@@ -51,7 +51,8 @@ Ext.define('Ck.print.Model', {
 		},
 		dpi: {
 			fields: ["dpi"],
-			data: [{dpi: 72}, {dpi: 96}, {dpi: 150}, {dpi: 300}, {dpi: 600}, {dpi: 900}, {dpi: 1200}]
+			// data: [{dpi: 72}, {dpi: 96}, {dpi: 150}, {dpi: 300}, {dpi: 600}, {dpi: 900}, {dpi: 1200}]
+			data: [{dpi: 150}]
 		}
 	}
 });

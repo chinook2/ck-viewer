@@ -6,14 +6,15 @@
 	position: relative;
 	background-color: white;
 	border:1px solid gray;
+	color: #004b64;
 }
 
 #ckPrint-logo{
 	position: absolute;
-	height: 50px;
-	width:120px;
-	left:3px;
-	top:3px;
+	height: 100px;
+	width:240px;
+	left:12px;
+	top:12px;
 	border:none;
 }
 
@@ -25,33 +26,31 @@
 
 .ckPrint-logo-part{
 	position: relative;
+	float:right !important;
 }
 .ckPrint-logo-partcnt{
 	position:relative;
-	padding:4px;
+	padding:8px;
 }
 
 #ckPrint-title a {
     text-decoration: none;
-    border-bottom: 3px solid black;
-    padding-bottom: 2px;
-	color: black;
+    border-bottom: 3px solid #004b64;
+    padding-bottom: 1px;
+	color: #004b64;
 }
 
 #ckPrint-title{ 
 	word-wrap: break-word; 
-	/* text-decoration-line: underline !important; */
-	/* text-decoration-thickness: 0.1em !important; */
-	/* text-underline-offset: 10px !important; */
-	line-height: 1;
-	font-size: 24px;
+	line-height: 1.2em;
+	font-size: 25px;
     font-weight: bold !important;
-	width:370px;
-    height: 121px;
-    left: 123px;
-    right: 278px;
-    margin-bottom: 5px;
-    padding-top: 20px;
+	/*width:740px;*/
+    height: 125px;
+    left: 145px;
+    right: 370px;
+    margin-bottom: 0px;
+    padding-top: 1px;
     position: absolute;
     text-align: center;
     top: 0;
@@ -59,11 +58,12 @@
 
 #ckPrint-param{
 	position: absolute;
-	height: 121px;
-	width:275px;
-	top: 3px;
+	height: 120px;
+	width:360px;
+	top: 6px;
 	bottom: 0px;
-	right:3px;
+	right:6px;
+	font-size:20px;
 	background-color: rgba(255, 255, 255, 0.83);
 }
 
@@ -73,63 +73,64 @@
 }
 
 #ckPrint-param li {
-    padding-bottom: 20px;
+    padding-bottom: 25px;
 }
 
 #ckPrint-legend{
 	position: absolute;
-	height: 321px;
-	top: 124px;
+	height: 155px;
+	top: 127px;
 	bottom: 0px;
-	left:3px;
-    right: 280px;
+	left:12px;
+    right: 179px;
 	background-color: rgba(255, 255, 255, 0.83);
 }
 
 #ckPrint-icopart{
 	position: absolute;
-	height: 200px;
-	top: 200px;
-	width:275px;
+	height: 100px;
+	top: 129px;
+	width:171px;
 	bottom: 0px;
-    right: 3px;
+    right: 6px;
 	background-color: rgba(255, 255, 255, 0.83);
 }
 
 #ckPrint-cpr{
 	position: absolute;
-	height: 20px;
-	top: 300px;
-	width:275px;
+	height: 50px;
+	top: 231px;
+	width:172px;
 	bottom: 0px;
-    right: 3px;
+    right: 5px;
 	background-color: rgba(255, 255, 255, 0.83);
 	text-align:right;
-	font-size:8px;
+	font-size:15px;
 }
 
-#ulleg{
+.ulleg{
     list-style-type: none;
     margin: 1px 0 0;
     padding: 0;
 }
 
-#ulleg li {
-    padding-bottom: 20px;
+.ulleg li {
+    padding-bottom: 16px;
+    list-style-type: none;
 }
 
 .ckPrint-legtitle{
-	font-size:8px;
+	font-size:16px;
 	position: absolute;
-	left:25px;
-	width:120px;
+	left:27px;
+	width:200px;
 }
 
 .ckPrint-legimg{
 	position: absolute;
 	left:0px;
-	width:24px;
-	height:15px;
+	width:30px;
+	height:19px;
 	margin-top:2px;
 }
 
@@ -139,7 +140,7 @@
     left: 3px;
     position: absolute;
     right: 3px;
-    top: 330px;
+    top: 289px;
 }
 
 #ckPrint-ref{
@@ -194,3 +195,6 @@
     padding-bottom: 20px;
 }
 
+#ckPrint-cntleg1 .ckPrint-legtitle {
+    font-size: 20px !important;
+}

@@ -6,13 +6,14 @@
 	position: relative;
 	background-color: white;
 	border:1px solid gray;
+	color: #004b64;
 }
  
 #ckPrint-title a {
     text-decoration: none;
     border-bottom: 3px solid black;
-    padding-bottom: 2px;
-	color: black;
+    padding-bottom: 1px;
+	color: #004b64;
 }
 
 #ckPrint-title{
@@ -20,14 +21,14 @@
 	/* text-decoration-line: underline !important; */
 	/* text-decoration-thickness: 0.1em !important; */
 	/* text-underline-offset: 10px !important; */
-	line-height: 1;
+	line-height: 1.2em;
 	position: absolute;
-	width:270px;
+	width:330px;
 	left: 3px;
-	top: 40px;
+	top: 80px;
 	margin-bottom: 5px;
 	text-align: center;
-	font-size: 24px;
+	font-size: 25px;
 	font-weight:bold;
 }
 
@@ -35,17 +36,18 @@
 	position: absolute;
 	right: 3px;
 	top: 3px;
-	left: 279px;
+	left: 340px;
 	bottom: 3px;
 	background-color: white;
 }
 
 #ckPrint-logo{
 	position: absolute;
-	height: 221px;
-	width:270px;
+	height: 240px;
+	width:330px;
 	left:3px;
-	bottom: 3px;
+	bottom: 20px;
+	font-size:20px;
 }
 
 #ckPrint-logo ul {
@@ -83,10 +85,10 @@
 
 #ckPrint-legend{
 	position: absolute;
-	top: 100px;
+	top: 150px;
 	width:270px;
 	left:3px;
-	bottom: 221px;
+	bottom: 259px;
 	background-color: rgba(255, 255, 255, 0.83);
 }
 
@@ -107,7 +109,7 @@
     left: 3px;
 	background-color: rgba(255, 255, 255, 0.83);
 	text-align:right;
-	font-size:8px;
+	font-size:10px;
 }
 
 #ulleg {
@@ -116,12 +118,13 @@
     padding: 0;
 }
 
-#ulleg li {
-    padding-bottom: 20px;
+.ulleg li {
+    list-style-type: none;
+	padding-bottom: 16px;
 }
 
 .ckPrint-legtitle{
-	font-size:8px;
+	font-size:15px;
 	position: absolute;
 	left:25px;
 	width:120px;
@@ -132,7 +135,7 @@
 	left:0px;
 	width:24px;
 	height:15px;
-	margin-top:2px;
+	margin-top:0px;
 }
 
 
@@ -175,6 +178,10 @@
 
 #ckPrint-cntleg1 li {
     padding-bottom: 20px;
+}
+
+.cls-cm-ttl{
+	padding-bottom: 45px !important;
 }
 
 
