@@ -61,7 +61,7 @@ Ext.define('Ext.overrides.Component', {
 	},
 
 	
-	initComponent: function() {
+	/*initComponent: function() {
 		var me = this;
 		var configurator, localeConfig;
 		if(me.getConfigurator) {
@@ -101,13 +101,13 @@ Ext.define('Ext.overrides.Component', {
 	updateLocale:function(newLocale, oldLocale) {
 		if(!Ext.localeReady) return;
 		this.doLocale();
-	},
+	},*/
 	/* Search for parent component:
 		 * - if Innola as parent but not Ck as parent => don't apply cascade (ensure we don't apply translate where not necessary)
 		 * - if Innola as parent and Ck as parent => apply cascade (means inside a map Ck-laSpatialUnit panel)
 		 * - element directly in body (window, tooltip, menu, ...) are often protected (because they have a parent Innola )
 		 */
-	isLocaleToBeApplied: function() {
+	/*isLocaleToBeApplied: function() {
 		return false;// Disable
 		if (this.__proto__.$className.startsWith('Innola')) {
 			return false;
@@ -278,7 +278,7 @@ Ext.define('Ext.overrides.Component', {
 				setter.call(me, value);
 			}
 		}
-	}
+	}*/
 	
 } /*,
  function(){
@@ -336,7 +336,7 @@ Ext.define('Ext.overrides.Component', {
  }*/
 );
 
-
+/*
 Ext.define('Ext.overrides.panel.Panel', {
 	override: 'Ext.panel.Panel',
 	localeProperties: ['title', 'html']
@@ -510,7 +510,7 @@ Ext.define("Ext.overrides.window.Toast", {
 	}
 });
 
-*/Ext.define("Ext.overrides.Action",  {
+*//*Ext.define("Ext.overrides.Action",  {
 	override: "Ext.Action",
 	localeProperties: ["text", "tooltip", "startMsg", "continueMsg"]
 });
@@ -544,7 +544,7 @@ Ext.define("Ext.overrides.tree.View", {
  Ext.define("Ext.overrides.toolbar.TextItem", {override: "Ext.toolbar.TextItem",localeProperties: ["text", "html"]});
  Ext.define("Ext.overrides.form.field.Number", {override: "Ext.form.field.Number",localeProperties: ["fieldLabel", "minText", "maxText", "negativeText", "nanText", "blankText", "minLengthText", "maxLengthText"]});
 */
-Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
+/*Ext.define("Ext.overrides.menu.Item", {override: "Ext.menu.Item",localeProperties: ["text", "tooltip"]});
 Ext.define("Ext.overrides.LoadMask", {
 	override: "Ext.LoadMask",
 	//localeProperties: ["msg"],
@@ -635,7 +635,7 @@ Ext.define("Ext.overrides.LoadMask", {
  c.picker.setLocale(d)
  }
  }});
- */
+ *//*
 Ext.define("Ext.overrides.form.field.ComboBox", {
 	override: "Ext.form.field.ComboBox",
 	localeProperties: ["fieldLabel"],
@@ -681,5 +681,5 @@ Ext.define("Ext.overrides.form.field.ComboBox", {
 			}
 		}
 	}
-});
+});*/
  
