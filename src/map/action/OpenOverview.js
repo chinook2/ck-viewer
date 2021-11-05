@@ -45,7 +45,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 		if(!this.win) {
 			this.ov = Ext.create({
 				xtype: "ckoverview",
-				ckview: this.getCkView().getView(),
+				ckview: this.button.up('ckview'),
 				resolutions: this.button.resolutions,
 				openner: this
 			});
@@ -55,7 +55,7 @@ Ext.define('Ck.map.action.OpenOverview', {
 				resizable: false,
 				modal: false,
 				layout: 'fit',
-				closeAction: 'hide',
+				closeAction: 'method-destroy',
 				items: this.ov,
 				bodyPadding: "0 0 0 0",
 				parentMap: this.getMap(),
@@ -71,12 +71,9 @@ Ext.define('Ck.map.action.OpenOverview', {
 
 		if(pressed) {
 			this.win.show();
-			if(this.firstView || this.ov.config.replaceEverytime) {
-				this.win.alignTo(this.getMap().getOlMap().getViewport(), "tl", [50, 40]);
-				this.firstView = false;
-			}
+			this.win.alignTo(this.button.up('ckview').down('ckmap').getController().getOlMap().getViewport(), "tl", [50, 40]);
 		} else {
-			this.win.hide();
+			this.win.close();
 		}
 
 		// Auto close overview popup when CkView or CkMap is hidden or destroy
@@ -102,7 +99,10 @@ Ext.define('Ck.map.action.OpenOverview', {
 	},
 
 	close: function(isDestroying) {
-		this.win.hide();
-		if(isDestroying!==true) this.button.setPressed(false);
+		if (this.win) {
+			this.win.destroy();
+			this.win = null;
+			if(isDestroying!==true) this.button.setPressed(false);
+		}
 	}
 });

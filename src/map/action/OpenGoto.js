@@ -67,7 +67,7 @@ Ext.define('Ck.map.action.OpenGoto', {
 				autoHeight: true,
 				modal: false,
 				layout: 'fit',
-				closeAction: 'hide',
+				closeAction: 'method-destroy',
 				collapsible: this.getWinCollapsible(),
 				parentMap: this.getMap(),
 				items: {
@@ -75,6 +75,12 @@ Ext.define('Ck.map.action.OpenGoto', {
 					ckview: this.getCkView().getView(),
 					openner: this,
 					gotoConfig: this.getGotoConfig()
+				},
+				listeners: {
+					close: function() {
+						this.close();
+					},
+					scope: this
 				}
 			});
 		}
@@ -111,7 +117,10 @@ Ext.define('Ck.map.action.OpenGoto', {
 	},
 
 	close: function(isDestroying) {
-		this.win.hide();
-		if(isDestroying!==true) this.button.setPressed(false);
+		if (this.win) {
+			this.win.destroy();
+			this.win = null;
+			if(isDestroying!==true) this.button.setPressed(false);
+		}
 	}
 });
