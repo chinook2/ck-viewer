@@ -208,6 +208,11 @@ Ext.define('Ck.result.Controller', {
 		}
 		
 		this.featureGrid.reconfigure(this.featureStore, columns);
+		
+		var layer = this.featureStore.ckLayer;
+		var layertypename = layer.get('id');
+		Ext.ComponentQuery.query('#export')[0].setHref(Ck.getApi() + "service=wfs&request=getselectedfeature&layers=" + layertypename + "&outputformat=csv");
+
 	},
 	
 	exportData: function() {
@@ -224,7 +229,7 @@ Ext.define('Ck.result.Controller', {
             });
         }
         
-        Ext.getDom('ifhidden').src = Ck.getApi() + "service=wfs&request=getselectedfeature&layers=" + layertypename + "&outputformat=csv";
+        Ext.ComponentQuery.query('#export')[0].setHref(Ck.getApi() + "service=wfs&request=getselectedfeature&layers=" + layertypename + "&outputformat=csv");
     },
 
 	/**
