@@ -116,3 +116,81 @@ ol.layer.Layer.prototype.setMap = function(map) {
  *
  *
  */
+/**
+ * Function to create a style with hash in Polygons at 45°.
+ * Options:
+ * * backgroundColor
+ * * color: line color
+ * * width: width and height of the image
+ * * lineWidth: width of the line
+ * * reverse: if true revers the sense (-45°)
+ */
+ol.style.HashFill = function(opt_options){
+	const options = opt_options || {};
+	return new ol.style.Fill({
+		color: function() {
+			var width = options.width || 10;
+			var lineWidth = options.lineWidth || 1;
+			var canvas = document.createElement('canvas');
+			canvas.style.backgroundColor = options.backgroundColor || 'white';
+			canvas.width = (width || 10) + .1;
+			canvas.height = width || 10;
+			var ctx = canvas.getContext('2d');
+			ctx.lineWidth = lineWidth;
+			ctx.strokeStyle = options.color || 'black';
+			ctx.fillStyle = options.color || 'black';
+			
+			if (options.reverse === true) {
+				// 1 - Draw the line
+				// 2 & 3 - Draw corners because line truncated in corner
+				ctx.beginPath();
+				ctx.moveTo(0,0);
+				ctx.lineTo(lineWidth,0);
+				ctx.lineTo(width,width-lineWidth);
+				ctx.lineTo(width, width);
+				ctx.lineTo(width-lineWidth,width);
+				ctx.lineTo(0, lineWidth);
+				ctx.fill();
+				
+				ctx.beginPath();
+				ctx.moveTo(width-lineWidth,0);
+				ctx.lineTo(width,0);
+				ctx.lineTo(width,lineWidth);
+				ctx.fill();
+				
+				ctx.beginPath();
+				ctx.moveTo(lineWidth,width);
+				ctx.lineTo(0,width);
+				ctx.lineTo(0, width-lineWidth);
+				ctx.fill();
+			} else {
+				// 1 - Draw the line
+				// 2 & 3 - Draw corners because line truncated in corner
+				ctx.beginPath();
+				ctx.moveTo(width-lineWidth,0);
+				ctx.lineTo(width,0);
+				ctx.lineTo(width,lineWidth);
+				ctx.lineTo(lineWidth, width);
+				ctx.lineTo(0,width);
+				ctx.lineTo(0, width-lineWidth);
+				ctx.fill();
+				
+				ctx.beginPath();
+				ctx.moveTo(0,0);
+				ctx.lineTo(lineWidth,0);
+				ctx.lineTo(0,lineWidth);
+				ctx.fill();
+				
+				ctx.beginPath();
+				ctx.moveTo(width,width);
+				ctx.lineTo(width-lineWidth,width);
+				ctx.lineTo(width,width-lineWidth);
+				ctx.fill();
+			}
+			
+			
+			
+			return ctx.createPattern(canvas,'repeat');
+		}()
+	});
+}
