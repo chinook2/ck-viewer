@@ -76,9 +76,13 @@ Ext.define("Ck.Goto", {
 	}],
 	bbar: ["->",{
 		text: Ck.text('goto_clear_marker'),
-		handler: "clearMarker"
+		handler: "clearMarker",
+		scale : 'medium',
+		cls : 'i-upper-btn'
 	},{
 		text: Ck.text('goto_go_to_position'),
-		handler: "goTo"
+		handler: "goTo",
+		scale : 'medium',
+		cls : 'i-upper-btn'
 	}]
 });
