@@ -68,9 +68,9 @@ Ext.define('Ck.form.plugin.GridEditing', {
 						if(!meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
 						if(rec && rec.isDummy === true) return false;
-						return 'ckClose';
+						return 'ck-close';
 					},
-					tooltip: 'Delete row',
+					tooltip: Ck.text('grid_edit_delete_row'),
 					handler: function(view, rowIndex, colIndex, item, e, rec, row) {
 						this.deleteRow(view, rowIndex);
 						grid.fireEvent('actionColumnClick', 'deleterow', rec);
@@ -96,7 +96,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			var txt = '';
 			if (this.deleteallrow !== false) {
 				// Html code to disply icon
-				txt = '<img role="button" alt="" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-action-col-icon ckClose" data-qtip="Delete all rows">';
+				txt = '<img role="button" alt="" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-action-col-icon ck-close" data-qtip="Delete all rows">';
 			}
 			col.push({
 				xtype: 'actioncolumn',
