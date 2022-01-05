@@ -24,7 +24,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 	text: '',
 
 	iconCls: 'ckfont ck-print',
-	tooltip: 'Open print panel',
+	tooltip: Ck.text('print_open_panel'),
 
 	/**
 	 * Object to override window instanciation parameters
@@ -48,7 +48,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 			}));
 
 			this.winOpt = Ext.applyIf(this.winOpt, {
-				title: 'Print',
+				title: Ck.text('print_win_title'),
 				width: 400,
 				layout: 'fit',
 				modal: false,

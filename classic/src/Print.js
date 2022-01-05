@@ -45,12 +45,12 @@ Ext.define("Ck.Print", {
 		itemId: "title",
 		name: "title",
 		xtype: "textfield",
-		fieldLabel: "Title...",
+		fieldLabel: Ck.text('print_title'),
 		editable: true
 	},{
 		itemId: "resolution",
 		name: "resolution",
-		fieldLabel: "Resolution",
+		fieldLabel: Ck.text('print_resolution'),
 		displayField: "scale",
 		valueField: "res",
 		anchor: '0',
@@ -61,7 +61,7 @@ Ext.define("Ck.Print", {
 	},{
 		itemId: "printLayout",
 		name: "printLayout",
-		fieldLabel: "Layout",
+		fieldLabel: Ck.text('print_layout'),
 		displayField: "label",
 		valueField: "id",
 		bind: {
@@ -71,7 +71,7 @@ Ext.define("Ck.Print", {
 	},{
 		itemId: "outputFormat",
 		name: "outputFormat",
-		fieldLabel: "Output format",
+		fieldLabel: Ck.text('print_output_format'),
 		displayField: "label",
 		valueField: "id",
 		bind: {
@@ -88,7 +88,7 @@ Ext.define("Ck.Print", {
 	}*/,{
 		itemId: "format",
 		name: "format",
-		fieldLabel: "Format",
+		fieldLabel: Ck.text('print_format'),
 		displayField: "label",
 		valueField: "id",
 		bind: {
@@ -99,22 +99,26 @@ Ext.define("Ck.Print", {
 		xtype: "radiogroup",
 		name: "orientation",
 		itemId: "orientation",
-		fieldLabel: "Orientation",
+		fieldLabel: Ck.text('print_orientation'),
 		columns: 2,
 		vertical: true,
 		items: [
-			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
-			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
+			{boxLabel: Ck.text('print_orientation_portrait'), name: "orientation", inputValue: "p"},
+			{boxLabel: Ck.text('print_orientation_landscape'), name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
 	}],
 
 	buttons: [{
-		text: "Print",
-		handler: "beforePrint"
+		text: Ck.text('print_print'),
+		handler: "beforePrint",
+		scale : 'medium',
+		cls : 'i-primary-btn i-upper-btn'
 	},{
-		text: "Cancel",
-		handler: "cancel"
+		text: Ck.text('print_cancel'),
+		handler: "cancel",
+		scale : 'medium',
+		cls : 'i-upper-btn'
 	}],
 
 	cls: "ckprint"
