@@ -40,6 +40,7 @@ Ext.define('Ck.map.action.OpenPrint', {
 	 * Create and display a windows with print form
 	 */
 	doAction: function(btn) {
+		this.button = btn || {};
 		if(!this.win) {
 			this.print = Ext.create(Ext.applyIf(this.printOpt, {
 				xtype: 'ckprint',
