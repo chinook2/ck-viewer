@@ -7,6 +7,9 @@ Ext.define('Ck.print.Model', {
 	alias: 'viewmodel.ckprint',
 
 	data: {
+		warning: {
+			screenResolZoom: false
+		},
 		printParam: {
 			title: "",
 			resolution: null,

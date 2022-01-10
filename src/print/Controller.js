@@ -393,8 +393,9 @@ Ext.define('Ck.print.Controller', {
 			});
 			
 			// Fix map size from web browser
-			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
-			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
+			// README: (SFR-529): issue with screen resolution and/or browser zoom: the image is truncated when using "devicePixelRatio" or ZOOMRATIO, but not when using normal size
+			var mapWidth = (this.canvasSize[0]  );// ( window.devicePixelRatio || window.ZOOMRATIO || 1));
+			var mapHeight = (this.canvasSize[1]  );// (window.devicePixelRatio || window.ZOOMRATIO || 1));
 
 			// Move map to invisible div to print with right resolution
 			this.printDiv = dh.append(document.body, {
@@ -439,7 +440,6 @@ Ext.define('Ck.print.Controller', {
 			this.mapDiv = Ext.get("ckPrint-map").dom;
 
 			var mapCanvas = this.composeCanvas();
-
 			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 			var dh = Ext.DomHelper;
 			this.mapImg = dh.append(this.mapDiv, {

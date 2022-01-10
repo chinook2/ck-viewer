@@ -24,7 +24,14 @@ Ext.define("Ck.Print", {
 		}
 	},
 	
-	listeners: { render: "displayPreview" },
+	listeners: { 
+		render: "displayPreview",
+		afterrender: function() {
+			if (window.ZOOMRATIO != 1) {
+				this.getViewModel().set('warning.screenResolZoom', true);
+			}
+		}
+	},
 	fieldDefaults: {
         labelWidth: 80,
         anchor: '100%'
@@ -38,6 +45,25 @@ Ext.define("Ck.Print", {
         type: 'vbox',
         align: 'stretch'  // Child items are stretched to full width
     },
+	dockedItems: [{
+		dock: 'top',
+		xtype: 'form',
+		cls: 'ckprint-panel-warning',
+		margin: 10,
+		iconCls: 'ck ck-warning',
+		title: Ck.text('print_alert_zoom_title'),
+		items: [{
+			xtype:'label',
+			cls: 'ckprint-text-warning',
+			html: '<p>' + Ck.text('print_alert_resolzoom_message') + '</p>',
+			bind: {
+				hidden: '{!warning.screenResolZoom}'
+			}
+		}],
+		bind: {
+			hidden: '{!warning.screenResolZoom}'
+		}
+	}],
 	/**
 	 * itemId needed for field getCmp, name needed for getValues
 	 */
