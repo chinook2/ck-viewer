@@ -12,6 +12,14 @@ Ext.define('Ck.ZipWriter', {
 	 * at the end execute a callback returning a Blob that can be downloaded.
 	 */
 	createZipFile: function(filelist, callback) {
+		// Default path to workers
+		zip.workerScriptsPath = "packages/ck-viewer/libs/zip/";
+		var o = Ck.getOption('zip');
+		if (o && o.workerScriptsPath) {
+			zip.workerScriptsPath = o.workerScriptsPath;
+		}
+		
+		// Create the zip
 		var bw = new zip.BlobWriter();
 		zip.createWriter(bw, function(writer) {
 			var nextFile = function(file) {
