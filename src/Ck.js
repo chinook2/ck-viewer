@@ -1009,6 +1009,15 @@ Ext.apply(Ck, {
 	        }
 	    }
 	    return -1;
+	},
+	
+	downloadBlobAsFile: function(blob, filename) {
+		var el = document.createElement('a');
+		el.href = window.URL.createObjectURL(blob);
+		el.setAttribute('download', filename);
+		document.body.appendChild(el);
+		el.click();
+		document.body.removeChild(el);
 	}
 
 }).init();
