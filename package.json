@@ -320,6 +320,8 @@
 		},{
 			"path": "libs/shapefile-js/shp.min.js"
 		},{
+			"path": "libs/shp-write/shpwrite.js"
+		},{
 			"path": "libs/papaparse/papaparse.min.js"
 		},{
 			"path": "libs/x2js/xml2json.min.js"
@@ -369,6 +371,8 @@
 			"path": "libs/zip/zip-fs.js"
 		},{
     		"path": "libs/shapefile-js/shp.js"
+    	},{
+    		"path": "libs/shp-write/shpwrite.js"
     	},{
     		"path": "libs/papaparse/papaparse.js"
     	},{
