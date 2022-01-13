@@ -25,4 +25,52 @@
 	color: grey;
 }
 
-
+.ckcolorpicker {
+	.x-colorpicker-field-swatch {
+		position: absolute;
+		width: 16px;
+		height: 16px;
+		left: 8px;
+		top: 0px;
+		bottom: 4px;
+		margin: auto;
+		border: solid 1px black;
+		
+		.x-colorpicker-field-swatch-inner {
+			position: absolute;
+			height: 100%;
+			width: 100%;
+		}
+	}
+	
+	.x-form-text-wrap-default {
+		padding-left: 18px;
+	}
+}
+.ckcolorpicker-prefix {
+	width: 15px;
+	height: 15px;
+	display: inline-block;
+	margin-right: 4px;
+	border: solid 1px black;
+}
+.ckcolumncolor {
+	width: 15px;
+	height: 15px;
+	display: inline-block;
+	margin-right: 4px;
+	border: solid 1px black;
+}
+.ckcolumntplicon,
+ {
+	.x-grid-cell-inner {
+		text-overflow: unset;
+	}
+}
+.ckcolumnicon span {
+	padding: 3px;
+}
+.ckcolumnicon.bordered span {
+	border: solid 1px grey;
+	border-radius: 5px;
+}
