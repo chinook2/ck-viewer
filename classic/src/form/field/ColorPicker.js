@@ -77,10 +77,22 @@ Ext.define('Ck.form.field.ColorPicker', {
 		this.on('change', this.onColorChange);
 	},
 	regex: /^#[0-9a-fA-F]{6}$/,
-	regexText: "Should be a value of CSS color like '#RRGGBB' (where RR is red in hexadecimal, GG is green in hexadecimal and BB is blue in hexadecimal)",
+	regexText: "CSS #RRGGBB ",
 	onColorChange: function(cb, newValue, oldValue) {
 		if (this.swatchEl && this.swatchEl.el) {
 			this.swatchEl.el.setStyle('background', newValue);
 		}
+	},
+	setValue: function(value) {
+		this.callParent(arguments);
+		this.onColorChange(this, value);
+	},
+	setRawValue: function(value) {
+		this.callParent(arguments);
+		this.onColorChange(this, value);
+	},
+	setInitValue: function(value) {
+		this.callParent(arguments);
+		this.onColorChange(this, value);
 	}
 });
