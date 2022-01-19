@@ -101,6 +101,13 @@ Ext.define('Ck.legend.Controller', {
 
 			// Append and remove node events (to manage order for example)
 			node.on("move", this.layerMove, this);
+			
+			if ( !(layer instanceof ol.layer.Group)) {
+				var provider = layer.getExtension('provider');
+				if (provider) {
+					node.set('qtip', Ck.text('layer_data_source') + provider);
+				}
+			}
 		}
 	},
 
