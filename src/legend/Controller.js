@@ -105,7 +105,8 @@ Ext.define('Ck.legend.Controller', {
 			if ( !(layer instanceof ol.layer.Group)) {
 				var provider = layer.getExtension('provider');
 				if (provider) {
-					node.set('qtip', Ck.text('layer_data_source') + provider);
+					node.set('qtitle', Ck.text('layer_data_source'));
+					node.set('qtip', provider);
 				}
 			}
 		}
