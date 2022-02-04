@@ -48,8 +48,8 @@ Ext.define('Ck.map.Style', {
 	 * Default select stroke color and width
 	 */
 	selectStroke: {
-		color: "#FF953D",
-		width: 2
+		color: "#FF953D00",
+		width: 0
 	},
 	
 	/**

@@ -17,7 +17,7 @@ Ext.define('Ck.Locale', {
         if(Ext.manifest.locale) locale = Ext.manifest.locale;
         if(Ck.params.locale) locale = Ck.params.locale;
 
-        var store = Ext.create('Ext.data.Store',{
+        /*var store = Ext.create('Ext.data.Store',{
             storeId: 'I18n',
             fields: ['en', 'fr', 'es'],
             autoLoad: true,
@@ -38,7 +38,7 @@ Ext.define('Ck.Locale', {
             store.on('load', function(){
                 this.set(locale);
             }, this);
-        }
+        }*/
     },
 
     set: function (locale) {
