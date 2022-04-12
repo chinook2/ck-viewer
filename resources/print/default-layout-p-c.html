@@ -7,24 +7,24 @@
 		<div id="ckPrint-page">
 			<div id="ckPrint-body">
 				<div id="ckPrint-title">
-					<div id="ckPrint-logo"><img id="ckPrint-logo" src="admin/img/logo.gif" style="width:160px"></div>
+					<div id="ckPrint-logo"><img id="ckPrint-logo" src="admin/img/logo.gif" style="width:calc(100px*{value:ratio}); margin-right:10px"></div>
 					<div id="ckPrint-app-name">Hub'im</div>
 				</div>
 
 				<div class="ckPrint-white-frame">
-					<div><b>{value:title}</b></div>
+					<div style="font-size:calc(24px*{value:ratio});margin-bottom: calc(15px*{value:ratio});line-height: calc(22px*{value:ratio})" ><b>{value:title}</b></div>
 					<div id="ckPrint-legend"></div>
 				</div>
 				<div id="whiteDivMap" class="ckPrint-white-frame">
-					<div id="ckPrint-filters-list"></div>
+					<div id="ckPrint-filters-list" style="font-size:calc(24px*{value:ratio})"></div>
 
 					<div id="ckPrint-overlay-right-top">
-						<div id="ckPrint-north"><img id="northArrow" src="desktop/resources/ck-viewer/print/north.png" style="width:60px;padding:10px"></div>
+						<div id="ckPrint-north"><img id="northArrow" src="desktop/resources/ck-viewer/print/north.png" style="width:calc(25px*{value:ratio})"></div>
 					</div>
 
 					<div id="ckPrint-overlay-left-bottom">
-						<div class="textMap">Date : <b>{value:date}</b></div>
-						<div class="textMap">Echelle : <b>{value:scale}</b></div>
+						<div class="textMap" style="font-size:calc(20px*{value:ratio});padding-top:calc(20px*{value:ratio})" >Date : <b>{value:date}</b></div>
+						<div class="textMap" style="font-size:calc(20px*{value:ratio});padding-top:calc(20px*{value:ratio})" >Echelle : <b>{value:scale}</b></div>
 					</div>
 
 					<div id="ckPrint-map" style="width: 774px; height: 825px;"></div>

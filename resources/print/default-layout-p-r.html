@@ -6,24 +6,24 @@
 	<body>
 		<div id="ckPrint-page">
 			<div id="ckPrint-body">
-				<div id="ckPrint-filters-list"></div>
+				<div id="ckPrint-filters-list" style="font-size:calc(24px*{value:ratio})"></div>
 
 				<div id="ckPrint-overlay-right-top">
-					<div id="ckPrint-north"><img id="northArrow" src="desktop/resources/ck-viewer/print/north.png" style="width:60px;padding:10px"></div>
+					<div id="ckPrint-north"><img id="northArrow" src="desktop/resources/ck-viewer/print/north.png" style="width:calc(25px*{value:ratio})"></div>
 				</div>
 
 				<div id="ckPrint-overlay-right-bottom">
-					<div><b>{value:title}</b></div>
+					<div style="font-size:calc(24px*{value:ratio});margin-bottom: calc(15px*{value:ratio});line-height: calc(22px*{value:ratio})" ><b>{value:title}</b></div>
 					<div id="ckPrint-legend"></div>
 				</div>
 
 				<div id="ckPrint-overlay-left-bottom" class="flex-container">
 					<div id="ckPrint-logo">
-						<img id="ckPrint-logo" src="admin/img/logo.gif" style="width:100px; margin-right:10px">
+						<img id="ckPrint-logo" src="admin/img/logo.gif" style="width:calc(100px*{value:ratio}); margin-right:10px">
 					</div>
 					<div>
-						<div class="textMap">Date : <b>{value:date}</b></div>
-						<div class="textMap">Echelle : <b>{value:scale}</b></div>
+						<div style="font-size:calc(20px*{value:ratio});padding-top:calc(20px*{value:ratio})" class="textMap">Date : <b>{value:date}</b></div>
+						<div style="font-size:calc(20px*{value:ratio});padding-top:calc(20px*{value:ratio})" class="textMap">Echelle : <b>{value:scale}</b></div>
 					</div>
 				</div>
 
