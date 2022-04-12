@@ -31,21 +31,21 @@ Ext.define('Ck.map.action.OpenDraw', {
 
 	// point config
 	pointConfig: {
-		color: Ck.Style.stroke.color,
+		color: "#ea7304",
 		radius: Ck.Style.minorRadius,
 		opacity: 70
 	},
 
 	// linestring config
 	linestringConfig: {
-		color: Ck.Style.stroke.color,
+		color: "#ea7304",
 		width: Ck.Style.minorRadius,
 		opacity: 70
 	},
 
 	// circle config
 	circleConfig: {
-		borderColor: Ck.Style.stroke.color,
+		borderColor: "#ea7304",
 		borderWidth: Ck.Style.minorRadius,
 		borderOpacity: 70,
 		backgroundColor: Ck.Style.fill.color,
@@ -54,7 +54,7 @@ Ext.define('Ck.map.action.OpenDraw', {
 
 	// polygon config
 	polygonConfig: {
-		borderColor: Ck.Style.stroke.color,
+		borderColor: "#ea7304",
 		borderWidth: Ck.Style.minorRadius,
 		borderOpacity: 70,
 		backgroundColor: Ck.Style.fill.color,
