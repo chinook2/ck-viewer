@@ -15,7 +15,8 @@ Ext.define('Ck.print.Model', {
 			dpi: 192,
 			format: "a4",
 			shape: {shape: 'r'},
-			orientation: {orientation: 'p'}
+			orientation: {orientation: 'p'},
+			equipementExt: {equipementExt: 'false'}
 		},
 		previewParam: {
 			fill: {},
@@ -49,6 +50,7 @@ Ext.define('Ck.print.Model', {
 		outputFormats: {
 			fields: ["id", "label"],
 			data: [
+				{id: "html", label: "HTML"},
 				{id: "jpg", label: "JPG"},
 				{id: "png", label: "PNG"},
 				{id: "pdf", label: "PDF"}
@@ -58,9 +60,11 @@ Ext.define('Ck.print.Model', {
 			fields: ["id", "label", "ratio"],
 			data: [
 				{id: "a4", label: "A4", ratio: 1.00},
-				{id: "a3", label: "A3", ratio: 1.41},
-/* 				{id: "a2", label: "A2", ratio: 2.00},
-				{id: "a1", label: "A1", ratio: 2.83} */
+				{id: "a3", label: "A3", ratio: 1.414},
+				{id: "a2", label: "A2", ratio: 2.00},
+				{id: "a1", label: "A1", ratio: 2.828},
+				{id: "a0", label: "A0", ratio: 2.828},
+				//{id: "a0", label: "A0", ratio: 4.00}
 			]
 		},
 		dpis: {

@@ -65,6 +65,7 @@ Ext.define('Ck.print.Controller', {
 			format: '{printParam.format}',
 			shape: '{printParam.shape}',
 			orientation: '{printParam.orientation}',
+			equipementExt: '{printParam.equipementExt}',
 			//title: '{printParam.title}',
 			dpi:  '{printParam.dpi}'
 		}
@@ -366,7 +367,11 @@ Ext.define('Ck.print.Controller', {
 		}
 
 		// Size of final print page in cm
-		this.pageSize = Ck.pageSize[this.get("printParam.format")];
+		if(this.get("printParam.format") == 'a0'){
+			this.pageSize = Ck.pageSize['a1'];
+		}else{
+			this.pageSize = Ck.pageSize[this.get("printParam.format")];
+		}
 		if (!this.pageSize) return;
 		this.pageSize = this.pageSize.slice(0); // Clone
 		// transform to cm
@@ -376,6 +381,12 @@ Ext.define('Ck.print.Controller', {
 		// Reverse size according to orientation
 		if(this.get("printParam.orientation").orientation == "l") {
 			this.pageSize.reverse();
+		}
+
+		if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+			this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+		}else{
+			this.ratio = 1;
 		}
 
 		// Apply DPI to get number of dot (pixel) needed
@@ -395,12 +406,6 @@ Ext.define('Ck.print.Controller', {
 		});
 		this.layoutDiv.appendChild(this.pageDiv);
 
-		if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
-			this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
-		}else{
-			this.ratio = 1;
-		}
-
 		// Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
 		var mapDiv = Ext.get("ckPrint-map");
 		this.mapDiv = mapDiv.dom;
@@ -415,6 +420,7 @@ Ext.define('Ck.print.Controller', {
 		// Calculate mapSize
 		var res = this.get("printParam.resolution");
 
+		// Définit la taille du rectangle englobant orange
 		this.mapSize = [
 			(this.canvasSize[0] * res),
 			(this.canvasSize[1] * res)
@@ -456,7 +462,30 @@ Ext.define('Ck.print.Controller', {
 				});
 				return false;
 		}
-
+		if(this.get("printParam.format") == 'a0'){
+			this.getOlMap().getLayers().forEach(function(grp) {
+				grp.getLayersArray().forEach(function(layer) {
+					var source = layer.getSource();
+					var context = Ck.getMap().originOwc.data.id;
+					if(source.getParams && source.updateParams) {
+						var params = source.getParams();
+						if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+							this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+						}else{
+							this.ratio = 1;
+						}
+						if(layer.getProperties().id == context + ':equipement_all_exterieur'){
+							params['RESOLUTION'] = 110;
+						}else{
+							params['RESOLUTION'] = 92;
+						}
+						params['WIDTH'] = params['WIDTH'] * this.ratio;
+						params['HEIGHT'] = params['HEIGHT'] * this.ratio;
+						source.updateParams(params);
+					}
+				})
+			});
+		}
 		// Close popup
 		var win = this.getView().up('window');
 		if(win) win.close();
@@ -468,6 +497,11 @@ Ext.define('Ck.print.Controller', {
 	composeCanvas: function() {
 		var mapCanvas = document.createElement('canvas');
 		var size = this.getOlMap().getSize();
+		if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+			this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+		}else{
+			this.ratio = 1;
+		}
 		mapCanvas.width = size[0];
 		mapCanvas.height = size[1];
 		var mapContext = mapCanvas.getContext('2d');
@@ -529,7 +563,6 @@ Ext.define('Ck.print.Controller', {
 		if(!this.canvasSize) {
 			return;
 		}
-
 		this.mask.show();
 		this.getOlMap().once('rendercomplete', function() {
 			// First display fake map on the screen during the real print
@@ -542,7 +575,8 @@ Ext.define('Ck.print.Controller', {
 			// Create the img element and add over map
 			this.fakeMap = dh.append(this.mapTarget, {
 				tag: 'img',
-				src: uri
+				src: uri,
+				style: 'width=' + mapCanvas.width + ';height=' + mapCanvas.width
 			});
 			
 			//Insertion légende
@@ -561,7 +595,7 @@ Ext.define('Ck.print.Controller', {
 
 				for(i=0 ; i < listlay.length; i++) {
 					//Si c'est un vecteur 
-					if(listlay[i].values_.title != 'Photo aérienne' && listlay[i].values_.title != 'OpenStreetMap' && listlay[i].values_.title != 'Surfaces' && listlay[i].values_.title != 'Types locaux' && listlay[i].values_.title != 'Codes locaux'){
+					if(listlay[i].values_.title != 'Photo aérienne' && listlay[i].values_.title != 'OpenStreetMap'){
 						if(Ext.isFunction(listlay[i].getLayersArray)){
 							listlay2 = listlay[i].getLayersArray();
 							for(t=0 ; t < listlay2.length; t++) {  
@@ -579,7 +613,18 @@ Ext.define('Ck.print.Controller', {
 												var context = Ck.getMap().originOwc.data.id;
 												if(source.getParams && source.updateParams) {
 													var params = source.getParams();
-													params['RESOLUTION'] = 192;
+													if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+														this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+													}else{
+														this.ratio = 1;
+													}
+													if(layer.getProperties().id == context + ':equipement_all_exterieur'){
+														params['RESOLUTION'] = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.id !== 'a4' ? 500 : 192;
+													}else{
+														params['RESOLUTION'] = 192;
+													}
+													params['WIDTH'] = params['WIDTH'] * this.ratio;
+													params['HEIGHT'] = params['HEIGHT'] * this.ratio;
 													source.updateParams(params);
 												}
 											})
@@ -597,10 +642,10 @@ Ext.define('Ck.print.Controller', {
 										this.getClassLength(listlay2[t]);
 										if(this.nbClass !== 1){
 											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + params;
-											colcnt += "<li><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' src='"+ url + "'></li>";
+											colcnt += "<li><div class='ckPrint-legtitle' style='font-size:calc(14px*{value:ratio})'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' style='width:calc(20px*{value:ratio})' src='"+ url + "'></li>";
 										}else{
 											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192";
-											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' src='"+ url + "'><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
+											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' style='width:calc(20px*{value:ratio})' src='"+ url + "'><div class='ckPrint-legtitle' style='font-size:calc(12px*{value:ratio})'>"+laytemp.getTitle()+"</div></li>";
 										}
 
 										//Iterate on column
@@ -637,8 +682,8 @@ Ext.define('Ck.print.Controller', {
 			}
 			
 			// Fix map size from web browser
-			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
-			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1));
+			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1)) /* / 4.34 */;
+			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1)) /* / 4.34 */;
 
 			// Move map to invisible div to print with right resolution
 			this.printDiv = dh.append(document.body, {
@@ -668,6 +713,10 @@ Ext.define('Ck.print.Controller', {
 			this.getMap().setCenter(center);
 			this.getMap().setResolution(res);
 			this.getOlView().setRotation(Ext.ComponentQuery.query('#angle')[0].getValue() * -1);
+			// Remettre à la normale la vue
+			if (Ck.getMap().getLayerById(Ck.getMap().originOwc.data.id + ":equipement_all_exterieur") && this.get("printParam.equipementExt").__proto__.equipementExt == true) {
+				Ck.getMap().getLayerById(Ck.getMap().originOwc.data.id + ":equipement_all_exterieur").setVisible(true);
+			}
 			//this.getOlView().setRotation(Ext.ComponentQuery.query('#angle')[0].getValue());
 			//this._olView.setRotation(Ext.ComponentQuery.query('#angle')[0].getValue() * -1);
 
@@ -675,8 +724,8 @@ Ext.define('Ck.print.Controller', {
 			this.getMap().on('layersloaded', this.print, this, {
 				single: true
 			});
-
 			this.getMap().redraw();
+
 		}.bind(this));
 		this.getOlMap().renderSync();
 	},
@@ -688,18 +737,6 @@ Ext.define('Ck.print.Controller', {
 	print: function() {
 		this.getOlMap().removeInteraction(this.previewLayerTransform);
 		this.getOlMap().once('rendercomplete', function(event) {
-			//Reset init resolution after print
-			this.getOlMap().getLayers().forEach(function(grp) {
-				grp.getLayersArray().forEach(function(layer) {
-					var source = layer.getSource();
-					if(source.getParams && source.updateParams) {
-						var params = source.getParams();
-						params['RESOLUTION'] = 96;
-						source.updateParams(params);
-					}
-				})
-			});
-
 			this.integratePrintValue();
 			// refresh mapDiv after integratePrintValue
 			this.mapDiv = Ext.get("ckPrint-map").dom;
@@ -743,7 +780,7 @@ Ext.define('Ck.print.Controller', {
 			case "pdf":
 				var pdf = new jsPDF({
 					orientation: this.get("printParam.orientation").orientation,
-					format: this.get("printParam.format"),
+					format: this.get("printParam.format") == 'a0' ? 'a1' : this.get("printParam.format"),
 					unit: "cm"
 				});
 				var imgURL = canvas.toDataURL("image/png", 1);
@@ -792,6 +829,12 @@ Ext.define('Ck.print.Controller', {
 		this.printValue['date'] = new Date(Date.now()).toLocaleDateString();
 		this.printValue['scale'] = "1 / " + Math.round(Ck.getMap().getScale());
 		this.printValue['srs'] = Ck.getMap().getProjection().getCode();
+		if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
+			this.printValue['ratio'] = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
+		}else{
+			this.printValue['ratio'] = 1;
+		}
+
 		//Rotate north arrow
 		//Ext.get("northArrow").setStyle("transform", "rotate(" + Ext.ComponentQuery.query('#angle')[0].getValue() + "deg)");
 		if (document.getElementById("northArrow")){
@@ -817,9 +860,9 @@ Ext.define('Ck.print.Controller', {
 		// Do substitutions
 		var layout = this.pageDiv.innerHTML;
 		for(var key in this.printValue) {
-			layout = layout.replace("{value:" + key + "}", this.printValue[key]);
+			layout = layout.replaceAll("{value:" + key + "}", this.printValue[key]);
 		}
-		layout = layout.replace(new RegExp("{value:staticsrc}", 'g') , "src");
+		layout = layout.replaceAll(new RegExp("{value:staticsrc}", 'g') , "src");
 
 
 		this.pageDiv.innerHTML = layout;
@@ -852,6 +895,17 @@ Ext.define('Ck.print.Controller', {
 /* 		if(this.previewLayerTransform.res){
 			Ext.ComponentQuery.query('#resolution')[0].setValue(this.previewLayerTransform.res);
 		} */
+		//Reset init resolution after print
+		this.getOlMap().getLayers().forEach(function(grp) {
+			grp.getLayersArray().forEach(function(layer) {
+				var source = layer.getSource();
+				if(source.getParams && source.updateParams) {
+					var params = source.getParams();
+					params['RESOLUTION'] = 92;
+					source.updateParams(params);
+				}
+			})
+		});
 		this._olView.setRotation(0);
 		this.previewLayer.getSource().clear();
 		this.getView().openner.close();
