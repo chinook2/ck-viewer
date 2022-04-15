@@ -69,7 +69,10 @@ Ext.define("Ck.Map", {
 			/**
 			 * Default control. + and - buttons to zoom in and zoom out.
 			 */
-			Zoom: {},
+			Zoom: {
+				zoomInTipLabel: Ck.text('action_zoom_in'),
+				zoomOutTipLabel: Ck.text('action_zoom_out')
+			},
 
 			/**
 			 * Control to display layers attributions.
