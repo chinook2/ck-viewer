@@ -1018,6 +1018,15 @@ Ext.apply(Ck, {
 		document.body.appendChild(el);
 		el.click();
 		document.body.removeChild(el);
+	},
+	useBlobInInputFile: function(blob, filename, mimeType) {
+		var file = new File([blob], filename,{type:mimeType, lastModified:new Date().getTime()});
+		var container = new DataTransfer();
+		container.items.add(file);
+		var el = document.createElement('input');
+		el.type = 'file';
+		el.files = container.files;
+		return el;
 	}
 
 }).init();
