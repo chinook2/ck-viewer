@@ -65,6 +65,8 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		 * Capitalize first letter of field name
 		 */
 		capitalize: true,
+		
+		revertOrder: false,
 
 		winWidth: 400,
 		winHeight: 400,
@@ -157,7 +159,11 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			if(this.res.length < 2 && this.getLight()) {
 				var t = this.createTab(this.res[0]);
 				if (t) {
-					this.win.add(t);
+					if (this.getRevertOrder() === true) {
+						this.win.insert(0, t);
+					} else {
+						this.win.add(t);
+					}
 					dInfo = true;
 				}
 			} else {
@@ -169,6 +175,9 @@ Ext.define('Ck.map.action.FeatureInfo', {
 						dInfo = true;
 					}
 				}, this);
+				if (this.getRevertOrder() === true) {
+					tab = tab.reverse();
+				}
 
 				if (dInfo) {
 					this.panel = Ck.create("Ext.tab.Panel", {
