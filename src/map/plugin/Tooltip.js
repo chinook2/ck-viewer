@@ -93,7 +93,7 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			}
 			// Create Ext template and cahe it
 			if(tttpl){
-				tpl = new Ext.Template(tttpl);
+				tpl = new Ext.XTemplate(tttpl);
 				this.cachedTpl[tttpl] = tpl;
 			}
 		}
