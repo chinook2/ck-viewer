@@ -61,7 +61,7 @@ Ext.define('Ck.map.plugin.Progress', {
 	 * Increment the count of loading tiles
 	 */
 	addLoading: function() {
-		if (this.loading === 0) {
+		if (this.loading === 0 && this.map && this.map.getController()) {
 			this.map.getController().fireEvent("layersloading");
 			this.show();
 		}
