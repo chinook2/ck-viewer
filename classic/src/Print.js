@@ -133,7 +133,7 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Paysage", name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
-	},{
+	}/* ,{
 		xtype: "radiogroup",
 		name: "equipementExt",
 		itemId: "equipementExt",
@@ -145,7 +145,7 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Visible", name: "equipementExt", inputValue: "true"}
 		],
 		bind: { value: "{printParam.equipementExt}" }
-	}/* ,{
+	} *//* ,{
         xtype: 'slider',
         name: 'rotate',
 		itemId: "rotate",

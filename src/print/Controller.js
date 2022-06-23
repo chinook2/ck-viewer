@@ -684,21 +684,6 @@ Ext.define('Ck.print.Controller', {
 			// Fix map size from web browser
 			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1)) /* / 4.34 */;
 			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1)) /* / 4.34 */;
-
-			// Move map to invisible div to print with right resolution
-			this.printDiv = dh.append(document.body, {
-				tag: 'div',
-				id: 'ckprint-div',
-				style: {
-					position: 'absolute',
-					top: (screen.height) + "px", // Comment to display div
-					width: mapWidth.toString() + "px",
-					height: mapHeight.toString() + "px"
-				}
-			});
-			this.getOlMap().setTarget(this.printDiv);
-
-
 			// Zoom on the desired extent
 			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 			//var res = this.get("printParam.resolution");
@@ -713,10 +698,25 @@ Ext.define('Ck.print.Controller', {
 			this.getMap().setCenter(center);
 			this.getMap().setResolution(res);
 			this.getOlView().setRotation(Ext.ComponentQuery.query('#angle')[0].getValue() * -1);
+			// Move map to invisible div to print with right resolution
+			this.printDiv = dh.append(document.body, {
+				tag: 'div',
+				id: 'ckprint-div',
+				style: {
+					position: 'absolute',
+					top: (screen.height) + "px", // Comment to display div
+					width: mapWidth.toString() + "px",
+					height: mapHeight.toString() + "px"
+				}
+			});
+			this.getOlMap().setTarget(this.printDiv);
+
+
+
 			// Remettre à la normale la vue
-			if (Ck.getMap().getLayerById(Ck.getMap().originOwc.data.id + ":equipement_all_exterieur") && this.get("printParam.equipementExt").__proto__.equipementExt == true) {
-				Ck.getMap().getLayerById(Ck.getMap().originOwc.data.id + ":equipement_all_exterieur").setVisible(true);
-			}
+			//if (Ck.getMap().getLayerById(Ck.getMap().originOwc.data.id + ":equipement_all_exterieur") && this.get("printParam.equipementExt").__proto__.equipementExt == true) {
+			//	Ck.getMap().getLayerById(Ck.getMap().originOwc.data.id + ":equipement_all_exterieur").setVisible(true);
+			//}
 			//this.getOlView().setRotation(Ext.ComponentQuery.query('#angle')[0].getValue());
 			//this._olView.setRotation(Ext.ComponentQuery.query('#angle')[0].getValue() * -1);
 
@@ -805,7 +805,6 @@ Ext.define('Ck.print.Controller', {
 		this.getOlMap().setTarget(this.mapTarget);
 		this.getMap().setCenter(this.oldCenter);
 		this.getMap().setResolution(this.oldRes);
-		this.getMap().setResolution(this.oldRes);
 		Ext.ComponentQuery.query('#angle')[0].setValue(0);
 
 		//Ext.ComponentQuery.query('#resolution')[0].setValue(this.previewLayerTransform.res);
@@ -838,7 +837,7 @@ Ext.define('Ck.print.Controller', {
 		//Rotate north arrow
 		//Ext.get("northArrow").setStyle("transform", "rotate(" + Ext.ComponentQuery.query('#angle')[0].getValue() + "deg)");
 		if (document.getElementById("northArrow")){
-			document.getElementById("northArrow").style.transform = 'rotate(' + Ext.ComponentQuery.query('#angle')[0].getValue()*100 + 'deg)';
+			document.getElementById("northArrow").style.transform = 'rotate(-' + Ext.ComponentQuery.query('#angle')[0].getValue()*100 + 'deg)';
 		}
 
 		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]') !== 0){
