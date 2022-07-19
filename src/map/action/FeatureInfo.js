@@ -66,7 +66,17 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		 */
 		capitalize: true,
 		
+		/**
+		 * Revert the natural order of tabs.
+		 * By default the natural order is from the top layer to base layer.
+		 * Reverted is from the base layer to the top layer.
+		 */
 		revertOrder: false,
+		/**
+		 * Use a specific parameter to define the order of tab.
+		 * for this, the extension "featureInfoTabOrder" shall be defined in layers (from 1 for the layer at the left to N the layer at the right.
+		 */
+		useFeatureInfoTabOrder: false,
 
 		winWidth: 400,
 		winHeight: 400,
@@ -177,6 +187,10 @@ Ext.define('Ck.map.action.FeatureInfo', {
 				}, this);
 				if (this.getRevertOrder() === true) {
 					tab = tab.reverse();
+				} else if (this.getUseFeatureInfoTabOrder() === true) {
+					tab.sort(function(tab1, tab2) {
+						return tab1.tabOrder - tab2.tabOrder;
+					});
 				}
 
 				if (dInfo) {
@@ -229,6 +243,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		var field, alias, tpl, data = [];
 		var col = lyr.layer.getExtension("columns") || {};
 		var nameTpl = lyr.layer.getExtension("featureNameTpl");
+		var tabOrder = lyr.layer.getExtension('featureInfoTabOrder') || 99999;
 		if(nameTpl) nameTpl = new Ext.XTemplate(nameTpl);
 		for(var i = 0; i < lyr.features.length; i++) {
 			var rawValues = lyr.features[i].getProperties() || {};
@@ -328,6 +343,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 			store: store,
 			layout: "fit",
 			scrollable: true,
+			tabOrder: tabOrder,
 			hideHeaders: this.getLight(),
 			header: (this.getLight())? { padding: 0 } : true,
 			columns: [{
