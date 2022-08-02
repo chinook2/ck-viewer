@@ -12,7 +12,7 @@ Ext.define('Ck.Notify', {
 	align: 'tr',
 
 	info: function(msg, e) {
-		Ext.toast({
+		Ext.window.Toast({
 			html: msg,
 			align: this.align,
 			hideDuration: 1500,
@@ -47,12 +47,30 @@ Ext.define('Ck.Notify', {
 			}];
 		}
 
-		Ext.toast(cfg);
+		Ext.window.Toast(cfg);
 		Ck.error(msg);
 		if(e && e.stack) Ck.log(e.stack);
 	},
 
 	eventDetails: function (e) {
 		if(e && e.stack) Ck.alert('Ck.Notify error details',  Ext.util.Format.nl2br(e.stack));
-	}
+	},
+    /**
+     * Shows a simple toast on the middle top of the screen.
+     * See the corresponding SCSS in all.scss
+     */
+    showToast: function(msg, additionalClass, timing) {
+        var duration = timing || 3500;
+        var baseCls = 'ck-toast' + (additionalClass ? ' ' + additionalClass : '');
+        var toast = document.createElement('div');
+        toast.innerHTML = msg;
+        document.body.appendChild(toast);
+        toast.className = baseCls + ' show'; // Shows the toast
+        Ext.defer(function() { // Hide the toast
+            toast.className = baseCls;
+            Ext.defer(function() { // Remove the toast
+                document.body.removeChild(toast);
+            }, 1000);
+        }, duration);
+    }
 });
