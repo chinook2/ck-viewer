@@ -62,9 +62,9 @@ Ext.define('Ck.Notify', {
     showToast: function(msg, mapView, additionalClass, timing) {
         var duration = timing || 3500;
         // Class x-panel-body-default is too ensure the CkFont is not applied
-        var baseCls = 'cktoast x-panel-body-default' + (additionalClass ? ' ' + additionalClass : '');
+        var baseCls = 'cktoast cktoast-temp x-panel-body-default' + (additionalClass ? ' ' + additionalClass : '');
         var toast = document.createElement('div');
-        toast.innerHTML = msg;
+        toast.innerHTML = '<div class="cktoast-child">' + msg + '</div>';
         mapView.el.dom.appendChild(toast);
         toast.className = baseCls + ' show'; // Shows the toast
         Ext.defer(function() { // Hide the toast
@@ -73,5 +73,19 @@ Ext.define('Ck.Notify', {
                 mapView.el.dom.removeChild(toast);
             }, 1000);
         }, duration);
+    },
+    showFixedToast: function(msg, mapView, additionalClass, icon) {
+        // Class x-panel-body-default is too ensure the CkFont is not applied
+        var baseCls = 'cktoast cktoast-container cktoast-fixed x-panel-body-default' + (additionalClass ? ' ' + additionalClass : '');
+        var toast = document.createElement('div');
+        toast.innerHTML = '<div class="cktoast-child">' + (icon ? '<span class="'+ icon + '"></span>&nbsp;' : '' ) + msg + '</div>';
+        toast.className = baseCls;
+        mapView.el.dom.appendChild(toast);
+        return toast;
+    },
+    hideFixedToast: function(toast, mapView) {
+        if (mapView && mapView.el && mapView.el.dom) {
+            mapView.el.dom.removeChild(toast);
+        }
     }
 });

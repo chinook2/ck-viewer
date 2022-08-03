@@ -3,24 +3,38 @@
  */
 .cktoast {
   visibility: hidden; /* Hidden by default.*/
-  min-width: 250px; /* Set a default minimum width */
-  margin-left: -125px; /* Divide value of min-width by 2 */
-  background-color: #888; 
-  color: #fff;
   text-align: center; /* Centered text */
-  border-radius: 4px; /* Rounded borders */
-  padding: 14px; /* Padding */
   position: absolute; /* Sit on top of the screen */
-  z-index: 50000; /* Add a z-index if needed */
-  left: 50%; /* Center */
+  z-index: 15000; /* Add a z-index, need to be below 19000 (Ext.win z-index) */ 
+  display: flex;
+  justify-content: center;
+  border: none;
+  background-color: transparent;
+  left: 0px;
+  right: 0px;
+}
+.cktoast-child {
+    min-width: 250px; /* Set a default minimum width */
+    background-color: #666; 
+    color: #fff;
+    border-radius: 4px; 
+    padding: 8px 14px;
+}
+.cktoast.cktoast-temp {
   top: 0px;
+}
+
+.cktoast.cktoast-fixed {
+  visibility: visible; /* Show the toast */
+  bottom: 30px;
+  opacity: 0.85;
 }
 
 /* Show the toast (class added with JavaScript) 
 Duration + delay shall correspond to javascript remove of item.
 */
-.cktoast.show {
-  visibility: visible; /* Show the snackbar */
+.cktoast.cktoast-temp.show {
+  visibility: visible; /* Show the toast */
   -webkit-animation: ck-toast-fadein 0.5s, ck-toast-fadeout 0.5s 3.2s;
   animation: ck-toast-fadein 0.5s, ck-toast-fadeout 0.5s 3.2s;
   top: 40px;
