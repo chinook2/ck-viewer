@@ -59,17 +59,18 @@ Ext.define('Ck.Notify', {
      * Shows a simple toast on the middle top of the screen.
      * See the corresponding SCSS in all.scss
      */
-    showToast: function(msg, additionalClass, timing) {
+    showToast: function(msg, mapView, additionalClass, timing) {
         var duration = timing || 3500;
-        var baseCls = 'ck-toast' + (additionalClass ? ' ' + additionalClass : '');
+        // Class x-panel-body-default is too ensure the CkFont is not applied
+        var baseCls = 'cktoast x-panel-body-default' + (additionalClass ? ' ' + additionalClass : '');
         var toast = document.createElement('div');
         toast.innerHTML = msg;
-        document.body.appendChild(toast);
+        mapView.el.dom.appendChild(toast);
         toast.className = baseCls + ' show'; // Shows the toast
         Ext.defer(function() { // Hide the toast
             toast.className = baseCls;
             Ext.defer(function() { // Remove the toast
-                document.body.removeChild(toast);
+                mapView.el.dom.removeChild(toast);
             }, 1000);
         }, duration);
     }

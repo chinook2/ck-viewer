@@ -1,7 +1,7 @@
 /**
  * Specific style for Ck-toast component (in Ck.Notify)
  */
-.ck-toast {
+.cktoast {
   visibility: hidden; /* Hidden by default.*/
   min-width: 250px; /* Set a default minimum width */
   margin-left: -125px; /* Divide value of min-width by 2 */
@@ -10,40 +10,39 @@
   text-align: center; /* Centered text */
   border-radius: 4px; /* Rounded borders */
   padding: 14px; /* Padding */
-  position: fixed; /* Sit on top of the screen */
+  position: absolute; /* Sit on top of the screen */
   z-index: 50000; /* Add a z-index if needed */
   left: 50%; /* Center */
-  top: 0px; 
-  font-family: unset !important;
+  top: 0px;
 }
 
 /* Show the toast (class added with JavaScript) 
 Duration + delay shall correspond to javascript remove of item.
 */
-.ck-toast.show {
+.cktoast.show {
   visibility: visible; /* Show the snackbar */
   -webkit-animation: ck-toast-fadein 0.5s, ck-toast-fadeout 0.5s 3.2s;
   animation: ck-toast-fadein 0.5s, ck-toast-fadeout 0.5s 3.2s;
-  top: 100px;
+  top: 40px;
   opacity: 0.85;
 }
 
 @-webkit-keyframes ck-toast-fadein {
   from {top: 0; opacity: 0;}
-  to {top: 100px; opacity: 0.85;}
+  to {top: 40px; opacity: 0.85;}
 }
 
 @keyframes ck-toast-fadein {
   from {top: 0; opacity: 0;}
-  to {top: 100px; opacity: 0.85;}
+  to {top: 40px; opacity: 0.85;}
 }
 
 @-webkit-keyframes ck-toast-fadeout {
-  from {top: 100px; opacity: 0.85;}
+  from {top: 40px; opacity: 0.85;}
   to {top: 0; opacity: 0;}
 }
 
 @keyframes ck-toast-fadeout {
-  from {top: 100px; opacity: 0.85;}
+  from {top: 40px; opacity: 0.85;}
   to {top: 0; opacity: 0;}
 }
