@@ -17,6 +17,7 @@ Ext.define('Ck.map.action.FeatureInfo', {
 
 	itemId: 'featureinfo',
 	tooltip: Ck.text('feature_info'),
+    helpMessage: Ck.text('feature_info_help_msg'),
 
 	timerId: null,
 
@@ -148,12 +149,17 @@ Ext.define('Ck.map.action.FeatureInfo', {
 		this.draw.setActive(pressed);
 		this.createContainer();
 
-		// Action disable
-		if(!pressed) {
-			if(this.draw.getSelect()) {
+        if (pressed) {
+            this._infoToast = Ck.Notify.showFixedToast(this.helpMessage, this.getMap().getView(), null, 'fa fa-info-circle');
+        } else {
+            if (this._infoToast) {
+                Ck.Notify.hideFixedToast(this._infoToast, this.getMap().getView());
+                this._infoToast = null;
+            }
+            if(this.draw.getSelect()) {
 				this.draw.getSelect().getFeatures().clear()
 			}
-		}
+        }
 	},
 
 	/**
