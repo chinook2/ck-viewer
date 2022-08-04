@@ -112,11 +112,17 @@ Ext.define('Ck.map.action.Measure', {
 		// Tooltip and label managment
 		this.measure.createMeasureTooltip();
 		this.draw.on('drawstart', function(evt) {
-			this.setHelpMsg(this.helpMessages.continueMsg);
+            if (this._infoToast) {
+                Ck.Notify.hideFixedToast(this._infoToast, this.getMap().getView());
+                this._infoToast = Ck.Notify.showFixedToast(this.helpMessages.continueMsg, this.getMap().getView(), null, 'fa fa-info-circle');
+            }
 			this.measure.measureStart(evt);
 		}.bind(this));
 		this.draw.on('drawend', function(evt) {
-			this.setHelpMsg(this.helpMessages.startMsg);
+            if (this._infoToast) {
+                Ck.Notify.hideFixedToast(this._infoToast, this.getMap().getView());
+                this._infoToast = Ck.Notify.showFixedToast(this.helpMessages.startMsg, this.getMap().getView(), null, 'fa fa-info-circle');
+            }
 			this.measure.measureEnd(evt);
 		}.bind(this));
 		
@@ -132,6 +138,15 @@ Ext.define('Ck.map.action.Measure', {
 		if(!this.draw) return;
 		this.draw.setActive(pressed);
 		if(this.tip) this.tip.setVisible(pressed);
+        
+        if (pressed) {
+            this._infoToast = Ck.Notify.showFixedToast(this.helpMessages.startMsg, this.getMap().getView(), null, 'fa fa-info-circle');
+        } else {
+            if (this._infoToast) {
+                Ck.Notify.hideFixedToast(this._infoToast, this.getMap().getView());
+                this._infoToast = null;
+            }
+        }
 		if(pressed) {
 			if (!this.measureTooltipElement) {
 				this.measure.createMeasureTooltip();
@@ -143,7 +158,6 @@ Ext.define('Ck.map.action.Measure', {
 			this.olMap.on('singleclick', function(evt) {
 				this.measure.pointerMoveHandler(evt);
 			}.bind(this));
-			this.setHelpMsg(this.helpMessages.startMsg);
 		} else {
 			this.olMap.un('pointermove', function(evt) {
 				this.measure.pointerMoveHandler(evt);
@@ -151,7 +165,6 @@ Ext.define('Ck.map.action.Measure', {
 			this.olMap.un('singleclick', function(evt) {
 				this.measure.pointerMoveHandler(evt);
 			}.bind(this));
-			this.setHelpMsg(null);
 
 			// Force clear tooltip if toggle off measure tool when drawing
 			this.measure.clearTooltip();
