@@ -35,7 +35,7 @@ Ext.define('Ck.map.action.ViewPrevious', {
 	doAction: function(btn) {
 		var map = this.getMap();
 
-		if(map.historyIdx - 1 >= 0) {
+		if(map.history && map.historyIdx - 1 >= 0) {
 			map.historyIdx--;
 			map.setExtent(map.history[map.historyIdx]);
 			map.historyIgnore = true;
