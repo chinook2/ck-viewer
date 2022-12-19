@@ -102,7 +102,8 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			var msg = tpl.apply(feature.getProperties());
 			if(msg){
 				this.tip.setHtml(msg);
-				this.tip.show();
+				this.tip.showBy(this.map); // Use this.map instead of the target to ensure to have a ExtJS element
+                this.tip.showAt(pixel); // force the pixel position
 			}
 		}
 
