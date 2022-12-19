@@ -13,7 +13,7 @@ Ext.define("Ck.map.ScaleList", {
 	controller: "ckmap.scalelist",
 	cls: "ckmap-scalelist",
 	
-	emptyText: 'Error, no scale available...',
+	emptyText: Ck.text('scale_list_notavailable'),
 	
 	shadow: false,
 	hideLabel: true,
