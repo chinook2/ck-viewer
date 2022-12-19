@@ -26,7 +26,7 @@ Ext.define('Ck.map.plugin.Tooltip', {
 					this.tip.hide();
 					return;
 				}
-	        	this.displayFeatureInfo(this.olMap.getEventPixel(evt.originalEvent));
+	        	this.displayFeatureInfo(evt.pixel);//this.olMap.getEventPixel(evt.originalEvent));
 		  	}.bind(this));
 
 	        this.olMap.on('click', function(evt) {
@@ -53,6 +53,7 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			trackMouse: true,
 			dismissDelay: 0,
 			renderTo: Ext.getBody(),
+            mouseOffset: [12, 15],
 			listeners: {
 				beforeshow: function(tip) {
 					// Prevent show empty tooltip
