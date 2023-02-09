@@ -329,6 +329,8 @@
 			"path": "libs/xmljs/xmllint.js"
 		},{
 			"path": "libs/dxf/dxf-parser.js"
+		},{
+			"path": "libs/dxf-writer/dxf-writer.js"
 		}]
 	},
 	"development": {
@@ -381,6 +383,8 @@
 			"path": "libs/xmljs/xmllint.js"
 		},{
 			"path": "libs/dxf/dxf-parser.js"
+		},{
+			"path": "libs/dxf-writer/dxf-writer.js"
 		}]
     },
 	"testing": {"environment": "testing"}
