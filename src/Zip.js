@@ -37,7 +37,10 @@ Ext.define('Ck.Zip', {
 	onGetEntries: function(entries) {
 		this.files = {};
 		this.nbFiles = entries.length;
-		entries.forEach(this.getEntryFile.bind(this));
+        if (this.nbFiles < 1 && Ext.isFunction(this.onError)) {
+           this.onError('no file in zip'); 
+		}
+        entries.forEach(this.getEntryFile.bind(this));
 	},
 
 	/**
