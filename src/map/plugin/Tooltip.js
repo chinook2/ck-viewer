@@ -99,7 +99,7 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			}
 		}
 
-		if(tpl){
+		if(tpl && !this.map.getDisabledTooltip()){
 			var msg = tpl.apply(feature.getProperties());
 			if(msg){
 				this.tip.setHtml(msg);

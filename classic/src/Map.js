@@ -124,7 +124,9 @@ Ext.define("Ck.Map", {
 			KeyboardZoom: {},
 			MouseWheelZoom: {}
 			// DragZoom: {}
-		}
+		},
+        
+        disabledTooltip: false // permits to disable displaying tooltip in some cases.
 	},
 
 	/* TODO : voir si peut simplifier des choses ?
