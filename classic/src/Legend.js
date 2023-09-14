@@ -43,6 +43,7 @@ Ext.define("Ck.Legend", {
 	rootVisible: false,
 	hideHeaders: true,
 	reserveScrollbar: true,
+    canMove: true,
 
 	cls: 'ck-legend',
 

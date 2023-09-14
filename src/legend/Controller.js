@@ -91,6 +91,7 @@ Ext.define('Ck.legend.Controller', {
 				checked: (layer.get('visible') && !(layer instanceof ol.layer.Group)),
 				iconCls: 'x-tree-noicon',
 				layer: layer,
+                allowDrag: this.getView().canMove,
 				allowDrop: (layer instanceof ol.layer.Group)
 			};
 
