@@ -223,9 +223,9 @@ Ext.define('Ck.Selection', {
 
 		draw.on('drawstart', function(evt) {
 			this.sketch = evt.feature;
-		}, this);
+		}.bind(this));
 
-		draw.on('drawend', this.processSelection, this);
+		draw.on('drawend', this.processSelection.bind(this));
 
 		olMap.addInteraction(draw);
 		draw.setActive(false);

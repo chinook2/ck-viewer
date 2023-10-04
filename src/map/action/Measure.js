@@ -114,11 +114,11 @@ Ext.define('Ck.map.action.Measure', {
 		this.draw.on('drawstart', function(evt) {
 			this.setHelpMsg(this.helpMessages.continueMsg);
 			this.measure.measureStart(evt);
-		}, this);
+		}.bind(this));
 		this.draw.on('drawend', function(evt) {
 			this.setHelpMsg(this.helpMessages.startMsg);
 			this.measure.measureEnd(evt);
-		}, this);
+		}.bind(this));
 		
 		// Update snap interaction
 		this.measure.updateMeasureSnapping();
@@ -128,6 +128,7 @@ Ext.define('Ck.map.action.Measure', {
 	 *
 	 */
 	toggleAction: function(btn, pressed) {
+		var me = this;
 		if(!this.draw) return;
 		this.draw.setActive(pressed);
 		if(this.tip) this.tip.setVisible(pressed);
@@ -135,14 +136,21 @@ Ext.define('Ck.map.action.Measure', {
 			if (!this.measureTooltipElement) {
 				this.measure.createMeasureTooltip();
 			}
-
-			this.olMap.on('pointermove', this.measure.pointerMoveHandler, this.measure);
+            this.olMap.on('pointermove', function(evt) {
+				this.measure.pointerMoveHandler(evt);
+			}.bind(this));
 			// fix for touch device
-			this.olMap.on('singleclick', this.measure.pointerMoveHandler, this.measure);
+			this.olMap.on('singleclick', function(evt) {
+				this.measure.pointerMoveHandler(evt);
+			}.bind(this));
 			this.setHelpMsg(this.helpMessages.startMsg);
 		} else {
-			this.olMap.un('pointermove', this.measure.pointerMoveHandler, this.measure);
-			this.olMap.un('singleclick', this.measure.pointerMoveHandler, this.measure);
+            this.olMap.un('pointermove', function(evt) {
+				this.measure.pointerMoveHandler(evt);
+			}.bind(this));
+			this.olMap.un('singleclick', function(evt) {
+				this.measure.pointerMoveHandler(evt);
+			}.bind(this));
 			this.setHelpMsg(null);
 
 			// Force clear tooltip if toggle off measure tool when drawing

@@ -147,6 +147,7 @@ Ext.define('Ck.map.Controller', {
 	 * @protected
 	 */
 	init: function() {
+		var me = this;
 		var v = this.getView();
 
 		if(Ck.params.context) {
@@ -166,6 +167,11 @@ Ext.define('Ck.map.Controller', {
 			control = Ck.create("ol.control." + controlName, controls[controlName]);
 			if(control) {
 				olControls.push(control);
+				// Use a not collapsible/collapsible attribution according map size
+				if (controlName=="Attribution") {
+					control.setCollapsible(false);
+					control.setCollapsed(false);
+				}
 			}
 		}
 
@@ -257,12 +263,23 @@ Ext.define('Ck.map.Controller', {
 			res.push(viewScales[i].res);
 		}
 
+		var viewExtent = this.originOwc.getExtent();
+		var smoothExtent = true;
+		if (this.originOwc.getExtension("limit_drag_to_extent")) {
+			viewExtent = this.originOwc.getExtent();
+			smoothExtent = false;
+		}
+
 		// Reset olView because "set" and "setProperties" method doesn't work for min/maxResolution
 		olMap.setView(new ol.View({
 			projection: viewProj,
 			center: v.getCenter(),
 			zoom: v.getZoom(),
-			resolutions: res
+			resolutions: res,
+			extent: viewExtent,
+			smoothExtentConstraint: smoothExtent,
+			constrainResolution: true,
+			smoothResolutionConstraint: false
 		}));
 		this.bindMap(olMap);
 
@@ -436,6 +453,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.layer.Group}
 	 */
 	relayMapEvents: function(olGroup) {
+        var me = this;
 		// Relay olMap events
 		olGroup.getLayers().on('add', function(colEvent) {
 			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
@@ -450,15 +468,15 @@ Ext.define('Ck.map.Controller', {
 			layer.getExtension = function(key) {
 				return (Ext.isEmpty(this.get("extension")))? undefined : this.get("extension")[key];
 			};
-			this.fireEvent('addlayer', layer, idx);
-		}, this);
+			me.fireEvent('addlayer', layer, idx);
+		}.bind(this));
 		olGroup.getLayers().on('remove', function(colEvent) {
 			if(Ck.functionInStackTrace(Ck.legend.Controller.prototype.layerMove, 6)) {
 				return;
 			}
 			var layer = colEvent.element;
-			this.fireEvent('removelayer', layer);
-		}, this);
+			me.fireEvent('removelayer', layer);
+		}.bind(this));
 	},
 
 	/**
@@ -683,6 +701,13 @@ Ext.define('Ck.map.Controller', {
 					};
 					break;
 			}
+			if (layer.getExtension("attribution")) {
+				olSourceOptions.attributions = layer.getExtension("attribution");
+			}
+            // For printing canvas.toDataUrl
+			Ext.apply(olSourceOptions,{
+				crossOrigin: "Anonymous"
+			});
 
 			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
 
@@ -917,7 +942,7 @@ Ext.define('Ck.map.Controller', {
 	 * @param {ol.Extent} extent An array of numbers representing an extent: [minx, miny, maxx, maxy].
 	 */
 	setExtent: function(extent) {
-		return this.getOlView().fit(extent, this.getOlMap().getSize());
+		return this.getOlView().fit(extent);
 	},
 
 	/**

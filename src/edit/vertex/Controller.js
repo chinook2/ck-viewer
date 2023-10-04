@@ -430,7 +430,7 @@ Ext.define('Ck.edit.vertex.Controller', {
 				this.moveInteraction = new ol.interaction.Translate({
 					features: new ol.Collection([this.feature])
 				});
-				this.moveInteraction.on("translateend", this.translateEnd, this);
+				this.moveInteraction.on("translateend", this.translateEnd.bind(this));
 				this.olMap.addInteraction(this.moveInteraction);
 
 				delete this.moveInteraction.previousCursor_;
@@ -444,8 +444,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 					deleteCondition: ol.events.condition.never,
 					features: new ol.Collection([this.feature])
 				});
-				this.modifyInteraction.on("modifystart", this.focusVertexRow, this);
-				this.modifyInteraction.on("modifyend", this.updateVertexRow, this);
+				this.modifyInteraction.on("modifystart", this.focusVertexRow.bind(this));
+				this.modifyInteraction.on("modifyend", this.updateVertexRow.bind(this));
 				this.olMap.addInteraction(this.modifyInteraction);
 
 				this.modifyInteraction.setActive(checked);

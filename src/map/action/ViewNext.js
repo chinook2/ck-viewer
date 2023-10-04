@@ -37,22 +37,24 @@ Ext.define('Ck.map.action.ViewNext', {
 
 		olMap.on("moveend", function(mapEvt) {
 			// Limit history size
-			if(map.history.length > 250) map.history.shift();
-			if(!map.historyIgnore) {
-				// remove unused history when move map from history index
-				if(map.historyIdx < map.history.length - 1) map.history.splice(map.historyIdx + 1);
+            if (map.history) {// Limit history size
+                if(map.history.length > 250) map.history.shift();
+                if(!map.historyIgnore) {
+                    // remove unused history when move map from history index
+                    if(map.historyIdx < map.history.length - 1) map.history.splice(map.historyIdx + 1);
 
-				map.history.push(map.getExtent());
-				map.historyIdx = map.history.length - 1;
+                    map.history.push(map.getExtent());
+                    map.historyIdx = map.history.length - 1;
 
-				// update button status
-				this.setDisabled(true);
-				if(map.historyIdx > 0) {
-					if(this._previous) this._previous.setDisabled(false);
-				}
-			}
-			map.historyIgnore = false;
-		}, this);
+                    // update button status
+                    this.setDisabled(true);
+                    if(map.historyIdx > 0) {
+                        if(this._previous) this._previous.setDisabled(false);
+                    }
+                }
+                map.historyIgnore = false;
+            }
+		}.bind(this));
 	},
 
 	/**

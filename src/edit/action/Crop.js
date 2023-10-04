@@ -76,7 +76,7 @@ Ext.define('Ck.edit.action.Crop', {
 			// One selected object, we lock selection on it
 			this.cropInteraction.setActive(false);
 			this.editCropDraw();
-		}, this);
+		}.bind(this));
 		this.interactions["cropInteraction"] = this.cropInteraction;
 		this.cropInteraction.setActive(false)
 	},
@@ -97,7 +97,7 @@ Ext.define('Ck.edit.action.Crop', {
 
 			this.getMap().addSpecialLayer(this.editCropLayer);
 		}
-		this.editCropLayer.getSource().on("addfeature", this.editCropFeature, this);
+		this.editCropLayer.getSource().on("addfeature", this.editCropFeature.bind(this));
 
 		if(!this.cropDrawInteraction){
 			this.cropDrawInteraction = new ol.interaction.Draw({

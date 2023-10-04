@@ -296,7 +296,7 @@ Ext.define('Ck.Measure', {
 			for (var i = 0, ii = coordinates.length - 1; i < ii; ++i) {
 				var c1 = ol.proj.transform(coordinates[i], sourceProj, 'EPSG:4326');
 				var c2 = ol.proj.transform(coordinates[i + 1], sourceProj, 'EPSG:4326');
-				length += this.wgs84Sphere.haversineDistance(c1, c2);
+				length += ol.sphere.getDistance(c1, c2);
 			}
 		} else {
 			if(geom instanceof ol.geom.Circle) {
@@ -358,7 +358,11 @@ Ext.define('Ck.Measure', {
 				area = (Math.PI * Math.pow(geom.getRadius(), 2) * 10000000000);
 			} else {
 				var coordinates = geom.getLinearRing(0).getCoordinates();
-				area = Math.abs(this.wgs84Sphere.geodesicArea(coordinates));
+				if (sourceProj.getUnits() == "m") {
+					area = Math.abs(ol.sphere.getArea(polygon.clone(), {projection:sourceProj}));
+				} else {
+					area = Math.abs(ol.sphere.getArea(polygon.clone().transform(sourceProj, 'EPSG:3857')));
+				}
 			}
 		} else {
 			area = polygon.getArea();
@@ -419,7 +423,7 @@ Ext.define('Ck.Measure', {
 		evt.feature.set('overlay', this.measureTooltip);
 		this.getSource().on('removefeature', function(evt) {
 			this.getOlMap().removeOverlay(evt.feature.get('overlay'));
-		}, this);
+		}.bind(this));
 
 		// unset sketch
 		this.sketch = null;
@@ -443,6 +447,21 @@ Ext.define('Ck.Measure', {
 	 */
 	clearMeasure: function() {
 		this.getSource().clear();
+	},
+
+	isExtentsLoaded: function(source, extents) {
+		var loadedExtentsRtree = source.loadedExtentsRtree_;
+		var i, ii;
+		for (i = 0, ii = extents.length; i < ii; ++i) {
+			var extentToLoad = extents[i];
+			var alreadyLoaded = loadedExtentsRtree.forEachInExtent(extentToLoad, function(object) {
+				return ol.extent.containsExtent(object.extent, extentToLoad);
+			});
+			if (!alreadyLoaded) {
+				return false
+			}
+		}
+		return true;
 	},
 
 	/**
@@ -491,7 +510,7 @@ Ext.define('Ck.Measure', {
 				}
 
 				// Perform getFeatures if they have not been loaded
-				if(!lyr.light && !lyr.source.isExtentsLoaded([ex])) {
+                if(!lyr.light && !this.isExtentsLoaded(lyr.source, [ex])) {
 					lyr.source.loadFeatures(ex);
 				} else {
 					this.snapFeatures.extend(lyr.source.getFeatures());
@@ -517,8 +536,9 @@ Ext.define('Ck.Measure', {
 		}
 		//
 
-		var source = new ol.source.Vector({
-			url : (lyr.light)? sl.getUrl() + env : function(ext) { return sl.getUrl() + env + "&BBOX=" + ext.join(","); },
+        var mapProj = this.getMap().getProjection().getCode();
+        var source = new ol.source.Vector({
+			url : (lyr.light)? sl.getUrl() + env : function(ext) { return sl.getUrl() + env + "&BBOX=" + ext.join(",") + "," + mapProj + "&srsName=" + mapProj; },
 			format: sl.getFormat(),
 			strategy: (lyr.light)? ol.loadingstrategy.all : ol.loadingstrategy.bbox
 		});
@@ -526,7 +546,7 @@ Ext.define('Ck.Measure', {
 		if(lyr.light) {
 			source.on("change", function(evt) {
 				this.loadSnappingFeaturesDone(evt);
-			}, this);
+			}.bind(this));
 			this.loadSnappingFeaturesStart(source);
 			source.loadFeatures();
 		} else {
@@ -568,7 +588,7 @@ Ext.define('Ck.Measure', {
 				});
 			}.bind(this, source);
 
-			source.on("change", this.loadSnappingFeaturesDone, this);
+			source.on("change", this.loadSnappingFeaturesDone.bind(this));
 
 			return source;
 		}

@@ -67,7 +67,7 @@ Ext.define('Ck.edit.action.Union', {
 			if(features.length == 2) {
 				this.editUnionSelected(features);
 			}
-		}, this);
+		}.bind(this));
 		this.interactions["unionInteraction"] = this.unionInteraction;
 		this.unionInteraction.setActive(false)
 	},

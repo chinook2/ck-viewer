@@ -22,15 +22,16 @@ Ext.define('Ck.map.plugin.Tooltip', {
 		if(this.tip){
 			this.olMap.on('pointermove', function(evt) {
 				if (evt.dragging) {
+					this.tip.html = null;
 					this.tip.hide();
 					return;
 				}
 	        	this.displayFeatureInfo(this.olMap.getEventPixel(evt.originalEvent));
-		  	}, this);
+		  	}.bind(this));
 
 	        this.olMap.on('click', function(evt) {
 				this.displayFeatureInfo(evt.pixel);
-	        }, this);
+	        }.bind(this));
 		}
 
 		//ckMap.getController().on("addLayer", this.addLoadListeners, this);
@@ -52,20 +53,10 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			trackMouse: true,
 			dismissDelay: 0,
 			renderTo: Ext.getBody(),
-			/*
-			onDocMouseDown: function() {
-				// prevent hide tooltip on click
-				Ext.defer(function(){
-					this.fireEvent('beforeshow', this);
-				}, 200, this);
-			},*/
 			listeners: {
 				beforeshow: function(tip) {
-					//if(!this.draw.get('active')) return false;
-
-					//var helpMsg = this.startMsg;
-					//if (this.sketch) helpMsg = this.continueMsg;
-					//this.tip.setHtml(helpMsg);
+					// Prevent show empty tooltip
+					if (!tip.html || tip.html == '') return false;
 				},
 				scope: this
 			}
@@ -73,12 +64,7 @@ Ext.define('Ck.map.plugin.Tooltip', {
 	},
 
 	displayFeatureInfo: function (pixel) {
-		/*
-		info.css({
-          left: pixel[0] + 'px',
-          top: (pixel[1] - 15) + 'px'
-        });
-		*/
+        this.tip.html = null;
 		this.tip.hide();
 
         var feature = this.olMap.forEachFeatureAtPixel(pixel, function(feature, layer) {
@@ -116,7 +102,8 @@ Ext.define('Ck.map.plugin.Tooltip', {
 			var msg = tpl.apply(feature.getProperties());
 			if(msg){
 				this.tip.setHtml(msg);
-				this.tip.show();
+                this.tip.showBy(this.map); // Use this.map instead of the target to ensure to have a ExtJS element
+                this.tip.showAt(pixel); // force the pixel position
 			}
 		}
 

@@ -58,7 +58,7 @@ Ext.define('Ck.legend.Controller', {
 		v.getView().getRowClass = this.getNodeClasses.bind(this);
 
 		// Event on ol view resolution change
-		this.getMap().getOlView().on('change:resolution',	this.setLegendLayersStyle, this);
+		this.getMap().getOlView().on('change:resolution',	this.setLegendLayersStyle.bind(this));
 
 		this.fireEvent('ready', this);
 	},
@@ -101,6 +101,12 @@ Ext.define('Ck.legend.Controller', {
 
 			// Append and remove node events (to manage order for example)
 			node.on("move", this.layerMove, this);
+			if ( !(layer instanceof ol.layer.Group)) {
+				var provider = layer.getExtension('provider');
+				if (provider) {
+					node.set('qtip', 'Data source: ' + provider);
+				}
+			}
 		}
 	},
 

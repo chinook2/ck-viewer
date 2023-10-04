@@ -45,7 +45,7 @@ Ext.define('Ck.overview.Controller', {
 			});
 		}
 
-		if(this.ovLayers.length === 0) {
+		if(this.ovLayers.get('length') === 0) {
 			this.getView().on("beforerender", function() {
 				if(this.openner.close) {
 					this.openner.close();
@@ -86,11 +86,23 @@ Ext.define('Ck.overview.Controller', {
 			resolutions: this.options.resolutions
 		});
 
+        var newOvLayers =  [];
+		for (var i=0;i<this.ovLayers.getLength();i++) {
+			var lyr = this.ovLayers.getArray()[i];
+			if (lyr instanceof ol.layer.Image) {
+				newOvLayers.push(new ol.layer.Image({source:lyr.getSource()}));
+			} else if (lyr instanceof ol.layer.Tile) {
+				newOvLayers.push(new ol.layer.Tile({source:lyr.getSource()}));
+			}else if (lyr instanceof ol.layer.Vector) {
+				newOvLayers.push(new ol.layer.Vector({source:lyr.getSource()}));
+			}
+		}
+
 		var opt = {
 			collapsed: false,
 			collapsible: false,
-			target: this.getView().getEl(),
-			layers: this.ovLayers,
+			target: this.getView().getEl().getId(),
+			layers: newOvLayers,
 			view: view
 		};
 

@@ -44,15 +44,15 @@ Ext.define('Ck.map.plugin.Progress', {
 
 			// Add loading event
 			if(typeof olSource.getImage == "function") {
-				olSource.on('imageloadstart', this.addLoading, this);
-				olSource.on('imageloadend', this.addLoaded, this);
-				olSource.on('imageloaderror', this.addLoaded, this);
+				olSource.on('imageloadstart', this.addLoading.bind(this));
+				olSource.on('imageloadend', this.addLoaded.bind(this));
+				olSource.on('imageloaderror', this.addLoaded.bind(this));
 			}
 
 			if(typeof olSource.getTile == "function") {
-				olSource.on('tileloadstart', this.addLoading, this);
-				olSource.on('tileloadend', this.addLoaded, this);
-				olSource.on('tileloaderror', this.addLoaded, this);
+				olSource.on('tileloadstart', this.addLoading.bind(this));
+				olSource.on('tileloadend', this.addLoaded.bind(this));
+				olSource.on('tileloaderror', this.addLoaded.bind(this));
 			}
 		}
 	},
@@ -61,7 +61,7 @@ Ext.define('Ck.map.plugin.Progress', {
 	 * Increment the count of loading tiles
 	 */
 	addLoading: function() {
-		if (this.loading === 0) {
+		if (this.loading === 0 && this.map && this.map.getController()) {
 			this.map.getController().fireEvent("layersloading");
 			this.show();
 		}

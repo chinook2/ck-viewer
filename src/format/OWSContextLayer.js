@@ -43,7 +43,9 @@ Ext.define('Ck.format.OWSContextLayer', {
 			visible		: data.properties.active,
 			userLyr		: Ext.isBoolean(data.properties.userLyr)? data.properties.userLyr : true,
 			minScale	: data.properties.minscale,
-			maxScale	: data.properties.maxscale
+			maxScale	: data.properties.maxscale,
+			maxResolution: data.properties.maxResolution || Infinity,
+			minResolution: data.properties.minResolution || 0
 		});
 
 		this.initConfig(config);

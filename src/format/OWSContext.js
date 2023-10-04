@@ -9,7 +9,8 @@ Ext.define('Ck.format.OWSContext', {
 		projection	: null,
 		scales		: null,
 		resolutions	: null,
-		layers		: []
+		layers		: [],
+        data        : {}
 	},
 
 	requires: [
@@ -21,6 +22,7 @@ Ext.define('Ck.format.OWSContext', {
 	 * @params {Object}
 	 */
 	constructor: function(config) {
+		var data = config.data;
 		var scales, proj, extent, resolutions = [], data = config.data;
 
 		// Scales
@@ -77,5 +79,14 @@ Ext.define('Ck.format.OWSContext', {
 			}
 		}
 		return res;
-	}
+	},
+
+	getExtension: function(key) {
+		var ext = this.getData().properties.extension || {};
+		if(Ext.isEmpty(key)) {
+			return ext;
+		} else {
+			return ext[key];
+		}
+	},
 });

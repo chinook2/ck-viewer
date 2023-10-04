@@ -535,7 +535,7 @@ Ext.apply(Ck, {
 
 
 	zoomToExtent: function(extent) {
-		this.getMap().getOlView().fit(extent, this.getMap().getOlMap().getSize());
+		this.getMap().getOlView().fit(extent);
 	},
 
 	/**

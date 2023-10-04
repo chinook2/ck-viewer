@@ -37,7 +37,7 @@
       * Required only if you are distributing this package through a Sencha Cmd repository,
       * in which case it should match the name you assign to your local package repository.
       */
-    "creator": "Memoris",
+    "creator": "Neogeo",
 
     /**
      * A summarized description of this package.
@@ -254,7 +254,7 @@
      */
     "css": [
         {
-            "path": "libs/ol3/ol.css"
+            "path": "libs/ol8/ol.css"
         }
     ],
 
@@ -274,9 +274,9 @@
 		 * Use "bundle" and "includeInBundle" proterties
 		 */
 		"js": [{
-			"path": "libs/ol3/ol-debug.js"
+			"path": "libs/ol8/ol.js"
 		},{
-			"path": "libs/ol3/ol.patch.js"
+			"path": "libs/ol8/ol.patch.js"
 		},{
 			"path": "libs/proj4js/proj4.js"
 		},{
@@ -324,9 +324,9 @@
          * see app.json for complete description
          */
         "js": [{
-    		"path": "libs/ol3/ol-debug.js"
+    		"path": "libs/ol8/ol.js"
     	},{
-    		"path": "libs/ol3/ol.patch.js"
+    		"path": "libs/ol8/ol.patch.js"
     	},{
     		"path": "libs/proj4js/proj4-src.js"
     	},{

@@ -34,7 +34,6 @@ Ext.define('Ck.map.action.MousePosition', {
 			className: 'ol-control ck-mouse-position'
 			//projection: 'EPSG:4326',
 			//target: document.getElementById('mouse-position'),
-			//undefinedHTML: '&nbsp;'
 		});
 
 		// TODO : manage in Actions.js if btn is pressed and call toggleAction...
