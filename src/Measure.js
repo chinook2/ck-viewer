@@ -121,7 +121,7 @@ Ext.define('Ck.Measure', {
 	 * Number of layer
 	 * @var Integer
 	 */
-	wgs84Sphere: new ol.Sphere(6378137),
+	//wgs84Sphere: new ol.sphere(6378137),
 
 	/**
 	 * Shortcut to get source storing the measures

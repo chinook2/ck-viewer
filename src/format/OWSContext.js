@@ -88,5 +88,5 @@ Ext.define('Ck.format.OWSContext', {
 		} else {
 			return ext[key];
 		}
-	},
+	}
 });
