@@ -121,7 +121,7 @@ Ext.define('Ck.Measure', {
 	 * Number of layer
 	 * @var Integer
 	 */
-	//wgs84Sphere: new ol.sphere(6378137),
+	wgs84Sphere: null,
 
 	/**
 	 * Shortcut to get source storing the measures
@@ -204,7 +204,7 @@ Ext.define('Ck.Measure', {
 		this.getMap().addSpecialLayer(this.getLayer());
 
 		// Update snap
-		this.getOlMap().on("moveend", this.updateSnappingFeatures, this);
+		this.getOlMap().on("moveend", this.updateSnappingFeatures.bind(this));
 
 
 		this.snapFeatures = new ol.Collection();
@@ -475,7 +475,9 @@ Ext.define('Ck.Measure', {
 		}
 
 		if(!Ext.isArray(lyrsToLoad)) {
-			this.snapFeatures.clear();
+            if (this.snapFeatures) {
+                this.snapFeatures.clear();
+            }
 		}
 
 		this.layersFeatures = [];

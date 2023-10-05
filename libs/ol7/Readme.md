@@ -1,6 +1,6 @@
-# ck-viewer/libs/ol8
+# ck-viewer/libs/ol7
 
-## OpenLayers 8.1.0
+## OpenLayers 7.5.2
 
 Files : 
 - ol.css : style
@@ -12,11 +12,11 @@ Use package.json to include sources :
 
     "js": [
         {
-            "path": "libs/ol8/ol-debug.js"
+            "path": "libs/ol7/ol.js"
         }
     ],
     "css": [
         {
-            "path": "libs/ol8/ol.css"
+            "path": "libs/ol7/ol.css"
         }
     ]
