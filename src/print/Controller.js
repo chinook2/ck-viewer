@@ -58,15 +58,6 @@ Ext.define('Ck.print.Controller', {
 	 * @var {DOMElement}
 	 */
 	mapImg: null, 
-    
-    bindings: {
-        onChangeValue: {
-			resolution: '{printParam.resolution}',
-			format: '{printParam.format}',
-			orientation: '{printParam.orientation}',
-			dpi:  '{printParam.dpi}'
-		}
-	},
 
 
 
@@ -188,9 +179,13 @@ Ext.define('Ck.print.Controller', {
 	 * Update preview box. Update view model data (binded data is refreshed too late)
 	 * Don't do anything for bind triggering (first call)
 	 */
-    onChangeValue: function(newValue) {
-		this.set(newValue);
-		this.updatePreview();
+    changeValue: function(field, newValue, oldValue, opts) {
+		if(opts.firstCall !== false) {
+			opts.firstCall = false;
+		} else {
+			this.set("printParam." + field.itemId, newValue);
+			this.updatePreview();
+		}
     },
 	
 	/**
