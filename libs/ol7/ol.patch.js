@@ -26,7 +26,7 @@ ol.interaction.Snap.handleEvent_ = function(evt) {
 
 // apply styleSnapped if needed
 ol.interaction.Draw.prototype.createOrUpdateSketchPoint_ = function(event) {
-  var coordinates = event.coordinate.slice();
+  var coordinates = event.slice(); // event returned is [x,y]
   if (!this.sketchPoint_) {
     this.sketchPoint_ = new ol.Feature(new ol.geom.Point(coordinates));
     this.updateSketchFeatures_();
@@ -67,7 +67,7 @@ ol.source.Vector.prototype.isExtentsLoaded = function(extents) {
 /**
  *  ADD viewParams parameter (Geoserver SQL View parameters)
  */
-ol.format.WFS.prototype.writeGetFeature = function(options) {
+/*ol.format.WFS.prototype.writeGetFeature = function(options) {
   var node = ol.xml.createElementNS(ol.format.WFS.WFSNS, 'GetFeature');
   node.setAttribute('service', 'WFS');
   node.setAttribute('version', '1.1.0');
@@ -103,7 +103,7 @@ ol.format.WFS.prototype.writeGetFeature = function(options) {
       ol.asserts.assert(options.geometryName,
           12); // `options.geometryName` must also be provided when `options.bbox` is set
       var bbox = ol.format.filter.bbox(
-          /** @type {string} */ (options.geometryName), options.bbox, options.srsName);
+          /** @type {string} *//* (options.geometryName), options.bbox, options.srsName);
       if (filter) {
         // if bbox and filter are both set, combine the two into a single filter
         filter = ol.format.filter.and(filter, bbox);
@@ -114,7 +114,7 @@ ol.format.WFS.prototype.writeGetFeature = function(options) {
   }
   ol.xml.setAttributeNS(node, 'http://www.w3.org/2001/XMLSchema-instance',
       'xsi:schemaLocation', this.schemaLocation_);
-  /** @type {ol.XmlNodeStackItem} */
+  /** @type {ol.XmlNodeStackItem} *//*
   var context = {
     node: node,
     'srsName': options.srsName,
@@ -126,9 +126,9 @@ ol.format.WFS.prototype.writeGetFeature = function(options) {
   };
   ol.asserts.assert(Array.isArray(options.featureTypes),
       11); // `options.featureTypes` should be an Array
-  ol.format.WFS.writeGetFeature_(node, /** @type {!Array.<string>} */ (options.featureTypes), [context]);
+  ol.format.WFS.writeGetFeature_(node, /** @type {!Array.<string>} *//* (options.featureTypes), [context]);
   return node;
-};
+};*/
 
 /**
  * Function to create a style with hash in Polygons at 45°.
