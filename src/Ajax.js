@@ -168,6 +168,27 @@ Ext.define('Ck.Ajax', {
 		}
 		xhr.send(fData);
 	},
+    
+    xhrBinaryData: function(options) {
+        var xhr = new XMLHttpRequest();
+        xhr.open(options.method || 'POST', options.url);
+        xhr.onreadystatechange = function() {
+			if (xhr.readyState == 4) {
+				if(xhr.status == 200 || xhr.status == 201 || xhr.status == 0) {
+					options.success.call(options.scope, xhr);
+				} else {
+					options.failure.call(options.scope, xhr);
+				}
+			}
+		};
+        if(Ext.isObject(options.headers)) {
+			for(var h in options.headers) {
+				var v = options.headers[h];
+				xhr.setRequestHeader(h, v);
+			}
+		}
+        xhr.send(options.file);
+    },
 
 	isCacheAvailable: function(options) {
 		// Only cache GET request
