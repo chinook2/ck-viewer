@@ -1,5 +1,14 @@
 {
     /**
+     * The namespace of this package.
+     *
+     * As a general rule, all classes that belong to this package should be under this namespace
+     * if multiple namespaces are part of this package, set this to "".
+     */
+    "namespace": "Ck",
+
+
+    /**
      * The name of the package.
      */
     "name": "ck-viewer",
@@ -30,6 +39,8 @@
      *
      */
     "toolkit": "classic",
+
+    "theme": "theme-material",
 
      /**
       * The author of the package.
@@ -70,6 +81,10 @@
      * This is set automatically by Sencha Cmd when first generating this file
      */
     "format": "1",
+
+    "properties": {
+        "skip.slice": 1
+    },
 
     /**
      * Additional resources used during theme slicing operations

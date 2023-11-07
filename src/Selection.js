@@ -11,6 +11,9 @@
  * For WFS callback parameter contain the reals features and not a clone
  */
 Ext.define('Ck.Selection', {
+    requires: [
+		'Ck'
+	],
 
 	config: {
 		/**

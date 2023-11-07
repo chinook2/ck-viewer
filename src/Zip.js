@@ -3,6 +3,9 @@
  */
 Ext.define('Ck.Zip', {
 	alternateClassName: 'CkZip',
+    requires: [
+		'Ck'
+	],
 
 	/**
 	 * @event filesloaded

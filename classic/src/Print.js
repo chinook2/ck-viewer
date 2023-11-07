@@ -59,8 +59,7 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{resolutions}",
 			value: "{printParam.resolution}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	},{
 		itemId: "printLayout",
 		name: "printLayout",
@@ -70,8 +69,7 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{layouts}",
 			value: "{printParam.layout}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	},{
 		itemId: "outputFormat",
 		name: "outputFormat",
@@ -81,8 +79,7 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{outputFormats}",
 			value: "{printParam.outputFormat}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	}/*,{
 		itemId: "dpi",
 		name: "dpi",
@@ -99,8 +96,7 @@ Ext.define("Ck.Print", {
 		bind: {
 			store: "{formats}",
 			value: "{printParam.format}"
-		},
-		listeners: { change: "changeValue" }
+		}
 	},{
 		xtype: "radiogroup",
 		name: "orientation",
@@ -112,8 +108,7 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Portrait", name: "orientation", inputValue: "p"},
 			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
 		],
-		bind: { value: "{printParam.orientation}" },
-		listeners: { change: "changeValue" }
+		bind: { value: "{printParam.orientation}" }
 	}],
 
 	buttons: [{

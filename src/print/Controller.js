@@ -57,9 +57,16 @@ Ext.define('Ck.print.Controller', {
 	 * Printed map image. Delete it after each printing.
 	 * @var {DOMElement}
 	 */
-	mapImg: null, 
-
-
+	mapImg: null,
+    
+    bindings: {
+        onChangeValue: {
+			resolution: '{printParam.resolution}',
+			format: '{printParam.format}',
+			orientation: '{printParam.orientation}',
+			dpi:  '{printParam.dpi}'
+		}
+	},
 
 	/**
 	 * Init the map component, init the viewModel.
@@ -135,9 +142,12 @@ Ext.define('Ck.print.Controller', {
 	 */
 	loadHTML: function(layoutId) {
 		var oLay = this.getStore("layouts").getById(layoutId);
-		
+		var path = Ck.getPath(oLay.get("packageName"));
+		if (path && !path.endsWith('/')) {
+			path = path + '/';
+		}
 		Cks.get({
-			url: Ck.getPath(oLay.get("packageName")) + "/print/" + layoutId + ".html",
+			url:  path + "print/" + layoutId + ".html",
 			scope: this,
 			success: function(response){
 				this.layoutsHTML[layoutId] = response.responseText;
@@ -156,9 +166,12 @@ Ext.define('Ck.print.Controller', {
 	 */
 	loadCss: function(layoutId) {
 		var oLay = this.getStore("layouts").getById(layoutId);
-		
+				var path = Ck.getPath(oLay.get("packageName"));
+		if (path && !path.endsWith('/')) {
+			path = path + '/';
+		}
 		Cks.get({
-			url: Ck.getPath(oLay.get("packageName")) + "/print/" + oLay.getId() + ".css",
+            url: path + "print/" + oLay.getId() + ".css",
 			scope: this,
 			success: function(response){
 				this.style.innerHTML = response.responseText;
@@ -179,13 +192,9 @@ Ext.define('Ck.print.Controller', {
 	 * Update preview box. Update view model data (binded data is refreshed too late)
 	 * Don't do anything for bind triggering (first call)
 	 */
-    changeValue: function(field, newValue, oldValue, opts) {
-		if(opts.firstCall !== false) {
-			opts.firstCall = false;
-		} else {
-			this.set("printParam." + field.itemId, newValue);
-			this.updatePreview();
-		}
+    onChangeValue: function(newValue) {
+		this.set(newValue);
+		this.updatePreview();
     },
 	
 	/**
@@ -290,7 +299,7 @@ Ext.define('Ck.print.Controller', {
 		// Hide preview vector
 		this.previewLayer.setVisible(false);
 
-		var rendererType = "canvas"; //this.getOlMap().getRenderer().getType();
+        var rendererType = "canvas"; //this.getOlMap().getRenderer().getType();
 		switch(rendererType) {
 			case "canvas":
 				if(!Ext.supports.Canvas) {
@@ -317,7 +326,7 @@ Ext.define('Ck.print.Controller', {
 		var win = this.getView().up('window');
 		if(win) win.close();
 	},
-    /**
+    	/**
 	 * 
 	 */
 	composeCanvas: function() {
