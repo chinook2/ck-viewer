@@ -23,6 +23,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 
 
 	initEditing: function(grid) {
+        var me = this;
 		this.grid = grid;
 
 		// Get parent ckform
@@ -65,7 +66,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 						return false;
 					},
 					getClass: function(v, meta, rec) {
-						if(!meta.record) return false; // hide icon on row editting
+						if(meta && !meta.record) return false; // hide icon on row editting
 						if(rec && rec.get('dummy')) return false;
 						if(rec && rec.isDummy === true) return false;
 						return 'ckClose';
@@ -94,13 +95,16 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			}
 
 			var txt = '';
-			if (this.deleteallrow !== false) {
-				// Html code to disply icon
-				txt = '<img role="button" alt="" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-action-col-icon ckClose" data-qtip="Delete all rows">';
-			}
+			
 			col.push({
 				xtype: 'actioncolumn',
 				text: txt,
+                afterText: function(out, values) {
+                    if (me.deleteallrow !== false) {
+                        // Html code to disply icon
+                        out.push('<img role="button" alt="x" src="data:image/gif;base64,R0lGODlhAQABAID/AMDAwAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==" class="x-action-col-icon ckClose" data-qtip="Delete all rows">');
+                    }
+                },
 				hidden: hide,
 				items: actions,
 				editor: false,
