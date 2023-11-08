@@ -320,7 +320,7 @@ Ext.define('Ck.edit.Controller', {
 			this.moveInteraction = new ol.interaction.Translate({
 				features: new ol.Collection([feature])
 			});
-			this.moveInteraction.on("translateend", this.pointTranslateEnd, this);
+			this.moveInteraction.on("translateend", this.pointTranslateEnd.bind(this));
 			this.getOlMap().addInteraction(this.moveInteraction);
 
 			// delete this.moveInteraction.previousCursor_;
