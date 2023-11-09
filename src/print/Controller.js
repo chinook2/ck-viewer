@@ -193,8 +193,10 @@ Ext.define('Ck.print.Controller', {
 	 * Don't do anything for bind triggering (first call)
 	 */
     onChangeValue: function(newValue) {
-		this.set(newValue);
-		this.updatePreview();
+        if (Object.keys(newValue).indexOf('dpi') > -1) { // Avoid case where not correct object given.
+			this.set(newValue);
+			this.updatePreview();
+		}
     },
 	
 	/**
@@ -512,13 +514,15 @@ Ext.define('Ck.print.Controller', {
 	 * Loop on all this.printValue members and put the values in the layout
 	 */
 	integratePrintValue: function() {
+        this.updatePreview();
 		this.printValue = this.getView().getForm().getValues();
 		this.addDefaultValues();
 
 		// Do substitutions
 		var layout = this.pageDiv.innerHTML;
 		for(var key in this.printValue) {
-			layout = layout.replace("{value:" + key + "}", this.printValue[key]);
+            var val =  this.printValue[key];
+			layout = layout.replace("{value:" + key + "}", Ext.isString(val) ? val.replace('\n','<br>') : val);
 		}
 		layout = layout.replace(new RegExp("{value:staticsrc}", 'g') , "src");
 
