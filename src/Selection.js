@@ -148,7 +148,12 @@ Ext.define('Ck.Selection', {
 		/**
 		 * When provide several layers, ignore WMS/WFS layers if found features in local Vector layers
 		 */
-		skipOwsLayers: false
+		skipOwsLayers: false,
+        
+        /**
+         * Additional filter to include to filter on property for example
+         */
+        additionalFilter: null
 	},
 
 	/**
@@ -531,17 +536,21 @@ Ext.define('Ck.Selection', {
 		//
 
 		var f = new ol.format.WFS();
+        var filter = new ol.format.filter.Intersects(
+				layer.getExtension("geometryColumn"),
+				selFt.getGeometry(),
+				this.getMap().getProjection().getCode()
+			);
+        if (this.getAdditionalFilter()) {
+            filter = new ol.format.filter.and(filter, this.getAdditionalFilter());
+        }
 		var gf = f.writeGetFeature({
 			srsName			: this.getMap().getProjection().getCode(),
 			featureTypes	: ope.getLayers().split(","),
 			geometryName	: layer.getExtension("geometryColumn"),
 			count			: this.getLimit(),
 			maxFeatures		: this.getLimit(),
-			filter			: new ol.format.filter.Intersects(
-				layer.getExtension("geometryColumn"),
-				selFt.getGeometry(),
-				this.getMap().getProjection().getCode()
-			)
+			filter			: filter
 		});
 
 		// Pre make reader options for readFeatures method
