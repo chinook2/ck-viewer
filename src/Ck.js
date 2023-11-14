@@ -561,6 +561,14 @@ Ext.apply(Ck, {
 			msg: msg
 		});
 	},
+	
+	/**
+	 * @inheritdoc Ext.Msg#alert
+	 */
+	alert: function(title, msg) {
+		if(!msg) return;
+		Ext.Msg.alert(title, msg);
+	},
 
 	/**
 	 * @inheritdoc Ext.Msg#alert
