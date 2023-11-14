@@ -27,7 +27,7 @@ Ext.define('Ck.Zip', {
 	 * File extensions to read as text
 	 * @type {Array} list of valid extensions
 	 */
-	readAsText: ['xml','txt','csv','json'],
+	readAsText: ['xml','txt','csv','json','geojson'],
 
 	/**
 	 * Called when Zip archives are open
@@ -36,6 +36,9 @@ Ext.define('Ck.Zip', {
 	onGetEntries: function(entries) {
 		this.files = {};
 		this.nbFiles = entries.length;
+        if (this.nbFiles < 1 && Ext.isFunction(this.onError)) {
+           this.onError('no file in zip'); 
+		}
 		entries.forEach(this.getEntryFile.bind(this));
 	},
 
