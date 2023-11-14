@@ -28,7 +28,7 @@ Ext.define('Ck.Zip', {
 	 * File extensions to read as text
 	 * @type {Array} list of valid extensions
 	 */
-	readAsText: ['xml','txt','csv','json','prj'],
+	readAsText: ['xml','txt','csv','json','prj','geojson'],
 
 	/**
 	 * Called when Zip archives are open
