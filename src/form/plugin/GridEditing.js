@@ -109,7 +109,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 				items: actions,
 				editor: false,
 				cellWrap: false,
-				flex: 0
+				flex: 0,
+				maxWidth: actions.length * 30 // ensure not too large column
 			});
 
 			// Helper to identify by CSS first cell for dummy row
