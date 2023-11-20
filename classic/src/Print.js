@@ -17,7 +17,6 @@ Ext.define("Ck.Print", {
 	},
 
 	config: {
-		bodyPadding: 10,
 		defaultType: "textfield",
 		defaults: {
 			width: "100%"
@@ -109,14 +108,6 @@ Ext.define("Ck.Print", {
 			{boxLabel: "Landscape", name: "orientation", inputValue: "l"}
 		],
 		bind: { value: "{printParam.orientation}" }
-	}],
-
-	buttons: [{
-		text: "Print",
-		handler: "beforePrint"
-	},{
-		text: "Cancel",
-		handler: "cancel"
 	}],
 
 	cls: "ckprint"

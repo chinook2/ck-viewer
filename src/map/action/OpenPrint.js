@@ -59,7 +59,18 @@ Ext.define('Ck.map.action.OpenPrint', {
 					close: this.print.getController().hidePreview,
 					show: this.print.getController().showPreview,
 					scope: this.print.getController()
-				}
+				},
+				buttons: [{
+					text: "Print",
+					handler: this.print.getController().beforePrint.bind(this.print.getController()),
+					scale : 'medium',
+					cls : 'i-primary-btn i-upper-btn'
+				},{
+					text: "Cancel",
+					handler: this.print.getController().cancel.bind(this.print.getController()),
+					scale : 'medium',
+					cls : 'i-upper-btn'
+				}]
 			});
 
 			this.win = Ext.create(this.classWindow, this.winOpt);

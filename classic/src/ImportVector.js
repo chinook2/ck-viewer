@@ -19,7 +19,6 @@ Ext.define("Ck.ImportVector", {
 	},
 
 	config: {
-		bodyPadding: 10,
 		defaultType: "combo",
 		defaults: {
 			width: "100%"
