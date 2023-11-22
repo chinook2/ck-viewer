@@ -54,12 +54,13 @@ Ext.define('Ck.map.action.OpenOverview', {
 			this.win = Ext.create(this.getWinClass() ? this.getWinClass() : this.classWindow, {
 				resizable: false,
 				modal: false,
+				ckview: this.button.up('ckview'),
 				layout: 'fit',
                 closeAction: 'method-destroy',
 				items: this.ov,
 				bodyPadding: "0 0 0 0",
 				parentMap: this.getMap(),
-                header: header,
+                //header: header,
 				listeners: {
 					close: function() {
 						this.close();

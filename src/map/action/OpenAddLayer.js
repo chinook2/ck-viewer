@@ -16,7 +16,7 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 	tooltip: 'Open add layer panel',
 
 	config: {
-		winWidth: 400,
+		winWidth: 600,
 		winHeight: 250,
 		winCollapsible: true,
 		winMaximizable: true
@@ -39,12 +39,11 @@ Ext.define('Ck.map.action.OpenAddLayer', {
 				title: 'Add Layer',
 				height: this.getWinHeight(),
 				width: this.getWinWidth(),
-				minHeight: 250,
+				minHeight: 300,
 				minWidth: 300,
+				modal: true,
 				layout: 'fit',
 				closeAction: 'hide',
-				collapsible: this.getWinCollapsible(),
-				maximizable: this.getWinMaximizable(),
 				ckview: this.getCkView().getView(),
 				parentMap: this.getMap(),
 				items: {

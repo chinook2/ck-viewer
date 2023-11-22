@@ -74,7 +74,7 @@ Ext.define("Ck.Goto", {
 		xtype: 'ckgoto-dms',
 		hidden: true
 	}],
-	bbar: ["->",{
+	buttons: [{
 		text: "Clear marker",
 		handler: "clearMarker",
 		scale : 'medium',
@@ -83,6 +83,6 @@ Ext.define("Ck.Goto", {
 		text: "Go to position",
 		handler: "goTo",
 		scale : 'medium',
-		cls : 'i-upper-btn'
+		cls : 'i-primary-btn i-upper-btn'
 	}]
 });

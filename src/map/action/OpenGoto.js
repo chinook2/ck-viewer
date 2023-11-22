@@ -16,13 +16,13 @@ Ext.define('Ck.map.action.OpenGoto', {
 		 * Width of window
 		 * @prop {Integer}
 		 */
-		winWidth: 400,
+		winWidth: 430,
 
 		/**
 		 * Height of window
 		 * @prop {Integer}
 		 */
-		winHeight: 200,
+		winHeight: 350,
 
 		/**
 		 * Title of window
