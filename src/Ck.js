@@ -570,6 +570,20 @@ Ext.apply(Ck, {
 		Ext.Msg.alert(title, msg);
 	},
 
+	info: function(title, msg, callback) {
+		Ext.Msg.show({
+			title: title,
+			message: msg,
+			buttons: Ext.Msg.OK,
+			icon: Ext.Msg.INFO,
+			fn: function(btn) {
+				if (Ext.isFunction(callback)) {
+					callback(msg);
+				}
+			}
+		});
+	},
+
 	/**
 	 * Create an object from a config object
 	 * @param {String/Object}		Class name or config object. Config object must have "xtype" and "config" member
