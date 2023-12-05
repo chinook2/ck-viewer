@@ -587,8 +587,8 @@ Ext.define('Ck.map.Controller', {
 				group: lyrGroup,
 				extent: extent,
 				opacity: layer.getExtension('opacity') || 1,
-				maxResolution: (maxRes == Infinity)? Infinity : this.getNearestResolution(maxRes),
-				minResolution: (maxRes == 0)? 0 : this.getNearestResolution(minRes),
+				maxResolution: maxRes,
+				minResolution: minRes,
 				style: olStyle,
 				visible: layer.getVisible(),
 				path: path,
@@ -1194,7 +1194,10 @@ Ext.define('Ck.map.Controller', {
 		var inRange = false;
 		if(layer.ckLayer) {
 			var res = this.getOlView().getResolution();
-			inRange = (layer.ckLayer.getMaxResolution() > res && layer.ckLayer.getMinResolution() < res);
+			// https://openlayers.org/en/v7.5.2/apidoc/module-ol_layer_Base-BaseLayer.html
+			// minResolution: inclusive
+			// maxResolution: exclusive
+			inRange = (layer.ckLayer.getMaxResolution() > res && layer.ckLayer.getMinResolution() <= res);
 		}
 		return inRange;
 	},

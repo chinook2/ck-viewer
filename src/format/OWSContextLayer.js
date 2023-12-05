@@ -83,7 +83,9 @@ Ext.define('Ck.format.OWSContextLayer', {
 			} else {
 				proj = Ck.getMap().getOlView().getProjection();
 			}
-			this._minResolution = Ck.getResolutionFromScale(value, proj);
+			var resol = this.getNearestResolution(Ck.getResolutionFromScale(value, proj));
+			this._minResolution = resol;
+			this.setMinResolution(resol);
 		}
 	},
 
@@ -98,7 +100,9 @@ Ext.define('Ck.format.OWSContextLayer', {
 			} else {
 				proj = Ck.getMap().getOlView().getProjection();
 			}
-			this._maxResolution = Ck.getResolutionFromScale(value, proj);
+			var resol = this.getNearestResolution(Ck.getResolutionFromScale(value, proj));
+			this._maxResolution = resol;
+			this.setMaxResolution(resol);
 		}
 	},
 
@@ -180,5 +184,24 @@ Ext.define('Ck.format.OWSContextLayer', {
 		}
 
 		return offering;
-	}
+	},
+
+	getNearestResolution: function(res, offset, upper) {
+		var idx = 0, mapRes = this.getOwsContext().getResolutions();
+
+		var nrRes = Math.closest(res, mapRes);
+		idx = mapRes.indexOf(nrRes);
+
+		if(offset > 0) {
+			upper = (upper === true)? 1 : -1;
+			for(var i = 0; i < offset; i++) {
+				idx = idx + upper;
+				if(Ext.isNumeric(mapRes[idx])) {
+					nrRes = mapRes[idx];
+				}
+			}
+		}
+
+		return nrRes;
+	},
 });
