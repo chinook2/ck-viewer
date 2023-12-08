@@ -235,9 +235,9 @@ Ext.define('Ck.Measure', {
 	 * @param {ol.MapBrowserEvent} evt
 	 */
 	pointerMoveHandler: function(evt) {
-		if (evt.dragging) {
+		/*if (evt.dragging) {
 			return;
-		}
+		}*/
 
 		var tooltipCoord = evt.coordinate;
 
