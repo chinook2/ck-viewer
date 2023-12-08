@@ -30,6 +30,7 @@ Ext.define("Ck.edit.Vertex", {
 			ptype: 'gridediting'
 		},{
 			ptype: "rowediting",
+			errorSummary : false,
 			clicksToEdit: 1
 		}],
 		

@@ -1102,6 +1102,7 @@ Ext.define('Ck.form.Controller', {
 							ptype: 'gridediting'
 						}, {
 							ptype: 'rowediting',
+							errorSummary : false,
 							pluginId: 'rowediting',
 							clicksToEdit: 1
 						}]);
