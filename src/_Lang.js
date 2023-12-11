@@ -197,7 +197,7 @@ Ck._Lang.setCurrentLang(loc.split('-')[0]);
 Ck.text = function(label, lang) { return Ck._Lang.t(label, lang || Ck._Lang.getCurrentLang() || Ck._Lang.getDefaultLang());};
 Ck.textFormat = function(label, variables) {
 	var text = Ck.text(label);
-	for (let k in variables) {
+	for (var k in variables) {
 		text = text.replace('{' + k + '}', variables[k]);
 	}
 	return text;

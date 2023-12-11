@@ -132,6 +132,8 @@ Ext.define('Ck.Action', {
 						this.doAction.apply(this, arguments);
 					}
 				} catch (e) {
+                    console.log(e.message);
+                    console.log(e);
 					Ck.Notify.error("Chinook Action Error :: " + e.message, e);
 				}
 			},
@@ -142,6 +144,8 @@ Ext.define('Ck.Action', {
 				try {
 					this.toggleAction.apply(this, arguments);
 				} catch (e) {
+                    console.log(e.message);
+                    console.log(e);
 					Ck.Notify.error("Chinook Action Error :: " + e.message, e);
 				}
 			},
@@ -151,6 +155,8 @@ Ext.define('Ck.Action', {
 				try {
 					this.toggleAction.apply(this, arguments);
 				} catch (e) {
+                    console.log(e.message);
+                    console.log(e);
 					Ck.Notify.error("Chinook Action Error :: " + e.message, e);
 				}
 			},
