@@ -89,7 +89,7 @@ Ext.define("Ck.Print", {
 	}*/,{
 		itemId: "format",
 		name: "format",
-		fieldLabel: "Format",
+		fieldLabel: "Paper Size",
 		displayField: "label",
 		valueField: "id",
 		bind: {
