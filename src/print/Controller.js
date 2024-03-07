@@ -11,545 +11,593 @@
  * - peparePrint move olMap
  */
 Ext.define('Ck.print.Controller', {
-	extend: 'Ck.Controller',
-	alias: 'controller.ckprint',
+    extend: 'Ck.Controller',
+    alias: 'controller.ckprint',
 
-	config: {
-		maskMsg: Ck.text('print_msg_progress')
-	},
+    config: {
+        maskMsg: Ck.text('print_msg_progress')
+    },
+    printLegendOnNewPage: false,
 
-	/**
-	 * List of parameters to configure the print (dpi, format, layout, resolution, )
-	 */
-	// printParam: {},
-	
-	/**
-	 * List of values to integrate in the print layout
-	 * @var {Object}
-	 */
-	printValue: {},
+    /**
+     * List of parameters to configure the print (dpi, format, layout, resolution, )
+     */
+    // printParam: {},
 
-	/**
-	 * Layer hosting preview vector
-	 * @var {ol.layer.Victor}
-	 */
-	previewLayer: null,
+    /**
+     * List of values to integrate in the print layout
+     * @var {Object}
+     */
+    printValue: {},
 
-	/**
-	 * HTML layouts { layoutId : layoutHTMLString }
-	 * @var {Object}
-	 */
-	layoutsHTML: {},
+    /**
+     * Layer hosting preview vector
+     * @var {ol.layer.Victor}
+     */
+    previewLayer: null,
 
-	/**
-	 * Div element
-	 * @var {DOMElement}
-	 */
-	layoutDiv: null,
+    /**
+     * HTML layouts { layoutId : layoutHTMLString }
+     * @var {Object}
+     */
+    layoutsHTML: {},
 
-	/**
-	 * Div element where the canvas will be put
-	 * @var {DOMElement}
-	 */
-	printDiv: null,
+    /**
+     * Div element
+     * @var {DOMElement}
+     */
+    layoutDiv: null,
 
-	/**
-	 * Printed map image. Delete it after each printing.
-	 * @var {DOMElement}
-	 */
-	mapImg: null,
+    /**
+     * Div element where the canvas will be put
+     * @var {DOMElement}
+     */
+    printDiv: null,
+
+    /**
+     * Printed map image. Delete it after each printing.
+     * @var {DOMElement}
+     */
+    mapImg: null,
 
     bindings: {
         onChangeValue: {
-			resolution: '{printParam.resolution}',
-			format: '{printParam.format}',
-			orientation: '{printParam.orientation}',
-			dpi:  '{printParam.dpi}'
-		}
-	},
-	
-	/**
-	 * Init the map component, init the viewModel.
-	 * @protected
-	 */
-	init: function() {
-		this.callParent(arguments);
+            resolution: '{printParam.resolution}',
+            format: '{printParam.format}',
+            orientation: '{printParam.orientation}',
+            dpi: '{printParam.dpi}'
+        }
+    },
 
-		this.loadResolutions();
+    /**
+     * Init the map component, init the viewModel.
+     * @protected
+     */
+    init: function () {
+        this.callParent(arguments);
 
-		// Creation preview layer
-		this.previewLayer = new ol.layer.Vector({
-			source: new ol.source.Vector(),
-			style: new ol.style.Style({
-				fill: new ol.style.Fill({
-					color: this.get("previewParam.fill.color") || 'rgba(255, 255, 255, 0.2)'
-				}),
-				stroke: new ol.style.Stroke({
-					color: this.get("previewParam.stroke.color") || '#ffcc33',
-					width: this.get("previewParam.stroke.width") || 1
-				})
-			})
-		});
-		this.getMap().addSpecialLayer(this.previewLayer);
+        this.loadResolutions();
 
-		// Init print value
-		var fields = this.view.getForm().getFields();
-		fields.each(function(field) {
-			this.printValue[field.name] = field.getValue() || "";
-		}, this);
+        // Creation preview layer
+        this.previewLayer = new ol.layer.Vector({
+            source: new ol.source.Vector(),
+            style: new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: this.get("previewParam.fill.color") || 'rgba(255, 255, 255, 0.2)'
+                }),
+                stroke: new ol.style.Stroke({
+                    color: this.get("previewParam.stroke.color") || '#ffcc33',
+                    width: this.get("previewParam.stroke.width") || 1
+                })
+            })
+        });
+        this.getMap().addSpecialLayer(this.previewLayer);
 
-		// Stylesheet for print div
-		this.style = document.createElement("style");
-		this.style.appendChild(document.createTextNode(""));
-		document.head.appendChild(this.style);
+        // Init print value
+        var fields = this.view.getForm().getFields();
+        fields.each(function (field) {
+            this.printValue[field.name] = field.getValue() || "";
+        }, this);
 
-		// Use ol.interaction.Translate
-		// Add DragFeature interaction to move preview
-		this.moveInteraction = new ol.interaction.Translate({
-			features: new ol.Collection([])
-		});
-		this.getOlMap().addInteraction(this.moveInteraction);
-		
-		// Hide layout combo if they are only 1 layout
-		this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 1);
+        // Stylesheet for print div
+        this.style = document.createElement("style");
+        this.style.appendChild(document.createTextNode(""));
+        document.head.appendChild(this.style);
 
-		// Create the mask
-		this.mask = new Ext.LoadMask({
-			msg: this.getMaskMsg(),
-			target: this.getMap().getView()
-		});
-	},
+        // Use ol.interaction.Translate
+        // Add DragFeature interaction to move preview
+        this.moveInteraction = new ol.interaction.Translate({
+            features: new ol.Collection([])
+        });
+        this.getOlMap().addInteraction(this.moveInteraction);
 
-	destroy: function () {
-		this.mask = null;
-	},
+        // Hide layout combo if they are only 1 layout
+        this.getView().items.get("printLayout").setVisible(this.getStore("layouts").getCount() > 1);
 
-	/**
-	 * Load resolutions list from OwsContext
-	 */
-	loadResolutions: function() {
-		var data = this.getMap().originOwc.getScales();
+        // Create the mask
+        this.mask = new Ext.LoadMask({
+            msg: this.getMaskMsg(),
+            target: this.getMap().getView()
+        });
+    },
 
-		this.getStore("resolutions").loadData(data);
-		
-		if(this.get("printParam.resolution") == null) {
-			this.set("printParam.resolution", this.getMap().getNearestResolution(this.getOlView().getResolution(), 1));
-		}
-	},
+    destroy: function () {
+        this.mask = null;
+    },
 
-	/**
-	 * Load corresponding json print layout
-	 */
-	loadHTML: function(layoutId) {
-		var oLay = this.getStore("layouts").getById(layoutId);
-		var path = Ck.getPath(oLay.get("packageName"));
-		if (path && !path.endsWith('/')) {
-			path = path + '/';
-		}
-		Cks.get({
-			url:  path + "print/" + layoutId + ".html",
-			scope: this,
-			success: function(response){
-				this.layoutsHTML[layoutId] = response.responseText;
-				this.loadCss(layoutId);
-			},
-			failure: function(response, opts) {
-				Ck.error('Error when loading the print layout !');
-			}
-		});
-	},
+    /**
+     * Load resolutions list from OwsContext
+     */
+    loadResolutions: function () {
+        var data = this.getMap().originOwc.getScales();
 
-	// TODO: merge css in the html template layout (get template from ck-viewer / app / api
+        this.getStore("resolutions").loadData(data);
 
-	/**
-	 * Load and add CSS to the document
-	 */
-	loadCss: function(layoutId) {
-		var oLay = this.getStore("layouts").getById(layoutId);
-		var path = Ck.getPath(oLay.get("packageName"));
-		if (path && !path.endsWith('/')) {
-			path = path + '/';
-		}
-		Cks.get({
-			url: path + "print/" + oLay.getId() + ".css",
-			scope: this,
-			success: function(response){
-				this.style.innerHTML = response.responseText;
-				this.updatePreview();
-			}
-		});
+        if (this.get("printParam.resolution") == null) {
+            this.set("printParam.resolution", this.getMap().getNearestResolution(this.getOlView().getResolution(), 1));
+        }
+    },
 
-	},
-	
-	/**
-	 * Display preview when view is rendered
-	 */
-	displayPreview: function() {
-		this.updatePreview();
-	},
-	
-	/**
-	 * Update preview box. Update view model data (binded data is refreshed too late)
-	 * Don't do anything for bind triggering (first call)
-	 */
-	onChangeValue: function(newValue) {
-		if (Object.keys(newValue).indexOf('dpi') > -1) { // Avoid case where not correct object given.
-			this.set(newValue);
-			this.updatePreview();
-		}
-	},
+    /**
+     * Load corresponding json print layout
+     */
+    loadHTML: function (layoutId) {
+        var oLay = this.getStore("layouts").getById(layoutId);
+        var path = Ck.getPath(oLay.get("packageName"));
+        if (path && !path.endsWith('/')) {
+            path = path + '/';
+        }
+        Cks.get({
+            url: path + "print/" + layoutId + ".html",
+            scope: this,
+            success: function (response) {
+                this.layoutsHTML[layoutId] = response.responseText;
+                this.loadCss(layoutId);
+            },
+            failure: function (response, opts) {
+                Ck.error('Error when loading the print layout !');
+            }
+        });
+    },
 
-	/**
-	 * Update the preview feature from layout, format and orientation
-	 */
-	updatePreview: function() {
-		var layoutHTML = this.layoutsHTML[this.get("printParam.layout")];
-		
-		if(!Ext.isString(layoutHTML)) {
-			this.loadHTML(this.get("printParam.layout"));
-			return false;
-		}
-		
-		this.renderLayout(layoutHTML);
-		
-		var center = this.getMap().getOlView().getCenter();
-		if(this.feature) {
-			center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
-			this.previewLayer.getSource().clear();
-		}
+    // TODO: merge css in the html template layout (get template from ck-viewer / app / api
 
-		var coordinate = [
-			center[0] - (this.mapSize[0] / 2),
-			center[1] - (this.mapSize[1] / 2),
-			center[0] + (this.mapSize[0] / 2),
-			center[1] + (this.mapSize[1] / 2)
-		];
+    /**
+     * Load and add CSS to the document
+     */
+    loadCss: function (layoutId) {
+        var oLay = this.getStore("layouts").getById(layoutId);
+        var path = Ck.getPath(oLay.get("packageName"));
+        if (path && !path.endsWith('/')) {
+            path = path + '/';
+        }
+        Cks.get({
+            url: path + "print/" + oLay.getId() + ".css",
+            scope: this,
+            success: function (response) {
+                this.style.innerHTML = response.responseText;
+                this.updatePreview();
+            }
+        });
 
-		this.feature = new ol.Feature({
-			geometry: new ol.geom.Polygon.fromExtent(coordinate)
-		});
-		this.moveInteraction.features_ = new ol.Collection([this.feature]);
-		this.previewLayer.getSource().addFeature(this.feature);
-	},
+    },
 
-	/**
-	 * Render the HTML layout just to calculate some variables. Remove it after
-	 *		- pageSize : printed page in CENTIMETERS (with margins) -> use to create pageCanvas
-	 *		- mapSize : size of the map in METERS -> use to draw preview
-	 *		- canvasSize : canvas size to print in PIXEL -> use for making div
-	 * @param {String} The HTML string
-	 */
-	renderLayout: function(layoutHTML) {
-		var parser = new DOMParser();
-		var htmlLayout = parser.parseFromString(layoutHTML, "text/html");
-		this.pageDiv = htmlLayout.getElementById("ckPrint-page");
-		if (!this.pageDiv) return;
+    /**
+     * Display preview when view is rendered
+     */
+    displayPreview: function () {
+        this.updatePreview();
+    },
 
-		if(this.layoutDiv) {
-			Ext.get(this.layoutDiv).remove();
-		}
+    /**
+     * Update preview box. Update view model data (binded data is refreshed too late)
+     * Don't do anything for bind triggering (first call)
+     */
+    onChangeValue: function (newValue) {
+        if (Object.keys(newValue).indexOf('dpi') > -1) { // Avoid case where not correct object given.
+            this.set(newValue);
+            this.updatePreview();
+        }
+    },
 
-		// Size of final print page in cm
-		this.pageSize = Ck.pageSize[this.get("printParam.format")];
-		if (!this.pageSize) return;
-		this.pageSize = this.pageSize.slice(0); // Clone
-		// transform to cm
-		this.pageSize[0] /= 10;
-		this.pageSize[1] /= 10;
+    /**
+     * Update the preview feature from layout, format and orientation
+     */
+    updatePreview: function () {
+        var layoutHTML = this.layoutsHTML[this.get("printParam.layout")];
 
-		// Reverse size according to orientation
-		if(this.get("printParam.orientation").orientation == "l") {
-			this.pageSize.reverse();
-		}
+        if (!Ext.isString(layoutHTML)) {
+            this.loadHTML(this.get("printParam.layout"));
+            return false;
+        }
 
-		// Apply DPI to get number of dot (pixel) needed
-		this.pageDiv.style.width = Math.floor((this.pageSize[0] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
-		this.pageDiv.style.height = Math.floor((this.pageSize[1] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
+        this.renderLayout(layoutHTML);
 
-		// Insert pageDiv in layout div
-		var dh = Ext.DomHelper;
-		this.layoutDiv = dh.append(document.body, {
-			tag: 'div',
-			id: 'ckprint-layoutdiv',
-			style: {
-				position: 'absolute',
-				left: "100%", // Comment to display layout
-				zIndex: 500
-			}
-		});
-		this.layoutDiv.appendChild(this.pageDiv);
+        var center = this.getMap().getOlView().getCenter();
+        if (this.feature) {
+            center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
+            this.previewLayer.getSource().clear();
+        }
 
-		// Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
-		var mapDiv = Ext.get("ckPrint-map");
-		this.mapDiv = mapDiv.dom;
-		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
+        var coordinate = [
+            center[0] - (this.mapSize[0] / 2),
+            center[1] - (this.mapSize[1] / 2),
+            center[0] + (this.mapSize[0] / 2),
+            center[1] + (this.mapSize[1] / 2)
+        ];
 
-		// Calculate mapSize
-		var res = this.get("printParam.resolution");
-		this.mapSize = [
-			(this.canvasSize[0] * res),
-			(this.canvasSize[1] * res)
-		];
-	},
+        this.feature = new ol.Feature({
+            geometry: new ol.geom.Polygon.fromExtent(coordinate)
+        });
+        this.moveInteraction.features_ = new ol.Collection([this.feature]);
+        this.previewLayer.getSource().addFeature(this.feature);
+    },
 
-	/**
-	 * Check how the document will be print
-	 */
-	beforePrint: function(btn) {
-		// Hide preview vector
-		this.previewLayer.setVisible(false);
+    /**
+     * Render the HTML layout just to calculate some variables. Remove it after
+     *		- pageSize : printed page in CENTIMETERS (with margins) -> use to create pageCanvas
+     *		- mapSize : size of the map in METERS -> use to draw preview
+     *		- canvasSize : canvas size to print in PIXEL -> use for making div
+     * @param {String} The HTML string
+     */
+    renderLayout: function (layoutHTML) {
+        var parser = new DOMParser();
+        var htmlLayout = parser.parseFromString(layoutHTML, "text/html");
+        this.pageDiv = htmlLayout.getElementById("ckPrint-page");
+        if (!this.pageDiv) return;
 
-		var rendererType = "canvas"; //this.getOlMap().getRenderer().getType();
-		switch(rendererType) {
-			case "canvas":
-				if(!Ext.supports.Canvas) {
-					Ext.Msg.show({
-						title: "Print error",
-						message: "Your browser doesn't support canvas and print tool need it. Use a modern browser.",
-						icone: Ext.Msg.Error,
-						buttons: Ext.Msg.OK
-					})
-				}
-				this.preparePrint();
-				break;
-			case "webgl":
-			default:
-				Ext.Msg.show({
-					message: "Chinook doesn't support printing from " + rendererType + " rendering map",
-					icon: Ext.Msg.ERROR,
-					buttons: Ext.Msg.OK
-				});
-				return false;
-		}
+        if (this.layoutDiv) {
+            Ext.get(this.layoutDiv).remove();
+        }
 
-		// Close popup
-		var win = this.getView().up('window');
-		if(win) win.close();
-	},
+        // Size of final print page in cm
+        this.pageSize = Ck.pageSize[this.get("printParam.format")];
+        if (!this.pageSize) return;
+        this.pageSize = this.pageSize.slice(0); // Clone
+        // transform to cm
+        this.pageSize[0] /= 10;
+        this.pageSize[1] /= 10;
 
-	/**
-	 * 
-	 */
-	composeCanvas: function() {
-		var mapCanvas = document.createElement('canvas');
-		var size = this.getOlMap().getSize();
-		mapCanvas.width = size[0];
-		mapCanvas.height = size[1];
-		var mapContext = mapCanvas.getContext('2d');
+        // Reverse size according to orientation
+        if (this.get("printParam.orientation").orientation == "l") {
+            this.pageSize.reverse();
+        }
 
-		Array.prototype.forEach.call(
-		  document.querySelectorAll('.ol-layer canvas'),
-		  function (canvas) {
-			if (canvas.width > 0) {
-			  var opacity = canvas.parentNode.style.opacity;
-			  mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
-			  var transform = canvas.style.transform;
-			  // Get the transform parameters from the style's transform matrix
-			  var matrix = transform
-				.match(/^matrix\(([^\(]*)\)$/)[1]
-				.split(',')
-				.map(Number);
-			  // Apply the transform to the export map context
-			  CanvasRenderingContext2D.prototype.setTransform.apply(
-				mapContext,
-				matrix
-			  );
-			  mapContext.drawImage(canvas, 0, 0);
-			}
-		  }
-		);
+        // Apply DPI to get number of dot (pixel) needed
+        this.pageDiv.style.width = Math.floor((this.pageSize[0] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
+        this.pageDiv.style.height = Math.floor((this.pageSize[1] / Ck.CM_PER_INCH) * this.get("printParam.dpi")).toString() + "px";
 
-		return mapCanvas;
-	},
+        // Insert pageDiv in layout div
+        var dh = Ext.DomHelper;
+        this.layoutDiv = dh.append(document.body, {
+            tag: 'div',
+            id: 'ckprint-layoutdiv',
+            style: {
+                position: 'absolute',
+                left: "100%", // Comment to display layout
+                zIndex: 500
+            }
+        });
+        this.layoutDiv.appendChild(this.pageDiv);
 
-	/**
-	 * Create a snapshot of the map and display it on the user interface. <br/>
-	 * Move the ol.Map in an invisible div to zoom on the right extent <br/>
-	 * Hide preview box to didn't print it <br/>
-	 * Hide listener to call the print method when all layers are loaded
-	 */
-	preparePrint: function() {
-		// Save current view param
-		this.oldRes = this.getOlView().getResolution();
-		this.oldCenter = this.getOlView().getCenter();
-		this.mapTarget = Ext.get(this.getOlMap().getTarget()).dom;
-		if(!this.canvasSize) {
-			return;
-		}
+        // Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
+        var mapDiv = Ext.get("ckPrint-map");
+        this.mapDiv = mapDiv.dom;
+        this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 
-		this.mask.show();
-		this.getOlMap().once('rendercomplete', function() {
-			// First display fake map on the screen during the real print
-			var mapCanvas = this.composeCanvas();
-			var mapCtx = mapCanvas.getContext("2d");
-			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+        // Calculate mapSize
+        var res = this.get("printParam.resolution");
+        this.mapSize = [
+            (this.canvasSize[0] * res),
+            (this.canvasSize[1] * res)
+        ];
+    },
 
-			var dh = Ext.DomHelper;
+    /**
+     * Check how the document will be print
+     */
+    beforePrint: function (btn) {
+        // Hide preview vector
+        this.previewLayer.setVisible(false);
 
-			// Create the img element and add over map
-			this.fakeMap = dh.append(this.mapTarget, {
-				tag: 'img',
-				src: uri
-			});
-			
-			// Fix map size from web browser
-			// README: (SFR-529): issue with screen resolution and/or browser zoom: the image is truncated when using "devicePixelRatio" or ZOOMRATIO, but not when using normal size
-			var mapWidth = (this.canvasSize[0]  );// ( window.devicePixelRatio || window.ZOOMRATIO || 1));
-			var mapHeight = (this.canvasSize[1]  );// (window.devicePixelRatio || window.ZOOMRATIO || 1));
+        var rendererType = "canvas"; //this.getOlMap().getRenderer().getType();
+        switch (rendererType) {
+            case "canvas":
+                if (!Ext.supports.Canvas) {
+                    Ext.Msg.show({
+                        title: "Print error",
+                        message: "Your browser doesn't support canvas and print tool need it. Use a modern browser.",
+                        icone: Ext.Msg.Error,
+                        buttons: Ext.Msg.OK
+                    })
+                }
+                this.preparePrint();
+                break;
+            case "webgl":
+            default:
+                Ext.Msg.show({
+                    message: "Chinook doesn't support printing from " + rendererType + " rendering map",
+                    icon: Ext.Msg.ERROR,
+                    buttons: Ext.Msg.OK
+                });
+                return false;
+        }
 
-			// Move map to invisible div to print with right resolution
-			this.printDiv = dh.append(document.body, {
-				tag: 'div',
-				id: 'ckprint-div',
-				style: {
-					position: 'absolute',
-					top: (screen.height) + "px", // Comment to display div
-					width: mapWidth.toString() + "px",
-					height: mapHeight.toString() + "px"
-				}
-			});
-			this.getOlMap().setTarget(this.printDiv);
+        // Close popup
+        var win = this.getView().up('window');
+        if (win) win.close();
+    },
 
+    /**
+     * 
+     */
+    composeCanvas: function () {
+        var mapCanvas = document.createElement('canvas');
+        var size = this.getOlMap().getSize();
+        mapCanvas.width = size[0];
+        mapCanvas.height = size[1];
+        var mapContext = mapCanvas.getContext('2d');
 
-			// Zoom on the desired extent
-			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
-			var res = this.get("printParam.resolution");
-			this.getMap().setCenter(center);
-			this.getMap().setResolution(res);
+        Array.prototype.forEach.call(
+            document.querySelectorAll('.ol-layer canvas'),
+            function (canvas) {
+                if (canvas.width > 0) {
+                    var opacity = canvas.parentNode.style.opacity;
+                    mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
+                    var transform = canvas.style.transform;
+                    // Get the transform parameters from the style's transform matrix
+                    var matrix = transform
+                        .match(/^matrix\(([^\(]*)\)$/)[1]
+                        .split(',')
+                        .map(Number);
+                    // Apply the transform to the export map context
+                    CanvasRenderingContext2D.prototype.setTransform.apply(
+                        mapContext,
+                        matrix
+                    );
+                    mapContext.drawImage(canvas, 0, 0);
+                }
+            }
+        );
 
-			// Call print when all layers are drawed
-			this.getMap().on('layersloaded', this.print, this, {
-				single: true
-			});
+        return mapCanvas;
+    },
 
-			this.getMap().redraw();
-		}.bind(this));
-		this.getOlMap().renderSync();
-	},
+    /**
+     * Create a snapshot of the map and display it on the user interface. <br/>
+     * Move the ol.Map in an invisible div to zoom on the right extent <br/>
+     * Hide preview box to didn't print it <br/>
+     * Hide listener to call the print method when all layers are loaded
+     */
+    preparePrint: function () {
+        // Save current view param
+        this.oldRes = this.getOlView().getResolution();
+        this.oldCenter = this.getOlView().getCenter();
+        this.mapTarget = Ext.get(this.getOlMap().getTarget()).dom;
+        if (!this.canvasSize) {
+            return;
+        }
+
+        this.mask.show();
+        this.getOlMap().once('rendercomplete', function () {
+            // First display fake map on the screen during the real print
+            var mapCanvas = this.composeCanvas();
+            var mapCtx = mapCanvas.getContext("2d");
+            var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+
+            var dh = Ext.DomHelper;
+
+            // Create the img element and add over map
+            this.fakeMap = dh.append(this.mapTarget, {
+                tag: 'img',
+                src: uri
+            });
+
+            // Fix map size from web browser
+            // README: (SFR-529): issue with screen resolution and/or browser zoom: the image is truncated when using "devicePixelRatio" or ZOOMRATIO, but not when using normal size
+            var mapWidth = (this.canvasSize[0]);// ( window.devicePixelRatio || window.ZOOMRATIO || 1));
+            var mapHeight = (this.canvasSize[1]);// (window.devicePixelRatio || window.ZOOMRATIO || 1));
+
+            // Move map to invisible div to print with right resolution
+            this.printDiv = dh.append(document.body, {
+                tag: 'div',
+                id: 'ckprint-div',
+                style: {
+                    position: 'absolute',
+                    top: (screen.height) + "px", // Comment to display div
+                    width: mapWidth.toString() + "px",
+                    height: mapHeight.toString() + "px"
+                }
+            });
+            this.getOlMap().setTarget(this.printDiv);
 
 
+            // Zoom on the desired extent
+            var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
+            var res = this.get("printParam.resolution");
+            this.getMap().setCenter(center);
+            this.getMap().setResolution(res);
 
-	/**
-	 * Once all layers loaded, create an image of map and integrate it into the HTML layout <br/>
-	 * Launch an html2canvas to create a canvas of HTML layout
-	 */
-	print: function() {
-		this.getOlMap().once('rendercomplete', function(event) {
-			this.integratePrintValue();
-			// refresh mapDiv after integratePrintValue
-			this.mapDiv = Ext.get("ckPrint-map").dom;
+            // Call print when all layers are drawed
+            this.getMap().on('layersloaded', this.print, this, {
+                single: true
+            });
 
-			var mapCanvas = this.composeCanvas();
-			var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-			var dh = Ext.DomHelper;
-			this.mapImg = dh.append(this.mapDiv, {
-				tag: 'img',
-				src: uri
-			});
-
-			// Convert layout page to canvas
-			html2canvas(this.pageDiv, {
-				allowTaint: true
-			}).then(function(canvas) {
-			    this.finishPrinting(canvas);
-			}.bind(this));
-		}.bind(this));
-		this.getOlMap().renderSync();
-	},
-
-	/**
-	 * Take a canvas and transform it to the desired format
-	 * @param {DOMElement} The canvas of the layout
-	 */
-	finishPrinting: function(canvas) {
-		switch(this.get("printParam.outputFormat")) {
-			case "jpg":
-			case "png":
-				var uri = canvas.toDataURL('image/' + this.get("printParam.outputFormat")).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-				// Pop the download prompt
-				var downloadLink = document.createElement("a");
-				downloadLink.href = uri;
-				downloadLink.download = "map." + this.get("printParam.outputFormat");
-				document.body.appendChild(downloadLink);
-				downloadLink.click();
-				document.body.removeChild(downloadLink);
-				break;
-
-			case "pdf":
-				var pdf = new jsPDF({
-					orientation: this.get("printParam.orientation").orientation,
-					format: this.get("printParam.format"),
-					unit: "cm"
-				});
-				var imgURL = canvas.toDataURL("image/jpg");
-				pdf.addImage({
-					imageData: imgURL,
-					format: 'jpeg',
-					x: 0,
-					y: 0,
-					w: this.pageSize[0],
-					h: this.pageSize[1]
-				});
-				pdf.save("map.pdf");
-		}
-
-		// Replace the map at the right place and remove temp div
-		this.printDiv.parentNode.removeChild(this.printDiv);
-		this.mapDiv.removeChild(this.mapImg);
-
-		// Reset center, resolution and preview
-		this.previewLayer.setVisible(true);
-		this.getOlMap().setTarget(this.mapTarget);
-		this.getMap().setCenter(this.oldCenter);
-		this.getMap().setResolution(this.oldRes);
-
-		// Delete fake image
-		this.mapTarget.removeChild(this.fakeMap);
-
-		// Close print popup, clear preview
-		this.cancel();
-		this.mask.hide();
-	},
-
-	/**
-	 * Loop on all this.printValue members and put the values in the layout
-	 */
-	integratePrintValue: function() {
-		this.updatePreview();
-		this.printValue = this.getView().getForm().getValues();
-		this.addDefaultValues();
-
-		// Do substitutions
-		var layout = this.pageDiv.innerHTML;
-		for(var key in this.printValue) {
-			var val =  this.printValue[key];
-			layout = layout.replace("{value:" + key + "}", Ext.isString(val) ? val.replace('\n','<br>') : val);
-		}
-		layout = layout.replace(new RegExp("{value:staticsrc}", 'g') , "src");
+            this.getMap().redraw();
+        }.bind(this));
+        this.getOlMap().renderSync();
+    },
 
 
-		this.pageDiv.innerHTML = layout;
-	},
 
-	addDefaultValues: Ext.emptyFn,
+    /**
+     * Once all layers loaded, create an image of map and integrate it into the HTML layout <br/>
+     * Launch an html2canvas to create a canvas of HTML layout
+     */
+    print: function () {
+        this.getOlMap().once('rendercomplete', function (event) {
+            this.integratePrintValue();
+            // refresh mapDiv after integratePrintValue
+            this.mapDiv = Ext.get("ckPrint-map").dom;
 
-	get: function(id) {
-		return this.getViewModel().get(id);
-	},
+            var mapCanvas = this.composeCanvas();
+            var uri = mapCanvas.toDataURL('image/jpg').replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+            var dh = Ext.DomHelper;
+            this.mapImg = dh.append(this.mapDiv, {
+                tag: 'img',
+                src: uri
+            });
 
-	set: function(id, value) {
-		return this.getViewModel().set(id, value);
-	},
+            // Convert layout page to canvas
+            html2canvas(this.pageDiv, {
+                allowTaint: true
+            }).then(function (canvas) {
+                this.finishPrinting(canvas);
+            }.bind(this));
+        }.bind(this));
+        this.getOlMap().renderSync();
+    },
 
-	hidePreview: function () {
-		this.previewLayer.setVisible(false);
-	},
-	
-	showPreview: function() {
-		this.previewLayer.setVisible(true);
-	},
+    /**
+     * Take a canvas and transform it to the desired format
+     * @param {DOMElement} The canvas of the layout
+     */
+    finishPrinting: function (canvas) {
+        var me = this;
+        try {
+            switch (this.get("printParam.outputFormat")) {
+                case "jpg":
+                case "png":
+                    var uri = canvas.toDataURL('image/' + this.get("printParam.outputFormat")).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
+                    // Pop the download prompt
+                    var downloadLink = document.createElement("a");
+                    downloadLink.href = uri;
+                    downloadLink.download = "map." + this.get("printParam.outputFormat");
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    break;
 
-	cancel: function() {
-		this.getView().openner.close();
-	}
+                case "pdf":
+                    var pdf = new jsPDF({
+                        orientation: this.get("printParam.orientation").orientation,
+                        format: this.get("printParam.format"),
+                        unit: "cm"
+                    });
+                    var imgURL = canvas.toDataURL("image/jpg");
+                    pdf.addImage({
+                        imageData: imgURL,
+                        format: 'jpeg',
+                        x: 0,
+                        y: 0,
+                        w: this.pageSize[0],
+                        h: this.pageSize[1]
+                    });
+                    if (this.printLegendOnNewPage) {
+                        var imagePath = this.getLegendImage();
+                        if (imagePath) {
+                            var dh = Ext.DomHelper;
+                            this.legendDiv = dh.append(document.body, {
+                                tag: 'div',
+                                id: 'ckprint-legenddiv',
+                                style: {
+                                    position: 'absolute',
+                                    left: "100%", // Comment to display layout
+                                    zIndex: 500
+                                }
+                            });
+                            dh.append(this.legendDiv, {
+                                tag: 'img',
+                                id: 'ckprint-legenddivimg',
+                                src: imagePath
+                            });
+                            html2canvas(this.legendDiv, {
+                                allowTaint: true
+                            }).then(function (canvasLegend) {
+                                pdf.addPage();
+                                pdf.addImage({
+                                    imageData: canvasLegend.toDataURL("image/jpg"),
+                                    format: 'png',
+                                    x: 0.5, // position in cm (need margin)
+                                    y: 0.5/*, hide width, let it automatic
+                                    w: me.legendDiv.children[0].width,
+                                    h: me.legendDiv.children[0].height*/
+                                });
+                                pdf.save("map.pdf");
+                                if (me.legendDiv) {
+                                    Ext.get(me.legendDiv).remove();
+                                }
+                            }.bind(this));
+                        }
+                    } else {
+                        pdf.save("map.pdf");
+                    }
+            }
+
+            // Replace the map at the right place and remove temp div
+            this.printDiv.parentNode.removeChild(this.printDiv);
+            this.mapDiv.removeChild(this.mapImg);
+
+            // Reset center, resolution and preview
+            this.previewLayer.setVisible(true);
+            this.getOlMap().setTarget(this.mapTarget);
+            this.getMap().setCenter(this.oldCenter);
+            this.getMap().setResolution(this.oldRes);
+
+            // Delete fake image
+            this.mapTarget.removeChild(this.fakeMap);
+
+            // Close print popup, clear preview
+            this.cancel();
+            this.mask.hide();
+        } catch (e) {
+            console.log(e);
+            Ck.alert(Ck.text('print_win_title'), Ck.text('print_error_generating_file'));
+            this.mask.hide();
+        }
+    },
+
+    /**
+     * Loop on all this.printValue members and put the values in the layout
+     */
+    integratePrintValue: function () {
+        this.updatePreview();
+        this.printValue = this.getView().getForm().getValues();
+        this.addDefaultValues();
+
+        // Do substitutions
+        var layout = this.pageDiv.innerHTML;
+        for (var key in this.printValue) {
+            var val = this.printValue[key];
+            layout = layout.replace("{value:" + key + "}", Ext.isString(val) ? val.replace('\n', '<br>') : val);
+        }
+        layout = layout.replace(new RegExp("{value:staticsrc}", 'g'), "src");
+
+
+        this.pageDiv.innerHTML = layout;
+    },
+
+    addDefaultValues: Ext.emptyFn,
+
+    get: function (id) {
+        return this.getViewModel().get(id);
+    },
+
+    set: function (id, value) {
+        return this.getViewModel().set(id, value);
+    },
+
+    hidePreview: function () {
+        this.previewLayer.setVisible(false);
+    },
+
+    showPreview: function () {
+        this.previewLayer.setVisible(true);
+    },
+
+    cancel: function () {
+        this.getView().openner.close();
+    },
+
+    getLegendImage: Ext.emptyFn
 });
