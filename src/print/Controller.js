@@ -15,9 +15,17 @@ Ext.define('Ck.print.Controller', {
     alias: 'controller.ckprint',
 
     config: {
-        maskMsg: Ck.text('print_msg_progress')
+        maskMsg: Ck.text('print_msg_progress'),
+        filename: 'map.pdf'
     },
-    printLegendOnNewPage: false,
+    /**
+     * Give the path to the legend image to include.
+     * Need to be overriden by specific project.
+     * @returns 
+     */
+    getLegendImage: function () {
+        return "";
+    },
 
     /**
      * List of parameters to configure the print (dpi, format, layout, resolution, )
@@ -493,7 +501,7 @@ Ext.define('Ck.print.Controller', {
                         w: this.pageSize[0],
                         h: this.pageSize[1]
                     });
-                    if (this.printLegendOnNewPage) {
+                    if (this.get('printParam.addLegend')) {
                         var imagePath = this.getLegendImage();
                         if (imagePath) {
                             var dh = Ext.DomHelper;
@@ -523,14 +531,14 @@ Ext.define('Ck.print.Controller', {
                                     w: me.legendDiv.children[0].width,
                                     h: me.legendDiv.children[0].height*/
                                 });
-                                pdf.save("map.pdf");
+                                pdf.save(me.getFilename());
                                 if (me.legendDiv) {
                                     Ext.get(me.legendDiv).remove();
                                 }
                             }.bind(this));
                         }
                     } else {
-                        pdf.save("map.pdf");
+                        pdf.save(me.getFilename());
                     }
             }
 
