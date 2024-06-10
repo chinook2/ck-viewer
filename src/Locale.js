@@ -9,25 +9,25 @@ Ext.define('Ck.Locale', {
     defaultLocale: 'en',
 
     requires: [
-		'Ck'
-	],
-    
+        'Ck'
+    ],
+
     /**
      *
      * @param config
      */
     constructor: function (config) {
         var locale = this.defaultLocale;
-        if(Ext.manifest.locale) locale = Ext.manifest.locale;
+        if (Ext.manifest.locale) locale = Ext.manifest.locale;
         // if(Ck.params.locale) locale = Ck.params.locale;
 
-        var store = Ext.create('Ext.data.Store',{
+        var store = Ext.create('Ext.data.Store', {
             storeId: 'I18n',
             fields: ['en', 'fr', 'es'],
             autoLoad: true,
             proxy: {
                 type: 'ajax',
-                url: Ck.getPath() + '/locale.json',
+                url: Ck.getPath() + 'locale.json',
                 noCache: false,
                 reader: {
                     type: 'json',
@@ -36,10 +36,10 @@ Ext.define('Ck.Locale', {
             }
         });
         Ext.localeReady = false;
-        if(store.isLoaded()){
+        if (store.isLoaded()) {
             this.set(locale);
         } else {
-            store.on('load', function(){
+            store.on('load', function () {
                 this.set(locale);
             }, this);
         }
@@ -52,30 +52,30 @@ Ext.define('Ck.Locale', {
         // update the Ck.View page
         // TODO : Manage multiples views
         var v = Ext.query('.ck-view')[0];
-        if(!v) {
+        if (!v) {
             Ck.log("Enable to find a valid Ck.View to set Locale.");
             return;
         }
 
-        if(v.tagName == 'BODY') {
+        if (v.tagName == 'BODY') {
             v = Ext.getCmp(v.firstChild.id);
         } else {
             v = Ext.getCmp(v.id);
         }
-        if(v && v.cascadeLocale) v.cascadeLocale(locale);
+        if (v && v.cascadeLocale) v.cascadeLocale(locale);
 
         // Update windows
         var aw = Ext.query('.x-window');
-        aw.forEach(function(w){
+        aw.forEach(function (w) {
             var win = Ext.getCmp(w.id);
-            if(win && win.cascadeLocale) win.cascadeLocale(locale);
+            if (win && win.cascadeLocale) win.cascadeLocale(locale);
         })
 
         // Update globals tips
         var at = Ext.query('.x-tip');
-        at.forEach(function(t){
+        at.forEach(function (t) {
             var tip = Ext.getCmp(t.id);
-            if(tip && tip.cascadeLocale) tip.cascadeLocale(locale);
+            if (tip && tip.cascadeLocale) tip.cascadeLocale(locale);
         })
     },
 
