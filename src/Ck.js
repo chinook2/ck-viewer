@@ -64,7 +64,7 @@ var Ck = Ck || {};
 Ext.apply(Ck, {
 
     CM_PER_INCH: 2.54,
-    DOTS_PER_INCH: 90,
+    DOTS_PER_INCH: 300,
 
     INCHES_PER_UNIT: {
         "50kilometers": 1968500,
