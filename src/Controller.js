@@ -98,6 +98,11 @@ Ext.define('Ck.Controller', {
 			return name;
 		}
 
+		var api = Ck.getApi();
+		if (api && name === api) {
+			return api;
+		}
+
 		var tpl = {st: "", ws: ""};
 		if(Ext.isFunction(this.getView().getUrlTemplate)){
 			tpl = this.getView().getUrlTemplate();

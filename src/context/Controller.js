@@ -39,7 +39,7 @@ Ext.define('Ck.context.Controller', {
 		}
 		
 		store.load({
-			url: this.getFullUrl(Ck.getApi()) + "service=wmc&request=getCapabilities"
+			url: Ck.getApi() + "service=wmc&request=getCapabilities"
 		});
 	},
 

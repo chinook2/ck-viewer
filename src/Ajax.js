@@ -106,7 +106,8 @@ Ext.define('Ck.Ajax', {
 
 	request: function(options) {
 		Ext.applyIf(options, {
-			defaultHeaders: Ext.Ajax.getDefaultHeaders()
+			defaultHeaders: Ext.Ajax.getDefaultHeaders(),
+			withCredentials: true
 		});
 				
 		options.disableCaching = false;

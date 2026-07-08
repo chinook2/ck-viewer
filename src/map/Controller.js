@@ -727,10 +727,18 @@ Ext.define('Ck.map.Controller', {
 					break;
 			}
 
-			// For printing canvas.toDataUrl
-			Ext.apply(olSourceOptions,{
-				crossOrigin: "Anonymous"
-			});
+			// For printing canvas.toDataUrl — only on cross-origin tiles.
+			// Same-origin WMS must send session cookies (Chinook 550 otherwise).
+			var mapUrl = olSourceOptions.url || '';
+			var isSameOrigin = mapUrl.indexOf('/') === 0;
+			if (!isSameOrigin && /^https?:\/\//i.test(mapUrl)) {
+				try {
+					isSameOrigin = new URL(mapUrl).origin === window.location.origin;
+				} catch (e) {}
+			}
+			if (!isSameOrigin) {
+				olSourceOptions.crossOrigin = 'anonymous';
+			}
 
 			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
 
