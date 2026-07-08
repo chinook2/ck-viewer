@@ -736,11 +736,6 @@ Ext.define('Ck.print.Controller', {
 		return title === 'Photo aérienne' || title === 'OpenStreetMap';
 	},
 
-	isEtiquetteLayer: function(olLayer) {
-		var layerId = olLayer.get("id") || "";
-		return /:(locaux_all|habillage_all)-\d+$/.test(layerId);
-	},
-
 	createLegendState: function(orientation) {
 		return {
 			orientation: orientation,
@@ -770,9 +765,6 @@ Ext.define('Ck.print.Controller', {
 				listlay2 = listlay[i].getLayersArray();
 				for (t = 0; t < listlay2.length; t++) {
 					if (listlay2[t].ckLayer && listlay2[t].getVisible() === true) {
-						if (this.isEtiquetteLayer(listlay2[t])) {
-							continue;
-						}
 						laytemp = listlay2[t].ckLayer;
 						this.appendLayerLegend(state, listlay2[t], laytemp);
 					}
