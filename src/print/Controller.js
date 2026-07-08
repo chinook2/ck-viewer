@@ -226,11 +226,18 @@ Ext.define('Ck.print.Controller', {
 		this.set("printParam.resolution", this.getMap().getNearestResolution(this.getOlView().getResolution(), 1));
 	},
 
+	getLayoutStoreEntry: function(layoutId) {
+		if (this.getStore("layouts").getById(layoutId)) {
+			return this.getStore("layouts").getById(layoutId);
+		}
+		return this.getStore("layouts").getById(this.get("printParam.layout") || "default-layout");
+	},
+
 	/**
 	 * Load corresponding json print layout
 	 */
 	loadHTML: function(layoutId) {
-		var oLay = this.getStore("layouts").getById(layoutId);
+		var oLay = this.getLayoutStoreEntry(layoutId);
 		
 		Cks.get({
 			url: Ck.getPath(oLay.get("packageName")) + "/print/" + layoutId + ".html",
@@ -251,14 +258,25 @@ Ext.define('Ck.print.Controller', {
 	 * Load and add CSS to the document
 	 */
 	loadCss: function(layoutId) {
-		var oLay = this.getStore("layouts").getById(layoutId);
+		var oLay = this.getLayoutStoreEntry(layoutId);
+		var basePath = Ck.getPath(oLay.get("packageName")) + "/print/";
 		
 		Cks.get({
-			url: Ck.getPath(oLay.get("packageName")) + "/print/" + oLay.getId() + ".css",
+			url: basePath + "print-sieml-layout.css",
 			scope: this,
-			success: function(response){
-				this.style.innerHTML = response.responseText;
-				this.updatePreview();
+			success: function(baseResponse) {
+				Cks.get({
+					url: basePath + layoutId + ".css",
+					scope: this,
+					success: function(response) {
+						this.style.innerHTML = baseResponse.responseText + "\n" + response.responseText;
+						this.updatePreview();
+					},
+					failure: function() {
+						this.style.innerHTML = baseResponse.responseText;
+						this.updatePreview();
+					}
+				});
 			}
 		});
 
@@ -349,6 +367,26 @@ Ext.define('Ck.print.Controller', {
 		this.previewLayer.getSource().addFeature(this.feature);
 	},
 
+	isFullPagePrintLayout: function(layoutHTML) {
+		return layoutHTML && layoutHTML.indexOf('id="ckPrint-param"') !== -1;
+	},
+
+	getMapAreaFallbackSize: function() {
+		var pageW = this.pageDiv.offsetWidth;
+		var pageH = this.pageDiv.offsetHeight;
+		var orientation = this.getPrintOrientation();
+		var top = orientation === "l" ? 250 : 289;
+		var bottom = 90;
+		var w = pageW - 6;
+		var h = pageH - top - bottom - 6;
+
+		if (this.pageDiv.classList.contains("shape-c") && w > 0 && h > w) {
+			h = w;
+		}
+
+		return [Math.max(w, 1), Math.max(h, 1)];
+	},
+
 	/**
 	 * Render the HTML layout just to calculate some variables. Remove it after
 	 *		- pageSize : printed page in CENTIMETERS (with margins) -> use to create pageCanvas
@@ -361,6 +399,8 @@ Ext.define('Ck.print.Controller', {
 		var htmlLayout = parser.parseFromString(layoutHTML, "text/html");
 		this.pageDiv = htmlLayout.getElementById("ckPrint-page");
 		if (!this.pageDiv) return;
+
+		this.fullPagePrintLayout = this.isFullPagePrintLayout(layoutHTML);
 
 		if(this.layoutDiv) {
 			Ext.get(this.layoutDiv).remove();
@@ -409,13 +449,43 @@ Ext.define('Ck.print.Controller', {
 		// Now calculate canvasSize (pixel) & mapSize (meters) from rendered page div
 		var mapDiv = Ext.get("ckPrint-map");
 		this.mapDiv = mapDiv.dom;
+		var mapWidthPx;
+		var mapHeightPx;
 
-		// Adapt component size to format thanks to ratio
-		var zoomNavRatio = window.devicePixelRatio;
-		mapDiv.setWidth(mapDiv.getWidth() * zoomNavRatio);
-		mapDiv.setHeight(mapDiv.getHeight() * zoomNavRatio);
-		
-		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
+		if (this.fullPagePrintLayout) {
+			// Page is already sized at target DPI — do not upscale like the legacy overlay layout
+			mapWidthPx = this.mapDiv.offsetWidth;
+			mapHeightPx = this.mapDiv.offsetHeight;
+			if (mapWidthPx <= 0 || mapHeightPx <= 0) {
+				var fallbackSize = this.getMapAreaFallbackSize();
+				mapWidthPx = fallbackSize[0];
+				mapHeightPx = fallbackSize[1];
+			}
+			if (this.pageDiv.classList.contains("shape-c") && mapWidthPx > 0) {
+				mapHeightPx = mapWidthPx;
+			}
+			mapDiv.setWidth(mapWidthPx);
+			mapDiv.setHeight(mapHeightPx);
+			this.canvasSize = [mapWidthPx, mapHeightPx];
+		} else {
+			if (this.pageDiv.classList.contains("shape-c")) {
+				var mapWidth = this.mapDiv.offsetWidth;
+				if (mapWidth > 0) {
+					mapDiv.setHeight(mapWidth);
+				}
+			}
+
+			var zoomNavRatio = window.devicePixelRatio;
+			mapWidthPx = mapDiv.dom.offsetWidth || mapDiv.getWidth();
+			mapHeightPx = mapDiv.dom.offsetHeight || mapDiv.getHeight();
+			mapDiv.setWidth(mapWidthPx * zoomNavRatio);
+			mapDiv.setHeight(mapHeightPx * zoomNavRatio);
+			this.canvasSize = [mapDiv.dom.offsetWidth || mapDiv.getWidth(), mapDiv.dom.offsetHeight || mapDiv.getHeight()];
+
+			mapDiv.setWidth(mapDiv.getWidth() * this.ratio * 2);
+			mapDiv.setHeight(mapDiv.getHeight() * this.ratio * 2);
+			this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
+		}
 
 		// Calculate mapSize
 		var res = this.get("printParam.resolution");
@@ -425,11 +495,6 @@ Ext.define('Ck.print.Controller', {
 			(this.canvasSize[0] * res),
 			(this.canvasSize[1] * res)
 		];
-
-		//Edit with new resolution to not be included on mapSize (and print shape)
-		mapDiv.setWidth(mapDiv.getWidth() * this.ratio * 2)
-		mapDiv.setHeight(mapDiv.getHeight() * this.ratio * 2);
-		this.canvasSize = [mapDiv.getWidth(), mapDiv.getHeight()];
 	},
 
 	/**
@@ -535,18 +600,320 @@ Ext.define('Ck.print.Controller', {
 	 * 
 	 */
 	getClassLength : function(layer) {
-		//Get class length
+		this.nbClass = 2;
 		Cks.get({
 			url: Ck.getApi() + "service=SLD&request=get&layers=" + layer.get("id"),
 			scope: this,
 			async: false,
 			success: function(response){
-				this.nbClass = response.responseXML.getElementsByTagName('sld:Rule').length;
+				this.nbClass = response.responseXML.getElementsByTagName('sld:Rule').length || 2;
 			},
 			failure: function(response, opts) {
 				Ck.error('Error count class !');
 			}
 		});
+	},
+
+	getPrintOrientation: function() {
+		var orientation = this.get("printParam.orientation");
+		if (orientation && orientation.__proto__ && orientation.__proto__.orientation !== undefined) {
+			return orientation.__proto__.orientation;
+		}
+		if (orientation && orientation.orientation !== undefined) {
+			return orientation.orientation;
+		}
+		return "p";
+	},
+
+	getPrintRatio: function() {
+		var formatField = Ext.ComponentQuery.query('#format')[0];
+		if (formatField && formatField.valueCollection.items.length !== 0) {
+			return formatField.valueCollection.items[0].data.ratio;
+		}
+		return 1;
+	},
+
+	updateLayerResolutionForPrint: function() {
+		var formatField = Ext.ComponentQuery.query('#format')[0];
+		if (!formatField || formatField.valueCollection.items.length === 0) {
+			return;
+		}
+
+		var ratio = this.getPrintRatio();
+		var context = Ck.getMap().originOwc.data.id;
+		var formatId = formatField.valueCollection.items[0].data.id;
+		var fullPagePrintLayout = this.fullPagePrintLayout;
+
+		this.getOlMap().getLayers().forEach(function(grp) {
+			grp.getLayersArray().forEach(function(layer) {
+				var source = layer.getSource();
+				if (source.getParams && source.updateParams) {
+					var params = source.getParams();
+					if (layer.getProperties().id == context + ':equipement_all_exterieur') {
+						params['RESOLUTION'] = formatId !== 'a4' ? 500 : 192;
+					} else {
+						params['RESOLUTION'] = 192;
+					}
+					if (!fullPagePrintLayout) {
+						params['WIDTH'] = params['WIDTH'] * ratio;
+						params['HEIGHT'] = params['HEIGHT'] * ratio;
+					}
+					source.updateParams(params);
+				}
+			});
+		});
+	},
+
+	getSqlFilterParam: function() {
+		var sqlFilter = "";
+		this.getOlMap().getLayers().forEach(function(grp) {
+			grp.getLayersArray().forEach(function(layer) {
+				var source = layer.getSource();
+				if (source.getParams) {
+					var params = source.getParams();
+					if (params['SQL_FILTER']) {
+						sqlFilter = "&SQL_FILTER=" + encodeURIComponent(params['SQL_FILTER']).replace(/'/g, "%27");
+					}
+				}
+			});
+		});
+		return sqlFilter;
+	},
+
+	getLegendGraphicUrl: function(layer) {
+		var extent = Ck.getMap().getExtent();
+		var sqlFilter = this.getSqlFilterParam();
+		this.getClassLength(layer);
+		if (this.nbClass !== 1) {
+			return Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + layer.get("id")
+				+ "&BBOX=" + extent[0] + "," + extent[1] + "," + extent[2] + "," + extent[3]
+				+ "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + sqlFilter;
+		}
+		return Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + layer.get("id")
+			+ "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192";
+	},
+
+	isBasemapLayerGroup: function(layerGroup) {
+		var title = layerGroup.values_ && layerGroup.values_.title;
+		return title === 'Photo aérienne' || title === 'OpenStreetMap';
+	},
+
+	isCodesLocauxLayer: function(olLayer, ckLayer) {
+		var layerId = olLayer.get("id") || "";
+		var title = ckLayer && ckLayer.getTitle ? ckLayer.getTitle() : "";
+		return title === "Codes locaux"
+			|| layerId.indexOf(":locaux_all-0") !== -1
+			|| layerId.indexOf(":locaux_all-2") !== -1;
+	},
+
+	isLocauxLayerVisible: function() {
+		var visible = false;
+		this.getOlMap().getLayers().forEach(function(grp) {
+			grp.getLayersArray().forEach(function(layer) {
+				var layerId = layer.get("id") || "";
+				if (layer.getVisible() && layerId.indexOf(":locaux_all") !== -1) {
+					visible = true;
+				}
+			});
+		});
+		return visible;
+	},
+
+	isLocauxMultiClass: function() {
+		var context = Ck.getMap().originOwc.data.id;
+		var layer = Ck.getMap().getLayerById(context + ":locaux_all");
+		if (!layer) {
+			return false;
+		}
+		this.getClassLength(layer);
+		return this.nbClass > 1;
+	},
+
+	getPrintFilterQueryString: function() {
+		var qs = "";
+		Ext.ComponentQuery.query("[componentCls~=comboFilter]").forEach(function(combo) {
+			if (combo.getRawValue() !== "" && combo.getValue() !== null && combo.getValue() !== undefined) {
+				var val = combo.getValue();
+				if (Ext.isArray(val)) {
+					qs += "&" + combo.valueField + "=" + encodeURIComponent(Ext.encode(val));
+				} else {
+					qs += "&" + combo.valueField + "=" + encodeURIComponent(val);
+				}
+			}
+		});
+		return qs;
+	},
+
+	getVisibleTypeLocalList: function() {
+		var extent = Ck.getMap().getExtent();
+		var types = [];
+		var url = Ck.getApi() + "s=bim&r=listtype_local"
+			+ this.getPrintFilterQueryString()
+			+ "&bbox=" + extent.join(",");
+
+		Cks.get({
+			url: url,
+			scope: this,
+			async: false,
+			success: function(response) {
+				var data = Ext.decode(response.responseText);
+				var records = Ext.isArray(data) ? data : (data.type_local || []);
+
+				Ext.Array.forEach(records, function(item) {
+					if (item && item.type_local) {
+						types.push(item.type_local);
+					}
+				});
+			}
+		});
+
+		return Ext.Array.sort(Ext.Array.unique(types));
+	},
+
+	getTypeLocalRuleLegendUrl: function(typeLocal) {
+		var context = Ck.getMap().originOwc.data.id;
+		var extent = Ck.getMap().getExtent();
+		var sqlFilter = this.getSqlFilterParam();
+
+		return Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + context + ":locaux_all"
+			+ "&RULE=" + encodeURIComponent(typeLocal)
+			+ "&BBOX=" + extent[0] + "," + extent[1] + "," + extent[2] + "," + extent[3]
+			+ "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + sqlFilter;
+	},
+
+	createLegendState: function(orientation) {
+		return {
+			orientation: orientation,
+			cntor: orientation === "p" ? 8 : 48,
+			colWidth: orientation === "p" ? 215 : 180,
+			colcnt: "",
+			ittest: 0,
+			irgt: 0,
+			codesLocauxAdded: false
+		};
+	},
+
+	appendLegendEntry: function(state, title, imageUrl) {
+		if (state.ittest === 0) {
+			state.colcnt += "<div style='position:absolute;left:" + state.irgt + "px'><ul class='ulleg'>";
+		}
+
+		var imgStyle = imageUrl
+			? "background: rgba(255, 255, 255, 0.83) url(" + imageUrl + ") no-repeat scroll left 0px;"
+			: "";
+		var safeTitle = Ext.String.htmlEncode(title);
+
+		state.colcnt += "<li><div class='ckPrint-legimg' style='" + imgStyle + "'></div><div class='ckPrint-legtitle'>" + safeTitle + "</div></li>";
+
+		if (state.ittest === state.cntor) {
+			state.colcnt += "</ul></div>";
+			state.ittest = 0;
+			state.irgt = state.irgt + state.colWidth;
+		} else {
+			state.ittest = state.ittest + 1;
+		}
+	},
+
+	appendTypeLocalLegend: function(state) {
+		var typeLocals = this.getVisibleTypeLocalList();
+		if (!typeLocals.length || !this.isLocauxLayerVisible()) {
+			return;
+		}
+
+		this.appendLegendEntry(state, "Codes locaux", null);
+		var useRuleLegend = this.isLocauxMultiClass();
+		Ext.Array.forEach(typeLocals, function(typeLocal) {
+			var legendUrl = useRuleLegend ? this.getTypeLocalRuleLegendUrl(typeLocal) : null;
+			this.appendLegendEntry(state, typeLocal, legendUrl);
+		}, this);
+		state.codesLocauxAdded = true;
+	},
+
+	closeLegendState: function(state) {
+		if (state.ittest > 0) {
+			state.colcnt += "</ul></div>";
+		}
+		return state.colcnt;
+	},
+
+	buildLegendHtml: function() {
+		var orientation = this.getPrintOrientation();
+		var state = this.createLegendState(orientation);
+		var listlay = Ck.getMap().getLayers().getArray();
+		var i, t, listlay2, laytemp, url;
+
+		for (i = 0; i < listlay.length; i++) {
+			if (!this.isBasemapLayerGroup(listlay[i]) && Ext.isFunction(listlay[i].getLayersArray)) {
+				listlay2 = listlay[i].getLayersArray();
+				for (t = 0; t < listlay2.length; t++) {
+					if (listlay2[t].ckLayer && listlay2[t].getVisible() === true) {
+						laytemp = listlay2[t].ckLayer;
+						if (this.isCodesLocauxLayer(listlay2[t], laytemp)) {
+							if (!state.codesLocauxAdded) {
+								this.appendTypeLocalLegend(state);
+							}
+							continue;
+						}
+						url = this.getLegendGraphicUrl(listlay2[t]);
+						this.appendLegendEntry(state, laytemp.getTitle(), url);
+					}
+				}
+			} else if (this.isBasemapLayerGroup(listlay[i]) && Ext.isFunction(listlay[i].getLayers)) {
+				listlay2 = listlay[i].getLayers().getArray();
+				for (t = 0; t < listlay2.length; t++) {
+					if (listlay2[t].ckLayer && listlay2[t].getVisible() === true) {
+						laytemp = listlay2[t].ckLayer;
+						this.appendLegendEntry(state, laytemp.getTitle(), null);
+					}
+				}
+			}
+		}
+
+		if (!state.codesLocauxAdded) {
+			this.appendTypeLocalLegend(state);
+		}
+
+		return this.closeLegendState(state);
+	},
+
+	getLayerAttribution: function(olLayer) {
+		var ext = olLayer.get("extension");
+		if (ext && ext.attribution) {
+			return ext.attribution;
+		}
+		if (olLayer.ckLayer && Ext.isFunction(olLayer.ckLayer.getExtension)) {
+			return olLayer.ckLayer.getExtension("attribution") || "";
+		}
+		return "";
+	},
+
+	buildAttributionHtml: function() {
+		var strlstcpr = "";
+		var listlay = this.getOlMap().getLayers().getArray();
+		var i, t, listlay2, attribution;
+
+		for (i = 0; i < listlay.length; i++) {
+			if (Ext.isFunction(listlay[i].getLayersArray)) {
+				listlay2 = listlay[i].getLayersArray();
+			} else if (Ext.isFunction(listlay[i].getLayers)) {
+				listlay2 = listlay[i].getLayers().getArray();
+			} else {
+				continue;
+			}
+			for (t = 0; t < listlay2.length; t++) {
+				if (listlay2[t].ckLayer && listlay2[t].getVisible() === true) {
+					attribution = this.getLayerAttribution(listlay2[t]);
+					if (attribution) {
+						if (strlstcpr !== "") {
+							strlstcpr += ", ";
+						}
+						strlstcpr += attribution;
+						return strlstcpr;
+					}
+				}
+			}
+		}
+		return strlstcpr;
 	},
 
 	/**
@@ -560,14 +927,15 @@ Ext.define('Ck.print.Controller', {
 		this.oldRes = this.getOlView().getResolution();
 		this.oldCenter = this.getOlView().getCenter();
 		this.mapTarget = Ext.get(this.getOlMap().getTarget()).dom;
-		if(!this.canvasSize) {
+		if(!this.canvasSize || !this.canvasSize[0] || !this.canvasSize[1]) {
+			this.mask.hide();
+			Ck.error('Print map size is invalid');
 			return;
 		}
 		this.mask.show();
 		this.getOlMap().once('rendercomplete', function() {
 			// First display fake map on the screen during the real print
 			var mapCanvas = this.composeCanvas();
-			var mapCtx = mapCanvas.getContext("2d");
 			var uri = mapCanvas.toDataURL('image/jpg', 1).replace(/^data:image\/[^;]/, 'data:application/octet-stream');
 
 			var dh = Ext.DomHelper;
@@ -578,112 +946,19 @@ Ext.define('Ck.print.Controller', {
 				src: uri,
 				style: 'width=' + mapCanvas.width + ';height=' + mapCanvas.width
 			});
-			
-			//Insertion légende
-			if (Ext.get('ckPrint-legend')){
-				Ext.get("ckPrint-legend").dom.style.display = "block";
-				listlay = Ck.getMap().getLayers().getArray();
-				colcnt = "";
-				var ittest = 0;
-				var irgt = 0;
-				if(this.get("printParam.orientation").__proto__.orientation == "p"){
-					cntor = 9;
-				}else{
-					cntor = 24;
-				}
-				var parser = new DOMParser();
 
-				for(i=0 ; i < listlay.length; i++) {
-					//Si c'est un vecteur 
-					if(listlay[i].values_.title != 'Photo aérienne' && listlay[i].values_.title != 'OpenStreetMap'){
-						if(Ext.isFunction(listlay[i].getLayersArray)){
-							listlay2 = listlay[i].getLayersArray();
-							for(t=0 ; t < listlay2.length; t++) {  
-								if(listlay2[t].ckLayer){
-								laytemp = listlay2[t].ckLayer;
-									if(listlay2[t].getVisible() == true){
-										//Count list elmnt
-										if(ittest == 0){
-											colcnt += "<div><ul class='ulleg'>";
-										}						
+			this.updateLayerResolutionForPrint();
 
-										this.getOlMap().getLayers().forEach(function(grp) {
-											grp.getLayersArray().forEach(function(layer) {
-												var source = layer.getSource();
-												var context = Ck.getMap().originOwc.data.id;
-												if(source.getParams && source.updateParams) {
-													var params = source.getParams();
-													if(Ext.ComponentQuery.query('#format')[0].valueCollection.items.length !== 0){
-														this.ratio = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.ratio;
-													}else{
-														this.ratio = 1;
-													}
-													if(layer.getProperties().id == context + ':equipement_all_exterieur'){
-														params['RESOLUTION'] = Ext.ComponentQuery.query('#format')[0].valueCollection.items[0].data.id !== 'a4' ? 500 : 192;
-													}else{
-														params['RESOLUTION'] = 192;
-													}
-													params['WIDTH'] = params['WIDTH'] * this.ratio;
-													params['HEIGHT'] = params['HEIGHT'] * this.ratio;
-													source.updateParams(params);
-												}
-											})
-										});
-
-										//Get params
-										if(this.getOlMap().getLayers().getArray()[1].getLayersArray()[2].getSource().getParams()['SQL_FILTER']){
-											var str = "&SQL_FILTER=" + encodeURIComponent(this.getOlMap().getLayers().getArray()[1].getLayersArray()[0].getSource().getParams()['SQL_FILTER']);
-											var params = str.replace(/'/g, "%27");
-										}else{
-											var params = "";
-										}
-
-										//Get number classes
-										this.getClassLength(listlay2[t]);
-										if(this.nbClass !== 1){
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&BBOX=" + Ck.getMap().getExtent()[0]  + "," + Ck.getMap().getExtent()[1]  + "," + Ck.getMap().getExtent()[2]  + "," + Ck.getMap().getExtent()[3] + "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + params;
-											colcnt += "<li><div class='ckPrint-legtitle' style='font-size:calc(14px*{value:ratio})'>"+laytemp.getTitle()+"</div><img class='ckPrint-legimg' style='width:calc(20px*{value:ratio})' src='"+ url + "'></li>";
-										}else{
-											url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + listlay2[t].get("id") + "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192";
-											colcnt += "<li class='flex-container'><img class='ckPrint-legimg' style='width:calc(20px*{value:ratio})' src='"+ url + "'><div class='ckPrint-legtitle' style='font-size:calc(12px*{value:ratio})'>"+laytemp.getTitle()+"</div></li>";
-										}
-
-										//Iterate on column
-										if(ittest == cntor){
-											colcnt += "</ul></div>";
-											ittest = 0;
-											irgt = irgt + 120;
-										}else{
-											ittest = ittest + 1;
-										}
-									}
-								}
-							}
-						}
-					}
-					//Si c'est un fond de plan (type raster par exemple)
-					else{
-						if(Ext.isFunction(listlay[i].getLayers)){
-							listlay2 = listlay[i].getLayers().getArray();
-							for(t=0 ; t < listlay2.length; t++) {  
-								if(listlay2[t].ckLayer){
-								laytemp = listlay2[t].ckLayer;
-									if(listlay2[t].getVisible() == true){
-										colcnt += "<li><div style='background: rgba(255, 255, 255, 0.83) no-repeat scroll left 0px;'></div><div class='ckPrint-legtitle'>"+laytemp.getTitle()+"</div></li>";
-									}
-								}
-							}
-						}
-					}
-				}
-				colcnt += "</ul></div>";
-				var targetleg = Ext.get("ckPrint-legend").dom;
-				targetleg.innerHTML = colcnt;	
+			var dpr = window.ZOOMRATIO || window.devicePixelRatio || 1;
+			var mapWidth;
+			var mapHeight;
+			if (this.fullPagePrintLayout) {
+				mapWidth = this.canvasSize[0];
+				mapHeight = this.canvasSize[1];
+			} else {
+				mapWidth = this.canvasSize[0] / dpr;
+				mapHeight = this.canvasSize[1] / dpr;
 			}
-			
-			// Fix map size from web browser
-			var mapWidth = (this.canvasSize[0]  / (window.ZOOMRATIO || window.devicePixelRatio || 1)) /* / 4.34 */;
-			var mapHeight = (this.canvasSize[1]  / (window.ZOOMRATIO || window.devicePixelRatio || 1)) /* / 4.34 */;
 			// Zoom on the desired extent
 			var center = ol.extent.getCenter(this.feature.getGeometry().getExtent());
 			//var res = this.get("printParam.resolution");
@@ -724,6 +999,10 @@ Ext.define('Ck.print.Controller', {
 			this.getMap().on('layersloaded', this.print, this, {
 				single: true
 			});
+			this._printLayersTimeout = setTimeout(function() {
+				this.getMap().un('layersloaded', this.print, this);
+				this.print();
+			}.bind(this), 90000);
 			this.getMap().redraw();
 
 		}.bind(this));
@@ -735,8 +1014,23 @@ Ext.define('Ck.print.Controller', {
 	 * Launch an html2canvas to create a canvas of HTML layout
 	 */
 	print: function() {
+		if (this._printLayersTimeout) {
+			clearTimeout(this._printLayersTimeout);
+			this._printLayersTimeout = null;
+		}
+
 		this.getOlMap().removeInteraction(this.previewLayerTransform);
 		this.getOlMap().once('rendercomplete', function(event) {
+			if (Ext.get('ckPrint-legend')) {
+				Ext.get("ckPrint-legend").dom.style.display = "block";
+				Ext.get("ckPrint-legend").dom.innerHTML = this.buildLegendHtml();
+			}
+
+			var cprTarget = Ext.get("ckPrint-cpr");
+			if (cprTarget) {
+				cprTarget.dom.innerHTML = this.buildAttributionHtml();
+			}
+
 			this.integratePrintValue();
 			// refresh mapDiv after integratePrintValue
 			this.mapDiv = Ext.get("ckPrint-map").dom;
@@ -812,6 +1106,10 @@ Ext.define('Ck.print.Controller', {
 		// Delete fake image
 		this.mapTarget.removeChild(this.fakeMap);
 		delete this.feature;
+		if (this._printLayersTimeout) {
+			clearTimeout(this._printLayersTimeout);
+			this._printLayersTimeout = null;
+		}
 		// Close print popup, clear preview
 		this.cancel();
 		this.mask.hide();
@@ -840,18 +1138,28 @@ Ext.define('Ck.print.Controller', {
 			document.getElementById("northArrow").style.transform = 'rotate(-' + Ext.ComponentQuery.query('#angle')[0].getValue()*100 + 'deg)';
 		}
 
-		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]') !== 0){
+		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]').length !== 0){
 			var comboFilters = Ext.ComponentQuery.query('[componentCls~=comboFilter]');
-			this.mapDiv = Ext.get("ckPrint-filters-list").dom;
-			var dh = Ext.DomHelper;
-			dh.append(this.mapDiv, "<em><b>Filtres utilisés : </b></em>");
-			comboFilters.forEach(function(combo,value){
-				if(combo.getRawValue() !== "" && combo.getRawValue !== null && combo.getRawValue !== undefined){
-					this.mapImg = dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
+			var filtersDiv = Ext.get("ckPrint-filters-list");
+			if (filtersDiv) {
+				this.mapDiv = filtersDiv.dom;
+				var dh = Ext.DomHelper;
+				dh.append(this.mapDiv, "<em><b>Filtres utilisés : </b></em>");
+				comboFilters.forEach(function(combo){
+					if(combo.getRawValue() !== "" && combo.getRawValue !== null && combo.getRawValue !== undefined){
+						dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
+					}
+				}, this);
+				if(filtersDiv.dom.childElementCount == 1){
+					var filtersSection = Ext.get("ckPrint-filters");
+					if (filtersSection) {
+						filtersSection.setStyle("display", "none");
+						var mapEl = Ext.get("ckPrint-map");
+						if (mapEl) {
+							mapEl.setStyle("bottom", "3px");
+						}
+					}
 				}
-			}, this)
-			if(Ext.get("ckPrint-filters-list").dom.childElementCount == 1){
-				Ext.destroy(Ext.get("ckPrint-filters-list"));
 			}
 		}
 		this.addDefaultValues();
