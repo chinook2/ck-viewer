@@ -600,13 +600,18 @@ Ext.define('Ck.print.Controller', {
 	 * 
 	 */
 	getClassLength : function(layer) {
-		this.nbClass = 2;
+		this.nbClass = 1;
 		Cks.get({
 			url: Ck.getApi() + "service=SLD&request=get&layers=" + layer.get("id"),
 			scope: this,
 			async: false,
 			success: function(response){
-				this.nbClass = response.responseXML.getElementsByTagName('sld:Rule').length || 2;
+				var xml = response.responseXML;
+				var rules = xml.getElementsByTagNameNS('http://www.opengis.net/sld', 'Rule');
+				if (!rules.length) {
+					rules = xml.getElementsByTagName('Rule');
+				}
+				this.nbClass = rules.length || 1;
 			},
 			failure: function(response, opts) {
 				Ck.error('Error count class !');
@@ -680,130 +685,36 @@ Ext.define('Ck.print.Controller', {
 		return sqlFilter;
 	},
 
-	getLegendGraphicUrl: function(layer) {
+	getLegendGraphicUrl: function(layer, multiClass) {
 		var extent = Ck.getMap().getExtent();
 		var sqlFilter = this.getSqlFilterParam();
-		this.getClassLength(layer);
-		if (this.nbClass !== 1) {
-			return Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + layer.get("id")
-				+ "&BBOX=" + extent[0] + "," + extent[1] + "," + extent[2] + "," + extent[3]
-				+ "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + sqlFilter;
+		var url = Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + layer.get("id")
+			+ "&FORMAT=image/png&TRANSPARENT=true"
+			+ "&SRS=EPSG:2154&RESOLUTION=192" + sqlFilter;
+
+		if (multiClass) {
+			return url + "&BBOX=" + extent.join(",") + "&WIDTH=350&HEIGHT=500";
 		}
-		return Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + layer.get("id")
-			+ "&RULE=Defaut&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192";
+
+		return url + "&RULE=Defaut&WIDTH=15&HEIGHT=15";
 	},
 
-	isBasemapLayerGroup: function(layerGroup) {
-		var title = layerGroup.values_ && layerGroup.values_.title;
-		return title === 'Photo aérienne' || title === 'OpenStreetMap';
-	},
-
-	isCodesLocauxLayer: function(olLayer, ckLayer) {
-		var layerId = olLayer.get("id") || "";
-		var title = ckLayer && ckLayer.getTitle ? ckLayer.getTitle() : "";
-		return title === "Codes locaux"
-			|| layerId.indexOf(":locaux_all-0") !== -1
-			|| layerId.indexOf(":locaux_all-2") !== -1;
-	},
-
-	isLocauxLayerVisible: function() {
-		var visible = false;
-		this.getOlMap().getLayers().forEach(function(grp) {
-			grp.getLayersArray().forEach(function(layer) {
-				var layerId = layer.get("id") || "";
-				if (layer.getVisible() && layerId.indexOf(":locaux_all") !== -1) {
-					visible = true;
-				}
-			});
-		});
-		return visible;
-	},
-
-	isLocauxMultiClass: function() {
-		var context = Ck.getMap().originOwc.data.id;
-		var layer = Ck.getMap().getLayerById(context + ":locaux_all");
-		if (!layer) {
-			return false;
-		}
-		this.getClassLength(layer);
-		return this.nbClass > 1;
-	},
-
-	getPrintFilterQueryString: function() {
-		var qs = "";
-		Ext.ComponentQuery.query("[componentCls~=comboFilter]").forEach(function(combo) {
-			if (combo.getRawValue() !== "" && combo.getValue() !== null && combo.getValue() !== undefined) {
-				var val = combo.getValue();
-				if (Ext.isArray(val)) {
-					qs += "&" + combo.valueField + "=" + encodeURIComponent(Ext.encode(val));
-				} else {
-					qs += "&" + combo.valueField + "=" + encodeURIComponent(val);
-				}
-			}
-		});
-		return qs;
-	},
-
-	getVisibleTypeLocalList: function() {
-		var extent = Ck.getMap().getExtent();
-		var types = [];
-		var url = Ck.getApi() + "s=bim&r=listtype_local"
-			+ this.getPrintFilterQueryString()
-			+ "&bbox=" + extent.join(",");
-
-		Cks.get({
-			url: url,
-			scope: this,
-			async: false,
-			success: function(response) {
-				var data = Ext.decode(response.responseText);
-				var records = Ext.isArray(data) ? data : (data.type_local || []);
-
-				Ext.Array.forEach(records, function(item) {
-					if (item && item.type_local) {
-						types.push(item.type_local);
-					}
-				});
-			}
-		});
-
-		return Ext.Array.sort(Ext.Array.unique(types));
-	},
-
-	getTypeLocalRuleLegendUrl: function(typeLocal) {
-		var context = Ck.getMap().originOwc.data.id;
-		var extent = Ck.getMap().getExtent();
-		var sqlFilter = this.getSqlFilterParam();
-
-		return Ck.getApi() + "service=wms&request=getLegendGraphic&layers=" + context + ":locaux_all"
-			+ "&RULE=" + encodeURIComponent(typeLocal)
-			+ "&BBOX=" + extent[0] + "," + extent[1] + "," + extent[2] + "," + extent[3]
-			+ "&SRS=EPSG:2154&WIDTH=15&HEIGHT=15&RESOLUTION=192" + sqlFilter;
-	},
-
-	createLegendState: function(orientation) {
-		return {
-			orientation: orientation,
-			cntor: orientation === "p" ? 8 : 48,
-			colWidth: orientation === "p" ? 215 : 180,
-			colcnt: "",
-			ittest: 0,
-			irgt: 0,
-			codesLocauxAdded: false
-		};
-	},
-
-	appendLegendEntry: function(state, title, imageUrl) {
+	appendLegendEntry: function(state, title, imageUrl, useImgTag) {
 		if (state.ittest === 0) {
 			state.colcnt += "<div style='position:absolute;left:" + state.irgt + "px'><ul class='ulleg'>";
 		}
 
-		var imgStyle = imageUrl
-			? "background: rgba(255, 255, 255, 0.83) url(" + imageUrl + ") no-repeat scroll left 0px;"
-			: "";
 		var safeTitle = Ext.String.htmlEncode(title);
 
-		state.colcnt += "<li><div class='ckPrint-legimg' style='" + imgStyle + "'></div><div class='ckPrint-legtitle'>" + safeTitle + "</div></li>";
+		if (useImgTag && imageUrl) {
+			state.colcnt += "<li class='ckPrint-legblock'><div class='ckPrint-legtitle ckPrint-legtitle-block'>" + safeTitle + "</div>"
+				+ "<img class='ckPrint-leglist-img' src='" + imageUrl + "' alt=''></li>";
+		} else {
+			var imgStyle = imageUrl
+				? "background: rgba(255, 255, 255, 0.83) url(" + imageUrl + ") no-repeat scroll left 0px;"
+				: "";
+			state.colcnt += "<li><div class='ckPrint-legimg' style='" + imgStyle + "'></div><div class='ckPrint-legtitle'>" + safeTitle + "</div></li>";
+		}
 
 		if (state.ittest === state.cntor) {
 			state.colcnt += "</ul></div>";
@@ -814,19 +725,31 @@ Ext.define('Ck.print.Controller', {
 		}
 	},
 
-	appendTypeLocalLegend: function(state) {
-		var typeLocals = this.getVisibleTypeLocalList();
-		if (!typeLocals.length || !this.isLocauxLayerVisible()) {
-			return;
-		}
+	appendLayerLegend: function(state, olLayer, ckLayer) {
+		this.getClassLength(olLayer);
+		var url = this.getLegendGraphicUrl(olLayer, this.nbClass > 1);
+		this.appendLegendEntry(state, ckLayer.getTitle(), url, this.nbClass > 1);
+	},
 
-		this.appendLegendEntry(state, "Codes locaux", null);
-		var useRuleLegend = this.isLocauxMultiClass();
-		Ext.Array.forEach(typeLocals, function(typeLocal) {
-			var legendUrl = useRuleLegend ? this.getTypeLocalRuleLegendUrl(typeLocal) : null;
-			this.appendLegendEntry(state, typeLocal, legendUrl);
-		}, this);
-		state.codesLocauxAdded = true;
+	isBasemapLayerGroup: function(layerGroup) {
+		var title = layerGroup.values_ && layerGroup.values_.title;
+		return title === 'Photo aérienne' || title === 'OpenStreetMap';
+	},
+
+	isEtiquetteLayer: function(olLayer) {
+		var layerId = olLayer.get("id") || "";
+		return /:(locaux_all|habillage_all)-\d+$/.test(layerId);
+	},
+
+	createLegendState: function(orientation) {
+		return {
+			orientation: orientation,
+			cntor: orientation === "p" ? 8 : 48,
+			colWidth: orientation === "p" ? 215 : 180,
+			colcnt: "",
+			ittest: 0,
+			irgt: 0
+		};
 	},
 
 	closeLegendState: function(state) {
@@ -840,22 +763,18 @@ Ext.define('Ck.print.Controller', {
 		var orientation = this.getPrintOrientation();
 		var state = this.createLegendState(orientation);
 		var listlay = Ck.getMap().getLayers().getArray();
-		var i, t, listlay2, laytemp, url;
+		var i, t, listlay2, laytemp;
 
 		for (i = 0; i < listlay.length; i++) {
 			if (!this.isBasemapLayerGroup(listlay[i]) && Ext.isFunction(listlay[i].getLayersArray)) {
 				listlay2 = listlay[i].getLayersArray();
 				for (t = 0; t < listlay2.length; t++) {
 					if (listlay2[t].ckLayer && listlay2[t].getVisible() === true) {
-						laytemp = listlay2[t].ckLayer;
-						if (this.isCodesLocauxLayer(listlay2[t], laytemp)) {
-							if (!state.codesLocauxAdded) {
-								this.appendTypeLocalLegend(state);
-							}
+						if (this.isEtiquetteLayer(listlay2[t])) {
 							continue;
 						}
-						url = this.getLegendGraphicUrl(listlay2[t]);
-						this.appendLegendEntry(state, laytemp.getTitle(), url);
+						laytemp = listlay2[t].ckLayer;
+						this.appendLayerLegend(state, listlay2[t], laytemp);
 					}
 				}
 			} else if (this.isBasemapLayerGroup(listlay[i]) && Ext.isFunction(listlay[i].getLayers)) {
@@ -863,14 +782,10 @@ Ext.define('Ck.print.Controller', {
 				for (t = 0; t < listlay2.length; t++) {
 					if (listlay2[t].ckLayer && listlay2[t].getVisible() === true) {
 						laytemp = listlay2[t].ckLayer;
-						this.appendLegendEntry(state, laytemp.getTitle(), null);
+						this.appendLegendEntry(state, laytemp.getTitle(), null, false);
 					}
 				}
 			}
-		}
-
-		if (!state.codesLocauxAdded) {
-			this.appendTypeLocalLegend(state);
 		}
 
 		return this.closeLegendState(state);
