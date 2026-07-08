@@ -1,0 +1,191 @@
+#ckPrint-page {
+	position: relative;
+	background-color: white;
+	border: 1px solid gray;
+	color: #004b64;
+}
+
+#ckPrint-logo {
+	position: absolute;
+	height: 100px;
+	width: 240px;
+	left: 12px;
+	top: 12px;
+	border: none;
+}
+
+.ckPrint-logtitle {
+	position: relative;
+	left: 5px;
+}
+
+.ckPrint-logo-part {
+	position: relative;
+	float: right !important;
+}
+
+.ckPrint-logo-partcnt {
+	position: relative;
+	padding: 8px;
+}
+
+#ckPrint-title a {
+	text-decoration: none;
+	border-bottom: 3px solid #2196f3;
+	padding-bottom: 1px;
+	color: #004b64;
+}
+
+#ckPrint-title {
+	word-wrap: break-word;
+	line-height: 1.2em;
+	font-size: 25px;
+	font-weight: bold !important;
+	height: 125px;
+	left: 145px;
+	right: 370px;
+	margin-bottom: 0;
+	padding-top: 1px;
+	position: absolute;
+	text-align: center;
+	top: 0;
+}
+
+#ckPrint-param {
+	position: absolute;
+	height: 120px;
+	width: 360px;
+	top: 6px;
+	right: 6px;
+	font-size: 20px;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-param ul {
+	list-style-type: none;
+	margin-top: 1px;
+	padding-left: 0;
+}
+
+#ckPrint-param li {
+	padding-bottom: 12px;
+}
+
+#ckPrint-legend {
+	position: absolute;
+	height: 155px;
+	top: 127px;
+	left: 12px;
+	right: 179px;
+	background-color: rgba(255, 255, 255, 0.83);
+	overflow: hidden;
+}
+
+#ckPrint-cpr {
+	position: absolute;
+	height: 50px;
+	top: 231px;
+	width: 172px;
+	right: 5px;
+	background-color: rgba(255, 255, 255, 0.83);
+	text-align: right;
+	font-size: 13px;
+	overflow: hidden;
+}
+
+.ulleg {
+	list-style-type: none;
+	margin: 1px 0 0;
+	padding: 0;
+}
+
+.ulleg li {
+	padding-bottom: 16px;
+	list-style-type: none;
+	position: relative;
+	min-height: 22px;
+}
+
+.ckPrint-legtitle {
+	font-size: 16px;
+	position: absolute;
+	left: 27px;
+	width: 200px;
+	line-height: 1.2em;
+}
+
+.ckPrint-legimg {
+	position: absolute;
+	left: 0;
+	width: 30px;
+	height: 19px;
+	margin-top: 2px;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+#ckPrint-map {
+	background-color: white;
+	bottom: 90px;
+	left: 3px;
+	position: absolute;
+	right: 3px;
+	top: 289px;
+}
+
+#ckPrint-filters {
+	position: absolute;
+	bottom: 3px;
+	left: 12px;
+	right: 12px;
+	min-height: 36px;
+	max-height: 82px;
+	padding: 6px 10px;
+	font-size: 14px;
+	background-color: rgba(255, 255, 255, 0.9);
+	overflow: hidden;
+}
+
+#ckPrint-filters h3 {
+	display: none;
+}
+
+#ckPrint-filters-list {
+	display: block;
+	line-height: 1.3em;
+}
+
+/* Landscape: more horizontal space for legend columns */
+#ckPrint-page.orientation-l #ckPrint-title {
+	right: 320px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-param {
+	width: 310px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-legend {
+	right: 12px;
+	height: 130px;
+	top: 110px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-cpr {
+	top: 200px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-map {
+	top: 250px;
+}
+
+#ckPrint-page.orientation-l .ckPrint-legtitle {
+	width: 170px;
+	font-size: 15px;
+}
+
+/* Square map preview area */
+#ckPrint-page.shape-c #ckPrint-map {
+	left: 50%;
+	right: auto;
+	transform: translateX(-50%);
+}
