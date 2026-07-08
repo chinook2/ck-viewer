@@ -796,8 +796,12 @@ Ext.define('Ck.map.Controller', {
 		if(this.contextLoadFail.indexOf(contextName) != -1) {
 			Ck.error("No context to load");
 		} else {
+			var url = contextName;
+			if (!/^https?:\/\//i.test(url) && url.indexOf('service=') === -1) {
+				url = Ck.getApi() + 'service=wmc&request=getContext&format=json&context=' + encodeURIComponent(contextName);
+			}
 			Cks.get({
-				url: this.getFullUrl( this.getMapUrl(contextName) ),
+				url: url,
 				scope: this,
 				success: function(response){
 					var owc = Ext.decode(response.responseText);
