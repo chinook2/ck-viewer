@@ -36,43 +36,79 @@ Ext.define('Ck.map.action.OpenPrint', {
 	 */
 	printOpt: {},
 
+	isPrintWindowValid: function() {
+		return this.win && !this.win.destroyed && this.print && !this.print.destroyed;
+	},
+
+	resetPrintWindow: function() {
+		if (this.win && !this.win.destroyed) {
+			this.win.destroy();
+		}
+		this.win = null;
+		this.print = null;
+	},
+
+	createPrintWindow: function() {
+		var printOpt = Ext.apply({
+			xtype: 'ckprint',
+			ckview: this.getCkView().getView(),
+			openner: this
+		}, this.printOpt || {});
+
+		this.print = Ext.create(printOpt);
+
+		var controller = this.print.getController();
+		var winConfig = Ext.apply({
+			title: 'Print',
+			width: 400,
+			layout: 'fit',
+			modal: false,
+			closeAction: 'hide',
+			parentMap: this.getMap()
+		}, this.winOpt || {});
+
+		// Never reuse a destroyed print component from a previous winOpt.
+		winConfig.items = [this.print];
+		winConfig.listeners = Ext.apply({}, winConfig.listeners, {
+			close: { fn: controller.hidePreview, scope: controller },
+			show: { fn: controller.showPreview, scope: controller },
+			hide: { fn: controller.hidePreview, scope: controller },
+			destroy: { fn: this.onPrintWindowDestroy, scope: this }
+		});
+
+		this.win = Ext.create(this.classWindow, winConfig);
+	},
+
+	onPrintWindowDestroy: function() {
+		this.win = null;
+		if (this.print && this.print.destroyed) {
+			this.print = null;
+		}
+	},
+
+	ckLoaded: function(mapController) {
+		mapController.on("loading", this.resetPrintWindow, this);
+	},
+
 	/**
 	 * Create and display a windows with print form
 	 */
 	doAction: function(btn) {
-		if(!this.win) {
-			this.print = Ext.create(Ext.applyIf(this.printOpt, {
-				xtype: 'ckprint',
-				ckview: this.getCkView().getView(),
-				openner: this
-			}));
-
-			this.winOpt = Ext.applyIf(this.winOpt, {
-				title: 'Print',
-				width: 400,
-				layout: 'fit',
-				modal: false,
-				closeAction: 'hide',
-				items: [this.print],
-				parentMap: this.getMap(),
-				listeners: {
-					close: this.print.getController().hidePreview,
-					show: this.print.getController().showPreview,
-					scope: this.print.getController()
-				}
-			});
-
-			this.win = Ext.create(this.classWindow, this.winOpt);
+		if (!this.isPrintWindowValid()) {
+			this.resetPrintWindow();
+			this.createPrintWindow();
 		}
 
 		this.win.show();
 	},
 	
 	close: function() {
-		this.win.close();
+		if (this.win && !this.win.destroyed) {
+			this.win.close();
+		}
 	},
 
 	destroy: function() {
-		if(this.win) this.win.destroy();
+		this.resetPrintWindow();
 	}
 });

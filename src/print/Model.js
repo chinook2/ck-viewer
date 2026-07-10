@@ -40,11 +40,11 @@ Ext.define('Ck.print.Model', {
 		layouts: {
 			fields: ["id", "label", "packageName"],
 			data: [
-				{id: "default-layout", label: "Default"},
-				{id: "default-layout-p-c", label: "Portrait Carré"},
-				{id: "default-layout-p-r", label: "Portrait Rectangle"},
-				{id: "default-layout-l-c", label: "Landscape Carré"},
-				{id: "default-layout-l-r", label: "Landscape Rectangle"}
+				{id: "default-layout", label: "Default", packageName: "ck-viewer"},
+				{id: "default-layout-p-c", label: "Portrait Carré", packageName: "ck-viewer"},
+				{id: "default-layout-p-r", label: "Portrait Rectangle", packageName: "ck-viewer"},
+				{id: "default-layout-l-c", label: "Landscape Carré", packageName: "ck-viewer"},
+				{id: "default-layout-l-r", label: "Landscape Rectangle", packageName: "ck-viewer"}
 			],
 		},
 		outputFormats: {
