@@ -727,18 +727,10 @@ Ext.define('Ck.map.Controller', {
 					break;
 			}
 
-			// For printing canvas.toDataUrl — only on cross-origin tiles.
-			// Same-origin WMS must send session cookies (Chinook 550 otherwise).
-			var mapUrl = olSourceOptions.url || '';
-			var isSameOrigin = mapUrl.indexOf('/') === 0;
-			if (!isSameOrigin && /^https?:\/\//i.test(mapUrl)) {
-				try {
-					isSameOrigin = new URL(mapUrl).origin === window.location.origin;
-				} catch (e) {}
-			}
-			if (!isSameOrigin) {
-				olSourceOptions.crossOrigin = 'anonymous';
-			}
+			// For printing canvas.toDataUrl
+			Ext.apply(olSourceOptions,{
+				crossOrigin: "Anonymous"
+			});
 
 			var olSource = Ck.create("ol.source." + ckLayerSpec.source, olSourceOptions);
 
@@ -796,12 +788,8 @@ Ext.define('Ck.map.Controller', {
 		if(this.contextLoadFail.indexOf(contextName) != -1) {
 			Ck.error("No context to load");
 		} else {
-			var url = contextName;
-			if (!/^https?:\/\//i.test(url) && url.indexOf('service=') === -1) {
-				url = Ck.getApi() + 'service=wmc&request=getContext&format=json&context=' + encodeURIComponent(contextName);
-			}
 			Cks.get({
-				url: url,
+				url: this.getFullUrl( this.getMapUrl(contextName) ),
 				scope: this,
 				success: function(response){
 					var owc = Ext.decode(response.responseText);

@@ -39,6 +39,8 @@ Ext.define('Ck.context.Controller', {
 		}
 		
 		store.load({
+			// Do not use getFullUrl(Ck.getApi()) — paths starting with "/" are treated
+			// as static resources and become resources/context/admin/index.php?...
 			url: Ck.getApi() + "service=wmc&request=getCapabilities"
 		});
 	},

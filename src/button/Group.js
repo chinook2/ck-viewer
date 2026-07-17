@@ -82,12 +82,8 @@
 
                     // Move toolbar inside ol viewport
             		// When drawing on map can move over the toolbar
-            		var panel = Ext.get(domEl);
-            		var toolbarEl = this.toolbar.getEl();
-            		if (panel && toolbarEl && toolbarEl.dom.parentNode !== domEl) {
-            			this.toolbar.allowDomMove = true;
-            			panel.appendChild(toolbarEl);
-            		}
+            		var panel = Ext.get(domEl.id);
+            		if(panel) panel.appendChild(this.toolbar.getEl());
             		//
 
             		if(this.autoClose === true) {

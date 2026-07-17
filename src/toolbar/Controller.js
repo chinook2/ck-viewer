@@ -31,12 +31,9 @@ Ext.define('Ck.toolbar.Controller', {
 
 		// Move toolbar inside ol viewport
 		// When drawing on map can move over the toolbar
-		var olViewport = this.getOlMap().getViewport();
-		var el = v.getEl();
-		if (olViewport && el && el.dom.parentNode !== olViewport) {
-			v.allowDomMove = true;
-			Ext.get(olViewport).appendChild(el);
-		}
+		var domEl = this.getOlMap().getViewport();
+		var panel = Ext.get(domEl.id);
+		if(panel) panel.appendChild(v.getEl());
 		//
 
 		// Note: with Ext 5.x afterlayout seem to be ignored !

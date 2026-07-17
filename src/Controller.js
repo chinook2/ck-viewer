@@ -93,14 +93,23 @@ Ext.define('Ck.Controller', {
 	 */
 	getFullUrl: function (name) {
 		var url = '';
+		var api;
+
+		if (!name) {
+			return '';
+		}
 
 		if(Ext.String.startsWith(name, 'http')) {
 			return name;
 		}
 
-		var api = Ck.getApi();
-		if (api && name === api) {
-			return api;
+		// Already a Chinook API call — do not apply static urlTemplate
+		// (would become resources/forms/admin/index.php?...json and break fid).
+		api = Ck.getApi() || '';
+		if (name.indexOf('service=') !== -1
+			|| (api && Ext.String.startsWith(name, api))
+			|| Ext.String.startsWith(name, '/admin/')) {
+			return name;
 		}
 
 		var tpl = {st: "", ws: ""};

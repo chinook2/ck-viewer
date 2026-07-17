@@ -7,6 +7,14 @@ Ext.define("Ck.edit.Vertex", {
 	alias: "widget.ckedit-vertex",
 	
 	controller: "ckedit.vertex",
+
+	/**
+	 * Form-compatible flag used by plugin.gridediting (lookupController view).
+	 * Vertex host is not Ck.Form but reuses that plugin on the vertex grid.
+	 */
+	config: {
+		editing: true
+	},
 	
 	cls: "ck-edit-vertex",
 	itemId: "edit-vertex",
