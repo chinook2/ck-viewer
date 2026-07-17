@@ -2130,20 +2130,47 @@ Ext.define('Ck.print.Controller', {
 			if (filtersDiv) {
 				this.mapDiv = filtersDiv.dom;
 				var dh = Ext.DomHelper;
+				var activeFilterCount = 0;
 				dh.append(this.mapDiv, "<em><b>Filtres utilisés : </b></em>");
 				comboFilters.forEach(function(combo){
-					if(combo.getRawValue() !== "" && combo.getRawValue !== null && combo.getRawValue !== undefined){
-						dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>" + combo.getDisplayField() + "</b> : " + combo.getRawValue() +  " (" + combo.valueCollection.items[0].data.surface + "m²)</div>");
+					var rawValue = combo.getRawValue();
+					if(rawValue !== "" && rawValue !== null && rawValue !== undefined){
+						var label = combo.getName() || combo.getFieldLabel() || combo.getDisplayField();
+						// Prefer the original filter name; fieldLabel may already include " : X m²"
+						if (label && label.indexOf(" : ") !== -1) {
+							label = label.split(" : ")[0];
+						}
+						var surfaceText = "";
+						var selected = combo.valueCollection && combo.valueCollection.items[0];
+						if (selected && selected.data && selected.data.surface != null && selected.data.surface !== "") {
+							surfaceText = " (" + selected.data.surface + " m²)";
+						} else {
+							// Application.js stores surface in fieldLabel via Ajax ("Name : 1234 m²")
+							var fieldLabel = combo.getFieldLabel() || "";
+							var surfaceMatch = fieldLabel.match(/:\s*([\d.,]+)\s*m²/i);
+							if (surfaceMatch) {
+								surfaceText = " (" + surfaceMatch[1] + " m²)";
+							}
+						}
+						dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>"
+							+ Ext.String.htmlEncode(label) + "</b> : " + Ext.String.htmlEncode(rawValue)
+							+ Ext.String.htmlEncode(surfaceText) + "</div>");
+						activeFilterCount++;
 					}
 				}, this);
-				if(filtersDiv.dom.childElementCount == 1){
-					var filtersSection = Ext.get("ckPrint-filters");
+				var filtersSection = Ext.get("ckPrint-filters");
+				var mapEl = Ext.get("ckPrint-map");
+				if(activeFilterCount === 0){
 					if (filtersSection) {
 						filtersSection.setStyle("display", "none");
-						var mapEl = Ext.get("ckPrint-map");
-						if (mapEl) {
-							mapEl.setStyle("bottom", "13px");
-						}
+					}
+					if (mapEl) {
+						mapEl.setStyle("bottom", "13px");
+					}
+				} else if (filtersSection) {
+					filtersSection.setStyle("display", "block");
+					if (mapEl) {
+						mapEl.setStyle("bottom", "100px");
 					}
 				}
 			}
