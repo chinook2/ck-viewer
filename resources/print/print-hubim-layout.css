@@ -331,6 +331,7 @@
 }
 
 #ckPrint-filters {
+	display: none;
 	position: absolute;
 	bottom: 3px;
 	left: 12px;

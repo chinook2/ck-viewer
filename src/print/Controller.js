@@ -363,23 +363,53 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	releasePrintDialogFocus: function(btn) {
+		var win = this.getView() && this.getView().up('window');
 		var el;
+		var active;
 
-		if (btn && btn.getEl) {
-			el = btn.getEl().dom;
-		} else if (btn && btn.nodeType === 1) {
-			el = btn;
+		if (btn) {
+			if (typeof btn.blur === 'function') {
+				btn.blur();
+			}
+			if (btn.removeCls) {
+				btn.removeCls(['x-focus', 'x-btn-focus', 'x-btn-default-small-focus']);
+			}
+			if (btn.getEl) {
+				el = btn.getEl() && btn.getEl().dom;
+			} else if (btn.nodeType === 1) {
+				el = btn;
+			}
+			if (el && el.blur) {
+				el.blur();
+			}
 		}
 
-		if (el && el.blur) {
-			el.blur();
-		}
-
-		if (document.activeElement && document.activeElement !== document.body && document.activeElement.blur) {
+		if (win && win.el && win.el.dom) {
+			active = document.activeElement;
+			if (active && win.el.dom.contains(active) && active.blur) {
+				active.blur();
+			}
+		} else if (document.activeElement && document.activeElement !== document.body && document.activeElement.blur) {
 			document.activeElement.blur();
 		}
 
 		this.focusPrintTarget();
+
+		// Ensure focus has left the print window before Ext applies aria-hidden
+		if (win && win.el && win.el.dom) {
+			active = document.activeElement;
+			if (active && win.el.dom.contains(active)) {
+				if (active.blur) {
+					active.blur();
+				}
+				if (document.body) {
+					if (!document.body.hasAttribute('tabindex')) {
+						document.body.setAttribute('tabindex', '-1');
+					}
+					document.body.focus({ preventScroll: true });
+				}
+			}
+		}
 	},
 
 	focusPrintTarget: function() {
@@ -401,15 +431,33 @@ Ext.define('Ck.print.Controller', {
 		}
 
 		if (document.body && document.body.focus) {
-			document.body.focus();
+			if (!document.body.hasAttribute('tabindex')) {
+				document.body.setAttribute('tabindex', '-1');
+			}
+			document.body.focus({ preventScroll: true });
 		}
 	},
 
 	hidePrintDialog: function() {
 		var win = this.getView().up('window');
-		if (win && !win.destroyed) {
-			win.hide();
+		var active;
+
+		if (!win || win.destroyed) {
+			return;
 		}
+
+		if (win.el && win.el.dom) {
+			active = document.activeElement;
+			if (active && win.el.dom.contains(active)) {
+				this.focusPrintTarget();
+				active = document.activeElement;
+				if (active && win.el.dom.contains(active) && active.blur) {
+					active.blur();
+				}
+			}
+		}
+
+		win.hide();
 	},
 
 	ensurePreviewLayers: function() {
@@ -794,9 +842,13 @@ Ext.define('Ck.print.Controller', {
 					});
 					return false;
 				}
+				// Blur first, then defer hide: Ext button focus/ripple can restore
+				// focus synchronously and trigger aria-hidden warnings on win.hide().
 				this.releasePrintDialogFocus(btn);
-				this.hidePrintDialog();
-				this.preparePrint();
+				Ext.defer(function() {
+					this.hidePrintDialog();
+					this.preparePrint();
+				}, 10, this);
 				break;
 			case "webgl":
 			default:
@@ -1225,59 +1277,64 @@ Ext.define('Ck.print.Controller', {
 		var rules = [];
 		var ogcNs = 'http://www.opengis.net/ogc';
 
-		Cks.get({
-			url: Ck.getApi() + "service=SLD&request=get&layers=" + layer.get("id"),
-			scope: this,
-			async: false,
-			success: function(response) {
-				var xml = this.parseXmlResponse(response);
-				var ruleNodes = xml && xml.getElementsByTagNameNS('http://www.opengis.net/sld', 'Rule');
-				var ns = 'http://www.opengis.net/sld';
-				var i, ruleNode, nameEl, titleEl, filterEl, propEl, literalEl, wknEl, minScaleEl, maxScaleEl;
-				var name, title, filterProperty, filterValue, symbolShape, minScale, maxScale, fillColor, isPolygonFill;
+		try {
+			Cks.get({
+				url: Ck.getApi() + "service=SLD&request=get&layers=" + layer.get("id"),
+				scope: this,
+				async: false,
+				timeout: 15000,
+				success: function(response) {
+					var xml = this.parseXmlResponse(response);
+					var ruleNodes = xml && xml.getElementsByTagNameNS('http://www.opengis.net/sld', 'Rule');
+					var ns = 'http://www.opengis.net/sld';
+					var i, ruleNode, nameEl, titleEl, filterEl, propEl, literalEl, wknEl, minScaleEl, maxScaleEl;
+					var name, title, filterProperty, filterValue, symbolShape, minScale, maxScale, fillColor, isPolygonFill;
 
-				if (!ruleNodes || !ruleNodes.length) {
-					ruleNodes = xml ? xml.getElementsByTagName('Rule') : [];
-				}
+					if (!ruleNodes || !ruleNodes.length) {
+						ruleNodes = xml ? xml.getElementsByTagName('Rule') : [];
+					}
 
-				for (i = 0; i < ruleNodes.length; i++) {
-					ruleNode = ruleNodes[i];
-					nameEl = ruleNode.getElementsByTagNameNS(ns, 'Name')[0] || ruleNode.getElementsByTagName('Name')[0];
-					titleEl = ruleNode.getElementsByTagNameNS(ns, 'Title')[0] || ruleNode.getElementsByTagName('Title')[0];
-					filterEl = ruleNode.getElementsByTagNameNS(ogcNs, 'Filter')[0]
-						|| ruleNode.getElementsByTagNameNS(ns, 'Filter')[0]
-						|| ruleNode.getElementsByTagName('Filter')[0];
-					propEl = filterEl && (filterEl.getElementsByTagNameNS(ogcNs, 'PropertyName')[0] || filterEl.getElementsByTagName('PropertyName')[0]);
-					literalEl = filterEl && (filterEl.getElementsByTagNameNS(ogcNs, 'Literal')[0] || filterEl.getElementsByTagName('Literal')[0]);
-					wknEl = ruleNode.getElementsByTagNameNS(ns, 'WellKnownName')[0] || ruleNode.getElementsByTagName('WellKnownName')[0];
-					minScaleEl = ruleNode.getElementsByTagNameNS(ns, 'MinScaleDenominator')[0] || ruleNode.getElementsByTagName('MinScaleDenominator')[0];
-					maxScaleEl = ruleNode.getElementsByTagNameNS(ns, 'MaxScaleDenominator')[0] || ruleNode.getElementsByTagName('MaxScaleDenominator')[0];
-					name = nameEl && nameEl.textContent ? nameEl.textContent : 'Defaut';
-					title = titleEl && titleEl.textContent ? titleEl.textContent : name;
-					filterProperty = propEl && propEl.textContent ? propEl.textContent.trim() : null;
-					filterValue = literalEl && literalEl.textContent ? literalEl.textContent.trim() : title;
-					symbolShape = wknEl && wknEl.textContent ? wknEl.textContent.trim().toLowerCase() : 'square';
-					minScale = minScaleEl && minScaleEl.textContent ? parseFloat(minScaleEl.textContent) : null;
-					maxScale = maxScaleEl && maxScaleEl.textContent ? parseFloat(maxScaleEl.textContent) : null;
-					isPolygonFill = this.ruleUsesPolygonFill(ruleNode);
-					fillColor = isPolygonFill ? this.getSldRuleFillColor(ruleNode) : null;
-					rules.push({
-						name: name,
-						title: title,
-						filterProperty: filterProperty,
-						filterValue: filterValue,
-						symbolShape: symbolShape,
-						isPolygonFill: isPolygonFill,
-						fillColor: fillColor,
-						minScale: minScale,
-						maxScale: maxScale
-					});
+					for (i = 0; i < ruleNodes.length; i++) {
+						ruleNode = ruleNodes[i];
+						nameEl = ruleNode.getElementsByTagNameNS(ns, 'Name')[0] || ruleNode.getElementsByTagName('Name')[0];
+						titleEl = ruleNode.getElementsByTagNameNS(ns, 'Title')[0] || ruleNode.getElementsByTagName('Title')[0];
+						filterEl = ruleNode.getElementsByTagNameNS(ogcNs, 'Filter')[0]
+							|| ruleNode.getElementsByTagNameNS(ns, 'Filter')[0]
+							|| ruleNode.getElementsByTagName('Filter')[0];
+						propEl = filterEl && (filterEl.getElementsByTagNameNS(ogcNs, 'PropertyName')[0] || filterEl.getElementsByTagName('PropertyName')[0]);
+						literalEl = filterEl && (filterEl.getElementsByTagNameNS(ogcNs, 'Literal')[0] || filterEl.getElementsByTagName('Literal')[0]);
+						wknEl = ruleNode.getElementsByTagNameNS(ns, 'WellKnownName')[0] || ruleNode.getElementsByTagName('WellKnownName')[0];
+						minScaleEl = ruleNode.getElementsByTagNameNS(ns, 'MinScaleDenominator')[0] || ruleNode.getElementsByTagName('MinScaleDenominator')[0];
+						maxScaleEl = ruleNode.getElementsByTagNameNS(ns, 'MaxScaleDenominator')[0] || ruleNode.getElementsByTagName('MaxScaleDenominator')[0];
+						name = nameEl && nameEl.textContent ? nameEl.textContent : 'Defaut';
+						title = titleEl && titleEl.textContent ? titleEl.textContent : name;
+						filterProperty = propEl && propEl.textContent ? propEl.textContent.trim() : null;
+						filterValue = literalEl && literalEl.textContent ? literalEl.textContent.trim() : title;
+						symbolShape = wknEl && wknEl.textContent ? wknEl.textContent.trim().toLowerCase() : 'square';
+						minScale = minScaleEl && minScaleEl.textContent ? parseFloat(minScaleEl.textContent) : null;
+						maxScale = maxScaleEl && maxScaleEl.textContent ? parseFloat(maxScaleEl.textContent) : null;
+						isPolygonFill = this.ruleUsesPolygonFill(ruleNode);
+						fillColor = isPolygonFill ? this.getSldRuleFillColor(ruleNode) : null;
+						rules.push({
+							name: name,
+							title: title,
+							filterProperty: filterProperty,
+							filterValue: filterValue,
+							symbolShape: symbolShape,
+							isPolygonFill: isPolygonFill,
+							fillColor: fillColor,
+							minScale: minScale,
+							maxScale: maxScale
+						});
+					}
+				},
+				failure: function() {
+					Ck.error('Error reading SLD rules !');
 				}
-			},
-			failure: function() {
-				Ck.error('Error reading SLD rules !');
-			}
-		});
+			});
+		} catch (e) {
+			Ck.log("getSldRules aborted: " + (e && e.message ? e.message : e));
+		}
 
 		this.nbClass = rules.length || 1;
 		return rules;
@@ -1312,38 +1369,50 @@ Ext.define('Ck.print.Controller', {
 			+ "&typename=" + encodeURIComponent(typename)
 			+ "&SRS=EPSG:2154"
 			+ "&BBOX=" + extent.join(",")
-			+ "&maxfeatures=5000"
+			+ "&maxfeatures=500"
 			+ "&outputformat=GML2"
 			+ this.getLayerSqlQueryParam(layer);
 
-		Cks.get({
-			url: url,
-			scope: this,
-			async: false,
-			success: function(response) {
-				var xml = this.parseXmlResponse(response);
-				var all, j, node, localName, value, propertyKey;
+		// Browsers often reject synchronous XHR (NetworkError), especially for large WFS.
+		// Fail soft so print legend can fall back to scale-only filtering.
+		try {
+			Cks.get({
+				url: url,
+				scope: this,
+				async: false,
+				timeout: 15000,
+				success: function(response) {
+					var xml = this.parseXmlResponse(response);
+					var all, j, node, localName, value, propertyKey;
 
-				result.queried = true;
+					result.queried = true;
 
-				if (!xml || !propertyName) {
-					return;
-				}
+					if (!xml || !propertyName) {
+						return;
+					}
 
-				propertyKey = propertyName.indexOf(':') >= 0 ? propertyName.split(':').pop() : propertyName;
-				all = xml.getElementsByTagName('*');
-				for (j = 0; j < all.length; j++) {
-					node = all[j];
-					localName = node.localName || (node.nodeName ? node.nodeName.split(':').pop() : '');
-					if (localName === propertyKey) {
-						value = node.textContent ? node.textContent.trim() : '';
-						if (value) {
-							result.values[value] = true;
+					propertyKey = propertyName.indexOf(':') >= 0 ? propertyName.split(':').pop() : propertyName;
+					all = xml.getElementsByTagName('*');
+					for (j = 0; j < all.length; j++) {
+						node = all[j];
+						localName = node.localName || (node.nodeName ? node.nodeName.split(':').pop() : '');
+						if (localName === propertyKey) {
+							value = node.textContent ? node.textContent.trim() : '';
+							if (value) {
+								result.values[value] = true;
+							}
 						}
 					}
+				},
+				failure: function() {
+					result.queried = false;
 				}
-			}
-		});
+			});
+		} catch (e) {
+			Ck.log("getVisibleClassificationValues aborted: " + (e && e.message ? e.message : e));
+			result.queried = false;
+			result.values = {};
+		}
 
 		return result;
 	},
@@ -1402,7 +1471,18 @@ Ext.define('Ck.print.Controller', {
 		visibleData = this.getVisibleClassificationValues(layer, propertyName);
 		visibleValues = visibleData.values;
 
-		if (visibleData.queried && Ext.Object.isEmpty(visibleValues)) {
+		// Query failed (e.g. sync XHR blocked): keep scale-visible rules, do not hide all.
+		if (!visibleData.queried) {
+			for (i = 0; i < rules.length; i++) {
+				rule = rules[i];
+				if (this.ruleIsVisibleAtScale(rule, scale)) {
+					visible.push(rule);
+				}
+			}
+			return visible;
+		}
+
+		if (Ext.Object.isEmpty(visibleValues)) {
 			return [];
 		}
 
@@ -2102,10 +2182,107 @@ Ext.define('Ck.print.Controller', {
 	},
 
 	/**
+	 * Build HTML for the "Filtres utilisés" footer from active comboFilter values.
+	 * Returns {html, count} so injection can run after layout substitutions.
+	 */
+	buildPrintFiltersContent: function() {
+		var comboFilters = Ext.ComponentQuery.query('[componentCls~=comboFilter]');
+		var parts = [];
+		var activeFilterCount = 0;
+
+		if (!comboFilters || comboFilters.length === 0) {
+			return { html: "", count: 0 };
+		}
+
+		comboFilters.forEach(function(combo) {
+			var rawValue = combo.getRawValue();
+			var label;
+			var surfaceText;
+			var selected;
+			var fieldLabel;
+			var surfaceMatch;
+
+			if (rawValue === "" || rawValue === null || rawValue === undefined) {
+				return;
+			}
+
+			label = combo.getName() || combo.getFieldLabel() || combo.getDisplayField();
+			// Prefer the original filter name; fieldLabel may already include " : X m²"
+			if (label && label.indexOf(" : ") !== -1) {
+				label = label.split(" : ")[0];
+			}
+
+			surfaceText = "";
+			selected = combo.valueCollection && combo.valueCollection.items[0];
+			if (selected && selected.data && selected.data.surface != null && selected.data.surface !== "") {
+				surfaceText = " (" + selected.data.surface + " m²)";
+			} else {
+				fieldLabel = combo.getFieldLabel() || "";
+				surfaceMatch = fieldLabel.match(/:\s*([\d.,]+)\s*m²/i);
+				if (surfaceMatch) {
+					surfaceText = " (" + surfaceMatch[1] + " m²)";
+				}
+			}
+
+			parts.push(
+				"<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>"
+				+ Ext.String.htmlEncode(label) + "</b> : " + Ext.String.htmlEncode(rawValue)
+				+ Ext.String.htmlEncode(surfaceText) + "</div>"
+			);
+			activeFilterCount++;
+		});
+
+		if (activeFilterCount === 0) {
+			return { html: "", count: 0 };
+		}
+
+		return {
+			html: "<em><b>Filtres utilisés : </b></em>" + parts.join(""),
+			count: activeFilterCount
+		};
+	},
+
+	/**
+	 * Inject filters into the print page after {value:...} substitutions so the
+	 * footer is not wiped by pageDiv.innerHTML replacement.
+	 */
+	applyPrintFiltersContent: function(filtersContent) {
+		var filtersDiv = Ext.get("ckPrint-filters-list");
+		var filtersSection = Ext.get("ckPrint-filters");
+		var mapEl = Ext.get("ckPrint-map");
+		var count = filtersContent && filtersContent.count ? filtersContent.count : 0;
+		var html = filtersContent && filtersContent.html ? filtersContent.html : "";
+
+		if (!filtersDiv || !filtersSection) {
+			return;
+		}
+
+		filtersDiv.dom.innerHTML = html;
+
+		if (count === 0) {
+			filtersSection.setStyle("display", "none");
+			if (mapEl) {
+				mapEl.setStyle("bottom", "13px");
+			}
+			return;
+		}
+
+		filtersSection.setStyle("display", "block");
+		if (mapEl) {
+			mapEl.setStyle("bottom", "100px");
+		}
+	},
+
+	/**
 	 * Loop on all this.printValue members and put the values in the layout
 	 * AGA - 28/10/2020 - Update print params and insert filters params on template
 	 */
 	integratePrintValue: function() {
+		var filtersContent;
+		var layout;
+		var key;
+		var value;
+
 		this.printValue = this.getView().getForm().getValues();
 		//this.printValue['title'] = Ext.ComponentQuery.query("#printTitle")[0].getValue();
 		this.printValue['title'];
@@ -2124,68 +2301,26 @@ Ext.define('Ck.print.Controller', {
 			document.getElementById("northArrow").style.transform = 'rotate(-' + Ext.ComponentQuery.query('#angle')[0].getValue()*100 + 'deg)';
 		}
 
-		if(Ext.ComponentQuery.query('[componentCls~=comboFilter]').length !== 0){
-			var comboFilters = Ext.ComponentQuery.query('[componentCls~=comboFilter]');
-			var filtersDiv = Ext.get("ckPrint-filters-list");
-			if (filtersDiv) {
-				this.mapDiv = filtersDiv.dom;
-				var dh = Ext.DomHelper;
-				var activeFilterCount = 0;
-				dh.append(this.mapDiv, "<em><b>Filtres utilisés : </b></em>");
-				comboFilters.forEach(function(combo){
-					var rawValue = combo.getRawValue();
-					if(rawValue !== "" && rawValue !== null && rawValue !== undefined){
-						var label = combo.getName() || combo.getFieldLabel() || combo.getDisplayField();
-						// Prefer the original filter name; fieldLabel may already include " : X m²"
-						if (label && label.indexOf(" : ") !== -1) {
-							label = label.split(" : ")[0];
-						}
-						var surfaceText = "";
-						var selected = combo.valueCollection && combo.valueCollection.items[0];
-						if (selected && selected.data && selected.data.surface != null && selected.data.surface !== "") {
-							surfaceText = " (" + selected.data.surface + " m²)";
-						} else {
-							// Application.js stores surface in fieldLabel via Ajax ("Name : 1234 m²")
-							var fieldLabel = combo.getFieldLabel() || "";
-							var surfaceMatch = fieldLabel.match(/:\s*([\d.,]+)\s*m²/i);
-							if (surfaceMatch) {
-								surfaceText = " (" + surfaceMatch[1] + " m²)";
-							}
-						}
-						dh.append(this.mapDiv, "<div class='ckPrint-logtitle' style='display:inline; margin-right:10px'><b>"
-							+ Ext.String.htmlEncode(label) + "</b> : " + Ext.String.htmlEncode(rawValue)
-							+ Ext.String.htmlEncode(surfaceText) + "</div>");
-						activeFilterCount++;
-					}
-				}, this);
-				var filtersSection = Ext.get("ckPrint-filters");
-				var mapEl = Ext.get("ckPrint-map");
-				if(activeFilterCount === 0){
-					if (filtersSection) {
-						filtersSection.setStyle("display", "none");
-					}
-					if (mapEl) {
-						mapEl.setStyle("bottom", "13px");
-					}
-				} else if (filtersSection) {
-					filtersSection.setStyle("display", "block");
-					if (mapEl) {
-						mapEl.setStyle("bottom", "100px");
-					}
-				}
-			}
-		}
+		// Collect filter footer before substitutions; inject after innerHTML rewrite
+		filtersContent = this.buildPrintFiltersContent();
 		this.addDefaultValues();
 
 		// Do substitutions
-		var layout = this.pageDiv.innerHTML;
-		for(var key in this.printValue) {
-			layout = layout.replaceAll("{value:" + key + "}", this.printValue[key]);
+		layout = this.pageDiv.innerHTML;
+		for (key in this.printValue) {
+			if (!Object.prototype.hasOwnProperty.call(this.printValue, key)) {
+				continue;
+			}
+			value = this.printValue[key];
+			if (value == null) {
+				value = "";
+			}
+			layout = layout.replaceAll("{value:" + key + "}", value);
 		}
 		layout = layout.replaceAll(new RegExp("{value:staticsrc}", 'g') , "src");
 
-
 		this.pageDiv.innerHTML = layout;
+		this.applyPrintFiltersContent(filtersContent);
 	},
 
 	addDefaultValues: Ext.emptyFn,
