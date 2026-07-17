@@ -773,40 +773,79 @@ Ext.define('Ck.edit.Controller', {
 		}
 	},
 	close: function() {
-
-		if(this.vertex) {
-			this.vertex.close.bind(this.vertex)();
+		try {
+			if (this.vertex && !this.vertex.destroyed) {
+				this.vertex.close();
+			}
+		} catch (e) {
+			Ck.log && Ck.log("edit.vertex.close: " + e);
 		}
-		if(this.history) {
-			this.history.close.bind(this.history)();
+		try {
+			if (this.history && this.history.close) {
+				this.history.close();
+			}
+		} catch (e) {
+			Ck.log && Ck.log("edit.history.close: " + e);
 		}
-		if(this.feature) {
-			this.feature.close.bind(this.feature)();
-		}
-
-		
-		if(this.mainWindow) {
-			this.mainWindow.close();
-		}
-		if(this.wfsLayer) {
-			this.getMap().removeSpecialLayer(this.wfsLayer);
-		}
-
-		
-		if(this.moveInteraction) {
-			this.getOlMap().removeInteraction(this.moveInteraction);
+		try {
+			if (this.feature && this.feature.close) {
+				this.feature.close();
+			}
+		} catch (e) {
+			Ck.log && Ck.log("edit.feature.close: " + e);
 		}
 
-		if(this.getDisplayVertex()) {
+		try {
+			if (this.mainWindow && !this.mainWindow.destroyed) {
+				this.mainWindow.close();
+			}
+		} catch (e) {
+			Ck.log && Ck.log("edit.mainWindow.close: " + e);
+		}
+		this.mainWindow = null;
+		this.vertex = null;
+		this.vertexPanel = null;
+		this.feature = null;
+		this.history = null;
+
+		if (this.wfsLayer) {
+			try {
+				this.getMap().removeSpecialLayer(this.wfsLayer);
+			} catch (e) {
+				// ignore
+			}
+		}
+
+		if (this.moveInteraction) {
+			try {
+				this.getOlMap().removeInteraction(this.moveInteraction);
+			} catch (e) {
+				// ignore
+			}
+			this.moveInteraction = null;
+		}
+
+		if (this.getDisplayVertex()) {
 			var map = this.getMap();
 			var layer = map.getLayerById(this.getLayer().get("id") + "_vertex");
-			
-			if(layer) {
-				map.removeSpecialLayer(layer);
-			}			
+
+			if (layer) {
+				try {
+					map.removeSpecialLayer(layer);
+				} catch (e) {
+					// ignore
+				}
+			}
 		}
 
-		this.getOpenner().close();
+		try {
+			var opener = this.getOpenner && this.getOpenner();
+			if (opener && !opener.destroyed) {
+				opener.close();
+			}
+		} catch (e) {
+			Ck.log && Ck.log("edit.opener.close: " + e);
+		}
 	},
 
 	/**

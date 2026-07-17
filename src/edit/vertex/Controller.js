@@ -129,6 +129,9 @@ Ext.define('Ck.edit.vertex.Controller', {
 		this.ftCoords = this.geometry.getCoordinates();
 		
 		this.loadVertex();
+
+		// Avoid stacking destroyable listeners if loadFeature is called again
+		this.destroySessionListeners();
 		
 		this.gridEvent = this.grid.on({
 			destroyable: true,
@@ -157,7 +160,19 @@ Ext.define('Ck.edit.vertex.Controller', {
 				scope: this
 			}
 		});
-		this.grid.scrollTo(0, 0);
+		// Locked grid may expose a LockingScroller whose normal/locked scroller is still null
+		Ext.defer(function() {
+			if (!this.grid || this.grid.destroyed) {
+				return;
+			}
+			try {
+				if (this.grid.getScrollable && this.grid.getScrollable()) {
+					this.grid.scrollTo(0, 0);
+				}
+			} catch (e) {
+				// Ignore — scroll-to-top is optional when the locked view is not ready yet
+			}
+		}, 50, this);
 	},
 	
 	/**
@@ -192,13 +207,70 @@ Ext.define('Ck.edit.vertex.Controller', {
 	},
 	
 	/**
-	 * To make the panel unactive 
+	 * Tear down grid/store listeners created in loadFeature (safe to call twice).
 	 */
-	unloadGeometry: function() {
+	destroySessionListeners: function() {
+		if (this.gridEvent) {
+			try {
+				this.gridEvent.destroy();
+			} catch (e) {
+				// already destroyed / partially cleaned
+			}
+			this.gridEvent = null;
+		}
+		if (this.storeEvent) {
+			try {
+				this.storeEvent.destroy();
+			} catch (e) {
+				// already destroyed / partially cleaned
+			}
+			this.storeEvent = null;
+		}
+	},
+
+	/**
+	 * To make the panel unactive.
+	 * @param {Boolean} [forClose] When true, skip Ext listener/radio teardown — the
+	 *   owning window destroy must clear ViewController listeners itself (double
+	 *   teardown causes Ext Event.removeListener timerId crashes).
+	 */
+	unloadGeometry: function(forClose) {
 		this.removeAllMarker();
-		this.gridEvent.destroy();
-		this.storeEvent.destroy();
-		this.getView().getDockedItems()[0].getComponent("vertex-live-edit").getMenu().getComponent("action-none").setValue(true);
+		this.destroySessionListeners();
+
+		// Closing the edit window: do not toggle radios — change handlers recreate
+		// OL interactions and disturb Ext ViewController listener teardown (timerId).
+		if (forClose) {
+			return;
+		}
+
+		var view = this.getView && this.getView();
+		var liveEdit, menu, actionNone, radios;
+		if (view && !view.destroyed) {
+			liveEdit = view.down("#vertex-live-edit");
+			if (liveEdit && liveEdit.getMenu) {
+				menu = liveEdit.getMenu();
+				actionNone = menu.down("#action-none");
+				if (actionNone && actionNone.setValue) {
+					radios = menu.query('radio');
+					Ext.Array.each(radios, function(r) {
+						if (r && r.suspendEvents) {
+							r.suspendEvents();
+						}
+					});
+					try {
+						actionNone.setValue(true);
+					} catch (e) {
+						// ignore
+					}
+					Ext.Array.each(radios, function(r) {
+						if (r && r.resumeEvents) {
+							r.resumeEvents();
+						}
+					});
+				}
+			}
+		}
 	},
 	
 	/**
@@ -437,7 +509,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 				this.moveInteraction = new ol.interaction.Translate({
 					features: new ol.Collection([this.feature])
 				});
-				this.moveInteraction.on("translateend", this.translateEnd, this);
+				// OL6+ ignores a third "scope" arg — must bind explicitly
+				this.moveInteraction.on("translateend", this.translateEnd.bind(this));
 				this.olMap.addInteraction(this.moveInteraction);
 				
 				delete this.moveInteraction.previousCursor_;
@@ -451,8 +524,8 @@ Ext.define('Ck.edit.vertex.Controller', {
 					deleteCondition: ol.events.condition.never,
 					features: new ol.Collection([this.feature])
 				});
-				this.modifyInteraction.on("modifystart", this.focusVertexRow, this);
-				this.modifyInteraction.on("modifyend", this.updateVertexRow, this);
+				this.modifyInteraction.on("modifystart", this.focusVertexRow.bind(this));
+				this.modifyInteraction.on("modifyend", this.updateVertexRow.bind(this));
 				this.olMap.addInteraction(this.modifyInteraction);
 					
 				this.modifyInteraction.setActive(checked);
@@ -509,36 +582,41 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {ol.interaction.ModifyEvent}
 	 */
 	focusVertexRow: function(event) {
-		var vertex = event.target.vertexFeature_.getGeometry();
+		var target = event && event.target;
+		if (!target || !target.vertexFeature_ || !target.dragSegments_ || !target.dragSegments_[0]) {
+			return;
+		}
+
+		var vertex = target.vertexFeature_.getGeometry();
 		var coord = vertex.getCoordinates();
- 		var idx = 0;
-		
+		var idx = 0;
+		var prevPoint = target.dragSegments_[0][0].segment[0];
+
 		// If it's a click on a vertex or not (then create it)
-		if(event.target.snappedToVertex_) {
- 			// idx = this.getIndexFromCoord(coord) - 1;
- 			var prevPoint = event.target.dragSegments_[0][0].segment[0];
- 			idx = this.getIndexFromCoord(prevPoint);
- 		} else {			
-			var prevPoint = event.target.dragSegments_[0][0].segment[0];
- 			idx = this.getIndexFromCoord(prevPoint);
- 			
- 			var data = {
+		if (target.snappedToVertex_) {
+			idx = this.getIndexFromCoord(prevPoint);
+		} else {
+			idx = this.getIndexFromCoord(prevPoint);
+
+			var data = {
 				number: idx + 1,
 				longitude: this.trimCoord(coord[0]),
 				latitude: this.trimCoord(coord[1]),
 				geometry: coord
 			};
-			
-			if(this.grid.getStore()) {
+
+			if (this.grid && this.grid.getStore()) {
 				this.grid.getStore().insert(idx, data);
-			} else {
+			} else if (this.store) {
 				this.store.insert(idx, data);
 			}
-			
-			this.coords.splice(idx, 0, [data.longitude, data.latitude]);			
-			this.reindexVertex();		
+
+			if (this.coords) {
+				this.coords.splice(idx, 0, [data.longitude, data.latitude]);
+			}
+			this.reindexVertex();
 		}
-		
+
 		this.focusRow(idx);
 		this.currentVertexIdx = idx;
 	},
@@ -549,9 +627,15 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	updateVertexRow: function(event) {
 		this.geometryChanged = true;
+		if (!event || !event.target || !event.target.vertexFeature_ || !this.store) {
+			return;
+		}
 		var coord = event.target.vertexFeature_.getGeometry().getCoordinates();
- 		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
- 		
+		var dataRow = this.store.getData().getAt(this.currentVertexIdx);
+		if (!dataRow) {
+			return;
+		}
+
  		if(coord[0] != dataRow.data[0] || coord[1] != dataRow.data[1]) {
 			
 			// Do snapping
@@ -605,11 +689,28 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {ol.Coordinates}
 	 * @return {Integer}
 	 */
+	/**
+	 * OL6 no longer exposes ol.coordinate.equals — compare XY (and Z if present).
+	 */
+	coordsEqual: function(a, b) {
+		if (!a || !b || a.length !== b.length) {
+			return false;
+		}
+		if (a[0] !== b[0] || a[1] !== b[1]) {
+			return false;
+		}
+		return a.length < 3 || a[2] === b[2];
+	},
+
 	getIndexFromCoord: function(coord) {
-		var coord, found = false, arVertex = this.store.getData();
-		for(var i = 0; (i < arVertex.getCount() && !found); i++) {
+		var found = false, arVertex, i, geom;
+		if (!this.store || !coord) {
+			return 0;
+		}
+		arVertex = this.store.getData();
+		for (i = 0; (i < arVertex.getCount() && !found); i++) {
 			geom = arVertex.getAt(i).data.geometry;
-			if(ol.coordinate.equals(geom, coord)) {
+			if (geom && this.coordsEqual(geom, coord)) {
 				found = true;
 			}
 		}
@@ -621,8 +722,13 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 * @param {Integer} The row to focus
 	 */
 	focusRow: function(idx) {
+		if (!this.grid || !this.store) {
+			return;
+		}
 		this.grid.setSelection(this.store.getAt(idx));
-		this.grid.getView().focusRow(idx);
+		if (this.grid.getView) {
+			this.grid.getView().focusRow(idx);
+		}
 	},
 	
 	/**
@@ -641,16 +747,28 @@ Ext.define('Ck.edit.vertex.Controller', {
 	
 	/**
 	 * Close interactions if opened and remove markers
+	 * @param {Boolean} [forClose]
 	 */
-	closeAll: function() {
-		if(this.modifyInteraction) {
-			this.olMap.removeInteraction(this.modifyInteraction);
+	closeAll: function(forClose) {
+		if (this.modifyInteraction && this.olMap) {
+			try {
+				this.olMap.removeInteraction(this.modifyInteraction);
+			} catch (e) {
+				// ignore
+			}
+			this.modifyInteraction = null;
 		}
-		if(this.moveInteraction) {
-			this.olMap.removeInteraction(this.moveInteraction);
+		if (this.moveInteraction && this.olMap) {
+			try {
+				this.olMap.removeInteraction(this.moveInteraction);
+			} catch (e) {
+				// ignore
+			}
+			this.moveInteraction = null;
 		}
-		if(this.feature !== undefined) {
-			this.unloadGeometry();
+		if (this.feature !== undefined) {
+			this.unloadGeometry(!!forClose);
+			this.feature = undefined;
 		}
 	},
 	
@@ -667,21 +785,36 @@ Ext.define('Ck.edit.vertex.Controller', {
 	 */
 	cancel: function() {
 		this.unloadGeometry();
-		this.feature.setGeometry(this.originalGeometry);
+		if (this.feature && this.originalGeometry) {
+			this.feature.setGeometry(this.originalGeometry);
+		}
 		this.fireEvent("cancel", this.feature);
 	},
 	
 	/**
 	 * Close edition
 	 */
-	close: function() {		
-		this.closeAll();
-		this.vertexLayer.setMap(null);
+	close: function() {
+		// forClose=true: do not destroy Ext listeners / toggle radios — mainWindow.close()
+		// destroys the ViewController and must own listener cleanup.
+		this.closeAll(true);
+		if (this.vertexLayer) {
+			try {
+				this.vertexLayer.setMap(null);
+				if (Ck.getMap && Ck.getMap()) {
+					Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
+				}
+			} catch (e) {
+				// ignore
+			}
+		}
 
-		Ck.getMap().getOlMap().removeLayer(this.vertexLayer);
-		
-		if(this.controller !== undefined && this.controller.vertexContainer !== undefined) {
-			this.controller.vertexContainer.setVisible(false);
+		if (this.controller !== undefined && this.controller.vertexContainer !== undefined) {
+			try {
+				this.controller.vertexContainer.setVisible(false);
+			} catch (e) {
+				// ignore
+			}
 		}
 	},
 	

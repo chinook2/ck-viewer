@@ -1,0 +1,407 @@
+/* Hub'im print layout */
+#ckPrint-page {
+	position: relative;
+	background-color: white;
+	border: 1px solid gray;
+	color: #004b64;
+}
+
+#ckPrint-logo {
+	position: absolute;
+	height: 72px;
+	width: 200px;
+	left: 10px;
+	top: 8px;
+	border: none;
+}
+
+.ckPrint-logtitle {
+	position: relative;
+	left: 5px;
+}
+
+.ckPrint-logo-part {
+	position: relative;
+	float: right !important;
+}
+
+.ckPrint-logo-partcnt {
+	position: relative;
+	padding: 8px;
+}
+
+#ckPrint-title a {
+	text-decoration: none;
+	border-bottom: 3px solid #2196f3;
+	padding-bottom: 1px;
+	color: #004b64;
+}
+
+#ckPrint-title {
+	word-wrap: break-word;
+	line-height: 1.15em;
+	font-size: 22px;
+	font-weight: bold !important;
+	height: 82px;
+	left: 128px;
+	right: 340px;
+	margin-bottom: 0;
+	padding-top: 1px;
+	position: absolute;
+	text-align: center;
+	top: 0;
+}
+
+#ckPrint-param {
+	position: absolute;
+	height: 88px;
+	width: 330px;
+	top: 4px;
+	right: 6px;
+	font-size: 17px;
+	background-color: rgba(255, 255, 255, 0.83);
+}
+
+#ckPrint-param ul {
+	list-style-type: none;
+	margin-top: 1px;
+	padding-left: 0;
+}
+
+#ckPrint-param li {
+	padding-bottom: 8px;
+}
+
+#ckPrint-legend {
+	position: absolute;
+	top: 105px;
+	left: 12px;
+	width: auto;
+	min-width: 180px;
+	max-width: 45%;
+	bottom: 100px;
+	z-index: 2;
+	padding: 0;
+	padding-right: 10px;
+	box-sizing: border-box;
+	overflow: visible;
+	color: #004b64;
+}
+
+.ckPrint-legend-backdrop {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ffffff;
+	border: 1px solid #d0d0d0;
+	border-radius: 3px;
+	box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+	z-index: 0;
+}
+
+.ckPrint-legend-cols {
+	position: relative;
+	z-index: 2;
+	display: flex;
+	flex-direction: column;
+	flex-wrap: nowrap;
+	align-items: stretch;
+	gap: 0;
+	padding: 8px 0 10px 8px;
+}
+
+.ckPrint-legend-col {
+	flex: 0 0 auto;
+	width: auto;
+	min-width: 0;
+}
+
+#ckPrint-cpr {
+	position: absolute;
+	height: auto;
+	max-height: 50px;
+	top: auto;
+	bottom: 108px;
+	width: 160px;
+	right: 8px;
+	z-index: 3;
+	background-color: rgba(255, 255, 255, 0.88);
+	text-align: right;
+	font-size: 12px;
+	overflow: hidden;
+}
+
+.ulleg {
+	list-style-type: none;
+	margin: 1px 0 0;
+	padding: 0;
+}
+
+.ulleg li {
+	display: flex;
+	align-items: center;
+	padding-bottom: 12px;
+	list-style-type: none;
+	position: relative;
+	min-height: 22px;
+}
+
+.ulleg > li.ckPrint-leggroup {
+	display: block;
+}
+
+.ulleg li.ckPrint-legentry {
+	gap: 8px;
+}
+
+.ckPrint-legtitle {
+	font-size: 16px;
+	font-weight: 600;
+	position: relative;
+	left: auto;
+	flex: 1 1 auto;
+	width: auto;
+	min-width: 0;
+	line-height: 1.25em;
+	color: #004b64;
+	word-wrap: break-word;
+	overflow-wrap: break-word;
+}
+
+.ckPrint-legimg {
+	position: relative;
+	flex: 0 0 30px;
+	left: auto;
+	width: 30px;
+	height: 19px;
+	margin-top: 2px;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+.ckPrint-legimg-spacer {
+	visibility: hidden;
+}
+
+.ckPrint-legparent {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 22px;
+	padding-bottom: 4px;
+}
+
+.ckPrint-legparent .ckPrint-legtitle {
+	padding-left: 0.5px;
+}
+
+.ckPrint-leggroup {
+	display: block;
+	padding-bottom: 12px;
+	list-style: none;
+	width: 100%;
+}
+
+.ckPrint-legchildren {
+	display: block;
+	list-style: none;
+	margin: 0;
+	padding: 0 0 0 38.5px;
+	width: 100%;
+}
+
+.ckPrint-legchildren.ckPrint-legchildren-cols-2 {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: 14px;
+	row-gap: 0;
+	width: 100%;
+}
+
+.ckPrint-legchildren.ckPrint-legchildren-cols-3 {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	column-gap: 10px;
+	row-gap: 0;
+	width: 100%;
+}
+
+.ckPrint-legchildren.ckPrint-legchildren-cols-2 .ckPrint-legchild,
+.ckPrint-legchildren.ckPrint-legchildren-cols-3 .ckPrint-legchild {
+	padding-bottom: 5px;
+	min-height: 20px;
+	gap: 6px;
+}
+
+.ckPrint-legchildren.ckPrint-legchildren-cols-2 .ckPrint-legchild .ckPrint-legtitle,
+.ckPrint-legchildren.ckPrint-legchildren-cols-3 .ckPrint-legchild .ckPrint-legtitle {
+	flex: 0 1 auto;
+	white-space: nowrap;
+}
+
+.ckPrint-legchild {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	min-height: 22px;
+	padding-bottom: 8px;
+	padding-left: 0;
+}
+
+.ckPrint-legicon-img {
+	flex: 0 0 26px;
+	width: 26px;
+	height: 26px;
+	min-width: 26px;
+	min-height: 26px;
+	margin-top: 0;
+	padding: 2px 0;
+	box-sizing: content-box;
+	object-fit: contain;
+	display: block;
+	overflow: visible;
+}
+
+.ckPrint-legchild .ckPrint-legimg.ckPrint-legchild-swatch {
+	flex: 0 0 30px;
+	width: 30px;
+	height: 19px;
+	min-width: 30px;
+	min-height: 19px;
+	max-width: 30px;
+	max-height: 19px;
+	margin-top: 2px;
+	box-sizing: border-box;
+	background-size: contain;
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+
+.ckPrint-legchild .ckPrint-legimg.ckPrint-legicon-circle,
+.ckPrint-legchild .ckPrint-legimg.ckPrint-legicon-point,
+.ckPrint-legchild .ckPrint-legimg.ckPrint-legicon-triangle,
+.ckPrint-legicon-img.ckPrint-legicon-circle,
+.ckPrint-legicon-img.ckPrint-legicon-point,
+.ckPrint-legicon-img.ckPrint-legicon-triangle {
+	flex: 0 0 26px;
+	width: 26px;
+	height: 26px;
+	min-width: 26px;
+	min-height: 26px;
+	padding: 2px 0;
+	box-sizing: content-box;
+	object-fit: contain;
+}
+
+.ckPrint-legchild .ckPrint-legtitle {
+	flex: 1 1 auto;
+	width: auto;
+	min-width: 0;
+	color: #004b64;
+	text-transform: lowercase;
+	line-height: 1.25em;
+	padding-top: 0;
+}
+
+.ckPrint-legtext-icon {
+	background-size: contain;
+}
+
+#ckPrint-map {
+	background-color: white;
+	bottom: 100px;
+	left: 262px;
+	position: absolute;
+	right: 6px;
+	top: 105px;
+	z-index: 1;
+	overflow: hidden;
+}
+
+#ckPrint-map > img {
+	display: block;
+	position: relative;
+	z-index: 1;
+	width: 100%;
+	height: 100%;
+	object-fit: fill;
+	object-position: center center;
+}
+
+#ckPrint-filters {
+	position: absolute;
+	bottom: 3px;
+	left: 12px;
+	right: 12px;
+	min-height: 36px;
+	max-height: 96px;
+	padding: 6px 10px;
+	font-size: 14px;
+	color: #004b64;
+	background-color: rgba(255, 255, 255, 0.95);
+	border: 1px solid #d0d0d0;
+	border-radius: 3px;
+	overflow: auto;
+	z-index: 4;
+	box-sizing: border-box;
+}
+
+#ckPrint-filters h3 {
+	display: none;
+}
+
+#ckPrint-filters-list {
+	display: block;
+	line-height: 1.3em;
+}
+
+#ckPrint-filters-list em {
+	display: inline;
+	margin-right: 6px;
+}
+
+/* Landscape: more horizontal space for legend columns */
+#ckPrint-page.orientation-l #ckPrint-title {
+	right: 300px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-param {
+	width: 290px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-legend {
+	top: 98px;
+	bottom: 100px;
+}
+
+#ckPrint-page.orientation-l .ckPrint-legend-col {
+	width: auto;
+}
+
+#ckPrint-page.orientation-l #ckPrint-map {
+	top: 98px;
+	left: 262px;
+	right: 6px;
+	bottom: 100px;
+}
+
+#ckPrint-page.orientation-l #ckPrint-cpr {
+	bottom: 108px;
+}
+
+#ckPrint-page.orientation-l .ckPrint-legtitle {
+	font-size: 15px;
+}
+
+/* Square map preview area */
+#ckPrint-page.shape-c #ckPrint-map {
+	left: 262px;
+	right: 6px;
+	transform: none;
+}
+
+#ckPrint-page.orientation-l.shape-c #ckPrint-map {
+	left: 262px;
+}

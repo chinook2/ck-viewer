@@ -12,6 +12,8 @@ Ext.define('Ck.form.plugin.GridEditing', {
 		this.grid = grid;
 				
 		var formController = grid.lookupController();
+		var hostView = formController && formController.getView && formController.getView();
+		var editing = !!(hostView && Ext.isFunction(hostView.getEditing) && hostView.getEditing());
 		
 		// Init store fields from column definition
 		var store = grid.getStore();
@@ -79,7 +81,7 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			// Add action column for editing by plugin GridEditing
 			conf.columns.push({
 				xtype: 'actioncolumn',
-				hidden: !formController.getView().getEditing(),
+				hidden: !editing,
 				items: actions
 			});
 
@@ -92,14 +94,18 @@ Ext.define('Ck.form.plugin.GridEditing', {
 			this.actionColumn.width = 6 + (this.actionColumn.items.length * 20);
 		}
 
-		// On start editing
-		formController.on({
-			startEditing: this.startEditing,
-			stopEditing: this.stopEditing,
-			scope: this
-		});
-		// If already editing (in subform...)
-		if(formController.view.getEditing()===true) this.startEditing();
+		// On start editing (Form controllers fire these; Vertex may not)
+		if (formController && formController.on) {
+			formController.on({
+				startEditing: this.startEditing,
+				stopEditing: this.stopEditing,
+				scope: this
+			});
+		}
+		// If already editing (in subform / vertex panel...)
+		if (editing) {
+			this.startEditing();
+		}
 		
 		grid.on({
 			validateedit: this.addNewRow,

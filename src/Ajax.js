@@ -358,11 +358,25 @@ Ext.define('Ck.Ajax', {
 			}
 		}
 		
-		// Do the getFeature query
+		// Keep WFS-T on same origin (webpack :81 proxy) so CKSESSID is sent.
+		// Default Cks.post Content-Type (application/json) is wrong for WFS XML.
+		var url = ope.getUrl();
+		if (url && typeof url === 'string') {
+			url = url.replace(/^https?:\/\/[^/]+(\/admin\b)/i, '$1');
+		}
+		if (!url) {
+			url = (Ck.getApi() || '/admin/index.php?').replace(/\?$/, '');
+		}
+
 		Cks.post({
 			scope: this,
-			url: ope.getUrl(),
+			url: url,
 			rawData: pTemp.innerHTML,
+			encode: false,
+			withCredentials: true,
+			headers: {
+				'Content-Type': 'text/xml; charset=UTF-8'
+			},
 			success: successCallback || defSucc,
 			failure: failureCallback || defFail
 		});
